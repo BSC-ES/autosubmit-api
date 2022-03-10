@@ -24,9 +24,9 @@ import os
 import sys
 import string
 from datetime import datetime
-import autosubmitAPIwu.database.db_common as db_common
-from autosubmitAPIwu.config.basicConfig import BasicConfig
-from autosubmitAPIwu.config.config_common import AutosubmitConfig
+import autosubmit_api.database.db_common as db_common
+from autosubmit_api.config.basicConfig import BasicConfig
+from autosubmit_api.config.config_common import AutosubmitConfig
 from bscearth.utils.config_parser import ConfigParserFactory
 from bscearth.utils.log import Log
 

@@ -1,12 +1,11 @@
 #!/usr/bin/env python
 import os
-from autosubmitAPIwu.config.basicConfig import BasicConfig
-from autosubmitAPIwu.components.jobs.job_factory import SimJob, Job
-from autosubmitAPIwu.config.config_common import AutosubmitConfig
+from autosubmit_api.config.basicConfig import BasicConfig
+from autosubmit_api.components.jobs.job_factory import SimJob, Job
+from autosubmit_api.config.config_common import AutosubmitConfig
 from bscearth.utils.config_parser import ConfigParserFactory
-from autosubmitAPIwu.job.job_utils import datechunk_to_year
 from abc import ABCMeta, abstractmethod
-from autosubmitAPIwu.common.utils import JobSection, parse_number_processors, timestamp_to_datetime_format
+from autosubmit_api.common.utils import JobSection, parse_number_processors, timestamp_to_datetime_format, datechunk_to_year
 from typing import List
 
 class ProjectType:

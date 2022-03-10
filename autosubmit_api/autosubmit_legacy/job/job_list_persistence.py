@@ -23,7 +23,7 @@ from sys import setrecursionlimit
 import os
 
 from bscearth.utils.log import Log
-from autosubmitAPIwu.database.db_manager import DbManager
+from autosubmit_api.database.db_manager import DbManager
 
 
 class JobListPersistence(object):

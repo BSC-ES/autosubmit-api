@@ -21,10 +21,10 @@ import os
 from xml.dom.minidom import parseString
 import subprocess
 
-from autosubmitAPIwu.platforms.paramiko_platform import ParamikoPlatform
-from autosubmitAPIwu.platforms.headers.local_header import LocalHeader
+from autosubmit_api.autosubmit_legacy.platforms.paramiko_platform import ParamikoPlatform
+from autosubmit_api.autosubmit_legacy.platforms.headers.local_header import LocalHeader
 
-from autosubmitAPIwu.config.basicConfig import BasicConfig
+from autosubmit_api.config.basicConfig import BasicConfig
 from bscearth.utils.log import Log
 
 

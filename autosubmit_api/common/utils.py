@@ -158,3 +158,77 @@ def timestamp_to_datetime_format(timestamp):
   if timestamp and timestamp > 0:
     return datetime.datetime.utcfromtimestamp(timestamp).strftime('%Y-%m-%d %H:%M:%S')
   return None
+
+def datechunk_to_year(chunk_unit, chunk_size):
+    # type: (str, int) -> float
+    """
+    Gets chunk unit and size and returns the value in years
+
+    :return: years  
+    :rtype: float
+    """    
+    chunk_size = chunk_size * 1.0
+    options = ["year", "month", "day", "hour"]
+    if (chunk_unit == "year"):
+        return chunk_size
+    elif (chunk_unit == "month"):
+        return chunk_size / 12
+    elif (chunk_unit == "day"):
+        return chunk_size / 365
+    elif (chunk_unit == "hour"):
+        return chunk_size / 8760
+    else:
+        return 0.0
+
+
+class Status:
+    """
+    Class to handle the status of a job
+    """
+    WAITING = 0
+    READY = 1
+    SUBMITTED = 2
+    QUEUING = 3
+    RUNNING = 4
+    COMPLETED = 5
+    HELD = 6
+    PREPARED = 7
+    SKIPPED = 8
+    FAILED = -1
+    UNKNOWN = -2
+    SUSPENDED = -3
+    #######
+    # Note: any change on constants must be applied on the dict below!!!
+    VALUE_TO_KEY = {-3: 'SUSPENDED', -2: 'UNKNOWN', -1: 'FAILED', 0: 'WAITING', 1: 'READY',
+                    2: 'SUBMITTED', 3: 'QUEUING', 4: 'RUNNING', 5: 'COMPLETED', 6: 'HELD', 7: 'PREPARED', 8: 'SKIPPED'}
+    STRING_TO_CODE = {v: k for k, v in VALUE_TO_KEY.items()}
+
+    def retval(self, value):
+        return getattr(self, value)
+
+
+class bcolors:
+    HEADER = '\033[95m'
+    OKBLUE = '\033[94m'
+    OKGREEN = '\033[92m'
+    WARNING = '\033[93m'
+    FAIL = '\033[91m'
+    ENDC = '\033[0m'
+    BOLD = '\033[1m'
+    UNDERLINE = '\033[4m'
+    # Status Colors
+    UNKNOWN = '\033[37;1m'
+    WAITING = '\033[37m'
+
+    READY = '\033[36;1m'
+    SUBMITTED = '\033[36m'
+    QUEUING = '\033[35;1m'
+    RUNNING = '\033[32m'
+    COMPLETED = '\033[33m'
+    SKIPPED = '\033[33m'
+    PREPARED = '\033[34;2m'
+    HELD = '\033[34;1m'
+    FAILED = '\033[31m'
+    SUSPENDED = '\033[31;1m'
+    CODE_TO_COLOR = {-3: SUSPENDED, -2: UNKNOWN, -1: FAILED, 0: WAITING, 1: READY,
+                     2: SUBMITTED, 3: QUEUING, 4: RUNNING, 5: COMPLETED, 6: HELD, 7: PREPARED, 8: SKIPPED}

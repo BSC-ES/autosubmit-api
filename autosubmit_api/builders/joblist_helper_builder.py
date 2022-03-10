@@ -1,9 +1,9 @@
 #!/usr/bin/env python
-from autosubmitAPIwu.config.basicConfig import BasicConfig
-from autosubmitAPIwu.builders.configuration_facade_builder import AutosubmitConfigurationFacadeBuilder, ConfigurationFacadeDirector
-from autosubmitAPIwu.builders.basic_builder import BasicBuilder
-from autosubmitAPIwu.builders.pkl_organizer_builder import PklOrganizerBuilder, PklOrganizerDirector
-from autosubmitAPIwu.components.jobs.joblist_helper import JobListHelper
+from autosubmit_api.config.basicConfig import BasicConfig
+from autosubmit_api.builders.configuration_facade_builder import AutosubmitConfigurationFacadeBuilder, ConfigurationFacadeDirector
+from autosubmit_api.builders.basic_builder import BasicBuilder
+from autosubmit_api.builders.pkl_organizer_builder import PklOrganizerBuilder, PklOrganizerDirector
+from autosubmit_api.components.jobs.joblist_helper import JobListHelper
 from abc import ABCMeta, abstractmethod
 
 

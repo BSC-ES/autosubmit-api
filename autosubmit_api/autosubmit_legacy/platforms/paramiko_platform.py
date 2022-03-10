@@ -7,9 +7,9 @@ import time
 import select
 
 from bscearth.utils.log import Log
-from autosubmitAPIwu.job.job_common import Status
-from autosubmitAPIwu.job.job_common import Type
-from autosubmitAPIwu.platforms.platform import Platform
+from autosubmit_api.autosubmit_legacy.job.job_common import Status
+from autosubmit_api.autosubmit_legacy.job.job_common import Type
+from autosubmit_api.autosubmit_legacy.platforms.platform import Platform
 from bscearth.utils.date import date2str
 
 class ParamikoTimeout(Exception):

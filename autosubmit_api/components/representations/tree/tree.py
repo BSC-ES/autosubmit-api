@@ -1,10 +1,9 @@
 #!/usr/bin/env python
-from autosubmitAPIwu.components.jobs.joblist_loader import JobListLoader
-from autosubmitAPIwu.components.jobs.job_factory import Job
-import autosubmitAPIwu.components.jobs.utils as JUtils
-import autosubmitAPIwu.performance.utils as PUtils
-import autosubmitAPIwu.common.utils as utils
-from autosubmitAPIwu.job.job_common import Status
+import autosubmit_api.components.jobs.utils as JUtils
+import autosubmit_api.performance.utils as PUtils
+from autosubmit_api.components.jobs.joblist_loader import JobListLoader
+from autosubmit_api.components.jobs.job_factory import Job
+from autosubmit_api.common.utils import Status, get_average_total_time, get_current_timestamp
 from collections import deque, OrderedDict
 from typing import List, Dict, Tuple, Set, Any
 
@@ -46,7 +45,7 @@ class TreeRepresentation(object):
       "reference": self.result_header,
       "error": False,
       "error_message": "",
-      "pkl_timestamp": utils.get_current_timestamp()
+      "pkl_timestamp": get_current_timestamp()
     }
     
   def _distribute_into_date_member_groups(self):
@@ -210,7 +209,7 @@ class TreeRepresentation(object):
 
   def _calculate_average_post_time(self):
     post_jobs = [job for job in self.joblist_loader.jobs if job.section == "POST" and job.status in {Status.COMPLETED}]    
-    self.average_post_time = utils.get_average_total_time(post_jobs)
+    self.average_post_time = get_average_total_time(post_jobs)
 
   def _generate_node_data(self):
     for job in self.joblist_loader.jobs:

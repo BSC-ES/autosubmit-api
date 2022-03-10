@@ -20,15 +20,15 @@ import unittest
 import traceback
 import os
 import time
-import autosubmitAPIwu.common.utils_for_testing as UtilsForTesting
-import autosubmitAPIwu.performance.utils as PUtils
+import autosubmit_api.common.utils_for_testing as UtilsForTesting
+import autosubmit_api.performance.utils as PUtils
 from shutil import copy2
 from collections import namedtuple
-from autosubmitAPIwu.history.internal_logging import Logging
+from autosubmit_api.history.internal_logging import Logging
 from strategies import StraightWrapperAssociationStrategy, GeneralizedWrapperDistributionStrategy, PlatformInformationHandler
-from autosubmitAPIwu.config.basicConfig import BasicConfig
+from autosubmit_api.config.basicConfig import BasicConfig
 from platform_monitor.slurm_monitor import SlurmMonitor
-from autosubmitAPIwu.builders.experiment_history_builder import ExperimentHistoryDirector, ExperimentHistoryBuilder
+from autosubmit_api.builders.experiment_history_builder import ExperimentHistoryDirector, ExperimentHistoryBuilder
 EXPID_TT00_SOURCE = "test_database.db~"
 EXPID_TT01_SOURCE = "test_database_no_run.db~"
 EXPID = "tt00"

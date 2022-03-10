@@ -23,8 +23,8 @@ import time
 import os
 import radical.saga as saga
 
-from autosubmitAPIwu.config.basicConfig import BasicConfig
-from autosubmitAPIwu.config.config_common import AutosubmitConfig
+from autosubmit_api.config.basicConfig import BasicConfig
+from autosubmit_api.config.config_common import AutosubmitConfig
 from saga_platform import SagaPlatform
 from submitter import Submitter
 

@@ -2,7 +2,7 @@
 
 from datetime import date
 from pickle import NONE
-from autosubmitAPIwu.job.job_common import Status
+from autosubmit_api.autosubmit_legacy.job.job_common import Status
 from typing import List
 
 wrapped_title_format = " <span class='badge' style='background-color:#94b8b8'>Wrapped {0} </span>"

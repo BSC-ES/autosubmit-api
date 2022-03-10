@@ -1,8 +1,8 @@
 #!/bin/env/python
 
-from autosubmitAPIwu.job.job import Job
+from autosubmit_api.autosubmit_legacy.job.job import Job
 from datetime import datetime, timedelta
-from autosubmitAPIwu.job.job_common import Status
+from autosubmit_api.common.utils import Status
 from typing import List, Tuple
 
 # from log.log import AutosubmitCritical

@@ -2,17 +2,14 @@
 
 import unittest
 from mock import Mock
-from autosubmitAPIwu.components.experiment.pkl_organizer import PklOrganizer
-from autosubmitAPIwu.components.experiment.configuration_facade import AutosubmitConfigurationFacade
+from autosubmit_api.components.experiment.pkl_organizer import PklOrganizer
 
 class TestPklOrganizer(unittest.TestCase):
   
   def setUp(self):
     self.configuration_facade = Mock() #
-    self.configuration_facade.pkl_path = "autosubmitAPIwu/components/experiment/test_case/a29z/pkl/job_list_a29z.pkl"
-    # print(self.configuration_facade.path_pkl)
-    self.configuration_facade.get_autosubmit_version.return_value = "3.13.0"
-    # AutosubmitConfigurationFacade("a29z")
+    self.configuration_facade.pkl_path = "autosubmit_api/components/experiment/test_case/a29z/pkl/job_list_a29z.pkl"    
+    self.configuration_facade.get_autosubmit_version.return_value = "3.13.0"    
     self.pkl_organizer = PklOrganizer(self.configuration_facade)
     self.assertTrue(len(self.pkl_organizer.current_content) == 590)
     self.assertTrue(len(self.pkl_organizer.sim_jobs) == 0)

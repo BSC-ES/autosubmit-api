@@ -1,15 +1,15 @@
 import os
 import time
-from autosubmitAPIwu.common.utils import get_experiments_from_folder
-from autosubmitAPIwu.job.job_utils import get_job_package_code
-from autosubmitAPIwu.config.basicConfig import BasicConfig
-from autosubmitAPIwu.history.database_managers.experiment_history_db_manager import ExperimentHistoryDbManager
-# from autosubmitAPIwu.components.jobs.joblist_loader import JobListLoader
-from autosubmitAPIwu.builders.joblist_loader_builder import JobListLoaderBuilder, JobListLoaderDirector
-from autosubmitAPIwu.builders.experiment_history_builder import ExperimentHistoryDirector, ExperimentHistoryBuilder
-from autosubmitAPIwu.history.experiment_history import ExperimentHistory
-from autosubmitAPIwu.history.platform_monitor.slurm_monitor import SlurmMonitor
-from autosubmitAPIwu.history.strategies import PlatformInformationHandler, SingleAssociationStrategy, StraightWrapperAssociationStrategy, TwoDimWrapperDistributionStrategy, GeneralizedWrapperDistributionStrategy
+from autosubmit_api.common.utils import get_experiments_from_folder
+# from autosubmitAPIwu.job.job_utils import get_job_package_code
+from autosubmit_api.config.basicConfig import BasicConfig
+from autosubmit_api.history.database_managers.experiment_history_db_manager import ExperimentHistoryDbManager
+# from autosubmit_api.components.jobs.joblist_loader import JobListLoader
+from autosubmit_api.builders.joblist_loader_builder import JobListLoaderBuilder, JobListLoaderDirector
+from autosubmit_api.builders.experiment_history_builder import ExperimentHistoryDirector, ExperimentHistoryBuilder
+from autosubmit_api.history.experiment_history import ExperimentHistory
+from autosubmit_api.history.platform_monitor.slurm_monitor import SlurmMonitor
+from autosubmit_api.history.strategies import PlatformInformationHandler, SingleAssociationStrategy, StraightWrapperAssociationStrategy, TwoDimWrapperDistributionStrategy, GeneralizedWrapperDistributionStrategy
 
 BasicConfig.read()
 

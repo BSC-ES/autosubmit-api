@@ -1,4 +1,4 @@
-import autosubmitAPIwu.workers.populate_times as PopulateTimes
+import autosubmit_api.workers.populate_times as PopulateTimes
 
 
 def main():

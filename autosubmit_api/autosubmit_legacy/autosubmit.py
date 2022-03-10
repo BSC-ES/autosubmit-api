@@ -42,33 +42,32 @@ import argparse
 import radical.saga as saga
 
 sys.path.insert(0, os.path.abspath('.'))
-from config.basicConfig import BasicConfig
-from config.config_common import AutosubmitConfig
+from autosubmit_api.config.basicConfig import BasicConfig
+from autosubmit_api.config.config_common import AutosubmitConfig
 from bscearth.utils.config_parser import ConfigParserFactory
-from job.job_common import Status
-from git.autosubmit_git import AutosubmitGit
-from job.job_list import JobList
-from job.job_packages import JobPackageThread
-from job.job_package_persistence import JobPackagePersistence
-from job.job_list_persistence import JobListPersistenceDb
-from job.job_list_persistence import JobListPersistencePkl
-from job.job_grouping import JobGrouping
+from autosubmit_api.autosubmit_legacy.job.job_common import Status
+from autosubmit_api.git.autosubmit_git import AutosubmitGit
+from autosubmit_api.autosubmit_legacy.job.job_list import JobList
+from autosubmit_api.autosubmit_legacy.job.job_packages import JobPackageThread
+from autosubmit_api.autosubmit_legacy.job.job_package_persistence import JobPackagePersistence
+from autosubmit_api.autosubmit_legacy.job.job_list_persistence import JobListPersistenceDb
+from autosubmit_api.autosubmit_legacy.job.job_list_persistence import JobListPersistencePkl
+from autosubmit_api.autosubmit_legacy.job.job_grouping import JobGrouping
 from bscearth.utils.log import Log
-from database.db_common import create_db
-from experiment.experiment_common import new_experiment
-from experiment.experiment_common import copy_experiment
-from database.db_common import delete_experiment
-from database.db_common import get_autosubmit_version
-from monitor.monitor import Monitor
+from autosubmit_api.database.db_common import create_db
+from autosubmit_api.experiment.experiment_common import new_experiment
+from autosubmit_api.experiment.experiment_common import copy_experiment
+from autosubmit_api.database.db_common import delete_experiment
+from autosubmit_api.database.db_common import get_autosubmit_version
+from autosubmit_api.monitor.monitor import Monitor
 from bscearth.utils.date import date2str
-from notifications.mail_notifier import MailNotifier
-from notifications.notifier import Notifier
-from platforms.saga_submitter import SagaSubmitter
-from platforms.paramiko_submitter import ParamikoSubmitter
-from job.job_exceptions import WrongTemplateException
-from job.job_packager import JobPackager
-from sets import Set
-from platforms.paramiko_platform import ParamikoTimeout
+from autosubmit_api.notifications.mail_notifier import MailNotifier
+from autosubmit_api.notifications.notifier import Notifier
+from autosubmit_api.autosubmit_legacy.platforms.saga_submitter import SagaSubmitter
+from autosubmit_api.autosubmit_legacy.platforms.paramiko_submitter import ParamikoSubmitter
+from autosubmit_api.autosubmit_legacy.job.job_exceptions import WrongTemplateException
+from autosubmit_api.autosubmit_legacy.job.job_packager import JobPackager
+from autosubmit_api.autosubmit_legacy.platforms.paramiko_platform import ParamikoTimeout
 """
 Main module for autosubmit. Only contains an interface class to all functionality implemented on autosubmit
 """
@@ -109,21 +108,21 @@ class Autosubmit:
     """
     Interface class for autosubmit.
     """
-    sys.setrecursionlimit(500000)
-    # Get the version number from the relevant file. If not, from autosubmit package
-    scriptdir = os.path.abspath(os.path.dirname(__file__))
+    # sys.setrecursionlimit(500000)
+    # # Get the version number from the relevant file. If not, from autosubmit package
+    # scriptdir = os.path.abspath(os.path.dirname(__file__))
 
-    if not os.path.exists(os.path.join(scriptdir, 'VERSION')):
-        scriptdir = os.path.join(scriptdir, os.path.pardir)
+    # if not os.path.exists(os.path.join(scriptdir, 'VERSION')):
+    #     scriptdir = os.path.join(scriptdir, os.path.pardir)
 
-    version_path = os.path.join(scriptdir, 'VERSION')
-    readme_path = os.path.join(scriptdir, 'README')
-    changes_path = os.path.join(scriptdir, 'CHANGELOG')
-    if os.path.isfile(version_path):
-        with open(version_path) as f:
-            autosubmit_version = f.read().strip()
-    else:
-        autosubmit_version = require("autosubmitAPIwu")[0].version
+    # version_path = os.path.join(scriptdir, 'VERSION')
+    # readme_path = os.path.join(scriptdir, 'README')
+    # changes_path = os.path.join(scriptdir, 'CHANGELOG')
+    # if os.path.isfile(version_path):
+    #     with open(version_path) as f:
+    #         autosubmit_version = f.read().strip()
+    # else:
+    #     autosubmit_version = require("autosubmitAPIwu")[0].version
 
     exit = False
 

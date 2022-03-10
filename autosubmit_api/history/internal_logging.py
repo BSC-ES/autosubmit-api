@@ -18,7 +18,7 @@
 import os
 import utils as HUtils
 # from database_managers.database_manager import DEFAULT_LOCAL_ROOT_DIR, DEFAULT_HISTORICAL_LOGS_DIR
-from autosubmitAPIwu.config.basicConfig import BasicConfig
+from autosubmit_api.config.basicConfig import BasicConfig
 
 class Logging():
   def __init__(self, expid, basic_config):

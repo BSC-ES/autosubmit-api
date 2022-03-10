@@ -17,7 +17,7 @@
 # You should have received a copy of the GNU General Public License
 # along with Autosubmit.  If not, see <http://www.gnu.org/licenses/>.
 
-from autosubmitAPIwu.platforms.wrappers.wrapper_builder import WrapperDirector, PythonVerticalWrapperBuilder, \
+from autosubmit_api.autosubmit_legacy.platforms.wrappers.wrapper_builder import WrapperDirector, PythonVerticalWrapperBuilder, \
     PythonHorizontalWrapperBuilder, PythonHorizontalVerticalWrapperBuilder, PythonVerticalHorizontalWrapperBuilder, \
     BashHorizontalWrapperBuilder, BashVerticalWrapperBuilder
 

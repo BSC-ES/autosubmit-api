@@ -31,7 +31,7 @@ from pyparsing import nestedExpr
 from bscearth.utils.config_parser import ConfigParserFactory, ConfigParser
 from bscearth.utils.date import parse_date
 from bscearth.utils.log import Log
-from autosubmitAPIwu.config.basicConfig import BasicConfig
+from autosubmit_api.config.basicConfig import BasicConfig
 
 
 class AutosubmitConfig(object):

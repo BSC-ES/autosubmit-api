@@ -3,7 +3,7 @@ from time import sleep
 import os
 
 from bscearth.utils.log import Log
-from autosubmitAPIwu.job.job_common import Status
+from autosubmit_api.autosubmit_legacy.job.job_common import Status
 
 
 class Platform(object):

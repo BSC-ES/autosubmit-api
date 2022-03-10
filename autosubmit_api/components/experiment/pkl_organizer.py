@@ -1,13 +1,12 @@
 #!/usr/bin/env python
 import os
 import pickle
-from autosubmitAPIwu.common.utils import JobSection, PklJob, PklJob14, is_wrapper_type_in_pkl_version
-from autosubmitAPIwu.job.job_common import Status
-from autosubmitAPIwu.job.job_utils import SimpleJob
-from autosubmitAPIwu.components.experiment.configuration_facade import AutosubmitConfigurationFacade
+import autosubmit_api.components.jobs.job_factory as factory 
+from autosubmit_api.common.utils import JobSection, PklJob, PklJob14, is_wrapper_type_in_pkl_version, Status
+from autosubmit_api.autosubmit_legacy.job.job_utils import SimpleJob
+from autosubmit_api.components.experiment.configuration_facade import AutosubmitConfigurationFacade
+from autosubmit_api.components.jobs.job_factory import Job
 from typing import List, Dict, Set
-from autosubmitAPIwu.components.jobs.job_factory import Job
-import autosubmitAPIwu.components.jobs.job_factory as factory 
 
 
 class PklOrganizer(object):

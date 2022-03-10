@@ -1,8 +1,8 @@
 import os
-from autosubmitAPIwu.config.basicConfig import BasicConfig
-from autosubmitAPIwu.components.jobs.job_factory import Job
+from autosubmit_api.config.basicConfig import BasicConfig
+from autosubmit_api.components.jobs.job_factory import Job
 from bscearth.utils.date import parse_date
-from autosubmitAPIwu.components.jobs.utils import is_a_completed_retrial
+from autosubmit_api.components.jobs.utils import is_a_completed_retrial
 from datetime import datetime
 from typing import List
 

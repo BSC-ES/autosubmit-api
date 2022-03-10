@@ -34,34 +34,36 @@ import socket
 from collections import deque
 
 
-import autosubmitAPIwu.database.db_common as db_common
-from autosubmitAPIwu.job.job_list import JobList
-from autosubmitAPIwu.job.job import Job
-from autosubmitAPIwu.job.job_utils import SubJobManager, SubJob, SimpleJob, datechunk_to_year, tostamp
-from autosubmitAPIwu.performance.utils import calculate_ASYPD_perjob, calculate_SYPD_perjob
-from autosubmitAPIwu.monitor.monitor import Monitor
-from autosubmitAPIwu.job.job_common import Status
-from autosubmitAPIwu.common.utils import parse_number_processors, is_version_historical_ready, timestamp_to_datetime_format
-from autosubmitAPIwu.statistics.statistics import Statistics
-import autosubmitAPIwu.experiment.common_db_requests as DbRequests
-import autosubmitAPIwu.database.db_jobdata as JobData
-from autosubmitAPIwu.config.basicConfig import BasicConfig
-from autosubmitAPIwu.config.config_common import AutosubmitConfig
+from autosubmit_api.autosubmit_legacy.autosubmit import Autosubmit
+import autosubmit_api.database.db_common as db_common
+import autosubmit_api.experiment.common_db_requests as DbRequests
+import autosubmit_api.database.db_jobdata as JobData
+import autosubmit_api.database.db_structure as DbStructure
+
+from autosubmit_api.autosubmit_legacy.job.job_list import JobList
+from autosubmit_api.autosubmit_legacy.job.job import Job
+from autosubmit_api.autosubmit_legacy.job.job_utils import SubJobManager, SubJob, SimpleJob, tostamp
+from autosubmit_api.performance.utils import calculate_ASYPD_perjob, calculate_SYPD_perjob
+from autosubmit_api.monitor.monitor import Monitor
+from autosubmit_api.common.utils import parse_number_processors, is_version_historical_ready, timestamp_to_datetime_format, datechunk_to_year, Status
+from autosubmit_api.statistics.statistics import Statistics
+
+from autosubmit_api.config.basicConfig import BasicConfig
+from autosubmit_api.config.config_common import AutosubmitConfig
 from bscearth.utils.config_parser import ConfigParserFactory
 from bscearth.utils.log import Log
 from bscearth.utils.date import date2str
-from autosubmitAPIwu.autosubmit import Autosubmit
-import autosubmitAPIwu.database.db_structure as DbStructure
-from autosubmitAPIwu.database.db_jobdata import JobDataStructure, ExperimentGraphDrawing
-from autosubmitAPIwu.database.db_jobdata import DB_VERSION_SCHEMA_CHANGES
-from autosubmitAPIwu.components.representations.tree.tree import TreeRepresentation
-from autosubmitAPIwu.components.representations.graph.graph import GraphRepresentation, GroupedBy, Layout
-# from autosubmitAPIwu.components.jobs.joblist_loader import JobListLoader
-from autosubmitAPIwu.history.experiment_history import ExperimentHistory
-from autosubmitAPIwu.builders.experiment_history_builder import ExperimentHistoryDirector, ExperimentHistoryBuilder
-from autosubmitAPIwu.builders.configuration_facade_builder import ConfigurationFacadeDirector, AutosubmitConfigurationFacadeBuilder
-from autosubmitAPIwu.builders.joblist_loader_builder import JobListLoaderBuilder, JobListLoaderDirector
-from autosubmitAPIwu.components.jobs.job_support import JobSupport
+
+from autosubmit_api.database.db_jobdata import JobDataStructure, ExperimentGraphDrawing
+from autosubmit_api.database.db_jobdata import DB_VERSION_SCHEMA_CHANGES
+from autosubmit_api.components.representations.tree.tree import TreeRepresentation
+from autosubmit_api.components.representations.graph.graph import GraphRepresentation, GroupedBy, Layout
+
+from autosubmit_api.history.experiment_history import ExperimentHistory
+from autosubmit_api.builders.experiment_history_builder import ExperimentHistoryDirector, ExperimentHistoryBuilder
+from autosubmit_api.builders.configuration_facade_builder import ConfigurationFacadeDirector, AutosubmitConfigurationFacadeBuilder
+from autosubmit_api.builders.joblist_loader_builder import JobListLoaderBuilder, JobListLoaderDirector
+from autosubmit_api.components.jobs.job_support import JobSupport
 from typing import Dict, Any
 
 BasicConfig.read()

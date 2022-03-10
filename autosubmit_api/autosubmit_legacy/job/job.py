@@ -28,11 +28,11 @@ import datetime
 from collections import OrderedDict
 #from bscearth.utils.config_parser import ConfigParserFactory
 
-from autosubmitAPIwu.monitor.monitor import Monitor
-from autosubmitAPIwu.job.job_common import Status, Type
-from autosubmitAPIwu.config.basicConfig import BasicConfig
-from autosubmitAPIwu.job.job_common import StatisticsSnippetBash, StatisticsSnippetPython
-from autosubmitAPIwu.job.job_common import StatisticsSnippetR, StatisticsSnippetEmpty
+from autosubmit_api.monitor.monitor import Monitor
+from autosubmit_api.autosubmit_legacy.job.job_common import Status, Type
+from autosubmit_api.config.basicConfig import BasicConfig
+from autosubmit_api.autosubmit_legacy.job.job_common import StatisticsSnippetBash, StatisticsSnippetPython
+from autosubmit_api.autosubmit_legacy.job.job_common import StatisticsSnippetR, StatisticsSnippetEmpty
 #from autosubmitAPIwu.config.config_common import AutosubmitConfig
 from bscearth.utils.date import date2str, parse_date, previous_day, chunk_end_date, chunk_start_date, Log, subs_dates
 

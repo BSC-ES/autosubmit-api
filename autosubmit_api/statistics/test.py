@@ -1,18 +1,18 @@
 import unittest
 import os
-from autosubmitAPIwu.statistics.statistics import Statistics
-from autosubmitAPIwu.monitor.monitor import Monitor
-from autosubmitAPIwu.job.job_common import Status
-from autosubmitAPIwu.job.job_utils import SubJobManager, SubJob
-from autosubmitAPIwu.config.basicConfig import BasicConfig
-from autosubmitAPIwu.config.config_common import AutosubmitConfig
+import autosubmit_api.database.db_structure as DbStructure
+from autosubmit_api.database.db_jobdata import JobDataStructure, ExperimentGraphDrawing
+from autosubmit_api.statistics.statistics import Statistics
+from autosubmit_api.monitor.monitor import Monitor
+# from autosubmitAPIwu.job.job_common import Status
+from autosubmit_api.autosubmit_legacy.job.job_utils import SubJobManager, SubJob
+from autosubmit_api.config.basicConfig import BasicConfig
+from autosubmit_api.config.config_common import AutosubmitConfig
 from bscearth.utils.config_parser import ConfigParserFactory
-from autosubmitAPIwu.autosubmit import Autosubmit
-from autosubmitAPIwu.job.job_list import JobList
-import autosubmitAPIwu.experiment.common_db_requests as DbRequests
-import autosubmitAPIwu.database.db_structure as DbStructure
-from autosubmitAPIwu.database.db_jobdata import JobDataStructure, ExperimentGraphDrawing
-import statistics
+from autosubmit_api.autosubmit_legacy.autosubmit import Autosubmit
+from autosubmit_api.autosubmit_legacy.job.job_list import JobList
+from autosubmit_api.common.utils import Status
+import autosubmit_api.experiment.common_db_requests as DbRequests
 
 class TestStatistics(unittest.TestCase):
   def setUp(self):

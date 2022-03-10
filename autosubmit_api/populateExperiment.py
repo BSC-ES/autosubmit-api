@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import autosubmitAPIwu.experiment.common_requests as ExperimentUtils
+import autosubmit_api.experiment.common_requests as ExperimentUtils
 import sys
 from os.path import expanduser
 from os.path import join

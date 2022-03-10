@@ -1,11 +1,11 @@
 #!/usr/bin/env python
 import collections
 import time
-import autosubmitAPIwu.common.utils as util
-import autosubmitAPIwu.components.jobs.utils as JUtils
-from autosubmitAPIwu.job.job_common import Status
-from autosubmitAPIwu.monitor.monitor import Monitor
-from autosubmitAPIwu.history.data_classes.job_data import JobData
+import autosubmit_api.common.utils as util
+import autosubmit_api.components.jobs.utils as JUtils
+from autosubmit_api.common.utils import Status
+from autosubmit_api.monitor.monitor import Monitor
+from autosubmit_api.history.data_classes.job_data import JobData
 from typing import Tuple, List, Dict, Set
 # from autosubmitAPIwu.database.db_jobdata import JobData
 from abc import ABCMeta, abstractmethod

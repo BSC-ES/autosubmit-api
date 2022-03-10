@@ -26,8 +26,8 @@ from networkx.algorithms.dag import is_directed_acyclic_graph
 from networkx import DiGraph
 from networkx import dfs_edges
 from networkx import NetworkXError
-from autosubmitAPIwu.job.job_package_persistence import JobPackagePersistence
-from autosubmitAPIwu.config.basicConfig import BasicConfig
+from autosubmit_api.autosubmit_legacy.job.job_package_persistence import JobPackagePersistence
+from autosubmit_api.config.basicConfig import BasicConfig
 
 
 def transitive_reduction(graph):

@@ -18,9 +18,9 @@
 # along with Autosubmit.  If not, see <http://www.gnu.org/licenses/>.
 
 from bscearth.utils.log import Log
-from autosubmitAPIwu.job.job_common import Status, Type
+from autosubmit_api.autosubmit_legacy.job.job_common import Status, Type
 from bscearth.utils.date import sum_str_hours
-from autosubmitAPIwu.job.job_packages import JobPackageSimple, JobPackageVertical, JobPackageHorizontal, \
+from autosubmit_api.autosubmit_legacy.job.job_packages import JobPackageSimple, JobPackageVertical, JobPackageHorizontal, \
     JobPackageSimpleWrapped, JobPackageHorizontalVertical, JobPackageVerticalHorizontal
 from operator import attrgetter
 from math import ceil

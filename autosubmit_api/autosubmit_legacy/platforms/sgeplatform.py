@@ -22,8 +22,8 @@ import subprocess
 
 from xml.dom.minidom import parseString
 
-from autosubmitAPIwu.platforms.paramiko_platform import ParamikoPlatform
-from autosubmitAPIwu.platforms.headers.sge_header import SgeHeader
+from autosubmit_api.autosubmit_legacy.platforms.paramiko_platform import ParamikoPlatform
+from autosubmit_api.autosubmit_legacy.platforms.headers.sge_header import SgeHeader
 
 
 class SgePlatform(ParamikoPlatform):

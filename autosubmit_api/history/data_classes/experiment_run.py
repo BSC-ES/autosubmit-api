@@ -17,11 +17,11 @@
 # along with Autosubmit.  If not, see <http://www.gnu.org/licenses/>.
 
 import json
-import autosubmitAPIwu.common.utils as common_utils
-import autosubmitAPIwu.performance.utils as PUtils
-from autosubmitAPIwu.history.utils import get_current_datetime_if_none
-from autosubmitAPIwu.history.data_classes.job_data import JobData
-from autosubmitAPIwu.components.jobs.job_factory import SimJob
+import autosubmit_api.common.utils as common_utils
+import autosubmit_api.performance.utils as PUtils
+from autosubmit_api.history.utils import get_current_datetime_if_none
+from autosubmit_api.history.data_classes.job_data import JobData
+from autosubmit_api.components.jobs.job_factory import SimJob
 from typing import List, Dict, Tuple
 class ExperimentRun(object):
   """

@@ -19,8 +19,6 @@
 import collections
 from enum import Enum
 
-from sqlalchemy import table
-
 class DatabaseVersion(Enum):
   CURRENT_DB_VERSION = 18
   EXPERIMENT_HEADER_PLATFORM_ADDED = 17

@@ -1,12 +1,12 @@
 #!/bin/env/python
-import autosubmitAPIwu.components.jobs.utils as JobUtils
+import autosubmit_api.components.jobs.utils as JobUtils
 from datetime import datetime, timedelta
-from autosubmitAPIwu.config.basicConfig import BasicConfig
-from autosubmitAPIwu.components.jobs.job_factory import Job
-from autosubmitAPIwu.statistics.job_stat import JobStat
-from autosubmitAPIwu.statistics.stats_summary import StatsSummary
-from autosubmitAPIwu.components.jobs.job_support import JobSupport
-from autosubmitAPIwu.statistics.utils import timedelta2hours
+from autosubmit_api.config.basicConfig import BasicConfig
+from autosubmit_api.components.jobs.job_factory import Job
+from autosubmit_api.statistics.job_stat import JobStat
+from autosubmit_api.statistics.stats_summary import StatsSummary
+from autosubmit_api.components.jobs.job_support import JobSupport
+from autosubmit_api.statistics.utils import timedelta2hours
 from typing import List, Union, Dict
 # from collections import namedtuple
 

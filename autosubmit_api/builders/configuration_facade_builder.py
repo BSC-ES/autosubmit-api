@@ -1,8 +1,8 @@
 #!/usr/bin/env python
-from autosubmitAPIwu.config.basicConfig import BasicConfig
-from autosubmitAPIwu.config.config_common import AutosubmitConfig
-from autosubmitAPIwu.builders.basic_builder import BasicBuilder
-from autosubmitAPIwu.components.experiment.configuration_facade import AutosubmitConfigurationFacade, BasicConfigurationFacade, ConfigurationFacade
+from autosubmit_api.config.basicConfig import BasicConfig
+from autosubmit_api.config.config_common import AutosubmitConfig
+from autosubmit_api.builders.basic_builder import BasicBuilder
+from autosubmit_api.components.experiment.configuration_facade import AutosubmitConfigurationFacade, BasicConfigurationFacade, ConfigurationFacade
 from bscearth.utils.config_parser import ConfigParserFactory
 from abc import ABCMeta, abstractmethod
 

@@ -21,10 +21,10 @@ import os
 
 from xml.dom.minidom import parseString
 
-from autosubmitAPIwu.platforms.paramiko_platform import ParamikoPlatform
-from autosubmitAPIwu.platforms.headers.slurm_header import SlurmHeader
-from autosubmitAPIwu.platforms.wrappers.wrapper_factory import SlurmWrapperFactory
-from autosubmitAPIwu.config.basicConfig import BasicConfig
+from autosubmit_api.autosubmit_legacy.platforms.paramiko_platform import ParamikoPlatform
+from autosubmit_api.autosubmit_legacy.platforms.headers.slurm_header import SlurmHeader
+from autosubmit_api.autosubmit_legacy.platforms.wrappers.wrapper_factory import SlurmWrapperFactory
+from autosubmit_api.config.basicConfig import BasicConfig
 
 
 class SlurmPlatform(ParamikoPlatform):

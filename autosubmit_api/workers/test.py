@@ -1,7 +1,7 @@
 import unittest
 
-import autosubmitAPIwu.workers.process_graph_drawings as ProcessGraph
-from autosubmitAPIwu.builders.configuration_facade_builder import ConfigurationFacadeDirector, AutosubmitConfigurationFacadeBuilder
+import autosubmit_api.workers.process_graph_drawings as ProcessGraph
+from autosubmit_api.builders.configuration_facade_builder import ConfigurationFacadeDirector, AutosubmitConfigurationFacadeBuilder
 
 class TestGraphDraw(unittest.TestCase):
   def setUp(self):

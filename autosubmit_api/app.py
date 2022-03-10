@@ -45,7 +45,7 @@ from experiment.common_requests import get_last_test_archive_status, get_job_log
 import experiment.utils as Utiles
 from performance.performance_metrics import PerformanceMetrics
 from database.db_common import search_experiment_by_id
-from autosubmitAPIwu.builders.joblist_helper_builder import JobListHelperBuilder, JobListHelperDirector
+from builders.joblist_helper_builder import JobListHelperBuilder, JobListHelperDirector
 
 
 JWT_SECRET = os.environ.get("SECRET_KEY")

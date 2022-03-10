@@ -17,7 +17,7 @@
 # along with Autosubmit.  If not, see <http://www.gnu.org/licenses/>.
 
 from platform_monitor import PlatformMonitor
-from autosubmitAPIwu.history.platform_monitor.slurm_monitor_item import SlurmMonitorItem
+from autosubmit_api.history.platform_monitor.slurm_monitor_item import SlurmMonitorItem
 
 class SlurmMonitor(PlatformMonitor):
   """ Manages Slurm commands interpretation. """

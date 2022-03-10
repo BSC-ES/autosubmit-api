@@ -19,13 +19,13 @@ import sqlite3
 import os
 import traceback
 import textwrap
-import autosubmitAPIwu.history.utils as HUtils
-import autosubmitAPIwu.history.database_managers.database_models as Models
-from autosubmitAPIwu.history.data_classes.job_data import JobData
-from autosubmitAPIwu.history.data_classes.experiment_run import ExperimentRun
-from autosubmitAPIwu.config.basicConfig import BasicConfig
+import autosubmit_api.history.utils as HUtils
+import autosubmit_api.history.database_managers.database_models as Models
+from autosubmit_api.history.data_classes.job_data import JobData
+from autosubmit_api.history.data_classes.experiment_run import ExperimentRun
+from autosubmit_api.config.basicConfig import BasicConfig
 from abc import ABCMeta, abstractmethod
-from autosubmitAPIwu.history.database_managers.database_manager import DatabaseManager, DEFAULT_JOBDATA_DIR
+from autosubmit_api.history.database_managers.database_manager import DatabaseManager, DEFAULT_JOBDATA_DIR
 from datetime import datetime
 from typing import List
 from collections import namedtuple

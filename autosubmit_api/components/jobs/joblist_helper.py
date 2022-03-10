@@ -1,12 +1,12 @@
 #!/usr/bin/env python
-from autosubmitAPIwu.job.job_list import JobList
-from autosubmitAPIwu.database.db_jobdata import JobDataStructure, JobRow
-from autosubmitAPIwu.components.experiment.configuration_facade import AutosubmitConfigurationFacade
-from autosubmitAPIwu.components.experiment.pkl_organizer import PklOrganizer
-from autosubmitAPIwu.config.basicConfig import BasicConfig
-from autosubmitAPIwu.job.job_utils import datechunk_to_year
+from autosubmit_api.autosubmit_legacy.job.job_list import JobList
+from autosubmit_api.database.db_jobdata import JobDataStructure, JobRow
+from autosubmit_api.components.experiment.configuration_facade import AutosubmitConfigurationFacade
+from autosubmit_api.components.experiment.pkl_organizer import PklOrganizer
+from autosubmit_api.config.basicConfig import BasicConfig
+from autosubmit_api.autosubmit_legacy.job.job_utils import datechunk_to_year
 from typing import List, Dict
-from autosubmitAPIwu.components.jobs.job_factory import Job
+from autosubmit_api.components.jobs.job_factory import Job
 
 class JobListHelper(object):
   """ Loads time (queuing runnning) and packages. """

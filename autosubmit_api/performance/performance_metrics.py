@@ -1,10 +1,10 @@
 #!/usr/bin/env python
 import traceback
-import autosubmitAPIwu.common.utils as utils
-from autosubmitAPIwu.components.experiment.pkl_organizer import PklOrganizer
-from autosubmitAPIwu.components.experiment.configuration_facade import AutosubmitConfigurationFacade
-from autosubmitAPIwu.components.jobs.joblist_helper import JobListHelper
-from autosubmitAPIwu.components.jobs.job_factory import Job
+import autosubmit_api.common.utils as utils
+from autosubmit_api.components.experiment.pkl_organizer import PklOrganizer
+from autosubmit_api.components.experiment.configuration_facade import AutosubmitConfigurationFacade
+from autosubmit_api.components.jobs.joblist_helper import JobListHelper
+from autosubmit_api.components.jobs.job_factory import Job
 from typing import List, Dict
 
 class PerformanceMetrics(object):

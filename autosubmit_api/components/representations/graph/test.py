@@ -4,10 +4,10 @@ import unittest
 import math
 
 from networkx.algorithms.distance_measures import center
-from autosubmitAPIwu.job.job_common import Status
-from autosubmitAPIwu.components.representations.graph.graph import GraphRepresentation, GroupedBy, Layout
-from autosubmitAPIwu.components.representations.graph.edge import RealEdge
-from autosubmitAPIwu.builders.joblist_loader_builder import JobListLoaderBuilder, JobListLoaderDirector
+from autosubmit_api.common.utils import Status
+from autosubmit_api.components.representations.graph.graph import GraphRepresentation, GroupedBy, Layout
+from autosubmit_api.components.representations.graph.edge import RealEdge
+from autosubmit_api.builders.joblist_loader_builder import JobListLoaderBuilder, JobListLoaderDirector
 from collections import Counter
 
 class TestGraph(unittest.TestCase):

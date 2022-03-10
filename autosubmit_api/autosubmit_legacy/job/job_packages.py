@@ -27,10 +27,10 @@ except ImportError:
 import os
 import time
 import random
-from autosubmitAPIwu.job.job_common import Status
+from autosubmit_api.autosubmit_legacy.job.job_common import Status
 from bscearth.utils.log import Log
-from autosubmitAPIwu.job.job_exceptions import WrongTemplateException
-from autosubmitAPIwu.job.job import Job
+from autosubmit_api.autosubmit_legacy.job.job_exceptions import WrongTemplateException
+from autosubmit_api.autosubmit_legacy.job.job import Job
 from bscearth.utils.date import sum_str_hours
 
 

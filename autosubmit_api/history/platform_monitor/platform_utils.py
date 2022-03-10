@@ -63,7 +63,7 @@ def try_parse_time_to_timestamp(input):
     return 0
 
 def read_example(example_name):
-  source_path = "autosubmitAPIwu/history/platform_monitor/output_examples/"
+  source_path = "autosubmit_api/history/platform_monitor/output_examples/"
   file_path = os.path.join(source_path, example_name)
   with open(file_path, "r") as fp:
       output_ssh = fp.read()

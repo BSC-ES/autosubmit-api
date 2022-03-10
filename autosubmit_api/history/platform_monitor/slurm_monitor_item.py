@@ -16,7 +16,7 @@
 # You should have received a copy of the GNU General Public License
 # along with Autosubmit.  If not, see <http://www.gnu.org/licenses/>.
 
-import autosubmitAPIwu.history.platform_monitor.platform_utils as utils
+import autosubmit_api.history.platform_monitor.platform_utils as utils
 
 class SlurmMonitorItem():
   def __init__(self, name, status, ncpus, nnodes, submit, start, finish, energy="0", MaxRSS=0.0, AveRSS=0.0):

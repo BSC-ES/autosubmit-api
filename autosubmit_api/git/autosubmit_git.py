@@ -23,7 +23,7 @@ from shutil import rmtree
 import subprocess
 import shutil
 
-from autosubmitAPIwu.config.basicConfig import BasicConfig
+from autosubmit_api.config.basicConfig import BasicConfig
 from bscearth.utils.log import Log
 
 

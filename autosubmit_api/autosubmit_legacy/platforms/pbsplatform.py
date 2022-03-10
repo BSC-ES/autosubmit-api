@@ -19,12 +19,12 @@
 
 import os
 
-from autosubmitAPIwu.platforms.paramiko_platform import ParamikoPlatform, ParamikoPlatformException
+from autosubmit_api.autosubmit_legacy.platforms.paramiko_platform import ParamikoPlatform, ParamikoPlatformException
 from bscearth.utils.log import Log
 
-from autosubmitAPIwu.platforms.headers.pbs10_header import Pbs10Header
-from autosubmitAPIwu.platforms.headers.pbs11_header import Pbs11Header
-from autosubmitAPIwu.platforms.headers.pbs12_header import Pbs12Header
+from autosubmit_api.autosubmit_legacy.platforms.headers.pbs10_header import Pbs10Header
+from autosubmit_api.autosubmit_legacy.platforms.headers.pbs11_header import Pbs11Header
+from autosubmit_api.autosubmit_legacy.platforms.headers.pbs12_header import Pbs12Header
 
 
 class PBSPlatform(ParamikoPlatform):

@@ -20,9 +20,9 @@ import os
 import time
 import subprocess
 from experiment_status import ExperimentStatus
-from autosubmitAPIwu.config.basicConfig import BasicConfig
-from autosubmitAPIwu.experiment.common_requests import _is_exp_running
-from autosubmitAPIwu.common.utils import get_experiments_from_folder
+from autosubmit_api.config.basicConfig import BasicConfig
+from autosubmit_api.experiment.common_requests import _is_exp_running
+from autosubmit_api.common.utils import get_experiments_from_folder
 from typing import Dict, Set
 from utils import SAFE_TIME_LIMIT_STATUS
 

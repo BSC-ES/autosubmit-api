@@ -19,7 +19,7 @@ import os
 import traceback
 import database_managers.database_models as Models
 import utils as HUtils
-import autosubmitAPIwu.performance.utils as PUtils
+import autosubmit_api.performance.utils as PUtils
 from time import time, sleep
 from database_managers.experiment_history_db_manager import ExperimentHistoryDbManager
 from database_managers.database_manager import DEFAULT_JOBDATA_DIR, DEFAULT_HISTORICAL_LOGS_DIR
@@ -28,7 +28,7 @@ from data_classes.job_data import JobData
 from data_classes.experiment_run import ExperimentRun
 from platform_monitor.slurm_monitor import SlurmMonitor
 from internal_logging import Logging
-from autosubmitAPIwu.config.basicConfig import BasicConfig
+from autosubmit_api.config.basicConfig import BasicConfig
 from typing import List, Dict, Tuple, Any
 
 SECONDS_WAIT_PLATFORM = 60

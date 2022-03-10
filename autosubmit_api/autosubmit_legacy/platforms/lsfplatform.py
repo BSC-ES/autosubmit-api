@@ -19,9 +19,9 @@
 
 import os
 
-from autosubmitAPIwu.platforms.paramiko_platform import ParamikoPlatform
-from autosubmitAPIwu.platforms.headers.lsf_header import LsfHeader
-from autosubmitAPIwu.platforms.wrappers.wrapper_factory import LSFWrapperFactory
+from autosubmit_api.autosubmit_legacy.platforms.paramiko_platform import ParamikoPlatform
+from autosubmit_api.autosubmit_legacy.platforms.headers.lsf_header import LsfHeader
+from autosubmit_api.autosubmit_legacy.platforms.wrappers.wrapper_factory import LSFWrapperFactory
 
 
 class LsfPlatform(ParamikoPlatform):

@@ -19,9 +19,9 @@
 from audioop import reverse
 import collections
 import time
-import autosubmitAPIwu.history.utils as HUtils
-import autosubmitAPIwu.history.database_managers.database_models as Models
-from autosubmitAPIwu.job.job_common import Status
+import autosubmit_api.history.utils as HUtils
+import autosubmit_api.history.database_managers.database_models as Models
+from autosubmit_api.common.utils import Status
 from datetime import datetime, timedelta
 from json import dumps, loads
 from typing import List

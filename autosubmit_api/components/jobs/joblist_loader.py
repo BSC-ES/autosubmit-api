@@ -2,18 +2,18 @@
 
 import os
 from fnmatch import fnmatch
-from autosubmitAPIwu.components.jobs.joblist_helper import JobListHelper
-from autosubmitAPIwu.components.experiment.pkl_organizer import PklOrganizer
-from autosubmitAPIwu.components.experiment.configuration_facade import AutosubmitConfigurationFacade
-from autosubmitAPIwu.components.jobs.job_factory import StandardJob, Job
-from autosubmitAPIwu.database.db_structure import get_structure
-from autosubmitAPIwu.job.job_common import Status
+from autosubmit_api.components.jobs.joblist_helper import JobListHelper
+from autosubmit_api.components.experiment.pkl_organizer import PklOrganizer
+from autosubmit_api.components.experiment.configuration_facade import AutosubmitConfigurationFacade
+from autosubmit_api.components.jobs.job_factory import StandardJob, Job
+from autosubmit_api.database.db_structure import get_structure
+from autosubmit_api.autosubmit_legacy.job.job_common import Status
 from bscearth.utils.date import date2str, parse_date
 from typing import Dict, List, Set, Tuple
 # Builder Imports
-from autosubmitAPIwu.config.config_common import AutosubmitConfig
+from autosubmit_api.config.config_common import AutosubmitConfig
 from bscearth.utils.config_parser import ConfigParserFactory
-from autosubmitAPIwu.config.basicConfig import BasicConfig
+from autosubmit_api.config.basicConfig import BasicConfig
 
 class JobListLoader(object):
   """ Class that manages loading the list of jobs from the pkl. Adds other resources. """

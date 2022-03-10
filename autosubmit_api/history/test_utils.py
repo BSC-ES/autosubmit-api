@@ -1,6 +1,6 @@
 
 import unittest
-import autosubmitAPIwu.history.utils as HUtils
+import autosubmit_api.history.utils as HUtils
 
 class TestUtils(unittest.TestCase):
   def setUp(self):

@@ -24,17 +24,17 @@ import os
 
 from bscearth.utils.log import Log
 
-from autosubmitAPIwu.config.basicConfig import BasicConfig
-from autosubmitAPIwu.config.config_common import AutosubmitConfig
+from autosubmit_api.config.basicConfig import BasicConfig
+from autosubmit_api.config.config_common import AutosubmitConfig
 from submitter import Submitter
-from autosubmitAPIwu.platforms.psplatform import PsPlatform
-from autosubmitAPIwu.platforms.lsfplatform import LsfPlatform
-from autosubmitAPIwu.platforms.pbsplatform import PBSPlatform
-from autosubmitAPIwu.platforms.sgeplatform import SgePlatform
-from autosubmitAPIwu.platforms.ecplatform import EcPlatform
-from autosubmitAPIwu.platforms.slurmplatform import SlurmPlatform
-from autosubmitAPIwu.platforms.locplatform import LocalPlatform
-from autosubmitAPIwu.platforms.paramiko_platform import ParamikoPlatformException
+from autosubmit_api.autosubmit_legacy.platforms.psplatform import PsPlatform
+from autosubmit_api.autosubmit_legacy.platforms.lsfplatform import LsfPlatform
+from autosubmit_api.autosubmit_legacy.platforms.pbsplatform import PBSPlatform
+from autosubmit_api.autosubmit_legacy.platforms.sgeplatform import SgePlatform
+from autosubmit_api.autosubmit_legacy.platforms.ecplatform import EcPlatform
+from autosubmit_api.autosubmit_legacy.platforms.slurmplatform import SlurmPlatform
+from autosubmit_api.autosubmit_legacy.platforms.locplatform import LocalPlatform
+from autosubmit_api.autosubmit_legacy.platforms.paramiko_platform import ParamikoPlatformException
 
 
 class ParamikoSubmitter(Submitter):

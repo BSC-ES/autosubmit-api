@@ -1,5 +1,5 @@
 #!/usr/bin/env pytthon
-from autosubmitAPIwu.job.job_common import Status
+from autosubmit_api.common.utils import Status
 
 def calculate_SYPD_perjob(chunk_unit, chunk_size, job_chunk, run_time, status):
     # type: (str, int, int, int, int) -> float

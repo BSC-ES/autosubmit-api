@@ -1,9 +1,9 @@
 #!/usr/bin/env python
-from autosubmitAPIwu.config.basicConfig import BasicConfig
-from autosubmitAPIwu.components.experiment.pkl_organizer import PklOrganizer
-from autosubmitAPIwu.builders.configuration_facade_builder import AutosubmitConfigurationFacadeBuilder, ConfigurationFacadeDirector
-from autosubmitAPIwu.builders.basic_builder import BasicBuilder
-from autosubmitAPIwu.components.experiment.configuration_facade import AutosubmitConfigurationFacade
+from autosubmit_api.config.basicConfig import BasicConfig
+from autosubmit_api.components.experiment.pkl_organizer import PklOrganizer
+from autosubmit_api.builders.configuration_facade_builder import AutosubmitConfigurationFacadeBuilder, ConfigurationFacadeDirector
+from autosubmit_api.builders.basic_builder import BasicBuilder
+from autosubmit_api.components.experiment.configuration_facade import AutosubmitConfigurationFacade
 
 class PklOrganizerBuilder(BasicBuilder):
   def __init__(self, expid):

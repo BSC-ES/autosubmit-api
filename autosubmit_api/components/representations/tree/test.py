@@ -1,19 +1,19 @@
 #!/usr/bin/env python
 
 import unittest
-import autosubmitAPIwu.common.utils_for_testing as UtilsForTesting
+import autosubmit_api.common.utils_for_testing as UtilsForTesting
 from mock import Mock
-from autosubmitAPIwu.components.representations.tree.tree import TreeRepresentation
-from autosubmitAPIwu.components.jobs.joblist_loader import JobListLoader
-from autosubmitAPIwu.components.experiment.pkl_organizer import PklOrganizer
-from autosubmitAPIwu.components.experiment.configuration_facade import AutosubmitConfigurationFacade
+from autosubmit_api.components.representations.tree.tree import TreeRepresentation
+from autosubmit_api.components.jobs.joblist_loader import JobListLoader
+from autosubmit_api.components.experiment.pkl_organizer import PklOrganizer
+from autosubmit_api.components.experiment.configuration_facade import AutosubmitConfigurationFacade
 # from autosubmitAPIwu.config.basicConfig import BasicConfig
 from bscearth.utils.config_parser import ConfigParserFactory
-from autosubmitAPIwu.config.config_common import AutosubmitConfig
+from autosubmit_api.config.config_common import AutosubmitConfig
 
-from autosubmitAPIwu.job.job_common import Status
-from autosubmitAPIwu.components.jobs.joblist_helper import JobListHelper
-from autosubmitAPIwu.config.basicConfig import BasicConfig
+from autosubmit_api.common.utils import Status
+from autosubmit_api.components.jobs.joblist_helper import JobListHelper
+from autosubmit_api.config.basicConfig import BasicConfig
 
 class TestTreeRepresentation(unittest.TestCase):
   def setUp(self):
@@ -48,50 +48,7 @@ class TestTreeRepresentation(unittest.TestCase):
     self.assertTrue(len(self.job_list_loader.dates) == len(tree_representation._distributed_dates))
     self.assertTrue(len(self.job_list_loader.members) == len(tree_representation._distributed_members))
 
-  
 
-  # def test_load(self):    
-  #   tree = TreeRepresentation("a3zk") 
-  #   tree.setup()
-  #   tree._distribute_into_date_member_groups()
-  #   for key, jobs in tree._date_member_distribution.items():
-  #     print(key)
-  #     for job in jobs:
-  #       print(job.name)
-  #       print(job.do_print())
-  #   print("Others:")
-  #   for job in tree._no_date_no_member_jobs:
-  #     print(job.name)
-    
-
-  # def test_gen_dm_folders(self):
-  #   tree = TreeRepresentation("a29z") 
-  #   tree.setup()
-  #   tree._distribute_into_date_member_groups()
-    # tree._distribute_into_date_member_groups()
-
-  # def test_tree_loader(self):
-  #   tree = TreeRepresentation("a44a")
-  #   tree.setup()
-  #   self.assertTrue(tree.joblist_loader.pkl_organizer.is_wrapper_type_in_pkl == True)
-  #   self.assertTrue(len(tree.joblist_loader.pkl_organizer.current_content) > 0)    
-  #   tree.perform_calculations()
-  #   print("Number of jobs {}".format(len(tree.nodes)))
-  #   self.assertTrue(len(tree.nodes) == 54)
-
-  # def test_generate_complete(self):
-  #   tree = TreeRepresentation("a29z")
-  #   tree.setup()
-  #   tree.perform_calculations()              
-  #   for job in tree.joblist_loader.jobs:      
-  #     if job.status == Status.COMPLETED:
-  #       self.assertTrue(job.out_path_local.startswith("/esarchive/"))
-  #       self.assertTrue(job.err_path_local.startswith("/esarchive/"))
-      #   print(job.out_path_local)
-      #   print(job.err_path_local)
-      # else:
-      #   print(job.name)
-    # self.assertTrue(self.test_graph.edge_count == edge_count)
 
 if __name__ == '__main__':
   unittest.main()

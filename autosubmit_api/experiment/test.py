@@ -19,7 +19,7 @@
 
 import unittest
 
-from autosubmitAPIwu.experiment.common_requests import get_job_history, get_experiment_data
+from autosubmit_api.experiment.common_requests import get_job_history, get_experiment_data
 
 class TestCommonRequests(unittest.TestCase):
   def setUp(self):

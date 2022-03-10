@@ -7,8 +7,8 @@ import radical.saga as saga
 
 from bscearth.utils.log import Log
 from bscearth.utils.date import date2str
-from autosubmitAPIwu.job.job_common import Status, Type
-from autosubmitAPIwu.platforms.platform import Platform
+from autosubmit_api.autosubmit_legacy.job.job_common import Status, Type
+from autosubmit_api.autosubmit_legacy.platforms.platform import Platform
 
 
 class SagaPlatform(Platform):

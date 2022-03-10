@@ -1,10 +1,10 @@
 import time
 import traceback
-import autosubmitAPIwu.experiment.common_db_requests as DbRequests
-import autosubmitAPIwu.common.utils as common_utils
-from autosubmitAPIwu.database.db_jobdata import ExperimentGraphDrawing
-from autosubmitAPIwu.builders.configuration_facade_builder import ConfigurationFacadeDirector, AutosubmitConfigurationFacadeBuilder
-from autosubmitAPIwu.builders.joblist_loader_builder import JobListLoaderBuilder, JobListLoaderDirector, JobListHelperBuilder
+import autosubmit_api.experiment.common_db_requests as DbRequests
+import autosubmit_api.common.utils as common_utils
+from autosubmit_api.database.db_jobdata import ExperimentGraphDrawing
+from autosubmit_api.builders.configuration_facade_builder import ConfigurationFacadeDirector, AutosubmitConfigurationFacadeBuilder
+from autosubmit_api.builders.joblist_loader_builder import JobListLoaderBuilder, JobListLoaderDirector, JobListHelperBuilder
 from typing import List, Any
 
 def process_active_graphs():

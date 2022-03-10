@@ -20,7 +20,7 @@ import traceback
 from database_managers.experiment_status_db_manager import ExperimentStatusDbManager
 from database_managers.database_manager import DEFAULT_LOCAL_ROOT_DIR, DEFAULT_HISTORICAL_LOGS_DIR
 from internal_logging import Logging
-from autosubmitAPIwu.config.basicConfig import BasicConfig
+from autosubmit_api.config.basicConfig import BasicConfig
 from typing import List
 from database_managers.database_models import ExperimentStatusRow
 

@@ -33,13 +33,12 @@ from datetime import datetime, timedelta
 from json import dumps, loads
 from time import mktime
 # from networkx import DiGraph
-from autosubmitAPIwu.config.basicConfig import BasicConfig
-from autosubmitAPIwu.job.job_common import Status, bcolors
-from autosubmitAPIwu.monitor.monitor import Monitor
-from autosubmitAPIwu.job.job_utils import job_times_to_text, datechunk_to_year, getTitle
-from autosubmitAPIwu.performance.utils import calculate_ASYPD_perjob, calculate_SYPD_perjob
-from autosubmitAPIwu.components.jobs.job_factory import SimJob
-from autosubmitAPIwu.common.utils import get_jobs_with_no_outliers
+from autosubmit_api.config.basicConfig import BasicConfig
+from autosubmit_api.monitor.monitor import Monitor
+from autosubmit_api.autosubmit_legacy.job.job_utils import job_times_to_text, getTitle
+from autosubmit_api.performance.utils import calculate_ASYPD_perjob, calculate_SYPD_perjob
+from autosubmit_api.components.jobs.job_factory import SimJob
+from autosubmit_api.common.utils import get_jobs_with_no_outliers, Status, bcolors, datechunk_to_year
 # from autosubmitAPIwu.job.job_list
 # import autosubmitAPIwu.experiment.common_db_requests as DbRequests
 from bscearth.utils.date import date2str, parse_date, previous_day, chunk_end_date, chunk_start_date, Log, subs_dates

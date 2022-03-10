@@ -1,8 +1,8 @@
 #!/usr/bin/env python
-from autosubmitAPIwu.config.basicConfig import BasicConfig
-from autosubmitAPIwu.builders.basic_builder import BasicBuilder
-from autosubmitAPIwu.components.jobs.joblist_loader import JobListLoader
-from autosubmitAPIwu.builders.joblist_helper_builder import JobListHelperBuilder, JobListHelperDirector
+from autosubmit_api.config.basicConfig import BasicConfig
+from autosubmit_api.builders.basic_builder import BasicBuilder
+from autosubmit_api.components.jobs.joblist_loader import JobListLoader
+from autosubmit_api.builders.joblist_helper_builder import JobListHelperBuilder, JobListHelperDirector
 
 class JobListLoaderBuilder(BasicBuilder):
   def __init__(self, expid):

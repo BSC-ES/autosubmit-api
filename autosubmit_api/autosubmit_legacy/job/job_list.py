@@ -49,27 +49,27 @@ from shutil import move
 from random import shuffle
 from dateutil.relativedelta import *
 
-from autosubmitAPIwu.job.job import Job
-from autosubmitAPIwu.config.config_common import AutosubmitConfig
+from autosubmit_api.autosubmit_legacy.job.job import Job
+from autosubmit_api.config.config_common import AutosubmitConfig
 from bscearth.utils.log import Log
-from autosubmitAPIwu.job.job_dict import DicJobs
-from autosubmitAPIwu.job.job_utils import Dependency
-from autosubmitAPIwu.job.job_utils import SubJob
-from autosubmitAPIwu.job.job_utils import SubJobManager, job_times_to_text, datechunk_to_year
-from autosubmitAPIwu.performance.utils import calculate_ASYPD_perjob, calculate_SYPD_perjob
-from autosubmitAPIwu.monitor.monitor import Monitor
-from autosubmitAPIwu.job.job_common import Status, Type
+from autosubmit_api.autosubmit_legacy.job.job_dict import DicJobs
+from autosubmit_api.autosubmit_legacy.job.job_utils import Dependency
+from autosubmit_api.autosubmit_legacy.job.job_utils import SubJob
+from autosubmit_api.autosubmit_legacy.job.job_utils import SubJobManager, job_times_to_text, datechunk_to_year
+from autosubmit_api.performance.utils import calculate_ASYPD_perjob, calculate_SYPD_perjob
+from autosubmit_api.monitor.monitor import Monitor
+from autosubmit_api.autosubmit_legacy.job.job_common import Status, Type
 from bscearth.utils.date import date2str, parse_date, sum_str_hours
-import autosubmitAPIwu.experiment.common_db_requests as DbRequests
-from autosubmitAPIwu.job.job_packages import JobPackageSimple, JobPackageArray, JobPackageThread
-from autosubmitAPIwu.job.job_package_persistence import JobPackagePersistence
-from autosubmitAPIwu.job.tree import Tree
-import autosubmitAPIwu.database.db_structure as DbStructure
-from autosubmitAPIwu.database.db_jobdata import JobDataStructure, JobRow, ExperimentGraphDrawing
+import autosubmit_api.experiment.common_db_requests as DbRequests
+from autosubmit_api.autosubmit_legacy.job.job_packages import JobPackageSimple, JobPackageArray, JobPackageThread
+from autosubmit_api.autosubmit_legacy.job.job_package_persistence import JobPackagePersistence
+# from autosubmit_api.autosubmit_legacy.job.tree import Tree
+import autosubmit_api.database.db_structure as DbStructure
+from autosubmit_api.database.db_jobdata import JobDataStructure, JobRow, ExperimentGraphDrawing
 
 from networkx import DiGraph
-from autosubmitAPIwu.job.job_utils import transitive_reduction
-from autosubmitAPIwu.common.utils import timestamp_to_datetime_format
+from autosubmit_api.autosubmit_legacy.job.job_utils import transitive_reduction
+from autosubmit_api.common.utils import timestamp_to_datetime_format
 
 
 class JobList:
@@ -1264,16 +1264,16 @@ class JobList:
             self.update_genealogy(notransitive=notransitive)
         del self._dic_jobs
 
-    def get_tree_representation(self):
-        """
-        Return a tree (treelib) representation of the list of jobs
+    # def get_tree_representation(self):
+    #     """
+    #     Return a tree (treelib) representation of the list of jobs
 
-        :return: job list hierarchy as a tree
-        :rtype: treelib instance
-        """
-        allJobs = self.get_all()
-        tree = Tree(allJobs)
-        return tree
+    #     :return: job list hierarchy as a tree
+    #     :rtype: treelib instance
+    #     """
+    #     allJobs = self.get_all()
+    #     tree = Tree(allJobs)
+    #     return tree
 
     @staticmethod
     def get_sourcetag():

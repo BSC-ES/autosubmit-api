@@ -20,10 +20,10 @@
 import os
 import textwrap
 import time
-from autosubmitAPIwu.history.database_managers.database_manager import DatabaseManager, DEFAULT_LOCAL_ROOT_DIR
-from autosubmitAPIwu.config.basicConfig import BasicConfig
-import autosubmitAPIwu.history.utils as HUtils
-import autosubmitAPIwu.history.database_managers.database_models as Models
+from autosubmit_api.history.database_managers.database_manager import DatabaseManager, DEFAULT_LOCAL_ROOT_DIR
+from autosubmit_api.config.basicConfig import BasicConfig
+import autosubmit_api.history.utils as HUtils
+import autosubmit_api.history.database_managers.database_models as Models
 from typing import List
 
 class ExperimentStatusDbManager(DatabaseManager):

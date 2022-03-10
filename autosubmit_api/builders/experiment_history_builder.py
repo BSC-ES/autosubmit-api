@@ -1,9 +1,9 @@
 #!/usr/bin/env python
-from autosubmitAPIwu.history.experiment_history import ExperimentHistory
-from autosubmitAPIwu.history.internal_logging import Logging
-from autosubmitAPIwu.config.basicConfig import BasicConfig
-from autosubmitAPIwu.history.database_managers.experiment_history_db_manager import ExperimentHistoryDbManager
-from autosubmitAPIwu.builders.basic_builder import BasicBuilder
+from autosubmit_api.history.experiment_history import ExperimentHistory
+from autosubmit_api.history.internal_logging import Logging
+from autosubmit_api.config.basicConfig import BasicConfig
+from autosubmit_api.history.database_managers.experiment_history_db_manager import ExperimentHistoryDbManager
+from autosubmit_api.builders.basic_builder import BasicBuilder
 from abc import ABCMeta, abstractmethod
 
 class Builder(BasicBuilder):

@@ -1,4 +1,4 @@
-import autosubmitAPIwu.workers.process_graph_drawings as ProcessGraph
+import autosubmit_api.workers.process_graph_drawings as ProcessGraph
 
 
 def main():

@@ -30,9 +30,9 @@ import copy
 
 import subprocess
 
-from autosubmitAPIwu.job.job_common import Status
-from autosubmitAPIwu.config.basicConfig import BasicConfig
-from autosubmitAPIwu.config.config_common import AutosubmitConfig
+from autosubmit_api.autosubmit_legacy.job.job_common import Status
+from autosubmit_api.config.basicConfig import BasicConfig
+from autosubmit_api.config.config_common import AutosubmitConfig
 from bscearth.utils.log import Log
 from bscearth.utils.config_parser import ConfigParserFactory
 

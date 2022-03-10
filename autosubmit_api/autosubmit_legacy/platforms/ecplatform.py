@@ -20,13 +20,13 @@
 import os
 import subprocess
 
-from autosubmitAPIwu.platforms.paramiko_platform import ParamikoPlatform, ParamikoPlatformException
+from autosubmit_api.autosubmit_legacy.platforms.paramiko_platform import ParamikoPlatform, ParamikoPlatformException
 from bscearth.utils.log import Log
 
-from autosubmitAPIwu.platforms.headers.ec_header import EcHeader
-from autosubmitAPIwu.platforms.headers.ec_cca_header import EcCcaHeader
-from autosubmitAPIwu.platforms.headers.slurm_header import SlurmHeader
-from autosubmitAPIwu.platforms.wrappers.wrapper_factory import EcWrapperFactory
+from autosubmit_api.autosubmit_legacy.platforms.headers.ec_header import EcHeader
+from autosubmit_api.autosubmit_legacy.platforms.headers.ec_cca_header import EcCcaHeader
+from autosubmit_api.autosubmit_legacy.platforms.headers.slurm_header import SlurmHeader
+from autosubmit_api.autosubmit_legacy.platforms.wrappers.wrapper_factory import EcWrapperFactory
 
 
 class EcPlatform(ParamikoPlatform):

@@ -18,9 +18,9 @@
 
 import sqlite3
 import os
-import autosubmitAPIwu.history.utils as HUtils
-import autosubmitAPIwu.history.database_managers.database_models as Models
-from autosubmitAPIwu.config.basicConfig import BasicConfig
+import autosubmit_api.history.utils as HUtils
+import autosubmit_api.history.database_managers.database_models as Models
+from autosubmit_api.config.basicConfig import BasicConfig
 from abc import ABCMeta, abstractmethod
 
 DEFAULT_JOBDATA_DIR = os.path.join('/esarchive', 'autosubmit', 'as_metadata', 'data')

@@ -20,8 +20,8 @@
 import os
 from xml.dom.minidom import parseString
 
-from autosubmitAPIwu.platforms.paramiko_platform import ParamikoPlatform
-from autosubmitAPIwu.platforms.headers.ps_header import PsHeader
+from autosubmit_api.autosubmit_legacy.platforms.paramiko_platform import ParamikoPlatform
+from autosubmit_api.autosubmit_legacy.platforms.headers.ps_header import PsHeader
 
 
 class PsPlatform(ParamikoPlatform):

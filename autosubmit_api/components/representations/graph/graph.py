@@ -2,17 +2,16 @@
 
 from multiprocessing.sharedctypes import Value
 import networkx as nx
-import autosubmitAPIwu.performance.utils as PUtils
-import autosubmitAPIwu.common.utils as utils
-
+import autosubmit_api.performance.utils as PUtils
+# import autosubmit_api.common.utils as utils
+from autosubmit_api.common.utils import Status, get_average_total_time
 from networkx.linalg.laplacianmatrix import laplacian_matrix
-from autosubmitAPIwu.components.jobs.job_factory import Job
-from autosubmitAPIwu.components.jobs.joblist_loader import JobListLoader
-from autosubmitAPIwu.job.job_common import Status
-from autosubmitAPIwu.monitor.monitor import Monitor
-from autosubmitAPIwu.database.db_jobdata import ExperimentGraphDrawing
+from autosubmit_api.components.jobs.job_factory import Job
+from autosubmit_api.components.jobs.joblist_loader import JobListLoader
+from autosubmit_api.monitor.monitor import Monitor
+from autosubmit_api.database.db_jobdata import ExperimentGraphDrawing
 
-from autosubmitAPIwu.components.representations.graph.edge import Edge, RealEdge
+from autosubmit_api.components.representations.graph.edge import Edge, RealEdge
 from typing import List, Dict, Tuple, Set, Any
 from scipy import sparse
 
@@ -224,7 +223,7 @@ class GraphRepresentation(object):
   
   def _calculate_average_post_time(self):
     post_jobs = [job for job in self.jobs if job.section == "POST" and job.status in {Status.COMPLETED}]    
-    self.average_post_time = utils.get_average_total_time(post_jobs)
+    self.average_post_time = get_average_total_time(post_jobs)
 
   def _generate_node_data(self):
     for job_name in self.job_dictionary:      

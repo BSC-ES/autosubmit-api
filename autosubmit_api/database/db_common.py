@@ -24,12 +24,12 @@ import os
 import sqlite3
 
 from bscearth.utils.log import Log
-from autosubmitAPIwu.config.basicConfig import BasicConfig
-from autosubmitAPIwu.config.config_common import AutosubmitConfig
-from autosubmitAPIwu.builders.experiment_history_builder import ExperimentHistoryDirector, ExperimentHistoryBuilder
+from autosubmit_api.config.basicConfig import BasicConfig
+from autosubmit_api.config.config_common import AutosubmitConfig
+from autosubmit_api.builders.experiment_history_builder import ExperimentHistoryDirector, ExperimentHistoryBuilder
 from bscearth.utils.config_parser import ConfigParserFactory
-import autosubmitAPIwu.experiment.common_db_requests as DbRequests
-from autosubmitAPIwu.database.db_jobdata import JobDataStructure
+import autosubmit_api.experiment.common_db_requests as DbRequests
+from autosubmit_api.database.db_jobdata import JobDataStructure
 from datetime import datetime
 from typing import Dict, Any
 

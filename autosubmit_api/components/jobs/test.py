@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 import unittest
-from autosubmitAPIwu.components.jobs.joblist_loader import JobListLoader
+from autosubmit_api.components.jobs.joblist_loader import JobListLoader
 
 class TestJobListLoader(unittest.TestCase):
   def setUp(self):

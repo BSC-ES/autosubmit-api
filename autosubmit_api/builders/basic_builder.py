@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-from autosubmitAPIwu.config.basicConfig import BasicConfig
+from autosubmit_api.config.basicConfig import BasicConfig
 from abc import ABCMeta
 
 class BasicBuilder:

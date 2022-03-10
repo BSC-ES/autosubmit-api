@@ -17,7 +17,7 @@
 # You should have received a copy of the GNU General Public License
 # along with Autosubmit.  If not, see <http://www.gnu.org/licenses/>.
 
-from autosubmitAPIwu.job.job_common import Status
+from autosubmit_api.autosubmit_legacy.job.job_common import Status
 from bscearth.utils.date import date2str
 import copy
 
