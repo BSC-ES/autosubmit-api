@@ -1,0 +1,3601 @@
+[INFO] JOBID=805763
+
+job_name_ptrn='/gpfs/scratch/bsc32/bsc32627/t0ni/LOG_t0ni/t0ni_19931101_fc0_1_EARTHDIAGS'
++ job_name_ptrn=/gpfs/scratch/bsc32/bsc32627/t0ni/LOG_t0ni/t0ni_19931101_fc0_1_EARTHDIAGS
+echo $(date +%s) > ${job_name_ptrn}_STAT
+date +%s
+++ date +%s
++ echo 1639854654
+
+###################
+# Autosubmit job
+###################
+
+module purge
++ module purge
++ source /apps/modules/module_wrapper.sh purge
+#!/bin/bash
+
+BINPATH=/apps/modules/current/bin/modulecmd
+++ BINPATH=/apps/modules/current/bin/modulecmd
+MODULESHELL=sh
+++ MODULESHELL=sh
+
+if [[ -z "$MODULESBEGINENV" ]]; then
+	if [[ -n "$TMPDIR" && $TMPDIR =~ ^/.*/[0-9]+\.tmpdir$ ]]; then
+		export MODULESBEGINENV="$TMPDIR/.modulesbeginenv_$(date +"%Y%m%d%H%M%S%N")"
+	elif [[ -n "$HOME" ]]; then
+		export MODULESBEGINENV="$HOME/.modulesbeginenv"
+	fi
+fi
+++ [[ -z /home/bsc32/bsc32627/.modulesbeginenv ]]
+if [[ "$_MODULESBEGINENV_" != "$MODULESBEGINENV" ]]; then
+	unset _MODULESBEGINENV_
+fi
+++ [[ /home/bsc32/bsc32627/.modulesbeginenv != \/\h\o\m\e\/\b\s\c\3\2\/\b\s\c\3\2\6\2\7\/\.\m\o\d\u\l\e\s\b\e\g\i\n\e\n\v ]]
+
+case $# in
+0 ) # no args: launch help
+	eval `$BINPATH $MODULESHELL help`
+	;;
+1 ) # 1 args: launch it!
+	eval `$BINPATH $MODULESHELL $1`
+	;;
+* ) # 2 or more args: parse it!
+
+	options=$1
+	shift	# delete the option from args
+	i=0
+	for arg in "$@"	# save the rest of args in modulenames array
+	do
+		modulenames[$i]=$arg
+		((i++))
+	done
+
+	array_opts=( add load rm unload swap switch sw show display avail av help whatis initadd initprepend initrm initswitch )
+	process=0
+	for option in "${array_opts[@]}" # check for the options
+	do
+		if [ "${options}" = "$option" ] # will process the args
+		then
+			process=1
+			break
+		fi
+	done
+
+	if [ $process -eq 0 ]  
+	then	
+		# other options, just launch it
+		eval `$BINPATH $MODULESHELL $options ${modulenames[*]}`
+	else
+		# save the names of modulefiles in array_names
+		x=0
+		for LINE in $(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done) ; do array_names[$x]="$LINE" ; ((x++)); done
+		# compare all modulenames from the entry with the existing modulefiles
+		i=0; j=0
+		for modulename in "${modulenames[@]}" 
+		do
+			found=0
+			# split module and version
+			local module=${modulename%/*}
+			version=${modulename#*/} # if no version, then module=version
+			for filename in "${array_names[@]}"
+			do
+				shopt -s nocasematch
+				case "$module" in
+				$filename )
+					if [ "$module" == "$version" ] # default version
+					then
+						array_modules[$i]=$filename
+					else # explicit version number
+						array_modules[$i]="$filename/$version"
+					fi
+					((i++))
+					found=1
+          break
+					;;
+				* )
+					;;
+				esac
+			done
+			if [ $found -eq 0 ] # module not found
+			then
+				unknown_modules[$j]=$modulename
+				((j++))
+			fi	
+		done
+	        eval `$BINPATH $MODULESHELL $options ${array_modules[*]} ${unknown_modules[*]:-}` # launch the right modules
+
+	fi
+	;;
+esac
+++ case $# in
+$BINPATH $MODULESHELL $1
++++ /apps/modules/current/bin/modulecmd sh purge
+remove openmpi/1.8.1 (PATH, MANPATH, LD_LIBRARY_PATH)
+++ eval alias 'bqueues='\''/apps/modules/bsc/bin/bsc_queues'\'';' 'LD_LIBRARY_PATH='\''/opt/lsf/9.1/linux2.6-glibc2.3-x86_64/lib'\'';export' 'LD_LIBRARY_PATH;MANPATH='\''/opt/lsf/9.1/man:/usr/local/man:/usr/share/man'\'';export' 'MANPATH;PATH='\''/opt/lsf/9.1/linux2.6-glibc2.3-x86_64/bin:/opt/lsf/9.1/linux2.6-glibc2.3-x86_64/etc:/usr/local/bin:/usr/bin:/bin:/usr/bin/X11:/usr/X11R6/bin:/usr/games:/opt/bin:/opt/ibutils/bin:/usr/lib/mit/bin:/usr/lib/mit/sbin:/opt/intel/mic/bin:.'\'';export' 'PATH;unset' 'I_MPI_CXX;unset' 'OMPI_F77;unset' 'OMPI_MCA_mtl;unset' '_LMFILES_;unset' 'LOADEDMODULES;unset' 'MXM_LOG_LEVEL;unset' 'OMPI_CC;unset' 'MPI_V;unset' 'MPICH_CXX;unset' 'I_MPI_CC;unset' 'INTEL_HOME;unset' 'I_MPI_F90;unset' 'OMPI_MCA_coll_hcoll_enable;unset' 'INTEL_LICENSE_FILE;unset' 'INTEL_INC;unset' 'MXM_OOB_FIRST_SL;unset' 'MPI;unset' 'MP_COMPILER;unset' 'MPICH_F90;unset' 'OMPI_CXX;unset' 'MPICH_FC;unset' 'INTEL_VERSION;unset' 'I_MPI_F77;unset' 'OMPI_F90;unset' 'MPICH_F77;unset' 'OMPI_FC;unset' 'MPICH_CC;'
+alias bqueues='/apps/modules/bsc/bin/bsc_queues'; LD_LIBRARY_PATH='/opt/lsf/9.1/linux2.6-glibc2.3-x86_64/lib';export LD_LIBRARY_PATH;MANPATH='/opt/lsf/9.1/man:/usr/local/man:/usr/share/man';export MANPATH;PATH='/opt/lsf/9.1/linux2.6-glibc2.3-x86_64/bin:/opt/lsf/9.1/linux2.6-glibc2.3-x86_64/etc:/usr/local/bin:/usr/bin:/bin:/usr/bin/X11:/usr/X11R6/bin:/usr/games:/opt/bin:/opt/ibutils/bin:/usr/lib/mit/bin:/usr/lib/mit/sbin:/opt/intel/mic/bin:.';export PATH;unset I_MPI_CXX;unset OMPI_F77;unset OMPI_MCA_mtl;unset _LMFILES_;unset LOADEDMODULES;unset MXM_LOG_LEVEL;unset OMPI_CC;unset MPI_V;unset MPICH_CXX;unset I_MPI_CC;unset INTEL_HOME;unset I_MPI_F90;unset OMPI_MCA_coll_hcoll_enable;unset INTEL_LICENSE_FILE;unset INTEL_INC;unset MXM_OOB_FIRST_SL;unset MPI;unset MP_COMPILER;unset MPICH_F90;unset OMPI_CXX;unset MPICH_FC;unset INTEL_VERSION;unset I_MPI_F77;unset OMPI_F90;unset MPICH_F77;unset OMPI_FC;unset MPICH_CC;
++++ alias bqueues=/apps/modules/bsc/bin/bsc_queues
++++ LD_LIBRARY_PATH=/opt/lsf/9.1/linux2.6-glibc2.3-x86_64/lib
++++ export LD_LIBRARY_PATH
++++ MANPATH=/opt/lsf/9.1/man:/usr/local/man:/usr/share/man
++++ export MANPATH
++++ PATH=/opt/lsf/9.1/linux2.6-glibc2.3-x86_64/bin:/opt/lsf/9.1/linux2.6-glibc2.3-x86_64/etc:/usr/local/bin:/usr/bin:/bin:/usr/bin/X11:/usr/X11R6/bin:/usr/games:/opt/bin:/opt/ibutils/bin:/usr/lib/mit/bin:/usr/lib/mit/sbin:/opt/intel/mic/bin:.
++++ export PATH
++++ unset I_MPI_CXX
++++ unset OMPI_F77
++++ unset OMPI_MCA_mtl
++++ unset _LMFILES_
++++ unset LOADEDMODULES
++++ unset MXM_LOG_LEVEL
++++ unset OMPI_CC
++++ unset MPI_V
++++ unset MPICH_CXX
++++ unset I_MPI_CC
++++ unset INTEL_HOME
++++ unset I_MPI_F90
++++ unset OMPI_MCA_coll_hcoll_enable
++++ unset INTEL_LICENSE_FILE
++++ unset INTEL_INC
++++ unset MXM_OOB_FIRST_SL
++++ unset MPI
++++ unset MP_COMPILER
++++ unset MPICH_F90
++++ unset OMPI_CXX
++++ unset MPICH_FC
++++ unset INTEL_VERSION
++++ unset I_MPI_F77
++++ unset OMPI_F90
++++ unset MPICH_F77
++++ unset OMPI_FC
++++ unset MPICH_CC
+
+unset BINPATH array_modules unknown_modules modulenames array_names i j x option options modulename  version found LINE process process array_opts filename arg
+++ unset BINPATH array_modules unknown_modules modulenames array_names i j x option options modulename version found LINE process process array_opts filename arg
+
+module use /gpfs/projects/bsc32/software/suselinux/11/modules/all
++ module use /gpfs/projects/bsc32/software/suselinux/11/modules/all
++ source /apps/modules/module_wrapper.sh use /gpfs/projects/bsc32/software/suselinux/11/modules/all
+#!/bin/bash
+
+BINPATH=/apps/modules/current/bin/modulecmd
+++ BINPATH=/apps/modules/current/bin/modulecmd
+MODULESHELL=sh
+++ MODULESHELL=sh
+
+if [[ -z "$MODULESBEGINENV" ]]; then
+	if [[ -n "$TMPDIR" && $TMPDIR =~ ^/.*/[0-9]+\.tmpdir$ ]]; then
+		export MODULESBEGINENV="$TMPDIR/.modulesbeginenv_$(date +"%Y%m%d%H%M%S%N")"
+	elif [[ -n "$HOME" ]]; then
+		export MODULESBEGINENV="$HOME/.modulesbeginenv"
+	fi
+fi
+++ [[ -z /home/bsc32/bsc32627/.modulesbeginenv ]]
+if [[ "$_MODULESBEGINENV_" != "$MODULESBEGINENV" ]]; then
+	unset _MODULESBEGINENV_
+fi
+++ [[ /home/bsc32/bsc32627/.modulesbeginenv != \/\h\o\m\e\/\b\s\c\3\2\/\b\s\c\3\2\6\2\7\/\.\m\o\d\u\l\e\s\b\e\g\i\n\e\n\v ]]
+
+case $# in
+0 ) # no args: launch help
+	eval `$BINPATH $MODULESHELL help`
+	;;
+1 ) # 1 args: launch it!
+	eval `$BINPATH $MODULESHELL $1`
+	;;
+* ) # 2 or more args: parse it!
+
+	options=$1
+	shift	# delete the option from args
+	i=0
+	for arg in "$@"	# save the rest of args in modulenames array
+	do
+		modulenames[$i]=$arg
+		((i++))
+	done
+
+	array_opts=( add load rm unload swap switch sw show display avail av help whatis initadd initprepend initrm initswitch )
+	process=0
+	for option in "${array_opts[@]}" # check for the options
+	do
+		if [ "${options}" = "$option" ] # will process the args
+		then
+			process=1
+			break
+		fi
+	done
+
+	if [ $process -eq 0 ]  
+	then	
+		# other options, just launch it
+		eval `$BINPATH $MODULESHELL $options ${modulenames[*]}`
+	else
+		# save the names of modulefiles in array_names
+		x=0
+		for LINE in $(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done) ; do array_names[$x]="$LINE" ; ((x++)); done
+		# compare all modulenames from the entry with the existing modulefiles
+		i=0; j=0
+		for modulename in "${modulenames[@]}" 
+		do
+			found=0
+			# split module and version
+			local module=${modulename%/*}
+			version=${modulename#*/} # if no version, then module=version
+			for filename in "${array_names[@]}"
+			do
+				shopt -s nocasematch
+				case "$module" in
+				$filename )
+					if [ "$module" == "$version" ] # default version
+					then
+						array_modules[$i]=$filename
+					else # explicit version number
+						array_modules[$i]="$filename/$version"
+					fi
+					((i++))
+					found=1
+          break
+					;;
+				* )
+					;;
+				esac
+			done
+			if [ $found -eq 0 ] # module not found
+			then
+				unknown_modules[$j]=$modulename
+				((j++))
+			fi	
+		done
+	        eval `$BINPATH $MODULESHELL $options ${array_modules[*]} ${unknown_modules[*]:-}` # launch the right modules
+
+	fi
+	;;
+esac
+++ case $# in
+++ options=use
+++ shift
+++ i=0
+++ for arg in '"$@"'
+++ modulenames[$i]=/gpfs/projects/bsc32/software/suselinux/11/modules/all
+++ (( i++ ))
+++ array_opts=(add load rm unload swap switch sw show display avail av help whatis initadd initprepend initrm initswitch)
+++ process=0
+++ for option in '"${array_opts[@]}"'
+++ '[' use = add ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' use = load ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' use = rm ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' use = unload ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' use = swap ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' use = switch ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' use = sw ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' use = show ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' use = display ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' use = avail ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' use = av ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' use = help ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' use = whatis ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' use = initadd ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' use = initprepend ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' use = initrm ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' use = initswitch ']'
+++ '[' 0 -eq 0 ']'
+$BINPATH $MODULESHELL $options ${modulenames[*]}
++++ /apps/modules/current/bin/modulecmd sh use /gpfs/projects/bsc32/software/suselinux/11/modules/all
+++ eval 'MODULEPATH='\''/gpfs/projects/bsc32/software/suselinux/11/modules/all:/apps/modules/modulefiles/applications_bis:/apps/modules/modulefiles/applications:/apps/modules/modulefiles/compilers:/apps/modules/modulefiles/environment:/apps/modules/modulefiles/libraries:/apps/modules/modulefiles/tools:/apps/modules/PRACE'\'';export' 'MODULEPATH;'
+MODULEPATH='/gpfs/projects/bsc32/software/suselinux/11/modules/all:/apps/modules/modulefiles/applications_bis:/apps/modules/modulefiles/applications:/apps/modules/modulefiles/compilers:/apps/modules/modulefiles/environment:/apps/modules/modulefiles/libraries:/apps/modules/modulefiles/tools:/apps/modules/PRACE';export MODULEPATH;
++++ MODULEPATH=/gpfs/projects/bsc32/software/suselinux/11/modules/all:/apps/modules/modulefiles/applications_bis:/apps/modules/modulefiles/applications:/apps/modules/modulefiles/compilers:/apps/modules/modulefiles/environment:/apps/modules/modulefiles/libraries:/apps/modules/modulefiles/tools:/apps/modules/PRACE
++++ export MODULEPATH
+
+unset BINPATH array_modules unknown_modules modulenames array_names i j x option options modulename  version found LINE process process array_opts filename arg
+++ unset BINPATH array_modules unknown_modules modulenames array_names i j x option options modulename version found LINE process process array_opts filename arg
+
+module unuse /apps/modules/modulefiles/applications
++ module unuse /apps/modules/modulefiles/applications
++ source /apps/modules/module_wrapper.sh unuse /apps/modules/modulefiles/applications
+#!/bin/bash
+
+BINPATH=/apps/modules/current/bin/modulecmd
+++ BINPATH=/apps/modules/current/bin/modulecmd
+MODULESHELL=sh
+++ MODULESHELL=sh
+
+if [[ -z "$MODULESBEGINENV" ]]; then
+	if [[ -n "$TMPDIR" && $TMPDIR =~ ^/.*/[0-9]+\.tmpdir$ ]]; then
+		export MODULESBEGINENV="$TMPDIR/.modulesbeginenv_$(date +"%Y%m%d%H%M%S%N")"
+	elif [[ -n "$HOME" ]]; then
+		export MODULESBEGINENV="$HOME/.modulesbeginenv"
+	fi
+fi
+++ [[ -z /home/bsc32/bsc32627/.modulesbeginenv ]]
+if [[ "$_MODULESBEGINENV_" != "$MODULESBEGINENV" ]]; then
+	unset _MODULESBEGINENV_
+fi
+++ [[ /home/bsc32/bsc32627/.modulesbeginenv != \/\h\o\m\e\/\b\s\c\3\2\/\b\s\c\3\2\6\2\7\/\.\m\o\d\u\l\e\s\b\e\g\i\n\e\n\v ]]
+
+case $# in
+0 ) # no args: launch help
+	eval `$BINPATH $MODULESHELL help`
+	;;
+1 ) # 1 args: launch it!
+	eval `$BINPATH $MODULESHELL $1`
+	;;
+* ) # 2 or more args: parse it!
+
+	options=$1
+	shift	# delete the option from args
+	i=0
+	for arg in "$@"	# save the rest of args in modulenames array
+	do
+		modulenames[$i]=$arg
+		((i++))
+	done
+
+	array_opts=( add load rm unload swap switch sw show display avail av help whatis initadd initprepend initrm initswitch )
+	process=0
+	for option in "${array_opts[@]}" # check for the options
+	do
+		if [ "${options}" = "$option" ] # will process the args
+		then
+			process=1
+			break
+		fi
+	done
+
+	if [ $process -eq 0 ]  
+	then	
+		# other options, just launch it
+		eval `$BINPATH $MODULESHELL $options ${modulenames[*]}`
+	else
+		# save the names of modulefiles in array_names
+		x=0
+		for LINE in $(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done) ; do array_names[$x]="$LINE" ; ((x++)); done
+		# compare all modulenames from the entry with the existing modulefiles
+		i=0; j=0
+		for modulename in "${modulenames[@]}" 
+		do
+			found=0
+			# split module and version
+			local module=${modulename%/*}
+			version=${modulename#*/} # if no version, then module=version
+			for filename in "${array_names[@]}"
+			do
+				shopt -s nocasematch
+				case "$module" in
+				$filename )
+					if [ "$module" == "$version" ] # default version
+					then
+						array_modules[$i]=$filename
+					else # explicit version number
+						array_modules[$i]="$filename/$version"
+					fi
+					((i++))
+					found=1
+          break
+					;;
+				* )
+					;;
+				esac
+			done
+			if [ $found -eq 0 ] # module not found
+			then
+				unknown_modules[$j]=$modulename
+				((j++))
+			fi	
+		done
+	        eval `$BINPATH $MODULESHELL $options ${array_modules[*]} ${unknown_modules[*]:-}` # launch the right modules
+
+	fi
+	;;
+esac
+++ case $# in
+++ options=unuse
+++ shift
+++ i=0
+++ for arg in '"$@"'
+++ modulenames[$i]=/apps/modules/modulefiles/applications
+++ (( i++ ))
+++ array_opts=(add load rm unload swap switch sw show display avail av help whatis initadd initprepend initrm initswitch)
+++ process=0
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = add ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = load ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = rm ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = unload ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = swap ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = switch ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = sw ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = show ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = display ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = avail ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = av ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = help ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = whatis ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = initadd ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = initprepend ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = initrm ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = initswitch ']'
+++ '[' 0 -eq 0 ']'
+$BINPATH $MODULESHELL $options ${modulenames[*]}
++++ /apps/modules/current/bin/modulecmd sh unuse /apps/modules/modulefiles/applications
+++ eval 'MODULEPATH='\''/gpfs/projects/bsc32/software/suselinux/11/modules/all:/apps/modules/modulefiles/applications_bis:/apps/modules/modulefiles/compilers:/apps/modules/modulefiles/environment:/apps/modules/modulefiles/libraries:/apps/modules/modulefiles/tools:/apps/modules/PRACE'\'';export' 'MODULEPATH;'
+MODULEPATH='/gpfs/projects/bsc32/software/suselinux/11/modules/all:/apps/modules/modulefiles/applications_bis:/apps/modules/modulefiles/compilers:/apps/modules/modulefiles/environment:/apps/modules/modulefiles/libraries:/apps/modules/modulefiles/tools:/apps/modules/PRACE';export MODULEPATH;
++++ MODULEPATH=/gpfs/projects/bsc32/software/suselinux/11/modules/all:/apps/modules/modulefiles/applications_bis:/apps/modules/modulefiles/compilers:/apps/modules/modulefiles/environment:/apps/modules/modulefiles/libraries:/apps/modules/modulefiles/tools:/apps/modules/PRACE
++++ export MODULEPATH
+
+unset BINPATH array_modules unknown_modules modulenames array_names i j x option options modulename  version found LINE process process array_opts filename arg
+++ unset BINPATH array_modules unknown_modules modulenames array_names i j x option options modulename version found LINE process process array_opts filename arg
+
+module unuse /apps/modules/modulefiles/applications_bis
++ module unuse /apps/modules/modulefiles/applications_bis
++ source /apps/modules/module_wrapper.sh unuse /apps/modules/modulefiles/applications_bis
+#!/bin/bash
+
+BINPATH=/apps/modules/current/bin/modulecmd
+++ BINPATH=/apps/modules/current/bin/modulecmd
+MODULESHELL=sh
+++ MODULESHELL=sh
+
+if [[ -z "$MODULESBEGINENV" ]]; then
+	if [[ -n "$TMPDIR" && $TMPDIR =~ ^/.*/[0-9]+\.tmpdir$ ]]; then
+		export MODULESBEGINENV="$TMPDIR/.modulesbeginenv_$(date +"%Y%m%d%H%M%S%N")"
+	elif [[ -n "$HOME" ]]; then
+		export MODULESBEGINENV="$HOME/.modulesbeginenv"
+	fi
+fi
+++ [[ -z /home/bsc32/bsc32627/.modulesbeginenv ]]
+if [[ "$_MODULESBEGINENV_" != "$MODULESBEGINENV" ]]; then
+	unset _MODULESBEGINENV_
+fi
+++ [[ /home/bsc32/bsc32627/.modulesbeginenv != \/\h\o\m\e\/\b\s\c\3\2\/\b\s\c\3\2\6\2\7\/\.\m\o\d\u\l\e\s\b\e\g\i\n\e\n\v ]]
+
+case $# in
+0 ) # no args: launch help
+	eval `$BINPATH $MODULESHELL help`
+	;;
+1 ) # 1 args: launch it!
+	eval `$BINPATH $MODULESHELL $1`
+	;;
+* ) # 2 or more args: parse it!
+
+	options=$1
+	shift	# delete the option from args
+	i=0
+	for arg in "$@"	# save the rest of args in modulenames array
+	do
+		modulenames[$i]=$arg
+		((i++))
+	done
+
+	array_opts=( add load rm unload swap switch sw show display avail av help whatis initadd initprepend initrm initswitch )
+	process=0
+	for option in "${array_opts[@]}" # check for the options
+	do
+		if [ "${options}" = "$option" ] # will process the args
+		then
+			process=1
+			break
+		fi
+	done
+
+	if [ $process -eq 0 ]  
+	then	
+		# other options, just launch it
+		eval `$BINPATH $MODULESHELL $options ${modulenames[*]}`
+	else
+		# save the names of modulefiles in array_names
+		x=0
+		for LINE in $(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done) ; do array_names[$x]="$LINE" ; ((x++)); done
+		# compare all modulenames from the entry with the existing modulefiles
+		i=0; j=0
+		for modulename in "${modulenames[@]}" 
+		do
+			found=0
+			# split module and version
+			local module=${modulename%/*}
+			version=${modulename#*/} # if no version, then module=version
+			for filename in "${array_names[@]}"
+			do
+				shopt -s nocasematch
+				case "$module" in
+				$filename )
+					if [ "$module" == "$version" ] # default version
+					then
+						array_modules[$i]=$filename
+					else # explicit version number
+						array_modules[$i]="$filename/$version"
+					fi
+					((i++))
+					found=1
+          break
+					;;
+				* )
+					;;
+				esac
+			done
+			if [ $found -eq 0 ] # module not found
+			then
+				unknown_modules[$j]=$modulename
+				((j++))
+			fi	
+		done
+	        eval `$BINPATH $MODULESHELL $options ${array_modules[*]} ${unknown_modules[*]:-}` # launch the right modules
+
+	fi
+	;;
+esac
+++ case $# in
+++ options=unuse
+++ shift
+++ i=0
+++ for arg in '"$@"'
+++ modulenames[$i]=/apps/modules/modulefiles/applications_bis
+++ (( i++ ))
+++ array_opts=(add load rm unload swap switch sw show display avail av help whatis initadd initprepend initrm initswitch)
+++ process=0
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = add ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = load ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = rm ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = unload ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = swap ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = switch ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = sw ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = show ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = display ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = avail ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = av ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = help ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = whatis ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = initadd ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = initprepend ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = initrm ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = initswitch ']'
+++ '[' 0 -eq 0 ']'
+$BINPATH $MODULESHELL $options ${modulenames[*]}
++++ /apps/modules/current/bin/modulecmd sh unuse /apps/modules/modulefiles/applications_bis
+++ eval 'MODULEPATH='\''/gpfs/projects/bsc32/software/suselinux/11/modules/all:/apps/modules/modulefiles/compilers:/apps/modules/modulefiles/environment:/apps/modules/modulefiles/libraries:/apps/modules/modulefiles/tools:/apps/modules/PRACE'\'';export' 'MODULEPATH;'
+MODULEPATH='/gpfs/projects/bsc32/software/suselinux/11/modules/all:/apps/modules/modulefiles/compilers:/apps/modules/modulefiles/environment:/apps/modules/modulefiles/libraries:/apps/modules/modulefiles/tools:/apps/modules/PRACE';export MODULEPATH;
++++ MODULEPATH=/gpfs/projects/bsc32/software/suselinux/11/modules/all:/apps/modules/modulefiles/compilers:/apps/modules/modulefiles/environment:/apps/modules/modulefiles/libraries:/apps/modules/modulefiles/tools:/apps/modules/PRACE
++++ export MODULEPATH
+
+unset BINPATH array_modules unknown_modules modulenames array_names i j x option options modulename  version found LINE process process array_opts filename arg
+++ unset BINPATH array_modules unknown_modules modulenames array_names i j x option options modulename version found LINE process process array_opts filename arg
+
+module unuse /apps/modules/modulefiles/compilers
++ module unuse /apps/modules/modulefiles/compilers
++ source /apps/modules/module_wrapper.sh unuse /apps/modules/modulefiles/compilers
+#!/bin/bash
+
+BINPATH=/apps/modules/current/bin/modulecmd
+++ BINPATH=/apps/modules/current/bin/modulecmd
+MODULESHELL=sh
+++ MODULESHELL=sh
+
+if [[ -z "$MODULESBEGINENV" ]]; then
+	if [[ -n "$TMPDIR" && $TMPDIR =~ ^/.*/[0-9]+\.tmpdir$ ]]; then
+		export MODULESBEGINENV="$TMPDIR/.modulesbeginenv_$(date +"%Y%m%d%H%M%S%N")"
+	elif [[ -n "$HOME" ]]; then
+		export MODULESBEGINENV="$HOME/.modulesbeginenv"
+	fi
+fi
+++ [[ -z /home/bsc32/bsc32627/.modulesbeginenv ]]
+if [[ "$_MODULESBEGINENV_" != "$MODULESBEGINENV" ]]; then
+	unset _MODULESBEGINENV_
+fi
+++ [[ /home/bsc32/bsc32627/.modulesbeginenv != \/\h\o\m\e\/\b\s\c\3\2\/\b\s\c\3\2\6\2\7\/\.\m\o\d\u\l\e\s\b\e\g\i\n\e\n\v ]]
+
+case $# in
+0 ) # no args: launch help
+	eval `$BINPATH $MODULESHELL help`
+	;;
+1 ) # 1 args: launch it!
+	eval `$BINPATH $MODULESHELL $1`
+	;;
+* ) # 2 or more args: parse it!
+
+	options=$1
+	shift	# delete the option from args
+	i=0
+	for arg in "$@"	# save the rest of args in modulenames array
+	do
+		modulenames[$i]=$arg
+		((i++))
+	done
+
+	array_opts=( add load rm unload swap switch sw show display avail av help whatis initadd initprepend initrm initswitch )
+	process=0
+	for option in "${array_opts[@]}" # check for the options
+	do
+		if [ "${options}" = "$option" ] # will process the args
+		then
+			process=1
+			break
+		fi
+	done
+
+	if [ $process -eq 0 ]  
+	then	
+		# other options, just launch it
+		eval `$BINPATH $MODULESHELL $options ${modulenames[*]}`
+	else
+		# save the names of modulefiles in array_names
+		x=0
+		for LINE in $(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done) ; do array_names[$x]="$LINE" ; ((x++)); done
+		# compare all modulenames from the entry with the existing modulefiles
+		i=0; j=0
+		for modulename in "${modulenames[@]}" 
+		do
+			found=0
+			# split module and version
+			local module=${modulename%/*}
+			version=${modulename#*/} # if no version, then module=version
+			for filename in "${array_names[@]}"
+			do
+				shopt -s nocasematch
+				case "$module" in
+				$filename )
+					if [ "$module" == "$version" ] # default version
+					then
+						array_modules[$i]=$filename
+					else # explicit version number
+						array_modules[$i]="$filename/$version"
+					fi
+					((i++))
+					found=1
+          break
+					;;
+				* )
+					;;
+				esac
+			done
+			if [ $found -eq 0 ] # module not found
+			then
+				unknown_modules[$j]=$modulename
+				((j++))
+			fi	
+		done
+	        eval `$BINPATH $MODULESHELL $options ${array_modules[*]} ${unknown_modules[*]:-}` # launch the right modules
+
+	fi
+	;;
+esac
+++ case $# in
+++ options=unuse
+++ shift
+++ i=0
+++ for arg in '"$@"'
+++ modulenames[$i]=/apps/modules/modulefiles/compilers
+++ (( i++ ))
+++ array_opts=(add load rm unload swap switch sw show display avail av help whatis initadd initprepend initrm initswitch)
+++ process=0
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = add ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = load ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = rm ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = unload ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = swap ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = switch ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = sw ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = show ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = display ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = avail ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = av ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = help ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = whatis ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = initadd ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = initprepend ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = initrm ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = initswitch ']'
+++ '[' 0 -eq 0 ']'
+$BINPATH $MODULESHELL $options ${modulenames[*]}
++++ /apps/modules/current/bin/modulecmd sh unuse /apps/modules/modulefiles/compilers
+++ eval 'MODULEPATH='\''/gpfs/projects/bsc32/software/suselinux/11/modules/all:/apps/modules/modulefiles/environment:/apps/modules/modulefiles/libraries:/apps/modules/modulefiles/tools:/apps/modules/PRACE'\'';export' 'MODULEPATH;'
+MODULEPATH='/gpfs/projects/bsc32/software/suselinux/11/modules/all:/apps/modules/modulefiles/environment:/apps/modules/modulefiles/libraries:/apps/modules/modulefiles/tools:/apps/modules/PRACE';export MODULEPATH;
++++ MODULEPATH=/gpfs/projects/bsc32/software/suselinux/11/modules/all:/apps/modules/modulefiles/environment:/apps/modules/modulefiles/libraries:/apps/modules/modulefiles/tools:/apps/modules/PRACE
++++ export MODULEPATH
+
+unset BINPATH array_modules unknown_modules modulenames array_names i j x option options modulename  version found LINE process process array_opts filename arg
+++ unset BINPATH array_modules unknown_modules modulenames array_names i j x option options modulename version found LINE process process array_opts filename arg
+
+module unuse /apps/modules/modulefiles/tools
++ module unuse /apps/modules/modulefiles/tools
++ source /apps/modules/module_wrapper.sh unuse /apps/modules/modulefiles/tools
+#!/bin/bash
+
+BINPATH=/apps/modules/current/bin/modulecmd
+++ BINPATH=/apps/modules/current/bin/modulecmd
+MODULESHELL=sh
+++ MODULESHELL=sh
+
+if [[ -z "$MODULESBEGINENV" ]]; then
+	if [[ -n "$TMPDIR" && $TMPDIR =~ ^/.*/[0-9]+\.tmpdir$ ]]; then
+		export MODULESBEGINENV="$TMPDIR/.modulesbeginenv_$(date +"%Y%m%d%H%M%S%N")"
+	elif [[ -n "$HOME" ]]; then
+		export MODULESBEGINENV="$HOME/.modulesbeginenv"
+	fi
+fi
+++ [[ -z /home/bsc32/bsc32627/.modulesbeginenv ]]
+if [[ "$_MODULESBEGINENV_" != "$MODULESBEGINENV" ]]; then
+	unset _MODULESBEGINENV_
+fi
+++ [[ /home/bsc32/bsc32627/.modulesbeginenv != \/\h\o\m\e\/\b\s\c\3\2\/\b\s\c\3\2\6\2\7\/\.\m\o\d\u\l\e\s\b\e\g\i\n\e\n\v ]]
+
+case $# in
+0 ) # no args: launch help
+	eval `$BINPATH $MODULESHELL help`
+	;;
+1 ) # 1 args: launch it!
+	eval `$BINPATH $MODULESHELL $1`
+	;;
+* ) # 2 or more args: parse it!
+
+	options=$1
+	shift	# delete the option from args
+	i=0
+	for arg in "$@"	# save the rest of args in modulenames array
+	do
+		modulenames[$i]=$arg
+		((i++))
+	done
+
+	array_opts=( add load rm unload swap switch sw show display avail av help whatis initadd initprepend initrm initswitch )
+	process=0
+	for option in "${array_opts[@]}" # check for the options
+	do
+		if [ "${options}" = "$option" ] # will process the args
+		then
+			process=1
+			break
+		fi
+	done
+
+	if [ $process -eq 0 ]  
+	then	
+		# other options, just launch it
+		eval `$BINPATH $MODULESHELL $options ${modulenames[*]}`
+	else
+		# save the names of modulefiles in array_names
+		x=0
+		for LINE in $(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done) ; do array_names[$x]="$LINE" ; ((x++)); done
+		# compare all modulenames from the entry with the existing modulefiles
+		i=0; j=0
+		for modulename in "${modulenames[@]}" 
+		do
+			found=0
+			# split module and version
+			local module=${modulename%/*}
+			version=${modulename#*/} # if no version, then module=version
+			for filename in "${array_names[@]}"
+			do
+				shopt -s nocasematch
+				case "$module" in
+				$filename )
+					if [ "$module" == "$version" ] # default version
+					then
+						array_modules[$i]=$filename
+					else # explicit version number
+						array_modules[$i]="$filename/$version"
+					fi
+					((i++))
+					found=1
+          break
+					;;
+				* )
+					;;
+				esac
+			done
+			if [ $found -eq 0 ] # module not found
+			then
+				unknown_modules[$j]=$modulename
+				((j++))
+			fi	
+		done
+	        eval `$BINPATH $MODULESHELL $options ${array_modules[*]} ${unknown_modules[*]:-}` # launch the right modules
+
+	fi
+	;;
+esac
+++ case $# in
+++ options=unuse
+++ shift
+++ i=0
+++ for arg in '"$@"'
+++ modulenames[$i]=/apps/modules/modulefiles/tools
+++ (( i++ ))
+++ array_opts=(add load rm unload swap switch sw show display avail av help whatis initadd initprepend initrm initswitch)
+++ process=0
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = add ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = load ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = rm ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = unload ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = swap ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = switch ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = sw ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = show ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = display ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = avail ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = av ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = help ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = whatis ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = initadd ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = initprepend ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = initrm ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = initswitch ']'
+++ '[' 0 -eq 0 ']'
+$BINPATH $MODULESHELL $options ${modulenames[*]}
++++ /apps/modules/current/bin/modulecmd sh unuse /apps/modules/modulefiles/tools
+++ eval 'MODULEPATH='\''/gpfs/projects/bsc32/software/suselinux/11/modules/all:/apps/modules/modulefiles/environment:/apps/modules/modulefiles/libraries:/apps/modules/PRACE'\'';export' 'MODULEPATH;'
+MODULEPATH='/gpfs/projects/bsc32/software/suselinux/11/modules/all:/apps/modules/modulefiles/environment:/apps/modules/modulefiles/libraries:/apps/modules/PRACE';export MODULEPATH;
++++ MODULEPATH=/gpfs/projects/bsc32/software/suselinux/11/modules/all:/apps/modules/modulefiles/environment:/apps/modules/modulefiles/libraries:/apps/modules/PRACE
++++ export MODULEPATH
+
+unset BINPATH array_modules unknown_modules modulenames array_names i j x option options modulename  version found LINE process process array_opts filename arg
+++ unset BINPATH array_modules unknown_modules modulenames array_names i j x option options modulename version found LINE process process array_opts filename arg
+
+module unuse /apps/modules/modulefiles/libraries
++ module unuse /apps/modules/modulefiles/libraries
++ source /apps/modules/module_wrapper.sh unuse /apps/modules/modulefiles/libraries
+#!/bin/bash
+
+BINPATH=/apps/modules/current/bin/modulecmd
+++ BINPATH=/apps/modules/current/bin/modulecmd
+MODULESHELL=sh
+++ MODULESHELL=sh
+
+if [[ -z "$MODULESBEGINENV" ]]; then
+	if [[ -n "$TMPDIR" && $TMPDIR =~ ^/.*/[0-9]+\.tmpdir$ ]]; then
+		export MODULESBEGINENV="$TMPDIR/.modulesbeginenv_$(date +"%Y%m%d%H%M%S%N")"
+	elif [[ -n "$HOME" ]]; then
+		export MODULESBEGINENV="$HOME/.modulesbeginenv"
+	fi
+fi
+++ [[ -z /home/bsc32/bsc32627/.modulesbeginenv ]]
+if [[ "$_MODULESBEGINENV_" != "$MODULESBEGINENV" ]]; then
+	unset _MODULESBEGINENV_
+fi
+++ [[ /home/bsc32/bsc32627/.modulesbeginenv != \/\h\o\m\e\/\b\s\c\3\2\/\b\s\c\3\2\6\2\7\/\.\m\o\d\u\l\e\s\b\e\g\i\n\e\n\v ]]
+
+case $# in
+0 ) # no args: launch help
+	eval `$BINPATH $MODULESHELL help`
+	;;
+1 ) # 1 args: launch it!
+	eval `$BINPATH $MODULESHELL $1`
+	;;
+* ) # 2 or more args: parse it!
+
+	options=$1
+	shift	# delete the option from args
+	i=0
+	for arg in "$@"	# save the rest of args in modulenames array
+	do
+		modulenames[$i]=$arg
+		((i++))
+	done
+
+	array_opts=( add load rm unload swap switch sw show display avail av help whatis initadd initprepend initrm initswitch )
+	process=0
+	for option in "${array_opts[@]}" # check for the options
+	do
+		if [ "${options}" = "$option" ] # will process the args
+		then
+			process=1
+			break
+		fi
+	done
+
+	if [ $process -eq 0 ]  
+	then	
+		# other options, just launch it
+		eval `$BINPATH $MODULESHELL $options ${modulenames[*]}`
+	else
+		# save the names of modulefiles in array_names
+		x=0
+		for LINE in $(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done) ; do array_names[$x]="$LINE" ; ((x++)); done
+		# compare all modulenames from the entry with the existing modulefiles
+		i=0; j=0
+		for modulename in "${modulenames[@]}" 
+		do
+			found=0
+			# split module and version
+			local module=${modulename%/*}
+			version=${modulename#*/} # if no version, then module=version
+			for filename in "${array_names[@]}"
+			do
+				shopt -s nocasematch
+				case "$module" in
+				$filename )
+					if [ "$module" == "$version" ] # default version
+					then
+						array_modules[$i]=$filename
+					else # explicit version number
+						array_modules[$i]="$filename/$version"
+					fi
+					((i++))
+					found=1
+          break
+					;;
+				* )
+					;;
+				esac
+			done
+			if [ $found -eq 0 ] # module not found
+			then
+				unknown_modules[$j]=$modulename
+				((j++))
+			fi	
+		done
+	        eval `$BINPATH $MODULESHELL $options ${array_modules[*]} ${unknown_modules[*]:-}` # launch the right modules
+
+	fi
+	;;
+esac
+++ case $# in
+++ options=unuse
+++ shift
+++ i=0
+++ for arg in '"$@"'
+++ modulenames[$i]=/apps/modules/modulefiles/libraries
+++ (( i++ ))
+++ array_opts=(add load rm unload swap switch sw show display avail av help whatis initadd initprepend initrm initswitch)
+++ process=0
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = add ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = load ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = rm ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = unload ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = swap ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = switch ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = sw ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = show ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = display ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = avail ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = av ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = help ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = whatis ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = initadd ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = initprepend ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = initrm ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = initswitch ']'
+++ '[' 0 -eq 0 ']'
+$BINPATH $MODULESHELL $options ${modulenames[*]}
++++ /apps/modules/current/bin/modulecmd sh unuse /apps/modules/modulefiles/libraries
+++ eval 'MODULEPATH='\''/gpfs/projects/bsc32/software/suselinux/11/modules/all:/apps/modules/modulefiles/environment:/apps/modules/PRACE'\'';export' 'MODULEPATH;'
+MODULEPATH='/gpfs/projects/bsc32/software/suselinux/11/modules/all:/apps/modules/modulefiles/environment:/apps/modules/PRACE';export MODULEPATH;
++++ MODULEPATH=/gpfs/projects/bsc32/software/suselinux/11/modules/all:/apps/modules/modulefiles/environment:/apps/modules/PRACE
++++ export MODULEPATH
+
+unset BINPATH array_modules unknown_modules modulenames array_names i j x option options modulename  version found LINE process process array_opts filename arg
+++ unset BINPATH array_modules unknown_modules modulenames array_names i j x option options modulename version found LINE process process array_opts filename arg
+
+module unuse /apps/modules/modulefiles/environment
++ module unuse /apps/modules/modulefiles/environment
++ source /apps/modules/module_wrapper.sh unuse /apps/modules/modulefiles/environment
+#!/bin/bash
+
+BINPATH=/apps/modules/current/bin/modulecmd
+++ BINPATH=/apps/modules/current/bin/modulecmd
+MODULESHELL=sh
+++ MODULESHELL=sh
+
+if [[ -z "$MODULESBEGINENV" ]]; then
+	if [[ -n "$TMPDIR" && $TMPDIR =~ ^/.*/[0-9]+\.tmpdir$ ]]; then
+		export MODULESBEGINENV="$TMPDIR/.modulesbeginenv_$(date +"%Y%m%d%H%M%S%N")"
+	elif [[ -n "$HOME" ]]; then
+		export MODULESBEGINENV="$HOME/.modulesbeginenv"
+	fi
+fi
+++ [[ -z /home/bsc32/bsc32627/.modulesbeginenv ]]
+if [[ "$_MODULESBEGINENV_" != "$MODULESBEGINENV" ]]; then
+	unset _MODULESBEGINENV_
+fi
+++ [[ /home/bsc32/bsc32627/.modulesbeginenv != \/\h\o\m\e\/\b\s\c\3\2\/\b\s\c\3\2\6\2\7\/\.\m\o\d\u\l\e\s\b\e\g\i\n\e\n\v ]]
+
+case $# in
+0 ) # no args: launch help
+	eval `$BINPATH $MODULESHELL help`
+	;;
+1 ) # 1 args: launch it!
+	eval `$BINPATH $MODULESHELL $1`
+	;;
+* ) # 2 or more args: parse it!
+
+	options=$1
+	shift	# delete the option from args
+	i=0
+	for arg in "$@"	# save the rest of args in modulenames array
+	do
+		modulenames[$i]=$arg
+		((i++))
+	done
+
+	array_opts=( add load rm unload swap switch sw show display avail av help whatis initadd initprepend initrm initswitch )
+	process=0
+	for option in "${array_opts[@]}" # check for the options
+	do
+		if [ "${options}" = "$option" ] # will process the args
+		then
+			process=1
+			break
+		fi
+	done
+
+	if [ $process -eq 0 ]  
+	then	
+		# other options, just launch it
+		eval `$BINPATH $MODULESHELL $options ${modulenames[*]}`
+	else
+		# save the names of modulefiles in array_names
+		x=0
+		for LINE in $(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done) ; do array_names[$x]="$LINE" ; ((x++)); done
+		# compare all modulenames from the entry with the existing modulefiles
+		i=0; j=0
+		for modulename in "${modulenames[@]}" 
+		do
+			found=0
+			# split module and version
+			local module=${modulename%/*}
+			version=${modulename#*/} # if no version, then module=version
+			for filename in "${array_names[@]}"
+			do
+				shopt -s nocasematch
+				case "$module" in
+				$filename )
+					if [ "$module" == "$version" ] # default version
+					then
+						array_modules[$i]=$filename
+					else # explicit version number
+						array_modules[$i]="$filename/$version"
+					fi
+					((i++))
+					found=1
+          break
+					;;
+				* )
+					;;
+				esac
+			done
+			if [ $found -eq 0 ] # module not found
+			then
+				unknown_modules[$j]=$modulename
+				((j++))
+			fi	
+		done
+	        eval `$BINPATH $MODULESHELL $options ${array_modules[*]} ${unknown_modules[*]:-}` # launch the right modules
+
+	fi
+	;;
+esac
+++ case $# in
+++ options=unuse
+++ shift
+++ i=0
+++ for arg in '"$@"'
+++ modulenames[$i]=/apps/modules/modulefiles/environment
+++ (( i++ ))
+++ array_opts=(add load rm unload swap switch sw show display avail av help whatis initadd initprepend initrm initswitch)
+++ process=0
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = add ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = load ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = rm ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = unload ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = swap ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = switch ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = sw ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = show ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = display ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = avail ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = av ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = help ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = whatis ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = initadd ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = initprepend ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = initrm ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = initswitch ']'
+++ '[' 0 -eq 0 ']'
+$BINPATH $MODULESHELL $options ${modulenames[*]}
++++ /apps/modules/current/bin/modulecmd sh unuse /apps/modules/modulefiles/environment
+++ eval 'MODULEPATH='\''/gpfs/projects/bsc32/software/suselinux/11/modules/all:/apps/modules/PRACE'\'';export' 'MODULEPATH;'
+MODULEPATH='/gpfs/projects/bsc32/software/suselinux/11/modules/all:/apps/modules/PRACE';export MODULEPATH;
++++ MODULEPATH=/gpfs/projects/bsc32/software/suselinux/11/modules/all:/apps/modules/PRACE
++++ export MODULEPATH
+
+unset BINPATH array_modules unknown_modules modulenames array_names i j x option options modulename  version found LINE process process array_opts filename arg
+++ unset BINPATH array_modules unknown_modules modulenames array_names i j x option options modulename version found LINE process process array_opts filename arg
+
+module unuse /apps/modules/PRACE
++ module unuse /apps/modules/PRACE
++ source /apps/modules/module_wrapper.sh unuse /apps/modules/PRACE
+#!/bin/bash
+
+BINPATH=/apps/modules/current/bin/modulecmd
+++ BINPATH=/apps/modules/current/bin/modulecmd
+MODULESHELL=sh
+++ MODULESHELL=sh
+
+if [[ -z "$MODULESBEGINENV" ]]; then
+	if [[ -n "$TMPDIR" && $TMPDIR =~ ^/.*/[0-9]+\.tmpdir$ ]]; then
+		export MODULESBEGINENV="$TMPDIR/.modulesbeginenv_$(date +"%Y%m%d%H%M%S%N")"
+	elif [[ -n "$HOME" ]]; then
+		export MODULESBEGINENV="$HOME/.modulesbeginenv"
+	fi
+fi
+++ [[ -z /home/bsc32/bsc32627/.modulesbeginenv ]]
+if [[ "$_MODULESBEGINENV_" != "$MODULESBEGINENV" ]]; then
+	unset _MODULESBEGINENV_
+fi
+++ [[ /home/bsc32/bsc32627/.modulesbeginenv != \/\h\o\m\e\/\b\s\c\3\2\/\b\s\c\3\2\6\2\7\/\.\m\o\d\u\l\e\s\b\e\g\i\n\e\n\v ]]
+
+case $# in
+0 ) # no args: launch help
+	eval `$BINPATH $MODULESHELL help`
+	;;
+1 ) # 1 args: launch it!
+	eval `$BINPATH $MODULESHELL $1`
+	;;
+* ) # 2 or more args: parse it!
+
+	options=$1
+	shift	# delete the option from args
+	i=0
+	for arg in "$@"	# save the rest of args in modulenames array
+	do
+		modulenames[$i]=$arg
+		((i++))
+	done
+
+	array_opts=( add load rm unload swap switch sw show display avail av help whatis initadd initprepend initrm initswitch )
+	process=0
+	for option in "${array_opts[@]}" # check for the options
+	do
+		if [ "${options}" = "$option" ] # will process the args
+		then
+			process=1
+			break
+		fi
+	done
+
+	if [ $process -eq 0 ]  
+	then	
+		# other options, just launch it
+		eval `$BINPATH $MODULESHELL $options ${modulenames[*]}`
+	else
+		# save the names of modulefiles in array_names
+		x=0
+		for LINE in $(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done) ; do array_names[$x]="$LINE" ; ((x++)); done
+		# compare all modulenames from the entry with the existing modulefiles
+		i=0; j=0
+		for modulename in "${modulenames[@]}" 
+		do
+			found=0
+			# split module and version
+			local module=${modulename%/*}
+			version=${modulename#*/} # if no version, then module=version
+			for filename in "${array_names[@]}"
+			do
+				shopt -s nocasematch
+				case "$module" in
+				$filename )
+					if [ "$module" == "$version" ] # default version
+					then
+						array_modules[$i]=$filename
+					else # explicit version number
+						array_modules[$i]="$filename/$version"
+					fi
+					((i++))
+					found=1
+          break
+					;;
+				* )
+					;;
+				esac
+			done
+			if [ $found -eq 0 ] # module not found
+			then
+				unknown_modules[$j]=$modulename
+				((j++))
+			fi	
+		done
+	        eval `$BINPATH $MODULESHELL $options ${array_modules[*]} ${unknown_modules[*]:-}` # launch the right modules
+
+	fi
+	;;
+esac
+++ case $# in
+++ options=unuse
+++ shift
+++ i=0
+++ for arg in '"$@"'
+++ modulenames[$i]=/apps/modules/PRACE
+++ (( i++ ))
+++ array_opts=(add load rm unload swap switch sw show display avail av help whatis initadd initprepend initrm initswitch)
+++ process=0
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = add ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = load ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = rm ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = unload ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = swap ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = switch ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = sw ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = show ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = display ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = avail ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = av ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = help ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = whatis ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = initadd ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = initprepend ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = initrm ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = initswitch ']'
+++ '[' 0 -eq 0 ']'
+$BINPATH $MODULESHELL $options ${modulenames[*]}
++++ /apps/modules/current/bin/modulecmd sh unuse /apps/modules/PRACE
+++ eval 'MODULEPATH='\''/gpfs/projects/bsc32/software/suselinux/11/modules/all'\'';export' 'MODULEPATH;'
+MODULEPATH='/gpfs/projects/bsc32/software/suselinux/11/modules/all';export MODULEPATH;
++++ MODULEPATH=/gpfs/projects/bsc32/software/suselinux/11/modules/all
++++ export MODULEPATH
+
+unset BINPATH array_modules unknown_modules modulenames array_names i j x option options modulename  version found LINE process process array_opts filename arg
+++ unset BINPATH array_modules unknown_modules modulenames array_names i j x option options modulename version found LINE process process array_opts filename arg
+
+set +x
++ set +x
+module load Singularity/3.2.0-GCC-8.3.0
+#!/bin/bash
+
+BINPATH=/apps/modules/current/bin/modulecmd
+MODULESHELL=sh
+
+if [[ -z "$MODULESBEGINENV" ]]; then
+	if [[ -n "$TMPDIR" && $TMPDIR =~ ^/.*/[0-9]+\.tmpdir$ ]]; then
+		export MODULESBEGINENV="$TMPDIR/.modulesbeginenv_$(date +"%Y%m%d%H%M%S%N")"
+	elif [[ -n "$HOME" ]]; then
+		export MODULESBEGINENV="$HOME/.modulesbeginenv"
+	fi
+fi
+if [[ "$_MODULESBEGINENV_" != "$MODULESBEGINENV" ]]; then
+	unset _MODULESBEGINENV_
+fi
+
+case $# in
+0 ) # no args: launch help
+	eval `$BINPATH $MODULESHELL help`
+	;;
+1 ) # 1 args: launch it!
+	eval `$BINPATH $MODULESHELL $1`
+	;;
+* ) # 2 or more args: parse it!
+
+	options=$1
+	shift	# delete the option from args
+	i=0
+	for arg in "$@"	# save the rest of args in modulenames array
+	do
+		modulenames[$i]=$arg
+		((i++))
+	done
+
+	array_opts=( add load rm unload swap switch sw show display avail av help whatis initadd initprepend initrm initswitch )
+	process=0
+	for option in "${array_opts[@]}" # check for the options
+	do
+		if [ "${options}" = "$option" ] # will process the args
+		then
+			process=1
+			break
+		fi
+	done
+
+	if [ $process -eq 0 ]  
+	then	
+		# other options, just launch it
+		eval `$BINPATH $MODULESHELL $options ${modulenames[*]}`
+	else
+		# save the names of modulefiles in array_names
+		x=0
+		for LINE in $(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done) ; do array_names[$x]="$LINE" ; ((x++)); done
+		# compare all modulenames from the entry with the existing modulefiles
+		i=0; j=0
+		for modulename in "${modulenames[@]}" 
+		do
+			found=0
+			# split module and version
+			local module=${modulename%/*}
+			version=${modulename#*/} # if no version, then module=version
+			for filename in "${array_names[@]}"
+			do
+				shopt -s nocasematch
+				case "$module" in
+				$filename )
+					if [ "$module" == "$version" ] # default version
+					then
+						array_modules[$i]=$filename
+					else # explicit version number
+						array_modules[$i]="$filename/$version"
+					fi
+					((i++))
+					found=1
+          break
+					;;
+				* )
+					;;
+				esac
+			done
+			if [ $found -eq 0 ] # module not found
+			then
+				unknown_modules[$j]=$modulename
+				((j++))
+			fi	
+		done
+	        eval `$BINPATH $MODULESHELL $options ${array_modules[*]} ${unknown_modules[*]:-}` # launch the right modules
+
+	fi
+	;;
+esac
+for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done
+$BINPATH $MODULESHELL $options ${array_modules[*]} ${unknown_modules[*]:-}
+EBDEVELZLIB='/gpfs/projects/bsc32/software/suselinux/11/software/zlib/1.2.11-GCCcore-8.3.0/easybuild/zlib-1.2.11-GCCcore-8.3.0-easybuild-devel';export EBDEVELZLIB;CPATH='/gpfs/projects/bsc32/software/suselinux/11/software/Singularity/3.2.0-GCC-8.3.0/include:/gpfs/projects/bsc32/software/suselinux/11/software/binutils/2.32-GCCcore-8.3.0/include:/gpfs/projects/bsc32/software/suselinux/11/software/zlib/1.2.11-GCCcore-8.3.0/include:/gpfs/projects/bsc32/software/suselinux/11/software/GCCcore/8.3.0/include';export CPATH;LD_LIBRARY_PATH='/gpfs/projects/bsc32/software/suselinux/11/software/Singularity/3.2.0-GCC-8.3.0/lib:/gpfs/projects/bsc32/software/suselinux/11/software/binutils/2.32-GCCcore-8.3.0/lib:/gpfs/projects/bsc32/software/suselinux/11/software/zlib/1.2.11-GCCcore-8.3.0/lib:/gpfs/projects/bsc32/software/suselinux/11/software/GCCcore/8.3.0/lib/gcc/x86_64-pc-linux-gnu/8.3.0:/gpfs/projects/bsc32/software/suselinux/11/software/GCCcore/8.3.0/lib64:/gpfs/projects/bsc32/software/suselinux/11/software/GCCcore/8.3.0/lib:/opt/lsf/9.1/linux2.6-glibc2.3-x86_64/lib';export LD_LIBRARY_PATH;EBDEVELBINUTILS='/gpfs/projects/bsc32/software/suselinux/11/software/binutils/2.32-GCCcore-8.3.0/easybuild/binutils-2.32-GCCcore-8.3.0-easybuild-devel';export EBDEVELBINUTILS;LIBRARY_PATH='/gpfs/projects/bsc32/software/suselinux/11/software/Singularity/3.2.0-GCC-8.3.0/lib:/gpfs/projects/bsc32/software/suselinux/11/software/binutils/2.32-GCCcore-8.3.0/lib:/gpfs/projects/bsc32/software/suselinux/11/software/zlib/1.2.11-GCCcore-8.3.0/lib:/gpfs/projects/bsc32/software/suselinux/11/software/GCCcore/8.3.0/lib64:/gpfs/projects/bsc32/software/suselinux/11/software/GCCcore/8.3.0/lib';export LIBRARY_PATH;MANPATH='/gpfs/projects/bsc32/software/suselinux/11/software/Singularity/3.2.0-GCC-8.3.0/share/man:/gpfs/projects/bsc32/software/suselinux/11/software/binutils/2.32-GCCcore-8.3.0/share/man:/gpfs/projects/bsc32/software/suselinux/11/software/zlib/1.2.11-GCCcore-8.3.0/share/man:/gpfs/projects/bsc32/software/suselinux/11/software/GCCcore/8.3.0/share/man:/opt/lsf/9.1/man:/usr/local/man:/usr/share/man';export MANPATH;EBVERSIONGCC='8.3.0';export EBVERSIONGCC;LOADEDMODULES='GCCcore/8.3.0:zlib/1.2.11-GCCcore-8.3.0:binutils/2.32-GCCcore-8.3.0:GCC/8.3.0:Singularity/3.2.0-GCC-8.3.0';export LOADEDMODULES;_LMFILES_='/gpfs/projects/bsc32/software/suselinux/11/modules/all/GCCcore/8.3.0:/gpfs/projects/bsc32/software/suselinux/11/modules/all/zlib/1.2.11-GCCcore-8.3.0:/gpfs/projects/bsc32/software/suselinux/11/modules/all/binutils/2.32-GCCcore-8.3.0:/gpfs/projects/bsc32/software/suselinux/11/modules/all/GCC/8.3.0:/gpfs/projects/bsc32/software/suselinux/11/modules/all/Singularity/3.2.0-GCC-8.3.0';export _LMFILES_;EBVERSIONGCCCORE='8.3.0';export EBVERSIONGCCCORE;PKG_CONFIG_PATH='/gpfs/projects/bsc32/software/suselinux/11/software/zlib/1.2.11-GCCcore-8.3.0/lib/pkgconfig';export PKG_CONFIG_PATH;EBDEVELGCC='/gpfs/projects/bsc32/software/suselinux/11/software/GCC/8.3.0/easybuild/GCC-8.3.0-easybuild-devel';export EBDEVELGCC;EBROOTZLIB='/gpfs/projects/bsc32/software/suselinux/11/software/zlib/1.2.11-GCCcore-8.3.0';export EBROOTZLIB;XDG_DATA_DIRS='/gpfs/projects/bsc32/software/suselinux/11/software/Singularity/3.2.0-GCC-8.3.0/share:/usr/share:/etc/opt/kde3/share:/opt/kde3/share';export XDG_DATA_DIRS;EBROOTBINUTILS='/gpfs/projects/bsc32/software/suselinux/11/software/binutils/2.32-GCCcore-8.3.0';export EBROOTBINUTILS;EBDEVELGCCCORE='/gpfs/projects/bsc32/software/suselinux/11/software/GCCcore/8.3.0/easybuild/GCCcore-8.3.0-easybuild-devel';export EBDEVELGCCCORE;EBVERSIONSINGULARITY='3.2.0';export EBVERSIONSINGULARITY;EBROOTGCC='/gpfs/projects/bsc32/software/suselinux/11/software/GCCcore/8.3.0';export EBROOTGCC;EBROOTGCCCORE='/gpfs/projects/bsc32/software/suselinux/11/software/GCCcore/8.3.0';export EBROOTGCCCORE;EBDEVELSINGULARITY='/gpfs/projects/bsc32/software/suselinux/11/software/Singularity/3.2.0-GCC-8.3.0/easybuild/Singularity-3.2.0-GCC-8.3.0-easybuild-devel';export EBDEVELSINGULARITY;PATH='/gpfs/projects/bsc32/software/suselinux/11/software/Singularity/3.2.0-GCC-8.3.0/bin:/gpfs/projects/bsc32/software/suselinux/11/software/binutils/2.32-GCCcore-8.3.0/bin:/gpfs/projects/bsc32/software/suselinux/11/software/GCCcore/8.3.0/bin:/opt/lsf/9.1/linux2.6-glibc2.3-x86_64/bin:/opt/lsf/9.1/linux2.6-glibc2.3-x86_64/etc:/usr/local/bin:/usr/bin:/bin:/usr/bin/X11:/usr/X11R6/bin:/usr/games:/opt/bin:/opt/ibutils/bin:/usr/lib/mit/bin:/usr/lib/mit/sbin:/opt/intel/mic/bin:.';export PATH;EBROOTSINGULARITY='/gpfs/projects/bsc32/software/suselinux/11/software/Singularity/3.2.0-GCC-8.3.0';export EBROOTSINGULARITY;EBVERSIONZLIB='1.2.11';export EBVERSIONZLIB;EBVERSIONBINUTILS='2.32';export EBVERSIONBINUTILS;
+
+unset BINPATH array_modules unknown_modules modulenames array_names i j x option options modulename  version found LINE process process array_opts filename arg
+
+set -xuve
+
+#
+# General Paths
+#
+MODEL=ecearth
++ MODEL=ecearth
+VERSION=trunk
++ VERSION=trunk
+PROJDIR=/esarchive/autosubmit/t0ni/proj/auto-ecearth3
++ PROJDIR=/esarchive/autosubmit/t0ni/proj/auto-ecearth3
+#
+# Experiment description
+#
+EXPID=t0ni
++ EXPID=t0ni
+MEMBER=fc0
++ MEMBER=fc0
+START_date=19931101
++ START_date=19931101
+VERSION=trunk
++ VERSION=trunk
+NEMGRID=ORCA025L75
++ NEMGRID=ORCA025L75
+IFSGRID=T511L91
++ IFSGRID=T511L91
+CMOR_ACTIVITY_ID=CMIP
++ CMOR_ACTIVITY_ID=CMIP
+CMOR_ADD_STARTDATE=FALSE
++ CMOR_ADD_STARTDATE=FALSE
+CMOR_EXP_CUSTOM=FALSE
++ CMOR_EXP_CUSTOM=FALSE
+MODEL_RES=HR
++ MODEL_RES=HR
+BSC_OUTCLASS=reduced
++ BSC_OUTCLASS=reduced
+TEMPLATE=ecearth3
++ TEMPLATE=ecearth3
+CURRENT_ARCH=nord3
++ CURRENT_ARCH=nord3
+
+CONTAINER_VERSION="latest"
++ CONTAINER_VERSION=latest
+
+. $PROJDIR/plugins/utils.sh
++ . /esarchive/autosubmit/t0ni/proj/auto-ecearth3/plugins/utils.sh
+
+
+#####################################################################################################################
+# blocking_rsync using dt_commands
+# Globals:
+#   None
+# Arguments:
+#   options, source, destination, target_group USE_DT_COMMANDS
+# Returns:
+#   None
+#####################################################################################################################
+function blocking_rsync() {
+  options=$1
+  source=$2
+  destination=$3
+  target_group=$4
+  if [[ -z ${USE_DT_COMMANDS-} ]]; then USE_DT_COMMANDS=TRUE; fi
+
+  if [[ ${USE_DT_COMMANDS} == "FALSE" ]]; then
+    sg ${target_group} "rsync ${options} ${source} ${destination}"
+  else
+    t1=$(date +%s)
+    jid=$(dtsgrsync ${target_group} $options $source $destination | awk '{print $4}')
+    if [[ -z ${jid} ]]; then
+      USE_DT_COMMANDS=FALSE
+      blocking_rsync "${options}" ${source} ${destination} ${target_group}
+    else
+      jsc=$(dtq -j $jid | wc -l)
+      jst=$(dtq -j $jid | awk '{print $4}' | tail -1)
+      echo "The job $jid is $jst"
+
+      while [[ $jsc -gt 1 && $jst != "STATE" ]]; do
+        sleep ${sleep_time:-60}
+        jsc=$(dtq -j $jid | wc -l)
+        jst=$(dtq -j $jid | awk '{print $4}' | tail -1)
+        echo "The job $jid is $jst"
+      done
+
+      t2=$(date +%s)
+      tr=$(date -d "0 -$t1 sec + $t2 sec" +%T)
+
+      # exit ok
+      # .err empty and .err file exists
+      if [[ -f dtsgrsync_${jid}.err ]] && [[ ! -s dtsgrsync_${jid}.err ]]; then
+        rm -f dtsgrsync_${jid}*
+        return
+      else
+        echo "the "dtsgrsync_${jid}.err " is not empty"
+        cat dtsgrsync_${jid}.err
+        exit 1
+      fi
+    fi
+  fi
+
+}
+
+# Functions to get the grid size to be used for CDO and S2DV
+#
+# Written by Pablo Echevarria
+#
+# Barcelona Supercomputing Center - Earth Science
+
+#####################################################################################################################
+# Get grid dims
+# Globals:  NEMO_GRID
+# Arguments:
+#   TEMPLATE NEMGRID IFSGRID
+# Returns:
+#   GRID_S2DV GRID_CDO
+#####################################################################################################################
+function get_grid_dims() {
+
+  local MODEL=${TEMPLATE/3/}
+
+  NEMO_GRID=$(echo $NEMGRID | awk -F\L '{print $1}')
+
+  if [[ $MODEL == 'ecearth' ]] || [[ $MODEL == 'ifs' ]] || [[ $MODEL == 'lsm' ]]; then
+    GRID_POST=$IFSGRID
+    case ${IFSGRID} in
+    'T159L62')
+      GRID_CDO='t106grid'
+      GRID_PLOT='320x160'
+      ;; # For cdo, the T159 is the t106
+      # Correspondance betweeen reduced and regular gaussian grid
+    'T255L91' | 'T255L62') GRID_CDO='t170grid' GRID_PLOT='512x256' ;;
+    'T511L91') GRID_CDO='t340grid' GRID_PLOT='1024x512' ;;
+    'T799L62' | 'T799L91')
+      echo "Is the mask ready for this configuration?"
+      stop
+      ;;
+    *)
+      echo "IFS grid is not defined"
+      exit 1
+      ;;
+    esac
+
+  elif [[ $MODEL == 'nemo' ]]; then
+    case $NEMO_GRID in
+    'ORCA2')
+      GRID_POST='T159L62'
+      GRID_CDO='t106grid'
+      GRID_PLOT='320x160'
+      ;;
+    'ORCA1')
+      GRID_POST='T255L91'
+      GRID_CDO='t170grid'
+      GRID_PLOT='512x256'
+      ;;
+    'ORCA025')
+      GRID_POST='T511L91'
+      GRID_CDO='t340grid'
+      GRID_PLOT='1024x512'
+      ;;
+    *)
+      echo "Nemo grid is not defined"
+      exit 1
+      ;;
+    esac
+  else
+    echo "Model is not defined"
+    exit 1
+  fi
+  export GRID_POST
+  export GRID_CDO
+  export GRID_PLOT
+
+}
+
+#####################################################################################################################
+# generate a checksum and store it in a file for the inidata folder
+# Globals:
+#   None
+# Arguments:
+#   Checksum_filename
+# Returns:
+#   None
+#####################################################################################################################
+function inidata_checksum_generate() {
+
+  filename=$1
+
+  if [[ "$filename" == "" ]]; then
+    echo "Filename argument is required to store the checksum results, exiting now"
+    exit 1
+  fi
+
+  # this generates the md5sum for every file present in the experiment inidata folder and a global md5sum of the complete list
+  echo "Generating list of files (and md5sum of each) in the directory, time taken:"
+  files_time="$(time (find inidata/ -type f -exec md5sum {} \; | sort -k 2 &> ${filename}_tmpl_files.txt ) 2>&1 1>/dev/null )"
+  echo "${files_time}"
+
+  # this creates a list of the paths of all the links and files and generates the md5sum for that list
+  echo "Generating list of links in the directory, time taken:"
+  links_time="$(time (find -L inidata/ -type f -exec readlink -f {} \; | sort &> ${filename}_tmpl_links.txt ) 2>&1 1>/dev/null )"
+  echo "${links_time}"
+}
+. ${PROJDIR}/platforms/${CURRENT_ARCH}/utils.sh
++ . /esarchive/autosubmit/t0ni/proj/auto-ecearth3/platforms/nord3/utils.sh
+#####################################################################################################################
+# Functions for handling environment/globals setup for nord3 platform
+# Author: J.R.Berlin
+#####################################################################################################################
+
+. ${PROJDIR}/platforms/marenostrum4/utils.sh
+++ . /esarchive/autosubmit/t0ni/proj/auto-ecearth3/platforms/marenostrum4/utils.sh
+#####################################################################################################################
+# Functions for handling filesystem operations for marenostrum4 platform
+# Author: J.R.Berlin
+#####################################################################################################################
+
+#. ${PROJDIR}/platforms/common/common.utils.sh
+
+#####################################################################################################################
+# any override from the common libraries defined in filesystem.sh or new function goes here
+#####################################################################################################################
+
+#####################################################################################################################
+# Globals:
+#   None
+# Arguments:
+#   None
+# Returns:
+#   None
+# Purpose: load the common modules required by standard jobs in Marenostrum4
+#####################################################################################################################
+function setup_modules() {
+  set +xuve
+  module purge
+  module load intel/2018.3
+  module load mkl/2018.3
+  module load impi/2018.3
+  module load netcdf/4.2
+  module load hdf5/1.8.19
+  module load perl/5.26
+  module load fftw/3.3.6
+  module load python/2.7.13
+  module load udunits/2.2.25
+  module load gsl/2.4
+  module load nco/4.2.3_netcdf-4.2
+  module load CDO/1.7.2
+  module list
+  set -xuve
+}
+
+#####################################################################################################################
+# Globals:
+#   USER
+# Arguments:
+#   None
+# Returns:
+#   None
+# Purpose: Setup common paths as global variables, required by the different jobs running un the underlying platform
+#           used in nord3, transfer_node and bscearth000 as well
+####################################################################################################################
+function setup_common_paths() {
+  # common globals
+  MODELS_DIR=/gpfs/projects/bsc32/models
+  export SCRATCH=/gpfs/scratch/$(id -gn)/${USER}
+  GROUP=bsc32
+  # check if the machine has the environment tmp var defined
+  SCRATCH_TMP_DIR=${SCRATCH}/${EXPID}/${START_date}/${MEMBER}/tmp/${JOBNAME}
+  #initial conditions dirr for the platform, in order to have this working properly we need
+  #all IC/rst files in place synchronized from bsc32/projects
+  INTERMEDIATE_EXP_DIR=/gpfs/projects/${GROUP}/repository/exp
+  EXTRA_DIR=/gpfs/projects/${GROUP}/repository
+  IC_DIR=/gpfs/projects/${GROUP}/repository/ic
+}
+
+#####################################################################################################################
+# Globals:
+#   None
+# Arguments:
+#   None
+# Returns:
+#   None
+# Purpose: set the global variables and functions to be used by the jobs running in the underlying architecture
+#          used in nord3, transfer_node and bscearth000 as well
+#####################################################################################################################
+function setup_common_environment_vars() {
+  # common globals
+  MODELS_DIR=/gpfs/projects/bsc32/models
+  GROUP=bsc32
+}
+
+#####################################################################################################################
+# Globals:
+#   None
+# Arguments:
+#   None
+# Returns:
+#   None
+# Purpose: set the common set of global variables to be used for the jobs running on the underlying archictecture
+#####################################################################################################################
+function setup_environment_vars() {
+  # common globals
+  setup_common_environment_vars
+  export ECE3_POSTPROC_MACHINE=mn4
+}
+
+#####################################################################################################################
+# Globals:
+#   CURRENT_ARCH, HPCARCH
+# Arguments:
+#   None
+# Returns:
+#   None
+# Purpose: set the global variables refering to common paths to be used by the jobs running in the
+#         underlying architecture, used in nord3, transfer_node and bscearth000 as well
+#####################################################################################################################
+function setup_paths() {
+  setup_common_paths
+  if [[ "${CURRENT_ARCH}" == "${HPCARCH}" ]]; then
+    setup_paths_libs
+  fi
+}
+
+#####################################################################################################################
+# Globals:
+#   USER, PATH
+# Arguments:
+#   None
+# Returns:
+#   None
+# Purpose: auxiliary function to load paths to the different modules that will be load when the job
+#         executes in the cluster
+#####################################################################################################################
+function setup_paths_libs() {
+  grib_api_path=/apps/GRIB/1.14.0/INTEL
+  PATH=${grib_api_path}/bin:${PATH}
+
+  export SCRATCH=/gpfs/scratch/$(id -gn)/${USER}
+  export PATH=/gpfs/projects/bsc32/repository/apps/rebuild_nemo_marenostrum4:${PATH}
+  export PYTHONPATH=${grib_api_path}/lib/python2.7/site-packages/grib_api:${PYTHONPATH-}
+  export GRIB_BIN_PATH=${grib_api_path}/bin
+  export GRIB_DEFINITION_PATH=${grib_api_path}/share/grib_api/definitions
+  export GRIB_SAMPLES_PATH=${grib_api_path}/share/grib_api/ifs_samples/grib1
+}
+
+#####################################################################################################################
+# Globals:
+#   None
+# Arguments:
+#   None
+# Returns:
+#   None
+# Purpose: auxiliary function to load paths to the different modules that will be load when the job
+#          executes in the cluster, used in transfer machines!
+#####################################################################################################################
+function setup_environment_vars_local() {
+  setup_common_environment_vars
+  export ECE3_POSTPROC_MACHINE=mn4
+}
+
+#used in transfer machines !
+
+#####################################################################################################################
+# Globals:
+#   None
+# Arguments:
+#   None
+# Returns:
+#   None
+# Purpose: auxiliary function to set the intermediate storage root path, used in transfer machines, this function
+# overrides the base function in common.filesystem.sh
+#####################################################################################################################
+function setup_paths_local() {
+  echo "MN4 Paths"
+  GROUP=bsc32
+  export INTERMEDIATE_EXP_DIR=/gpfs/projects/${GROUP}/repository/exp
+}
+
+#####################################################################################################################
+# any override from the common libraries defined in utils.sh or new function goes below here
+#####################################################################################################################
+
+#####################################################################################################################
+# Globals:
+#   None
+# Arguments:
+#   None
+# Returns:
+#   None
+# Purpose: load the common modules required by standard jobs in Nord3
+#####################################################################################################################
+function setup_modules() {
+  module purge
+  set +xuve
+  # General libs
+  module load intel/13.0.1 impi/4.1.3.049 MKL/11.0.1
+  module load SZIP/2.1 HDF5/1.8.14 NETCDF/4.2-impi
+  module load NCO/4.2.3
+  module load GRIB/1.14.0-nc
+  module list
+  set -xuve
+}
+
+#####################################################################################################################
+# Globals:
+#   None
+# Arguments:
+#   None
+# Returns:
+#   None
+# Purpose: unload/purge modules before load the needed components for NCTime and EARTHDIAGS modules
+#####################################################################################################################
+function prepare_environment_modules() {
+  module purge
+  module use /gpfs/projects/bsc32/software/suselinux/11/modules/all
+  module unuse /apps/modules/modulefiles/applications
+  module unuse /apps/modules/modulefiles/applications_bis
+  module unuse /apps/modules/modulefiles/compilers
+  module unuse /apps/modules/modulefiles/tools
+  module unuse /apps/modules/modulefiles/libraries
+  module unuse /apps/modules/modulefiles/environment
+  module unuse /apps/modules/PRACE
+}
+
+#####################################################################################################################
+# Globals:
+#   None
+# Arguments:
+#   None
+# Returns:
+#   None
+# Purpose: load the  modules required by earthdiags job in Nord3
+#####################################################################################################################
+function setup_modules_earthdiags() {
+  prepare_environment_modules
+  set +xuve
+  module load Singularity/3.2.0-GCC-8.3.0
+  set -xuve
+}
+
+#####################################################################################################################
+# Globals:
+#   None
+# Arguments:
+#   None
+# Returns:
+#   None
+# Purpose: load the  modules required by nctime job in Nord3
+#####################################################################################################################
+function setup_modules_nctime() {
+  prepare_environment_modules
+  set +xuve
+  module load nctime/4.6.5-foss-2019b-Python-2.7.16
+  set -xuve
+}
+
+#####################################################################################################################
+# Globals:
+#   GROUP, USER, EXPID, START_date, MEMBER, GROUP, PATH
+# Arguments:
+#   None
+# Returns:
+#   None
+# Purpose: set the global variables refering to common paths to be used by the jobs running in the
+#         underlying architecture ( initial conditions, grib modules, intermediate storage,etc )
+#####################################################################################################################
+function setup_paths() {
+  export SCRATCH_TMP_DIR=/gpfs/scratch/${GROUP}/${USER}/${EXPID}/${START_date}/${MEMBER}/tmp/${JOBNAME}
+  INTERMEDIATE_EXP_DIR=/gpfs/projects/${GROUP}/repository/exp
+  EXTRA_DIR=/gpfs/projects/${GROUP}/repository
+  IC_DIR=/gpfs/projects/${GROUP}/repository/ic
+  #initial conditions dirr for the platform, in order to have this working properly we need
+  #all IC/rst files in place synchronized from bsc32/projects
+
+  PATH=/gpfs/apps/MN3/CDO/1.6.9/bin:${PATH}
+  export PATH=/gpfs/projects/bsc32/repository/apps/rebuild_nemo_nord3/:${PATH}
+  grib_api_path=/gpfs/apps/MN3/GRIB/1.14.0
+  PATH=${grib_api_path}/bin:${PATH}
+  export GRIB_BIN_PATH=${grib_api_path}/bin
+  export GRIB_DEFINITION_PATH=${grib_api_path}/share/grib_api/definitions
+  export GRIB_SAMPLES_PATH=${grib_api_path}/share/grib_api/ifs_samples/grib1
+}
+
+#####################################################################################################################
+# Globals:
+#   None
+# Arguments:
+#   None
+# Returns:
+#   None
+# Purpose: auxiliary function to common environment vars that will be used when the job
+#          executes in the Nord3 cluster
+#####################################################################################################################
+function setup_environment_vars() {
+  setup_common_environment_vars
+}
+
+#####################################################################################################################
+# Globals:
+#   None
+# Arguments:
+#   None
+# Returns:
+#   None
+# Purpose: auxiliary function to set the intermediate storage root path, used in transfer machines, this function
+# overrides the base function in common.filesystem.sh
+#####################################################################################################################
+function setup_environment_vars_local() {
+  echo "Nord3 common environment variables"
+  setup_common_environment_vars
+}
+
+#####################################################################################################################
+# Globals:
+#   None
+# Arguments:
+#   None
+# Returns:
+#   None
+# Purpose: auxiliary function to set the intermediate storage root path, used in transfer machines, this function
+# overrides the base function in common.filesystem.sh
+#####################################################################################################################
+function setup_paths_local() {
+  echo "Nord3 Paths"
+  export INTERMEDIATE_EXP_DIR=/gpfs/projects/${GROUP}/repository/exp
+}
+setup_modules_earthdiags
++ setup_modules_earthdiags
++ prepare_environment_modules
++ module purge
++ source /apps/modules/module_wrapper.sh purge
+#!/bin/bash
+
+BINPATH=/apps/modules/current/bin/modulecmd
+++ BINPATH=/apps/modules/current/bin/modulecmd
+MODULESHELL=sh
+++ MODULESHELL=sh
+
+if [[ -z "$MODULESBEGINENV" ]]; then
+	if [[ -n "$TMPDIR" && $TMPDIR =~ ^/.*/[0-9]+\.tmpdir$ ]]; then
+		export MODULESBEGINENV="$TMPDIR/.modulesbeginenv_$(date +"%Y%m%d%H%M%S%N")"
+	elif [[ -n "$HOME" ]]; then
+		export MODULESBEGINENV="$HOME/.modulesbeginenv"
+	fi
+fi
+++ [[ -z /home/bsc32/bsc32627/.modulesbeginenv ]]
+if [[ "$_MODULESBEGINENV_" != "$MODULESBEGINENV" ]]; then
+	unset _MODULESBEGINENV_
+fi
+++ [[ /home/bsc32/bsc32627/.modulesbeginenv != \/\h\o\m\e\/\b\s\c\3\2\/\b\s\c\3\2\6\2\7\/\.\m\o\d\u\l\e\s\b\e\g\i\n\e\n\v ]]
+
+case $# in
+0 ) # no args: launch help
+	eval `$BINPATH $MODULESHELL help`
+	;;
+1 ) # 1 args: launch it!
+	eval `$BINPATH $MODULESHELL $1`
+	;;
+* ) # 2 or more args: parse it!
+
+	options=$1
+	shift	# delete the option from args
+	i=0
+	for arg in "$@"	# save the rest of args in modulenames array
+	do
+		modulenames[$i]=$arg
+		((i++))
+	done
+
+	array_opts=( add load rm unload swap switch sw show display avail av help whatis initadd initprepend initrm initswitch )
+	process=0
+	for option in "${array_opts[@]}" # check for the options
+	do
+		if [ "${options}" = "$option" ] # will process the args
+		then
+			process=1
+			break
+		fi
+	done
+
+	if [ $process -eq 0 ]  
+	then	
+		# other options, just launch it
+		eval `$BINPATH $MODULESHELL $options ${modulenames[*]}`
+	else
+		# save the names of modulefiles in array_names
+		x=0
+		for LINE in $(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done) ; do array_names[$x]="$LINE" ; ((x++)); done
+		# compare all modulenames from the entry with the existing modulefiles
+		i=0; j=0
+		for modulename in "${modulenames[@]}" 
+		do
+			found=0
+			# split module and version
+			local module=${modulename%/*}
+			version=${modulename#*/} # if no version, then module=version
+			for filename in "${array_names[@]}"
+			do
+				shopt -s nocasematch
+				case "$module" in
+				$filename )
+					if [ "$module" == "$version" ] # default version
+					then
+						array_modules[$i]=$filename
+					else # explicit version number
+						array_modules[$i]="$filename/$version"
+					fi
+					((i++))
+					found=1
+          break
+					;;
+				* )
+					;;
+				esac
+			done
+			if [ $found -eq 0 ] # module not found
+			then
+				unknown_modules[$j]=$modulename
+				((j++))
+			fi	
+		done
+	        eval `$BINPATH $MODULESHELL $options ${array_modules[*]} ${unknown_modules[*]:-}` # launch the right modules
+
+	fi
+	;;
+esac
+++ case $# in
+$BINPATH $MODULESHELL $1
++++ /apps/modules/current/bin/modulecmd sh purge
+++ eval 'LD_LIBRARY_PATH='\''/opt/lsf/9.1/linux2.6-glibc2.3-x86_64/lib'\'';export' 'LD_LIBRARY_PATH;XDG_DATA_DIRS='\''/usr/share:/etc/opt/kde3/share:/opt/kde3/share'\'';export' 'XDG_DATA_DIRS;PATH='\''/opt/lsf/9.1/linux2.6-glibc2.3-x86_64/bin:/opt/lsf/9.1/linux2.6-glibc2.3-x86_64/etc:/usr/local/bin:/usr/bin:/bin:/usr/bin/X11:/usr/X11R6/bin:/usr/games:/opt/bin:/opt/ibutils/bin:/usr/lib/mit/bin:/usr/lib/mit/sbin:/opt/intel/mic/bin:.'\'';export' 'PATH;MANPATH='\''/opt/lsf/9.1/man:/usr/local/man:/usr/share/man'\'';export' 'MANPATH;unset' 'CPATH;unset' 'EBDEVELZLIB;unset' 'LIBRARY_PATH;unset' 'EBDEVELBINUTILS;unset' '_LMFILES_;unset' 'LOADEDMODULES;unset' 'EBVERSIONGCC;unset' 'EBVERSIONGCCCORE;unset' 'PKG_CONFIG_PATH;unset' 'EBDEVELGCC;unset' 'EBROOTZLIB;unset' 'EBDEVELGCCCORE;unset' 'EBROOTBINUTILS;unset' 'EBVERSIONSINGULARITY;unset' 'EBROOTGCC;unset' 'EBROOTGCCCORE;unset' 'EBDEVELSINGULARITY;unset' 'EBROOTSINGULARITY;unset' 'EBVERSIONZLIB;unset' 'EBVERSIONBINUTILS;'
+LD_LIBRARY_PATH='/opt/lsf/9.1/linux2.6-glibc2.3-x86_64/lib';export LD_LIBRARY_PATH;XDG_DATA_DIRS='/usr/share:/etc/opt/kde3/share:/opt/kde3/share';export XDG_DATA_DIRS;PATH='/opt/lsf/9.1/linux2.6-glibc2.3-x86_64/bin:/opt/lsf/9.1/linux2.6-glibc2.3-x86_64/etc:/usr/local/bin:/usr/bin:/bin:/usr/bin/X11:/usr/X11R6/bin:/usr/games:/opt/bin:/opt/ibutils/bin:/usr/lib/mit/bin:/usr/lib/mit/sbin:/opt/intel/mic/bin:.';export PATH;MANPATH='/opt/lsf/9.1/man:/usr/local/man:/usr/share/man';export MANPATH;unset CPATH;unset EBDEVELZLIB;unset LIBRARY_PATH;unset EBDEVELBINUTILS;unset _LMFILES_;unset LOADEDMODULES;unset EBVERSIONGCC;unset EBVERSIONGCCCORE;unset PKG_CONFIG_PATH;unset EBDEVELGCC;unset EBROOTZLIB;unset EBDEVELGCCCORE;unset EBROOTBINUTILS;unset EBVERSIONSINGULARITY;unset EBROOTGCC;unset EBROOTGCCCORE;unset EBDEVELSINGULARITY;unset EBROOTSINGULARITY;unset EBVERSIONZLIB;unset EBVERSIONBINUTILS;
++++ LD_LIBRARY_PATH=/opt/lsf/9.1/linux2.6-glibc2.3-x86_64/lib
++++ export LD_LIBRARY_PATH
++++ XDG_DATA_DIRS=/usr/share:/etc/opt/kde3/share:/opt/kde3/share
++++ export XDG_DATA_DIRS
++++ PATH=/opt/lsf/9.1/linux2.6-glibc2.3-x86_64/bin:/opt/lsf/9.1/linux2.6-glibc2.3-x86_64/etc:/usr/local/bin:/usr/bin:/bin:/usr/bin/X11:/usr/X11R6/bin:/usr/games:/opt/bin:/opt/ibutils/bin:/usr/lib/mit/bin:/usr/lib/mit/sbin:/opt/intel/mic/bin:.
++++ export PATH
++++ MANPATH=/opt/lsf/9.1/man:/usr/local/man:/usr/share/man
++++ export MANPATH
++++ unset CPATH
++++ unset EBDEVELZLIB
++++ unset LIBRARY_PATH
++++ unset EBDEVELBINUTILS
++++ unset _LMFILES_
++++ unset LOADEDMODULES
++++ unset EBVERSIONGCC
++++ unset EBVERSIONGCCCORE
++++ unset PKG_CONFIG_PATH
++++ unset EBDEVELGCC
++++ unset EBROOTZLIB
++++ unset EBDEVELGCCCORE
++++ unset EBROOTBINUTILS
++++ unset EBVERSIONSINGULARITY
++++ unset EBROOTGCC
++++ unset EBROOTGCCCORE
++++ unset EBDEVELSINGULARITY
++++ unset EBROOTSINGULARITY
++++ unset EBVERSIONZLIB
++++ unset EBVERSIONBINUTILS
+
+unset BINPATH array_modules unknown_modules modulenames array_names i j x option options modulename  version found LINE process process array_opts filename arg
+++ unset BINPATH array_modules unknown_modules modulenames array_names i j x option options modulename version found LINE process process array_opts filename arg
+
++ module use /gpfs/projects/bsc32/software/suselinux/11/modules/all
++ source /apps/modules/module_wrapper.sh use /gpfs/projects/bsc32/software/suselinux/11/modules/all
+#!/bin/bash
+
+BINPATH=/apps/modules/current/bin/modulecmd
+++ BINPATH=/apps/modules/current/bin/modulecmd
+MODULESHELL=sh
+++ MODULESHELL=sh
+
+if [[ -z "$MODULESBEGINENV" ]]; then
+	if [[ -n "$TMPDIR" && $TMPDIR =~ ^/.*/[0-9]+\.tmpdir$ ]]; then
+		export MODULESBEGINENV="$TMPDIR/.modulesbeginenv_$(date +"%Y%m%d%H%M%S%N")"
+	elif [[ -n "$HOME" ]]; then
+		export MODULESBEGINENV="$HOME/.modulesbeginenv"
+	fi
+fi
+++ [[ -z /home/bsc32/bsc32627/.modulesbeginenv ]]
+if [[ "$_MODULESBEGINENV_" != "$MODULESBEGINENV" ]]; then
+	unset _MODULESBEGINENV_
+fi
+++ [[ /home/bsc32/bsc32627/.modulesbeginenv != \/\h\o\m\e\/\b\s\c\3\2\/\b\s\c\3\2\6\2\7\/\.\m\o\d\u\l\e\s\b\e\g\i\n\e\n\v ]]
+
+case $# in
+0 ) # no args: launch help
+	eval `$BINPATH $MODULESHELL help`
+	;;
+1 ) # 1 args: launch it!
+	eval `$BINPATH $MODULESHELL $1`
+	;;
+* ) # 2 or more args: parse it!
+
+	options=$1
+	shift	# delete the option from args
+	i=0
+	for arg in "$@"	# save the rest of args in modulenames array
+	do
+		modulenames[$i]=$arg
+		((i++))
+	done
+
+	array_opts=( add load rm unload swap switch sw show display avail av help whatis initadd initprepend initrm initswitch )
+	process=0
+	for option in "${array_opts[@]}" # check for the options
+	do
+		if [ "${options}" = "$option" ] # will process the args
+		then
+			process=1
+			break
+		fi
+	done
+
+	if [ $process -eq 0 ]  
+	then	
+		# other options, just launch it
+		eval `$BINPATH $MODULESHELL $options ${modulenames[*]}`
+	else
+		# save the names of modulefiles in array_names
+		x=0
+		for LINE in $(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done) ; do array_names[$x]="$LINE" ; ((x++)); done
+		# compare all modulenames from the entry with the existing modulefiles
+		i=0; j=0
+		for modulename in "${modulenames[@]}" 
+		do
+			found=0
+			# split module and version
+			local module=${modulename%/*}
+			version=${modulename#*/} # if no version, then module=version
+			for filename in "${array_names[@]}"
+			do
+				shopt -s nocasematch
+				case "$module" in
+				$filename )
+					if [ "$module" == "$version" ] # default version
+					then
+						array_modules[$i]=$filename
+					else # explicit version number
+						array_modules[$i]="$filename/$version"
+					fi
+					((i++))
+					found=1
+          break
+					;;
+				* )
+					;;
+				esac
+			done
+			if [ $found -eq 0 ] # module not found
+			then
+				unknown_modules[$j]=$modulename
+				((j++))
+			fi	
+		done
+	        eval `$BINPATH $MODULESHELL $options ${array_modules[*]} ${unknown_modules[*]:-}` # launch the right modules
+
+	fi
+	;;
+esac
+++ case $# in
+++ options=use
+++ shift
+++ i=0
+++ for arg in '"$@"'
+++ modulenames[$i]=/gpfs/projects/bsc32/software/suselinux/11/modules/all
+++ (( i++ ))
+++ array_opts=(add load rm unload swap switch sw show display avail av help whatis initadd initprepend initrm initswitch)
+++ process=0
+++ for option in '"${array_opts[@]}"'
+++ '[' use = add ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' use = load ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' use = rm ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' use = unload ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' use = swap ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' use = switch ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' use = sw ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' use = show ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' use = display ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' use = avail ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' use = av ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' use = help ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' use = whatis ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' use = initadd ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' use = initprepend ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' use = initrm ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' use = initswitch ']'
+++ '[' 0 -eq 0 ']'
+$BINPATH $MODULESHELL $options ${modulenames[*]}
++++ /apps/modules/current/bin/modulecmd sh use /gpfs/projects/bsc32/software/suselinux/11/modules/all
+++ eval
+
+unset BINPATH array_modules unknown_modules modulenames array_names i j x option options modulename  version found LINE process process array_opts filename arg
+++ unset BINPATH array_modules unknown_modules modulenames array_names i j x option options modulename version found LINE process process array_opts filename arg
+
++ module unuse /apps/modules/modulefiles/applications
++ source /apps/modules/module_wrapper.sh unuse /apps/modules/modulefiles/applications
+#!/bin/bash
+
+BINPATH=/apps/modules/current/bin/modulecmd
+++ BINPATH=/apps/modules/current/bin/modulecmd
+MODULESHELL=sh
+++ MODULESHELL=sh
+
+if [[ -z "$MODULESBEGINENV" ]]; then
+	if [[ -n "$TMPDIR" && $TMPDIR =~ ^/.*/[0-9]+\.tmpdir$ ]]; then
+		export MODULESBEGINENV="$TMPDIR/.modulesbeginenv_$(date +"%Y%m%d%H%M%S%N")"
+	elif [[ -n "$HOME" ]]; then
+		export MODULESBEGINENV="$HOME/.modulesbeginenv"
+	fi
+fi
+++ [[ -z /home/bsc32/bsc32627/.modulesbeginenv ]]
+if [[ "$_MODULESBEGINENV_" != "$MODULESBEGINENV" ]]; then
+	unset _MODULESBEGINENV_
+fi
+++ [[ /home/bsc32/bsc32627/.modulesbeginenv != \/\h\o\m\e\/\b\s\c\3\2\/\b\s\c\3\2\6\2\7\/\.\m\o\d\u\l\e\s\b\e\g\i\n\e\n\v ]]
+
+case $# in
+0 ) # no args: launch help
+	eval `$BINPATH $MODULESHELL help`
+	;;
+1 ) # 1 args: launch it!
+	eval `$BINPATH $MODULESHELL $1`
+	;;
+* ) # 2 or more args: parse it!
+
+	options=$1
+	shift	# delete the option from args
+	i=0
+	for arg in "$@"	# save the rest of args in modulenames array
+	do
+		modulenames[$i]=$arg
+		((i++))
+	done
+
+	array_opts=( add load rm unload swap switch sw show display avail av help whatis initadd initprepend initrm initswitch )
+	process=0
+	for option in "${array_opts[@]}" # check for the options
+	do
+		if [ "${options}" = "$option" ] # will process the args
+		then
+			process=1
+			break
+		fi
+	done
+
+	if [ $process -eq 0 ]  
+	then	
+		# other options, just launch it
+		eval `$BINPATH $MODULESHELL $options ${modulenames[*]}`
+	else
+		# save the names of modulefiles in array_names
+		x=0
+		for LINE in $(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done) ; do array_names[$x]="$LINE" ; ((x++)); done
+		# compare all modulenames from the entry with the existing modulefiles
+		i=0; j=0
+		for modulename in "${modulenames[@]}" 
+		do
+			found=0
+			# split module and version
+			local module=${modulename%/*}
+			version=${modulename#*/} # if no version, then module=version
+			for filename in "${array_names[@]}"
+			do
+				shopt -s nocasematch
+				case "$module" in
+				$filename )
+					if [ "$module" == "$version" ] # default version
+					then
+						array_modules[$i]=$filename
+					else # explicit version number
+						array_modules[$i]="$filename/$version"
+					fi
+					((i++))
+					found=1
+          break
+					;;
+				* )
+					;;
+				esac
+			done
+			if [ $found -eq 0 ] # module not found
+			then
+				unknown_modules[$j]=$modulename
+				((j++))
+			fi	
+		done
+	        eval `$BINPATH $MODULESHELL $options ${array_modules[*]} ${unknown_modules[*]:-}` # launch the right modules
+
+	fi
+	;;
+esac
+++ case $# in
+++ options=unuse
+++ shift
+++ i=0
+++ for arg in '"$@"'
+++ modulenames[$i]=/apps/modules/modulefiles/applications
+++ (( i++ ))
+++ array_opts=(add load rm unload swap switch sw show display avail av help whatis initadd initprepend initrm initswitch)
+++ process=0
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = add ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = load ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = rm ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = unload ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = swap ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = switch ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = sw ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = show ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = display ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = avail ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = av ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = help ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = whatis ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = initadd ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = initprepend ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = initrm ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = initswitch ']'
+++ '[' 0 -eq 0 ']'
+$BINPATH $MODULESHELL $options ${modulenames[*]}
++++ /apps/modules/current/bin/modulecmd sh unuse /apps/modules/modulefiles/applications
+++ eval
+
+unset BINPATH array_modules unknown_modules modulenames array_names i j x option options modulename  version found LINE process process array_opts filename arg
+++ unset BINPATH array_modules unknown_modules modulenames array_names i j x option options modulename version found LINE process process array_opts filename arg
+
++ module unuse /apps/modules/modulefiles/applications_bis
++ source /apps/modules/module_wrapper.sh unuse /apps/modules/modulefiles/applications_bis
+#!/bin/bash
+
+BINPATH=/apps/modules/current/bin/modulecmd
+++ BINPATH=/apps/modules/current/bin/modulecmd
+MODULESHELL=sh
+++ MODULESHELL=sh
+
+if [[ -z "$MODULESBEGINENV" ]]; then
+	if [[ -n "$TMPDIR" && $TMPDIR =~ ^/.*/[0-9]+\.tmpdir$ ]]; then
+		export MODULESBEGINENV="$TMPDIR/.modulesbeginenv_$(date +"%Y%m%d%H%M%S%N")"
+	elif [[ -n "$HOME" ]]; then
+		export MODULESBEGINENV="$HOME/.modulesbeginenv"
+	fi
+fi
+++ [[ -z /home/bsc32/bsc32627/.modulesbeginenv ]]
+if [[ "$_MODULESBEGINENV_" != "$MODULESBEGINENV" ]]; then
+	unset _MODULESBEGINENV_
+fi
+++ [[ /home/bsc32/bsc32627/.modulesbeginenv != \/\h\o\m\e\/\b\s\c\3\2\/\b\s\c\3\2\6\2\7\/\.\m\o\d\u\l\e\s\b\e\g\i\n\e\n\v ]]
+
+case $# in
+0 ) # no args: launch help
+	eval `$BINPATH $MODULESHELL help`
+	;;
+1 ) # 1 args: launch it!
+	eval `$BINPATH $MODULESHELL $1`
+	;;
+* ) # 2 or more args: parse it!
+
+	options=$1
+	shift	# delete the option from args
+	i=0
+	for arg in "$@"	# save the rest of args in modulenames array
+	do
+		modulenames[$i]=$arg
+		((i++))
+	done
+
+	array_opts=( add load rm unload swap switch sw show display avail av help whatis initadd initprepend initrm initswitch )
+	process=0
+	for option in "${array_opts[@]}" # check for the options
+	do
+		if [ "${options}" = "$option" ] # will process the args
+		then
+			process=1
+			break
+		fi
+	done
+
+	if [ $process -eq 0 ]  
+	then	
+		# other options, just launch it
+		eval `$BINPATH $MODULESHELL $options ${modulenames[*]}`
+	else
+		# save the names of modulefiles in array_names
+		x=0
+		for LINE in $(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done) ; do array_names[$x]="$LINE" ; ((x++)); done
+		# compare all modulenames from the entry with the existing modulefiles
+		i=0; j=0
+		for modulename in "${modulenames[@]}" 
+		do
+			found=0
+			# split module and version
+			local module=${modulename%/*}
+			version=${modulename#*/} # if no version, then module=version
+			for filename in "${array_names[@]}"
+			do
+				shopt -s nocasematch
+				case "$module" in
+				$filename )
+					if [ "$module" == "$version" ] # default version
+					then
+						array_modules[$i]=$filename
+					else # explicit version number
+						array_modules[$i]="$filename/$version"
+					fi
+					((i++))
+					found=1
+          break
+					;;
+				* )
+					;;
+				esac
+			done
+			if [ $found -eq 0 ] # module not found
+			then
+				unknown_modules[$j]=$modulename
+				((j++))
+			fi	
+		done
+	        eval `$BINPATH $MODULESHELL $options ${array_modules[*]} ${unknown_modules[*]:-}` # launch the right modules
+
+	fi
+	;;
+esac
+++ case $# in
+++ options=unuse
+++ shift
+++ i=0
+++ for arg in '"$@"'
+++ modulenames[$i]=/apps/modules/modulefiles/applications_bis
+++ (( i++ ))
+++ array_opts=(add load rm unload swap switch sw show display avail av help whatis initadd initprepend initrm initswitch)
+++ process=0
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = add ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = load ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = rm ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = unload ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = swap ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = switch ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = sw ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = show ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = display ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = avail ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = av ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = help ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = whatis ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = initadd ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = initprepend ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = initrm ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = initswitch ']'
+++ '[' 0 -eq 0 ']'
+$BINPATH $MODULESHELL $options ${modulenames[*]}
++++ /apps/modules/current/bin/modulecmd sh unuse /apps/modules/modulefiles/applications_bis
+++ eval
+
+unset BINPATH array_modules unknown_modules modulenames array_names i j x option options modulename  version found LINE process process array_opts filename arg
+++ unset BINPATH array_modules unknown_modules modulenames array_names i j x option options modulename version found LINE process process array_opts filename arg
+
++ module unuse /apps/modules/modulefiles/compilers
++ source /apps/modules/module_wrapper.sh unuse /apps/modules/modulefiles/compilers
+#!/bin/bash
+
+BINPATH=/apps/modules/current/bin/modulecmd
+++ BINPATH=/apps/modules/current/bin/modulecmd
+MODULESHELL=sh
+++ MODULESHELL=sh
+
+if [[ -z "$MODULESBEGINENV" ]]; then
+	if [[ -n "$TMPDIR" && $TMPDIR =~ ^/.*/[0-9]+\.tmpdir$ ]]; then
+		export MODULESBEGINENV="$TMPDIR/.modulesbeginenv_$(date +"%Y%m%d%H%M%S%N")"
+	elif [[ -n "$HOME" ]]; then
+		export MODULESBEGINENV="$HOME/.modulesbeginenv"
+	fi
+fi
+++ [[ -z /home/bsc32/bsc32627/.modulesbeginenv ]]
+if [[ "$_MODULESBEGINENV_" != "$MODULESBEGINENV" ]]; then
+	unset _MODULESBEGINENV_
+fi
+++ [[ /home/bsc32/bsc32627/.modulesbeginenv != \/\h\o\m\e\/\b\s\c\3\2\/\b\s\c\3\2\6\2\7\/\.\m\o\d\u\l\e\s\b\e\g\i\n\e\n\v ]]
+
+case $# in
+0 ) # no args: launch help
+	eval `$BINPATH $MODULESHELL help`
+	;;
+1 ) # 1 args: launch it!
+	eval `$BINPATH $MODULESHELL $1`
+	;;
+* ) # 2 or more args: parse it!
+
+	options=$1
+	shift	# delete the option from args
+	i=0
+	for arg in "$@"	# save the rest of args in modulenames array
+	do
+		modulenames[$i]=$arg
+		((i++))
+	done
+
+	array_opts=( add load rm unload swap switch sw show display avail av help whatis initadd initprepend initrm initswitch )
+	process=0
+	for option in "${array_opts[@]}" # check for the options
+	do
+		if [ "${options}" = "$option" ] # will process the args
+		then
+			process=1
+			break
+		fi
+	done
+
+	if [ $process -eq 0 ]  
+	then	
+		# other options, just launch it
+		eval `$BINPATH $MODULESHELL $options ${modulenames[*]}`
+	else
+		# save the names of modulefiles in array_names
+		x=0
+		for LINE in $(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done) ; do array_names[$x]="$LINE" ; ((x++)); done
+		# compare all modulenames from the entry with the existing modulefiles
+		i=0; j=0
+		for modulename in "${modulenames[@]}" 
+		do
+			found=0
+			# split module and version
+			local module=${modulename%/*}
+			version=${modulename#*/} # if no version, then module=version
+			for filename in "${array_names[@]}"
+			do
+				shopt -s nocasematch
+				case "$module" in
+				$filename )
+					if [ "$module" == "$version" ] # default version
+					then
+						array_modules[$i]=$filename
+					else # explicit version number
+						array_modules[$i]="$filename/$version"
+					fi
+					((i++))
+					found=1
+          break
+					;;
+				* )
+					;;
+				esac
+			done
+			if [ $found -eq 0 ] # module not found
+			then
+				unknown_modules[$j]=$modulename
+				((j++))
+			fi	
+		done
+	        eval `$BINPATH $MODULESHELL $options ${array_modules[*]} ${unknown_modules[*]:-}` # launch the right modules
+
+	fi
+	;;
+esac
+++ case $# in
+++ options=unuse
+++ shift
+++ i=0
+++ for arg in '"$@"'
+++ modulenames[$i]=/apps/modules/modulefiles/compilers
+++ (( i++ ))
+++ array_opts=(add load rm unload swap switch sw show display avail av help whatis initadd initprepend initrm initswitch)
+++ process=0
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = add ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = load ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = rm ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = unload ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = swap ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = switch ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = sw ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = show ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = display ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = avail ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = av ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = help ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = whatis ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = initadd ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = initprepend ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = initrm ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = initswitch ']'
+++ '[' 0 -eq 0 ']'
+$BINPATH $MODULESHELL $options ${modulenames[*]}
++++ /apps/modules/current/bin/modulecmd sh unuse /apps/modules/modulefiles/compilers
+++ eval
+
+unset BINPATH array_modules unknown_modules modulenames array_names i j x option options modulename  version found LINE process process array_opts filename arg
+++ unset BINPATH array_modules unknown_modules modulenames array_names i j x option options modulename version found LINE process process array_opts filename arg
+
++ module unuse /apps/modules/modulefiles/tools
++ source /apps/modules/module_wrapper.sh unuse /apps/modules/modulefiles/tools
+#!/bin/bash
+
+BINPATH=/apps/modules/current/bin/modulecmd
+++ BINPATH=/apps/modules/current/bin/modulecmd
+MODULESHELL=sh
+++ MODULESHELL=sh
+
+if [[ -z "$MODULESBEGINENV" ]]; then
+	if [[ -n "$TMPDIR" && $TMPDIR =~ ^/.*/[0-9]+\.tmpdir$ ]]; then
+		export MODULESBEGINENV="$TMPDIR/.modulesbeginenv_$(date +"%Y%m%d%H%M%S%N")"
+	elif [[ -n "$HOME" ]]; then
+		export MODULESBEGINENV="$HOME/.modulesbeginenv"
+	fi
+fi
+++ [[ -z /home/bsc32/bsc32627/.modulesbeginenv ]]
+if [[ "$_MODULESBEGINENV_" != "$MODULESBEGINENV" ]]; then
+	unset _MODULESBEGINENV_
+fi
+++ [[ /home/bsc32/bsc32627/.modulesbeginenv != \/\h\o\m\e\/\b\s\c\3\2\/\b\s\c\3\2\6\2\7\/\.\m\o\d\u\l\e\s\b\e\g\i\n\e\n\v ]]
+
+case $# in
+0 ) # no args: launch help
+	eval `$BINPATH $MODULESHELL help`
+	;;
+1 ) # 1 args: launch it!
+	eval `$BINPATH $MODULESHELL $1`
+	;;
+* ) # 2 or more args: parse it!
+
+	options=$1
+	shift	# delete the option from args
+	i=0
+	for arg in "$@"	# save the rest of args in modulenames array
+	do
+		modulenames[$i]=$arg
+		((i++))
+	done
+
+	array_opts=( add load rm unload swap switch sw show display avail av help whatis initadd initprepend initrm initswitch )
+	process=0
+	for option in "${array_opts[@]}" # check for the options
+	do
+		if [ "${options}" = "$option" ] # will process the args
+		then
+			process=1
+			break
+		fi
+	done
+
+	if [ $process -eq 0 ]  
+	then	
+		# other options, just launch it
+		eval `$BINPATH $MODULESHELL $options ${modulenames[*]}`
+	else
+		# save the names of modulefiles in array_names
+		x=0
+		for LINE in $(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done) ; do array_names[$x]="$LINE" ; ((x++)); done
+		# compare all modulenames from the entry with the existing modulefiles
+		i=0; j=0
+		for modulename in "${modulenames[@]}" 
+		do
+			found=0
+			# split module and version
+			local module=${modulename%/*}
+			version=${modulename#*/} # if no version, then module=version
+			for filename in "${array_names[@]}"
+			do
+				shopt -s nocasematch
+				case "$module" in
+				$filename )
+					if [ "$module" == "$version" ] # default version
+					then
+						array_modules[$i]=$filename
+					else # explicit version number
+						array_modules[$i]="$filename/$version"
+					fi
+					((i++))
+					found=1
+          break
+					;;
+				* )
+					;;
+				esac
+			done
+			if [ $found -eq 0 ] # module not found
+			then
+				unknown_modules[$j]=$modulename
+				((j++))
+			fi	
+		done
+	        eval `$BINPATH $MODULESHELL $options ${array_modules[*]} ${unknown_modules[*]:-}` # launch the right modules
+
+	fi
+	;;
+esac
+++ case $# in
+++ options=unuse
+++ shift
+++ i=0
+++ for arg in '"$@"'
+++ modulenames[$i]=/apps/modules/modulefiles/tools
+++ (( i++ ))
+++ array_opts=(add load rm unload swap switch sw show display avail av help whatis initadd initprepend initrm initswitch)
+++ process=0
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = add ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = load ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = rm ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = unload ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = swap ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = switch ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = sw ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = show ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = display ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = avail ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = av ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = help ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = whatis ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = initadd ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = initprepend ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = initrm ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = initswitch ']'
+++ '[' 0 -eq 0 ']'
+$BINPATH $MODULESHELL $options ${modulenames[*]}
++++ /apps/modules/current/bin/modulecmd sh unuse /apps/modules/modulefiles/tools
+++ eval
+
+unset BINPATH array_modules unknown_modules modulenames array_names i j x option options modulename  version found LINE process process array_opts filename arg
+++ unset BINPATH array_modules unknown_modules modulenames array_names i j x option options modulename version found LINE process process array_opts filename arg
+
++ module unuse /apps/modules/modulefiles/libraries
++ source /apps/modules/module_wrapper.sh unuse /apps/modules/modulefiles/libraries
+#!/bin/bash
+
+BINPATH=/apps/modules/current/bin/modulecmd
+++ BINPATH=/apps/modules/current/bin/modulecmd
+MODULESHELL=sh
+++ MODULESHELL=sh
+
+if [[ -z "$MODULESBEGINENV" ]]; then
+	if [[ -n "$TMPDIR" && $TMPDIR =~ ^/.*/[0-9]+\.tmpdir$ ]]; then
+		export MODULESBEGINENV="$TMPDIR/.modulesbeginenv_$(date +"%Y%m%d%H%M%S%N")"
+	elif [[ -n "$HOME" ]]; then
+		export MODULESBEGINENV="$HOME/.modulesbeginenv"
+	fi
+fi
+++ [[ -z /home/bsc32/bsc32627/.modulesbeginenv ]]
+if [[ "$_MODULESBEGINENV_" != "$MODULESBEGINENV" ]]; then
+	unset _MODULESBEGINENV_
+fi
+++ [[ /home/bsc32/bsc32627/.modulesbeginenv != \/\h\o\m\e\/\b\s\c\3\2\/\b\s\c\3\2\6\2\7\/\.\m\o\d\u\l\e\s\b\e\g\i\n\e\n\v ]]
+
+case $# in
+0 ) # no args: launch help
+	eval `$BINPATH $MODULESHELL help`
+	;;
+1 ) # 1 args: launch it!
+	eval `$BINPATH $MODULESHELL $1`
+	;;
+* ) # 2 or more args: parse it!
+
+	options=$1
+	shift	# delete the option from args
+	i=0
+	for arg in "$@"	# save the rest of args in modulenames array
+	do
+		modulenames[$i]=$arg
+		((i++))
+	done
+
+	array_opts=( add load rm unload swap switch sw show display avail av help whatis initadd initprepend initrm initswitch )
+	process=0
+	for option in "${array_opts[@]}" # check for the options
+	do
+		if [ "${options}" = "$option" ] # will process the args
+		then
+			process=1
+			break
+		fi
+	done
+
+	if [ $process -eq 0 ]  
+	then	
+		# other options, just launch it
+		eval `$BINPATH $MODULESHELL $options ${modulenames[*]}`
+	else
+		# save the names of modulefiles in array_names
+		x=0
+		for LINE in $(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done) ; do array_names[$x]="$LINE" ; ((x++)); done
+		# compare all modulenames from the entry with the existing modulefiles
+		i=0; j=0
+		for modulename in "${modulenames[@]}" 
+		do
+			found=0
+			# split module and version
+			local module=${modulename%/*}
+			version=${modulename#*/} # if no version, then module=version
+			for filename in "${array_names[@]}"
+			do
+				shopt -s nocasematch
+				case "$module" in
+				$filename )
+					if [ "$module" == "$version" ] # default version
+					then
+						array_modules[$i]=$filename
+					else # explicit version number
+						array_modules[$i]="$filename/$version"
+					fi
+					((i++))
+					found=1
+          break
+					;;
+				* )
+					;;
+				esac
+			done
+			if [ $found -eq 0 ] # module not found
+			then
+				unknown_modules[$j]=$modulename
+				((j++))
+			fi	
+		done
+	        eval `$BINPATH $MODULESHELL $options ${array_modules[*]} ${unknown_modules[*]:-}` # launch the right modules
+
+	fi
+	;;
+esac
+++ case $# in
+++ options=unuse
+++ shift
+++ i=0
+++ for arg in '"$@"'
+++ modulenames[$i]=/apps/modules/modulefiles/libraries
+++ (( i++ ))
+++ array_opts=(add load rm unload swap switch sw show display avail av help whatis initadd initprepend initrm initswitch)
+++ process=0
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = add ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = load ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = rm ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = unload ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = swap ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = switch ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = sw ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = show ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = display ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = avail ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = av ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = help ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = whatis ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = initadd ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = initprepend ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = initrm ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = initswitch ']'
+++ '[' 0 -eq 0 ']'
+$BINPATH $MODULESHELL $options ${modulenames[*]}
++++ /apps/modules/current/bin/modulecmd sh unuse /apps/modules/modulefiles/libraries
+++ eval
+
+unset BINPATH array_modules unknown_modules modulenames array_names i j x option options modulename  version found LINE process process array_opts filename arg
+++ unset BINPATH array_modules unknown_modules modulenames array_names i j x option options modulename version found LINE process process array_opts filename arg
+
++ module unuse /apps/modules/modulefiles/environment
++ source /apps/modules/module_wrapper.sh unuse /apps/modules/modulefiles/environment
+#!/bin/bash
+
+BINPATH=/apps/modules/current/bin/modulecmd
+++ BINPATH=/apps/modules/current/bin/modulecmd
+MODULESHELL=sh
+++ MODULESHELL=sh
+
+if [[ -z "$MODULESBEGINENV" ]]; then
+	if [[ -n "$TMPDIR" && $TMPDIR =~ ^/.*/[0-9]+\.tmpdir$ ]]; then
+		export MODULESBEGINENV="$TMPDIR/.modulesbeginenv_$(date +"%Y%m%d%H%M%S%N")"
+	elif [[ -n "$HOME" ]]; then
+		export MODULESBEGINENV="$HOME/.modulesbeginenv"
+	fi
+fi
+++ [[ -z /home/bsc32/bsc32627/.modulesbeginenv ]]
+if [[ "$_MODULESBEGINENV_" != "$MODULESBEGINENV" ]]; then
+	unset _MODULESBEGINENV_
+fi
+++ [[ /home/bsc32/bsc32627/.modulesbeginenv != \/\h\o\m\e\/\b\s\c\3\2\/\b\s\c\3\2\6\2\7\/\.\m\o\d\u\l\e\s\b\e\g\i\n\e\n\v ]]
+
+case $# in
+0 ) # no args: launch help
+	eval `$BINPATH $MODULESHELL help`
+	;;
+1 ) # 1 args: launch it!
+	eval `$BINPATH $MODULESHELL $1`
+	;;
+* ) # 2 or more args: parse it!
+
+	options=$1
+	shift	# delete the option from args
+	i=0
+	for arg in "$@"	# save the rest of args in modulenames array
+	do
+		modulenames[$i]=$arg
+		((i++))
+	done
+
+	array_opts=( add load rm unload swap switch sw show display avail av help whatis initadd initprepend initrm initswitch )
+	process=0
+	for option in "${array_opts[@]}" # check for the options
+	do
+		if [ "${options}" = "$option" ] # will process the args
+		then
+			process=1
+			break
+		fi
+	done
+
+	if [ $process -eq 0 ]  
+	then	
+		# other options, just launch it
+		eval `$BINPATH $MODULESHELL $options ${modulenames[*]}`
+	else
+		# save the names of modulefiles in array_names
+		x=0
+		for LINE in $(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done) ; do array_names[$x]="$LINE" ; ((x++)); done
+		# compare all modulenames from the entry with the existing modulefiles
+		i=0; j=0
+		for modulename in "${modulenames[@]}" 
+		do
+			found=0
+			# split module and version
+			local module=${modulename%/*}
+			version=${modulename#*/} # if no version, then module=version
+			for filename in "${array_names[@]}"
+			do
+				shopt -s nocasematch
+				case "$module" in
+				$filename )
+					if [ "$module" == "$version" ] # default version
+					then
+						array_modules[$i]=$filename
+					else # explicit version number
+						array_modules[$i]="$filename/$version"
+					fi
+					((i++))
+					found=1
+          break
+					;;
+				* )
+					;;
+				esac
+			done
+			if [ $found -eq 0 ] # module not found
+			then
+				unknown_modules[$j]=$modulename
+				((j++))
+			fi	
+		done
+	        eval `$BINPATH $MODULESHELL $options ${array_modules[*]} ${unknown_modules[*]:-}` # launch the right modules
+
+	fi
+	;;
+esac
+++ case $# in
+++ options=unuse
+++ shift
+++ i=0
+++ for arg in '"$@"'
+++ modulenames[$i]=/apps/modules/modulefiles/environment
+++ (( i++ ))
+++ array_opts=(add load rm unload swap switch sw show display avail av help whatis initadd initprepend initrm initswitch)
+++ process=0
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = add ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = load ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = rm ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = unload ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = swap ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = switch ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = sw ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = show ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = display ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = avail ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = av ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = help ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = whatis ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = initadd ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = initprepend ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = initrm ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = initswitch ']'
+++ '[' 0 -eq 0 ']'
+$BINPATH $MODULESHELL $options ${modulenames[*]}
++++ /apps/modules/current/bin/modulecmd sh unuse /apps/modules/modulefiles/environment
+++ eval
+
+unset BINPATH array_modules unknown_modules modulenames array_names i j x option options modulename  version found LINE process process array_opts filename arg
+++ unset BINPATH array_modules unknown_modules modulenames array_names i j x option options modulename version found LINE process process array_opts filename arg
+
++ module unuse /apps/modules/PRACE
++ source /apps/modules/module_wrapper.sh unuse /apps/modules/PRACE
+#!/bin/bash
+
+BINPATH=/apps/modules/current/bin/modulecmd
+++ BINPATH=/apps/modules/current/bin/modulecmd
+MODULESHELL=sh
+++ MODULESHELL=sh
+
+if [[ -z "$MODULESBEGINENV" ]]; then
+	if [[ -n "$TMPDIR" && $TMPDIR =~ ^/.*/[0-9]+\.tmpdir$ ]]; then
+		export MODULESBEGINENV="$TMPDIR/.modulesbeginenv_$(date +"%Y%m%d%H%M%S%N")"
+	elif [[ -n "$HOME" ]]; then
+		export MODULESBEGINENV="$HOME/.modulesbeginenv"
+	fi
+fi
+++ [[ -z /home/bsc32/bsc32627/.modulesbeginenv ]]
+if [[ "$_MODULESBEGINENV_" != "$MODULESBEGINENV" ]]; then
+	unset _MODULESBEGINENV_
+fi
+++ [[ /home/bsc32/bsc32627/.modulesbeginenv != \/\h\o\m\e\/\b\s\c\3\2\/\b\s\c\3\2\6\2\7\/\.\m\o\d\u\l\e\s\b\e\g\i\n\e\n\v ]]
+
+case $# in
+0 ) # no args: launch help
+	eval `$BINPATH $MODULESHELL help`
+	;;
+1 ) # 1 args: launch it!
+	eval `$BINPATH $MODULESHELL $1`
+	;;
+* ) # 2 or more args: parse it!
+
+	options=$1
+	shift	# delete the option from args
+	i=0
+	for arg in "$@"	# save the rest of args in modulenames array
+	do
+		modulenames[$i]=$arg
+		((i++))
+	done
+
+	array_opts=( add load rm unload swap switch sw show display avail av help whatis initadd initprepend initrm initswitch )
+	process=0
+	for option in "${array_opts[@]}" # check for the options
+	do
+		if [ "${options}" = "$option" ] # will process the args
+		then
+			process=1
+			break
+		fi
+	done
+
+	if [ $process -eq 0 ]  
+	then	
+		# other options, just launch it
+		eval `$BINPATH $MODULESHELL $options ${modulenames[*]}`
+	else
+		# save the names of modulefiles in array_names
+		x=0
+		for LINE in $(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done) ; do array_names[$x]="$LINE" ; ((x++)); done
+		# compare all modulenames from the entry with the existing modulefiles
+		i=0; j=0
+		for modulename in "${modulenames[@]}" 
+		do
+			found=0
+			# split module and version
+			local module=${modulename%/*}
+			version=${modulename#*/} # if no version, then module=version
+			for filename in "${array_names[@]}"
+			do
+				shopt -s nocasematch
+				case "$module" in
+				$filename )
+					if [ "$module" == "$version" ] # default version
+					then
+						array_modules[$i]=$filename
+					else # explicit version number
+						array_modules[$i]="$filename/$version"
+					fi
+					((i++))
+					found=1
+          break
+					;;
+				* )
+					;;
+				esac
+			done
+			if [ $found -eq 0 ] # module not found
+			then
+				unknown_modules[$j]=$modulename
+				((j++))
+			fi	
+		done
+	        eval `$BINPATH $MODULESHELL $options ${array_modules[*]} ${unknown_modules[*]:-}` # launch the right modules
+
+	fi
+	;;
+esac
+++ case $# in
+++ options=unuse
+++ shift
+++ i=0
+++ for arg in '"$@"'
+++ modulenames[$i]=/apps/modules/PRACE
+++ (( i++ ))
+++ array_opts=(add load rm unload swap switch sw show display avail av help whatis initadd initprepend initrm initswitch)
+++ process=0
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = add ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = load ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = rm ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = unload ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = swap ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = switch ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = sw ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = show ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = display ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = avail ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = av ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = help ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = whatis ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = initadd ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = initprepend ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = initrm ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' unuse = initswitch ']'
+++ '[' 0 -eq 0 ']'
+$BINPATH $MODULESHELL $options ${modulenames[*]}
++++ /apps/modules/current/bin/modulecmd sh unuse /apps/modules/PRACE
+++ eval
+
+unset BINPATH array_modules unknown_modules modulenames array_names i j x option options modulename  version found LINE process process array_opts filename arg
+++ unset BINPATH array_modules unknown_modules modulenames array_names i j x option options modulename version found LINE process process array_opts filename arg
+
++ set +xuve
+. ${PROJDIR}/plugins/cmorization.sh
++ . /esarchive/autosubmit/t0ni/proj/auto-ecearth3/plugins/cmorization.sh
+#####################################################################################################################
+# Globals: CMOR_REALIZATION_INDEX, MEMBER
+# Arguments:
+#
+# Returns:
+#   None
+# Purpose: Set the cmor realization index based on the member list
+#
+#####################################################################################################################
+function cmor_realization_indexing() {
+
+  if [[ ! -z ${CMOR_REALIZATION_INDEX} ]]; then
+    CMOR_REALIZATION_INDEX_LIST=($(echo ${CMOR_REALIZATION_INDEX}))
+    member_index0=$(echo $((10#$(echo ${MEMBER} | cut -c3-))))
+    realization_index=${CMOR_REALIZATION_INDEX_LIST[${member_index0}]}
+  else
+    realization_index=${member_index}
+  fi
+
+}
+
+#####################################################################################################################
+# Globals: CMOR_EXP_CUSTOM BSC_OUTCLASS CMOR_ADD_STARTDATE sub_experiment_id
+# Arguments:
+#
+# Returns:
+#   None
+# Purpose: Creates the subexperiment id according to CMOR_EXP_CUSTOM BSC_OUTCLASS CMOR_ADD_STARTDATE to add it in the CMOR file names
+#
+#####################################################################################################################
+
+function create_sub_experiment_id() {
+  #The logics of the creation of the sub_experiment_id are described in https://earth.bsc.es/gitlab/es/auto-ecearth3/-/issues/1355#note_101060
+  if [[ ${CMOR_EXP_CUSTOM} == "TRUE" ]]; then
+    if [[ -n $(echo ${BSC_OUTCLASS} | grep dcpp) ]] || [[ "${CMOR_ACTIVITY_ID}" == "DCPP" ]]; then
+      if [[ ${CMOR_ADD_STARTDATE} == "TRUE" ]]; then
+        echo TRUE TRUE TRUE
+        sub_experiment_id=s$(echo ${START_date} | cut -c1-8)
+      else
+        echo TRUE TRUE FALSE
+        sub_experiment_id=s$(echo ${START_date} | cut -c1-4)
+      fi
+    else
+      if [[ ${CMOR_ADD_STARTDATE} == "TRUE" ]]; then
+        echo TRUE FALSE TRUE
+        sub_experiment_id=s$(echo ${START_date} | cut -c1-8)
+      else
+        echo TRUE FALSE FALSE
+        sub_experiment_id=""
+      fi
+    fi
+  else
+    if [[ -n $(echo ${BSC_OUTCLASS} | grep dcpp) ]] || [[ "${CMOR_ACTIVITY_ID}" == "DCPP" ]]; then
+      if [[ ${CMOR_ADD_STARTDATE} == "TRUE" ]]; then
+        echo "Running with CMOR_EXP_CUSTOM=False + CMOR_ADD_STARTDATE=True is forbidden, exiting"
+        exit 0
+      else
+        sub_experiment_id=s$(echo ${START_date} | cut -c1-4)
+      fi
+    else
+      if [[ ${CMOR_ADD_STARTDATE} == "TRUE" ]]; then
+        echo "Running with CMOR_EXP_CUSTOM=False + CMOR_ADD_STARTDATE=True is forbidden, exiting"
+        exit 0
+      else
+        sub_experiment_id=""
+      fi
+    fi
+  fi
+
+}
+create_sub_experiment_id
++ create_sub_experiment_id
++ [[ FALSE == \T\R\U\E ]]
+echo ${BSC_OUTCLASS} | grep dcpp
+++ echo reduced
+++ grep dcpp
++ [[ -n '' ]]
++ [[ CMIP == \D\C\P\P ]]
++ [[ FALSE == \T\R\U\E ]]
++ sub_experiment_id=
+
+if [[ -z $sub_experiment_id ]]; then
+  ADD_STARTDATE=FALSE
+  APPEND_STARTDATE_YEAR_ONLY=""
+else
+  ADD_STARTDATE=TRUE
+  if [[ ${#sub_experiment_id} -eq 5 ]]; then
+    APPEND_STARTDATE_YEAR_ONLY=TRUE
+  else
+    APPEND_STARTDATE_YEAR_ONLY=FALSE
+  fi
+fi
++ [[ -z '' ]]
++ ADD_STARTDATE=FALSE
++ APPEND_STARTDATE_YEAR_ONLY=
+
+set -v
++ set -v
+get_grid_dims
++ get_grid_dims
++ local MODEL=ecearth
+echo $NEMGRID | awk -F\L '{print $1}'
+++ echo ORCA025L75
+++ awk -FL '{print $1}'
++ NEMO_GRID=ORCA025
++ [[ ecearth == \e\c\e\a\r\t\h ]]
++ GRID_POST=T511L91
++ case ${IFSGRID} in
++ GRID_CDO=t340grid
++ GRID_PLOT=1024x512
++ export GRID_POST
++ export GRID_CDO
++ export GRID_PLOT
+
+CMOR_MODEL_ID=EC-EARTH-AOGCM
++ CMOR_MODEL_ID=EC-EARTH-AOGCM
+if [ ${CMOR_MODEL_ID} = "EC-EARTH-AOGCM" ]; then
+  dataset="EC-Earth3"
+else
+  dataset=$(echo $CMOR_MODEL_ID | sed "s/EC-EARTH/EC-Earth3/")
+  # eg: EC-EARTH-HR -> EC-Earth3-HR, EC-EARTH-CC -> EC-Earth3-CC , EC-EARTH-AerChem -> EC-Earth3-AerChem, EC-EARTH-Veg-LR -> EC-EARTH-Veg-LR
+fi
++ '[' EC-EARTH-AOGCM = EC-EARTH-AOGCM ']'
++ dataset=EC-Earth3
+
+nem_grid_wol=$(echo ${NEMGRID} | cut -d 'L' -f 1) # without level (wol)
+echo ${NEMGRID} | cut -d 'L' -f 1
+++ echo ORCA025L75
+++ cut -d L -f 1
++ nem_grid_wol=ORCA025
+case $VERSION in
+'v2.3.0' | 'ecearth-v2.2')
+  NEMOVERSION='Ec2.3_O1L42'
+  ;;
+v3.* | 'trunk')
+  case ${MODEL_RES} in
+  "HR") NEMOVERSION=Ec3.2_O25${NEMGRID/ORCA025/} ;;
+  "LR") NEMOVERSION=Ec3.2_O1${NEMGRID/ORCA1/} ;;
+  esac
+  ;;
+esac
++ case $VERSION in
++ case ${MODEL_RES} in
++ NEMOVERSION=Ec3.2_O25L75
+
+conf_file=/gpfs/scratch/bsc32/bsc32627/t0ni/diags_${EXPID}_${START_date}_${MEMBER}_1.conf
++ conf_file=/gpfs/scratch/bsc32/bsc32627/t0ni/diags_t0ni_19931101_fc0_1.conf
+MEMBER_DIGITS=${MEMBER#fc}
++ MEMBER_DIGITS=0
+
+cat >${conf_file} <<EOF1
+[DIAGNOSTICS]
+# Path to the folder where you want to create the temporary files
+SCRATCH_DIR = ${TMPDIR}
+SKIP_DIAGS_DONE = False
+# Root path for the cmorized data to use
+DATA_DIR = /esarchive/
+# Path to NEMO's mask and grid files needed for CDFTools
+CON_FILES = /esarchive/autosubmit/con_files/
+# Diagnostics to run, space separated. You must provide for each one the name and the parameters (comma separated) or
+# an alias defined in the ALIAS section (see more below). If you are using the diagnostics just to CMORize, leave it
+# empty
+DIAGS = BASIC_OCEAN BASIC_SEAICE sivolume,Northern_Hemisphere:Southern_Hemisphere
+# Frequency of the data you want to use by default. Some diagnostics do not use this value: i.e. monmean always stores
+# its results at monthly frequency (obvious) and has a parameter to specify input's frequency.
+FREQUENCY = mon
+DATA_CONVENTION = CMIP6
+# Path to CDFTOOLS binaries
+CDFTOOLS_PATH =
+# Common scratch folder for the ocean masks.
+# This is useful to avoid replicating them for each run at the fat nodes.
+# By default is ‘/scratch/Earth/ocean_masks’
+SCRATCH_MASKS =
+# If true, copies the mesh files regardless of presence in scratch dir
+RESTORE_MESHES = False
+# Limits the maximum amount of threads used. Default: 0 (no limitation, one per virtual core available)
+MAX_CORES = 1
+
+[CMOR]
+SKIP_PREPARE = True
+# If true, recreates CMOR files regardless of presence. Default = False
+FORCE = FALSE
+FORCE_UNTAR = FALSE
+# If true, CMORizes ocean files.  Default = True
+OCEAN_FILES = FALSE
+# If true, CMORizes atmosphere files.  Default = True
+ATMOSPHERE_FILES = FALSE
+CHUNKS = 1
+APPEND_STARTDATE = ${ADD_STARTDATE}
+APPEND_STARTDATE_YEAR_ONLY = ${APPEND_STARTDATE_YEAR_ONLY}
+
+
+# The next bunch of parameters are used to provide metadata for the CMOR files
+ACTIVITY = CMIP
+ASSOCIATED_EXPERIMENT = 
+INITIALIZATION_METHOD = 1
+PHYSICS_VERSION = 1
+SOURCE = ${MODEL}${VERSION}, ocean: Nemo3.6, ifs36r4, lim3
+VERSION = latest
+
+[EXPERIMENT]
+# Experiments parameters as defined in CMOR standard
+INSTITUTE = EC-Earth-Consortium
+MODEL = ${dataset}
+NAME = piControl
+# Model version: Available versions
+MODEL_VERSION =${NEMOVERSION-}
+ATMOS_GRID = ${GRID_STARTDATE-}
+# Atmospheric output timestep in hours
+ATMOS_TIMESTEP = 6
+# Ocean output timestep in hours
+OCEAN_TIMESTEP = 6
+
+EXPID = t0ni
+STARTDATES = ${START_date}
+MEMBERS = ${MEMBER_DIGITS}
+MEMBER_DIGITS = ${#MEMBER_DIGITS}
+# set MEMBER_COUNT_START if CMOR_REALIZATION_INDEX is non-sequential - see #1527
+#MEMBER_COUNT_START=-2
+CHUNK_SIZE = 1
+CHUNKS = 2
+CHUNK_LIST = 1
+
+# This ALIAS section is a bit different
+# Inside this, you can provide alias for frequent diagnostics calls.
+# By default, there are some of the diagnostics available at the previous version.
+# You can define an alias for one or more diagnostic calls
+#
+# if an EARTHDIAGS diagnostic support multiple variables, like interpcdo does, they must be separated by ':', not ',' as the later is reserved to separate the different parameters
+
+[ALIAS]
+BASIC_OCEAN = regmean,ocean,tos,Global_Ocean:Atlantic_Ocean:Pacific_Ocean:Indian_Ocean:Antarctic_Ocean:Nino3.4 regmean,ocean,thetao:sos,Global_Ocean:Atlantic_Ocean:Pacific_Ocean:Indian_Ocean:Antarctic_Ocean ohclayer,0,300,Global_Ocean:Atlantic_Ocean:Pacific_Ocean:Indian_Ocean:Antarctic_Ocean ohclayer,0,700,Global_Ocean:Atlantic_Ocean:Pacific_Ocean:Indian_Ocean:Antarctic_Ocean ohclayer,0,2000,Global_Ocean:Atlantic_Ocean:Pacific_Ocean:Indian_Ocean:Antarctic_Ocean ohclayer,0,10000,Global_Ocean:Atlantic_Ocean:Pacific_Ocean:Indian_Ocean:Antarctic_Ocean
+BASIC_SEAICE = siasiesiv,Northern_Hemisphere:Southern_Hemisphere
+BASIC_PISCES = regmean,ocean,epc100:intpp:intdic:fgco2:fgo2,Global_Ocean:Atlantic_Ocean:Pacific_Ocean:Indian_Ocean:Antarctic_Ocean interpcdo,ocean,no3:o2,r360x180,,,,yearly interpcdo,ocean,intpp:intdic,r360x180
+BASIC_ATMOS =
+
+EOF1
++ cat
+
+set +e
++ set +e
+
+export PROJ_LIB=/opt/conda/share/proj/
++ export PROJ_LIB=/opt/conda/share/proj/
++ PROJ_LIB=/opt/conda/share/proj/
+export SINGULARITY_BINDPATH=/esarchive:/esarchive
++ export SINGULARITY_BINDPATH=/esarchive:/esarchive
++ SINGULARITY_BINDPATH=/esarchive:/esarchive
+CONTAINER="/esarchive/software/containers/earthdiagnostics/earthdiagnostics-${CONTAINER_VERSION}.sif"
++ CONTAINER=/esarchive/software/containers/earthdiagnostics/earthdiagnostics-latest.sif
+newgrp Earth
++ newgrp Earth
+singularity exec ${CONTAINER} earthdiags -f ${conf_file} -lc DEBUG
++ singularity exec /esarchive/software/containers/earthdiagnostics/earthdiagnostics-latest.sif earthdiags -f /gpfs/scratch/bsc32/bsc32627/t0ni/diags_t0ni_19931101_fc0_1.conf -lc DEBUG
+[33mWARNING:[0m seccomp requested but not enabled, seccomp library is missing or too old
+SUCCESS=${?}
++ SUCCESS=0
+rm -r ${TMPDIR}
++ rm -r /scratch/tmp/805763.tmpdir
+set -e
++ set -e
+if [[ ${SUCCESS} -ne 0 ]]; then
+  exit ${SUCCESS}
+fi
++ [[ 0 -ne 0 ]]
+rm -f ${conf_file}
++ rm -f /gpfs/scratch/bsc32/bsc32627/t0ni/diags_t0ni_19931101_fc0_1.conf
+
+###################
+# Autosubmit tailer
+###################
+set -xuve
++ set -xuve
+echo $(date +%s) >> ${job_name_ptrn}_STAT
+date +%s
+++ date +%s
++ echo 1639854881
+touch ${job_name_ptrn}_COMPLETED
++ touch /gpfs/scratch/bsc32/bsc32627/t0ni/LOG_t0ni/t0ni_19931101_fc0_1_EARTHDIAGS_COMPLETED
+exit 0
++ exit 0

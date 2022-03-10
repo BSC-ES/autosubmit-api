@@ -1,0 +1,666 @@
+[INFO] JOBID=805763
+
+Initialising Earth Diagnostics Version 3.5.4
+Setting namelist /opt/conda/lib/python3.8/site-packages/earthdiagnostics/CDFTOOLS_cmip6.namlist
+Parsing file /opt/conda/lib/python3.8/site-packages/earthdiagnostics/cmor_tables/cmip6/Tables/CMIP6_3hr.json
+Parsing file /opt/conda/lib/python3.8/site-packages/earthdiagnostics/cmor_tables/cmip6/Tables/CMIP6_6hrLev.json
+Parsing file /opt/conda/lib/python3.8/site-packages/earthdiagnostics/cmor_tables/cmip6/Tables/CMIP6_6hrPlev.json
+Parsing file /opt/conda/lib/python3.8/site-packages/earthdiagnostics/cmor_tables/cmip6/Tables/CMIP6_6hrPlevPt.json
+[33m[WARNING] Multiple modeling realms assigned to variable surface_snow_amount (snw): ['landIce', 'land']. [0m[39m
+[33m[WARNING] We will use landIce as it is the most specific[0m[39m
+Parsing file /opt/conda/lib/python3.8/site-packages/earthdiagnostics/cmor_tables/cmip6/Tables/CMIP6_AERday.json
+Parsing file /opt/conda/lib/python3.8/site-packages/earthdiagnostics/cmor_tables/cmip6/Tables/CMIP6_AERhr.json
+Parsing file /opt/conda/lib/python3.8/site-packages/earthdiagnostics/cmor_tables/cmip6/Tables/CMIP6_AERmon.json
+Parsing file /opt/conda/lib/python3.8/site-packages/earthdiagnostics/cmor_tables/cmip6/Tables/CMIP6_AERmonZ.json
+Parsing file /opt/conda/lib/python3.8/site-packages/earthdiagnostics/cmor_tables/cmip6/Tables/CMIP6_Amon.json
+[33m[WARNING] Multiple modeling realms assigned to variable mole_fraction_of_cfc113_in_air (cfc113global): ['atmos', 'atmosChem']. [0m[39m
+[33m[WARNING] We will use atmosChem as it is the most specific[0m[39m
+[33m[WARNING] Multiple modeling realms assigned to variable mole_fraction_of_cfc11_in_air (cfc11global): ['atmos', 'atmosChem']. [0m[39m
+[33m[WARNING] We will use atmosChem as it is the most specific[0m[39m
+[33m[WARNING] Multiple modeling realms assigned to variable mole_fraction_of_cfc12_in_air (cfc12global): ['atmos', 'atmosChem']. [0m[39m
+[33m[WARNING] We will use atmosChem as it is the most specific[0m[39m
+[33m[WARNING] Multiple modeling realms assigned to variable mole_fraction_of_methane_in_air (ch4): ['atmos', 'atmosChem']. [0m[39m
+[33m[WARNING] We will use atmosChem as it is the most specific[0m[39m
+[33m[WARNING] Multiple modeling realms assigned to variable mole_fraction_of_methane_in_air (ch4global): ['atmos', 'atmosChem']. [0m[39m
+[33m[WARNING] We will use atmosChem as it is the most specific[0m[39m
+[33m[WARNING] Multiple modeling realms assigned to variable mole_fraction_of_methane_in_air (ch4global): ['atmos', 'atmosChem']. [0m[39m
+[33m[WARNING] We will use atmosChem as it is the most specific[0m[39m
+[33m[WARNING] Multiple modeling realms assigned to variable mole_fraction_of_hcfc22_in_air (hcfc22global): ['atmos', 'atmosChem']. [0m[39m
+[33m[WARNING] We will use atmosChem as it is the most specific[0m[39m
+[33m[WARNING] Multiple modeling realms assigned to variable mole_fraction_of_nitrous_oxide_in_air (n2o): ['atmos', 'atmosChem']. [0m[39m
+[33m[WARNING] We will use atmosChem as it is the most specific[0m[39m
+[33m[WARNING] Multiple modeling realms assigned to variable mole_fraction_of_nitrous_oxide_in_air (n2oglobal): ['atmos', 'atmosChem']. [0m[39m
+[33m[WARNING] We will use atmosChem as it is the most specific[0m[39m
+[33m[WARNING] Multiple modeling realms assigned to variable mole_fraction_of_nitrous_oxide_in_air (n2oglobal): ['atmos', 'atmosChem']. [0m[39m
+[33m[WARNING] We will use atmosChem as it is the most specific[0m[39m
+[33m[WARNING] Multiple modeling realms assigned to variable mole_fraction_of_ozone_in_air (o3): ['atmos', 'atmosChem']. [0m[39m
+[33m[WARNING] We will use atmosChem as it is the most specific[0m[39m
+Parsing file /opt/conda/lib/python3.8/site-packages/earthdiagnostics/cmor_tables/cmip6/Tables/CMIP6_CF3hr.json
+Parsing file /opt/conda/lib/python3.8/site-packages/earthdiagnostics/cmor_tables/cmip6/Tables/CMIP6_CFday.json
+Parsing file /opt/conda/lib/python3.8/site-packages/earthdiagnostics/cmor_tables/cmip6/Tables/CMIP6_CFmon.json
+Parsing file /opt/conda/lib/python3.8/site-packages/earthdiagnostics/cmor_tables/cmip6/Tables/CMIP6_CFsubhr.json
+Skipping file /opt/conda/lib/python3.8/site-packages/earthdiagnostics/cmor_tables/cmip6/Tables/CMIP6_CV.json
+Parsing file /opt/conda/lib/python3.8/site-packages/earthdiagnostics/cmor_tables/cmip6/Tables/CMIP6_E1hr.json
+Parsing file /opt/conda/lib/python3.8/site-packages/earthdiagnostics/cmor_tables/cmip6/Tables/CMIP6_E1hrClimMon.json
+Parsing file /opt/conda/lib/python3.8/site-packages/earthdiagnostics/cmor_tables/cmip6/Tables/CMIP6_E3hr.json
+Parsing file /opt/conda/lib/python3.8/site-packages/earthdiagnostics/cmor_tables/cmip6/Tables/CMIP6_E3hrPt.json
+Parsing file /opt/conda/lib/python3.8/site-packages/earthdiagnostics/cmor_tables/cmip6/Tables/CMIP6_E6hrZ.json
+Parsing file /opt/conda/lib/python3.8/site-packages/earthdiagnostics/cmor_tables/cmip6/Tables/CMIP6_Eday.json
+[33m[WARNING] Multiple modeling realms assigned to variable age_of_surface_snow (agesno): ['landIce', 'land']. [0m[39m
+[33m[WARNING] We will use landIce as it is the most specific[0m[39m
+[33m[WARNING] Multiple modeling realms assigned to variable surface_downward_heat_flux_in_snow (hfdsn): ['landIce', 'land']. [0m[39m
+[33m[WARNING] We will use landIce as it is the most specific[0m[39m
+[33m[WARNING] Multiple modeling realms assigned to variable liquid_water_content_of_snow_layer (lwsnl): ['landIce', 'land']. [0m[39m
+[33m[WARNING] We will use landIce as it is the most specific[0m[39m
+[33m[WARNING] Multiple modeling realms assigned to variable liquid_water_content_of_permafrost_layer (pflw): ['landIce', 'land']. [0m[39m
+[33m[WARNING] We will use landIce as it is the most specific[0m[39m
+[33m[WARNING] Multiple modeling realms assigned to variable surface_snow_thickness (snd): ['landIce', 'land']. [0m[39m
+[33m[WARNING] We will use landIce as it is the most specific[0m[39m
+[33m[WARNING] Multiple modeling realms assigned to variable surface_snow_melt_flux (snm): ['landIce', 'land']. [0m[39m
+[33m[WARNING] We will use landIce as it is the most specific[0m[39m
+[33m[WARNING] Multiple modeling realms assigned to variable soot_content_of_surface_snow (sootsn): ['landIce', 'land']. [0m[39m
+[33m[WARNING] We will use landIce as it is the most specific[0m[39m
+[33m[WARNING] Multiple modeling realms assigned to variable permafrost_layer_thickness (tpf): ['landIce', 'land']. [0m[39m
+[33m[WARNING] We will use landIce as it is the most specific[0m[39m
+[33m[WARNING] Multiple modeling realms assigned to variable temperature_in_surface_snow (tsn): ['landIce', 'land']. [0m[39m
+[33m[WARNING] We will use landIce as it is the most specific[0m[39m
+Parsing file /opt/conda/lib/python3.8/site-packages/earthdiagnostics/cmor_tables/cmip6/Tables/CMIP6_EdayZ.json
+Parsing file /opt/conda/lib/python3.8/site-packages/earthdiagnostics/cmor_tables/cmip6/Tables/CMIP6_Efx.json
+Parsing file /opt/conda/lib/python3.8/site-packages/earthdiagnostics/cmor_tables/cmip6/Tables/CMIP6_Emon.json
+Parsing file /opt/conda/lib/python3.8/site-packages/earthdiagnostics/cmor_tables/cmip6/Tables/CMIP6_EmonZ.json
+Parsing file /opt/conda/lib/python3.8/site-packages/earthdiagnostics/cmor_tables/cmip6/Tables/CMIP6_Esubhr.json
+Parsing file /opt/conda/lib/python3.8/site-packages/earthdiagnostics/cmor_tables/cmip6/Tables/CMIP6_Eyr.json
+Parsing file /opt/conda/lib/python3.8/site-packages/earthdiagnostics/cmor_tables/cmip6/Tables/CMIP6_IfxAnt.json
+Parsing file /opt/conda/lib/python3.8/site-packages/earthdiagnostics/cmor_tables/cmip6/Tables/CMIP6_IfxGre.json
+Parsing file /opt/conda/lib/python3.8/site-packages/earthdiagnostics/cmor_tables/cmip6/Tables/CMIP6_ImonAnt.json
+[33m[WARNING] Multiple modeling realms assigned to variable surface_snow_area_fraction (snc): ['landIce', 'land']. [0m[39m
+[33m[WARNING] We will use landIce as it is the most specific[0m[39m
+Parsing file /opt/conda/lib/python3.8/site-packages/earthdiagnostics/cmor_tables/cmip6/Tables/CMIP6_ImonGre.json
+Parsing file /opt/conda/lib/python3.8/site-packages/earthdiagnostics/cmor_tables/cmip6/Tables/CMIP6_IyrAnt.json
+Parsing file /opt/conda/lib/python3.8/site-packages/earthdiagnostics/cmor_tables/cmip6/Tables/CMIP6_IyrGre.json
+Parsing file /opt/conda/lib/python3.8/site-packages/earthdiagnostics/cmor_tables/cmip6/Tables/CMIP6_LImon.json
+Parsing file /opt/conda/lib/python3.8/site-packages/earthdiagnostics/cmor_tables/cmip6/Tables/CMIP6_Lmon.json
+[33m[WARNING] Multiple modeling realms assigned to variable soil_frozen_water_content (mrfso): ['land', 'landIce']. [0m[39m
+[33m[WARNING] We will use landIce as it is the most specific[0m[39m
+Parsing file /opt/conda/lib/python3.8/site-packages/earthdiagnostics/cmor_tables/cmip6/Tables/CMIP6_Oclim.json
+Parsing file /opt/conda/lib/python3.8/site-packages/earthdiagnostics/cmor_tables/cmip6/Tables/CMIP6_Oday.json
+Parsing file /opt/conda/lib/python3.8/site-packages/earthdiagnostics/cmor_tables/cmip6/Tables/CMIP6_Odec.json
+[33m[WARNING] Multiple modeling realms assigned to variable downward_sea_ice_basal_salt_flux (sfdsi): ['ocean', 'seaIce']. [0m[39m
+[33m[WARNING] We will use seaIce as it is the most specific[0m[39m
+Parsing file /opt/conda/lib/python3.8/site-packages/earthdiagnostics/cmor_tables/cmip6/Tables/CMIP6_Ofx.json
+Parsing file /opt/conda/lib/python3.8/site-packages/earthdiagnostics/cmor_tables/cmip6/Tables/CMIP6_Omon.json
+[33m[WARNING] Multiple modeling realms assigned to variable water_flux_into_sea_water_due_to_sea_ice_thermodynamics (fsitherm): ['ocean', 'seaIce']. [0m[39m
+[33m[WARNING] We will use seaIce as it is the most specific[0m[39m
+[33m[WARNING] Multiple modeling realms assigned to variable heat_flux_into_sea_water_due_to_freezing_of_frazil_ice (hfsifrazil): ['ocean', 'seaIce']. [0m[39m
+[33m[WARNING] We will use seaIce as it is the most specific[0m[39m
+[33m[WARNING] Multiple modeling realms assigned to variable heat_flux_into_sea_water_due_to_freezing_of_frazil_ice (hfsifrazil): ['ocean', 'seaIce']. [0m[39m
+[33m[WARNING] We will use seaIce as it is the most specific[0m[39m
+[33m[WARNING] Multiple modeling realms assigned to variable virtual_salt_flux_into_sea_water_due_to_sea_ice_thermodynamics (vsfsit): ['ocean', 'seaIce']. [0m[39m
+[33m[WARNING] We will use seaIce as it is the most specific[0m[39m
+Parsing file /opt/conda/lib/python3.8/site-packages/earthdiagnostics/cmor_tables/cmip6/Tables/CMIP6_Oyr.json
+Parsing file /opt/conda/lib/python3.8/site-packages/earthdiagnostics/cmor_tables/cmip6/Tables/CMIP6_SIday.json
+[33m[WARNING] Multiple modeling realms assigned to variable sea_ice_thickness (sithick): ['seaIce', 'ocean']. [0m[39m
+[33m[WARNING] We will use seaIce as it is the most specific[0m[39m
+Parsing file /opt/conda/lib/python3.8/site-packages/earthdiagnostics/cmor_tables/cmip6/Tables/CMIP6_SImon.json
+Skipping file /opt/conda/lib/python3.8/site-packages/earthdiagnostics/cmor_tables/cmip6/Tables/CMIP6_coordinate.json
+Parsing file /opt/conda/lib/python3.8/site-packages/earthdiagnostics/cmor_tables/cmip6/Tables/CMIP6_day.json
+Parsing file /opt/conda/lib/python3.8/site-packages/earthdiagnostics/cmor_tables/cmip6/Tables/CMIP6_fx.json
+[33m[WARNING] Multiple modeling realms assigned to variable cell_area (areacella): ['atmos', 'land']. [0m[39m
+[33m[WARNING] We will use atmos as it is the first on the list and there is no one that is more specific[0m[39m
+[33m[WARNING] Aliases ['ppphy2 '] could not be mapped to any variable[0m[39m
+[33m[WARNING] Aliases ['alb_ice'] could not be mapped to any variable[0m[39m
+[33m[WARNING] Aliases ['hflx_rnf_cea'] could not be mapped to any variable[0m[39m
+[33m[WARNING] Aliases ['hflx_cal_cea'] could not be mapped to any variable[0m[39m
+[33m[WARNING] Aliases ['calving'] could not be mapped to any variable[0m[39m
+Preparing command list
+Changing alias BASIC_OCEAN for regmean,ocean,tos,Global_Ocean:Atlantic_Ocean:Pacific_Ocean:Indian_Ocean:Antarctic_Ocean:Nino3.4 regmean,ocean,thetao:sos,Global_Ocean:Atlantic_Ocean:Pacific_Ocean:Indian_Ocean:Antarctic_Ocean ohclayer,0,300,Global_Ocean:Atlantic_Ocean:Pacific_Ocean:Indian_Ocean:Antarctic_Ocean ohclayer,0,700,Global_Ocean:Atlantic_Ocean:Pacific_Ocean:Indian_Ocean:Antarctic_Ocean ohclayer,0,2000,Global_Ocean:Atlantic_Ocean:Pacific_Ocean:Indian_Ocean:Antarctic_Ocean ohclayer,0,10000,Global_Ocean:Atlantic_Ocean:Pacific_Ocean:Indian_Ocean:Antarctic_Ocean
+Changing alias BASIC_SEAICE for siasiesiv,Northern_Hemisphere:Southern_Hemisphere
+Command list ready: 
+regmean,ocean,tos,Global_Ocean:Atlantic_Ocean:Pacific_Ocean:Indian_Ocean:Antarctic_Ocean:Nino3.4
+regmean,ocean,thetao:sos,Global_Ocean:Atlantic_Ocean:Pacific_Ocean:Indian_Ocean:Antarctic_Ocean
+ohclayer,0,300,Global_Ocean:Atlantic_Ocean:Pacific_Ocean:Indian_Ocean:Antarctic_Ocean
+ohclayer,0,700,Global_Ocean:Atlantic_Ocean:Pacific_Ocean:Indian_Ocean:Antarctic_Ocean
+ohclayer,0,2000,Global_Ocean:Atlantic_Ocean:Pacific_Ocean:Indian_Ocean:Antarctic_Ocean
+ohclayer,0,10000,Global_Ocean:Atlantic_Ocean:Pacific_Ocean:Indian_Ocean:Antarctic_Ocean
+siasiesiv,Northern_Hemisphere:Southern_Hemisphere
+sivolume,Northern_Hemisphere:Southern_Hemisphere
+Diags ready
+Running diags for experiment t0ni, startdates ['19931101'], members [0]
+Using netCDF version 4.7.4 of Dec 14 2020 16:14:56 $
+Copying mesh files
+Copying file /scratch/tmp/805763.tmpdir/diags/t0ni/cmip6/mesh_mask_nemo.Ec3.2_O25L75.nc
+File cmip6/mesh_mask_nemo.Ec3.2_O25L75.nc ready
+Copying... 2021-12-18 20:12:00.645942
+Finished 2021-12-18 20:12:04.223360
+File mesh_hgr.nc ready
+File mesh_zgr.nc ready
+File mask.nc ready
+Copying file /scratch/tmp/805763.tmpdir/diags/t0ni/cmip6/new_maskglo.Ec3.2_O25L75.nc
+File cmip6/new_maskglo.Ec3.2_O25L75.nc ready
+Copying... 2021-12-18 20:12:05.444460
+Finished 2021-12-18 20:12:05.484875
+File new_maskglo.nc ready
+Copying file /scratch/tmp/805763.tmpdir/diags/t0ni/cmip6/basins.Ec3.2_O25L75.nc
+File cmip6/basins.Ec3.2_O25L75.nc ready
+Copying... 2021-12-18 20:12:06.442406
+Finished 2021-12-18 20:12:06.654790
+File basins.nc ready
+[32mMesh files ready![0m[39m
+Time to prepare: 0:01:09.358907
+Running diagnostics
+Adding regmean,ocean,tos,Global_Ocean:Atlantic_Ocean:Pacific_Ocean:Indian_Ocean:Antarctic_Ocean:Nino3.4 to diagnostic list
+Max basin length: 15
+Adding regmean,ocean,thetao:sos,Global_Ocean:Atlantic_Ocean:Pacific_Ocean:Indian_Ocean:Antarctic_Ocean to diagnostic list
+Max basin length: 15
+Max basin length: 15
+Adding ohclayer,0,300,Global_Ocean:Atlantic_Ocean:Pacific_Ocean:Indian_Ocean:Antarctic_Ocean to diagnostic list
+Adding ohclayer,0,700,Global_Ocean:Atlantic_Ocean:Pacific_Ocean:Indian_Ocean:Antarctic_Ocean to diagnostic list
+Adding ohclayer,0,2000,Global_Ocean:Atlantic_Ocean:Pacific_Ocean:Indian_Ocean:Antarctic_Ocean to diagnostic list
+Adding ohclayer,0,10000,Global_Ocean:Atlantic_Ocean:Pacific_Ocean:Indian_Ocean:Antarctic_Ocean to diagnostic list
+Adding siasiesiv,Northern_Hemisphere:Southern_Hemisphere to diagnostic list
+Adding sivolume,Northern_Hemisphere:Southern_Hemisphere to diagnostic list
+Starting to compute at 2021-12-18 20:12:38.596546
+Using 1 threads
+[33m[WARNING] Variable tosmean is not defined in the CMOR table. Please add it[0m[39m
+[33m[WARNING] Variable tos3dmean is not defined in the CMOR table. Please add it[0m[39m
+[33m[WARNING] Variable thetaomean is not defined in the CMOR table. Please add it[0m[39m
+[33m[WARNING] Variable thetao3dmean is not defined in the CMOR table. Please add it[0m[39m
+[33m[WARNING] Variable sosmean is not defined in the CMOR table. Please add it[0m[39m
+[33m[WARNING] Variable sos3dmean is not defined in the CMOR table. Please add it[0m[39m
+Checking file Data file for /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Omon/thetao/gn/v20211218/thetao_Omon_EC-Earth3_piControl_r1i1p1f1_gn_199311-199311.nc. Local status 1 Storage status2
+Downloading file /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Omon/thetao/gn/v20211218/thetao_Omon_EC-Earth3_piControl_r1i1p1f1_gn_199311-199311.nc...
+Copying... 2021-12-18 20:12:38.627542
+Finished 2021-12-18 20:12:40.395376
+File /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Omon/thetao/gn/v20211218/thetao_Omon_EC-Earth3_piControl_r1i1p1f1_gn_199311-199311.nc ready!
+Starting Region mean Startdate: 19931101 Member: 0 Chunk: 1 Variable: thetao Box: 1 Save 3D: True Grid point: t
+Checking file Data file for /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Omon/thetao/gn/v20211218/thetao_Omon_EC-Earth3_piControl_r1i1p1f1_gn_199311-199311.nc. Local status 2 Storage status2
+Checking file Data file for /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Omon/thetaomean/gn/v20211218/thetaomean_Omon_EC-Earth3_piControl_r1i1p1f1_gn_199311-199311.nc. Local status 5 Storage status0
+Checking file Data file for /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Omon/thetao3dmean/gn/v20211218/thetao3dmean_Omon_EC-Earth3_piControl_r1i1p1f1_gn_199311-199311.nc. Local status 5 Storage status0
+Checking file Data file for /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Omon/tos/gn/v20211218/tos_Omon_EC-Earth3_piControl_r1i1p1f1_gn_199311-199311.nc. Local status 1 Storage status2
+Downloading file /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Omon/tos/gn/v20211218/tos_Omon_EC-Earth3_piControl_r1i1p1f1_gn_199311-199311.nc...
+Copying... 2021-12-18 20:12:40.401279
+Finished 2021-12-18 20:12:40.725752
+File /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Omon/tos/gn/v20211218/tos_Omon_EC-Earth3_piControl_r1i1p1f1_gn_199311-199311.nc ready!
+Checking file Data file for /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Omon/tos/gn/v20211218/tos_Omon_EC-Earth3_piControl_r1i1p1f1_gn_199311-199311.nc. Local status 2 Storage status2
+Checking file Data file for /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Omon/sos/gn/v20211218/sos_Omon_EC-Earth3_piControl_r1i1p1f1_gn_199311-199311.nc. Local status 1 Storage status2
+Downloading file /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Omon/sos/gn/v20211218/sos_Omon_EC-Earth3_piControl_r1i1p1f1_gn_199311-199311.nc...
+Copying... 2021-12-18 20:12:40.733134
+Finished 2021-12-18 20:12:41.099833
+File /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Omon/sos/gn/v20211218/sos_Omon_EC-Earth3_piControl_r1i1p1f1_gn_199311-199311.nc ready!
+Checking file Data file for /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Omon/sos/gn/v20211218/sos_Omon_EC-Earth3_piControl_r1i1p1f1_gn_199311-199311.nc. Local status 2 Storage status2
+Checking file Data file for /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/SImon/siconc/gn/v20211218/siconc_SImon_EC-Earth3_piControl_r1i1p1f1_gn_199311-199311.nc. Local status 1 Storage status2
+Downloading file /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/SImon/siconc/gn/v20211218/siconc_SImon_EC-Earth3_piControl_r1i1p1f1_gn_199311-199311.nc...
+Copying... 2021-12-18 20:12:41.108851
+Finished 2021-12-18 20:12:41.586243
+File /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/SImon/siconc/gn/v20211218/siconc_SImon_EC-Earth3_piControl_r1i1p1f1_gn_199311-199311.nc ready!
+Checking file Data file for /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/SImon/siconc/gn/v20211218/siconc_SImon_EC-Earth3_piControl_r1i1p1f1_gn_199311-199311.nc. Local status 2 Storage status2
+Checking file Data file for /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/SImon/sivol/gn/v20211218/sivol_SImon_EC-Earth3_piControl_r1i1p1f1_gn_199311-199311.nc. Local status 1 Storage status2
+Downloading file /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/SImon/sivol/gn/v20211218/sivol_SImon_EC-Earth3_piControl_r1i1p1f1_gn_199311-199311.nc...
+Copying... 2021-12-18 20:12:41.592724
+Finished 2021-12-18 20:12:41.900033
+File /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/SImon/sivol/gn/v20211218/sivol_SImon_EC-Earth3_piControl_r1i1p1f1_gn_199311-199311.nc ready!
+Checking file Data file for /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/SImon/sivol/gn/v20211218/sivol_SImon_EC-Earth3_piControl_r1i1p1f1_gn_199311-199311.nc. Local status 2 Storage status2
+Reformatting to netCDF-4
+Checking file Data file for /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Omon/thetaomean/gn/v20211218/thetaomean_Omon_EC-Earth3_piControl_r1i1p1f1_gn_199311-199311.nc. Local status 2 Storage status0
+Checking file Data file for /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Omon/thetaomean/gn/v20211218/thetaomean_Omon_EC-Earth3_piControl_r1i1p1f1_gn_199311-199311.nc. Local status 2 Storage status1
+Copying... 2021-12-18 20:12:57.052468
+Finished 2021-12-18 20:12:57.054332
+File /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Omon/thetaomean/gn/v20211218/thetaomean_Omon_EC-Earth3_piControl_r1i1p1f1_gn_199311-199311.nc uploaded!
+Checking file Data file for /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Omon/thetaomean/gn/v20211218/thetaomean_Omon_EC-Earth3_piControl_r1i1p1f1_gn_199311-199311.nc. Local status 2 Storage status2
+File /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Omon/thetaomean/gn/v20211218/thetaomean_Omon_EC-Earth3_piControl_r1i1p1f1_gn_199311-199311.nc no longer needed. Deleting from scratch...
+File /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Omon/thetaomean/gn/v20211218/thetaomean_Omon_EC-Earth3_piControl_r1i1p1f1_gn_199311-199311.nc deleted from scratch
+Reformatting to netCDF-4
+Checking file Data file for /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Omon/thetao3dmean/gn/v20211218/thetao3dmean_Omon_EC-Earth3_piControl_r1i1p1f1_gn_199311-199311.nc. Local status 2 Storage status0
+Checking file Data file for /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Omon/thetao3dmean/gn/v20211218/thetao3dmean_Omon_EC-Earth3_piControl_r1i1p1f1_gn_199311-199311.nc. Local status 2 Storage status1
+[32mFinished Region mean Startdate: 19931101 Member: 0 Chunk: 1 Variable: thetao Box: 1 Save 3D: True Grid point: t[0m[39m
+Starting Heat content layer Startdate: 19931101 Member: 0 Chunk: 1 Box: 0-300m
+Checking file Data file for /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Omon/heatc0-300m/gn/v20211218/heatc0-300m_Omon_EC-Earth3_piControl_r1i1p1f1_gn_199311-199311.nc. Local status 5 Storage status0
+Checking file Data file for /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Omon/heatcsum0-300m/gn/v20211218/heatcsum0-300m_Omon_EC-Earth3_piControl_r1i1p1f1_gn_199311-199311.nc. Local status 5 Storage status0
+Copying... 2021-12-18 20:13:10.673848
+Copying... 2021-12-18 20:13:10.676536
+Finished 2021-12-18 20:13:10.677749
+File /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Omon/thetao3dmean/gn/v20211218/thetao3dmean_Omon_EC-Earth3_piControl_r1i1p1f1_gn_199311-199311.nc uploaded!
+Checking file Data file for /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Omon/thetao3dmean/gn/v20211218/thetao3dmean_Omon_EC-Earth3_piControl_r1i1p1f1_gn_199311-199311.nc. Local status 2 Storage status2
+File /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Omon/thetao3dmean/gn/v20211218/thetao3dmean_Omon_EC-Earth3_piControl_r1i1p1f1_gn_199311-199311.nc no longer needed. Deleting from scratch...
+File /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Omon/thetao3dmean/gn/v20211218/thetao3dmean_Omon_EC-Earth3_piControl_r1i1p1f1_gn_199311-199311.nc deleted from scratch
+Finished 2021-12-18 20:13:10.783313
+Getting max and min values for heatc
+# DEBUG ==================================================
+# DEBUG: CALL>> ncatted --help
+# DEBUG ==================================================
+Found method: ncatted
+Overwriting file: /scratch/tmp/805763.tmpdir/diags/t0ni/temp7o934qfh.nc
+# DEBUG ==================================================
+# DEBUG: CALL>> /opt/conda/bin/ncatted -h -a valid_max,heatc,m,f,366031077376.0 --nco_dbg_lvl=3 --overwrite --output=/scratch/tmp/805763.tmpdir/diags/t0ni/temp7o934qfh.nc /scratch/tmp/805763.tmpdir/diags/t0ni/temp7o934qfh.nc
+# DEBUG ==================================================
+# DEBUG: RETURNCODE: 0
+Overwriting file: /scratch/tmp/805763.tmpdir/diags/t0ni/temp7o934qfh.nc
+# DEBUG ==================================================
+# DEBUG: CALL>> /opt/conda/bin/ncatted -h -a valid_min,heatc,m,f,0.0 --nco_dbg_lvl=3 --overwrite --output=/scratch/tmp/805763.tmpdir/diags/t0ni/temp7o934qfh.nc /scratch/tmp/805763.tmpdir/diags/t0ni/temp7o934qfh.nc
+# DEBUG ==================================================
+# DEBUG: RETURNCODE: 0
+Copying... 2021-12-18 20:13:28.561030
+Finished 2021-12-18 20:13:28.588088
+Overwriting file: /scratch/tmp/805763.tmpdir/diags/t0ni/temp7o934qfh.nc
+# DEBUG ==================================================
+# DEBUG: CALL>> /opt/conda/bin/ncatted -O -a _FillValue,heatc0-300m,o,d,1.e20 -a missingValue,heatc0-300m,o,d,1.e20 --nco_dbg_lvl=3 --output=/scratch/tmp/805763.tmpdir/diags/t0ni/temp7o934qfh.nc /scratch/tmp/805763.tmpdir/diags/t0ni/temp7o934qfh.nc
+# DEBUG ==================================================
+# DEBUG: RETURNCODE: 0
+Reformatting to netCDF-4
+Checking file Data file for /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Omon/heatc0-300m/gn/v20211218/heatc0-300m_Omon_EC-Earth3_piControl_r1i1p1f1_gn_199311-199311.nc. Local status 2 Storage status0
+Checking file Data file for /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Omon/heatc0-300m/gn/v20211218/heatc0-300m_Omon_EC-Earth3_piControl_r1i1p1f1_gn_199311-199311.nc. Local status 2 Storage status1
+Copying... 2021-12-18 20:13:29.590098
+Copying... 2021-12-18 20:13:29.592823
+Finished 2021-12-18 20:13:29.593155
+Overwriting file: /scratch/tmp/805763.tmpdir/diags/t0ni/tempumx3omlj.nc
+# DEBUG ==================================================
+# DEBUG: CALL>> /opt/conda/bin/ncatted -O -a _FillValue,heatcsum0-300m,o,d,1.e20 -a missingValue,heatcsum0-300m,o,d,1.e20 --nco_dbg_lvl=3 --output=/scratch/tmp/805763.tmpdir/diags/t0ni/tempumx3omlj.nc /scratch/tmp/805763.tmpdir/diags/t0ni/tempumx3omlj.nc
+# DEBUG ==================================================
+Finished 2021-12-18 20:13:29.635504
+File /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Omon/heatc0-300m/gn/v20211218/heatc0-300m_Omon_EC-Earth3_piControl_r1i1p1f1_gn_199311-199311.nc uploaded!
+Checking file Data file for /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Omon/heatc0-300m/gn/v20211218/heatc0-300m_Omon_EC-Earth3_piControl_r1i1p1f1_gn_199311-199311.nc. Local status 2 Storage status2
+File /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Omon/heatc0-300m/gn/v20211218/heatc0-300m_Omon_EC-Earth3_piControl_r1i1p1f1_gn_199311-199311.nc no longer needed. Deleting from scratch...
+File /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Omon/heatc0-300m/gn/v20211218/heatc0-300m_Omon_EC-Earth3_piControl_r1i1p1f1_gn_199311-199311.nc deleted from scratch
+# DEBUG: RETURNCODE: 0
+Reformatting to netCDF-4
+Checking file Data file for /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Omon/heatcsum0-300m/gn/v20211218/heatcsum0-300m_Omon_EC-Earth3_piControl_r1i1p1f1_gn_199311-199311.nc. Local status 2 Storage status0
+Checking file Data file for /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Omon/heatcsum0-300m/gn/v20211218/heatcsum0-300m_Omon_EC-Earth3_piControl_r1i1p1f1_gn_199311-199311.nc. Local status 2 Storage status1
+[32mFinished Heat content layer Startdate: 19931101 Member: 0 Chunk: 1 Box: 0-300m[0m[39m
+Starting Heat content layer Startdate: 19931101 Member: 0 Chunk: 1 Box: 0-700m
+Checking file Data file for /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Omon/heatc0-700m/gn/v20211218/heatc0-700m_Omon_EC-Earth3_piControl_r1i1p1f1_gn_199311-199311.nc. Local status 5 Storage status0
+Checking file Data file for /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Omon/heatcsum0-700m/gn/v20211218/heatcsum0-700m_Omon_EC-Earth3_piControl_r1i1p1f1_gn_199311-199311.nc. Local status 5 Storage status0
+Copying... 2021-12-18 20:13:29.899595
+Copying... 2021-12-18 20:13:29.901773
+Finished 2021-12-18 20:13:29.903143
+File /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Omon/heatcsum0-300m/gn/v20211218/heatcsum0-300m_Omon_EC-Earth3_piControl_r1i1p1f1_gn_199311-199311.nc uploaded!
+Checking file Data file for /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Omon/heatcsum0-300m/gn/v20211218/heatcsum0-300m_Omon_EC-Earth3_piControl_r1i1p1f1_gn_199311-199311.nc. Local status 2 Storage status2
+File /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Omon/heatcsum0-300m/gn/v20211218/heatcsum0-300m_Omon_EC-Earth3_piControl_r1i1p1f1_gn_199311-199311.nc no longer needed. Deleting from scratch...
+File /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Omon/heatcsum0-300m/gn/v20211218/heatcsum0-300m_Omon_EC-Earth3_piControl_r1i1p1f1_gn_199311-199311.nc deleted from scratch
+Finished 2021-12-18 20:13:30.017014
+Current status:
+===============
+Waiting:         0
+Ready to run:    6
+Running:         1
+Completed:       2
+Failed:          0
+===============
+Getting max and min values for heatc
+Overwriting file: /scratch/tmp/805763.tmpdir/diags/t0ni/temph833naf2.nc
+# DEBUG ==================================================
+# DEBUG: CALL>> /opt/conda/bin/ncatted -h -a valid_max,heatc,m,f,842419208192.0 --nco_dbg_lvl=3 --overwrite --output=/scratch/tmp/805763.tmpdir/diags/t0ni/temph833naf2.nc /scratch/tmp/805763.tmpdir/diags/t0ni/temph833naf2.nc
+# DEBUG ==================================================
+# DEBUG: RETURNCODE: 0
+Overwriting file: /scratch/tmp/805763.tmpdir/diags/t0ni/temph833naf2.nc
+# DEBUG ==================================================
+# DEBUG: CALL>> /opt/conda/bin/ncatted -h -a valid_min,heatc,m,f,0.0 --nco_dbg_lvl=3 --overwrite --output=/scratch/tmp/805763.tmpdir/diags/t0ni/temph833naf2.nc /scratch/tmp/805763.tmpdir/diags/t0ni/temph833naf2.nc
+# DEBUG ==================================================
+# DEBUG: RETURNCODE: 0
+Copying... 2021-12-18 20:13:47.760830
+Finished 2021-12-18 20:13:47.786616
+Overwriting file: /scratch/tmp/805763.tmpdir/diags/t0ni/temph833naf2.nc
+# DEBUG ==================================================
+# DEBUG: CALL>> /opt/conda/bin/ncatted -O -a _FillValue,heatc0-700m,o,d,1.e20 -a missingValue,heatc0-700m,o,d,1.e20 --nco_dbg_lvl=3 --output=/scratch/tmp/805763.tmpdir/diags/t0ni/temph833naf2.nc /scratch/tmp/805763.tmpdir/diags/t0ni/temph833naf2.nc
+# DEBUG ==================================================
+# DEBUG: RETURNCODE: 0
+Reformatting to netCDF-4
+Checking file Data file for /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Omon/heatc0-700m/gn/v20211218/heatc0-700m_Omon_EC-Earth3_piControl_r1i1p1f1_gn_199311-199311.nc. Local status 2 Storage status0
+Checking file Data file for /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Omon/heatc0-700m/gn/v20211218/heatc0-700m_Omon_EC-Earth3_piControl_r1i1p1f1_gn_199311-199311.nc. Local status 2 Storage status1
+Copying... 2021-12-18 20:13:48.775532
+Copying... 2021-12-18 20:13:48.778648
+Finished 2021-12-18 20:13:48.779111
+Overwriting file: /scratch/tmp/805763.tmpdir/diags/t0ni/tempikyvemd8.nc
+# DEBUG ==================================================
+# DEBUG: CALL>> /opt/conda/bin/ncatted -O -a _FillValue,heatcsum0-700m,o,d,1.e20 -a missingValue,heatcsum0-700m,o,d,1.e20 --nco_dbg_lvl=3 --output=/scratch/tmp/805763.tmpdir/diags/t0ni/tempikyvemd8.nc /scratch/tmp/805763.tmpdir/diags/t0ni/tempikyvemd8.nc
+# DEBUG ==================================================
+Finished 2021-12-18 20:13:48.821269
+File /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Omon/heatc0-700m/gn/v20211218/heatc0-700m_Omon_EC-Earth3_piControl_r1i1p1f1_gn_199311-199311.nc uploaded!
+Checking file Data file for /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Omon/heatc0-700m/gn/v20211218/heatc0-700m_Omon_EC-Earth3_piControl_r1i1p1f1_gn_199311-199311.nc. Local status 2 Storage status2
+File /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Omon/heatc0-700m/gn/v20211218/heatc0-700m_Omon_EC-Earth3_piControl_r1i1p1f1_gn_199311-199311.nc no longer needed. Deleting from scratch...
+File /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Omon/heatc0-700m/gn/v20211218/heatc0-700m_Omon_EC-Earth3_piControl_r1i1p1f1_gn_199311-199311.nc deleted from scratch
+# DEBUG: RETURNCODE: 0
+Reformatting to netCDF-4
+Checking file Data file for /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Omon/heatcsum0-700m/gn/v20211218/heatcsum0-700m_Omon_EC-Earth3_piControl_r1i1p1f1_gn_199311-199311.nc. Local status 2 Storage status0
+Checking file Data file for /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Omon/heatcsum0-700m/gn/v20211218/heatcsum0-700m_Omon_EC-Earth3_piControl_r1i1p1f1_gn_199311-199311.nc. Local status 2 Storage status1
+[32mFinished Heat content layer Startdate: 19931101 Member: 0 Chunk: 1 Box: 0-700m[0m[39m
+Starting Heat content layer Startdate: 19931101 Member: 0 Chunk: 1 Box: 0-2000m
+Checking file Data file for /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Omon/heatc0-2000m/gn/v20211218/heatc0-2000m_Omon_EC-Earth3_piControl_r1i1p1f1_gn_199311-199311.nc. Local status 5 Storage status0
+Checking file Data file for /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Omon/heatcsum0-2000m/gn/v20211218/heatcsum0-2000m_Omon_EC-Earth3_piControl_r1i1p1f1_gn_199311-199311.nc. Local status 5 Storage status0
+Copying... 2021-12-18 20:13:49.122929
+Copying... 2021-12-18 20:13:49.124226
+Finished 2021-12-18 20:13:49.125504
+File /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Omon/heatcsum0-700m/gn/v20211218/heatcsum0-700m_Omon_EC-Earth3_piControl_r1i1p1f1_gn_199311-199311.nc uploaded!
+Checking file Data file for /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Omon/heatcsum0-700m/gn/v20211218/heatcsum0-700m_Omon_EC-Earth3_piControl_r1i1p1f1_gn_199311-199311.nc. Local status 2 Storage status2
+File /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Omon/heatcsum0-700m/gn/v20211218/heatcsum0-700m_Omon_EC-Earth3_piControl_r1i1p1f1_gn_199311-199311.nc no longer needed. Deleting from scratch...
+File /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Omon/heatcsum0-700m/gn/v20211218/heatcsum0-700m_Omon_EC-Earth3_piControl_r1i1p1f1_gn_199311-199311.nc deleted from scratch
+Finished 2021-12-18 20:13:49.239543
+Getting max and min values for heatc
+Overwriting file: /scratch/tmp/805763.tmpdir/diags/t0ni/tempwnnt0yms.nc
+# DEBUG ==================================================
+# DEBUG: CALL>> /opt/conda/bin/ncatted -h -a valid_max,heatc,m,f,2343160250368.0 --nco_dbg_lvl=3 --overwrite --output=/scratch/tmp/805763.tmpdir/diags/t0ni/tempwnnt0yms.nc /scratch/tmp/805763.tmpdir/diags/t0ni/tempwnnt0yms.nc
+# DEBUG ==================================================
+# DEBUG: RETURNCODE: 0
+Overwriting file: /scratch/tmp/805763.tmpdir/diags/t0ni/tempwnnt0yms.nc
+# DEBUG ==================================================
+# DEBUG: CALL>> /opt/conda/bin/ncatted -h -a valid_min,heatc,m,f,0.0 --nco_dbg_lvl=3 --overwrite --output=/scratch/tmp/805763.tmpdir/diags/t0ni/tempwnnt0yms.nc /scratch/tmp/805763.tmpdir/diags/t0ni/tempwnnt0yms.nc
+# DEBUG ==================================================
+# DEBUG: RETURNCODE: 0
+Copying... 2021-12-18 20:14:08.325707
+Finished 2021-12-18 20:14:08.350843
+Overwriting file: /scratch/tmp/805763.tmpdir/diags/t0ni/tempwnnt0yms.nc
+# DEBUG ==================================================
+# DEBUG: CALL>> /opt/conda/bin/ncatted -O -a _FillValue,heatc0-2000m,o,d,1.e20 -a missingValue,heatc0-2000m,o,d,1.e20 --nco_dbg_lvl=3 --output=/scratch/tmp/805763.tmpdir/diags/t0ni/tempwnnt0yms.nc /scratch/tmp/805763.tmpdir/diags/t0ni/tempwnnt0yms.nc
+# DEBUG ==================================================
+# DEBUG: RETURNCODE: 0
+Reformatting to netCDF-4
+Checking file Data file for /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Omon/heatc0-2000m/gn/v20211218/heatc0-2000m_Omon_EC-Earth3_piControl_r1i1p1f1_gn_199311-199311.nc. Local status 2 Storage status0
+Checking file Data file for /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Omon/heatc0-2000m/gn/v20211218/heatc0-2000m_Omon_EC-Earth3_piControl_r1i1p1f1_gn_199311-199311.nc. Local status 2 Storage status1
+Copying... 2021-12-18 20:14:09.342593
+Copying... 2021-12-18 20:14:09.345520
+Finished 2021-12-18 20:14:09.345863
+Finished 2021-12-18 20:14:09.348582
+File /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Omon/heatc0-2000m/gn/v20211218/heatc0-2000m_Omon_EC-Earth3_piControl_r1i1p1f1_gn_199311-199311.nc uploaded!
+Checking file Data file for /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Omon/heatc0-2000m/gn/v20211218/heatc0-2000m_Omon_EC-Earth3_piControl_r1i1p1f1_gn_199311-199311.nc. Local status 2 Storage status2
+File /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Omon/heatc0-2000m/gn/v20211218/heatc0-2000m_Omon_EC-Earth3_piControl_r1i1p1f1_gn_199311-199311.nc no longer needed. Deleting from scratch...
+File /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Omon/heatc0-2000m/gn/v20211218/heatc0-2000m_Omon_EC-Earth3_piControl_r1i1p1f1_gn_199311-199311.nc deleted from scratch
+Overwriting file: /scratch/tmp/805763.tmpdir/diags/t0ni/tempujoggplz.nc
+# DEBUG ==================================================
+# DEBUG: CALL>> /opt/conda/bin/ncatted -O -a _FillValue,heatcsum0-2000m,o,d,1.e20 -a missingValue,heatcsum0-2000m,o,d,1.e20 --nco_dbg_lvl=3 --output=/scratch/tmp/805763.tmpdir/diags/t0ni/tempujoggplz.nc /scratch/tmp/805763.tmpdir/diags/t0ni/tempujoggplz.nc
+# DEBUG ==================================================
+# DEBUG: RETURNCODE: 0
+Reformatting to netCDF-4
+Checking file Data file for /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Omon/heatcsum0-2000m/gn/v20211218/heatcsum0-2000m_Omon_EC-Earth3_piControl_r1i1p1f1_gn_199311-199311.nc. Local status 2 Storage status0
+Checking file Data file for /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Omon/heatcsum0-2000m/gn/v20211218/heatcsum0-2000m_Omon_EC-Earth3_piControl_r1i1p1f1_gn_199311-199311.nc. Local status 2 Storage status1
+[32mFinished Heat content layer Startdate: 19931101 Member: 0 Chunk: 1 Box: 0-2000m[0m[39m
+Starting Heat content layer Startdate: 19931101 Member: 0 Chunk: 1 Box: 0-10000m
+Checking file Data file for /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Omon/heatc0-10000m/gn/v20211218/heatc0-10000m_Omon_EC-Earth3_piControl_r1i1p1f1_gn_199311-199311.nc. Local status 5 Storage status0
+Checking file Data file for /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Omon/heatcsum0-10000m/gn/v20211218/heatcsum0-10000m_Omon_EC-Earth3_piControl_r1i1p1f1_gn_199311-199311.nc. Local status 5 Storage status0
+Copying... 2021-12-18 20:14:09.668594
+Copying... 2021-12-18 20:14:09.670978
+Finished 2021-12-18 20:14:09.673016
+File /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Omon/heatcsum0-2000m/gn/v20211218/heatcsum0-2000m_Omon_EC-Earth3_piControl_r1i1p1f1_gn_199311-199311.nc uploaded!
+Checking file Data file for /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Omon/heatcsum0-2000m/gn/v20211218/heatcsum0-2000m_Omon_EC-Earth3_piControl_r1i1p1f1_gn_199311-199311.nc. Local status 2 Storage status2
+File /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Omon/heatcsum0-2000m/gn/v20211218/heatcsum0-2000m_Omon_EC-Earth3_piControl_r1i1p1f1_gn_199311-199311.nc no longer needed. Deleting from scratch...
+File /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Omon/heatcsum0-2000m/gn/v20211218/heatcsum0-2000m_Omon_EC-Earth3_piControl_r1i1p1f1_gn_199311-199311.nc deleted from scratch
+Finished 2021-12-18 20:14:09.783791
+Getting max and min values for heatc
+Overwriting file: /scratch/tmp/805763.tmpdir/diags/t0ni/temp658uex7g.nc
+# DEBUG ==================================================
+# DEBUG: CALL>> /opt/conda/bin/ncatted -h -a valid_max,heatc,m,f,6842840776704.0 --nco_dbg_lvl=3 --overwrite --output=/scratch/tmp/805763.tmpdir/diags/t0ni/temp658uex7g.nc /scratch/tmp/805763.tmpdir/diags/t0ni/temp658uex7g.nc
+# DEBUG ==================================================
+# DEBUG: RETURNCODE: 0
+Overwriting file: /scratch/tmp/805763.tmpdir/diags/t0ni/temp658uex7g.nc
+# DEBUG ==================================================
+# DEBUG: CALL>> /opt/conda/bin/ncatted -h -a valid_min,heatc,m,f,0.0 --nco_dbg_lvl=3 --overwrite --output=/scratch/tmp/805763.tmpdir/diags/t0ni/temp658uex7g.nc /scratch/tmp/805763.tmpdir/diags/t0ni/temp658uex7g.nc
+# DEBUG ==================================================
+# DEBUG: RETURNCODE: 0
+Copying... 2021-12-18 20:14:31.511413
+Finished 2021-12-18 20:14:31.536030
+Overwriting file: /scratch/tmp/805763.tmpdir/diags/t0ni/temp658uex7g.nc
+# DEBUG ==================================================
+# DEBUG: CALL>> /opt/conda/bin/ncatted -O -a _FillValue,heatc0-10000m,o,d,1.e20 -a missingValue,heatc0-10000m,o,d,1.e20 --nco_dbg_lvl=3 --output=/scratch/tmp/805763.tmpdir/diags/t0ni/temp658uex7g.nc /scratch/tmp/805763.tmpdir/diags/t0ni/temp658uex7g.nc
+# DEBUG ==================================================
+# DEBUG: RETURNCODE: 0
+Reformatting to netCDF-4
+Checking file Data file for /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Omon/heatc0-10000m/gn/v20211218/heatc0-10000m_Omon_EC-Earth3_piControl_r1i1p1f1_gn_199311-199311.nc. Local status 2 Storage status0
+Checking file Data file for /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Omon/heatc0-10000m/gn/v20211218/heatc0-10000m_Omon_EC-Earth3_piControl_r1i1p1f1_gn_199311-199311.nc. Local status 2 Storage status1
+Copying... 2021-12-18 20:14:32.583861
+Copying... 2021-12-18 20:14:32.586788
+Finished 2021-12-18 20:14:32.587101
+Overwriting file: /scratch/tmp/805763.tmpdir/diags/t0ni/tempslf5ziyx.nc
+# DEBUG ==================================================
+# DEBUG: CALL>> /opt/conda/bin/ncatted -O -a _FillValue,heatcsum0-10000m,o,d,1.e20 -a missingValue,heatcsum0-10000m,o,d,1.e20 --nco_dbg_lvl=3 --output=/scratch/tmp/805763.tmpdir/diags/t0ni/tempslf5ziyx.nc /scratch/tmp/805763.tmpdir/diags/t0ni/tempslf5ziyx.nc
+# DEBUG ==================================================
+Finished 2021-12-18 20:14:32.635319
+File /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Omon/heatc0-10000m/gn/v20211218/heatc0-10000m_Omon_EC-Earth3_piControl_r1i1p1f1_gn_199311-199311.nc uploaded!
+Checking file Data file for /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Omon/heatc0-10000m/gn/v20211218/heatc0-10000m_Omon_EC-Earth3_piControl_r1i1p1f1_gn_199311-199311.nc. Local status 2 Storage status2
+File /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Omon/heatc0-10000m/gn/v20211218/heatc0-10000m_Omon_EC-Earth3_piControl_r1i1p1f1_gn_199311-199311.nc no longer needed. Deleting from scratch...
+File /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Omon/heatc0-10000m/gn/v20211218/heatc0-10000m_Omon_EC-Earth3_piControl_r1i1p1f1_gn_199311-199311.nc deleted from scratch
+# DEBUG: RETURNCODE: 0
+Reformatting to netCDF-4
+Checking file Data file for /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Omon/heatcsum0-10000m/gn/v20211218/heatcsum0-10000m_Omon_EC-Earth3_piControl_r1i1p1f1_gn_199311-199311.nc. Local status 2 Storage status0
+Checking file Data file for /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Omon/heatcsum0-10000m/gn/v20211218/heatcsum0-10000m_Omon_EC-Earth3_piControl_r1i1p1f1_gn_199311-199311.nc. Local status 2 Storage status1
+[32mFinished Heat content layer Startdate: 19931101 Member: 0 Chunk: 1 Box: 0-10000m[0m[39m
+File /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Omon/thetao/gn/v20211218/thetao_Omon_EC-Earth3_piControl_r1i1p1f1_gn_199311-199311.nc no longer needed. Deleting from scratch...
+File /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Omon/thetao/gn/v20211218/thetao_Omon_EC-Earth3_piControl_r1i1p1f1_gn_199311-199311.nc deleted from scratch
+Starting Region mean Startdate: 19931101 Member: 0 Chunk: 1 Variable: tos Box: 1 Save 3D: True Grid point: t
+Checking file Data file for /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Omon/tosmean/gn/v20211218/tosmean_Omon_EC-Earth3_piControl_r1i1p1f1_gn_199311-199311.nc. Local status 5 Storage status0
+Checking file Data file for /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Omon/tos3dmean/gn/v20211218/tos3dmean_Omon_EC-Earth3_piControl_r1i1p1f1_gn_199311-199311.nc. Local status 5 Storage status0
+Copying... 2021-12-18 20:14:32.952997
+Finished 2021-12-18 20:14:32.957569
+File /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Omon/heatcsum0-10000m/gn/v20211218/heatcsum0-10000m_Omon_EC-Earth3_piControl_r1i1p1f1_gn_199311-199311.nc uploaded!
+Checking file Data file for /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Omon/heatcsum0-10000m/gn/v20211218/heatcsum0-10000m_Omon_EC-Earth3_piControl_r1i1p1f1_gn_199311-199311.nc. Local status 2 Storage status2
+File /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Omon/heatcsum0-10000m/gn/v20211218/heatcsum0-10000m_Omon_EC-Earth3_piControl_r1i1p1f1_gn_199311-199311.nc no longer needed. Deleting from scratch...
+File /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Omon/heatcsum0-10000m/gn/v20211218/heatcsum0-10000m_Omon_EC-Earth3_piControl_r1i1p1f1_gn_199311-199311.nc deleted from scratch
+Reformatting to netCDF-4
+Checking file Data file for /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Omon/tosmean/gn/v20211218/tosmean_Omon_EC-Earth3_piControl_r1i1p1f1_gn_199311-199311.nc. Local status 2 Storage status0
+Checking file Data file for /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Omon/tosmean/gn/v20211218/tosmean_Omon_EC-Earth3_piControl_r1i1p1f1_gn_199311-199311.nc. Local status 2 Storage status1
+[32mFinished Region mean Startdate: 19931101 Member: 0 Chunk: 1 Variable: tos Box: 1 Save 3D: True Grid point: t[0m[39m
+File /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Omon/tos/gn/v20211218/tos_Omon_EC-Earth3_piControl_r1i1p1f1_gn_199311-199311.nc no longer needed. Deleting from scratch...
+File /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Omon/tos/gn/v20211218/tos_Omon_EC-Earth3_piControl_r1i1p1f1_gn_199311-199311.nc deleted from scratch
+Starting Region mean Startdate: 19931101 Member: 0 Chunk: 1 Variable: sos Box: 1 Save 3D: True Grid point: t
+Checking file Data file for /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Omon/sosmean/gn/v20211218/sosmean_Omon_EC-Earth3_piControl_r1i1p1f1_gn_199311-199311.nc. Local status 5 Storage status0
+Checking file Data file for /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Omon/sos3dmean/gn/v20211218/sos3dmean_Omon_EC-Earth3_piControl_r1i1p1f1_gn_199311-199311.nc. Local status 5 Storage status0
+Copying... 2021-12-18 20:14:33.810500
+Finished 2021-12-18 20:14:33.811740
+File /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Omon/tosmean/gn/v20211218/tosmean_Omon_EC-Earth3_piControl_r1i1p1f1_gn_199311-199311.nc uploaded!
+Checking file Data file for /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Omon/tosmean/gn/v20211218/tosmean_Omon_EC-Earth3_piControl_r1i1p1f1_gn_199311-199311.nc. Local status 2 Storage status2
+File /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Omon/tosmean/gn/v20211218/tosmean_Omon_EC-Earth3_piControl_r1i1p1f1_gn_199311-199311.nc no longer needed. Deleting from scratch...
+File /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Omon/tosmean/gn/v20211218/tosmean_Omon_EC-Earth3_piControl_r1i1p1f1_gn_199311-199311.nc deleted from scratch
+Reformatting to netCDF-4
+Checking file Data file for /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Omon/sosmean/gn/v20211218/sosmean_Omon_EC-Earth3_piControl_r1i1p1f1_gn_199311-199311.nc. Local status 2 Storage status0
+Checking file Data file for /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Omon/sosmean/gn/v20211218/sosmean_Omon_EC-Earth3_piControl_r1i1p1f1_gn_199311-199311.nc. Local status 2 Storage status1
+[32mFinished Region mean Startdate: 19931101 Member: 0 Chunk: 1 Variable: sos Box: 1 Save 3D: True Grid point: t[0m[39m
+File /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Omon/sos/gn/v20211218/sos_Omon_EC-Earth3_piControl_r1i1p1f1_gn_199311-199311.nc no longer needed. Deleting from scratch...
+File /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Omon/sos/gn/v20211218/sos_Omon_EC-Earth3_piControl_r1i1p1f1_gn_199311-199311.nc deleted from scratch
+Starting Siasiesiv Startdate: 19931101 Member: 0 Chunk: 1 Basins: Northern_Hemisphere,Southern_Hemisphere Omit volume: True
+Checking file Data file for /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/SImon/siareas/gn/v20211218/siareas_SImon_EC-Earth3_piControl_r1i1p1f1_gn_199311-199311.nc. Local status 5 Storage status0
+Checking file Data file for /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/SImon/siextents/gn/v20211218/siextents_SImon_EC-Earth3_piControl_r1i1p1f1_gn_199311-199311.nc. Local status 5 Storage status0
+Checking file Data file for /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/SImon/siarean/gn/v20211218/siarean_SImon_EC-Earth3_piControl_r1i1p1f1_gn_199311-199311.nc. Local status 5 Storage status0
+Checking file Data file for /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/SImon/siextentn/gn/v20211218/siextentn_SImon_EC-Earth3_piControl_r1i1p1f1_gn_199311-199311.nc. Local status 5 Storage status0
+Copying... 2021-12-18 20:14:34.596995
+Finished 2021-12-18 20:14:34.602661
+File /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Omon/sosmean/gn/v20211218/sosmean_Omon_EC-Earth3_piControl_r1i1p1f1_gn_199311-199311.nc uploaded!
+Checking file Data file for /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Omon/sosmean/gn/v20211218/sosmean_Omon_EC-Earth3_piControl_r1i1p1f1_gn_199311-199311.nc. Local status 2 Storage status2
+File /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Omon/sosmean/gn/v20211218/sosmean_Omon_EC-Earth3_piControl_r1i1p1f1_gn_199311-199311.nc no longer needed. Deleting from scratch...
+File /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Omon/sosmean/gn/v20211218/sosmean_Omon_EC-Earth3_piControl_r1i1p1f1_gn_199311-199311.nc deleted from scratch
+Overwriting file: /scratch/tmp/805763.tmpdir/diags/t0ni/tempissse9pj.nc
+# DEBUG ==================================================
+# DEBUG: CALL>> /opt/conda/bin/ncatted -O -a _FillValue,siarean,o,d,1.e20 -a missingValue,siarean,o,d,1.e20 --nco_dbg_lvl=3 --output=/scratch/tmp/805763.tmpdir/diags/t0ni/tempissse9pj.nc /scratch/tmp/805763.tmpdir/diags/t0ni/tempissse9pj.nc
+# DEBUG ==================================================
+# DEBUG: RETURNCODE: 0
+Reformatting to netCDF-4
+Checking file Data file for /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/SImon/siarean/gn/v20211218/siarean_SImon_EC-Earth3_piControl_r1i1p1f1_gn_199311-199311.nc. Local status 2 Storage status0
+Checking file Data file for /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/SImon/siarean/gn/v20211218/siarean_SImon_EC-Earth3_piControl_r1i1p1f1_gn_199311-199311.nc. Local status 2 Storage status1
+Copying... 2021-12-18 20:14:35.371172
+Finished 2021-12-18 20:14:35.378124
+File /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/SImon/siarean/gn/v20211218/siarean_SImon_EC-Earth3_piControl_r1i1p1f1_gn_199311-199311.nc uploaded!
+Checking file Data file for /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/SImon/siarean/gn/v20211218/siarean_SImon_EC-Earth3_piControl_r1i1p1f1_gn_199311-199311.nc. Local status 2 Storage status2
+File /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/SImon/siarean/gn/v20211218/siarean_SImon_EC-Earth3_piControl_r1i1p1f1_gn_199311-199311.nc no longer needed. Deleting from scratch...
+File /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/SImon/siarean/gn/v20211218/siarean_SImon_EC-Earth3_piControl_r1i1p1f1_gn_199311-199311.nc deleted from scratch
+Overwriting file: /scratch/tmp/805763.tmpdir/diags/t0ni/tempkcwqykqc.nc
+# DEBUG ==================================================
+# DEBUG: CALL>> /opt/conda/bin/ncatted -O -a _FillValue,siareas,o,d,1.e20 -a missingValue,siareas,o,d,1.e20 --nco_dbg_lvl=3 --output=/scratch/tmp/805763.tmpdir/diags/t0ni/tempkcwqykqc.nc /scratch/tmp/805763.tmpdir/diags/t0ni/tempkcwqykqc.nc
+# DEBUG ==================================================
+# DEBUG: RETURNCODE: 0
+Reformatting to netCDF-4
+Checking file Data file for /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/SImon/siareas/gn/v20211218/siareas_SImon_EC-Earth3_piControl_r1i1p1f1_gn_199311-199311.nc. Local status 2 Storage status0
+Checking file Data file for /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/SImon/siareas/gn/v20211218/siareas_SImon_EC-Earth3_piControl_r1i1p1f1_gn_199311-199311.nc. Local status 2 Storage status1
+Copying... 2021-12-18 20:14:35.684923
+Finished 2021-12-18 20:14:35.689757
+File /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/SImon/siareas/gn/v20211218/siareas_SImon_EC-Earth3_piControl_r1i1p1f1_gn_199311-199311.nc uploaded!
+Checking file Data file for /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/SImon/siareas/gn/v20211218/siareas_SImon_EC-Earth3_piControl_r1i1p1f1_gn_199311-199311.nc. Local status 2 Storage status2
+File /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/SImon/siareas/gn/v20211218/siareas_SImon_EC-Earth3_piControl_r1i1p1f1_gn_199311-199311.nc no longer needed. Deleting from scratch...
+File /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/SImon/siareas/gn/v20211218/siareas_SImon_EC-Earth3_piControl_r1i1p1f1_gn_199311-199311.nc deleted from scratch
+Overwriting file: /scratch/tmp/805763.tmpdir/diags/t0ni/templuog6h1t.nc
+# DEBUG ==================================================
+# DEBUG: CALL>> /opt/conda/bin/ncatted -O -a _FillValue,siextentn,o,d,1.e20 -a missingValue,siextentn,o,d,1.e20 --nco_dbg_lvl=3 --output=/scratch/tmp/805763.tmpdir/diags/t0ni/templuog6h1t.nc /scratch/tmp/805763.tmpdir/diags/t0ni/templuog6h1t.nc
+# DEBUG ==================================================
+# DEBUG: RETURNCODE: 0
+Reformatting to netCDF-4
+Checking file Data file for /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/SImon/siextentn/gn/v20211218/siextentn_SImon_EC-Earth3_piControl_r1i1p1f1_gn_199311-199311.nc. Local status 2 Storage status0
+Checking file Data file for /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/SImon/siextentn/gn/v20211218/siextentn_SImon_EC-Earth3_piControl_r1i1p1f1_gn_199311-199311.nc. Local status 2 Storage status1
+Copying... 2021-12-18 20:14:35.995278
+Finished 2021-12-18 20:14:36.000385
+File /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/SImon/siextentn/gn/v20211218/siextentn_SImon_EC-Earth3_piControl_r1i1p1f1_gn_199311-199311.nc uploaded!
+Checking file Data file for /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/SImon/siextentn/gn/v20211218/siextentn_SImon_EC-Earth3_piControl_r1i1p1f1_gn_199311-199311.nc. Local status 2 Storage status2
+File /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/SImon/siextentn/gn/v20211218/siextentn_SImon_EC-Earth3_piControl_r1i1p1f1_gn_199311-199311.nc no longer needed. Deleting from scratch...
+File /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/SImon/siextentn/gn/v20211218/siextentn_SImon_EC-Earth3_piControl_r1i1p1f1_gn_199311-199311.nc deleted from scratch
+Overwriting file: /scratch/tmp/805763.tmpdir/diags/t0ni/tempno90ympf.nc
+# DEBUG ==================================================
+# DEBUG: CALL>> /opt/conda/bin/ncatted -O -a _FillValue,siextents,o,d,1.e20 -a missingValue,siextents,o,d,1.e20 --nco_dbg_lvl=3 --output=/scratch/tmp/805763.tmpdir/diags/t0ni/tempno90ympf.nc /scratch/tmp/805763.tmpdir/diags/t0ni/tempno90ympf.nc
+# DEBUG ==================================================
+# DEBUG: RETURNCODE: 0
+Reformatting to netCDF-4
+Checking file Data file for /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/SImon/siextents/gn/v20211218/siextents_SImon_EC-Earth3_piControl_r1i1p1f1_gn_199311-199311.nc. Local status 2 Storage status0
+Checking file Data file for /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/SImon/siextents/gn/v20211218/siextents_SImon_EC-Earth3_piControl_r1i1p1f1_gn_199311-199311.nc. Local status 2 Storage status1
+[32mFinished Siasiesiv Startdate: 19931101 Member: 0 Chunk: 1 Basins: Northern_Hemisphere,Southern_Hemisphere Omit volume: True[0m[39m
+File /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/SImon/siconc/gn/v20211218/siconc_SImon_EC-Earth3_piControl_r1i1p1f1_gn_199311-199311.nc no longer needed. Deleting from scratch...
+File /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/SImon/siconc/gn/v20211218/siconc_SImon_EC-Earth3_piControl_r1i1p1f1_gn_199311-199311.nc deleted from scratch
+Starting Sivolume Startdate: 19931101 Member: 0 Chunk: 1 Basins: Northern_Hemisphere,Southern_Hemisphere 
+Checking file Data file for /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/SImon/sivols/gn/v20211218/sivols_SImon_EC-Earth3_piControl_r1i1p1f1_gn_199311-199311.nc. Local status 5 Storage status0
+Checking file Data file for /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/SImon/sivoln/gn/v20211218/sivoln_SImon_EC-Earth3_piControl_r1i1p1f1_gn_199311-199311.nc. Local status 5 Storage status0
+Copying... 2021-12-18 20:14:36.314885
+Finished 2021-12-18 20:14:36.319594
+File /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/SImon/siextents/gn/v20211218/siextents_SImon_EC-Earth3_piControl_r1i1p1f1_gn_199311-199311.nc uploaded!
+Checking file Data file for /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/SImon/siextents/gn/v20211218/siextents_SImon_EC-Earth3_piControl_r1i1p1f1_gn_199311-199311.nc. Local status 2 Storage status2
+File /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/SImon/siextents/gn/v20211218/siextents_SImon_EC-Earth3_piControl_r1i1p1f1_gn_199311-199311.nc no longer needed. Deleting from scratch...
+File /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/SImon/siextents/gn/v20211218/siextents_SImon_EC-Earth3_piControl_r1i1p1f1_gn_199311-199311.nc deleted from scratch
+Overwriting file: /scratch/tmp/805763.tmpdir/diags/t0ni/tempd6lbpfwx.nc
+# DEBUG ==================================================
+# DEBUG: CALL>> /opt/conda/bin/ncatted -O -a _FillValue,sivoln,o,d,1.e20 -a missingValue,sivoln,o,d,1.e20 --nco_dbg_lvl=3 --output=/scratch/tmp/805763.tmpdir/diags/t0ni/tempd6lbpfwx.nc /scratch/tmp/805763.tmpdir/diags/t0ni/tempd6lbpfwx.nc
+# DEBUG ==================================================
+# DEBUG: RETURNCODE: 0
+Checking file Data file for /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/SImon/sivoln/gn/v20211218/sivoln_SImon_EC-Earth3_piControl_r1i1p1f1_gn_199311-199311.nc. Local status 2 Storage status0
+Checking file Data file for /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/SImon/sivoln/gn/v20211218/sivoln_SImon_EC-Earth3_piControl_r1i1p1f1_gn_199311-199311.nc. Local status 2 Storage status1
+Copying... 2021-12-18 20:14:38.170039
+Finished 2021-12-18 20:14:38.171322
+File /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/SImon/sivoln/gn/v20211218/sivoln_SImon_EC-Earth3_piControl_r1i1p1f1_gn_199311-199311.nc uploaded!
+Checking file Data file for /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/SImon/sivoln/gn/v20211218/sivoln_SImon_EC-Earth3_piControl_r1i1p1f1_gn_199311-199311.nc. Local status 2 Storage status2
+File /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/SImon/sivoln/gn/v20211218/sivoln_SImon_EC-Earth3_piControl_r1i1p1f1_gn_199311-199311.nc no longer needed. Deleting from scratch...
+File /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/SImon/sivoln/gn/v20211218/sivoln_SImon_EC-Earth3_piControl_r1i1p1f1_gn_199311-199311.nc deleted from scratch
+Current status:
+===============
+Waiting:         0
+Ready to run:    0
+Running:         1
+Completed:       8
+Failed:          0
+===============
+Overwriting file: /scratch/tmp/805763.tmpdir/diags/t0ni/tempsd7mpqpl.nc
+# DEBUG ==================================================
+# DEBUG: CALL>> /opt/conda/bin/ncatted -O -a _FillValue,sivols,o,d,1.e20 -a missingValue,sivols,o,d,1.e20 --nco_dbg_lvl=3 --output=/scratch/tmp/805763.tmpdir/diags/t0ni/tempsd7mpqpl.nc /scratch/tmp/805763.tmpdir/diags/t0ni/tempsd7mpqpl.nc
+# DEBUG ==================================================
+# DEBUG: RETURNCODE: 0
+Checking file Data file for /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/SImon/sivols/gn/v20211218/sivols_SImon_EC-Earth3_piControl_r1i1p1f1_gn_199311-199311.nc. Local status 2 Storage status0
+Checking file Data file for /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/SImon/sivols/gn/v20211218/sivols_SImon_EC-Earth3_piControl_r1i1p1f1_gn_199311-199311.nc. Local status 2 Storage status1
+[32mFinished Sivolume Startdate: 19931101 Member: 0 Chunk: 1 Basins: Northern_Hemisphere,Southern_Hemisphere [0m[39m
+File /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/SImon/sivol/gn/v20211218/sivol_SImon_EC-Earth3_piControl_r1i1p1f1_gn_199311-199311.nc no longer needed. Deleting from scratch...
+Copying... 2021-12-18 20:14:39.616896
+File /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/SImon/sivol/gn/v20211218/sivol_SImon_EC-Earth3_piControl_r1i1p1f1_gn_199311-199311.nc deleted from scratch
+Finished 2021-12-18 20:14:39.618697
+File /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/SImon/sivols/gn/v20211218/sivols_SImon_EC-Earth3_piControl_r1i1p1f1_gn_199311-199311.nc uploaded!
+Checking file Data file for /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/SImon/sivols/gn/v20211218/sivols_SImon_EC-Earth3_piControl_r1i1p1f1_gn_199311-199311.nc. Local status 2 Storage status2
+File /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/SImon/sivols/gn/v20211218/sivols_SImon_EC-Earth3_piControl_r1i1p1f1_gn_199311-199311.nc no longer needed. Deleting from scratch...
+File /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/SImon/sivols/gn/v20211218/sivols_SImon_EC-Earth3_piControl_r1i1p1f1_gn_199311-199311.nc deleted from scratch
+[32mDiagnostics finished at 2021-12-18 20:14:39.763750[0m[39m
+[32mElapsed time: 0:02:01.167204
+[0m[39m
+Time consumed by each diagnostic class
+--------------------------------------
+regmean                 0:00:31.918873
+ohclayer                0:01:22.273341
+siasiesiv               0:00:01.716010
+sivolume                0:00:03.305602
+
+------------------------------------------------------------
+Sender: LSF System <perf@s01r2b02>
+Subject: Job 805763: <t0ni_19931101_fc0_1_EARTHDIAGS> in cluster <mn3> Done
+
+Job <t0ni_19931101_fc0_1_EARTHDIAGS> was submitted from host <login1> by user <bsc32627> in cluster <mn3>.
+Job was executed on host(s) <s01r2b02>, in queue <debug>, as user <bsc32627> in cluster <mn3>.
+</home/bsc32/bsc32627> was used as the home directory.
+</gpfs/scratch/bsc32/bsc32627/t0ni/LOG_t0ni> was used as the working directory.
+Started at Sat Dec 18 20:10:51 2021
+Results reported on Sat Dec 18 20:14:41 2021
+
+Your job looked like:
+
+------------------------------------------------------------
+# LSBATCH: User input
+#!/bin/bash
+
+###############################################################################
+#                   EARTHDIAGS t0ni EXPERIMENT
+###############################################################################
+#
+#BSUB -q debug
+#BSUB -J t0ni_19931101_fc0_1_EARTHDIAGS
+#BSUB -oo /gpfs/scratch/bsc32/bsc32627/t0ni/LOG_t0ni/t0ni_19931101_fc0_1_EARTHDIAGS.cmd.out
+#BSUB -eo /gpfs/scratch/bsc32/bsc32627/t0ni/LOG_t0ni/t0ni_19931101_fc0_1_EARTHDIAGS.cmd.err
+#BSUB -W 01:00
+#BSUB -n 1
+
+
+#
+###############################################################################
+###################
+# Autosubmit header
+###################
+set -xuve
+job_name_ptrn='/gpfs/scratch/bsc32/bsc32627/t0ni/LOG_t0ni/t0ni_19931101_fc0_1_EARTHDIAGS'
+echo $(date +%s) > ${job_name_ptrn}_STAT
+
+###################
+# Autosubmit job
+###################
+
+module purge
+module use /gpfs/projects/bsc32/software/suselinux/11/modules/all
+module unuse /apps/modules/modulefiles/applications
+module unuse /apps/modules/modulefiles/applications_bis
+module unuse /apps/modules/modulefiles/compilers
+module unuse /apps/modules/modulefiles/tools
+module unuse /apps/modules/modulefiles/libraries
+module unuse /apps/modules/modulefiles/environment
+module unuse /apps/modules/PRACE
+set +x
+module load Singularity/3.2.0-GCC-8.3.0
+set -xuve
+
+#
+# General Paths
+#
+MODEL=ecearth
+VERSION=trunk
+PROJDIR=/esarchive/autosubmit/t0ni/proj/auto-ecearth3
+#
+# Experiment description
+#
+EXPID=t0ni
+
+(... more ...)
+------------------------------------------------------------
+
+Successfully completed.
+
+Resource usage summary:
+
+    CPU time :               267.75 sec.
+    Max Memory :             22693 MB
+    Average Memory :         14009.62 MB
+    Total Requested Memory : 1750.00 MB
+    Delta Memory :           -20943.00 MB
+    (Delta: the difference between Total Requested Memory and Max Memory.)
+    Max Processes :          6
+    Max Threads :            45
+    Job Energy Consumption : 0.006403 kWh
+
+The output (if any) is above this job summary.
+
+
+
+PS:
+
+Read file </gpfs/scratch/bsc32/bsc32627/t0ni/LOG_t0ni/t0ni_19931101_fc0_1_EARTHDIAGS.cmd.err> for stderr output of this job.
+

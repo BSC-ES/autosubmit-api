@@ -1,0 +1,23 @@
+job_name_ptrn='/gpfs/scratch/cns61/cns61280/a28v/LOG_a28v/a28v_19500101_fc0_1_SIM'
++ job_name_ptrn=/gpfs/scratch/cns61/cns61280/a28v/LOG_a28v/a28v_19500101_fc0_1_SIM
+echo $(date +%s) > ${job_name_ptrn}_STAT
+date +%s
+++ date +%s
++ echo 1569562607
+
+###################
+# Autosubmit job
+###################
+
+#!/usr/bin/env bash
+
+set -xuve
++ set -xuve
+
+cd /gpfs/scratch/cns61/cns61280/a28v
++ cd /gpfs/scratch/cns61/cns61280/a28v
+
+# librunscript defines some helper functions
+source ./librunscript.sh
++ source ./librunscript.sh
+a28v_19500101_fc0_1_SIM.cmd: line 39: ./librunscript.sh: No such file or directory

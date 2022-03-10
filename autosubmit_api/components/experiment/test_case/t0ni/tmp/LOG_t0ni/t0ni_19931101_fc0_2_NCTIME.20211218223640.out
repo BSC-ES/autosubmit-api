@@ -1,0 +1,378 @@
+[INFO] JOBID=805828
+
+/scratch/tmp/805828.tmpdir/t0ni/nctime/fc0/CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/day/psl/gr/v20211218:
+total 8
+lrwxrwxrwx 1 bsc32627 bsc32 190 Dec 18 22:36 psl_day_EC-Earth3_piControl_r1i1p1f1_gr_19931101-19931130.nc -> /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/./CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/day/psl/gr/v20211218/psl_day_EC-Earth3_piControl_r1i1p1f1_gr_19931101-19931130.nc
+lrwxrwxrwx 1 bsc32627 bsc32 190 Dec 18 22:36 psl_day_EC-Earth3_piControl_r1i1p1f1_gr_19931201-19931231.nc -> /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/./CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/day/psl/gr/v20211218/psl_day_EC-Earth3_piControl_r1i1p1f1_gr_19931201-19931231.nc
+
+/scratch/tmp/805828.tmpdir/t0ni/nctime/fc0/CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Omon/wfonocorr/gn/v20211218:
+total 8
+lrwxrwxrwx 1 bsc32627 bsc32 200 Dec 18 22:36 wfonocorr_Omon_EC-Earth3_piControl_r1i1p1f1_gn_199311-199311.nc -> /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/./CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Omon/wfonocorr/gn/v20211218/wfonocorr_Omon_EC-Earth3_piControl_r1i1p1f1_gn_199311-199311.nc
+lrwxrwxrwx 1 bsc32627 bsc32 200 Dec 18 22:36 wfonocorr_Omon_EC-Earth3_piControl_r1i1p1f1_gn_199312-199312.nc -> /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/./CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Omon/wfonocorr/gn/v20211218/wfonocorr_Omon_EC-Earth3_piControl_r1i1p1f1_gn_199312-199312.nc
+
+/scratch/tmp/805828.tmpdir/t0ni/nctime/fc0/CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Omon/tauuo/gn/v20211218:
+total 8
+lrwxrwxrwx 1 bsc32627 bsc32 192 Dec 18 22:36 tauuo_Omon_EC-Earth3_piControl_r1i1p1f1_gn_199311-199311.nc -> /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/./CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Omon/tauuo/gn/v20211218/tauuo_Omon_EC-Earth3_piControl_r1i1p1f1_gn_199311-199311.nc
+lrwxrwxrwx 1 bsc32627 bsc32 192 Dec 18 22:36 tauuo_Omon_EC-Earth3_piControl_r1i1p1f1_gn_199312-199312.nc -> /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/./CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Omon/tauuo/gn/v20211218/tauuo_Omon_EC-Earth3_piControl_r1i1p1f1_gn_199312-199312.nc
+
+/scratch/tmp/805828.tmpdir/t0ni/nctime/fc0/CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Omon/tos/gn/v20211218:
+total 8
+lrwxrwxrwx 1 bsc32627 bsc32 188 Dec 18 22:36 tos_Omon_EC-Earth3_piControl_r1i1p1f1_gn_199311-199311.nc -> /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/./CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Omon/tos/gn/v20211218/tos_Omon_EC-Earth3_piControl_r1i1p1f1_gn_199311-199311.nc
+lrwxrwxrwx 1 bsc32627 bsc32 188 Dec 18 22:36 tos_Omon_EC-Earth3_piControl_r1i1p1f1_gn_199312-199312.nc -> /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/./CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Omon/tos/gn/v20211218/tos_Omon_EC-Earth3_piControl_r1i1p1f1_gn_199312-199312.nc
+
+/scratch/tmp/805828.tmpdir/t0ni/nctime/fc0/CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Omon/hfevapds/gn/v20211218:
+total 8
+lrwxrwxrwx 1 bsc32627 bsc32 198 Dec 18 22:36 hfevapds_Omon_EC-Earth3_piControl_r1i1p1f1_gn_199311-199311.nc -> /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/./CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Omon/hfevapds/gn/v20211218/hfevapds_Omon_EC-Earth3_piControl_r1i1p1f1_gn_199311-199311.nc
+lrwxrwxrwx 1 bsc32627 bsc32 198 Dec 18 22:36 hfevapds_Omon_EC-Earth3_piControl_r1i1p1f1_gn_199312-199312.nc -> /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/./CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Omon/hfevapds/gn/v20211218/hfevapds_Omon_EC-Earth3_piControl_r1i1p1f1_gn_199312-199312.nc
+
+/scratch/tmp/805828.tmpdir/t0ni/nctime/fc0/CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Omon/sos/gn/v20211218:
+total 8
+lrwxrwxrwx 1 bsc32627 bsc32 188 Dec 18 22:36 sos_Omon_EC-Earth3_piControl_r1i1p1f1_gn_199311-199311.nc -> /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/./CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Omon/sos/gn/v20211218/sos_Omon_EC-Earth3_piControl_r1i1p1f1_gn_199311-199311.nc
+lrwxrwxrwx 1 bsc32627 bsc32 188 Dec 18 22:36 sos_Omon_EC-Earth3_piControl_r1i1p1f1_gn_199312-199312.nc -> /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/./CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Omon/sos/gn/v20211218/sos_Omon_EC-Earth3_piControl_r1i1p1f1_gn_199312-199312.nc
+
+/scratch/tmp/805828.tmpdir/t0ni/nctime/fc0/CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Omon/friver/gn/v20211218:
+total 8
+lrwxrwxrwx 1 bsc32627 bsc32 194 Dec 18 22:36 friver_Omon_EC-Earth3_piControl_r1i1p1f1_gn_199311-199311.nc -> /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/./CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Omon/friver/gn/v20211218/friver_Omon_EC-Earth3_piControl_r1i1p1f1_gn_199311-199311.nc
+lrwxrwxrwx 1 bsc32627 bsc32 194 Dec 18 22:36 friver_Omon_EC-Earth3_piControl_r1i1p1f1_gn_199312-199312.nc -> /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/./CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Omon/friver/gn/v20211218/friver_Omon_EC-Earth3_piControl_r1i1p1f1_gn_199312-199312.nc
+
+/scratch/tmp/805828.tmpdir/t0ni/nctime/fc0/CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Omon/thetao/gn/v20211218:
+total 8
+lrwxrwxrwx 1 bsc32627 bsc32 194 Dec 18 22:36 thetao_Omon_EC-Earth3_piControl_r1i1p1f1_gn_199311-199311.nc -> /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/./CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Omon/thetao/gn/v20211218/thetao_Omon_EC-Earth3_piControl_r1i1p1f1_gn_199311-199311.nc
+lrwxrwxrwx 1 bsc32627 bsc32 194 Dec 18 22:36 thetao_Omon_EC-Earth3_piControl_r1i1p1f1_gn_199312-199312.nc -> /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/./CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Omon/thetao/gn/v20211218/thetao_Omon_EC-Earth3_piControl_r1i1p1f1_gn_199312-199312.nc
+
+/scratch/tmp/805828.tmpdir/t0ni/nctime/fc0/CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Omon/precip/gn/v20211218:
+total 8
+lrwxrwxrwx 1 bsc32627 bsc32 194 Dec 18 22:36 precip_Omon_EC-Earth3_piControl_r1i1p1f1_gn_199311-199311.nc -> /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/./CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Omon/precip/gn/v20211218/precip_Omon_EC-Earth3_piControl_r1i1p1f1_gn_199311-199311.nc
+lrwxrwxrwx 1 bsc32627 bsc32 194 Dec 18 22:36 precip_Omon_EC-Earth3_piControl_r1i1p1f1_gn_199312-199312.nc -> /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/./CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Omon/precip/gn/v20211218/precip_Omon_EC-Earth3_piControl_r1i1p1f1_gn_199312-199312.nc
+
+/scratch/tmp/805828.tmpdir/t0ni/nctime/fc0/CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Omon/tauvo/gn/v20211218:
+total 8
+lrwxrwxrwx 1 bsc32627 bsc32 192 Dec 18 22:36 tauvo_Omon_EC-Earth3_piControl_r1i1p1f1_gn_199311-199311.nc -> /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/./CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Omon/tauvo/gn/v20211218/tauvo_Omon_EC-Earth3_piControl_r1i1p1f1_gn_199311-199311.nc
+lrwxrwxrwx 1 bsc32627 bsc32 192 Dec 18 22:36 tauvo_Omon_EC-Earth3_piControl_r1i1p1f1_gn_199312-199312.nc -> /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/./CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Omon/tauvo/gn/v20211218/tauvo_Omon_EC-Earth3_piControl_r1i1p1f1_gn_199312-199312.nc
+
+/scratch/tmp/805828.tmpdir/t0ni/nctime/fc0/CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Omon/vo/gn/v20211218:
+total 8
+lrwxrwxrwx 1 bsc32627 bsc32 186 Dec 18 22:36 vo_Omon_EC-Earth3_piControl_r1i1p1f1_gn_199311-199311.nc -> /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/./CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Omon/vo/gn/v20211218/vo_Omon_EC-Earth3_piControl_r1i1p1f1_gn_199311-199311.nc
+lrwxrwxrwx 1 bsc32627 bsc32 186 Dec 18 22:36 vo_Omon_EC-Earth3_piControl_r1i1p1f1_gn_199312-199312.nc -> /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/./CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Omon/vo/gn/v20211218/vo_Omon_EC-Earth3_piControl_r1i1p1f1_gn_199312-199312.nc
+
+/scratch/tmp/805828.tmpdir/t0ni/nctime/fc0/CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Omon/hfds/gn/v20211218:
+total 8
+lrwxrwxrwx 1 bsc32627 bsc32 190 Dec 18 22:36 hfds_Omon_EC-Earth3_piControl_r1i1p1f1_gn_199311-199311.nc -> /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/./CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Omon/hfds/gn/v20211218/hfds_Omon_EC-Earth3_piControl_r1i1p1f1_gn_199311-199311.nc
+lrwxrwxrwx 1 bsc32627 bsc32 190 Dec 18 22:36 hfds_Omon_EC-Earth3_piControl_r1i1p1f1_gn_199312-199312.nc -> /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/./CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Omon/hfds/gn/v20211218/hfds_Omon_EC-Earth3_piControl_r1i1p1f1_gn_199312-199312.nc
+
+/scratch/tmp/805828.tmpdir/t0ni/nctime/fc0/CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Omon/ficeberg/gn/v20211218:
+total 8
+lrwxrwxrwx 1 bsc32627 bsc32 198 Dec 18 22:36 ficeberg_Omon_EC-Earth3_piControl_r1i1p1f1_gn_199311-199311.nc -> /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/./CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Omon/ficeberg/gn/v20211218/ficeberg_Omon_EC-Earth3_piControl_r1i1p1f1_gn_199311-199311.nc
+lrwxrwxrwx 1 bsc32627 bsc32 198 Dec 18 22:36 ficeberg_Omon_EC-Earth3_piControl_r1i1p1f1_gn_199312-199312.nc -> /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/./CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Omon/ficeberg/gn/v20211218/ficeberg_Omon_EC-Earth3_piControl_r1i1p1f1_gn_199312-199312.nc
+
+/scratch/tmp/805828.tmpdir/t0ni/nctime/fc0/CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Omon/subl/gn/v20211218:
+total 8
+lrwxrwxrwx 1 bsc32627 bsc32 190 Dec 18 22:36 subl_Omon_EC-Earth3_piControl_r1i1p1f1_gn_199311-199311.nc -> /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/./CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Omon/subl/gn/v20211218/subl_Omon_EC-Earth3_piControl_r1i1p1f1_gn_199311-199311.nc
+lrwxrwxrwx 1 bsc32627 bsc32 190 Dec 18 22:36 subl_Omon_EC-Earth3_piControl_r1i1p1f1_gn_199312-199312.nc -> /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/./CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Omon/subl/gn/v20211218/subl_Omon_EC-Earth3_piControl_r1i1p1f1_gn_199312-199312.nc
+
+/scratch/tmp/805828.tmpdir/t0ni/nctime/fc0/CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Omon/calving/gn/v20211218:
+total 8
+lrwxrwxrwx 1 bsc32627 bsc32 196 Dec 18 22:36 calving_Omon_EC-Earth3_piControl_r1i1p1f1_gn_199311-199311.nc -> /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/./CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Omon/calving/gn/v20211218/calving_Omon_EC-Earth3_piControl_r1i1p1f1_gn_199311-199311.nc
+lrwxrwxrwx 1 bsc32627 bsc32 196 Dec 18 22:36 calving_Omon_EC-Earth3_piControl_r1i1p1f1_gn_199312-199312.nc -> /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/./CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Omon/calving/gn/v20211218/calving_Omon_EC-Earth3_piControl_r1i1p1f1_gn_199312-199312.nc
+
+/scratch/tmp/805828.tmpdir/t0ni/nctime/fc0/CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Omon/uo/gn/v20211218:
+total 8
+lrwxrwxrwx 1 bsc32627 bsc32 186 Dec 18 22:36 uo_Omon_EC-Earth3_piControl_r1i1p1f1_gn_199311-199311.nc -> /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/./CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Omon/uo/gn/v20211218/uo_Omon_EC-Earth3_piControl_r1i1p1f1_gn_199311-199311.nc
+lrwxrwxrwx 1 bsc32627 bsc32 186 Dec 18 22:36 uo_Omon_EC-Earth3_piControl_r1i1p1f1_gn_199312-199312.nc -> /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/./CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Omon/uo/gn/v20211218/uo_Omon_EC-Earth3_piControl_r1i1p1f1_gn_199312-199312.nc
+
+/scratch/tmp/805828.tmpdir/t0ni/nctime/fc0/CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Omon/rsntds/gn/v20211218:
+total 8
+lrwxrwxrwx 1 bsc32627 bsc32 194 Dec 18 22:36 rsntds_Omon_EC-Earth3_piControl_r1i1p1f1_gn_199311-199311.nc -> /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/./CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Omon/rsntds/gn/v20211218/rsntds_Omon_EC-Earth3_piControl_r1i1p1f1_gn_199311-199311.nc
+lrwxrwxrwx 1 bsc32627 bsc32 194 Dec 18 22:36 rsntds_Omon_EC-Earth3_piControl_r1i1p1f1_gn_199312-199312.nc -> /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/./CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Omon/rsntds/gn/v20211218/rsntds_Omon_EC-Earth3_piControl_r1i1p1f1_gn_199312-199312.nc
+
+/scratch/tmp/805828.tmpdir/t0ni/nctime/fc0/CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Omon/zos/gn/v20211218:
+total 8
+lrwxrwxrwx 1 bsc32627 bsc32 188 Dec 18 22:36 zos_Omon_EC-Earth3_piControl_r1i1p1f1_gn_199311-199311.nc -> /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/./CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Omon/zos/gn/v20211218/zos_Omon_EC-Earth3_piControl_r1i1p1f1_gn_199311-199311.nc
+lrwxrwxrwx 1 bsc32627 bsc32 188 Dec 18 22:36 zos_Omon_EC-Earth3_piControl_r1i1p1f1_gn_199312-199312.nc -> /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/./CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Omon/zos/gn/v20211218/zos_Omon_EC-Earth3_piControl_r1i1p1f1_gn_199312-199312.nc
+
+/scratch/tmp/805828.tmpdir/t0ni/nctime/fc0/CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Omon/so/gn/v20211218:
+total 8
+lrwxrwxrwx 1 bsc32627 bsc32 186 Dec 18 22:36 so_Omon_EC-Earth3_piControl_r1i1p1f1_gn_199311-199311.nc -> /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/./CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Omon/so/gn/v20211218/so_Omon_EC-Earth3_piControl_r1i1p1f1_gn_199311-199311.nc
+lrwxrwxrwx 1 bsc32627 bsc32 186 Dec 18 22:36 so_Omon_EC-Earth3_piControl_r1i1p1f1_gn_199312-199312.nc -> /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/./CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Omon/so/gn/v20211218/so_Omon_EC-Earth3_piControl_r1i1p1f1_gn_199312-199312.nc
+
+/scratch/tmp/805828.tmpdir/t0ni/nctime/fc0/CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Omon/mlotst/gn/v20211218:
+total 8
+lrwxrwxrwx 1 bsc32627 bsc32 194 Dec 18 22:36 mlotst_Omon_EC-Earth3_piControl_r1i1p1f1_gn_199311-199311.nc -> /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/./CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Omon/mlotst/gn/v20211218/mlotst_Omon_EC-Earth3_piControl_r1i1p1f1_gn_199311-199311.nc
+lrwxrwxrwx 1 bsc32627 bsc32 194 Dec 18 22:36 mlotst_Omon_EC-Earth3_piControl_r1i1p1f1_gn_199312-199312.nc -> /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/./CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Omon/mlotst/gn/v20211218/mlotst_Omon_EC-Earth3_piControl_r1i1p1f1_gn_199312-199312.nc
+
+/scratch/tmp/805828.tmpdir/t0ni/nctime/fc0/CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Omon/evs/gn/v20211218:
+total 8
+lrwxrwxrwx 1 bsc32627 bsc32 188 Dec 18 22:36 evs_Omon_EC-Earth3_piControl_r1i1p1f1_gn_199311-199311.nc -> /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/./CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Omon/evs/gn/v20211218/evs_Omon_EC-Earth3_piControl_r1i1p1f1_gn_199311-199311.nc
+lrwxrwxrwx 1 bsc32627 bsc32 188 Dec 18 22:36 evs_Omon_EC-Earth3_piControl_r1i1p1f1_gn_199312-199312.nc -> /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/./CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Omon/evs/gn/v20211218/evs_Omon_EC-Earth3_piControl_r1i1p1f1_gn_199312-199312.nc
+
+/scratch/tmp/805828.tmpdir/t0ni/nctime/fc0/CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/LImon/snw/gr/v20211218:
+total 8
+lrwxrwxrwx 1 bsc32627 bsc32 190 Dec 18 22:36 snw_LImon_EC-Earth3_piControl_r1i1p1f1_gr_199311-199311.nc -> /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/./CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/LImon/snw/gr/v20211218/snw_LImon_EC-Earth3_piControl_r1i1p1f1_gr_199311-199311.nc
+lrwxrwxrwx 1 bsc32627 bsc32 190 Dec 18 22:36 snw_LImon_EC-Earth3_piControl_r1i1p1f1_gr_199312-199312.nc -> /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/./CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/LImon/snw/gr/v20211218/snw_LImon_EC-Earth3_piControl_r1i1p1f1_gr_199312-199312.nc
+
+/scratch/tmp/805828.tmpdir/t0ni/nctime/fc0/CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/SImon/siconc/gn/v20211218:
+total 8
+lrwxrwxrwx 1 bsc32627 bsc32 196 Dec 18 22:36 siconc_SImon_EC-Earth3_piControl_r1i1p1f1_gn_199311-199311.nc -> /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/./CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/SImon/siconc/gn/v20211218/siconc_SImon_EC-Earth3_piControl_r1i1p1f1_gn_199311-199311.nc
+lrwxrwxrwx 1 bsc32627 bsc32 196 Dec 18 22:36 siconc_SImon_EC-Earth3_piControl_r1i1p1f1_gn_199312-199312.nc -> /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/./CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/SImon/siconc/gn/v20211218/siconc_SImon_EC-Earth3_piControl_r1i1p1f1_gn_199312-199312.nc
+
+/scratch/tmp/805828.tmpdir/t0ni/nctime/fc0/CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/SImon/sithick/gn/v20211218:
+total 8
+lrwxrwxrwx 1 bsc32627 bsc32 198 Dec 18 22:36 sithick_SImon_EC-Earth3_piControl_r1i1p1f1_gn_199311-199311.nc -> /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/./CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/SImon/sithick/gn/v20211218/sithick_SImon_EC-Earth3_piControl_r1i1p1f1_gn_199311-199311.nc
+lrwxrwxrwx 1 bsc32627 bsc32 198 Dec 18 22:36 sithick_SImon_EC-Earth3_piControl_r1i1p1f1_gn_199312-199312.nc -> /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/./CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/SImon/sithick/gn/v20211218/sithick_SImon_EC-Earth3_piControl_r1i1p1f1_gn_199312-199312.nc
+
+/scratch/tmp/805828.tmpdir/t0ni/nctime/fc0/CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/SImon/sispeed/gn/v20211218:
+total 8
+lrwxrwxrwx 1 bsc32627 bsc32 198 Dec 18 22:36 sispeed_SImon_EC-Earth3_piControl_r1i1p1f1_gn_199311-199311.nc -> /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/./CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/SImon/sispeed/gn/v20211218/sispeed_SImon_EC-Earth3_piControl_r1i1p1f1_gn_199311-199311.nc
+lrwxrwxrwx 1 bsc32627 bsc32 198 Dec 18 22:36 sispeed_SImon_EC-Earth3_piControl_r1i1p1f1_gn_199312-199312.nc -> /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/./CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/SImon/sispeed/gn/v20211218/sispeed_SImon_EC-Earth3_piControl_r1i1p1f1_gn_199312-199312.nc
+
+/scratch/tmp/805828.tmpdir/t0ni/nctime/fc0/CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/SImon/siu/gn/v20211218:
+total 8
+lrwxrwxrwx 1 bsc32627 bsc32 190 Dec 18 22:36 siu_SImon_EC-Earth3_piControl_r1i1p1f1_gn_199311-199311.nc -> /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/./CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/SImon/siu/gn/v20211218/siu_SImon_EC-Earth3_piControl_r1i1p1f1_gn_199311-199311.nc
+lrwxrwxrwx 1 bsc32627 bsc32 190 Dec 18 22:36 siu_SImon_EC-Earth3_piControl_r1i1p1f1_gn_199312-199312.nc -> /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/./CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/SImon/siu/gn/v20211218/siu_SImon_EC-Earth3_piControl_r1i1p1f1_gn_199312-199312.nc
+
+/scratch/tmp/805828.tmpdir/t0ni/nctime/fc0/CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/SImon/sivol/gn/v20211218:
+total 8
+lrwxrwxrwx 1 bsc32627 bsc32 194 Dec 18 22:36 sivol_SImon_EC-Earth3_piControl_r1i1p1f1_gn_199311-199311.nc -> /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/./CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/SImon/sivol/gn/v20211218/sivol_SImon_EC-Earth3_piControl_r1i1p1f1_gn_199311-199311.nc
+lrwxrwxrwx 1 bsc32627 bsc32 194 Dec 18 22:36 sivol_SImon_EC-Earth3_piControl_r1i1p1f1_gn_199312-199312.nc -> /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/./CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/SImon/sivol/gn/v20211218/sivol_SImon_EC-Earth3_piControl_r1i1p1f1_gn_199312-199312.nc
+
+/scratch/tmp/805828.tmpdir/t0ni/nctime/fc0/CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/SImon/sitemptop/gn/v20211218:
+total 8
+lrwxrwxrwx 1 bsc32627 bsc32 202 Dec 18 22:36 sitemptop_SImon_EC-Earth3_piControl_r1i1p1f1_gn_199311-199311.nc -> /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/./CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/SImon/sitemptop/gn/v20211218/sitemptop_SImon_EC-Earth3_piControl_r1i1p1f1_gn_199311-199311.nc
+lrwxrwxrwx 1 bsc32627 bsc32 202 Dec 18 22:36 sitemptop_SImon_EC-Earth3_piControl_r1i1p1f1_gn_199312-199312.nc -> /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/./CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/SImon/sitemptop/gn/v20211218/sitemptop_SImon_EC-Earth3_piControl_r1i1p1f1_gn_199312-199312.nc
+
+/scratch/tmp/805828.tmpdir/t0ni/nctime/fc0/CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/SImon/siv/gn/v20211218:
+total 8
+lrwxrwxrwx 1 bsc32627 bsc32 190 Dec 18 22:36 siv_SImon_EC-Earth3_piControl_r1i1p1f1_gn_199311-199311.nc -> /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/./CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/SImon/siv/gn/v20211218/siv_SImon_EC-Earth3_piControl_r1i1p1f1_gn_199311-199311.nc
+lrwxrwxrwx 1 bsc32627 bsc32 190 Dec 18 22:36 siv_SImon_EC-Earth3_piControl_r1i1p1f1_gn_199312-199312.nc -> /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/./CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/SImon/siv/gn/v20211218/siv_SImon_EC-Earth3_piControl_r1i1p1f1_gn_199312-199312.nc
+
+/scratch/tmp/805828.tmpdir/t0ni/nctime/fc0/CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Emon/tdps/gr/v20211218:
+total 8
+lrwxrwxrwx 1 bsc32627 bsc32 190 Dec 18 22:36 tdps_Emon_EC-Earth3_piControl_r1i1p1f1_gr_199311-199311.nc -> /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/./CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Emon/tdps/gr/v20211218/tdps_Emon_EC-Earth3_piControl_r1i1p1f1_gr_199311-199311.nc
+lrwxrwxrwx 1 bsc32627 bsc32 190 Dec 18 22:36 tdps_Emon_EC-Earth3_piControl_r1i1p1f1_gr_199312-199312.nc -> /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/./CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Emon/tdps/gr/v20211218/tdps_Emon_EC-Earth3_piControl_r1i1p1f1_gr_199312-199312.nc
+
+/scratch/tmp/805828.tmpdir/t0ni/nctime/fc0/CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Lmon/mrro/gr/v20211218:
+total 8
+lrwxrwxrwx 1 bsc32627 bsc32 190 Dec 18 22:36 mrro_Lmon_EC-Earth3_piControl_r1i1p1f1_gr_199311-199311.nc -> /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/./CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Lmon/mrro/gr/v20211218/mrro_Lmon_EC-Earth3_piControl_r1i1p1f1_gr_199311-199311.nc
+lrwxrwxrwx 1 bsc32627 bsc32 190 Dec 18 22:36 mrro_Lmon_EC-Earth3_piControl_r1i1p1f1_gr_199312-199312.nc -> /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/./CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Lmon/mrro/gr/v20211218/mrro_Lmon_EC-Earth3_piControl_r1i1p1f1_gr_199312-199312.nc
+
+/scratch/tmp/805828.tmpdir/t0ni/nctime/fc0/CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Amon/prc/gr/v20211218:
+total 8
+lrwxrwxrwx 1 bsc32627 bsc32 188 Dec 18 22:36 prc_Amon_EC-Earth3_piControl_r1i1p1f1_gr_199311-199311.nc -> /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/./CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Amon/prc/gr/v20211218/prc_Amon_EC-Earth3_piControl_r1i1p1f1_gr_199311-199311.nc
+lrwxrwxrwx 1 bsc32627 bsc32 188 Dec 18 22:36 prc_Amon_EC-Earth3_piControl_r1i1p1f1_gr_199312-199312.nc -> /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/./CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Amon/prc/gr/v20211218/prc_Amon_EC-Earth3_piControl_r1i1p1f1_gr_199312-199312.nc
+
+/scratch/tmp/805828.tmpdir/t0ni/nctime/fc0/CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Amon/hfls/gr/v20211218:
+total 8
+lrwxrwxrwx 1 bsc32627 bsc32 190 Dec 18 22:36 hfls_Amon_EC-Earth3_piControl_r1i1p1f1_gr_199311-199311.nc -> /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/./CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Amon/hfls/gr/v20211218/hfls_Amon_EC-Earth3_piControl_r1i1p1f1_gr_199311-199311.nc
+lrwxrwxrwx 1 bsc32627 bsc32 190 Dec 18 22:36 hfls_Amon_EC-Earth3_piControl_r1i1p1f1_gr_199312-199312.nc -> /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/./CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Amon/hfls/gr/v20211218/hfls_Amon_EC-Earth3_piControl_r1i1p1f1_gr_199312-199312.nc
+
+/scratch/tmp/805828.tmpdir/t0ni/nctime/fc0/CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Amon/vas/gr/v20211218:
+total 8
+lrwxrwxrwx 1 bsc32627 bsc32 188 Dec 18 22:36 vas_Amon_EC-Earth3_piControl_r1i1p1f1_gr_199311-199311.nc -> /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/./CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Amon/vas/gr/v20211218/vas_Amon_EC-Earth3_piControl_r1i1p1f1_gr_199311-199311.nc
+lrwxrwxrwx 1 bsc32627 bsc32 188 Dec 18 22:36 vas_Amon_EC-Earth3_piControl_r1i1p1f1_gr_199312-199312.nc -> /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/./CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Amon/vas/gr/v20211218/vas_Amon_EC-Earth3_piControl_r1i1p1f1_gr_199312-199312.nc
+
+/scratch/tmp/805828.tmpdir/t0ni/nctime/fc0/CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Amon/rlds/gr/v20211218:
+total 8
+lrwxrwxrwx 1 bsc32627 bsc32 190 Dec 18 22:36 rlds_Amon_EC-Earth3_piControl_r1i1p1f1_gr_199311-199311.nc -> /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/./CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Amon/rlds/gr/v20211218/rlds_Amon_EC-Earth3_piControl_r1i1p1f1_gr_199311-199311.nc
+lrwxrwxrwx 1 bsc32627 bsc32 190 Dec 18 22:36 rlds_Amon_EC-Earth3_piControl_r1i1p1f1_gr_199312-199312.nc -> /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/./CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Amon/rlds/gr/v20211218/rlds_Amon_EC-Earth3_piControl_r1i1p1f1_gr_199312-199312.nc
+
+/scratch/tmp/805828.tmpdir/t0ni/nctime/fc0/CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Amon/uas/gr/v20211218:
+total 8
+lrwxrwxrwx 1 bsc32627 bsc32 188 Dec 18 22:36 uas_Amon_EC-Earth3_piControl_r1i1p1f1_gr_199311-199311.nc -> /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/./CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Amon/uas/gr/v20211218/uas_Amon_EC-Earth3_piControl_r1i1p1f1_gr_199311-199311.nc
+lrwxrwxrwx 1 bsc32627 bsc32 188 Dec 18 22:36 uas_Amon_EC-Earth3_piControl_r1i1p1f1_gr_199312-199312.nc -> /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/./CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Amon/uas/gr/v20211218/uas_Amon_EC-Earth3_piControl_r1i1p1f1_gr_199312-199312.nc
+
+/scratch/tmp/805828.tmpdir/t0ni/nctime/fc0/CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Amon/prsn/gr/v20211218:
+total 8
+lrwxrwxrwx 1 bsc32627 bsc32 190 Dec 18 22:36 prsn_Amon_EC-Earth3_piControl_r1i1p1f1_gr_199311-199311.nc -> /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/./CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Amon/prsn/gr/v20211218/prsn_Amon_EC-Earth3_piControl_r1i1p1f1_gr_199311-199311.nc
+lrwxrwxrwx 1 bsc32627 bsc32 190 Dec 18 22:36 prsn_Amon_EC-Earth3_piControl_r1i1p1f1_gr_199312-199312.nc -> /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/./CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Amon/prsn/gr/v20211218/prsn_Amon_EC-Earth3_piControl_r1i1p1f1_gr_199312-199312.nc
+
+/scratch/tmp/805828.tmpdir/t0ni/nctime/fc0/CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Amon/va/gr/v20211218:
+total 8
+lrwxrwxrwx 1 bsc32627 bsc32 186 Dec 18 22:36 va_Amon_EC-Earth3_piControl_r1i1p1f1_gr_199311-199311.nc -> /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/./CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Amon/va/gr/v20211218/va_Amon_EC-Earth3_piControl_r1i1p1f1_gr_199311-199311.nc
+lrwxrwxrwx 1 bsc32627 bsc32 186 Dec 18 22:36 va_Amon_EC-Earth3_piControl_r1i1p1f1_gr_199312-199312.nc -> /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/./CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Amon/va/gr/v20211218/va_Amon_EC-Earth3_piControl_r1i1p1f1_gr_199312-199312.nc
+
+/scratch/tmp/805828.tmpdir/t0ni/nctime/fc0/CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Amon/tas/gr/v20211218:
+total 8
+lrwxrwxrwx 1 bsc32627 bsc32 188 Dec 18 22:36 tas_Amon_EC-Earth3_piControl_r1i1p1f1_gr_199311-199311.nc -> /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/./CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Amon/tas/gr/v20211218/tas_Amon_EC-Earth3_piControl_r1i1p1f1_gr_199311-199311.nc
+lrwxrwxrwx 1 bsc32627 bsc32 188 Dec 18 22:36 tas_Amon_EC-Earth3_piControl_r1i1p1f1_gr_199312-199312.nc -> /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/./CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Amon/tas/gr/v20211218/tas_Amon_EC-Earth3_piControl_r1i1p1f1_gr_199312-199312.nc
+
+/scratch/tmp/805828.tmpdir/t0ni/nctime/fc0/CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Amon/clt/gr/v20211218:
+total 8
+lrwxrwxrwx 1 bsc32627 bsc32 188 Dec 18 22:36 clt_Amon_EC-Earth3_piControl_r1i1p1f1_gr_199311-199311.nc -> /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/./CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Amon/clt/gr/v20211218/clt_Amon_EC-Earth3_piControl_r1i1p1f1_gr_199311-199311.nc
+lrwxrwxrwx 1 bsc32627 bsc32 188 Dec 18 22:36 clt_Amon_EC-Earth3_piControl_r1i1p1f1_gr_199312-199312.nc -> /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/./CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Amon/clt/gr/v20211218/clt_Amon_EC-Earth3_piControl_r1i1p1f1_gr_199312-199312.nc
+
+/scratch/tmp/805828.tmpdir/t0ni/nctime/fc0/CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Amon/ua/gr/v20211218:
+total 8
+lrwxrwxrwx 1 bsc32627 bsc32 186 Dec 18 22:36 ua_Amon_EC-Earth3_piControl_r1i1p1f1_gr_199311-199311.nc -> /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/./CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Amon/ua/gr/v20211218/ua_Amon_EC-Earth3_piControl_r1i1p1f1_gr_199311-199311.nc
+lrwxrwxrwx 1 bsc32627 bsc32 186 Dec 18 22:36 ua_Amon_EC-Earth3_piControl_r1i1p1f1_gr_199312-199312.nc -> /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/./CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Amon/ua/gr/v20211218/ua_Amon_EC-Earth3_piControl_r1i1p1f1_gr_199312-199312.nc
+
+/scratch/tmp/805828.tmpdir/t0ni/nctime/fc0/CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Amon/hfss/gr/v20211218:
+total 8
+lrwxrwxrwx 1 bsc32627 bsc32 190 Dec 18 22:36 hfss_Amon_EC-Earth3_piControl_r1i1p1f1_gr_199311-199311.nc -> /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/./CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Amon/hfss/gr/v20211218/hfss_Amon_EC-Earth3_piControl_r1i1p1f1_gr_199311-199311.nc
+lrwxrwxrwx 1 bsc32627 bsc32 190 Dec 18 22:36 hfss_Amon_EC-Earth3_piControl_r1i1p1f1_gr_199312-199312.nc -> /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/./CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Amon/hfss/gr/v20211218/hfss_Amon_EC-Earth3_piControl_r1i1p1f1_gr_199312-199312.nc
+
+/scratch/tmp/805828.tmpdir/t0ni/nctime/fc0/CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Amon/rsds/gr/v20211218:
+total 8
+lrwxrwxrwx 1 bsc32627 bsc32 190 Dec 18 22:36 rsds_Amon_EC-Earth3_piControl_r1i1p1f1_gr_199311-199311.nc -> /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/./CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Amon/rsds/gr/v20211218/rsds_Amon_EC-Earth3_piControl_r1i1p1f1_gr_199311-199311.nc
+lrwxrwxrwx 1 bsc32627 bsc32 190 Dec 18 22:36 rsds_Amon_EC-Earth3_piControl_r1i1p1f1_gr_199312-199312.nc -> /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/./CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Amon/rsds/gr/v20211218/rsds_Amon_EC-Earth3_piControl_r1i1p1f1_gr_199312-199312.nc
+
+/scratch/tmp/805828.tmpdir/t0ni/nctime/fc0/CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Amon/rlus/gr/v20211218:
+total 8
+lrwxrwxrwx 1 bsc32627 bsc32 190 Dec 18 22:36 rlus_Amon_EC-Earth3_piControl_r1i1p1f1_gr_199311-199311.nc -> /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/./CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Amon/rlus/gr/v20211218/rlus_Amon_EC-Earth3_piControl_r1i1p1f1_gr_199311-199311.nc
+lrwxrwxrwx 1 bsc32627 bsc32 190 Dec 18 22:36 rlus_Amon_EC-Earth3_piControl_r1i1p1f1_gr_199312-199312.nc -> /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/./CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Amon/rlus/gr/v20211218/rlus_Amon_EC-Earth3_piControl_r1i1p1f1_gr_199312-199312.nc
+
+/scratch/tmp/805828.tmpdir/t0ni/nctime/fc0/CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Amon/rsdt/gr/v20211218:
+total 8
+lrwxrwxrwx 1 bsc32627 bsc32 190 Dec 18 22:36 rsdt_Amon_EC-Earth3_piControl_r1i1p1f1_gr_199311-199311.nc -> /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/./CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Amon/rsdt/gr/v20211218/rsdt_Amon_EC-Earth3_piControl_r1i1p1f1_gr_199311-199311.nc
+lrwxrwxrwx 1 bsc32627 bsc32 190 Dec 18 22:36 rsdt_Amon_EC-Earth3_piControl_r1i1p1f1_gr_199312-199312.nc -> /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/./CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Amon/rsdt/gr/v20211218/rsdt_Amon_EC-Earth3_piControl_r1i1p1f1_gr_199312-199312.nc
+
+/scratch/tmp/805828.tmpdir/t0ni/nctime/fc0/CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Amon/tasmin/gr/v20211218:
+total 8
+lrwxrwxrwx 1 bsc32627 bsc32 194 Dec 18 22:36 tasmin_Amon_EC-Earth3_piControl_r1i1p1f1_gr_199311-199311.nc -> /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/./CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Amon/tasmin/gr/v20211218/tasmin_Amon_EC-Earth3_piControl_r1i1p1f1_gr_199311-199311.nc
+lrwxrwxrwx 1 bsc32627 bsc32 194 Dec 18 22:36 tasmin_Amon_EC-Earth3_piControl_r1i1p1f1_gr_199312-199312.nc -> /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/./CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Amon/tasmin/gr/v20211218/tasmin_Amon_EC-Earth3_piControl_r1i1p1f1_gr_199312-199312.nc
+
+/scratch/tmp/805828.tmpdir/t0ni/nctime/fc0/CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Amon/ta/gr/v20211218:
+total 8
+lrwxrwxrwx 1 bsc32627 bsc32 186 Dec 18 22:36 ta_Amon_EC-Earth3_piControl_r1i1p1f1_gr_199311-199311.nc -> /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/./CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Amon/ta/gr/v20211218/ta_Amon_EC-Earth3_piControl_r1i1p1f1_gr_199311-199311.nc
+lrwxrwxrwx 1 bsc32627 bsc32 186 Dec 18 22:36 ta_Amon_EC-Earth3_piControl_r1i1p1f1_gr_199312-199312.nc -> /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/./CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Amon/ta/gr/v20211218/ta_Amon_EC-Earth3_piControl_r1i1p1f1_gr_199312-199312.nc
+
+/scratch/tmp/805828.tmpdir/t0ni/nctime/fc0/CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Amon/rlut/gr/v20211218:
+total 8
+lrwxrwxrwx 1 bsc32627 bsc32 190 Dec 18 22:36 rlut_Amon_EC-Earth3_piControl_r1i1p1f1_gr_199311-199311.nc -> /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/./CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Amon/rlut/gr/v20211218/rlut_Amon_EC-Earth3_piControl_r1i1p1f1_gr_199311-199311.nc
+lrwxrwxrwx 1 bsc32627 bsc32 190 Dec 18 22:36 rlut_Amon_EC-Earth3_piControl_r1i1p1f1_gr_199312-199312.nc -> /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/./CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Amon/rlut/gr/v20211218/rlut_Amon_EC-Earth3_piControl_r1i1p1f1_gr_199312-199312.nc
+
+/scratch/tmp/805828.tmpdir/t0ni/nctime/fc0/CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Amon/tosa/gr/v20211218:
+total 8
+lrwxrwxrwx 1 bsc32627 bsc32 190 Dec 18 22:36 tosa_Amon_EC-Earth3_piControl_r1i1p1f1_gr_199311-199311.nc -> /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/./CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Amon/tosa/gr/v20211218/tosa_Amon_EC-Earth3_piControl_r1i1p1f1_gr_199311-199311.nc
+lrwxrwxrwx 1 bsc32627 bsc32 190 Dec 18 22:36 tosa_Amon_EC-Earth3_piControl_r1i1p1f1_gr_199312-199312.nc -> /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/./CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Amon/tosa/gr/v20211218/tosa_Amon_EC-Earth3_piControl_r1i1p1f1_gr_199312-199312.nc
+
+/scratch/tmp/805828.tmpdir/t0ni/nctime/fc0/CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Amon/psl/gr/v20211218:
+total 8
+lrwxrwxrwx 1 bsc32627 bsc32 188 Dec 18 22:36 psl_Amon_EC-Earth3_piControl_r1i1p1f1_gr_199311-199311.nc -> /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/./CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Amon/psl/gr/v20211218/psl_Amon_EC-Earth3_piControl_r1i1p1f1_gr_199311-199311.nc
+lrwxrwxrwx 1 bsc32627 bsc32 188 Dec 18 22:36 psl_Amon_EC-Earth3_piControl_r1i1p1f1_gr_199312-199312.nc -> /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/./CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Amon/psl/gr/v20211218/psl_Amon_EC-Earth3_piControl_r1i1p1f1_gr_199312-199312.nc
+
+/scratch/tmp/805828.tmpdir/t0ni/nctime/fc0/CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Amon/pr/gr/v20211218:
+total 8
+lrwxrwxrwx 1 bsc32627 bsc32 186 Dec 18 22:36 pr_Amon_EC-Earth3_piControl_r1i1p1f1_gr_199311-199311.nc -> /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/./CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Amon/pr/gr/v20211218/pr_Amon_EC-Earth3_piControl_r1i1p1f1_gr_199311-199311.nc
+lrwxrwxrwx 1 bsc32627 bsc32 186 Dec 18 22:36 pr_Amon_EC-Earth3_piControl_r1i1p1f1_gr_199312-199312.nc -> /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/./CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Amon/pr/gr/v20211218/pr_Amon_EC-Earth3_piControl_r1i1p1f1_gr_199312-199312.nc
+
+/scratch/tmp/805828.tmpdir/t0ni/nctime/fc0/CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Amon/tasmax/gr/v20211218:
+total 8
+lrwxrwxrwx 1 bsc32627 bsc32 194 Dec 18 22:36 tasmax_Amon_EC-Earth3_piControl_r1i1p1f1_gr_199311-199311.nc -> /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/./CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Amon/tasmax/gr/v20211218/tasmax_Amon_EC-Earth3_piControl_r1i1p1f1_gr_199311-199311.nc
+lrwxrwxrwx 1 bsc32627 bsc32 194 Dec 18 22:36 tasmax_Amon_EC-Earth3_piControl_r1i1p1f1_gr_199312-199312.nc -> /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/./CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Amon/tasmax/gr/v20211218/tasmax_Amon_EC-Earth3_piControl_r1i1p1f1_gr_199312-199312.nc
+
+/scratch/tmp/805828.tmpdir/t0ni/nctime/fc0/CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Amon/evspsbl/gr/v20211218:
+total 8
+lrwxrwxrwx 1 bsc32627 bsc32 196 Dec 18 22:36 evspsbl_Amon_EC-Earth3_piControl_r1i1p1f1_gr_199311-199311.nc -> /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/./CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Amon/evspsbl/gr/v20211218/evspsbl_Amon_EC-Earth3_piControl_r1i1p1f1_gr_199311-199311.nc
+lrwxrwxrwx 1 bsc32627 bsc32 196 Dec 18 22:36 evspsbl_Amon_EC-Earth3_piControl_r1i1p1f1_gr_199312-199312.nc -> /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/./CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Amon/evspsbl/gr/v20211218/evspsbl_Amon_EC-Earth3_piControl_r1i1p1f1_gr_199312-199312.nc
+
+/scratch/tmp/805828.tmpdir/t0ni/nctime/fc0/CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Amon/rsus/gr/v20211218:
+total 8
+lrwxrwxrwx 1 bsc32627 bsc32 190 Dec 18 22:36 rsus_Amon_EC-Earth3_piControl_r1i1p1f1_gr_199311-199311.nc -> /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/./CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Amon/rsus/gr/v20211218/rsus_Amon_EC-Earth3_piControl_r1i1p1f1_gr_199311-199311.nc
+lrwxrwxrwx 1 bsc32627 bsc32 190 Dec 18 22:36 rsus_Amon_EC-Earth3_piControl_r1i1p1f1_gr_199312-199312.nc -> /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/./CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Amon/rsus/gr/v20211218/rsus_Amon_EC-Earth3_piControl_r1i1p1f1_gr_199312-199312.nc
+
+/scratch/tmp/805828.tmpdir/t0ni/nctime/fc0/CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Amon/rsut/gr/v20211218:
+total 8
+lrwxrwxrwx 1 bsc32627 bsc32 190 Dec 18 22:36 rsut_Amon_EC-Earth3_piControl_r1i1p1f1_gr_199311-199311.nc -> /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/./CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Amon/rsut/gr/v20211218/rsut_Amon_EC-Earth3_piControl_r1i1p1f1_gr_199311-199311.nc
+lrwxrwxrwx 1 bsc32627 bsc32 190 Dec 18 22:36 rsut_Amon_EC-Earth3_piControl_r1i1p1f1_gr_199312-199312.nc -> /esarchive/exp/ecearth/t0ni/original_files/cmorfiles/./CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Amon/rsut/gr/v20211218/rsut_Amon_EC-Earth3_piControl_r1i1p1f1_gr_199312-199312.nc
+Analysing data, please wait...[KProcess netCDF file(s): 0% | 1/110 filesProcess netCDF file(s): 1% | 2/110 filesProcess netCDF file(s): 2% | 3/110 filesProcess netCDF file(s): 3% | 4/110 filesProcess netCDF file(s): 4% | 5/110 filesProcess netCDF file(s): 5% | 6/110 filesProcess netCDF file(s): 6% | 7/110 filesProcess netCDF file(s): 7% | 8/110 filesProcess netCDF file(s): 8% | 9/110 filesProcess netCDF file(s): 9% | 10/110 filesProcess netCDF file(s): 10% | 11/110 filesProcess netCDF file(s): 10% | 12/110 filesProcess netCDF file(s): 11% | 13/110 filesProcess netCDF file(s): 12% | 14/110 filesProcess netCDF file(s): 13% | 15/110 filesProcess netCDF file(s): 14% | 16/110 filesProcess netCDF file(s): 15% | 17/110 filesProcess netCDF file(s): 16% | 18/110 filesProcess netCDF file(s): 17% | 19/110 filesProcess netCDF file(s): 18% | 20/110 filesProcess netCDF file(s): 19% | 21/110 filesProcess netCDF file(s): 20% | 22/110 filesProcess netCDF file(s): 20% | 23/110 filesProcess netCDF file(s): 21% | 24/110 filesProcess netCDF file(s): 22% | 25/110 filesProcess netCDF file(s): 23% | 26/110 filesProcess netCDF file(s): 24% | 27/110 filesProcess netCDF file(s): 25% | 28/110 filesProcess netCDF file(s): 26% | 29/110 filesProcess netCDF file(s): 27% | 30/110 filesProcess netCDF file(s): 28% | 31/110 filesProcess netCDF file(s): 29% | 32/110 filesProcess netCDF file(s): 30% | 33/110 filesProcess netCDF file(s): 30% | 34/110 filesProcess netCDF file(s): 31% | 35/110 filesProcess netCDF file(s): 32% | 36/110 filesProcess netCDF file(s): 33% | 37/110 filesProcess netCDF file(s): 34% | 38/110 filesProcess netCDF file(s): 35% | 39/110 filesProcess netCDF file(s): 36% | 40/110 filesProcess netCDF file(s): 37% | 41/110 filesProcess netCDF file(s): 38% | 42/110 filesProcess netCDF file(s): 39% | 43/110 filesProcess netCDF file(s): 40% | 44/110 filesProcess netCDF file(s): 40% | 45/110 filesProcess netCDF file(s): 41% | 46/110 filesProcess netCDF file(s): 42% | 47/110 filesProcess netCDF file(s): 43% | 48/110 filesProcess netCDF file(s): 44% | 49/110 filesProcess netCDF file(s): 45% | 50/110 filesProcess netCDF file(s): 46% | 51/110 filesProcess netCDF file(s): 47% | 52/110 filesProcess netCDF file(s): 48% | 53/110 filesProcess netCDF file(s): 49% | 54/110 filesProcess netCDF file(s): 50% | 55/110 filesProcess netCDF file(s): 50% | 56/110 filesProcess netCDF file(s): 51% | 57/110 filesProcess netCDF file(s): 52% | 58/110 filesProcess netCDF file(s): 53% | 59/110 filesProcess netCDF file(s): 54% | 60/110 filesProcess netCDF file(s): 55% | 61/110 filesProcess netCDF file(s): 56% | 62/110 filesProcess netCDF file(s): 57% | 63/110 filesProcess netCDF file(s): 58% | 64/110 filesProcess netCDF file(s): 59% | 65/110 filesProcess netCDF file(s): 60% | 66/110 filesProcess netCDF file(s): 60% | 67/110 filesProcess netCDF file(s): 61% | 68/110 filesProcess netCDF file(s): 62% | 69/110 filesProcess netCDF file(s): 63% | 70/110 filesProcess netCDF file(s): 64% | 71/110 filesProcess netCDF file(s): 65% | 72/110 filesProcess netCDF file(s): 66% | 73/110 filesProcess netCDF file(s): 67% | 74/110 filesProcess netCDF file(s): 68% | 75/110 filesProcess netCDF file(s): 69% | 76/110 filesProcess netCDF file(s): 70% | 77/110 filesProcess netCDF file(s): 70% | 78/110 filesProcess netCDF file(s): 71% | 79/110 filesProcess netCDF file(s): 72% | 80/110 filesProcess netCDF file(s): 73% | 81/110 filesProcess netCDF file(s): 74% | 82/110 filesProcess netCDF file(s): 75% | 83/110 filesProcess netCDF file(s): 76% | 84/110 filesProcess netCDF file(s): 77% | 85/110 filesProcess netCDF file(s): 78% | 86/110 filesProcess netCDF file(s): 79% | 87/110 filesProcess netCDF file(s): 80% | 88/110 filesProcess netCDF file(s): 80% | 89/110 filesProcess netCDF file(s): 81% | 90/110 filesProcess netCDF file(s): 82% | 91/110 filesProcess netCDF file(s): 83% | 92/110 filesProcess netCDF file(s): 84% | 93/110 filesProcess netCDF file(s): 85% | 94/110 filesProcess netCDF file(s): 86% | 95/110 filesProcess netCDF file(s): 87% | 96/110 filesProcess netCDF file(s): 88% | 97/110 filesProcess netCDF file(s): 89% | 98/110 filesProcess netCDF file(s): 90% | 99/110 filesProcess netCDF file(s): 90% | 100/110 filesProcess netCDF file(s): 91% | 101/110 filesProcess netCDF file(s): 92% | 102/110 filesProcess netCDF file(s): 93% | 103/110 filesProcess netCDF file(s): 94% | 104/110 filesProcess netCDF file(s): 95% | 105/110 filesProcess netCDF file(s): 96% | 106/110 filesProcess netCDF file(s): 97% | 107/110 filesProcess netCDF file(s): 98% | 108/110 filesProcess netCDF file(s): 99% | 109/110 filesProcess netCDF file(s): 100% | 110/110 files
+Number of file(s) with error(s): 0
+Number of file(s) scanned: 110
+Number of file(s) skipped: 0
+Collecting data, please wait...[KProcess netCDF file(s): 0% | 1/110 filesProcess netCDF file(s): 1% | 2/110 filesProcess netCDF file(s): 2% | 3/110 filesProcess netCDF file(s): 3% | 4/110 filesProcess netCDF file(s): 4% | 5/110 filesProcess netCDF file(s): 5% | 6/110 filesProcess netCDF file(s): 6% | 7/110 filesProcess netCDF file(s): 7% | 8/110 filesProcess netCDF file(s): 8% | 9/110 filesProcess netCDF file(s): 9% | 10/110 filesProcess netCDF file(s): 10% | 11/110 filesProcess netCDF file(s): 10% | 12/110 filesProcess netCDF file(s): 11% | 13/110 filesProcess netCDF file(s): 12% | 14/110 filesProcess netCDF file(s): 13% | 15/110 filesProcess netCDF file(s): 14% | 16/110 filesProcess netCDF file(s): 15% | 17/110 filesProcess netCDF file(s): 16% | 18/110 filesProcess netCDF file(s): 17% | 19/110 filesProcess netCDF file(s): 18% | 20/110 filesProcess netCDF file(s): 19% | 21/110 filesProcess netCDF file(s): 20% | 22/110 filesProcess netCDF file(s): 20% | 23/110 filesProcess netCDF file(s): 21% | 24/110 filesProcess netCDF file(s): 22% | 25/110 filesProcess netCDF file(s): 23% | 26/110 filesProcess netCDF file(s): 24% | 27/110 filesProcess netCDF file(s): 25% | 28/110 filesProcess netCDF file(s): 26% | 29/110 filesProcess netCDF file(s): 27% | 30/110 filesProcess netCDF file(s): 28% | 31/110 filesProcess netCDF file(s): 29% | 32/110 filesProcess netCDF file(s): 30% | 33/110 filesProcess netCDF file(s): 30% | 34/110 filesProcess netCDF file(s): 31% | 35/110 filesProcess netCDF file(s): 32% | 36/110 filesProcess netCDF file(s): 33% | 37/110 filesProcess netCDF file(s): 34% | 38/110 filesProcess netCDF file(s): 35% | 39/110 filesProcess netCDF file(s): 36% | 40/110 filesProcess netCDF file(s): 37% | 41/110 filesProcess netCDF file(s): 38% | 42/110 filesProcess netCDF file(s): 39% | 43/110 filesProcess netCDF file(s): 40% | 44/110 filesProcess netCDF file(s): 40% | 45/110 filesProcess netCDF file(s): 41% | 46/110 filesProcess netCDF file(s): 42% | 47/110 filesProcess netCDF file(s): 43% | 48/110 filesProcess netCDF file(s): 44% | 49/110 filesProcess netCDF file(s): 45% | 50/110 filesProcess netCDF file(s): 46% | 51/110 filesProcess netCDF file(s): 47% | 52/110 filesProcess netCDF file(s): 48% | 53/110 filesProcess netCDF file(s): 49% | 54/110 filesProcess netCDF file(s): 50% | 55/110 filesProcess netCDF file(s): 50% | 56/110 filesProcess netCDF file(s): 51% | 57/110 filesProcess netCDF file(s): 52% | 58/110 filesProcess netCDF file(s): 53% | 59/110 filesProcess netCDF file(s): 54% | 60/110 filesProcess netCDF file(s): 55% | 61/110 filesProcess netCDF file(s): 56% | 62/110 filesProcess netCDF file(s): 57% | 63/110 filesProcess netCDF file(s): 58% | 64/110 filesProcess netCDF file(s): 59% | 65/110 filesProcess netCDF file(s): 60% | 66/110 filesProcess netCDF file(s): 60% | 67/110 filesProcess netCDF file(s): 61% | 68/110 filesProcess netCDF file(s): 62% | 69/110 filesProcess netCDF file(s): 63% | 70/110 filesProcess netCDF file(s): 64% | 71/110 filesProcess netCDF file(s): 65% | 72/110 filesProcess netCDF file(s): 66% | 73/110 filesProcess netCDF file(s): 67% | 74/110 filesProcess netCDF file(s): 68% | 75/110 filesProcess netCDF file(s): 69% | 76/110 filesProcess netCDF file(s): 70% | 77/110 filesProcess netCDF file(s): 70% | 78/110 filesProcess netCDF file(s): 71% | 79/110 filesProcess netCDF file(s): 72% | 80/110 filesProcess netCDF file(s): 73% | 81/110 filesProcess netCDF file(s): 74% | 82/110 filesProcess netCDF file(s): 75% | 83/110 filesProcess netCDF file(s): 76% | 84/110 filesProcess netCDF file(s): 77% | 85/110 filesProcess netCDF file(s): 78% | 86/110 filesProcess netCDF file(s): 79% | 87/110 filesProcess netCDF file(s): 80% | 88/110 filesProcess netCDF file(s): 80% | 89/110 filesProcess netCDF file(s): 81% | 90/110 filesProcess netCDF file(s): 82% | 91/110 filesProcess netCDF file(s): 83% | 92/110 filesProcess netCDF file(s): 84% | 93/110 filesProcess netCDF file(s): 85% | 94/110 filesProcess netCDF file(s): 86% | 95/110 filesProcess netCDF file(s): 87% | 96/110 filesProcess netCDF file(s): 88% | 97/110 filesProcess netCDF file(s): 89% | 98/110 filesProcess netCDF file(s): 90% | 99/110 filesProcess netCDF file(s): 90% | 100/110 filesProcess netCDF file(s): 91% | 101/110 filesProcess netCDF file(s): 92% | 102/110 filesProcess netCDF file(s): 93% | 103/110 filesProcess netCDF file(s): 94% | 104/110 filesProcess netCDF file(s): 95% | 105/110 filesProcess netCDF file(s): 96% | 106/110 filesProcess netCDF file(s): 97% | 107/110 filesProcess netCDF file(s): 98% | 108/110 filesProcess netCDF file(s): 99% | 109/110 filesProcess netCDF file(s): 100% | 110/110 files
+Number of node(s): 110
+Number of dataset(s): 55
+Number of dataset(s) with overlap(s): 0
+Number of dataset(s) with broken time series: 0
+Number of file(s) scanned: 110
+Number of file(s) skipped: 0
+
+------------------------------------------------------------
+Sender: LSF System <perf@s01r2b84>
+Subject: Job 805828: <t0ni_19931101_fc0_2_NCTIME> in cluster <mn3> Done
+
+Job <t0ni_19931101_fc0_2_NCTIME> was submitted from host <login1> by user <bsc32627> in cluster <mn3>.
+Job was executed on host(s) <s01r2b84>, in queue <sequential>, as user <bsc32627> in cluster <mn3>.
+</home/bsc32/bsc32627> was used as the home directory.
+</gpfs/scratch/bsc32/bsc32627/t0ni/LOG_t0ni> was used as the working directory.
+Started at Sat Dec 18 22:36:26 2021
+Results reported on Sat Dec 18 22:37:10 2021
+
+Your job looked like:
+
+------------------------------------------------------------
+# LSBATCH: User input
+#!/bin/bash
+
+###############################################################################
+#                   NCTIME t0ni EXPERIMENT
+###############################################################################
+#
+#BSUB -q bsc_es
+#BSUB -J t0ni_19931101_fc0_2_NCTIME
+#BSUB -oo /gpfs/scratch/bsc32/bsc32627/t0ni/LOG_t0ni/t0ni_19931101_fc0_2_NCTIME.cmd.out
+#BSUB -eo /gpfs/scratch/bsc32/bsc32627/t0ni/LOG_t0ni/t0ni_19931101_fc0_2_NCTIME.cmd.err
+#BSUB -W 01:00
+#BSUB -n 1
+
+
+#
+###############################################################################
+###################
+# Autosubmit header
+###################
+set -xuve
+job_name_ptrn='/gpfs/scratch/bsc32/bsc32627/t0ni/LOG_t0ni/t0ni_19931101_fc0_2_NCTIME'
+echo $(date +%s) > ${job_name_ptrn}_STAT
+
+###################
+# Autosubmit job
+###################
+
+set -v
+#
+# Architecture
+#
+CHUNK=2
+Chunk_end_date=19931231
+Chunk_start_date=19931201
+EXPID=t0ni
+HPCARCH=marenostrum4
+CURRENT_ARCH=nord3
+HPCPROJ=bsc32
+HPCUSER=bsc32627
+JOBNAME=t0ni_19931101_fc0_2_NCTIME
+MEMBER=fc0
+MODEL=ecearth
+PROJDIR=/esarchive/autosubmit/t0ni/proj/auto-ecearth3
+PROJ=bsc32
+CHUNKSIZE=1
+MEMBER=fc0
+CMOR_REALIZATION_INDEX=""
+START_date=19931101
+
+export HPCPROJ
+
+(... more ...)
+------------------------------------------------------------
+
+Successfully completed.
+
+Resource usage summary:
+
+    CPU time :               19.48 sec.
+    Max Memory :             1005 MB
+    Average Memory :         794.00 MB
+    Total Requested Memory : 1750.00 MB
+    Delta Memory :           745.00 MB
+    (Delta: the difference between Total Requested Memory and Max Memory.)
+    Max Processes :          4
+    Max Threads :            5
+
+The output (if any) is above this job summary.
+
+
+
+PS:
+
+Read file </gpfs/scratch/bsc32/bsc32627/t0ni/LOG_t0ni/t0ni_19931101_fc0_2_NCTIME.cmd.err> for stderr output of this job.
+

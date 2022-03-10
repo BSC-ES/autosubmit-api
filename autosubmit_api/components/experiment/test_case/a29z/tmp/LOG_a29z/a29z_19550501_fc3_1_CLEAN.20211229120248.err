@@ -1,0 +1,28 @@
+[INFO] JOBID=19588028
+
+job_name_ptrn='/gpfs/scratch/bsc32/bsc32985/a29z/LOG_a29z/a29z_19550501_fc3_1_CLEAN'
++ job_name_ptrn=/gpfs/scratch/bsc32/bsc32985/a29z/LOG_a29z/a29z_19550501_fc3_1_CLEAN
+echo $(date +%s) > ${job_name_ptrn}_STAT
+date +%s
+++ date +%s
++ echo 1640775761
+
+###################
+# Autosubmit job
+###################
+
+sleep 30
++ sleep 30
+###################
+# Autosubmit tailer
+###################
+set -xuve
++ set -xuve
+echo $(date +%s) >> ${job_name_ptrn}_STAT
+date +%s
+++ date +%s
++ echo 1640775791
+touch ${job_name_ptrn}_COMPLETED
++ touch /gpfs/scratch/bsc32/bsc32985/a29z/LOG_a29z/a29z_19550501_fc3_1_CLEAN_COMPLETED
+exit 0
++ exit 0

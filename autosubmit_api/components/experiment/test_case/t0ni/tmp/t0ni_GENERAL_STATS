@@ -1,0 +1,85 @@
+
+# CPMIP performance metrics for CMIP6
+
+[METRICS]
+# Simulated years per day
+SYPD = 3.03
+# Core hours per simulated year
+CHSY = 18968.50
+# Theoretical Joules per simulated year 
+TJPSY =  727363533
+# Real Joules per simulated year 
+RJPSY = 
+# Actual simulated years per day
+ASYPD = .45
+# Real simulated years per day
+RSYPD = .25
+# Memory bloat
+Memory bloat = 
+# Data Output cost (%)
+Data Output cost (%) = 3.96
+# Data intensity (MB/CH)
+Data intensity (MB/CH) = .003
+
+# Job statistics
+
+[JOB_STATS]
+Job name 	 = 	 Queue time (H:M:S) 	 Run time (H:M:S) 
+         t0ni_19931101_fc0_2_CMORATM = 	   00:00:07 	   00:00:55 
+           t0ni_19931101_fc0_1_CLEAN = 	   00:00:00 	   00:04:24 
+            t0ni_19931101_fc0_2_POST = 	   02:27:22 	   00:00:18 
+               t0ni_19931101_fc0_INI = 	   06:44:26 	   00:08:51 
+            t0ni_19931101_fc0_1_POST = 	   06:08:16 	   00:00:11 
+          t0ni_19931101_fc0_1_SAVEIC = 	   00:00:04 	   00:55:31 
+          t0ni_19931101_fc0_2_SAVEIC = 	   00:00:04 	   00:57:50 
+             t0ni_19931101_fc0_2_SIM = 	   00:46:18 	   00:47:20 
+                    t0ni_SYNCHRONIZE = 	   00:00:00 	   00:04:01 
+                   t0ni_REMOTE_SETUP = 	   06:39:57 	   00:34:42 
+             t0ni_19931101_fc0_1_SIM = 	   00:00:04 	   00:46:13 
+         t0ni_19931101_fc0_1_CMOROCE = 	   05:19:41 	   00:04:03 
+         t0ni_19931101_fc0_2_CMOROCE = 	   05:17:47 	   00:03:52 
+         t0ni_19931101_fc0_1_MONITOR = 	   00:00:03 	   00:05:54 
+           t0ni_19931101_fc0_2_CLEAN = 	   00:00:00 	   00:04:39 
+                    t0ni_LOCAL_SETUP = 	   00:00:00 	   00:00:04 
+         t0ni_19931101_fc0_1_CMORATM = 	   00:00:04 	   00:00:55 
+      t0ni_19931101_fc0_1_EARTHDIAGS = 	   00:02:34 	   00:03:47 
+
+# Jobs average time
+
+[QUEUE_TIME_AVG]
+# SIM jobs queue time average (H:M:S)
+SIM_QUEUE_TIME_AVG = 00:23:11
+# POST jobs queue time average (H:M:S)
+POST_QUEUE_TIME_AVG = 04:17:49
+# CLEAN jobs queue time average (H:M:S)
+CLEAN_QUEUE_TIME_AVG = 00:00:00
+
+[RUN_TIME_AVG]
+# SIM jobs run time average (H:M:S)
+SIM_RUN_TIME_AVG = 00:46:46
+# POST jobs run time average (H:M:S)
+POST_RUN_TIME_AVG = 00:00:14
+# CLEAN jobs run time average (H:M:S)
+CLEAN_RUN_TIME_AVG = 00:04:31
+
+# Jobs cumulated time
+
+[QUEUE_TIME_CUM]
+# SIM jobs queue time cumulated (H:M:S)
+SIM_QUEUE_TIME_CUM = 00:46:22
+# POST jobs queue time cumulated (H:M:S)
+POST_QUEUE_TIME_CUM = 08:35:38
+# CLEAN jobs queue time cumulated (H:M:S)
+CLEAN_QUEUE_TIME_CUM = 00:00:00
+# TRANSFER jobs queue time cumulated (H:M:S)
+TRANSFER_QUEUE_TIME_CUM = 00:00:00
+
+[RUN_TIME_CUM]
+# SIM jobs run time cumulated (H:M:S)
+SIM_RUN_TIME_CUM = 01:33:33
+# POST jobs run time average (H:M:S)
+POST_RUN_TIME_CUM = 00:00:29
+# CLEAN jobs run time average (H:M:S)
+CLEAN_RUN_TIME_CUM = 00:09:03
+# TRANSFER jobs run time average (H:M:S)
+TRANSFER_RUN_TIME_CUM = 00:00:00

@@ -1,0 +1,412 @@
+def get_experiment_metrics(expid):
+    """
+    Gets metrics
+    """
+    error = False
+    error_message = ""
+    SYPD = ASYPD = CHSY = JPSY = RSYPD = Parallelization = 0
+    seconds_in_a_day = 86400
+    list_considered = []
+    core_hours_year = []
+    warnings_job_data = []
+    total_run_time = 0
+    total_queue_time = total_CHSY = total_JPSY = energy_count = 0
+
+    try:
+        # Basic info
+        BasicConfig.read()
+        path = BasicConfig.LOCAL_ROOT_DIR + '/' + expid + '/pkl'
+        tmp_path = os.path.join(
+            BasicConfig.LOCAL_ROOT_DIR, expid, BasicConfig.LOCAL_TMP_DIR)
+        pkl_filename = "job_list_" + str(expid) + ".pkl"
+        path_pkl = path + "/" + pkl_filename
+
+        as_conf = AutosubmitConfig(
+            expid, BasicConfig, ConfigParserFactory())
+        if not as_conf.check_conf_files():
+            # Log.critical('Can not run with invalid configuration')
+            raise Exception(
+                'Autosubmit GUI might not have permission to access necessary configuration files.')
+
+        # Chunk Information
+        chunk_unit = as_conf.get_chunk_size_unit()
+        chunk_size = as_conf.get_chunk_size()
+        year_per_sim = datechunk_to_year(chunk_unit, chunk_size)
+        if year_per_sim <= 0:
+            raise Exception("The system couldn't calculate year per SIM value " + str(year_per_sim) +
+                            ", for chunk size " + str(chunk_size) + " and chunk unit " + str(chunk_unit))
+
+        # From database
+        # db_file = os.path.join(BasicConfig.LOCAL_ROOT_DIR, "ecearth.db")
+        # conn = DbRequests.create_connection(db_file)
+        # job_times = DbRequests.get_times_detail_by_expid(conn, expid)
+
+        # Job time information
+        # Try to get packages
+        job_to_package = {}
+        package_to_jobs = {}
+        job_to_package, package_to_jobs, _, _ = JobList.retrieve_packages(
+            BasicConfig, expid)
+        # Basic data
+        job_running_to_seconds = {}
+        # SIM POST TRANSFER jobs (COMPLETED) in experiment
+        sim_jobs_in_pkl = []
+        post_jobs_in_pkl = []
+        transfer_jobs_in_pkl = []
+        clean_jobs_in_pkl = []
+        sim_jobs_info = []
+        post_jobs_info = []
+        transfer_jobs_info = []
+        clean_jobs_info = []
+        sim_jobs_info_asypd = []
+        sim_jobs_info_rsypd = []
+        outlied = []
+        # Get pkl information
+        if os.path.exists(path_pkl):
+            fd = open(path_pkl, 'r')
+            pickle_content = pickle.load(fd)
+            # pickle 0: Name, 2: StatusCode
+            sim_jobs_in_pkl = [item[0]
+                               for item in pickle_content if 'SIM' in item[0].split('_') and int(item[2]) == Status.COMPLETED]
+            post_jobs_in_pkl = [item[0]
+                                for item in pickle_content if 'POST' in item[0].split('_') and int(item[2]) == Status.COMPLETED]
+            transfer_member = [item[0]
+                               for item in pickle_content if item[0].find('TRANSFER_MEMBER') > 0 and int(item[2]) == Status.COMPLETED]
+            transfer_jobs_in_pkl = [item[0]
+                                    for item in pickle_content if 'TRANSFER' in item[0].split('_') and int(item[2]) == Status.COMPLETED and item[0] not in transfer_member]
+            clean_member = [item[0]
+                            for item in pickle_content if item[0].find('CLEAN_MEMBER') > 0 and int(item[2]) == Status.COMPLETED]
+            clean_jobs_in_pkl = [item[0]
+                                 for item in pickle_content if 'CLEAN' in item[0].split('_') and int(item[2]) == Status.COMPLETED and item[0] not in clean_member]
+
+            # print(transfer_jobs_in_pkl)
+            fakeAllJobs = [SimpleJob(item[0], tmp_path, int(item[2]))
+                           for item in pickle_content]
+            del pickle_content
+            job_running_to_seconds, _, warnings_job_data = JobList.get_job_times_collection(
+                BasicConfig, fakeAllJobs, expid, job_to_package, package_to_jobs, timeseconds=True)
+            # ASYPD - RSYPD warnings
+            if len(post_jobs_in_pkl) == 0:
+                warnings_job_data.append(
+                    "ASYPD | There are no (COMPLETED) POST jobs in the experiment, ASYPD cannot be computed.")
+            if len(transfer_jobs_in_pkl) == 0 and len(clean_jobs_in_pkl) == 0:
+                warnings_job_data.append(
+                    "RSYPD | There are no TRANSFER nor CLEAN (COMPLETED) jobs in the experiment, RSYPD cannot be computed.")
+            if len(transfer_jobs_in_pkl) == 0 and len(clean_jobs_in_pkl) > 0:
+                warnings_job_data.append(
+                    "RSYPD | There are no TRANSFER (COMPLETED) jobs in the experiment, we resort to use (COMPLETED) CLEAN jobs to compute RSYPD.")
+
+        Parallelization = 0
+        try:
+            processors_value = as_conf.get_processors("SIM")
+            if processors_value.find(":") >= 0:
+                # It is an expression
+                components = processors_value.split(":")
+                Parallelization = int(sum(
+                    [math.ceil(float(x) / 36.0) * 36.0 for x in components]))
+                warnings_job_data.append("Parallelization parsing | {0} was interpreted as {1} cores.".format(
+                    processors_value, Parallelization))
+            else:
+                # It is int
+                Parallelization = int(processors_value)
+        except Exception as exp:
+            # print(exp)
+            warnings_job_data.append(
+                "CHSY Critical | Autosubmit API could not parse the number of processors for the SIM job.")
+            pass
+
+        # ASYPD
+        # Main Loop
+        # Times exist
+        if len(job_running_to_seconds) > 0:
+            # job_info attributes: ['name', 'queue_time', 'run_time', 'status', 'energy', 'submit', 'start', 'finish', 'ncpus']
+            sim_jobs_info = [job_running_to_seconds[job_name]
+                             for job_name in sim_jobs_in_pkl if job_running_to_seconds.get(job_name, None) is not None]
+            sim_jobs_info.sort(key=lambda x: tostamp(x.finish), reverse=True)
+
+            # SIM outlier detection
+            data_run_times = [job.run_time for job in sim_jobs_info]
+            mean_1 = np.mean(data_run_times) if len(data_run_times) > 0 else 0
+            std_1 = np.std(data_run_times) if len(data_run_times) > 0 else 0
+            threshold = 2
+
+            # ASYPD Pre
+            post_jobs_info = [job_running_to_seconds[job_name]
+                              for job_name in post_jobs_in_pkl if job_running_to_seconds.get(job_name, None) is not None and job_running_to_seconds[job_name].finish is not None]
+            post_jobs_info.sort(key=lambda x: tostamp(x.finish), reverse=True)
+            # End ASYPD Pre
+            for job_info in sim_jobs_info:
+                # JobRow object
+                z_score = (job_info.run_time - mean_1) / \
+                    std_1 if std_1 > 0 else 0
+                # print("{} : {}".format(job_info.name, z_score, threshold))
+                if np.abs(z_score) <= threshold and job_info.run_time > 0:
+                    status = job_info.status if job_info else "UNKNOWN"
+                    # Energy
+                    energy = round(job_info.energy, 2) if job_info else 0
+                    if energy == 0:
+                        warnings_job_data.append(
+                            "Considered | Job {0} (Package {1}) has no energy information and is not going to be considered for energy calculations.".format(job_info.name, job_to_package.get(job_info.name, "")))
+                    total_queue_time += max(int(job_info.queue_time), 0)
+                    total_run_time += max(int(job_info.run_time), 0)
+                    seconds_per_year = (Parallelization *
+                                        job_info.run_time) / year_per_sim
+                    job_JPSY = round(energy / year_per_sim,
+                                     2) if year_per_sim > 0 else 0
+                    job_SYPD = round((year_per_sim * seconds_in_a_day) /
+                                     max(int(job_info.run_time), 0), 2) if job_info.run_time > 0 else 0
+                    job_ASYPD = round((year_per_sim * seconds_in_a_day) / (int(job_info.queue_time) + int(job_info.run_time) + sum(
+                        job.queue_time + job.run_time for job in post_jobs_info) / len(post_jobs_info)) if len(post_jobs_info) > 0 else 0, 2)
+
+                    # Maximum finish time
+                    # max_sim_finish = tostamp(job_info.finish) if job_info.finish is not None and tostamp(
+                    #     job_info.finish) > max_sim_finish else max_sim_finish
+                    #     sim_count += 1
+                    total_CHSY += round(seconds_per_year / 3600, 2)
+                    total_JPSY += job_JPSY
+                    if job_JPSY > 0:
+                        # Ignore for mean calculation
+                        energy_count += 1
+                    # core_hours_year.append(year_seconds/3600)
+                    list_considered.append(
+                        {"name": job_info.name,
+                            "queue": int(job_info.queue_time),
+                            "running": int(job_info.run_time),
+                            "CHSY": round(seconds_per_year / 3600, 2),
+                            "SYPD": job_SYPD,
+                            "ASYPD": job_ASYPD,
+                            "JPSY": job_JPSY,
+                            "energy": energy})
+                else:
+                    # print("Outlied {}".format(job_info.name))
+                    outlied.append(job_info.name)
+                    warnings_job_data.append(
+                        "Outlier | Job {0} (Package {1} - Running time {2} seconds) has been considered an outlier (mean {3}, std {4}, z_score {5}) and will be ignored for performance calculations.".format(job_info.name, job_to_package.get(job_info.name, "NA"), str(job_info.run_time), str(round(mean_1, 2)), str(round(std_1, 2)), str(round(z_score, 2))))
+
+            # ASYPD Pre
+            sim_jobs_info_asypd = [job for job in sim_jobs_info if job.name not in outlied] if len(
+                post_jobs_info) > 0 else []
+            sim_jobs_info_asypd.sort(
+                key=lambda x: tostamp(x.finish), reverse=True)
+
+            # RSYPD
+            transfer_jobs_info = [job_running_to_seconds[job_name]
+                                  for job_name in transfer_jobs_in_pkl if job_running_to_seconds.get(job_name, None) is not None and job_running_to_seconds[job_name].finish is not None]
+            transfer_jobs_info.sort(
+                key=lambda x: tostamp(x.finish), reverse=True)
+            if len(transfer_jobs_info) <= 0:
+                clean_jobs_info = [job_running_to_seconds[job_name]
+                                   for job_name in clean_jobs_in_pkl if job_running_to_seconds.get(job_name, None) is not None and job_running_to_seconds[job_name].finish is not None]
+                clean_jobs_info.sort(
+                    key=lambda x: tostamp(x.finish), reverse=True)
+                sim_jobs_info_rsypd = [job for job in sim_jobs_info if job.name not in outlied and tostamp(job.finish) <= tostamp(
+                    clean_jobs_info[0].finish)] if len(clean_jobs_info) > 0 else []
+            else:
+                sim_jobs_info_rsypd = [job for job in sim_jobs_info if job.name not in outlied and tostamp(job.finish) <= tostamp(
+                    transfer_jobs_info[0].finish)]
+            sim_jobs_info_rsypd.sort(
+                key=lambda x: tostamp(x.finish), reverse=True)
+
+        SYPD = ((year_per_sim * len(list_considered) * seconds_in_a_day) /
+                (total_run_time)) if total_run_time > 0 else 0
+        SYPD = round(SYPD, 2)
+        #  Old
+        # ASYPD = ((year_per_sim * len(list_considered) * seconds_in_a_day) /
+        #          (total_run_time + total_queue_time) if (total_run_time +
+        #                                                  total_queue_time) > 0 else 0)
+        # Paper Implementation
+        # ASYPD = ((year_per_sim * len(list_considered) * seconds_in_a_day) / (max_sim_finish -
+        #                                                                      min_submit)) if (max_sim_finish - min_submit) > 0 else 0
+        # ASYPD New Implementation
+        ASYPD = (year_per_sim * len(sim_jobs_info_asypd) * seconds_in_a_day) / (sum(job.queue_time + job.run_time for job in sim_jobs_info_asypd) +
+                                                                                sum(job.queue_time + job.run_time for job in post_jobs_info) / len(post_jobs_info)) if len(sim_jobs_info_asypd) > 0 and len(post_jobs_info) > 0 else 0
+
+        # RSYPD
+        RSYPD = 0
+        if len(transfer_jobs_info) > 0:
+            RSYPD = (year_per_sim * len(sim_jobs_info_rsypd) * seconds_in_a_day) / (tostamp(transfer_jobs_info[0].finish) - tostamp(sim_jobs_info_rsypd[-1].start)) if len(
+                sim_jobs_info_rsypd) > 0 and len(transfer_jobs_info) > 0 and (tostamp(transfer_jobs_info[0].finish) - tostamp(sim_jobs_info_rsypd[-1].start)) > 0 else 0
+        else:
+            RSYPD = (year_per_sim * len(sim_jobs_info_rsypd) * seconds_in_a_day) / (tostamp(clean_jobs_info[0].finish) - tostamp(sim_jobs_info_rsypd[-1].start)) if len(
+                sim_jobs_info_rsypd) > 0 and len(clean_jobs_info) > 0 and (tostamp(clean_jobs_info[0].finish) - tostamp(sim_jobs_info_rsypd[-1].start)) > 0 else 0
+
+        ASYPD = round(ASYPD, 4)
+        RSYPD = round(RSYPD, 4)
+        CHSY = round(total_CHSY / len(list_considered),
+                     2) if len(list_considered) > 0 else total_CHSY
+        JPSY = round(
+            total_JPSY / energy_count, 2) if energy_count > 0 else total_JPSY
+    except Exception as ex:
+        print(traceback.format_exc())
+        error = True
+        error_message = str(ex)
+        pass
+
+    return {"SYPD": SYPD,
+            "ASYPD": ASYPD,
+            "RSYPD": RSYPD,
+            "CHSY": CHSY,
+            "JPSY": JPSY,
+            "Parallelization": Parallelization,
+            "considered": list_considered,
+            "error": error,
+            "error_message": error_message,
+            "warnings_job_data": warnings_job_data,
+            }
+
+def get_experiment_graph_format_test(expid):
+    """
+    Some testing. Does not serve any purpose now, but the code might be useful.
+    """
+    base_list = dict()
+    pkl_timestamp = 10000000
+    try:
+        notransitive = False
+        print("Received " + str(expid))
+        BasicConfig.read()
+        exp_path = os.path.join(BasicConfig.LOCAL_ROOT_DIR, expid)
+        tmp_path = os.path.join(exp_path, BasicConfig.LOCAL_TMP_DIR)
+        as_conf = AutosubmitConfig(
+            expid, BasicConfig, ConfigParserFactory())
+        if not as_conf.check_conf_files():
+            # Log.critical('Can not run with invalid configuration')
+            raise Exception(
+                'Autosubmit GUI might not have permission to access necessary configuration files.')
+
+        job_list = Autosubmit.load_job_list(
+            expid, as_conf, notransitive=notransitive)
+
+        job_list.sort_by_id()
+        base_list = job_list.get_graph_representation(BasicConfig)
+    except Exception as e:
+        return {'nodes': [],
+                'edges': [],
+                'error': True,
+                'error_message': str(e),
+                'graphviz': False,
+                'max_children': 0,
+                'max_parents': 0,
+                'total_jobs': 0,
+                'pkl_timestamp': 0}
+    name_to_id = dict()
+    # name_to_weight = dict()
+    list_nodes = list()
+    list_edges = list()
+    i = 0
+    with open('/home/Earth/wuruchi/Documents/Personal/spectralgraph/data/graph_' + expid + '.txt', 'w') as the_file:
+        for item in base_list['nodes']:
+            # the_file.write(str(i) + "\n")
+            name_to_id[item['id']] = i
+            list_nodes.append(i)
+            i += 1
+        for item in base_list['edges']:
+            the_file.write(str(name_to_id[item['from']]) + " " + str(
+                name_to_id[item['to']]) + " " + ("10" if item['is_wrapper'] == True else "1") + "\n")
+            list_edges.append(
+                (name_to_id[item['from']], name_to_id[item['to']]))
+        for item in base_list['fake_edges']:
+            the_file.write(str(name_to_id[item['from']]) + " " + str(
+                name_to_id[item['to']]) + " " + ("10" if item['is_wrapper'] == True else "1") + "\n")
+            list_edges.append(
+                (name_to_id[item['from']], name_to_id[item['to']]))
+    return list_nodes, list_edges
+
+
+
+def update_running_experiments(time_condition=600):
+    """
+    Tests if an experiment is running and updates database as_times.db accordingly.\n
+    :return: Nothing
+    """
+    t0 = time.time()
+    experiment_to_modified_ts = dict() # type: Dict[str, int]
+    try:
+        BasicConfig.read()
+        path = BasicConfig.LOCAL_ROOT_DIR
+        # List of experiments from pkl
+        tp0 = time.time()
+        currentDirectories = subprocess.Popen(['ls', '-t', path],
+                                              stdout=subprocess.PIPE,
+                                              stderr=subprocess.STDOUT) if (os.path.exists(path)) else None
+        stdOut, stdErr = currentDirectories.communicate(
+        ) if currentDirectories else (None, None)
+        
+        # Build connection to ecearth.db
+        db_file = os.path.join(path, "ecearth.db")
+        conn = DbRequests.create_connection(db_file)
+        current_table = DbRequests.prepare_status_db()
+        readingpkl = stdOut.split() if stdOut else []
+        
+        tp1 = time.time()
+        for expid in readingpkl:
+          pkl_path = os.path.join(path, expid, "pkl", "job_list_{0}.pkl".format(expid))          
+          if not len(expid) == 4 or not os.path.exists(pkl_path):
+            continue                              
+          t1 = time.time()
+          # Timer safeguard
+          if (t1 - t0) > SAFE_TIME_LIMIT_STATUS:
+              raise Exception(
+                  "Time limit reached {0:06.2f} seconds on update_running_experiments while processing {1}. \
+                  Time spent on reading data {2:06.2f} seconds.".format((t1 - t0), expid, (tp1 - tp0)))                            
+          current_stat = os.stat(pkl_path)          
+          time_diff = int(time.time()) - int(current_stat.st_mtime)
+          if (time_diff < time_condition):
+              experiment_to_modified_ts[expid] = time_diff
+              if current_table.get(expid, None) is not None:
+                  # UPDATE RUNNING
+                  _exp_id, _status, _seconds = current_table[expid]
+                  if _status != "RUNNING":
+                      DbRequests.update_exp_status(
+                          expid, "RUNNING", time_diff)
+              else:
+                  # Insert new experiment
+                  current_id = DbRequests.insert_experiment_status(
+                      conn, expid, time_diff)
+                  current_table[expid] = (
+                      current_id, 'RUNNING', time_diff)
+          elif (time_diff <= 3600):
+              # If it has been running in the last 1 hour
+              # It must have been added before
+              error, error_message, is_running, timediff, _ = _is_exp_running(
+                  expid)
+              if is_running == True:
+                  if current_table.get(expid, None):
+                      _exp_id, _status, _seconds = current_table[expid]
+                      if _status != "RUNNING" and is_running == True:
+                          DbRequests.update_exp_status(
+                              expid, "RUNNING", _seconds)
+                  else:
+                      current_id = DbRequests.insert_experiment_status(
+                          conn, expid, time_diff)
+                      current_table[expid] = (
+                          current_id, 'RUNNING', time_diff)
+
+        for expid in current_table:
+            exp_id, status, seconds = current_table[expid]
+            if status == "RUNNING" and experiment_to_modified_ts.get(expid, None) is None:
+                # Perform exhaustive check
+                error, error_message, is_running, timediff, _ = _is_exp_running(
+                    expid)
+                # UPDATE NOT RUNNING
+                if (is_running == False):
+                    # print("Update NOT RUNNING for " + expid)
+                    DbRequests.update_exp_status(
+                        expid, "NOT RUNNING", timediff)
+    except Exception as e:
+        # print(expid)
+        print(e.message)
+        # print(traceback.format_exc())
+
+def get_experiment_run_detail(expid, run_id):
+    error = False
+    error_message = ""
+    result = None
+    try:
+        result = JobDataStructure(expid).get_current_run_job_data_json(run_id)
+        tags = {"source": JobList.get_sourcetag(), "target": JobList.get_targettag(), "sync": JobList.get_synctag(), "check": JobList.get_checkmark(
+        ), "completed": JobList.get_completed_tag(), "running_tag": JobList.get_running_tag(), "queuing_tag": JobList.get_queuing_tag(), "failed_tag": JobList.get_failed_tag()}
+    except Exception as exp:
+        error = True
+        error_message = str(exp)
+        pass
+    return {"error": error, "error_message": error_message, "rundata": result}

@@ -1,0 +1,31 @@
+[INFO] JOBID=19268645
+
+ICMGGa2s5INIT
+ICMGGa2s5INIUA
+ICMSHa2s5INIT
+Nothing to do for ifs veg source ifs
+total 8
+drwxr-sr-x  3 bsc32627 bsc32 4096 Dec 18 07:35 19931101
+drwxr-sr-x  2 bsc32627 bsc32 4096 Dec 18 07:35 LOG_t0ni
+drwxr-sr-x 11 bsc32627 bsc32 4096 Dec 16 10:42 auto-ecearth3
+lrwxrwxrwx  1 bsc32627 bsc32   43 Dec 18 00:16 ctrl -> auto-ecearth3/sources/runtime/classic/ctrl/
+lrwxrwxrwx  1 bsc32627 bsc32   51 Dec 18 00:16 ecconf.cfg -> auto-ecearth3/sources/runtime/autosubmit/ecconf.cfg
+lrwxrwxrwx  1 bsc32627 bsc32   47 Dec 18 00:16 liblsm.sh -> auto-ecearth3/sources/runtime/classic/liblsm.sh
+lrwxrwxrwx  1 bsc32627 bsc32   53 Dec 18 00:16 librunscript.sh -> auto-ecearth3/sources/runtime/classic/librunscript.sh
+lrwxrwxrwx  1 bsc32627 bsc32   51 Dec 18 00:16 libsave_ic.sh -> auto-ecearth3/sources/runtime/classic/libsave_ic.sh
+Generating checksum file to check if the inidata is modified during the experiment
+Generating list of files (and md5sum of each) in the directory, time taken:
+++ sort -k 2
+++ find inidata/ -type f -exec md5sum '{}' ';'
+
+real	1m14.518s
+user	1m1.929s
+sys	0m4.175s
+Generating list of links in the directory, time taken:
+++ sort
+++ find -L inidata/ -type f -exec readlink -f '{}' ';'
+
+real	2m15.528s
+user	0m0.968s
+sys	0m29.998s
+common.ini Done

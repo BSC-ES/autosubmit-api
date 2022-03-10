@@ -1,0 +1,974 @@
+[INFO] JOBID=17370
+
+job_name_ptrn='/esarchive/autosubmit/t0ni/tmp/LOG_t0ni/t0ni_LOCAL_SETUP'
++ job_name_ptrn=/esarchive/autosubmit/t0ni/tmp/LOG_t0ni/t0ni_LOCAL_SETUP
+echo $(date +%s) > ${job_name_ptrn}_STAT
+date +%s)
+date +%s
+++ date +%s
++ echo 1639758732
+
+###################
+# Autosubmit job
+###################
+
+set -xuve
++ set -xuve
+
+#
+# Architecture
+#
+STAMP=$(date +%Y_%m_%d_%H_%M)
+date +%Y_%m_%d_%H_%M)
+date +%Y_%m_%d_%H_%M
+++ date +%Y_%m_%d_%H_%M
++ STAMP=2021_12_17_17_32
+HPCARCH=marenostrum4
++ HPCARCH=marenostrum4
+HPCPROJ=bsc32
++ HPCPROJ=bsc32
+HPCUSER=bsc32627
++ HPCUSER=bsc32627
+EXPID=t0ni
++ EXPID=t0ni
+SCRATCH_DIR=/gpfs/scratch
++ SCRATCH_DIR=/gpfs/scratch
+JOBNAME=t0ni_LOCAL_SETUP
++ JOBNAME=t0ni_LOCAL_SETUP
+ROOTDIR=/esarchive/autosubmit/t0ni
++ ROOTDIR=/esarchive/autosubmit/t0ni
+LOGDIR=$ROOTDIR/tmp/LOG_$EXPID
++ LOGDIR=/esarchive/autosubmit/t0ni/tmp/LOG_t0ni
+PROJDEST=auto-ecearth3
++ PROJDEST=auto-ecearth3
+PROJDIR=/esarchive/autosubmit/t0ni/proj/auto-ecearth3
++ PROJDIR=/esarchive/autosubmit/t0ni/proj/auto-ecearth3
+CMORIZATION=TRUE
++ CMORIZATION=TRUE
+HPCHOST=mn1.bsc.es
++ HPCHOST=mn1.bsc.es
+MEMBER=None
++ MEMBER=None
+RUN_START_DATE=""
++ RUN_START_DATE=
+CMOR_REALIZATION_INDEX=""
++ CMOR_REALIZATION_INDEX=
+CMOR_EXP=piControl
++ CMOR_EXP=piControl
+BSC_OUTCLASS=reduced
++ BSC_OUTCLASS=reduced
+CMIP6_OUTCLASS=
++ CMIP6_OUTCLASS=
+CMOR_EXP_CUSTOM=FALSE
++ CMOR_EXP_CUSTOM=FALSE
+CMOR_ADD_STARTDATE=FALSE
++ CMOR_ADD_STARTDATE=FALSE
+
+#
+# General Paths and Conf.
+#
+MODEL=ecearth
++ MODEL=ecearth
+VERSION=trunk
++ VERSION=trunk
+PRECOMPILED_VERSION=
++ PRECOMPILED_VERSION=
+
+if [[ -z "${RUN_START_DATE}" ]]; then
+  RUN_START_DATE="None"
+fi
++ [[ -z '' ]]
++ RUN_START_DATE=None
+
+TEMPLATE_NAME=ecearth3
++ TEMPLATE_NAME=ecearth3
+NEMO_resolution=ORCA025L75
++ NEMO_resolution=ORCA025L75
+[[ "FALSE" == TRUE ]] && TM5=TRUE || TM5=FALSE
++ [[ FALSE == TRUE ]]
++ TM5=FALSE
+[[ "FALSE" == TRUE ]] && DEBUG_MODE=TRUE || DEBUG_MODE=FALSE
++ [[ FALSE == TRUE ]]
++ DEBUG_MODE=FALSE
+
+# get the mkdir function of the platform
+. ${PROJDIR}/platforms/common/common.filesystem.sh
++ . /esarchive/autosubmit/t0ni/proj/auto-ecearth3/platforms/common/common.filesystem.sh
+#####################################################################################################################
+# Common Functions for handling file system operations on the different host types
+# of the supported machines
+# Author/Maintainer: J.R.Berlin
+#####################################################################################################################
+
+#####################################################################################################################
+# Executes mkdir + chmod to handle proper rights in the target folder in esarchive partition
+# Globals:
+#   None
+# Arguments:
+#   target_dir
+# Returns:
+#   None
+#####################################################################################################################
+function mkdir_esarchive() {
+  target_dir=$1
+  mkdir -p ${target_dir}
+  chmod_esarchive ${target_dir}
+}
+
+#####################################################################################################################
+# Executes chmod with g+s so users of a given group doesnt have access problems to certain outputs and files
+# Globals:
+#   None
+# Arguments:
+#   target_dir
+# Returns:
+#   None
+#####################################################################################################################
+function chmod_esarchive() {
+  target_dir=$1
+  chmod =0770,g+s ${target_dir}
+}
+
+
+#####################################################################################################################
+# Globals:
+# RUN_dir,  SCRATCH_TMP_DIR, MEMBER, out_member
+# Arguments:
+#   None
+# Returns:
+#   None
+# Purpose: creates the folder passed as parameter and assign proper group rights
+#
+#####################################################################################################################
+function mkdir_intermediate_storage() {
+  #default group
+  target_group=bsc32
+  target_dir=$1
+  if [[ "$#" -eq 2 ]]; then
+    target_group=$2
+  fi
+
+  if [[ ! -d "${target_dir}" ]]; then
+    sg ${target_group} "mkdir -p ${target_dir}"
+    chmod g+w ${target_dir}
+  fi
+}
+
+#####################################################################################################################
+# Globals:
+#   None,
+# Arguments:
+#   $1: the folder to be removed
+# Returns:
+#   None
+# Purpose: removes the intermediate storage folder passed as parameter
+#
+#####################################################################################################################
+function delete_intermediate_storage() {
+  rm -rf $1 2>/dev/null
+}
+
+#####################################################################################################################
+# Globals:
+#   None,
+# Arguments:
+#   $1: the source folder/file to be copied
+#   $2: the target directory
+# Returns:
+#   None
+# Purpose: copies the intermediate storage folder passed as parameter
+#
+#####################################################################################################################
+function copy_intermediate_storage() {
+  cp -f $1 $2
+}
+
+#####################################################################################################################
+# Globals:
+#   None,
+# Arguments:
+#   $1: the ecm folder whose content we want to enumerate
+# Returns:
+#   None
+# Purpose: enumerate the content of the intermediate storage folder passed as parameter
+#
+#####################################################################################################################
+function list_intermediate_storage() {
+  ls $1
+}
+
+#####################################################################################################################
+# Globals:
+#   None,
+# Arguments:
+#   $1: the folder whose permissions we want to change
+# Returns:
+#   None
+# Purpose: change the permissions of the intermediate storage folder passed as parameter
+#
+#####################################################################################################################
+function chmod_intermediate_storage() {
+  chmod 744 $1
+}
+
+#####################################################################################################################
+# Globals:
+#   None,
+# Arguments:
+#   $1: the folder we want to test
+# Returns:
+#   None
+# Purpose: test the intermediate storage folder passed as parameter
+#
+#####################################################################################################################
+function test_intermediate_storage() {
+  test $1
+}
+
+# check if directory is empty and doesnt contain any file
+#####################################################################################################################
+# Globals:
+# RUN_dir,  SCRATCH_TMP_DIR, MEMBER, out_member
+# Arguments:
+#   None
+# Returns:
+#   None
+# Purpose: Main function for initialization - ifs3
+#
+#####################################################################################################################
+function is_empty_directory() {
+  local target_path=$1
+  local result=false
+  if [[ -z "$(ls -A ${target_path})" ]]; then
+    result=true
+  fi
+  return result
+}
+
+#####################################################################################################################
+# Globals:
+# RUN_dir,
+# Arguments:
+#   source= source directory where are the files to be synchronized
+#   destination=path to the directory that will be synchronized with the source dir
+#   flags=options for the rsync
+# Returns:
+#   None
+# Purpose: synchronizes two directories from different file systems
+#          depending of the context, dt commands will be used by using blocking_rsync,
+#          and rsync otherwise, <how_many_retry_copy_file> attempts will allowed to try to transfer the files in case
+#          of failure
+#####################################################################################################################
+function rsync_with_retry() {
+
+  source=$2
+  destination=$3
+  flags=$1
+  group=$4
+  retry=0
+  how_many_retry_copy_file=5
+  use_dt_rsync=FALSE
+
+  exist_dtrsync=$(echo $(command -v dtrsync))
+  if [[ ! -z "${exist_dtrsync-}" ]]; then
+    use_dt_rsync=TRUE
+  fi
+
+  while [[ $retry -le $how_many_retry_copy_file ]]; do
+
+    t1=$(date +%s)
+    if [[ "${use_dt_rsync-}" == "FALSE" ]]; then
+      USE_DT_COMMANDS=FALSE
+      echo "Calling blocking_rsync with DT_COMMANDS=FALSE since they are not available on this machine"
+    fi
+    blocking_rsync "${flags}" ${source} ${destination} ${group}
+
+    if [[ $? ]]; then
+      t2=$(date +%s)
+      tr=$(date -d "0 -$t1 sec + $t2 sec" +%T)
+      echo "done."
+      break
+    else
+      ((retry++))
+    fi
+  done
+  if [[ $retry -eq how_many_retry_copy_file ]]; then
+    echo "Transfer error in rsync"
+    exit 1
+  fi
+}
+
+#####################################################################################################################
+# Globals:
+# PROJDIR, target_destination, REMOTE_PATH
+# Arguments:
+#   None
+# Returns:
+#   None
+# Purpose: synchronizes the auto-ecearth source folder with changes done in autosubmit auto-ecearth folder of the
+# experiment
+#
+#####################################################################################################################
+function transfer_model() {
+  local folders_that_will_not_be_transferred=""
+  . ${PROJDIR}/plugins/utils.sh
+  source=${PROJDIR}
+  destination=${target_destination}
+  exclusions="--exclude={'templates','utils','test_cases','*.o','*.mod','*.exe','/BLD','ifs-36r4/bin','ifs-36r4/lib/*.a','COMPILE/arch*','COMPILE/cpp*','lpjg/build'}"
+  options="${exclusions} --no-group --delete --force --recursive --links --perms --times --specials --verbose"
+  if [[ "$#" -eq 1 ]]; then
+    folders_that_will_not_be_transferred="$1"
+    for folder in ${folders_that_will_not_be_transferred-}; do
+      options+=" --exclude='${source}/${folder}' "
+    done
+  fi
+  group=$(id -gn)
+  rsync_with_retry "${options}" ${source} "${REMOTE_PATH}${destination}" ${group}
+}
+
+#####################################################################################################################
+# Globals:
+# RUN_dir,
+# Arguments:
+#   filenames: the file or list of files to be moved to the target location,
+#   target_dir: the target directory where the files will be moved
+#   is_transfer: defines if the target filesystem is the intermediate storage or esarchive ( permanent storage)
+# Returns:
+#   None
+# Purpose: move files across different file systems, used mainly in CLEAN and TRANSFER jobs, this is the base function,
+# each platform can have its own custom implementation if needed ( for instance ecmwf-sc40 has its own version of this
+# function, the moved files are removed from the source location
+#
+#####################################################################################################################
+function move_files() {
+  local filenames=$1
+  local target_dir=$2
+  local is_transfer=$3
+
+  if [[ "${is_transfer-}" == "TRUE" ]]; then
+    # we are transferring from Scratch to Esarchive directly
+    blocking_rsync '--no-perms --links --times --recursive --remove-source-files --no-group  --omit-dir-times --chmod=g+rwxs,o-rwx' "${filenames}" ${target_dir} Earth
+  else
+    files_to_send=$(echo "${filenames}")
+    rsync --perms --links --times --recursive --remove-source-files --no-group  --omit-dir-times --chmod=g+rwxs,o-rwx ${files_to_send} ${target_dir}
+  fi
+  # check if there were errors
+  if [[ $? != 0 ]]; then
+    echo "Error occurred on move_files....exiting"
+    exit 1
+  fi
+}
+
+#####################################################################################################################
+# Globals:
+# RUN_dir, ini_data_dir
+# Arguments:
+#   None
+# Returns:
+#   None
+# Purpose: copy the initialization files to inidata directory in the scratch directory of the experiment, the command
+#   creates links to the files instead of copying these physically for optimizing storage
+#
+#####################################################################################################################
+function copy_inidata() {
+  cp --symbolic-link --recursive --force --update ${ini_data_dir} ${RUN_dir}
+}
+
+#####################################################################################################################
+# Globals:
+#
+# Arguments:
+#   src: source folder for the needed restarts
+#   dst: target location where these will be copied
+# Returns:
+#   None
+# Purpose: prepare restarts to be linked in to the inidata folder
+#####################################################################################################################
+function copy_default_restarts() {
+  local src=$1
+  local dst=$2
+  cp --symbolic-link --recursive --force --update ${src} ${dst}
+}
+
+#####################################################################################################################
+# Globals:
+# RUN_dir, SCRATCH_TMP_DIR, MEMBER, ROOTDIR
+# Arguments:
+#   None
+# Returns:
+#   None
+# Purpose: clean up the temporary directories used and set run dir, used in almost all platforms
+#
+#####################################################################################################################
+function setup_paths_transfer() {
+  rm -rf ${SCRATCH_TMP_DIR}
+  mkdir -p ${SCRATCH_TMP_DIR}
+  RUN_dir=${ROOTDIR}/${START_date}/${MEMBER}/runtime
+}
+
+#####################################################################################################################
+# Globals:
+# SCRATCH_DIR, HPCPROJ, HPCUSER, EXPID,PROJDEST
+# Arguments:
+#   None
+# Returns:
+#   None
+# Purpose:  check the existence of the auto-ecearth folder in the experiment folder in the cluster
+#
+#####################################################################################################################
+function check_model_existence() {
+  SCRATCH_MODEL_PATH=${SCRATCH_DIR}/${HPCPROJ}/${HPCUSER}/${EXPID}/${PROJDEST}
+  MODEL_EXISTS="FALSE"
+  if [[ -d ${SCRATCH_MODEL_PATH} ]]; then
+    MODEL_EXISTS="TRUE"
+    export MODEL_EXISTS
+  fi
+}
+
+#####################################################################################################################
+# Globals:
+# PROJDIR, SCRATCH_DIR, HPCPROJ, HPCUSER, EXPID, HPCARCH
+# Arguments:
+#   None
+# Returns:
+#   None
+# Purpose: prepare/load needed libraries in order to execute the synchronize process
+#
+#####################################################################################################################
+function setup_synchronize() {
+  export target_destination=$SCRATCH_DIR/$HPCPROJ/$HPCUSER/$EXPID/
+  export REMOTE_PATH=' '
+  # import custom architecture
+  . ${PROJDIR}/platforms/${HPCARCH}/filesystem.sh
+}
+
+#####################################################################################################################
+# Globals:
+# RUN_dir, USE_REMOTE_HOST, HPCUSER,  HPCHOST
+# Arguments:
+#    source_cmor_dir= source location for the cmorized files , usually the folder that corresponds to the chunk folder
+#    target_cmor_dir= target destination where the files will be moved
+#    is_transfer= indicates if the temporary storage will be used or not
+# Returns:
+#   None
+# Purpose: upper level function to transfer the cmorized outputs either in CLEAN ( when USE_INTERMEDIATE_STORAGE=FALSE )
+#    or the standard TRANSFER, this is the base function and other platforms may have different implementations such as
+#    ecmwf-xc40
+#####################################################################################################################
+function move_cmor_files() {
+  local source_cmor_dir=$1
+  local target_cmor_dir=$2
+  local is_transfer=$3
+  local remote_host=' '
+
+  # used in bscearth000 machine, maybe wise to create a function in platforms for this particular case
+  if [[ "${USE_REMOTE_HOST-}" == "TRUE" ]]; then
+    cmor_folders=$(ssh ${HPCUSER}@${HPCHOST} "ls -d ${source_cmor_dir}/cmor_*_${CHUNK}/" 2>/dev/null) && returncode=$? || returncode=$?
+    if [[ ! -z "${cmor_folders-}" && ${returncode} -eq 0 ]]; then
+      for cmor_remote_dir in ${cmor_folders}; do
+        list_of_cmor_files=$(ssh ${HPCUSER}@${HPCHOST} "ls ${cmor_remote_dir}" 2>/dev/null) && returncode=$? || returncode=$?
+        if [[ ! -z "${list_of_cmor_files-}" && ${returncode} -eq 0 ]]; then
+          echo "moving cmor files ....."
+          move_files ${HPCUSER}@${HPCHOST}:${cmor_remote_dir} ${target_cmor_dir} ${is_transfer}
+          # remove cmor folder after moving the files
+          # if there where some files left behind, this method will throw an exception making the job to crash
+          ssh ${HPCUSER}@${HPCHOST} "find ${cmor_remote_dir} -type d -delete"
+        fi
+      done
+    fi
+  else
+    if [[ -d ${source_cmor_dir} ]]; then
+      echo "moving cmor files ....."
+      cmor_folders=$(ls -d ${source_cmor_dir}/cmor_*_${CHUNK}/ 2>/dev/null) && returncode=$? || returncode=$?
+      if [[ ! -z "${cmor_folders-}" && ${returncode} -eq 0 ]]; then
+        base_storage_cmor_target_dir=${target_cmor_dir}
+        for cmor_remote_dir in ${cmor_folders}; do
+          #defaults when we use intermediate storage structure must be the same in the intermediate storage
+          if [[ "${is_transfer-}" != "TRUE" ]]; then
+            target_cmor_dir=${base_storage_cmor_target_dir}/$(basename ${cmor_remote_dir})
+          fi
+          move_files ${cmor_remote_dir} ${target_cmor_dir} ${is_transfer}
+          # delete the folder, if there where some files left behind, this method will throw an exception making the job to crash
+          find ${cmor_remote_dir} -type d -delete
+        done
+      fi
+    fi
+  fi
+}
+
+#####################################################################################################################
+# Globals:
+# RUN_dir, ROOTDIR, EXPID
+# Arguments:
+#   source_pattern: is the destination path for the output
+#   destination_path: is the name of the final folder of the destination path /
+#   list_of_files_to_copy: list of files to copy
+# Returns:
+#   None
+# Purpose: Local transfer of model output, the function first retrieve the list of files to be transferred and then
+#     if such file is not empty proceed to transfer them
+#####################################################################################################################
+function do_transfer() {
+
+  #  to leave the dt command output in log folder
+  cd ${ROOTDIR}/LOG_${EXPID}
+
+  source_pattern=$1
+  destination_path=$2
+  source_path=$(dirname ${source_pattern[0]})
+  local remote_host=' '
+
+  get_list_of_files_to_copy && returncode=$? || returncode=$?
+  #apply mkdir and let the rsync apply the chmod
+  if [[ ! -z "${list_of_files_to_copy-}" ]]; then
+    mkdir -p ${destination_path}
+    for source_file_name in $list_of_files_to_copy; do
+      echo "transferring file ... "${source_file_name} ${destination_path}
+      blocking_rsync '--no-perms --links --times --recursive --remove-source-files --no-group  --omit-dir-times --chmod=g+rwxs,o-rwx' ${remote_host}${source_file_name} ${destination_path} Earth
+    done
+  fi
+}
+
+#####################################################################################################################
+# Globals:
+# USE_REMOTE_HOST, HPCUSER, HPCHOST, source_pattern
+# Arguments:
+#   None
+# Returns:
+#   None
+# Purpose: get the list of files to be copied to the cluster, used by transfer/clean templates
+#
+#####################################################################################################################
+function get_list_of_files_to_copy() {
+  if [[ "${USE_REMOTE_HOST-}" == "TRUE" ]]; then
+    list_of_files_to_copy=$(ssh ${HPCUSER}@${HPCHOST} "ls ${source_pattern}" 2>/dev/null)
+    remote_host=${HPCUSER}@${HPCHOST}:
+  else
+    list_of_files_to_copy=$(ls ${source_pattern} 2>/dev/null)
+  fi
+}
+
+#####################################################################################################################
+# Globals:
+# RUN_dir,
+# Arguments:
+#   None
+# Returns:
+#   None
+# Purpose: performs the synchronization by transferring the model files to the cluster for preparation before running
+# the experiment, is the common interface for the synchronization template, implementation may be different depending
+# on the underlying architecture where the sync needs to be executed
+#
+#####################################################################################################################
+function do_synchronize() {
+  folders_that_will_not_be_transferred=""
+  if [[ "$#" -eq 1 ]] ; then
+    folders_that_will_not_be_transferred="$1"
+  fi
+  echo "Calling function transfer_model"
+  transfer_model ${folders_that_will_not_be_transferred}
+  echo "common.synchronize Done"
+}
+
+#####################################################################################################################
+# Globals:
+# RUN_dir, INTERMEDIATE_EXP_DIR, MODEL, EXPID
+# Arguments:
+#   None
+# Returns:
+#   None
+# Purpose: Prepare source and target paths for CLEAN/TRANSFER
+#####################################################################################################################
+function setup_paths_localtrans() {
+  src=${INTERMEDIATE_EXP_DIR}
+  local_INTERMEDIATE_EXP_DIR=/gpfs/archive/bsc32/esarchive/exp/${MODEL}
+  destination_folder=${local_INTERMEDIATE_EXP_DIR}/${EXPID}/original_files/
+}
+
+# copy to scratch the platforms files
+#####################################################################################################################
+# Globals:
+# ROOTDIR, PROJDEST, PROJDIR
+# Arguments:
+#   None
+# Returns:
+#   None
+# Purpose: send the initial set of libraries used by the synchronize job in order to be able to run
+#
+#####################################################################################################################
+function copy_platform_environment_to_host() {
+  mkdir -p ${ROOTDIR}/${PROJDEST}/platforms
+  rsync --recursive --links --perms --times --owner --devices --specials --verbose --omit-dir-times ${PROJDIR}/platforms/ ${ROOTDIR}/${PROJDEST}/platforms
+  rsync --recursive --links --perms --times --owner --devices --specials --verbose --omit-dir-times ${PROJDIR}/plugins/ ${ROOTDIR}/${PROJDEST}/plugins
+}
+
+#####################################################################################################################
+# Globals:
+# RUN_dir,  LOGDIR, CHUNK, START_date, MEMBER, STAMP, PATHOUT
+# Arguments:
+#   None
+# Returns:
+#   None
+# Purpose: copy logs to the proper storage location before wiping out the experiment folder ( used by CLEAN_EXPERIMENT )
+#####################################################################################################################
+function save_logs() {
+  echo "We are now storing log files"
+  cd ${LOGDIR}
+  logs_tarfile="logfiles_${EXPID}_${STAMP}.tar"
+  IS_TRANSFER=TRUE
+  prepare_logs && returncode=$? || returncode=$?
+  if [[ ${returncode} -eq 0 ]] || [[ ${returncode} -eq 123 ]]; then
+    [[ ! -f ../${logs_tarfile}.gz ]] && gzip -9 ../${logs_tarfile}
+    local pathout_logfiles="${PATHOUT}/logfiles/"
+    move_files ../${logs_tarfile}.gz ${pathout_logfiles} ${IS_TRANSFER}
+    rm -f ../${logs_tarfile}.gz
+  fi
+}
+
+#####################################################################################################################
+# Globals:
+# INTERMEDIATE_EXP_DIR, EXPID, ROOTDIR, RM ( alias for deleting files )
+# Arguments:
+#   None
+# Returns:
+#   None
+# Purpose: wipe out the experiment folders (used intermediate storage, scratch)
+#####################################################################################################################
+function remove_experiment_folders() {
+  #remove the folder in intermediate storage (if it was used)
+  delete_intermediate_storage ${INTERMEDIATE_EXP_DIR}/${EXPID}
+  #delete scratch folder
+  rm -rf ${ROOTDIR}/*
+  # needed for indicating that the job finished successfully by autosubmit
+  mkdir -p ${ROOTDIR}/LOG_${EXPID}/
+}
+
+#
+# run_time_variables
+#
+
+#####################################################################################################################
+# Globals: BSC_OUTCLASS, CMIP6_OUTCLASS
+#
+# Arguments:
+#   None
+# Returns:
+#   None
+# Purpose: set the defined outclass, before running the ecconf tool
+#
+#####################################################################################################################
+function set_outclass() {
+  if [[ -n "${BSC_OUTCLASS-}" ]]; then
+    outclass=/auto-ecearth3/outclass/${BSC_OUTCLASS}
+  elif [[ -n "${CMIP6_OUTCLASS-}" ]]; then
+    outclass=ctrl/output-control-files/cmip6/${CMIP6_OUTCLASS}
+    #if the outclass isn't found on the expected path, create links to the real path on the expected one
+    if [[ ! -d "${PROJDIR}/sources/runtime/classic/${outclass}" ]]; then
+      cd ${PROJDIR}/sources/runtime/classic/ctrl
+      mkdir output-control-files/
+      cd -
+      cd ${PROJDIR}/sources/runtime/classic/ctrl/output-control-files/
+      ln -s ../cmip6-output-control-files-pextra/ cmip6-output-control-files-pextra
+      cd -
+      cd ${PROJDIR}/sources/runtime/classic/ctrl/output-control-files/
+      ln -s ../cmip6-output-control-files/ cmip6
+      cd -
+    fi
+  elif [[ -z "${BSC_OUTCLASS-}" ]] && [[ -z "${CMIP6_OUTCLASS-}" ]]; then
+    outclass=ctrl
+  fi
+}
+
+#####################################################################################################################
+# Globals: PROJDIR, EXPID, ROOTDIR
+#
+# Arguments:
+#   None
+# Returns:
+#   None
+# Purpose: invoke the config validator, in order to check the correctness of several settings defined in the proj.conf
+#
+#####################################################################################################################
+function config_validator() {
+  set +xuve
+  module load Python/3.7.3-foss-2015a
+  echo "running Config Validator (You can check the result in the .out log file)"
+  python3 $PROJDIR/plugins/config_validator/main.py $EXPID $ROOTDIR/conf $PROJDIR
+  if [ $? != 0 ]; then
+    get_out=true
+  fi
+  set -xuve
+}
+
+#####################################################################################################################
+# Globals: PROJDIR, HPCARCH, SCRATCH path, Exp name, member (Optional), run_start_date (Optional)
+#
+# Arguments:
+#   None
+# Returns:
+#   None
+# Purpose: Runs ec-config tool for EC-Earth3 for a given architecture and path and other config data
+#
+#####################################################################################################################
+function run_ecconfig() {
+
+  #load the parameters
+  local proj_path=$1
+  local hpc_architecture=$2
+  local outclass=$3
+
+  cd ${proj_path}/sources/runtime/autosubmit
+
+  # if the files are not removed ec-conf failed in case of change the account
+  for file_name in ../classic/ctrl/tm5-config-run.rc ece-*.sh; do
+    rm -f $file_name
+  done
+
+  #check loaded parameters
+  local get_out=false
+  if [[ -z ${proj_path} ]]; then
+    echo "proj_path is empty"
+    get_out="true"
+  fi
+  if [[ -z ${hpc_architecture} ]]; then
+    echo "hpc_architecture is empty"
+    get_out="true"
+  fi
+  if [[ -z ${outclass} ]]; then
+    echo "outclass is not defined"
+    get_out="true"
+  fi
+
+  if [[ "${get_out}" == "true" ]]; then exit 1; fi
+
+  cd ${proj_path}/sources/runtime/autosubmit
+  ln -sf ../classic/platform
+  #call the right function based on the correct path to the platform
+  . ${proj_path}/platforms/${hpc_architecture}/ecconf.sh
+
+  # Python 2.7 is requiered by ecconfig
+  set +xuve
+  module load Python/2.7.9-foss-2015a
+  set -xuve
+  ecconfig ${proj_path} ${outclass}
+
+  #give permissions to generated files
+  chmod g+w ${proj_path}/sources/runtime/autosubmit/ece-*.sh
+
+  #check return value of the invocation
+  if [ $? != 0 ]; then
+    exit 1
+  fi
+
+}
+
+#####################################################################################################################
+# Globals:
+#
+# Arguments:
+#   None
+# Returns:
+#   None
+# Purpose: check that the value of the cmorization realization index is correct
+#
+#####################################################################################################################
+function check_cmor_realization_index() {
+  for current_index in ${CMOR_REALIZATION_INDEX[@]}; do
+    typeset -i current_index=${current_index}
+    if [[ ${current_index} -eq 0 ]]; then
+      echo "You defined your realization index as 0 when it should start at 1. Exiting"
+      exit 1
+    fi
+  done
+}
+
+#####################################################################################################################
+# Globals: ROOTDIR, EXPID, ROOTDIR, EXPID
+#
+# Arguments:
+#   None
+# Returns:
+#   None
+# Purpose: check the member realization coherency with the one defined in the CMOR_REALIZATION_INDEX variable in proj.conf
+#
+#####################################################################################################################
+function check_member_realization_coherency() {
+  nb_members=$(grep "MEMBERS = " ${ROOTDIR}/conf/expdef_${EXPID}.conf | cut -f2 -d"=" | wc -w)
+  nb_cmor_realization_index=$(grep "CMOR_REALIZATION_INDEX =" ${ROOTDIR}/conf/proj_${EXPID}.conf | cut -f2 -d"=" | wc -w)
+  if [[ ${nb_cmor_realization_index} != 0 ]] && [[ "${nb_members}" != "${nb_cmor_realization_index}" ]]; then
+    echo "Number of members (${nb_members}) is different from the number of cmor_realization_indexes (${nb_cmor_realization_index}). Check your proj. Exiting."
+    exit 1
+  fi
+}
+
+#####################################################################################################################
+# Globals: CMOR_ADD_STARTDATE, CMOR_EXP, CMOR_EXP_CUSTOM, EXPID
+#
+# Arguments:
+#   None
+# Returns:
+#   None
+# Purpose: Add start dates in CMOR CMIP6_CV.json
+#
+#####################################################################################################################
+function add_cmor_startdates(){
+  #Update CMOR_tables
+  if [[ ${CMOR_EXP_CUSTOM} == "TRUE" ]]; then
+    for START_date in $( cat /esarchive/autosubmit/${EXPID}/conf/expdef_${EXPID}.conf | grep "DATELIST =" | grep -v "#" | cut -f2 -d"=");do
+      python ${PROJDIR}/plugins/cmor_pythonsetup.py --projdir $PROJDIR --template_name ecearth3 --expid $EXPID --cmor_exp $CMOR_EXP --cmor_add_startdate $CMOR_ADD_STARTDATE --startdate $START_date
+    done
+  fi
+}
+
+######################################################
+#
+# MAIN
+#
+######################################################
+
+if [[ "${DEBUG_MODE-}" == "FALSE" ]]; then
+
+  #
+  # Copy Model Sources
+  #
+
+  get_out="false"
+  cd ${PROJDIR}/sources/runtime/autosubmit
+  config_validator
+  check_cmor_realization_index
+  check_member_realization_coherency
+  add_cmor_startdates
+
+  #
+  # Create the /esarchive/exp/ecearth/$expid folder once at the beginning to avoid race conditions leading to permissions issues
+  #
+
+  mkdir_esarchive /esarchive/exp/${MODEL}/${EXPID}
+
+  #
+  # Run ec-conf
+  #
+
+  set_outclass
+
+  run_ecconfig ${PROJDIR} ${HPCARCH} ${outclass} ${PRECOMPILED_VERSION}
+
+  echo "common.localsetup Done"
+
+  if [[ "${get_out}" == "true" ]]; then 
+    echo "ERROR: The config checker detected errors in your configurations. Please, see the job standard output (.out log) for more details" >& 2
+    exit 1
+  fi
+
+fi
++ [[ FALSE == \F\A\L\S\E ]]
++ get_out=false
++ cd /esarchive/autosubmit/t0ni/proj/auto-ecearth3/sources/runtime/autosubmit
++ config_validator
++ set +xuve
+
+The following have been reloaded with a version change:
+  1) Python/2.7.9-foss-2015a => Python/3.7.3-foss-2015a
+
++ check_cmor_realization_index
++ check_member_realization_coherency
+grep "MEMBERS = " ${ROOTDIR}/conf/expdef_${EXPID}.conf | cut -f2 -d"=" | wc -w)
+grep "MEMBERS = " ${ROOTDIR}/conf/expdef_${EXPID}.conf | cut -f2 -d"=" | wc -w
+++ grep 'MEMBERS = ' /esarchive/autosubmit/t0ni/conf/expdef_t0ni.conf
+++ wc -w
+++ cut -f2 -d=
++ nb_members=1
+grep "CMOR_REALIZATION_INDEX =" ${ROOTDIR}/conf/proj_${EXPID}.conf | cut -f2 -d"=" | wc -w)
+grep "CMOR_REALIZATION_INDEX =" ${ROOTDIR}/conf/proj_${EXPID}.conf | cut -f2 -d"=" | wc -w
+++ wc -w
+++ cut -f2 -d=
+++ grep 'CMOR_REALIZATION_INDEX =' /esarchive/autosubmit/t0ni/conf/proj_t0ni.conf
++ nb_cmor_realization_index=0
++ [[ 0 != 0 ]]
++ add_cmor_startdates
++ [[ FALSE == \T\R\U\E ]]
++ mkdir_esarchive /esarchive/exp/ecearth/t0ni
++ target_dir=/esarchive/exp/ecearth/t0ni
++ mkdir -p /esarchive/exp/ecearth/t0ni
++ chmod_esarchive /esarchive/exp/ecearth/t0ni
++ target_dir=/esarchive/exp/ecearth/t0ni
++ chmod =0770,g+s /esarchive/exp/ecearth/t0ni
++ set_outclass
++ [[ -n reduced ]]
++ outclass=/auto-ecearth3/outclass/reduced
++ run_ecconfig /esarchive/autosubmit/t0ni/proj/auto-ecearth3 marenostrum4 /auto-ecearth3/outclass/reduced
++ local proj_path=/esarchive/autosubmit/t0ni/proj/auto-ecearth3
++ local hpc_architecture=marenostrum4
++ local outclass=/auto-ecearth3/outclass/reduced
++ cd /esarchive/autosubmit/t0ni/proj/auto-ecearth3/sources/runtime/autosubmit
++ for file_name in ../classic/ctrl/tm5-config-run.rc 'ece-*.sh'
++ rm -f ../classic/ctrl/tm5-config-run.rc
++ for file_name in ../classic/ctrl/tm5-config-run.rc 'ece-*.sh'
++ rm -f ece-esm.sh
++ for file_name in ../classic/ctrl/tm5-config-run.rc 'ece-*.sh'
++ rm -f ece-lsm.sh
++ for file_name in ../classic/ctrl/tm5-config-run.rc 'ece-*.sh'
++ rm -f ece-nemo.sh
++ local get_out=false
++ [[ -z /esarchive/autosubmit/t0ni/proj/auto-ecearth3 ]]
++ [[ -z marenostrum4 ]]
++ [[ -z /auto-ecearth3/outclass/reduced ]]
++ [[ false == \t\r\u\e ]]
++ cd /esarchive/autosubmit/t0ni/proj/auto-ecearth3/sources/runtime/autosubmit
++ ln -sf ../classic/platform
++ . /esarchive/autosubmit/t0ni/proj/auto-ecearth3/platforms/marenostrum4/ecconf.sh
+#!/usr/bin/env bash
+
+#####################################################################################################################
+# Globals:
+#   None
+# Arguments:
+#  project_path: location of the experiment folder (/esarchive/autosubmit/<expid>)
+#  outclass: the outclass to be used for the generated outputs
+# Returns:
+#   None
+# Purpose: Runs ec-config tool for EC-Earth3 for Marenostrum 4 architecture
+#####################################################################################################################
+function ecconfig() {
+
+  local project_path=$1
+  local outclass=$2
+
+  cd ${project_path}/sources/runtime/autosubmit
+  ln -sf ../classic/platform
+  ../../sources/util/ec-conf/ec-conf --platform bsc-marenostrum4 \
+    -o MOD:GENERAL:OUTPUT_CONTROL_FILES_DIR=${outclass} \
+    ${ecearth_src_dir-} \
+    config-run.xml
+
+}
++ set +xuve
+
+The following have been reloaded with a version change:
+  1) Python/3.7.3-foss-2015a => Python/2.7.9-foss-2015a
+
++ ecconfig /esarchive/autosubmit/t0ni/proj/auto-ecearth3 /auto-ecearth3/outclass/reduced
++ local project_path=/esarchive/autosubmit/t0ni/proj/auto-ecearth3
++ local outclass=/auto-ecearth3/outclass/reduced
++ cd /esarchive/autosubmit/t0ni/proj/auto-ecearth3/sources/runtime/autosubmit
++ ln -sf ../classic/platform
++ ../../sources/util/ec-conf/ec-conf --platform bsc-marenostrum4 -o MOD:GENERAL:OUTPUT_CONTROL_FILES_DIR=/auto-ecearth3/outclass/reduced config-run.xml
++ chmod g+w /esarchive/autosubmit/t0ni/proj/auto-ecearth3/sources/runtime/autosubmit/ece-esm.sh /esarchive/autosubmit/t0ni/proj/auto-ecearth3/sources/runtime/autosubmit/ece-lsm.sh /esarchive/autosubmit/t0ni/proj/auto-ecearth3/sources/runtime/autosubmit/ece-nemo.sh
++ '[' 0 '!=' 0 ']'
++ echo 'common.localsetup Done'
++ [[ false == \t\r\u\e ]]
+
+###################
+# Autosubmit tailer
+###################
+set -xuve
++ set -xuve
+echo $(date +%s) >> ${job_name_ptrn}_STAT
+date +%s)
+date +%s
+++ date +%s
++ echo 1639758736
+touch ${job_name_ptrn}_COMPLETED
++ touch /esarchive/autosubmit/t0ni/tmp/LOG_t0ni/t0ni_LOCAL_SETUP_COMPLETED
+exit 0
++ exit 0

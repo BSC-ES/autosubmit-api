@@ -1,0 +1,3805 @@
+[INFO] JOBID=19279317
+
+=====================================
+files for 19931201 are in /gpfs/scratch/bsc32/bsc32627/t0ni/19931101/fc0/runtime/save_ic/19931201
+delete
+ifs
+nemo
+oasis
+=====================================
+IFS ifiles ICMGGt0niINIT ICMGGt0niINIUA ICMSHt0niINIT found!
+ICMGGt0niINIT
+ICMGGt0niINIUA
+ICMSHt0niINIT
+=====================================
+filebase_oce: t0ni_00002880_restart_oce filebase_ice: t0ni_00002880_restart_ice
+found 1391 files matching pattern t0ni_00002880_restart_oce
+file t0ni_00002880_restart_oce,  num_domains 1391, num_threads 48
+ Running OMP with           48  thread(s).
+ Rebuilding the following files:
+ t0ni_00002880_restart_oce_0000.nc
+ t0ni_00002880_restart_oce_0001.nc
+ t0ni_00002880_restart_oce_0002.nc
+ t0ni_00002880_restart_oce_0003.nc
+ t0ni_00002880_restart_oce_0004.nc
+ t0ni_00002880_restart_oce_0005.nc
+ t0ni_00002880_restart_oce_0006.nc
+ t0ni_00002880_restart_oce_0007.nc
+ t0ni_00002880_restart_oce_0008.nc
+ t0ni_00002880_restart_oce_0009.nc
+ t0ni_00002880_restart_oce_0010.nc
+ t0ni_00002880_restart_oce_0011.nc
+ t0ni_00002880_restart_oce_0012.nc
+ t0ni_00002880_restart_oce_0013.nc
+ t0ni_00002880_restart_oce_0014.nc
+ t0ni_00002880_restart_oce_0015.nc
+ t0ni_00002880_restart_oce_0016.nc
+ t0ni_00002880_restart_oce_0017.nc
+ t0ni_00002880_restart_oce_0018.nc
+ t0ni_00002880_restart_oce_0019.nc
+ t0ni_00002880_restart_oce_0020.nc
+ t0ni_00002880_restart_oce_0021.nc
+ t0ni_00002880_restart_oce_0022.nc
+ t0ni_00002880_restart_oce_0023.nc
+ t0ni_00002880_restart_oce_0024.nc
+ t0ni_00002880_restart_oce_0025.nc
+ t0ni_00002880_restart_oce_0026.nc
+ t0ni_00002880_restart_oce_0027.nc
+ t0ni_00002880_restart_oce_0028.nc
+ t0ni_00002880_restart_oce_0029.nc
+ t0ni_00002880_restart_oce_0030.nc
+ t0ni_00002880_restart_oce_0031.nc
+ t0ni_00002880_restart_oce_0032.nc
+ t0ni_00002880_restart_oce_0033.nc
+ t0ni_00002880_restart_oce_0034.nc
+ t0ni_00002880_restart_oce_0035.nc
+ t0ni_00002880_restart_oce_0036.nc
+ t0ni_00002880_restart_oce_0037.nc
+ t0ni_00002880_restart_oce_0038.nc
+ t0ni_00002880_restart_oce_0039.nc
+ t0ni_00002880_restart_oce_0040.nc
+ t0ni_00002880_restart_oce_0041.nc
+ t0ni_00002880_restart_oce_0042.nc
+ t0ni_00002880_restart_oce_0043.nc
+ t0ni_00002880_restart_oce_0044.nc
+ t0ni_00002880_restart_oce_0045.nc
+ t0ni_00002880_restart_oce_0046.nc
+ t0ni_00002880_restart_oce_0047.nc
+ t0ni_00002880_restart_oce_0048.nc
+ t0ni_00002880_restart_oce_0049.nc
+ t0ni_00002880_restart_oce_0050.nc
+ t0ni_00002880_restart_oce_0051.nc
+ t0ni_00002880_restart_oce_0052.nc
+ t0ni_00002880_restart_oce_0053.nc
+ t0ni_00002880_restart_oce_0054.nc
+ t0ni_00002880_restart_oce_0055.nc
+ t0ni_00002880_restart_oce_0056.nc
+ t0ni_00002880_restart_oce_0057.nc
+ t0ni_00002880_restart_oce_0058.nc
+ t0ni_00002880_restart_oce_0059.nc
+ t0ni_00002880_restart_oce_0060.nc
+ t0ni_00002880_restart_oce_0061.nc
+ t0ni_00002880_restart_oce_0062.nc
+ t0ni_00002880_restart_oce_0063.nc
+ t0ni_00002880_restart_oce_0064.nc
+ t0ni_00002880_restart_oce_0065.nc
+ t0ni_00002880_restart_oce_0066.nc
+ t0ni_00002880_restart_oce_0067.nc
+ t0ni_00002880_restart_oce_0068.nc
+ t0ni_00002880_restart_oce_0069.nc
+ t0ni_00002880_restart_oce_0070.nc
+ t0ni_00002880_restart_oce_0071.nc
+ t0ni_00002880_restart_oce_0072.nc
+ t0ni_00002880_restart_oce_0073.nc
+ t0ni_00002880_restart_oce_0074.nc
+ t0ni_00002880_restart_oce_0075.nc
+ t0ni_00002880_restart_oce_0076.nc
+ t0ni_00002880_restart_oce_0077.nc
+ t0ni_00002880_restart_oce_0078.nc
+ t0ni_00002880_restart_oce_0079.nc
+ t0ni_00002880_restart_oce_0080.nc
+ t0ni_00002880_restart_oce_0081.nc
+ t0ni_00002880_restart_oce_0082.nc
+ t0ni_00002880_restart_oce_0083.nc
+ t0ni_00002880_restart_oce_0084.nc
+ t0ni_00002880_restart_oce_0085.nc
+ t0ni_00002880_restart_oce_0086.nc
+ t0ni_00002880_restart_oce_0087.nc
+ t0ni_00002880_restart_oce_0088.nc
+ t0ni_00002880_restart_oce_0089.nc
+ t0ni_00002880_restart_oce_0090.nc
+ t0ni_00002880_restart_oce_0091.nc
+ t0ni_00002880_restart_oce_0092.nc
+ t0ni_00002880_restart_oce_0093.nc
+ t0ni_00002880_restart_oce_0094.nc
+ t0ni_00002880_restart_oce_0095.nc
+ t0ni_00002880_restart_oce_0096.nc
+ t0ni_00002880_restart_oce_0097.nc
+ t0ni_00002880_restart_oce_0098.nc
+ t0ni_00002880_restart_oce_0099.nc
+ t0ni_00002880_restart_oce_0100.nc
+ t0ni_00002880_restart_oce_0101.nc
+ t0ni_00002880_restart_oce_0102.nc
+ t0ni_00002880_restart_oce_0103.nc
+ t0ni_00002880_restart_oce_0104.nc
+ t0ni_00002880_restart_oce_0105.nc
+ t0ni_00002880_restart_oce_0106.nc
+ t0ni_00002880_restart_oce_0107.nc
+ t0ni_00002880_restart_oce_0108.nc
+ t0ni_00002880_restart_oce_0109.nc
+ t0ni_00002880_restart_oce_0110.nc
+ t0ni_00002880_restart_oce_0111.nc
+ t0ni_00002880_restart_oce_0112.nc
+ t0ni_00002880_restart_oce_0113.nc
+ t0ni_00002880_restart_oce_0114.nc
+ t0ni_00002880_restart_oce_0115.nc
+ t0ni_00002880_restart_oce_0116.nc
+ t0ni_00002880_restart_oce_0117.nc
+ t0ni_00002880_restart_oce_0118.nc
+ t0ni_00002880_restart_oce_0119.nc
+ t0ni_00002880_restart_oce_0120.nc
+ t0ni_00002880_restart_oce_0121.nc
+ t0ni_00002880_restart_oce_0122.nc
+ t0ni_00002880_restart_oce_0123.nc
+ t0ni_00002880_restart_oce_0124.nc
+ t0ni_00002880_restart_oce_0125.nc
+ t0ni_00002880_restart_oce_0126.nc
+ t0ni_00002880_restart_oce_0127.nc
+ t0ni_00002880_restart_oce_0128.nc
+ t0ni_00002880_restart_oce_0129.nc
+ t0ni_00002880_restart_oce_0130.nc
+ t0ni_00002880_restart_oce_0131.nc
+ t0ni_00002880_restart_oce_0132.nc
+ t0ni_00002880_restart_oce_0133.nc
+ t0ni_00002880_restart_oce_0134.nc
+ t0ni_00002880_restart_oce_0135.nc
+ t0ni_00002880_restart_oce_0136.nc
+ t0ni_00002880_restart_oce_0137.nc
+ t0ni_00002880_restart_oce_0138.nc
+ t0ni_00002880_restart_oce_0139.nc
+ t0ni_00002880_restart_oce_0140.nc
+ t0ni_00002880_restart_oce_0141.nc
+ t0ni_00002880_restart_oce_0142.nc
+ t0ni_00002880_restart_oce_0143.nc
+ t0ni_00002880_restart_oce_0144.nc
+ t0ni_00002880_restart_oce_0145.nc
+ t0ni_00002880_restart_oce_0146.nc
+ t0ni_00002880_restart_oce_0147.nc
+ t0ni_00002880_restart_oce_0148.nc
+ t0ni_00002880_restart_oce_0149.nc
+ t0ni_00002880_restart_oce_0150.nc
+ t0ni_00002880_restart_oce_0151.nc
+ t0ni_00002880_restart_oce_0152.nc
+ t0ni_00002880_restart_oce_0153.nc
+ t0ni_00002880_restart_oce_0154.nc
+ t0ni_00002880_restart_oce_0155.nc
+ t0ni_00002880_restart_oce_0156.nc
+ t0ni_00002880_restart_oce_0157.nc
+ t0ni_00002880_restart_oce_0158.nc
+ t0ni_00002880_restart_oce_0159.nc
+ t0ni_00002880_restart_oce_0160.nc
+ t0ni_00002880_restart_oce_0161.nc
+ t0ni_00002880_restart_oce_0162.nc
+ t0ni_00002880_restart_oce_0163.nc
+ t0ni_00002880_restart_oce_0164.nc
+ t0ni_00002880_restart_oce_0165.nc
+ t0ni_00002880_restart_oce_0166.nc
+ t0ni_00002880_restart_oce_0167.nc
+ t0ni_00002880_restart_oce_0168.nc
+ t0ni_00002880_restart_oce_0169.nc
+ t0ni_00002880_restart_oce_0170.nc
+ t0ni_00002880_restart_oce_0171.nc
+ t0ni_00002880_restart_oce_0172.nc
+ t0ni_00002880_restart_oce_0173.nc
+ t0ni_00002880_restart_oce_0174.nc
+ t0ni_00002880_restart_oce_0175.nc
+ t0ni_00002880_restart_oce_0176.nc
+ t0ni_00002880_restart_oce_0177.nc
+ t0ni_00002880_restart_oce_0178.nc
+ t0ni_00002880_restart_oce_0179.nc
+ t0ni_00002880_restart_oce_0180.nc
+ t0ni_00002880_restart_oce_0181.nc
+ t0ni_00002880_restart_oce_0182.nc
+ t0ni_00002880_restart_oce_0183.nc
+ t0ni_00002880_restart_oce_0184.nc
+ t0ni_00002880_restart_oce_0185.nc
+ t0ni_00002880_restart_oce_0186.nc
+ t0ni_00002880_restart_oce_0187.nc
+ t0ni_00002880_restart_oce_0188.nc
+ t0ni_00002880_restart_oce_0189.nc
+ t0ni_00002880_restart_oce_0190.nc
+ t0ni_00002880_restart_oce_0191.nc
+ t0ni_00002880_restart_oce_0192.nc
+ t0ni_00002880_restart_oce_0193.nc
+ t0ni_00002880_restart_oce_0194.nc
+ t0ni_00002880_restart_oce_0195.nc
+ t0ni_00002880_restart_oce_0196.nc
+ t0ni_00002880_restart_oce_0197.nc
+ t0ni_00002880_restart_oce_0198.nc
+ t0ni_00002880_restart_oce_0199.nc
+ t0ni_00002880_restart_oce_0200.nc
+ t0ni_00002880_restart_oce_0201.nc
+ t0ni_00002880_restart_oce_0202.nc
+ t0ni_00002880_restart_oce_0203.nc
+ t0ni_00002880_restart_oce_0204.nc
+ t0ni_00002880_restart_oce_0205.nc
+ t0ni_00002880_restart_oce_0206.nc
+ t0ni_00002880_restart_oce_0207.nc
+ t0ni_00002880_restart_oce_0208.nc
+ t0ni_00002880_restart_oce_0209.nc
+ t0ni_00002880_restart_oce_0210.nc
+ t0ni_00002880_restart_oce_0211.nc
+ t0ni_00002880_restart_oce_0212.nc
+ t0ni_00002880_restart_oce_0213.nc
+ t0ni_00002880_restart_oce_0214.nc
+ t0ni_00002880_restart_oce_0215.nc
+ t0ni_00002880_restart_oce_0216.nc
+ t0ni_00002880_restart_oce_0217.nc
+ t0ni_00002880_restart_oce_0218.nc
+ t0ni_00002880_restart_oce_0219.nc
+ t0ni_00002880_restart_oce_0220.nc
+ t0ni_00002880_restart_oce_0221.nc
+ t0ni_00002880_restart_oce_0222.nc
+ t0ni_00002880_restart_oce_0223.nc
+ t0ni_00002880_restart_oce_0224.nc
+ t0ni_00002880_restart_oce_0225.nc
+ t0ni_00002880_restart_oce_0226.nc
+ t0ni_00002880_restart_oce_0227.nc
+ t0ni_00002880_restart_oce_0228.nc
+ t0ni_00002880_restart_oce_0229.nc
+ t0ni_00002880_restart_oce_0230.nc
+ t0ni_00002880_restart_oce_0231.nc
+ t0ni_00002880_restart_oce_0232.nc
+ t0ni_00002880_restart_oce_0233.nc
+ t0ni_00002880_restart_oce_0234.nc
+ t0ni_00002880_restart_oce_0235.nc
+ t0ni_00002880_restart_oce_0236.nc
+ t0ni_00002880_restart_oce_0237.nc
+ t0ni_00002880_restart_oce_0238.nc
+ t0ni_00002880_restart_oce_0239.nc
+ t0ni_00002880_restart_oce_0240.nc
+ t0ni_00002880_restart_oce_0241.nc
+ t0ni_00002880_restart_oce_0242.nc
+ t0ni_00002880_restart_oce_0243.nc
+ t0ni_00002880_restart_oce_0244.nc
+ t0ni_00002880_restart_oce_0245.nc
+ t0ni_00002880_restart_oce_0246.nc
+ t0ni_00002880_restart_oce_0247.nc
+ t0ni_00002880_restart_oce_0248.nc
+ t0ni_00002880_restart_oce_0249.nc
+ t0ni_00002880_restart_oce_0250.nc
+ t0ni_00002880_restart_oce_0251.nc
+ t0ni_00002880_restart_oce_0252.nc
+ t0ni_00002880_restart_oce_0253.nc
+ t0ni_00002880_restart_oce_0254.nc
+ t0ni_00002880_restart_oce_0255.nc
+ t0ni_00002880_restart_oce_0256.nc
+ t0ni_00002880_restart_oce_0257.nc
+ t0ni_00002880_restart_oce_0258.nc
+ t0ni_00002880_restart_oce_0259.nc
+ t0ni_00002880_restart_oce_0260.nc
+ t0ni_00002880_restart_oce_0261.nc
+ t0ni_00002880_restart_oce_0262.nc
+ t0ni_00002880_restart_oce_0263.nc
+ t0ni_00002880_restart_oce_0264.nc
+ t0ni_00002880_restart_oce_0265.nc
+ t0ni_00002880_restart_oce_0266.nc
+ t0ni_00002880_restart_oce_0267.nc
+ t0ni_00002880_restart_oce_0268.nc
+ t0ni_00002880_restart_oce_0269.nc
+ t0ni_00002880_restart_oce_0270.nc
+ t0ni_00002880_restart_oce_0271.nc
+ t0ni_00002880_restart_oce_0272.nc
+ t0ni_00002880_restart_oce_0273.nc
+ t0ni_00002880_restart_oce_0274.nc
+ t0ni_00002880_restart_oce_0275.nc
+ t0ni_00002880_restart_oce_0276.nc
+ t0ni_00002880_restart_oce_0277.nc
+ t0ni_00002880_restart_oce_0278.nc
+ t0ni_00002880_restart_oce_0279.nc
+ t0ni_00002880_restart_oce_0280.nc
+ t0ni_00002880_restart_oce_0281.nc
+ t0ni_00002880_restart_oce_0282.nc
+ t0ni_00002880_restart_oce_0283.nc
+ t0ni_00002880_restart_oce_0284.nc
+ t0ni_00002880_restart_oce_0285.nc
+ t0ni_00002880_restart_oce_0286.nc
+ t0ni_00002880_restart_oce_0287.nc
+ t0ni_00002880_restart_oce_0288.nc
+ t0ni_00002880_restart_oce_0289.nc
+ t0ni_00002880_restart_oce_0290.nc
+ t0ni_00002880_restart_oce_0291.nc
+ t0ni_00002880_restart_oce_0292.nc
+ t0ni_00002880_restart_oce_0293.nc
+ t0ni_00002880_restart_oce_0294.nc
+ t0ni_00002880_restart_oce_0295.nc
+ t0ni_00002880_restart_oce_0296.nc
+ t0ni_00002880_restart_oce_0297.nc
+ t0ni_00002880_restart_oce_0298.nc
+ t0ni_00002880_restart_oce_0299.nc
+ t0ni_00002880_restart_oce_0300.nc
+ t0ni_00002880_restart_oce_0301.nc
+ t0ni_00002880_restart_oce_0302.nc
+ t0ni_00002880_restart_oce_0303.nc
+ t0ni_00002880_restart_oce_0304.nc
+ t0ni_00002880_restart_oce_0305.nc
+ t0ni_00002880_restart_oce_0306.nc
+ t0ni_00002880_restart_oce_0307.nc
+ t0ni_00002880_restart_oce_0308.nc
+ t0ni_00002880_restart_oce_0309.nc
+ t0ni_00002880_restart_oce_0310.nc
+ t0ni_00002880_restart_oce_0311.nc
+ t0ni_00002880_restart_oce_0312.nc
+ t0ni_00002880_restart_oce_0313.nc
+ t0ni_00002880_restart_oce_0314.nc
+ t0ni_00002880_restart_oce_0315.nc
+ t0ni_00002880_restart_oce_0316.nc
+ t0ni_00002880_restart_oce_0317.nc
+ t0ni_00002880_restart_oce_0318.nc
+ t0ni_00002880_restart_oce_0319.nc
+ t0ni_00002880_restart_oce_0320.nc
+ t0ni_00002880_restart_oce_0321.nc
+ t0ni_00002880_restart_oce_0322.nc
+ t0ni_00002880_restart_oce_0323.nc
+ t0ni_00002880_restart_oce_0324.nc
+ t0ni_00002880_restart_oce_0325.nc
+ t0ni_00002880_restart_oce_0326.nc
+ t0ni_00002880_restart_oce_0327.nc
+ t0ni_00002880_restart_oce_0328.nc
+ t0ni_00002880_restart_oce_0329.nc
+ t0ni_00002880_restart_oce_0330.nc
+ t0ni_00002880_restart_oce_0331.nc
+ t0ni_00002880_restart_oce_0332.nc
+ t0ni_00002880_restart_oce_0333.nc
+ t0ni_00002880_restart_oce_0334.nc
+ t0ni_00002880_restart_oce_0335.nc
+ t0ni_00002880_restart_oce_0336.nc
+ t0ni_00002880_restart_oce_0337.nc
+ t0ni_00002880_restart_oce_0338.nc
+ t0ni_00002880_restart_oce_0339.nc
+ t0ni_00002880_restart_oce_0340.nc
+ t0ni_00002880_restart_oce_0341.nc
+ t0ni_00002880_restart_oce_0342.nc
+ t0ni_00002880_restart_oce_0343.nc
+ t0ni_00002880_restart_oce_0344.nc
+ t0ni_00002880_restart_oce_0345.nc
+ t0ni_00002880_restart_oce_0346.nc
+ t0ni_00002880_restart_oce_0347.nc
+ t0ni_00002880_restart_oce_0348.nc
+ t0ni_00002880_restart_oce_0349.nc
+ t0ni_00002880_restart_oce_0350.nc
+ t0ni_00002880_restart_oce_0351.nc
+ t0ni_00002880_restart_oce_0352.nc
+ t0ni_00002880_restart_oce_0353.nc
+ t0ni_00002880_restart_oce_0354.nc
+ t0ni_00002880_restart_oce_0355.nc
+ t0ni_00002880_restart_oce_0356.nc
+ t0ni_00002880_restart_oce_0357.nc
+ t0ni_00002880_restart_oce_0358.nc
+ t0ni_00002880_restart_oce_0359.nc
+ t0ni_00002880_restart_oce_0360.nc
+ t0ni_00002880_restart_oce_0361.nc
+ t0ni_00002880_restart_oce_0362.nc
+ t0ni_00002880_restart_oce_0363.nc
+ t0ni_00002880_restart_oce_0364.nc
+ t0ni_00002880_restart_oce_0365.nc
+ t0ni_00002880_restart_oce_0366.nc
+ t0ni_00002880_restart_oce_0367.nc
+ t0ni_00002880_restart_oce_0368.nc
+ t0ni_00002880_restart_oce_0369.nc
+ t0ni_00002880_restart_oce_0370.nc
+ t0ni_00002880_restart_oce_0371.nc
+ t0ni_00002880_restart_oce_0372.nc
+ t0ni_00002880_restart_oce_0373.nc
+ t0ni_00002880_restart_oce_0374.nc
+ t0ni_00002880_restart_oce_0375.nc
+ t0ni_00002880_restart_oce_0376.nc
+ t0ni_00002880_restart_oce_0377.nc
+ t0ni_00002880_restart_oce_0378.nc
+ t0ni_00002880_restart_oce_0379.nc
+ t0ni_00002880_restart_oce_0380.nc
+ t0ni_00002880_restart_oce_0381.nc
+ t0ni_00002880_restart_oce_0382.nc
+ t0ni_00002880_restart_oce_0383.nc
+ t0ni_00002880_restart_oce_0384.nc
+ t0ni_00002880_restart_oce_0385.nc
+ t0ni_00002880_restart_oce_0386.nc
+ t0ni_00002880_restart_oce_0387.nc
+ t0ni_00002880_restart_oce_0388.nc
+ t0ni_00002880_restart_oce_0389.nc
+ t0ni_00002880_restart_oce_0390.nc
+ t0ni_00002880_restart_oce_0391.nc
+ t0ni_00002880_restart_oce_0392.nc
+ t0ni_00002880_restart_oce_0393.nc
+ t0ni_00002880_restart_oce_0394.nc
+ t0ni_00002880_restart_oce_0395.nc
+ t0ni_00002880_restart_oce_0396.nc
+ t0ni_00002880_restart_oce_0397.nc
+ t0ni_00002880_restart_oce_0398.nc
+ t0ni_00002880_restart_oce_0399.nc
+ t0ni_00002880_restart_oce_0400.nc
+ t0ni_00002880_restart_oce_0401.nc
+ t0ni_00002880_restart_oce_0402.nc
+ t0ni_00002880_restart_oce_0403.nc
+ t0ni_00002880_restart_oce_0404.nc
+ t0ni_00002880_restart_oce_0405.nc
+ t0ni_00002880_restart_oce_0406.nc
+ t0ni_00002880_restart_oce_0407.nc
+ t0ni_00002880_restart_oce_0408.nc
+ t0ni_00002880_restart_oce_0409.nc
+ t0ni_00002880_restart_oce_0410.nc
+ t0ni_00002880_restart_oce_0411.nc
+ t0ni_00002880_restart_oce_0412.nc
+ t0ni_00002880_restart_oce_0413.nc
+ t0ni_00002880_restart_oce_0414.nc
+ t0ni_00002880_restart_oce_0415.nc
+ t0ni_00002880_restart_oce_0416.nc
+ t0ni_00002880_restart_oce_0417.nc
+ t0ni_00002880_restart_oce_0418.nc
+ t0ni_00002880_restart_oce_0419.nc
+ t0ni_00002880_restart_oce_0420.nc
+ t0ni_00002880_restart_oce_0421.nc
+ t0ni_00002880_restart_oce_0422.nc
+ t0ni_00002880_restart_oce_0423.nc
+ t0ni_00002880_restart_oce_0424.nc
+ t0ni_00002880_restart_oce_0425.nc
+ t0ni_00002880_restart_oce_0426.nc
+ t0ni_00002880_restart_oce_0427.nc
+ t0ni_00002880_restart_oce_0428.nc
+ t0ni_00002880_restart_oce_0429.nc
+ t0ni_00002880_restart_oce_0430.nc
+ t0ni_00002880_restart_oce_0431.nc
+ t0ni_00002880_restart_oce_0432.nc
+ t0ni_00002880_restart_oce_0433.nc
+ t0ni_00002880_restart_oce_0434.nc
+ t0ni_00002880_restart_oce_0435.nc
+ t0ni_00002880_restart_oce_0436.nc
+ t0ni_00002880_restart_oce_0437.nc
+ t0ni_00002880_restart_oce_0438.nc
+ t0ni_00002880_restart_oce_0439.nc
+ t0ni_00002880_restart_oce_0440.nc
+ t0ni_00002880_restart_oce_0441.nc
+ t0ni_00002880_restart_oce_0442.nc
+ t0ni_00002880_restart_oce_0443.nc
+ t0ni_00002880_restart_oce_0444.nc
+ t0ni_00002880_restart_oce_0445.nc
+ t0ni_00002880_restart_oce_0446.nc
+ t0ni_00002880_restart_oce_0447.nc
+ t0ni_00002880_restart_oce_0448.nc
+ t0ni_00002880_restart_oce_0449.nc
+ t0ni_00002880_restart_oce_0450.nc
+ t0ni_00002880_restart_oce_0451.nc
+ t0ni_00002880_restart_oce_0452.nc
+ t0ni_00002880_restart_oce_0453.nc
+ t0ni_00002880_restart_oce_0454.nc
+ t0ni_00002880_restart_oce_0455.nc
+ t0ni_00002880_restart_oce_0456.nc
+ t0ni_00002880_restart_oce_0457.nc
+ t0ni_00002880_restart_oce_0458.nc
+ t0ni_00002880_restart_oce_0459.nc
+ t0ni_00002880_restart_oce_0460.nc
+ t0ni_00002880_restart_oce_0461.nc
+ t0ni_00002880_restart_oce_0462.nc
+ t0ni_00002880_restart_oce_0463.nc
+ t0ni_00002880_restart_oce_0464.nc
+ t0ni_00002880_restart_oce_0465.nc
+ t0ni_00002880_restart_oce_0466.nc
+ t0ni_00002880_restart_oce_0467.nc
+ t0ni_00002880_restart_oce_0468.nc
+ t0ni_00002880_restart_oce_0469.nc
+ t0ni_00002880_restart_oce_0470.nc
+ t0ni_00002880_restart_oce_0471.nc
+ t0ni_00002880_restart_oce_0472.nc
+ t0ni_00002880_restart_oce_0473.nc
+ t0ni_00002880_restart_oce_0474.nc
+ t0ni_00002880_restart_oce_0475.nc
+ t0ni_00002880_restart_oce_0476.nc
+ t0ni_00002880_restart_oce_0477.nc
+ t0ni_00002880_restart_oce_0478.nc
+ t0ni_00002880_restart_oce_0479.nc
+ t0ni_00002880_restart_oce_0480.nc
+ t0ni_00002880_restart_oce_0481.nc
+ t0ni_00002880_restart_oce_0482.nc
+ t0ni_00002880_restart_oce_0483.nc
+ t0ni_00002880_restart_oce_0484.nc
+ t0ni_00002880_restart_oce_0485.nc
+ t0ni_00002880_restart_oce_0486.nc
+ t0ni_00002880_restart_oce_0487.nc
+ t0ni_00002880_restart_oce_0488.nc
+ t0ni_00002880_restart_oce_0489.nc
+ t0ni_00002880_restart_oce_0490.nc
+ t0ni_00002880_restart_oce_0491.nc
+ t0ni_00002880_restart_oce_0492.nc
+ t0ni_00002880_restart_oce_0493.nc
+ t0ni_00002880_restart_oce_0494.nc
+ t0ni_00002880_restart_oce_0495.nc
+ t0ni_00002880_restart_oce_0496.nc
+ t0ni_00002880_restart_oce_0497.nc
+ t0ni_00002880_restart_oce_0498.nc
+ t0ni_00002880_restart_oce_0499.nc
+ t0ni_00002880_restart_oce_0500.nc
+ t0ni_00002880_restart_oce_0501.nc
+ t0ni_00002880_restart_oce_0502.nc
+ t0ni_00002880_restart_oce_0503.nc
+ t0ni_00002880_restart_oce_0504.nc
+ t0ni_00002880_restart_oce_0505.nc
+ t0ni_00002880_restart_oce_0506.nc
+ t0ni_00002880_restart_oce_0507.nc
+ t0ni_00002880_restart_oce_0508.nc
+ t0ni_00002880_restart_oce_0509.nc
+ t0ni_00002880_restart_oce_0510.nc
+ t0ni_00002880_restart_oce_0511.nc
+ t0ni_00002880_restart_oce_0512.nc
+ t0ni_00002880_restart_oce_0513.nc
+ t0ni_00002880_restart_oce_0514.nc
+ t0ni_00002880_restart_oce_0515.nc
+ t0ni_00002880_restart_oce_0516.nc
+ t0ni_00002880_restart_oce_0517.nc
+ t0ni_00002880_restart_oce_0518.nc
+ t0ni_00002880_restart_oce_0519.nc
+ t0ni_00002880_restart_oce_0520.nc
+ t0ni_00002880_restart_oce_0521.nc
+ t0ni_00002880_restart_oce_0522.nc
+ t0ni_00002880_restart_oce_0523.nc
+ t0ni_00002880_restart_oce_0524.nc
+ t0ni_00002880_restart_oce_0525.nc
+ t0ni_00002880_restart_oce_0526.nc
+ t0ni_00002880_restart_oce_0527.nc
+ t0ni_00002880_restart_oce_0528.nc
+ t0ni_00002880_restart_oce_0529.nc
+ t0ni_00002880_restart_oce_0530.nc
+ t0ni_00002880_restart_oce_0531.nc
+ t0ni_00002880_restart_oce_0532.nc
+ t0ni_00002880_restart_oce_0533.nc
+ t0ni_00002880_restart_oce_0534.nc
+ t0ni_00002880_restart_oce_0535.nc
+ t0ni_00002880_restart_oce_0536.nc
+ t0ni_00002880_restart_oce_0537.nc
+ t0ni_00002880_restart_oce_0538.nc
+ t0ni_00002880_restart_oce_0539.nc
+ t0ni_00002880_restart_oce_0540.nc
+ t0ni_00002880_restart_oce_0541.nc
+ t0ni_00002880_restart_oce_0542.nc
+ t0ni_00002880_restart_oce_0543.nc
+ t0ni_00002880_restart_oce_0544.nc
+ t0ni_00002880_restart_oce_0545.nc
+ t0ni_00002880_restart_oce_0546.nc
+ t0ni_00002880_restart_oce_0547.nc
+ t0ni_00002880_restart_oce_0548.nc
+ t0ni_00002880_restart_oce_0549.nc
+ t0ni_00002880_restart_oce_0550.nc
+ t0ni_00002880_restart_oce_0551.nc
+ t0ni_00002880_restart_oce_0552.nc
+ t0ni_00002880_restart_oce_0553.nc
+ t0ni_00002880_restart_oce_0554.nc
+ t0ni_00002880_restart_oce_0555.nc
+ t0ni_00002880_restart_oce_0556.nc
+ t0ni_00002880_restart_oce_0557.nc
+ t0ni_00002880_restart_oce_0558.nc
+ t0ni_00002880_restart_oce_0559.nc
+ t0ni_00002880_restart_oce_0560.nc
+ t0ni_00002880_restart_oce_0561.nc
+ t0ni_00002880_restart_oce_0562.nc
+ t0ni_00002880_restart_oce_0563.nc
+ t0ni_00002880_restart_oce_0564.nc
+ t0ni_00002880_restart_oce_0565.nc
+ t0ni_00002880_restart_oce_0566.nc
+ t0ni_00002880_restart_oce_0567.nc
+ t0ni_00002880_restart_oce_0568.nc
+ t0ni_00002880_restart_oce_0569.nc
+ t0ni_00002880_restart_oce_0570.nc
+ t0ni_00002880_restart_oce_0571.nc
+ t0ni_00002880_restart_oce_0572.nc
+ t0ni_00002880_restart_oce_0573.nc
+ t0ni_00002880_restart_oce_0574.nc
+ t0ni_00002880_restart_oce_0575.nc
+ t0ni_00002880_restart_oce_0576.nc
+ t0ni_00002880_restart_oce_0577.nc
+ t0ni_00002880_restart_oce_0578.nc
+ t0ni_00002880_restart_oce_0579.nc
+ t0ni_00002880_restart_oce_0580.nc
+ t0ni_00002880_restart_oce_0581.nc
+ t0ni_00002880_restart_oce_0582.nc
+ t0ni_00002880_restart_oce_0583.nc
+ t0ni_00002880_restart_oce_0584.nc
+ t0ni_00002880_restart_oce_0585.nc
+ t0ni_00002880_restart_oce_0586.nc
+ t0ni_00002880_restart_oce_0587.nc
+ t0ni_00002880_restart_oce_0588.nc
+ t0ni_00002880_restart_oce_0589.nc
+ t0ni_00002880_restart_oce_0590.nc
+ t0ni_00002880_restart_oce_0591.nc
+ t0ni_00002880_restart_oce_0592.nc
+ t0ni_00002880_restart_oce_0593.nc
+ t0ni_00002880_restart_oce_0594.nc
+ t0ni_00002880_restart_oce_0595.nc
+ t0ni_00002880_restart_oce_0596.nc
+ t0ni_00002880_restart_oce_0597.nc
+ t0ni_00002880_restart_oce_0598.nc
+ t0ni_00002880_restart_oce_0599.nc
+ t0ni_00002880_restart_oce_0600.nc
+ t0ni_00002880_restart_oce_0601.nc
+ t0ni_00002880_restart_oce_0602.nc
+ t0ni_00002880_restart_oce_0603.nc
+ t0ni_00002880_restart_oce_0604.nc
+ t0ni_00002880_restart_oce_0605.nc
+ t0ni_00002880_restart_oce_0606.nc
+ t0ni_00002880_restart_oce_0607.nc
+ t0ni_00002880_restart_oce_0608.nc
+ t0ni_00002880_restart_oce_0609.nc
+ t0ni_00002880_restart_oce_0610.nc
+ t0ni_00002880_restart_oce_0611.nc
+ t0ni_00002880_restart_oce_0612.nc
+ t0ni_00002880_restart_oce_0613.nc
+ t0ni_00002880_restart_oce_0614.nc
+ t0ni_00002880_restart_oce_0615.nc
+ t0ni_00002880_restart_oce_0616.nc
+ t0ni_00002880_restart_oce_0617.nc
+ t0ni_00002880_restart_oce_0618.nc
+ t0ni_00002880_restart_oce_0619.nc
+ t0ni_00002880_restart_oce_0620.nc
+ t0ni_00002880_restart_oce_0621.nc
+ t0ni_00002880_restart_oce_0622.nc
+ t0ni_00002880_restart_oce_0623.nc
+ t0ni_00002880_restart_oce_0624.nc
+ t0ni_00002880_restart_oce_0625.nc
+ t0ni_00002880_restart_oce_0626.nc
+ t0ni_00002880_restart_oce_0627.nc
+ t0ni_00002880_restart_oce_0628.nc
+ t0ni_00002880_restart_oce_0629.nc
+ t0ni_00002880_restart_oce_0630.nc
+ t0ni_00002880_restart_oce_0631.nc
+ t0ni_00002880_restart_oce_0632.nc
+ t0ni_00002880_restart_oce_0633.nc
+ t0ni_00002880_restart_oce_0634.nc
+ t0ni_00002880_restart_oce_0635.nc
+ t0ni_00002880_restart_oce_0636.nc
+ t0ni_00002880_restart_oce_0637.nc
+ t0ni_00002880_restart_oce_0638.nc
+ t0ni_00002880_restart_oce_0639.nc
+ t0ni_00002880_restart_oce_0640.nc
+ t0ni_00002880_restart_oce_0641.nc
+ t0ni_00002880_restart_oce_0642.nc
+ t0ni_00002880_restart_oce_0643.nc
+ t0ni_00002880_restart_oce_0644.nc
+ t0ni_00002880_restart_oce_0645.nc
+ t0ni_00002880_restart_oce_0646.nc
+ t0ni_00002880_restart_oce_0647.nc
+ t0ni_00002880_restart_oce_0648.nc
+ t0ni_00002880_restart_oce_0649.nc
+ t0ni_00002880_restart_oce_0650.nc
+ t0ni_00002880_restart_oce_0651.nc
+ t0ni_00002880_restart_oce_0652.nc
+ t0ni_00002880_restart_oce_0653.nc
+ t0ni_00002880_restart_oce_0654.nc
+ t0ni_00002880_restart_oce_0655.nc
+ t0ni_00002880_restart_oce_0656.nc
+ t0ni_00002880_restart_oce_0657.nc
+ t0ni_00002880_restart_oce_0658.nc
+ t0ni_00002880_restart_oce_0659.nc
+ t0ni_00002880_restart_oce_0660.nc
+ t0ni_00002880_restart_oce_0661.nc
+ t0ni_00002880_restart_oce_0662.nc
+ t0ni_00002880_restart_oce_0663.nc
+ t0ni_00002880_restart_oce_0664.nc
+ t0ni_00002880_restart_oce_0665.nc
+ t0ni_00002880_restart_oce_0666.nc
+ t0ni_00002880_restart_oce_0667.nc
+ t0ni_00002880_restart_oce_0668.nc
+ t0ni_00002880_restart_oce_0669.nc
+ t0ni_00002880_restart_oce_0670.nc
+ t0ni_00002880_restart_oce_0671.nc
+ t0ni_00002880_restart_oce_0672.nc
+ t0ni_00002880_restart_oce_0673.nc
+ t0ni_00002880_restart_oce_0674.nc
+ t0ni_00002880_restart_oce_0675.nc
+ t0ni_00002880_restart_oce_0676.nc
+ t0ni_00002880_restart_oce_0677.nc
+ t0ni_00002880_restart_oce_0678.nc
+ t0ni_00002880_restart_oce_0679.nc
+ t0ni_00002880_restart_oce_0680.nc
+ t0ni_00002880_restart_oce_0681.nc
+ t0ni_00002880_restart_oce_0682.nc
+ t0ni_00002880_restart_oce_0683.nc
+ t0ni_00002880_restart_oce_0684.nc
+ t0ni_00002880_restart_oce_0685.nc
+ t0ni_00002880_restart_oce_0686.nc
+ t0ni_00002880_restart_oce_0687.nc
+ t0ni_00002880_restart_oce_0688.nc
+ t0ni_00002880_restart_oce_0689.nc
+ t0ni_00002880_restart_oce_0690.nc
+ t0ni_00002880_restart_oce_0691.nc
+ t0ni_00002880_restart_oce_0692.nc
+ t0ni_00002880_restart_oce_0693.nc
+ t0ni_00002880_restart_oce_0694.nc
+ t0ni_00002880_restart_oce_0695.nc
+ t0ni_00002880_restart_oce_0696.nc
+ t0ni_00002880_restart_oce_0697.nc
+ t0ni_00002880_restart_oce_0698.nc
+ t0ni_00002880_restart_oce_0699.nc
+ t0ni_00002880_restart_oce_0700.nc
+ t0ni_00002880_restart_oce_0701.nc
+ t0ni_00002880_restart_oce_0702.nc
+ t0ni_00002880_restart_oce_0703.nc
+ t0ni_00002880_restart_oce_0704.nc
+ t0ni_00002880_restart_oce_0705.nc
+ t0ni_00002880_restart_oce_0706.nc
+ t0ni_00002880_restart_oce_0707.nc
+ t0ni_00002880_restart_oce_0708.nc
+ t0ni_00002880_restart_oce_0709.nc
+ t0ni_00002880_restart_oce_0710.nc
+ t0ni_00002880_restart_oce_0711.nc
+ t0ni_00002880_restart_oce_0712.nc
+ t0ni_00002880_restart_oce_0713.nc
+ t0ni_00002880_restart_oce_0714.nc
+ t0ni_00002880_restart_oce_0715.nc
+ t0ni_00002880_restart_oce_0716.nc
+ t0ni_00002880_restart_oce_0717.nc
+ t0ni_00002880_restart_oce_0718.nc
+ t0ni_00002880_restart_oce_0719.nc
+ t0ni_00002880_restart_oce_0720.nc
+ t0ni_00002880_restart_oce_0721.nc
+ t0ni_00002880_restart_oce_0722.nc
+ t0ni_00002880_restart_oce_0723.nc
+ t0ni_00002880_restart_oce_0724.nc
+ t0ni_00002880_restart_oce_0725.nc
+ t0ni_00002880_restart_oce_0726.nc
+ t0ni_00002880_restart_oce_0727.nc
+ t0ni_00002880_restart_oce_0728.nc
+ t0ni_00002880_restart_oce_0729.nc
+ t0ni_00002880_restart_oce_0730.nc
+ t0ni_00002880_restart_oce_0731.nc
+ t0ni_00002880_restart_oce_0732.nc
+ t0ni_00002880_restart_oce_0733.nc
+ t0ni_00002880_restart_oce_0734.nc
+ t0ni_00002880_restart_oce_0735.nc
+ t0ni_00002880_restart_oce_0736.nc
+ t0ni_00002880_restart_oce_0737.nc
+ t0ni_00002880_restart_oce_0738.nc
+ t0ni_00002880_restart_oce_0739.nc
+ t0ni_00002880_restart_oce_0740.nc
+ t0ni_00002880_restart_oce_0741.nc
+ t0ni_00002880_restart_oce_0742.nc
+ t0ni_00002880_restart_oce_0743.nc
+ t0ni_00002880_restart_oce_0744.nc
+ t0ni_00002880_restart_oce_0745.nc
+ t0ni_00002880_restart_oce_0746.nc
+ t0ni_00002880_restart_oce_0747.nc
+ t0ni_00002880_restart_oce_0748.nc
+ t0ni_00002880_restart_oce_0749.nc
+ t0ni_00002880_restart_oce_0750.nc
+ t0ni_00002880_restart_oce_0751.nc
+ t0ni_00002880_restart_oce_0752.nc
+ t0ni_00002880_restart_oce_0753.nc
+ t0ni_00002880_restart_oce_0754.nc
+ t0ni_00002880_restart_oce_0755.nc
+ t0ni_00002880_restart_oce_0756.nc
+ t0ni_00002880_restart_oce_0757.nc
+ t0ni_00002880_restart_oce_0758.nc
+ t0ni_00002880_restart_oce_0759.nc
+ t0ni_00002880_restart_oce_0760.nc
+ t0ni_00002880_restart_oce_0761.nc
+ t0ni_00002880_restart_oce_0762.nc
+ t0ni_00002880_restart_oce_0763.nc
+ t0ni_00002880_restart_oce_0764.nc
+ t0ni_00002880_restart_oce_0765.nc
+ t0ni_00002880_restart_oce_0766.nc
+ t0ni_00002880_restart_oce_0767.nc
+ t0ni_00002880_restart_oce_0768.nc
+ t0ni_00002880_restart_oce_0769.nc
+ t0ni_00002880_restart_oce_0770.nc
+ t0ni_00002880_restart_oce_0771.nc
+ t0ni_00002880_restart_oce_0772.nc
+ t0ni_00002880_restart_oce_0773.nc
+ t0ni_00002880_restart_oce_0774.nc
+ t0ni_00002880_restart_oce_0775.nc
+ t0ni_00002880_restart_oce_0776.nc
+ t0ni_00002880_restart_oce_0777.nc
+ t0ni_00002880_restart_oce_0778.nc
+ t0ni_00002880_restart_oce_0779.nc
+ t0ni_00002880_restart_oce_0780.nc
+ t0ni_00002880_restart_oce_0781.nc
+ t0ni_00002880_restart_oce_0782.nc
+ t0ni_00002880_restart_oce_0783.nc
+ t0ni_00002880_restart_oce_0784.nc
+ t0ni_00002880_restart_oce_0785.nc
+ t0ni_00002880_restart_oce_0786.nc
+ t0ni_00002880_restart_oce_0787.nc
+ t0ni_00002880_restart_oce_0788.nc
+ t0ni_00002880_restart_oce_0789.nc
+ t0ni_00002880_restart_oce_0790.nc
+ t0ni_00002880_restart_oce_0791.nc
+ t0ni_00002880_restart_oce_0792.nc
+ t0ni_00002880_restart_oce_0793.nc
+ t0ni_00002880_restart_oce_0794.nc
+ t0ni_00002880_restart_oce_0795.nc
+ t0ni_00002880_restart_oce_0796.nc
+ t0ni_00002880_restart_oce_0797.nc
+ t0ni_00002880_restart_oce_0798.nc
+ t0ni_00002880_restart_oce_0799.nc
+ t0ni_00002880_restart_oce_0800.nc
+ t0ni_00002880_restart_oce_0801.nc
+ t0ni_00002880_restart_oce_0802.nc
+ t0ni_00002880_restart_oce_0803.nc
+ t0ni_00002880_restart_oce_0804.nc
+ t0ni_00002880_restart_oce_0805.nc
+ t0ni_00002880_restart_oce_0806.nc
+ t0ni_00002880_restart_oce_0807.nc
+ t0ni_00002880_restart_oce_0808.nc
+ t0ni_00002880_restart_oce_0809.nc
+ t0ni_00002880_restart_oce_0810.nc
+ t0ni_00002880_restart_oce_0811.nc
+ t0ni_00002880_restart_oce_0812.nc
+ t0ni_00002880_restart_oce_0813.nc
+ t0ni_00002880_restart_oce_0814.nc
+ t0ni_00002880_restart_oce_0815.nc
+ t0ni_00002880_restart_oce_0816.nc
+ t0ni_00002880_restart_oce_0817.nc
+ t0ni_00002880_restart_oce_0818.nc
+ t0ni_00002880_restart_oce_0819.nc
+ t0ni_00002880_restart_oce_0820.nc
+ t0ni_00002880_restart_oce_0821.nc
+ t0ni_00002880_restart_oce_0822.nc
+ t0ni_00002880_restart_oce_0823.nc
+ t0ni_00002880_restart_oce_0824.nc
+ t0ni_00002880_restart_oce_0825.nc
+ t0ni_00002880_restart_oce_0826.nc
+ t0ni_00002880_restart_oce_0827.nc
+ t0ni_00002880_restart_oce_0828.nc
+ t0ni_00002880_restart_oce_0829.nc
+ t0ni_00002880_restart_oce_0830.nc
+ t0ni_00002880_restart_oce_0831.nc
+ t0ni_00002880_restart_oce_0832.nc
+ t0ni_00002880_restart_oce_0833.nc
+ t0ni_00002880_restart_oce_0834.nc
+ t0ni_00002880_restart_oce_0835.nc
+ t0ni_00002880_restart_oce_0836.nc
+ t0ni_00002880_restart_oce_0837.nc
+ t0ni_00002880_restart_oce_0838.nc
+ t0ni_00002880_restart_oce_0839.nc
+ t0ni_00002880_restart_oce_0840.nc
+ t0ni_00002880_restart_oce_0841.nc
+ t0ni_00002880_restart_oce_0842.nc
+ t0ni_00002880_restart_oce_0843.nc
+ t0ni_00002880_restart_oce_0844.nc
+ t0ni_00002880_restart_oce_0845.nc
+ t0ni_00002880_restart_oce_0846.nc
+ t0ni_00002880_restart_oce_0847.nc
+ t0ni_00002880_restart_oce_0848.nc
+ t0ni_00002880_restart_oce_0849.nc
+ t0ni_00002880_restart_oce_0850.nc
+ t0ni_00002880_restart_oce_0851.nc
+ t0ni_00002880_restart_oce_0852.nc
+ t0ni_00002880_restart_oce_0853.nc
+ t0ni_00002880_restart_oce_0854.nc
+ t0ni_00002880_restart_oce_0855.nc
+ t0ni_00002880_restart_oce_0856.nc
+ t0ni_00002880_restart_oce_0857.nc
+ t0ni_00002880_restart_oce_0858.nc
+ t0ni_00002880_restart_oce_0859.nc
+ t0ni_00002880_restart_oce_0860.nc
+ t0ni_00002880_restart_oce_0861.nc
+ t0ni_00002880_restart_oce_0862.nc
+ t0ni_00002880_restart_oce_0863.nc
+ t0ni_00002880_restart_oce_0864.nc
+ t0ni_00002880_restart_oce_0865.nc
+ t0ni_00002880_restart_oce_0866.nc
+ t0ni_00002880_restart_oce_0867.nc
+ t0ni_00002880_restart_oce_0868.nc
+ t0ni_00002880_restart_oce_0869.nc
+ t0ni_00002880_restart_oce_0870.nc
+ t0ni_00002880_restart_oce_0871.nc
+ t0ni_00002880_restart_oce_0872.nc
+ t0ni_00002880_restart_oce_0873.nc
+ t0ni_00002880_restart_oce_0874.nc
+ t0ni_00002880_restart_oce_0875.nc
+ t0ni_00002880_restart_oce_0876.nc
+ t0ni_00002880_restart_oce_0877.nc
+ t0ni_00002880_restart_oce_0878.nc
+ t0ni_00002880_restart_oce_0879.nc
+ t0ni_00002880_restart_oce_0880.nc
+ t0ni_00002880_restart_oce_0881.nc
+ t0ni_00002880_restart_oce_0882.nc
+ t0ni_00002880_restart_oce_0883.nc
+ t0ni_00002880_restart_oce_0884.nc
+ t0ni_00002880_restart_oce_0885.nc
+ t0ni_00002880_restart_oce_0886.nc
+ t0ni_00002880_restart_oce_0887.nc
+ t0ni_00002880_restart_oce_0888.nc
+ t0ni_00002880_restart_oce_0889.nc
+ t0ni_00002880_restart_oce_0890.nc
+ t0ni_00002880_restart_oce_0891.nc
+ t0ni_00002880_restart_oce_0892.nc
+ t0ni_00002880_restart_oce_0893.nc
+ t0ni_00002880_restart_oce_0894.nc
+ t0ni_00002880_restart_oce_0895.nc
+ t0ni_00002880_restart_oce_0896.nc
+ t0ni_00002880_restart_oce_0897.nc
+ t0ni_00002880_restart_oce_0898.nc
+ t0ni_00002880_restart_oce_0899.nc
+ t0ni_00002880_restart_oce_0900.nc
+ t0ni_00002880_restart_oce_0901.nc
+ t0ni_00002880_restart_oce_0902.nc
+ t0ni_00002880_restart_oce_0903.nc
+ t0ni_00002880_restart_oce_0904.nc
+ t0ni_00002880_restart_oce_0905.nc
+ t0ni_00002880_restart_oce_0906.nc
+ t0ni_00002880_restart_oce_0907.nc
+ t0ni_00002880_restart_oce_0908.nc
+ t0ni_00002880_restart_oce_0909.nc
+ t0ni_00002880_restart_oce_0910.nc
+ t0ni_00002880_restart_oce_0911.nc
+ t0ni_00002880_restart_oce_0912.nc
+ t0ni_00002880_restart_oce_0913.nc
+ t0ni_00002880_restart_oce_0914.nc
+ t0ni_00002880_restart_oce_0915.nc
+ t0ni_00002880_restart_oce_0916.nc
+ t0ni_00002880_restart_oce_0917.nc
+ t0ni_00002880_restart_oce_0918.nc
+ t0ni_00002880_restart_oce_0919.nc
+ t0ni_00002880_restart_oce_0920.nc
+ t0ni_00002880_restart_oce_0921.nc
+ t0ni_00002880_restart_oce_0922.nc
+ t0ni_00002880_restart_oce_0923.nc
+ t0ni_00002880_restart_oce_0924.nc
+ t0ni_00002880_restart_oce_0925.nc
+ t0ni_00002880_restart_oce_0926.nc
+ t0ni_00002880_restart_oce_0927.nc
+ t0ni_00002880_restart_oce_0928.nc
+ t0ni_00002880_restart_oce_0929.nc
+ t0ni_00002880_restart_oce_0930.nc
+ t0ni_00002880_restart_oce_0931.nc
+ t0ni_00002880_restart_oce_0932.nc
+ t0ni_00002880_restart_oce_0933.nc
+ t0ni_00002880_restart_oce_0934.nc
+ t0ni_00002880_restart_oce_0935.nc
+ t0ni_00002880_restart_oce_0936.nc
+ t0ni_00002880_restart_oce_0937.nc
+ t0ni_00002880_restart_oce_0938.nc
+ t0ni_00002880_restart_oce_0939.nc
+ t0ni_00002880_restart_oce_0940.nc
+ t0ni_00002880_restart_oce_0941.nc
+ t0ni_00002880_restart_oce_0942.nc
+ t0ni_00002880_restart_oce_0943.nc
+ t0ni_00002880_restart_oce_0944.nc
+ t0ni_00002880_restart_oce_0945.nc
+ t0ni_00002880_restart_oce_0946.nc
+ t0ni_00002880_restart_oce_0947.nc
+ t0ni_00002880_restart_oce_0948.nc
+ t0ni_00002880_restart_oce_0949.nc
+ t0ni_00002880_restart_oce_0950.nc
+ t0ni_00002880_restart_oce_0951.nc
+ t0ni_00002880_restart_oce_0952.nc
+ t0ni_00002880_restart_oce_0953.nc
+ t0ni_00002880_restart_oce_0954.nc
+ t0ni_00002880_restart_oce_0955.nc
+ t0ni_00002880_restart_oce_0956.nc
+ t0ni_00002880_restart_oce_0957.nc
+ t0ni_00002880_restart_oce_0958.nc
+ t0ni_00002880_restart_oce_0959.nc
+ t0ni_00002880_restart_oce_0960.nc
+ t0ni_00002880_restart_oce_0961.nc
+ t0ni_00002880_restart_oce_0962.nc
+ t0ni_00002880_restart_oce_0963.nc
+ t0ni_00002880_restart_oce_0964.nc
+ t0ni_00002880_restart_oce_0965.nc
+ t0ni_00002880_restart_oce_0966.nc
+ t0ni_00002880_restart_oce_0967.nc
+ t0ni_00002880_restart_oce_0968.nc
+ t0ni_00002880_restart_oce_0969.nc
+ t0ni_00002880_restart_oce_0970.nc
+ t0ni_00002880_restart_oce_0971.nc
+ t0ni_00002880_restart_oce_0972.nc
+ t0ni_00002880_restart_oce_0973.nc
+ t0ni_00002880_restart_oce_0974.nc
+ t0ni_00002880_restart_oce_0975.nc
+ t0ni_00002880_restart_oce_0976.nc
+ t0ni_00002880_restart_oce_0977.nc
+ t0ni_00002880_restart_oce_0978.nc
+ t0ni_00002880_restart_oce_0979.nc
+ t0ni_00002880_restart_oce_0980.nc
+ t0ni_00002880_restart_oce_0981.nc
+ t0ni_00002880_restart_oce_0982.nc
+ t0ni_00002880_restart_oce_0983.nc
+ t0ni_00002880_restart_oce_0984.nc
+ t0ni_00002880_restart_oce_0985.nc
+ t0ni_00002880_restart_oce_0986.nc
+ t0ni_00002880_restart_oce_0987.nc
+ t0ni_00002880_restart_oce_0988.nc
+ t0ni_00002880_restart_oce_0989.nc
+ t0ni_00002880_restart_oce_0990.nc
+ t0ni_00002880_restart_oce_0991.nc
+ t0ni_00002880_restart_oce_0992.nc
+ t0ni_00002880_restart_oce_0993.nc
+ t0ni_00002880_restart_oce_0994.nc
+ t0ni_00002880_restart_oce_0995.nc
+ t0ni_00002880_restart_oce_0996.nc
+ t0ni_00002880_restart_oce_0997.nc
+ t0ni_00002880_restart_oce_0998.nc
+ t0ni_00002880_restart_oce_0999.nc
+ t0ni_00002880_restart_oce_1000.nc
+ t0ni_00002880_restart_oce_1001.nc
+ t0ni_00002880_restart_oce_1002.nc
+ t0ni_00002880_restart_oce_1003.nc
+ t0ni_00002880_restart_oce_1004.nc
+ t0ni_00002880_restart_oce_1005.nc
+ t0ni_00002880_restart_oce_1006.nc
+ t0ni_00002880_restart_oce_1007.nc
+ t0ni_00002880_restart_oce_1008.nc
+ t0ni_00002880_restart_oce_1009.nc
+ t0ni_00002880_restart_oce_1010.nc
+ t0ni_00002880_restart_oce_1011.nc
+ t0ni_00002880_restart_oce_1012.nc
+ t0ni_00002880_restart_oce_1013.nc
+ t0ni_00002880_restart_oce_1014.nc
+ t0ni_00002880_restart_oce_1015.nc
+ t0ni_00002880_restart_oce_1016.nc
+ t0ni_00002880_restart_oce_1017.nc
+ t0ni_00002880_restart_oce_1018.nc
+ t0ni_00002880_restart_oce_1019.nc
+ t0ni_00002880_restart_oce_1020.nc
+ t0ni_00002880_restart_oce_1021.nc
+ t0ni_00002880_restart_oce_1022.nc
+ t0ni_00002880_restart_oce_1023.nc
+ t0ni_00002880_restart_oce_1024.nc
+ t0ni_00002880_restart_oce_1025.nc
+ t0ni_00002880_restart_oce_1026.nc
+ t0ni_00002880_restart_oce_1027.nc
+ t0ni_00002880_restart_oce_1028.nc
+ t0ni_00002880_restart_oce_1029.nc
+ t0ni_00002880_restart_oce_1030.nc
+ t0ni_00002880_restart_oce_1031.nc
+ t0ni_00002880_restart_oce_1032.nc
+ t0ni_00002880_restart_oce_1033.nc
+ t0ni_00002880_restart_oce_1034.nc
+ t0ni_00002880_restart_oce_1035.nc
+ t0ni_00002880_restart_oce_1036.nc
+ t0ni_00002880_restart_oce_1037.nc
+ t0ni_00002880_restart_oce_1038.nc
+ t0ni_00002880_restart_oce_1039.nc
+ t0ni_00002880_restart_oce_1040.nc
+ t0ni_00002880_restart_oce_1041.nc
+ t0ni_00002880_restart_oce_1042.nc
+ t0ni_00002880_restart_oce_1043.nc
+ t0ni_00002880_restart_oce_1044.nc
+ t0ni_00002880_restart_oce_1045.nc
+ t0ni_00002880_restart_oce_1046.nc
+ t0ni_00002880_restart_oce_1047.nc
+ t0ni_00002880_restart_oce_1048.nc
+ t0ni_00002880_restart_oce_1049.nc
+ t0ni_00002880_restart_oce_1050.nc
+ t0ni_00002880_restart_oce_1051.nc
+ t0ni_00002880_restart_oce_1052.nc
+ t0ni_00002880_restart_oce_1053.nc
+ t0ni_00002880_restart_oce_1054.nc
+ t0ni_00002880_restart_oce_1055.nc
+ t0ni_00002880_restart_oce_1056.nc
+ t0ni_00002880_restart_oce_1057.nc
+ t0ni_00002880_restart_oce_1058.nc
+ t0ni_00002880_restart_oce_1059.nc
+ t0ni_00002880_restart_oce_1060.nc
+ t0ni_00002880_restart_oce_1061.nc
+ t0ni_00002880_restart_oce_1062.nc
+ t0ni_00002880_restart_oce_1063.nc
+ t0ni_00002880_restart_oce_1064.nc
+ t0ni_00002880_restart_oce_1065.nc
+ t0ni_00002880_restart_oce_1066.nc
+ t0ni_00002880_restart_oce_1067.nc
+ t0ni_00002880_restart_oce_1068.nc
+ t0ni_00002880_restart_oce_1069.nc
+ t0ni_00002880_restart_oce_1070.nc
+ t0ni_00002880_restart_oce_1071.nc
+ t0ni_00002880_restart_oce_1072.nc
+ t0ni_00002880_restart_oce_1073.nc
+ t0ni_00002880_restart_oce_1074.nc
+ t0ni_00002880_restart_oce_1075.nc
+ t0ni_00002880_restart_oce_1076.nc
+ t0ni_00002880_restart_oce_1077.nc
+ t0ni_00002880_restart_oce_1078.nc
+ t0ni_00002880_restart_oce_1079.nc
+ t0ni_00002880_restart_oce_1080.nc
+ t0ni_00002880_restart_oce_1081.nc
+ t0ni_00002880_restart_oce_1082.nc
+ t0ni_00002880_restart_oce_1083.nc
+ t0ni_00002880_restart_oce_1084.nc
+ t0ni_00002880_restart_oce_1085.nc
+ t0ni_00002880_restart_oce_1086.nc
+ t0ni_00002880_restart_oce_1087.nc
+ t0ni_00002880_restart_oce_1088.nc
+ t0ni_00002880_restart_oce_1089.nc
+ t0ni_00002880_restart_oce_1090.nc
+ t0ni_00002880_restart_oce_1091.nc
+ t0ni_00002880_restart_oce_1092.nc
+ t0ni_00002880_restart_oce_1093.nc
+ t0ni_00002880_restart_oce_1094.nc
+ t0ni_00002880_restart_oce_1095.nc
+ t0ni_00002880_restart_oce_1096.nc
+ t0ni_00002880_restart_oce_1097.nc
+ t0ni_00002880_restart_oce_1098.nc
+ t0ni_00002880_restart_oce_1099.nc
+ t0ni_00002880_restart_oce_1100.nc
+ t0ni_00002880_restart_oce_1101.nc
+ t0ni_00002880_restart_oce_1102.nc
+ t0ni_00002880_restart_oce_1103.nc
+ t0ni_00002880_restart_oce_1104.nc
+ t0ni_00002880_restart_oce_1105.nc
+ t0ni_00002880_restart_oce_1106.nc
+ t0ni_00002880_restart_oce_1107.nc
+ t0ni_00002880_restart_oce_1108.nc
+ t0ni_00002880_restart_oce_1109.nc
+ t0ni_00002880_restart_oce_1110.nc
+ t0ni_00002880_restart_oce_1111.nc
+ t0ni_00002880_restart_oce_1112.nc
+ t0ni_00002880_restart_oce_1113.nc
+ t0ni_00002880_restart_oce_1114.nc
+ t0ni_00002880_restart_oce_1115.nc
+ t0ni_00002880_restart_oce_1116.nc
+ t0ni_00002880_restart_oce_1117.nc
+ t0ni_00002880_restart_oce_1118.nc
+ t0ni_00002880_restart_oce_1119.nc
+ t0ni_00002880_restart_oce_1120.nc
+ t0ni_00002880_restart_oce_1121.nc
+ t0ni_00002880_restart_oce_1122.nc
+ t0ni_00002880_restart_oce_1123.nc
+ t0ni_00002880_restart_oce_1124.nc
+ t0ni_00002880_restart_oce_1125.nc
+ t0ni_00002880_restart_oce_1126.nc
+ t0ni_00002880_restart_oce_1127.nc
+ t0ni_00002880_restart_oce_1128.nc
+ t0ni_00002880_restart_oce_1129.nc
+ t0ni_00002880_restart_oce_1130.nc
+ t0ni_00002880_restart_oce_1131.nc
+ t0ni_00002880_restart_oce_1132.nc
+ t0ni_00002880_restart_oce_1133.nc
+ t0ni_00002880_restart_oce_1134.nc
+ t0ni_00002880_restart_oce_1135.nc
+ t0ni_00002880_restart_oce_1136.nc
+ t0ni_00002880_restart_oce_1137.nc
+ t0ni_00002880_restart_oce_1138.nc
+ t0ni_00002880_restart_oce_1139.nc
+ t0ni_00002880_restart_oce_1140.nc
+ t0ni_00002880_restart_oce_1141.nc
+ t0ni_00002880_restart_oce_1142.nc
+ t0ni_00002880_restart_oce_1143.nc
+ t0ni_00002880_restart_oce_1144.nc
+ t0ni_00002880_restart_oce_1145.nc
+ t0ni_00002880_restart_oce_1146.nc
+ t0ni_00002880_restart_oce_1147.nc
+ t0ni_00002880_restart_oce_1148.nc
+ t0ni_00002880_restart_oce_1149.nc
+ t0ni_00002880_restart_oce_1150.nc
+ t0ni_00002880_restart_oce_1151.nc
+ t0ni_00002880_restart_oce_1152.nc
+ t0ni_00002880_restart_oce_1153.nc
+ t0ni_00002880_restart_oce_1154.nc
+ t0ni_00002880_restart_oce_1155.nc
+ t0ni_00002880_restart_oce_1156.nc
+ t0ni_00002880_restart_oce_1157.nc
+ t0ni_00002880_restart_oce_1158.nc
+ t0ni_00002880_restart_oce_1159.nc
+ t0ni_00002880_restart_oce_1160.nc
+ t0ni_00002880_restart_oce_1161.nc
+ t0ni_00002880_restart_oce_1162.nc
+ t0ni_00002880_restart_oce_1163.nc
+ t0ni_00002880_restart_oce_1164.nc
+ t0ni_00002880_restart_oce_1165.nc
+ t0ni_00002880_restart_oce_1166.nc
+ t0ni_00002880_restart_oce_1167.nc
+ t0ni_00002880_restart_oce_1168.nc
+ t0ni_00002880_restart_oce_1169.nc
+ t0ni_00002880_restart_oce_1170.nc
+ t0ni_00002880_restart_oce_1171.nc
+ t0ni_00002880_restart_oce_1172.nc
+ t0ni_00002880_restart_oce_1173.nc
+ t0ni_00002880_restart_oce_1174.nc
+ t0ni_00002880_restart_oce_1175.nc
+ t0ni_00002880_restart_oce_1176.nc
+ t0ni_00002880_restart_oce_1177.nc
+ t0ni_00002880_restart_oce_1178.nc
+ t0ni_00002880_restart_oce_1179.nc
+ t0ni_00002880_restart_oce_1180.nc
+ t0ni_00002880_restart_oce_1181.nc
+ t0ni_00002880_restart_oce_1182.nc
+ t0ni_00002880_restart_oce_1183.nc
+ t0ni_00002880_restart_oce_1184.nc
+ t0ni_00002880_restart_oce_1185.nc
+ t0ni_00002880_restart_oce_1186.nc
+ t0ni_00002880_restart_oce_1187.nc
+ t0ni_00002880_restart_oce_1188.nc
+ t0ni_00002880_restart_oce_1189.nc
+ t0ni_00002880_restart_oce_1190.nc
+ t0ni_00002880_restart_oce_1191.nc
+ t0ni_00002880_restart_oce_1192.nc
+ t0ni_00002880_restart_oce_1193.nc
+ t0ni_00002880_restart_oce_1194.nc
+ t0ni_00002880_restart_oce_1195.nc
+ t0ni_00002880_restart_oce_1196.nc
+ t0ni_00002880_restart_oce_1197.nc
+ t0ni_00002880_restart_oce_1198.nc
+ t0ni_00002880_restart_oce_1199.nc
+ t0ni_00002880_restart_oce_1200.nc
+ t0ni_00002880_restart_oce_1201.nc
+ t0ni_00002880_restart_oce_1202.nc
+ t0ni_00002880_restart_oce_1203.nc
+ t0ni_00002880_restart_oce_1204.nc
+ t0ni_00002880_restart_oce_1205.nc
+ t0ni_00002880_restart_oce_1206.nc
+ t0ni_00002880_restart_oce_1207.nc
+ t0ni_00002880_restart_oce_1208.nc
+ t0ni_00002880_restart_oce_1209.nc
+ t0ni_00002880_restart_oce_1210.nc
+ t0ni_00002880_restart_oce_1211.nc
+ t0ni_00002880_restart_oce_1212.nc
+ t0ni_00002880_restart_oce_1213.nc
+ t0ni_00002880_restart_oce_1214.nc
+ t0ni_00002880_restart_oce_1215.nc
+ t0ni_00002880_restart_oce_1216.nc
+ t0ni_00002880_restart_oce_1217.nc
+ t0ni_00002880_restart_oce_1218.nc
+ t0ni_00002880_restart_oce_1219.nc
+ t0ni_00002880_restart_oce_1220.nc
+ t0ni_00002880_restart_oce_1221.nc
+ t0ni_00002880_restart_oce_1222.nc
+ t0ni_00002880_restart_oce_1223.nc
+ t0ni_00002880_restart_oce_1224.nc
+ t0ni_00002880_restart_oce_1225.nc
+ t0ni_00002880_restart_oce_1226.nc
+ t0ni_00002880_restart_oce_1227.nc
+ t0ni_00002880_restart_oce_1228.nc
+ t0ni_00002880_restart_oce_1229.nc
+ t0ni_00002880_restart_oce_1230.nc
+ t0ni_00002880_restart_oce_1231.nc
+ t0ni_00002880_restart_oce_1232.nc
+ t0ni_00002880_restart_oce_1233.nc
+ t0ni_00002880_restart_oce_1234.nc
+ t0ni_00002880_restart_oce_1235.nc
+ t0ni_00002880_restart_oce_1236.nc
+ t0ni_00002880_restart_oce_1237.nc
+ t0ni_00002880_restart_oce_1238.nc
+ t0ni_00002880_restart_oce_1239.nc
+ t0ni_00002880_restart_oce_1240.nc
+ t0ni_00002880_restart_oce_1241.nc
+ t0ni_00002880_restart_oce_1242.nc
+ t0ni_00002880_restart_oce_1243.nc
+ t0ni_00002880_restart_oce_1244.nc
+ t0ni_00002880_restart_oce_1245.nc
+ t0ni_00002880_restart_oce_1246.nc
+ t0ni_00002880_restart_oce_1247.nc
+ t0ni_00002880_restart_oce_1248.nc
+ t0ni_00002880_restart_oce_1249.nc
+ t0ni_00002880_restart_oce_1250.nc
+ t0ni_00002880_restart_oce_1251.nc
+ t0ni_00002880_restart_oce_1252.nc
+ t0ni_00002880_restart_oce_1253.nc
+ t0ni_00002880_restart_oce_1254.nc
+ t0ni_00002880_restart_oce_1255.nc
+ t0ni_00002880_restart_oce_1256.nc
+ t0ni_00002880_restart_oce_1257.nc
+ t0ni_00002880_restart_oce_1258.nc
+ t0ni_00002880_restart_oce_1259.nc
+ t0ni_00002880_restart_oce_1260.nc
+ t0ni_00002880_restart_oce_1261.nc
+ t0ni_00002880_restart_oce_1262.nc
+ t0ni_00002880_restart_oce_1263.nc
+ t0ni_00002880_restart_oce_1264.nc
+ t0ni_00002880_restart_oce_1265.nc
+ t0ni_00002880_restart_oce_1266.nc
+ t0ni_00002880_restart_oce_1267.nc
+ t0ni_00002880_restart_oce_1268.nc
+ t0ni_00002880_restart_oce_1269.nc
+ t0ni_00002880_restart_oce_1270.nc
+ t0ni_00002880_restart_oce_1271.nc
+ t0ni_00002880_restart_oce_1272.nc
+ t0ni_00002880_restart_oce_1273.nc
+ t0ni_00002880_restart_oce_1274.nc
+ t0ni_00002880_restart_oce_1275.nc
+ t0ni_00002880_restart_oce_1276.nc
+ t0ni_00002880_restart_oce_1277.nc
+ t0ni_00002880_restart_oce_1278.nc
+ t0ni_00002880_restart_oce_1279.nc
+ t0ni_00002880_restart_oce_1280.nc
+ t0ni_00002880_restart_oce_1281.nc
+ t0ni_00002880_restart_oce_1282.nc
+ t0ni_00002880_restart_oce_1283.nc
+ t0ni_00002880_restart_oce_1284.nc
+ t0ni_00002880_restart_oce_1285.nc
+ t0ni_00002880_restart_oce_1286.nc
+ t0ni_00002880_restart_oce_1287.nc
+ t0ni_00002880_restart_oce_1288.nc
+ t0ni_00002880_restart_oce_1289.nc
+ t0ni_00002880_restart_oce_1290.nc
+ t0ni_00002880_restart_oce_1291.nc
+ t0ni_00002880_restart_oce_1292.nc
+ t0ni_00002880_restart_oce_1293.nc
+ t0ni_00002880_restart_oce_1294.nc
+ t0ni_00002880_restart_oce_1295.nc
+ t0ni_00002880_restart_oce_1296.nc
+ t0ni_00002880_restart_oce_1297.nc
+ t0ni_00002880_restart_oce_1298.nc
+ t0ni_00002880_restart_oce_1299.nc
+ t0ni_00002880_restart_oce_1300.nc
+ t0ni_00002880_restart_oce_1301.nc
+ t0ni_00002880_restart_oce_1302.nc
+ t0ni_00002880_restart_oce_1303.nc
+ t0ni_00002880_restart_oce_1304.nc
+ t0ni_00002880_restart_oce_1305.nc
+ t0ni_00002880_restart_oce_1306.nc
+ t0ni_00002880_restart_oce_1307.nc
+ t0ni_00002880_restart_oce_1308.nc
+ t0ni_00002880_restart_oce_1309.nc
+ t0ni_00002880_restart_oce_1310.nc
+ t0ni_00002880_restart_oce_1311.nc
+ t0ni_00002880_restart_oce_1312.nc
+ t0ni_00002880_restart_oce_1313.nc
+ t0ni_00002880_restart_oce_1314.nc
+ t0ni_00002880_restart_oce_1315.nc
+ t0ni_00002880_restart_oce_1316.nc
+ t0ni_00002880_restart_oce_1317.nc
+ t0ni_00002880_restart_oce_1318.nc
+ t0ni_00002880_restart_oce_1319.nc
+ t0ni_00002880_restart_oce_1320.nc
+ t0ni_00002880_restart_oce_1321.nc
+ t0ni_00002880_restart_oce_1322.nc
+ t0ni_00002880_restart_oce_1323.nc
+ t0ni_00002880_restart_oce_1324.nc
+ t0ni_00002880_restart_oce_1325.nc
+ t0ni_00002880_restart_oce_1326.nc
+ t0ni_00002880_restart_oce_1327.nc
+ t0ni_00002880_restart_oce_1328.nc
+ t0ni_00002880_restart_oce_1329.nc
+ t0ni_00002880_restart_oce_1330.nc
+ t0ni_00002880_restart_oce_1331.nc
+ t0ni_00002880_restart_oce_1332.nc
+ t0ni_00002880_restart_oce_1333.nc
+ t0ni_00002880_restart_oce_1334.nc
+ t0ni_00002880_restart_oce_1335.nc
+ t0ni_00002880_restart_oce_1336.nc
+ t0ni_00002880_restart_oce_1337.nc
+ t0ni_00002880_restart_oce_1338.nc
+ t0ni_00002880_restart_oce_1339.nc
+ t0ni_00002880_restart_oce_1340.nc
+ t0ni_00002880_restart_oce_1341.nc
+ t0ni_00002880_restart_oce_1342.nc
+ t0ni_00002880_restart_oce_1343.nc
+ t0ni_00002880_restart_oce_1344.nc
+ t0ni_00002880_restart_oce_1345.nc
+ t0ni_00002880_restart_oce_1346.nc
+ t0ni_00002880_restart_oce_1347.nc
+ t0ni_00002880_restart_oce_1348.nc
+ t0ni_00002880_restart_oce_1349.nc
+ t0ni_00002880_restart_oce_1350.nc
+ t0ni_00002880_restart_oce_1351.nc
+ t0ni_00002880_restart_oce_1352.nc
+ t0ni_00002880_restart_oce_1353.nc
+ t0ni_00002880_restart_oce_1354.nc
+ t0ni_00002880_restart_oce_1355.nc
+ t0ni_00002880_restart_oce_1356.nc
+ t0ni_00002880_restart_oce_1357.nc
+ t0ni_00002880_restart_oce_1358.nc
+ t0ni_00002880_restart_oce_1359.nc
+ t0ni_00002880_restart_oce_1360.nc
+ t0ni_00002880_restart_oce_1361.nc
+ t0ni_00002880_restart_oce_1362.nc
+ t0ni_00002880_restart_oce_1363.nc
+ t0ni_00002880_restart_oce_1364.nc
+ t0ni_00002880_restart_oce_1365.nc
+ t0ni_00002880_restart_oce_1366.nc
+ t0ni_00002880_restart_oce_1367.nc
+ t0ni_00002880_restart_oce_1368.nc
+ t0ni_00002880_restart_oce_1369.nc
+ t0ni_00002880_restart_oce_1370.nc
+ t0ni_00002880_restart_oce_1371.nc
+ t0ni_00002880_restart_oce_1372.nc
+ t0ni_00002880_restart_oce_1373.nc
+ t0ni_00002880_restart_oce_1374.nc
+ t0ni_00002880_restart_oce_1375.nc
+ t0ni_00002880_restart_oce_1376.nc
+ t0ni_00002880_restart_oce_1377.nc
+ t0ni_00002880_restart_oce_1378.nc
+ t0ni_00002880_restart_oce_1379.nc
+ t0ni_00002880_restart_oce_1380.nc
+ t0ni_00002880_restart_oce_1381.nc
+ t0ni_00002880_restart_oce_1382.nc
+ t0ni_00002880_restart_oce_1383.nc
+ t0ni_00002880_restart_oce_1384.nc
+ t0ni_00002880_restart_oce_1385.nc
+ t0ni_00002880_restart_oce_1386.nc
+ t0ni_00002880_restart_oce_1387.nc
+ t0ni_00002880_restart_oce_1388.nc
+ t0ni_00002880_restart_oce_1389.nc
+ t0ni_00002880_restart_oce_1390.nc
+ Size of global arrays:         1442        1050
+ Finding rebuild dimensions from the first file...
+ Rebuilding across dimensions x and y
+ Writing new file_name attribute
+ Writing new TimeStamp attribute
+ Defining variable nav_lon...
+ Defining variable nav_lat...
+ Defining variable nav_lev...
+ Defining variable time_counter...
+ Defining variable kt...
+ Defining variable ndastp...
+ Defining variable adatrj...
+ Defining variable rnf_b...
+ Defining variable rnf_hc_b...
+ Defining variable rnf_sc_b...
+ Defining variable utau_b...
+ Defining variable vtau_b...
+ Defining variable qns_b...
+ Defining variable emp_b...
+ Defining variable sfx_b...
+ Defining variable en...
+ Defining variable avt...
+ Defining variable avm...
+ Defining variable avmu...
+ Defining variable avmv...
+ Defining variable dissl...
+ Defining variable ub2_b...
+ Defining variable vb2_b...
+ Defining variable sbc_hc_b...
+ Defining variable sbc_sc_b...
+ Defining variable qsr_hc_b...
+ Defining variable fraqsr_1lev...
+ Defining variable fse3t_b...
+ Defining variable fse3t_n...
+ Defining variable rdt...
+ Defining variable rdttra1...
+ Defining variable ub...
+ Defining variable vb...
+ Defining variable tb...
+ Defining variable sb...
+ Defining variable rotb...
+ Defining variable hdivb...
+ Defining variable sshb...
+ Defining variable un...
+ Defining variable vn...
+ Defining variable tn...
+ Defining variable sn...
+ Defining variable rotn...
+ Defining variable hdivn...
+ Defining variable sshn...
+ Defining variable rhop...
+ Finished defining output file.
+ Opening input files...
+ All input files open.
+ Rebuilding data from variable nav_lon...
+ Writing variable nav_lon...
+ Rebuilding data from variable nav_lat...
+ Writing variable nav_lat...
+ Copying data from variable nav_lev...
+ Writing variable nav_lev...
+ Copying data from variable time_counter...
+ Writing variable time_counter...
+ Copying data from variable kt...
+ Writing variable kt...
+ Copying data from variable ndastp...
+ Writing variable ndastp...
+ Copying data from variable adatrj...
+ Writing variable adatrj...
+ Rebuilding data from variable rnf_b...
+ Writing variable rnf_b...
+ Rebuilding data from variable rnf_hc_b...
+ Writing variable rnf_hc_b...
+ Rebuilding data from variable rnf_sc_b...
+ Writing variable rnf_sc_b...
+ Rebuilding data from variable utau_b...
+ Writing variable utau_b...
+ Rebuilding data from variable vtau_b...
+ Writing variable vtau_b...
+ Rebuilding data from variable qns_b...
+ Writing variable qns_b...
+ Rebuilding data from variable emp_b...
+ Writing variable emp_b...
+ Rebuilding data from variable sfx_b...
+ Writing variable sfx_b...
+ Rebuilding data from variable en...
+ Writing variable en...
+ Rebuilding data from variable avt...
+ Writing variable avt...
+ Rebuilding data from variable avm...
+ Writing variable avm...
+ Rebuilding data from variable avmu...
+ Writing variable avmu...
+ Rebuilding data from variable avmv...
+ Writing variable avmv...
+ Rebuilding data from variable dissl...
+ Writing variable dissl...
+ Rebuilding data from variable ub2_b...
+ Writing variable ub2_b...
+ Rebuilding data from variable vb2_b...
+ Writing variable vb2_b...
+ Rebuilding data from variable sbc_hc_b...
+ Writing variable sbc_hc_b...
+ Rebuilding data from variable sbc_sc_b...
+ Writing variable sbc_sc_b...
+ Rebuilding data from variable qsr_hc_b...
+ Writing variable qsr_hc_b...
+ Rebuilding data from variable fraqsr_1lev...
+ Writing variable fraqsr_1lev...
+ Rebuilding data from variable fse3t_b...
+ Writing variable fse3t_b...
+ Rebuilding data from variable fse3t_n...
+ Writing variable fse3t_n...
+ Copying data from variable rdt...
+ Writing variable rdt...
+ Copying data from variable rdttra1...
+ Writing variable rdttra1...
+ Rebuilding data from variable ub...
+ Writing variable ub...
+ Rebuilding data from variable vb...
+ Writing variable vb...
+ Rebuilding data from variable tb...
+ Writing variable tb...
+ Rebuilding data from variable sb...
+ Writing variable sb...
+ Rebuilding data from variable rotb...
+ Writing variable rotb...
+ Rebuilding data from variable hdivb...
+ Writing variable hdivb...
+ Rebuilding data from variable sshb...
+ Writing variable sshb...
+ Rebuilding data from variable un...
+ Writing variable un...
+ Rebuilding data from variable vn...
+ Writing variable vn...
+ Rebuilding data from variable tn...
+ Writing variable tn...
+ Rebuilding data from variable sn...
+ Writing variable sn...
+ Rebuilding data from variable rotn...
+ Writing variable rotn...
+ Rebuilding data from variable hdivn...
+ Writing variable hdivn...
+ Rebuilding data from variable sshn...
+ Writing variable sshn...
+ Rebuilding data from variable rhop...
+ Writing variable rhop...
+ Closing input files...
+ Closing output file...
+ NEMO rebuild completed successfully
+ 
+found 1391 files matching pattern t0ni_00002880_restart_ice
+file t0ni_00002880_restart_ice,  num_domains 1391, num_threads 48
+ Running OMP with           48  thread(s).
+ Rebuilding the following files:
+ t0ni_00002880_restart_ice_0000.nc
+ t0ni_00002880_restart_ice_0001.nc
+ t0ni_00002880_restart_ice_0002.nc
+ t0ni_00002880_restart_ice_0003.nc
+ t0ni_00002880_restart_ice_0004.nc
+ t0ni_00002880_restart_ice_0005.nc
+ t0ni_00002880_restart_ice_0006.nc
+ t0ni_00002880_restart_ice_0007.nc
+ t0ni_00002880_restart_ice_0008.nc
+ t0ni_00002880_restart_ice_0009.nc
+ t0ni_00002880_restart_ice_0010.nc
+ t0ni_00002880_restart_ice_0011.nc
+ t0ni_00002880_restart_ice_0012.nc
+ t0ni_00002880_restart_ice_0013.nc
+ t0ni_00002880_restart_ice_0014.nc
+ t0ni_00002880_restart_ice_0015.nc
+ t0ni_00002880_restart_ice_0016.nc
+ t0ni_00002880_restart_ice_0017.nc
+ t0ni_00002880_restart_ice_0018.nc
+ t0ni_00002880_restart_ice_0019.nc
+ t0ni_00002880_restart_ice_0020.nc
+ t0ni_00002880_restart_ice_0021.nc
+ t0ni_00002880_restart_ice_0022.nc
+ t0ni_00002880_restart_ice_0023.nc
+ t0ni_00002880_restart_ice_0024.nc
+ t0ni_00002880_restart_ice_0025.nc
+ t0ni_00002880_restart_ice_0026.nc
+ t0ni_00002880_restart_ice_0027.nc
+ t0ni_00002880_restart_ice_0028.nc
+ t0ni_00002880_restart_ice_0029.nc
+ t0ni_00002880_restart_ice_0030.nc
+ t0ni_00002880_restart_ice_0031.nc
+ t0ni_00002880_restart_ice_0032.nc
+ t0ni_00002880_restart_ice_0033.nc
+ t0ni_00002880_restart_ice_0034.nc
+ t0ni_00002880_restart_ice_0035.nc
+ t0ni_00002880_restart_ice_0036.nc
+ t0ni_00002880_restart_ice_0037.nc
+ t0ni_00002880_restart_ice_0038.nc
+ t0ni_00002880_restart_ice_0039.nc
+ t0ni_00002880_restart_ice_0040.nc
+ t0ni_00002880_restart_ice_0041.nc
+ t0ni_00002880_restart_ice_0042.nc
+ t0ni_00002880_restart_ice_0043.nc
+ t0ni_00002880_restart_ice_0044.nc
+ t0ni_00002880_restart_ice_0045.nc
+ t0ni_00002880_restart_ice_0046.nc
+ t0ni_00002880_restart_ice_0047.nc
+ t0ni_00002880_restart_ice_0048.nc
+ t0ni_00002880_restart_ice_0049.nc
+ t0ni_00002880_restart_ice_0050.nc
+ t0ni_00002880_restart_ice_0051.nc
+ t0ni_00002880_restart_ice_0052.nc
+ t0ni_00002880_restart_ice_0053.nc
+ t0ni_00002880_restart_ice_0054.nc
+ t0ni_00002880_restart_ice_0055.nc
+ t0ni_00002880_restart_ice_0056.nc
+ t0ni_00002880_restart_ice_0057.nc
+ t0ni_00002880_restart_ice_0058.nc
+ t0ni_00002880_restart_ice_0059.nc
+ t0ni_00002880_restart_ice_0060.nc
+ t0ni_00002880_restart_ice_0061.nc
+ t0ni_00002880_restart_ice_0062.nc
+ t0ni_00002880_restart_ice_0063.nc
+ t0ni_00002880_restart_ice_0064.nc
+ t0ni_00002880_restart_ice_0065.nc
+ t0ni_00002880_restart_ice_0066.nc
+ t0ni_00002880_restart_ice_0067.nc
+ t0ni_00002880_restart_ice_0068.nc
+ t0ni_00002880_restart_ice_0069.nc
+ t0ni_00002880_restart_ice_0070.nc
+ t0ni_00002880_restart_ice_0071.nc
+ t0ni_00002880_restart_ice_0072.nc
+ t0ni_00002880_restart_ice_0073.nc
+ t0ni_00002880_restart_ice_0074.nc
+ t0ni_00002880_restart_ice_0075.nc
+ t0ni_00002880_restart_ice_0076.nc
+ t0ni_00002880_restart_ice_0077.nc
+ t0ni_00002880_restart_ice_0078.nc
+ t0ni_00002880_restart_ice_0079.nc
+ t0ni_00002880_restart_ice_0080.nc
+ t0ni_00002880_restart_ice_0081.nc
+ t0ni_00002880_restart_ice_0082.nc
+ t0ni_00002880_restart_ice_0083.nc
+ t0ni_00002880_restart_ice_0084.nc
+ t0ni_00002880_restart_ice_0085.nc
+ t0ni_00002880_restart_ice_0086.nc
+ t0ni_00002880_restart_ice_0087.nc
+ t0ni_00002880_restart_ice_0088.nc
+ t0ni_00002880_restart_ice_0089.nc
+ t0ni_00002880_restart_ice_0090.nc
+ t0ni_00002880_restart_ice_0091.nc
+ t0ni_00002880_restart_ice_0092.nc
+ t0ni_00002880_restart_ice_0093.nc
+ t0ni_00002880_restart_ice_0094.nc
+ t0ni_00002880_restart_ice_0095.nc
+ t0ni_00002880_restart_ice_0096.nc
+ t0ni_00002880_restart_ice_0097.nc
+ t0ni_00002880_restart_ice_0098.nc
+ t0ni_00002880_restart_ice_0099.nc
+ t0ni_00002880_restart_ice_0100.nc
+ t0ni_00002880_restart_ice_0101.nc
+ t0ni_00002880_restart_ice_0102.nc
+ t0ni_00002880_restart_ice_0103.nc
+ t0ni_00002880_restart_ice_0104.nc
+ t0ni_00002880_restart_ice_0105.nc
+ t0ni_00002880_restart_ice_0106.nc
+ t0ni_00002880_restart_ice_0107.nc
+ t0ni_00002880_restart_ice_0108.nc
+ t0ni_00002880_restart_ice_0109.nc
+ t0ni_00002880_restart_ice_0110.nc
+ t0ni_00002880_restart_ice_0111.nc
+ t0ni_00002880_restart_ice_0112.nc
+ t0ni_00002880_restart_ice_0113.nc
+ t0ni_00002880_restart_ice_0114.nc
+ t0ni_00002880_restart_ice_0115.nc
+ t0ni_00002880_restart_ice_0116.nc
+ t0ni_00002880_restart_ice_0117.nc
+ t0ni_00002880_restart_ice_0118.nc
+ t0ni_00002880_restart_ice_0119.nc
+ t0ni_00002880_restart_ice_0120.nc
+ t0ni_00002880_restart_ice_0121.nc
+ t0ni_00002880_restart_ice_0122.nc
+ t0ni_00002880_restart_ice_0123.nc
+ t0ni_00002880_restart_ice_0124.nc
+ t0ni_00002880_restart_ice_0125.nc
+ t0ni_00002880_restart_ice_0126.nc
+ t0ni_00002880_restart_ice_0127.nc
+ t0ni_00002880_restart_ice_0128.nc
+ t0ni_00002880_restart_ice_0129.nc
+ t0ni_00002880_restart_ice_0130.nc
+ t0ni_00002880_restart_ice_0131.nc
+ t0ni_00002880_restart_ice_0132.nc
+ t0ni_00002880_restart_ice_0133.nc
+ t0ni_00002880_restart_ice_0134.nc
+ t0ni_00002880_restart_ice_0135.nc
+ t0ni_00002880_restart_ice_0136.nc
+ t0ni_00002880_restart_ice_0137.nc
+ t0ni_00002880_restart_ice_0138.nc
+ t0ni_00002880_restart_ice_0139.nc
+ t0ni_00002880_restart_ice_0140.nc
+ t0ni_00002880_restart_ice_0141.nc
+ t0ni_00002880_restart_ice_0142.nc
+ t0ni_00002880_restart_ice_0143.nc
+ t0ni_00002880_restart_ice_0144.nc
+ t0ni_00002880_restart_ice_0145.nc
+ t0ni_00002880_restart_ice_0146.nc
+ t0ni_00002880_restart_ice_0147.nc
+ t0ni_00002880_restart_ice_0148.nc
+ t0ni_00002880_restart_ice_0149.nc
+ t0ni_00002880_restart_ice_0150.nc
+ t0ni_00002880_restart_ice_0151.nc
+ t0ni_00002880_restart_ice_0152.nc
+ t0ni_00002880_restart_ice_0153.nc
+ t0ni_00002880_restart_ice_0154.nc
+ t0ni_00002880_restart_ice_0155.nc
+ t0ni_00002880_restart_ice_0156.nc
+ t0ni_00002880_restart_ice_0157.nc
+ t0ni_00002880_restart_ice_0158.nc
+ t0ni_00002880_restart_ice_0159.nc
+ t0ni_00002880_restart_ice_0160.nc
+ t0ni_00002880_restart_ice_0161.nc
+ t0ni_00002880_restart_ice_0162.nc
+ t0ni_00002880_restart_ice_0163.nc
+ t0ni_00002880_restart_ice_0164.nc
+ t0ni_00002880_restart_ice_0165.nc
+ t0ni_00002880_restart_ice_0166.nc
+ t0ni_00002880_restart_ice_0167.nc
+ t0ni_00002880_restart_ice_0168.nc
+ t0ni_00002880_restart_ice_0169.nc
+ t0ni_00002880_restart_ice_0170.nc
+ t0ni_00002880_restart_ice_0171.nc
+ t0ni_00002880_restart_ice_0172.nc
+ t0ni_00002880_restart_ice_0173.nc
+ t0ni_00002880_restart_ice_0174.nc
+ t0ni_00002880_restart_ice_0175.nc
+ t0ni_00002880_restart_ice_0176.nc
+ t0ni_00002880_restart_ice_0177.nc
+ t0ni_00002880_restart_ice_0178.nc
+ t0ni_00002880_restart_ice_0179.nc
+ t0ni_00002880_restart_ice_0180.nc
+ t0ni_00002880_restart_ice_0181.nc
+ t0ni_00002880_restart_ice_0182.nc
+ t0ni_00002880_restart_ice_0183.nc
+ t0ni_00002880_restart_ice_0184.nc
+ t0ni_00002880_restart_ice_0185.nc
+ t0ni_00002880_restart_ice_0186.nc
+ t0ni_00002880_restart_ice_0187.nc
+ t0ni_00002880_restart_ice_0188.nc
+ t0ni_00002880_restart_ice_0189.nc
+ t0ni_00002880_restart_ice_0190.nc
+ t0ni_00002880_restart_ice_0191.nc
+ t0ni_00002880_restart_ice_0192.nc
+ t0ni_00002880_restart_ice_0193.nc
+ t0ni_00002880_restart_ice_0194.nc
+ t0ni_00002880_restart_ice_0195.nc
+ t0ni_00002880_restart_ice_0196.nc
+ t0ni_00002880_restart_ice_0197.nc
+ t0ni_00002880_restart_ice_0198.nc
+ t0ni_00002880_restart_ice_0199.nc
+ t0ni_00002880_restart_ice_0200.nc
+ t0ni_00002880_restart_ice_0201.nc
+ t0ni_00002880_restart_ice_0202.nc
+ t0ni_00002880_restart_ice_0203.nc
+ t0ni_00002880_restart_ice_0204.nc
+ t0ni_00002880_restart_ice_0205.nc
+ t0ni_00002880_restart_ice_0206.nc
+ t0ni_00002880_restart_ice_0207.nc
+ t0ni_00002880_restart_ice_0208.nc
+ t0ni_00002880_restart_ice_0209.nc
+ t0ni_00002880_restart_ice_0210.nc
+ t0ni_00002880_restart_ice_0211.nc
+ t0ni_00002880_restart_ice_0212.nc
+ t0ni_00002880_restart_ice_0213.nc
+ t0ni_00002880_restart_ice_0214.nc
+ t0ni_00002880_restart_ice_0215.nc
+ t0ni_00002880_restart_ice_0216.nc
+ t0ni_00002880_restart_ice_0217.nc
+ t0ni_00002880_restart_ice_0218.nc
+ t0ni_00002880_restart_ice_0219.nc
+ t0ni_00002880_restart_ice_0220.nc
+ t0ni_00002880_restart_ice_0221.nc
+ t0ni_00002880_restart_ice_0222.nc
+ t0ni_00002880_restart_ice_0223.nc
+ t0ni_00002880_restart_ice_0224.nc
+ t0ni_00002880_restart_ice_0225.nc
+ t0ni_00002880_restart_ice_0226.nc
+ t0ni_00002880_restart_ice_0227.nc
+ t0ni_00002880_restart_ice_0228.nc
+ t0ni_00002880_restart_ice_0229.nc
+ t0ni_00002880_restart_ice_0230.nc
+ t0ni_00002880_restart_ice_0231.nc
+ t0ni_00002880_restart_ice_0232.nc
+ t0ni_00002880_restart_ice_0233.nc
+ t0ni_00002880_restart_ice_0234.nc
+ t0ni_00002880_restart_ice_0235.nc
+ t0ni_00002880_restart_ice_0236.nc
+ t0ni_00002880_restart_ice_0237.nc
+ t0ni_00002880_restart_ice_0238.nc
+ t0ni_00002880_restart_ice_0239.nc
+ t0ni_00002880_restart_ice_0240.nc
+ t0ni_00002880_restart_ice_0241.nc
+ t0ni_00002880_restart_ice_0242.nc
+ t0ni_00002880_restart_ice_0243.nc
+ t0ni_00002880_restart_ice_0244.nc
+ t0ni_00002880_restart_ice_0245.nc
+ t0ni_00002880_restart_ice_0246.nc
+ t0ni_00002880_restart_ice_0247.nc
+ t0ni_00002880_restart_ice_0248.nc
+ t0ni_00002880_restart_ice_0249.nc
+ t0ni_00002880_restart_ice_0250.nc
+ t0ni_00002880_restart_ice_0251.nc
+ t0ni_00002880_restart_ice_0252.nc
+ t0ni_00002880_restart_ice_0253.nc
+ t0ni_00002880_restart_ice_0254.nc
+ t0ni_00002880_restart_ice_0255.nc
+ t0ni_00002880_restart_ice_0256.nc
+ t0ni_00002880_restart_ice_0257.nc
+ t0ni_00002880_restart_ice_0258.nc
+ t0ni_00002880_restart_ice_0259.nc
+ t0ni_00002880_restart_ice_0260.nc
+ t0ni_00002880_restart_ice_0261.nc
+ t0ni_00002880_restart_ice_0262.nc
+ t0ni_00002880_restart_ice_0263.nc
+ t0ni_00002880_restart_ice_0264.nc
+ t0ni_00002880_restart_ice_0265.nc
+ t0ni_00002880_restart_ice_0266.nc
+ t0ni_00002880_restart_ice_0267.nc
+ t0ni_00002880_restart_ice_0268.nc
+ t0ni_00002880_restart_ice_0269.nc
+ t0ni_00002880_restart_ice_0270.nc
+ t0ni_00002880_restart_ice_0271.nc
+ t0ni_00002880_restart_ice_0272.nc
+ t0ni_00002880_restart_ice_0273.nc
+ t0ni_00002880_restart_ice_0274.nc
+ t0ni_00002880_restart_ice_0275.nc
+ t0ni_00002880_restart_ice_0276.nc
+ t0ni_00002880_restart_ice_0277.nc
+ t0ni_00002880_restart_ice_0278.nc
+ t0ni_00002880_restart_ice_0279.nc
+ t0ni_00002880_restart_ice_0280.nc
+ t0ni_00002880_restart_ice_0281.nc
+ t0ni_00002880_restart_ice_0282.nc
+ t0ni_00002880_restart_ice_0283.nc
+ t0ni_00002880_restart_ice_0284.nc
+ t0ni_00002880_restart_ice_0285.nc
+ t0ni_00002880_restart_ice_0286.nc
+ t0ni_00002880_restart_ice_0287.nc
+ t0ni_00002880_restart_ice_0288.nc
+ t0ni_00002880_restart_ice_0289.nc
+ t0ni_00002880_restart_ice_0290.nc
+ t0ni_00002880_restart_ice_0291.nc
+ t0ni_00002880_restart_ice_0292.nc
+ t0ni_00002880_restart_ice_0293.nc
+ t0ni_00002880_restart_ice_0294.nc
+ t0ni_00002880_restart_ice_0295.nc
+ t0ni_00002880_restart_ice_0296.nc
+ t0ni_00002880_restart_ice_0297.nc
+ t0ni_00002880_restart_ice_0298.nc
+ t0ni_00002880_restart_ice_0299.nc
+ t0ni_00002880_restart_ice_0300.nc
+ t0ni_00002880_restart_ice_0301.nc
+ t0ni_00002880_restart_ice_0302.nc
+ t0ni_00002880_restart_ice_0303.nc
+ t0ni_00002880_restart_ice_0304.nc
+ t0ni_00002880_restart_ice_0305.nc
+ t0ni_00002880_restart_ice_0306.nc
+ t0ni_00002880_restart_ice_0307.nc
+ t0ni_00002880_restart_ice_0308.nc
+ t0ni_00002880_restart_ice_0309.nc
+ t0ni_00002880_restart_ice_0310.nc
+ t0ni_00002880_restart_ice_0311.nc
+ t0ni_00002880_restart_ice_0312.nc
+ t0ni_00002880_restart_ice_0313.nc
+ t0ni_00002880_restart_ice_0314.nc
+ t0ni_00002880_restart_ice_0315.nc
+ t0ni_00002880_restart_ice_0316.nc
+ t0ni_00002880_restart_ice_0317.nc
+ t0ni_00002880_restart_ice_0318.nc
+ t0ni_00002880_restart_ice_0319.nc
+ t0ni_00002880_restart_ice_0320.nc
+ t0ni_00002880_restart_ice_0321.nc
+ t0ni_00002880_restart_ice_0322.nc
+ t0ni_00002880_restart_ice_0323.nc
+ t0ni_00002880_restart_ice_0324.nc
+ t0ni_00002880_restart_ice_0325.nc
+ t0ni_00002880_restart_ice_0326.nc
+ t0ni_00002880_restart_ice_0327.nc
+ t0ni_00002880_restart_ice_0328.nc
+ t0ni_00002880_restart_ice_0329.nc
+ t0ni_00002880_restart_ice_0330.nc
+ t0ni_00002880_restart_ice_0331.nc
+ t0ni_00002880_restart_ice_0332.nc
+ t0ni_00002880_restart_ice_0333.nc
+ t0ni_00002880_restart_ice_0334.nc
+ t0ni_00002880_restart_ice_0335.nc
+ t0ni_00002880_restart_ice_0336.nc
+ t0ni_00002880_restart_ice_0337.nc
+ t0ni_00002880_restart_ice_0338.nc
+ t0ni_00002880_restart_ice_0339.nc
+ t0ni_00002880_restart_ice_0340.nc
+ t0ni_00002880_restart_ice_0341.nc
+ t0ni_00002880_restart_ice_0342.nc
+ t0ni_00002880_restart_ice_0343.nc
+ t0ni_00002880_restart_ice_0344.nc
+ t0ni_00002880_restart_ice_0345.nc
+ t0ni_00002880_restart_ice_0346.nc
+ t0ni_00002880_restart_ice_0347.nc
+ t0ni_00002880_restart_ice_0348.nc
+ t0ni_00002880_restart_ice_0349.nc
+ t0ni_00002880_restart_ice_0350.nc
+ t0ni_00002880_restart_ice_0351.nc
+ t0ni_00002880_restart_ice_0352.nc
+ t0ni_00002880_restart_ice_0353.nc
+ t0ni_00002880_restart_ice_0354.nc
+ t0ni_00002880_restart_ice_0355.nc
+ t0ni_00002880_restart_ice_0356.nc
+ t0ni_00002880_restart_ice_0357.nc
+ t0ni_00002880_restart_ice_0358.nc
+ t0ni_00002880_restart_ice_0359.nc
+ t0ni_00002880_restart_ice_0360.nc
+ t0ni_00002880_restart_ice_0361.nc
+ t0ni_00002880_restart_ice_0362.nc
+ t0ni_00002880_restart_ice_0363.nc
+ t0ni_00002880_restart_ice_0364.nc
+ t0ni_00002880_restart_ice_0365.nc
+ t0ni_00002880_restart_ice_0366.nc
+ t0ni_00002880_restart_ice_0367.nc
+ t0ni_00002880_restart_ice_0368.nc
+ t0ni_00002880_restart_ice_0369.nc
+ t0ni_00002880_restart_ice_0370.nc
+ t0ni_00002880_restart_ice_0371.nc
+ t0ni_00002880_restart_ice_0372.nc
+ t0ni_00002880_restart_ice_0373.nc
+ t0ni_00002880_restart_ice_0374.nc
+ t0ni_00002880_restart_ice_0375.nc
+ t0ni_00002880_restart_ice_0376.nc
+ t0ni_00002880_restart_ice_0377.nc
+ t0ni_00002880_restart_ice_0378.nc
+ t0ni_00002880_restart_ice_0379.nc
+ t0ni_00002880_restart_ice_0380.nc
+ t0ni_00002880_restart_ice_0381.nc
+ t0ni_00002880_restart_ice_0382.nc
+ t0ni_00002880_restart_ice_0383.nc
+ t0ni_00002880_restart_ice_0384.nc
+ t0ni_00002880_restart_ice_0385.nc
+ t0ni_00002880_restart_ice_0386.nc
+ t0ni_00002880_restart_ice_0387.nc
+ t0ni_00002880_restart_ice_0388.nc
+ t0ni_00002880_restart_ice_0389.nc
+ t0ni_00002880_restart_ice_0390.nc
+ t0ni_00002880_restart_ice_0391.nc
+ t0ni_00002880_restart_ice_0392.nc
+ t0ni_00002880_restart_ice_0393.nc
+ t0ni_00002880_restart_ice_0394.nc
+ t0ni_00002880_restart_ice_0395.nc
+ t0ni_00002880_restart_ice_0396.nc
+ t0ni_00002880_restart_ice_0397.nc
+ t0ni_00002880_restart_ice_0398.nc
+ t0ni_00002880_restart_ice_0399.nc
+ t0ni_00002880_restart_ice_0400.nc
+ t0ni_00002880_restart_ice_0401.nc
+ t0ni_00002880_restart_ice_0402.nc
+ t0ni_00002880_restart_ice_0403.nc
+ t0ni_00002880_restart_ice_0404.nc
+ t0ni_00002880_restart_ice_0405.nc
+ t0ni_00002880_restart_ice_0406.nc
+ t0ni_00002880_restart_ice_0407.nc
+ t0ni_00002880_restart_ice_0408.nc
+ t0ni_00002880_restart_ice_0409.nc
+ t0ni_00002880_restart_ice_0410.nc
+ t0ni_00002880_restart_ice_0411.nc
+ t0ni_00002880_restart_ice_0412.nc
+ t0ni_00002880_restart_ice_0413.nc
+ t0ni_00002880_restart_ice_0414.nc
+ t0ni_00002880_restart_ice_0415.nc
+ t0ni_00002880_restart_ice_0416.nc
+ t0ni_00002880_restart_ice_0417.nc
+ t0ni_00002880_restart_ice_0418.nc
+ t0ni_00002880_restart_ice_0419.nc
+ t0ni_00002880_restart_ice_0420.nc
+ t0ni_00002880_restart_ice_0421.nc
+ t0ni_00002880_restart_ice_0422.nc
+ t0ni_00002880_restart_ice_0423.nc
+ t0ni_00002880_restart_ice_0424.nc
+ t0ni_00002880_restart_ice_0425.nc
+ t0ni_00002880_restart_ice_0426.nc
+ t0ni_00002880_restart_ice_0427.nc
+ t0ni_00002880_restart_ice_0428.nc
+ t0ni_00002880_restart_ice_0429.nc
+ t0ni_00002880_restart_ice_0430.nc
+ t0ni_00002880_restart_ice_0431.nc
+ t0ni_00002880_restart_ice_0432.nc
+ t0ni_00002880_restart_ice_0433.nc
+ t0ni_00002880_restart_ice_0434.nc
+ t0ni_00002880_restart_ice_0435.nc
+ t0ni_00002880_restart_ice_0436.nc
+ t0ni_00002880_restart_ice_0437.nc
+ t0ni_00002880_restart_ice_0438.nc
+ t0ni_00002880_restart_ice_0439.nc
+ t0ni_00002880_restart_ice_0440.nc
+ t0ni_00002880_restart_ice_0441.nc
+ t0ni_00002880_restart_ice_0442.nc
+ t0ni_00002880_restart_ice_0443.nc
+ t0ni_00002880_restart_ice_0444.nc
+ t0ni_00002880_restart_ice_0445.nc
+ t0ni_00002880_restart_ice_0446.nc
+ t0ni_00002880_restart_ice_0447.nc
+ t0ni_00002880_restart_ice_0448.nc
+ t0ni_00002880_restart_ice_0449.nc
+ t0ni_00002880_restart_ice_0450.nc
+ t0ni_00002880_restart_ice_0451.nc
+ t0ni_00002880_restart_ice_0452.nc
+ t0ni_00002880_restart_ice_0453.nc
+ t0ni_00002880_restart_ice_0454.nc
+ t0ni_00002880_restart_ice_0455.nc
+ t0ni_00002880_restart_ice_0456.nc
+ t0ni_00002880_restart_ice_0457.nc
+ t0ni_00002880_restart_ice_0458.nc
+ t0ni_00002880_restart_ice_0459.nc
+ t0ni_00002880_restart_ice_0460.nc
+ t0ni_00002880_restart_ice_0461.nc
+ t0ni_00002880_restart_ice_0462.nc
+ t0ni_00002880_restart_ice_0463.nc
+ t0ni_00002880_restart_ice_0464.nc
+ t0ni_00002880_restart_ice_0465.nc
+ t0ni_00002880_restart_ice_0466.nc
+ t0ni_00002880_restart_ice_0467.nc
+ t0ni_00002880_restart_ice_0468.nc
+ t0ni_00002880_restart_ice_0469.nc
+ t0ni_00002880_restart_ice_0470.nc
+ t0ni_00002880_restart_ice_0471.nc
+ t0ni_00002880_restart_ice_0472.nc
+ t0ni_00002880_restart_ice_0473.nc
+ t0ni_00002880_restart_ice_0474.nc
+ t0ni_00002880_restart_ice_0475.nc
+ t0ni_00002880_restart_ice_0476.nc
+ t0ni_00002880_restart_ice_0477.nc
+ t0ni_00002880_restart_ice_0478.nc
+ t0ni_00002880_restart_ice_0479.nc
+ t0ni_00002880_restart_ice_0480.nc
+ t0ni_00002880_restart_ice_0481.nc
+ t0ni_00002880_restart_ice_0482.nc
+ t0ni_00002880_restart_ice_0483.nc
+ t0ni_00002880_restart_ice_0484.nc
+ t0ni_00002880_restart_ice_0485.nc
+ t0ni_00002880_restart_ice_0486.nc
+ t0ni_00002880_restart_ice_0487.nc
+ t0ni_00002880_restart_ice_0488.nc
+ t0ni_00002880_restart_ice_0489.nc
+ t0ni_00002880_restart_ice_0490.nc
+ t0ni_00002880_restart_ice_0491.nc
+ t0ni_00002880_restart_ice_0492.nc
+ t0ni_00002880_restart_ice_0493.nc
+ t0ni_00002880_restart_ice_0494.nc
+ t0ni_00002880_restart_ice_0495.nc
+ t0ni_00002880_restart_ice_0496.nc
+ t0ni_00002880_restart_ice_0497.nc
+ t0ni_00002880_restart_ice_0498.nc
+ t0ni_00002880_restart_ice_0499.nc
+ t0ni_00002880_restart_ice_0500.nc
+ t0ni_00002880_restart_ice_0501.nc
+ t0ni_00002880_restart_ice_0502.nc
+ t0ni_00002880_restart_ice_0503.nc
+ t0ni_00002880_restart_ice_0504.nc
+ t0ni_00002880_restart_ice_0505.nc
+ t0ni_00002880_restart_ice_0506.nc
+ t0ni_00002880_restart_ice_0507.nc
+ t0ni_00002880_restart_ice_0508.nc
+ t0ni_00002880_restart_ice_0509.nc
+ t0ni_00002880_restart_ice_0510.nc
+ t0ni_00002880_restart_ice_0511.nc
+ t0ni_00002880_restart_ice_0512.nc
+ t0ni_00002880_restart_ice_0513.nc
+ t0ni_00002880_restart_ice_0514.nc
+ t0ni_00002880_restart_ice_0515.nc
+ t0ni_00002880_restart_ice_0516.nc
+ t0ni_00002880_restart_ice_0517.nc
+ t0ni_00002880_restart_ice_0518.nc
+ t0ni_00002880_restart_ice_0519.nc
+ t0ni_00002880_restart_ice_0520.nc
+ t0ni_00002880_restart_ice_0521.nc
+ t0ni_00002880_restart_ice_0522.nc
+ t0ni_00002880_restart_ice_0523.nc
+ t0ni_00002880_restart_ice_0524.nc
+ t0ni_00002880_restart_ice_0525.nc
+ t0ni_00002880_restart_ice_0526.nc
+ t0ni_00002880_restart_ice_0527.nc
+ t0ni_00002880_restart_ice_0528.nc
+ t0ni_00002880_restart_ice_0529.nc
+ t0ni_00002880_restart_ice_0530.nc
+ t0ni_00002880_restart_ice_0531.nc
+ t0ni_00002880_restart_ice_0532.nc
+ t0ni_00002880_restart_ice_0533.nc
+ t0ni_00002880_restart_ice_0534.nc
+ t0ni_00002880_restart_ice_0535.nc
+ t0ni_00002880_restart_ice_0536.nc
+ t0ni_00002880_restart_ice_0537.nc
+ t0ni_00002880_restart_ice_0538.nc
+ t0ni_00002880_restart_ice_0539.nc
+ t0ni_00002880_restart_ice_0540.nc
+ t0ni_00002880_restart_ice_0541.nc
+ t0ni_00002880_restart_ice_0542.nc
+ t0ni_00002880_restart_ice_0543.nc
+ t0ni_00002880_restart_ice_0544.nc
+ t0ni_00002880_restart_ice_0545.nc
+ t0ni_00002880_restart_ice_0546.nc
+ t0ni_00002880_restart_ice_0547.nc
+ t0ni_00002880_restart_ice_0548.nc
+ t0ni_00002880_restart_ice_0549.nc
+ t0ni_00002880_restart_ice_0550.nc
+ t0ni_00002880_restart_ice_0551.nc
+ t0ni_00002880_restart_ice_0552.nc
+ t0ni_00002880_restart_ice_0553.nc
+ t0ni_00002880_restart_ice_0554.nc
+ t0ni_00002880_restart_ice_0555.nc
+ t0ni_00002880_restart_ice_0556.nc
+ t0ni_00002880_restart_ice_0557.nc
+ t0ni_00002880_restart_ice_0558.nc
+ t0ni_00002880_restart_ice_0559.nc
+ t0ni_00002880_restart_ice_0560.nc
+ t0ni_00002880_restart_ice_0561.nc
+ t0ni_00002880_restart_ice_0562.nc
+ t0ni_00002880_restart_ice_0563.nc
+ t0ni_00002880_restart_ice_0564.nc
+ t0ni_00002880_restart_ice_0565.nc
+ t0ni_00002880_restart_ice_0566.nc
+ t0ni_00002880_restart_ice_0567.nc
+ t0ni_00002880_restart_ice_0568.nc
+ t0ni_00002880_restart_ice_0569.nc
+ t0ni_00002880_restart_ice_0570.nc
+ t0ni_00002880_restart_ice_0571.nc
+ t0ni_00002880_restart_ice_0572.nc
+ t0ni_00002880_restart_ice_0573.nc
+ t0ni_00002880_restart_ice_0574.nc
+ t0ni_00002880_restart_ice_0575.nc
+ t0ni_00002880_restart_ice_0576.nc
+ t0ni_00002880_restart_ice_0577.nc
+ t0ni_00002880_restart_ice_0578.nc
+ t0ni_00002880_restart_ice_0579.nc
+ t0ni_00002880_restart_ice_0580.nc
+ t0ni_00002880_restart_ice_0581.nc
+ t0ni_00002880_restart_ice_0582.nc
+ t0ni_00002880_restart_ice_0583.nc
+ t0ni_00002880_restart_ice_0584.nc
+ t0ni_00002880_restart_ice_0585.nc
+ t0ni_00002880_restart_ice_0586.nc
+ t0ni_00002880_restart_ice_0587.nc
+ t0ni_00002880_restart_ice_0588.nc
+ t0ni_00002880_restart_ice_0589.nc
+ t0ni_00002880_restart_ice_0590.nc
+ t0ni_00002880_restart_ice_0591.nc
+ t0ni_00002880_restart_ice_0592.nc
+ t0ni_00002880_restart_ice_0593.nc
+ t0ni_00002880_restart_ice_0594.nc
+ t0ni_00002880_restart_ice_0595.nc
+ t0ni_00002880_restart_ice_0596.nc
+ t0ni_00002880_restart_ice_0597.nc
+ t0ni_00002880_restart_ice_0598.nc
+ t0ni_00002880_restart_ice_0599.nc
+ t0ni_00002880_restart_ice_0600.nc
+ t0ni_00002880_restart_ice_0601.nc
+ t0ni_00002880_restart_ice_0602.nc
+ t0ni_00002880_restart_ice_0603.nc
+ t0ni_00002880_restart_ice_0604.nc
+ t0ni_00002880_restart_ice_0605.nc
+ t0ni_00002880_restart_ice_0606.nc
+ t0ni_00002880_restart_ice_0607.nc
+ t0ni_00002880_restart_ice_0608.nc
+ t0ni_00002880_restart_ice_0609.nc
+ t0ni_00002880_restart_ice_0610.nc
+ t0ni_00002880_restart_ice_0611.nc
+ t0ni_00002880_restart_ice_0612.nc
+ t0ni_00002880_restart_ice_0613.nc
+ t0ni_00002880_restart_ice_0614.nc
+ t0ni_00002880_restart_ice_0615.nc
+ t0ni_00002880_restart_ice_0616.nc
+ t0ni_00002880_restart_ice_0617.nc
+ t0ni_00002880_restart_ice_0618.nc
+ t0ni_00002880_restart_ice_0619.nc
+ t0ni_00002880_restart_ice_0620.nc
+ t0ni_00002880_restart_ice_0621.nc
+ t0ni_00002880_restart_ice_0622.nc
+ t0ni_00002880_restart_ice_0623.nc
+ t0ni_00002880_restart_ice_0624.nc
+ t0ni_00002880_restart_ice_0625.nc
+ t0ni_00002880_restart_ice_0626.nc
+ t0ni_00002880_restart_ice_0627.nc
+ t0ni_00002880_restart_ice_0628.nc
+ t0ni_00002880_restart_ice_0629.nc
+ t0ni_00002880_restart_ice_0630.nc
+ t0ni_00002880_restart_ice_0631.nc
+ t0ni_00002880_restart_ice_0632.nc
+ t0ni_00002880_restart_ice_0633.nc
+ t0ni_00002880_restart_ice_0634.nc
+ t0ni_00002880_restart_ice_0635.nc
+ t0ni_00002880_restart_ice_0636.nc
+ t0ni_00002880_restart_ice_0637.nc
+ t0ni_00002880_restart_ice_0638.nc
+ t0ni_00002880_restart_ice_0639.nc
+ t0ni_00002880_restart_ice_0640.nc
+ t0ni_00002880_restart_ice_0641.nc
+ t0ni_00002880_restart_ice_0642.nc
+ t0ni_00002880_restart_ice_0643.nc
+ t0ni_00002880_restart_ice_0644.nc
+ t0ni_00002880_restart_ice_0645.nc
+ t0ni_00002880_restart_ice_0646.nc
+ t0ni_00002880_restart_ice_0647.nc
+ t0ni_00002880_restart_ice_0648.nc
+ t0ni_00002880_restart_ice_0649.nc
+ t0ni_00002880_restart_ice_0650.nc
+ t0ni_00002880_restart_ice_0651.nc
+ t0ni_00002880_restart_ice_0652.nc
+ t0ni_00002880_restart_ice_0653.nc
+ t0ni_00002880_restart_ice_0654.nc
+ t0ni_00002880_restart_ice_0655.nc
+ t0ni_00002880_restart_ice_0656.nc
+ t0ni_00002880_restart_ice_0657.nc
+ t0ni_00002880_restart_ice_0658.nc
+ t0ni_00002880_restart_ice_0659.nc
+ t0ni_00002880_restart_ice_0660.nc
+ t0ni_00002880_restart_ice_0661.nc
+ t0ni_00002880_restart_ice_0662.nc
+ t0ni_00002880_restart_ice_0663.nc
+ t0ni_00002880_restart_ice_0664.nc
+ t0ni_00002880_restart_ice_0665.nc
+ t0ni_00002880_restart_ice_0666.nc
+ t0ni_00002880_restart_ice_0667.nc
+ t0ni_00002880_restart_ice_0668.nc
+ t0ni_00002880_restart_ice_0669.nc
+ t0ni_00002880_restart_ice_0670.nc
+ t0ni_00002880_restart_ice_0671.nc
+ t0ni_00002880_restart_ice_0672.nc
+ t0ni_00002880_restart_ice_0673.nc
+ t0ni_00002880_restart_ice_0674.nc
+ t0ni_00002880_restart_ice_0675.nc
+ t0ni_00002880_restart_ice_0676.nc
+ t0ni_00002880_restart_ice_0677.nc
+ t0ni_00002880_restart_ice_0678.nc
+ t0ni_00002880_restart_ice_0679.nc
+ t0ni_00002880_restart_ice_0680.nc
+ t0ni_00002880_restart_ice_0681.nc
+ t0ni_00002880_restart_ice_0682.nc
+ t0ni_00002880_restart_ice_0683.nc
+ t0ni_00002880_restart_ice_0684.nc
+ t0ni_00002880_restart_ice_0685.nc
+ t0ni_00002880_restart_ice_0686.nc
+ t0ni_00002880_restart_ice_0687.nc
+ t0ni_00002880_restart_ice_0688.nc
+ t0ni_00002880_restart_ice_0689.nc
+ t0ni_00002880_restart_ice_0690.nc
+ t0ni_00002880_restart_ice_0691.nc
+ t0ni_00002880_restart_ice_0692.nc
+ t0ni_00002880_restart_ice_0693.nc
+ t0ni_00002880_restart_ice_0694.nc
+ t0ni_00002880_restart_ice_0695.nc
+ t0ni_00002880_restart_ice_0696.nc
+ t0ni_00002880_restart_ice_0697.nc
+ t0ni_00002880_restart_ice_0698.nc
+ t0ni_00002880_restart_ice_0699.nc
+ t0ni_00002880_restart_ice_0700.nc
+ t0ni_00002880_restart_ice_0701.nc
+ t0ni_00002880_restart_ice_0702.nc
+ t0ni_00002880_restart_ice_0703.nc
+ t0ni_00002880_restart_ice_0704.nc
+ t0ni_00002880_restart_ice_0705.nc
+ t0ni_00002880_restart_ice_0706.nc
+ t0ni_00002880_restart_ice_0707.nc
+ t0ni_00002880_restart_ice_0708.nc
+ t0ni_00002880_restart_ice_0709.nc
+ t0ni_00002880_restart_ice_0710.nc
+ t0ni_00002880_restart_ice_0711.nc
+ t0ni_00002880_restart_ice_0712.nc
+ t0ni_00002880_restart_ice_0713.nc
+ t0ni_00002880_restart_ice_0714.nc
+ t0ni_00002880_restart_ice_0715.nc
+ t0ni_00002880_restart_ice_0716.nc
+ t0ni_00002880_restart_ice_0717.nc
+ t0ni_00002880_restart_ice_0718.nc
+ t0ni_00002880_restart_ice_0719.nc
+ t0ni_00002880_restart_ice_0720.nc
+ t0ni_00002880_restart_ice_0721.nc
+ t0ni_00002880_restart_ice_0722.nc
+ t0ni_00002880_restart_ice_0723.nc
+ t0ni_00002880_restart_ice_0724.nc
+ t0ni_00002880_restart_ice_0725.nc
+ t0ni_00002880_restart_ice_0726.nc
+ t0ni_00002880_restart_ice_0727.nc
+ t0ni_00002880_restart_ice_0728.nc
+ t0ni_00002880_restart_ice_0729.nc
+ t0ni_00002880_restart_ice_0730.nc
+ t0ni_00002880_restart_ice_0731.nc
+ t0ni_00002880_restart_ice_0732.nc
+ t0ni_00002880_restart_ice_0733.nc
+ t0ni_00002880_restart_ice_0734.nc
+ t0ni_00002880_restart_ice_0735.nc
+ t0ni_00002880_restart_ice_0736.nc
+ t0ni_00002880_restart_ice_0737.nc
+ t0ni_00002880_restart_ice_0738.nc
+ t0ni_00002880_restart_ice_0739.nc
+ t0ni_00002880_restart_ice_0740.nc
+ t0ni_00002880_restart_ice_0741.nc
+ t0ni_00002880_restart_ice_0742.nc
+ t0ni_00002880_restart_ice_0743.nc
+ t0ni_00002880_restart_ice_0744.nc
+ t0ni_00002880_restart_ice_0745.nc
+ t0ni_00002880_restart_ice_0746.nc
+ t0ni_00002880_restart_ice_0747.nc
+ t0ni_00002880_restart_ice_0748.nc
+ t0ni_00002880_restart_ice_0749.nc
+ t0ni_00002880_restart_ice_0750.nc
+ t0ni_00002880_restart_ice_0751.nc
+ t0ni_00002880_restart_ice_0752.nc
+ t0ni_00002880_restart_ice_0753.nc
+ t0ni_00002880_restart_ice_0754.nc
+ t0ni_00002880_restart_ice_0755.nc
+ t0ni_00002880_restart_ice_0756.nc
+ t0ni_00002880_restart_ice_0757.nc
+ t0ni_00002880_restart_ice_0758.nc
+ t0ni_00002880_restart_ice_0759.nc
+ t0ni_00002880_restart_ice_0760.nc
+ t0ni_00002880_restart_ice_0761.nc
+ t0ni_00002880_restart_ice_0762.nc
+ t0ni_00002880_restart_ice_0763.nc
+ t0ni_00002880_restart_ice_0764.nc
+ t0ni_00002880_restart_ice_0765.nc
+ t0ni_00002880_restart_ice_0766.nc
+ t0ni_00002880_restart_ice_0767.nc
+ t0ni_00002880_restart_ice_0768.nc
+ t0ni_00002880_restart_ice_0769.nc
+ t0ni_00002880_restart_ice_0770.nc
+ t0ni_00002880_restart_ice_0771.nc
+ t0ni_00002880_restart_ice_0772.nc
+ t0ni_00002880_restart_ice_0773.nc
+ t0ni_00002880_restart_ice_0774.nc
+ t0ni_00002880_restart_ice_0775.nc
+ t0ni_00002880_restart_ice_0776.nc
+ t0ni_00002880_restart_ice_0777.nc
+ t0ni_00002880_restart_ice_0778.nc
+ t0ni_00002880_restart_ice_0779.nc
+ t0ni_00002880_restart_ice_0780.nc
+ t0ni_00002880_restart_ice_0781.nc
+ t0ni_00002880_restart_ice_0782.nc
+ t0ni_00002880_restart_ice_0783.nc
+ t0ni_00002880_restart_ice_0784.nc
+ t0ni_00002880_restart_ice_0785.nc
+ t0ni_00002880_restart_ice_0786.nc
+ t0ni_00002880_restart_ice_0787.nc
+ t0ni_00002880_restart_ice_0788.nc
+ t0ni_00002880_restart_ice_0789.nc
+ t0ni_00002880_restart_ice_0790.nc
+ t0ni_00002880_restart_ice_0791.nc
+ t0ni_00002880_restart_ice_0792.nc
+ t0ni_00002880_restart_ice_0793.nc
+ t0ni_00002880_restart_ice_0794.nc
+ t0ni_00002880_restart_ice_0795.nc
+ t0ni_00002880_restart_ice_0796.nc
+ t0ni_00002880_restart_ice_0797.nc
+ t0ni_00002880_restart_ice_0798.nc
+ t0ni_00002880_restart_ice_0799.nc
+ t0ni_00002880_restart_ice_0800.nc
+ t0ni_00002880_restart_ice_0801.nc
+ t0ni_00002880_restart_ice_0802.nc
+ t0ni_00002880_restart_ice_0803.nc
+ t0ni_00002880_restart_ice_0804.nc
+ t0ni_00002880_restart_ice_0805.nc
+ t0ni_00002880_restart_ice_0806.nc
+ t0ni_00002880_restart_ice_0807.nc
+ t0ni_00002880_restart_ice_0808.nc
+ t0ni_00002880_restart_ice_0809.nc
+ t0ni_00002880_restart_ice_0810.nc
+ t0ni_00002880_restart_ice_0811.nc
+ t0ni_00002880_restart_ice_0812.nc
+ t0ni_00002880_restart_ice_0813.nc
+ t0ni_00002880_restart_ice_0814.nc
+ t0ni_00002880_restart_ice_0815.nc
+ t0ni_00002880_restart_ice_0816.nc
+ t0ni_00002880_restart_ice_0817.nc
+ t0ni_00002880_restart_ice_0818.nc
+ t0ni_00002880_restart_ice_0819.nc
+ t0ni_00002880_restart_ice_0820.nc
+ t0ni_00002880_restart_ice_0821.nc
+ t0ni_00002880_restart_ice_0822.nc
+ t0ni_00002880_restart_ice_0823.nc
+ t0ni_00002880_restart_ice_0824.nc
+ t0ni_00002880_restart_ice_0825.nc
+ t0ni_00002880_restart_ice_0826.nc
+ t0ni_00002880_restart_ice_0827.nc
+ t0ni_00002880_restart_ice_0828.nc
+ t0ni_00002880_restart_ice_0829.nc
+ t0ni_00002880_restart_ice_0830.nc
+ t0ni_00002880_restart_ice_0831.nc
+ t0ni_00002880_restart_ice_0832.nc
+ t0ni_00002880_restart_ice_0833.nc
+ t0ni_00002880_restart_ice_0834.nc
+ t0ni_00002880_restart_ice_0835.nc
+ t0ni_00002880_restart_ice_0836.nc
+ t0ni_00002880_restart_ice_0837.nc
+ t0ni_00002880_restart_ice_0838.nc
+ t0ni_00002880_restart_ice_0839.nc
+ t0ni_00002880_restart_ice_0840.nc
+ t0ni_00002880_restart_ice_0841.nc
+ t0ni_00002880_restart_ice_0842.nc
+ t0ni_00002880_restart_ice_0843.nc
+ t0ni_00002880_restart_ice_0844.nc
+ t0ni_00002880_restart_ice_0845.nc
+ t0ni_00002880_restart_ice_0846.nc
+ t0ni_00002880_restart_ice_0847.nc
+ t0ni_00002880_restart_ice_0848.nc
+ t0ni_00002880_restart_ice_0849.nc
+ t0ni_00002880_restart_ice_0850.nc
+ t0ni_00002880_restart_ice_0851.nc
+ t0ni_00002880_restart_ice_0852.nc
+ t0ni_00002880_restart_ice_0853.nc
+ t0ni_00002880_restart_ice_0854.nc
+ t0ni_00002880_restart_ice_0855.nc
+ t0ni_00002880_restart_ice_0856.nc
+ t0ni_00002880_restart_ice_0857.nc
+ t0ni_00002880_restart_ice_0858.nc
+ t0ni_00002880_restart_ice_0859.nc
+ t0ni_00002880_restart_ice_0860.nc
+ t0ni_00002880_restart_ice_0861.nc
+ t0ni_00002880_restart_ice_0862.nc
+ t0ni_00002880_restart_ice_0863.nc
+ t0ni_00002880_restart_ice_0864.nc
+ t0ni_00002880_restart_ice_0865.nc
+ t0ni_00002880_restart_ice_0866.nc
+ t0ni_00002880_restart_ice_0867.nc
+ t0ni_00002880_restart_ice_0868.nc
+ t0ni_00002880_restart_ice_0869.nc
+ t0ni_00002880_restart_ice_0870.nc
+ t0ni_00002880_restart_ice_0871.nc
+ t0ni_00002880_restart_ice_0872.nc
+ t0ni_00002880_restart_ice_0873.nc
+ t0ni_00002880_restart_ice_0874.nc
+ t0ni_00002880_restart_ice_0875.nc
+ t0ni_00002880_restart_ice_0876.nc
+ t0ni_00002880_restart_ice_0877.nc
+ t0ni_00002880_restart_ice_0878.nc
+ t0ni_00002880_restart_ice_0879.nc
+ t0ni_00002880_restart_ice_0880.nc
+ t0ni_00002880_restart_ice_0881.nc
+ t0ni_00002880_restart_ice_0882.nc
+ t0ni_00002880_restart_ice_0883.nc
+ t0ni_00002880_restart_ice_0884.nc
+ t0ni_00002880_restart_ice_0885.nc
+ t0ni_00002880_restart_ice_0886.nc
+ t0ni_00002880_restart_ice_0887.nc
+ t0ni_00002880_restart_ice_0888.nc
+ t0ni_00002880_restart_ice_0889.nc
+ t0ni_00002880_restart_ice_0890.nc
+ t0ni_00002880_restart_ice_0891.nc
+ t0ni_00002880_restart_ice_0892.nc
+ t0ni_00002880_restart_ice_0893.nc
+ t0ni_00002880_restart_ice_0894.nc
+ t0ni_00002880_restart_ice_0895.nc
+ t0ni_00002880_restart_ice_0896.nc
+ t0ni_00002880_restart_ice_0897.nc
+ t0ni_00002880_restart_ice_0898.nc
+ t0ni_00002880_restart_ice_0899.nc
+ t0ni_00002880_restart_ice_0900.nc
+ t0ni_00002880_restart_ice_0901.nc
+ t0ni_00002880_restart_ice_0902.nc
+ t0ni_00002880_restart_ice_0903.nc
+ t0ni_00002880_restart_ice_0904.nc
+ t0ni_00002880_restart_ice_0905.nc
+ t0ni_00002880_restart_ice_0906.nc
+ t0ni_00002880_restart_ice_0907.nc
+ t0ni_00002880_restart_ice_0908.nc
+ t0ni_00002880_restart_ice_0909.nc
+ t0ni_00002880_restart_ice_0910.nc
+ t0ni_00002880_restart_ice_0911.nc
+ t0ni_00002880_restart_ice_0912.nc
+ t0ni_00002880_restart_ice_0913.nc
+ t0ni_00002880_restart_ice_0914.nc
+ t0ni_00002880_restart_ice_0915.nc
+ t0ni_00002880_restart_ice_0916.nc
+ t0ni_00002880_restart_ice_0917.nc
+ t0ni_00002880_restart_ice_0918.nc
+ t0ni_00002880_restart_ice_0919.nc
+ t0ni_00002880_restart_ice_0920.nc
+ t0ni_00002880_restart_ice_0921.nc
+ t0ni_00002880_restart_ice_0922.nc
+ t0ni_00002880_restart_ice_0923.nc
+ t0ni_00002880_restart_ice_0924.nc
+ t0ni_00002880_restart_ice_0925.nc
+ t0ni_00002880_restart_ice_0926.nc
+ t0ni_00002880_restart_ice_0927.nc
+ t0ni_00002880_restart_ice_0928.nc
+ t0ni_00002880_restart_ice_0929.nc
+ t0ni_00002880_restart_ice_0930.nc
+ t0ni_00002880_restart_ice_0931.nc
+ t0ni_00002880_restart_ice_0932.nc
+ t0ni_00002880_restart_ice_0933.nc
+ t0ni_00002880_restart_ice_0934.nc
+ t0ni_00002880_restart_ice_0935.nc
+ t0ni_00002880_restart_ice_0936.nc
+ t0ni_00002880_restart_ice_0937.nc
+ t0ni_00002880_restart_ice_0938.nc
+ t0ni_00002880_restart_ice_0939.nc
+ t0ni_00002880_restart_ice_0940.nc
+ t0ni_00002880_restart_ice_0941.nc
+ t0ni_00002880_restart_ice_0942.nc
+ t0ni_00002880_restart_ice_0943.nc
+ t0ni_00002880_restart_ice_0944.nc
+ t0ni_00002880_restart_ice_0945.nc
+ t0ni_00002880_restart_ice_0946.nc
+ t0ni_00002880_restart_ice_0947.nc
+ t0ni_00002880_restart_ice_0948.nc
+ t0ni_00002880_restart_ice_0949.nc
+ t0ni_00002880_restart_ice_0950.nc
+ t0ni_00002880_restart_ice_0951.nc
+ t0ni_00002880_restart_ice_0952.nc
+ t0ni_00002880_restart_ice_0953.nc
+ t0ni_00002880_restart_ice_0954.nc
+ t0ni_00002880_restart_ice_0955.nc
+ t0ni_00002880_restart_ice_0956.nc
+ t0ni_00002880_restart_ice_0957.nc
+ t0ni_00002880_restart_ice_0958.nc
+ t0ni_00002880_restart_ice_0959.nc
+ t0ni_00002880_restart_ice_0960.nc
+ t0ni_00002880_restart_ice_0961.nc
+ t0ni_00002880_restart_ice_0962.nc
+ t0ni_00002880_restart_ice_0963.nc
+ t0ni_00002880_restart_ice_0964.nc
+ t0ni_00002880_restart_ice_0965.nc
+ t0ni_00002880_restart_ice_0966.nc
+ t0ni_00002880_restart_ice_0967.nc
+ t0ni_00002880_restart_ice_0968.nc
+ t0ni_00002880_restart_ice_0969.nc
+ t0ni_00002880_restart_ice_0970.nc
+ t0ni_00002880_restart_ice_0971.nc
+ t0ni_00002880_restart_ice_0972.nc
+ t0ni_00002880_restart_ice_0973.nc
+ t0ni_00002880_restart_ice_0974.nc
+ t0ni_00002880_restart_ice_0975.nc
+ t0ni_00002880_restart_ice_0976.nc
+ t0ni_00002880_restart_ice_0977.nc
+ t0ni_00002880_restart_ice_0978.nc
+ t0ni_00002880_restart_ice_0979.nc
+ t0ni_00002880_restart_ice_0980.nc
+ t0ni_00002880_restart_ice_0981.nc
+ t0ni_00002880_restart_ice_0982.nc
+ t0ni_00002880_restart_ice_0983.nc
+ t0ni_00002880_restart_ice_0984.nc
+ t0ni_00002880_restart_ice_0985.nc
+ t0ni_00002880_restart_ice_0986.nc
+ t0ni_00002880_restart_ice_0987.nc
+ t0ni_00002880_restart_ice_0988.nc
+ t0ni_00002880_restart_ice_0989.nc
+ t0ni_00002880_restart_ice_0990.nc
+ t0ni_00002880_restart_ice_0991.nc
+ t0ni_00002880_restart_ice_0992.nc
+ t0ni_00002880_restart_ice_0993.nc
+ t0ni_00002880_restart_ice_0994.nc
+ t0ni_00002880_restart_ice_0995.nc
+ t0ni_00002880_restart_ice_0996.nc
+ t0ni_00002880_restart_ice_0997.nc
+ t0ni_00002880_restart_ice_0998.nc
+ t0ni_00002880_restart_ice_0999.nc
+ t0ni_00002880_restart_ice_1000.nc
+ t0ni_00002880_restart_ice_1001.nc
+ t0ni_00002880_restart_ice_1002.nc
+ t0ni_00002880_restart_ice_1003.nc
+ t0ni_00002880_restart_ice_1004.nc
+ t0ni_00002880_restart_ice_1005.nc
+ t0ni_00002880_restart_ice_1006.nc
+ t0ni_00002880_restart_ice_1007.nc
+ t0ni_00002880_restart_ice_1008.nc
+ t0ni_00002880_restart_ice_1009.nc
+ t0ni_00002880_restart_ice_1010.nc
+ t0ni_00002880_restart_ice_1011.nc
+ t0ni_00002880_restart_ice_1012.nc
+ t0ni_00002880_restart_ice_1013.nc
+ t0ni_00002880_restart_ice_1014.nc
+ t0ni_00002880_restart_ice_1015.nc
+ t0ni_00002880_restart_ice_1016.nc
+ t0ni_00002880_restart_ice_1017.nc
+ t0ni_00002880_restart_ice_1018.nc
+ t0ni_00002880_restart_ice_1019.nc
+ t0ni_00002880_restart_ice_1020.nc
+ t0ni_00002880_restart_ice_1021.nc
+ t0ni_00002880_restart_ice_1022.nc
+ t0ni_00002880_restart_ice_1023.nc
+ t0ni_00002880_restart_ice_1024.nc
+ t0ni_00002880_restart_ice_1025.nc
+ t0ni_00002880_restart_ice_1026.nc
+ t0ni_00002880_restart_ice_1027.nc
+ t0ni_00002880_restart_ice_1028.nc
+ t0ni_00002880_restart_ice_1029.nc
+ t0ni_00002880_restart_ice_1030.nc
+ t0ni_00002880_restart_ice_1031.nc
+ t0ni_00002880_restart_ice_1032.nc
+ t0ni_00002880_restart_ice_1033.nc
+ t0ni_00002880_restart_ice_1034.nc
+ t0ni_00002880_restart_ice_1035.nc
+ t0ni_00002880_restart_ice_1036.nc
+ t0ni_00002880_restart_ice_1037.nc
+ t0ni_00002880_restart_ice_1038.nc
+ t0ni_00002880_restart_ice_1039.nc
+ t0ni_00002880_restart_ice_1040.nc
+ t0ni_00002880_restart_ice_1041.nc
+ t0ni_00002880_restart_ice_1042.nc
+ t0ni_00002880_restart_ice_1043.nc
+ t0ni_00002880_restart_ice_1044.nc
+ t0ni_00002880_restart_ice_1045.nc
+ t0ni_00002880_restart_ice_1046.nc
+ t0ni_00002880_restart_ice_1047.nc
+ t0ni_00002880_restart_ice_1048.nc
+ t0ni_00002880_restart_ice_1049.nc
+ t0ni_00002880_restart_ice_1050.nc
+ t0ni_00002880_restart_ice_1051.nc
+ t0ni_00002880_restart_ice_1052.nc
+ t0ni_00002880_restart_ice_1053.nc
+ t0ni_00002880_restart_ice_1054.nc
+ t0ni_00002880_restart_ice_1055.nc
+ t0ni_00002880_restart_ice_1056.nc
+ t0ni_00002880_restart_ice_1057.nc
+ t0ni_00002880_restart_ice_1058.nc
+ t0ni_00002880_restart_ice_1059.nc
+ t0ni_00002880_restart_ice_1060.nc
+ t0ni_00002880_restart_ice_1061.nc
+ t0ni_00002880_restart_ice_1062.nc
+ t0ni_00002880_restart_ice_1063.nc
+ t0ni_00002880_restart_ice_1064.nc
+ t0ni_00002880_restart_ice_1065.nc
+ t0ni_00002880_restart_ice_1066.nc
+ t0ni_00002880_restart_ice_1067.nc
+ t0ni_00002880_restart_ice_1068.nc
+ t0ni_00002880_restart_ice_1069.nc
+ t0ni_00002880_restart_ice_1070.nc
+ t0ni_00002880_restart_ice_1071.nc
+ t0ni_00002880_restart_ice_1072.nc
+ t0ni_00002880_restart_ice_1073.nc
+ t0ni_00002880_restart_ice_1074.nc
+ t0ni_00002880_restart_ice_1075.nc
+ t0ni_00002880_restart_ice_1076.nc
+ t0ni_00002880_restart_ice_1077.nc
+ t0ni_00002880_restart_ice_1078.nc
+ t0ni_00002880_restart_ice_1079.nc
+ t0ni_00002880_restart_ice_1080.nc
+ t0ni_00002880_restart_ice_1081.nc
+ t0ni_00002880_restart_ice_1082.nc
+ t0ni_00002880_restart_ice_1083.nc
+ t0ni_00002880_restart_ice_1084.nc
+ t0ni_00002880_restart_ice_1085.nc
+ t0ni_00002880_restart_ice_1086.nc
+ t0ni_00002880_restart_ice_1087.nc
+ t0ni_00002880_restart_ice_1088.nc
+ t0ni_00002880_restart_ice_1089.nc
+ t0ni_00002880_restart_ice_1090.nc
+ t0ni_00002880_restart_ice_1091.nc
+ t0ni_00002880_restart_ice_1092.nc
+ t0ni_00002880_restart_ice_1093.nc
+ t0ni_00002880_restart_ice_1094.nc
+ t0ni_00002880_restart_ice_1095.nc
+ t0ni_00002880_restart_ice_1096.nc
+ t0ni_00002880_restart_ice_1097.nc
+ t0ni_00002880_restart_ice_1098.nc
+ t0ni_00002880_restart_ice_1099.nc
+ t0ni_00002880_restart_ice_1100.nc
+ t0ni_00002880_restart_ice_1101.nc
+ t0ni_00002880_restart_ice_1102.nc
+ t0ni_00002880_restart_ice_1103.nc
+ t0ni_00002880_restart_ice_1104.nc
+ t0ni_00002880_restart_ice_1105.nc
+ t0ni_00002880_restart_ice_1106.nc
+ t0ni_00002880_restart_ice_1107.nc
+ t0ni_00002880_restart_ice_1108.nc
+ t0ni_00002880_restart_ice_1109.nc
+ t0ni_00002880_restart_ice_1110.nc
+ t0ni_00002880_restart_ice_1111.nc
+ t0ni_00002880_restart_ice_1112.nc
+ t0ni_00002880_restart_ice_1113.nc
+ t0ni_00002880_restart_ice_1114.nc
+ t0ni_00002880_restart_ice_1115.nc
+ t0ni_00002880_restart_ice_1116.nc
+ t0ni_00002880_restart_ice_1117.nc
+ t0ni_00002880_restart_ice_1118.nc
+ t0ni_00002880_restart_ice_1119.nc
+ t0ni_00002880_restart_ice_1120.nc
+ t0ni_00002880_restart_ice_1121.nc
+ t0ni_00002880_restart_ice_1122.nc
+ t0ni_00002880_restart_ice_1123.nc
+ t0ni_00002880_restart_ice_1124.nc
+ t0ni_00002880_restart_ice_1125.nc
+ t0ni_00002880_restart_ice_1126.nc
+ t0ni_00002880_restart_ice_1127.nc
+ t0ni_00002880_restart_ice_1128.nc
+ t0ni_00002880_restart_ice_1129.nc
+ t0ni_00002880_restart_ice_1130.nc
+ t0ni_00002880_restart_ice_1131.nc
+ t0ni_00002880_restart_ice_1132.nc
+ t0ni_00002880_restart_ice_1133.nc
+ t0ni_00002880_restart_ice_1134.nc
+ t0ni_00002880_restart_ice_1135.nc
+ t0ni_00002880_restart_ice_1136.nc
+ t0ni_00002880_restart_ice_1137.nc
+ t0ni_00002880_restart_ice_1138.nc
+ t0ni_00002880_restart_ice_1139.nc
+ t0ni_00002880_restart_ice_1140.nc
+ t0ni_00002880_restart_ice_1141.nc
+ t0ni_00002880_restart_ice_1142.nc
+ t0ni_00002880_restart_ice_1143.nc
+ t0ni_00002880_restart_ice_1144.nc
+ t0ni_00002880_restart_ice_1145.nc
+ t0ni_00002880_restart_ice_1146.nc
+ t0ni_00002880_restart_ice_1147.nc
+ t0ni_00002880_restart_ice_1148.nc
+ t0ni_00002880_restart_ice_1149.nc
+ t0ni_00002880_restart_ice_1150.nc
+ t0ni_00002880_restart_ice_1151.nc
+ t0ni_00002880_restart_ice_1152.nc
+ t0ni_00002880_restart_ice_1153.nc
+ t0ni_00002880_restart_ice_1154.nc
+ t0ni_00002880_restart_ice_1155.nc
+ t0ni_00002880_restart_ice_1156.nc
+ t0ni_00002880_restart_ice_1157.nc
+ t0ni_00002880_restart_ice_1158.nc
+ t0ni_00002880_restart_ice_1159.nc
+ t0ni_00002880_restart_ice_1160.nc
+ t0ni_00002880_restart_ice_1161.nc
+ t0ni_00002880_restart_ice_1162.nc
+ t0ni_00002880_restart_ice_1163.nc
+ t0ni_00002880_restart_ice_1164.nc
+ t0ni_00002880_restart_ice_1165.nc
+ t0ni_00002880_restart_ice_1166.nc
+ t0ni_00002880_restart_ice_1167.nc
+ t0ni_00002880_restart_ice_1168.nc
+ t0ni_00002880_restart_ice_1169.nc
+ t0ni_00002880_restart_ice_1170.nc
+ t0ni_00002880_restart_ice_1171.nc
+ t0ni_00002880_restart_ice_1172.nc
+ t0ni_00002880_restart_ice_1173.nc
+ t0ni_00002880_restart_ice_1174.nc
+ t0ni_00002880_restart_ice_1175.nc
+ t0ni_00002880_restart_ice_1176.nc
+ t0ni_00002880_restart_ice_1177.nc
+ t0ni_00002880_restart_ice_1178.nc
+ t0ni_00002880_restart_ice_1179.nc
+ t0ni_00002880_restart_ice_1180.nc
+ t0ni_00002880_restart_ice_1181.nc
+ t0ni_00002880_restart_ice_1182.nc
+ t0ni_00002880_restart_ice_1183.nc
+ t0ni_00002880_restart_ice_1184.nc
+ t0ni_00002880_restart_ice_1185.nc
+ t0ni_00002880_restart_ice_1186.nc
+ t0ni_00002880_restart_ice_1187.nc
+ t0ni_00002880_restart_ice_1188.nc
+ t0ni_00002880_restart_ice_1189.nc
+ t0ni_00002880_restart_ice_1190.nc
+ t0ni_00002880_restart_ice_1191.nc
+ t0ni_00002880_restart_ice_1192.nc
+ t0ni_00002880_restart_ice_1193.nc
+ t0ni_00002880_restart_ice_1194.nc
+ t0ni_00002880_restart_ice_1195.nc
+ t0ni_00002880_restart_ice_1196.nc
+ t0ni_00002880_restart_ice_1197.nc
+ t0ni_00002880_restart_ice_1198.nc
+ t0ni_00002880_restart_ice_1199.nc
+ t0ni_00002880_restart_ice_1200.nc
+ t0ni_00002880_restart_ice_1201.nc
+ t0ni_00002880_restart_ice_1202.nc
+ t0ni_00002880_restart_ice_1203.nc
+ t0ni_00002880_restart_ice_1204.nc
+ t0ni_00002880_restart_ice_1205.nc
+ t0ni_00002880_restart_ice_1206.nc
+ t0ni_00002880_restart_ice_1207.nc
+ t0ni_00002880_restart_ice_1208.nc
+ t0ni_00002880_restart_ice_1209.nc
+ t0ni_00002880_restart_ice_1210.nc
+ t0ni_00002880_restart_ice_1211.nc
+ t0ni_00002880_restart_ice_1212.nc
+ t0ni_00002880_restart_ice_1213.nc
+ t0ni_00002880_restart_ice_1214.nc
+ t0ni_00002880_restart_ice_1215.nc
+ t0ni_00002880_restart_ice_1216.nc
+ t0ni_00002880_restart_ice_1217.nc
+ t0ni_00002880_restart_ice_1218.nc
+ t0ni_00002880_restart_ice_1219.nc
+ t0ni_00002880_restart_ice_1220.nc
+ t0ni_00002880_restart_ice_1221.nc
+ t0ni_00002880_restart_ice_1222.nc
+ t0ni_00002880_restart_ice_1223.nc
+ t0ni_00002880_restart_ice_1224.nc
+ t0ni_00002880_restart_ice_1225.nc
+ t0ni_00002880_restart_ice_1226.nc
+ t0ni_00002880_restart_ice_1227.nc
+ t0ni_00002880_restart_ice_1228.nc
+ t0ni_00002880_restart_ice_1229.nc
+ t0ni_00002880_restart_ice_1230.nc
+ t0ni_00002880_restart_ice_1231.nc
+ t0ni_00002880_restart_ice_1232.nc
+ t0ni_00002880_restart_ice_1233.nc
+ t0ni_00002880_restart_ice_1234.nc
+ t0ni_00002880_restart_ice_1235.nc
+ t0ni_00002880_restart_ice_1236.nc
+ t0ni_00002880_restart_ice_1237.nc
+ t0ni_00002880_restart_ice_1238.nc
+ t0ni_00002880_restart_ice_1239.nc
+ t0ni_00002880_restart_ice_1240.nc
+ t0ni_00002880_restart_ice_1241.nc
+ t0ni_00002880_restart_ice_1242.nc
+ t0ni_00002880_restart_ice_1243.nc
+ t0ni_00002880_restart_ice_1244.nc
+ t0ni_00002880_restart_ice_1245.nc
+ t0ni_00002880_restart_ice_1246.nc
+ t0ni_00002880_restart_ice_1247.nc
+ t0ni_00002880_restart_ice_1248.nc
+ t0ni_00002880_restart_ice_1249.nc
+ t0ni_00002880_restart_ice_1250.nc
+ t0ni_00002880_restart_ice_1251.nc
+ t0ni_00002880_restart_ice_1252.nc
+ t0ni_00002880_restart_ice_1253.nc
+ t0ni_00002880_restart_ice_1254.nc
+ t0ni_00002880_restart_ice_1255.nc
+ t0ni_00002880_restart_ice_1256.nc
+ t0ni_00002880_restart_ice_1257.nc
+ t0ni_00002880_restart_ice_1258.nc
+ t0ni_00002880_restart_ice_1259.nc
+ t0ni_00002880_restart_ice_1260.nc
+ t0ni_00002880_restart_ice_1261.nc
+ t0ni_00002880_restart_ice_1262.nc
+ t0ni_00002880_restart_ice_1263.nc
+ t0ni_00002880_restart_ice_1264.nc
+ t0ni_00002880_restart_ice_1265.nc
+ t0ni_00002880_restart_ice_1266.nc
+ t0ni_00002880_restart_ice_1267.nc
+ t0ni_00002880_restart_ice_1268.nc
+ t0ni_00002880_restart_ice_1269.nc
+ t0ni_00002880_restart_ice_1270.nc
+ t0ni_00002880_restart_ice_1271.nc
+ t0ni_00002880_restart_ice_1272.nc
+ t0ni_00002880_restart_ice_1273.nc
+ t0ni_00002880_restart_ice_1274.nc
+ t0ni_00002880_restart_ice_1275.nc
+ t0ni_00002880_restart_ice_1276.nc
+ t0ni_00002880_restart_ice_1277.nc
+ t0ni_00002880_restart_ice_1278.nc
+ t0ni_00002880_restart_ice_1279.nc
+ t0ni_00002880_restart_ice_1280.nc
+ t0ni_00002880_restart_ice_1281.nc
+ t0ni_00002880_restart_ice_1282.nc
+ t0ni_00002880_restart_ice_1283.nc
+ t0ni_00002880_restart_ice_1284.nc
+ t0ni_00002880_restart_ice_1285.nc
+ t0ni_00002880_restart_ice_1286.nc
+ t0ni_00002880_restart_ice_1287.nc
+ t0ni_00002880_restart_ice_1288.nc
+ t0ni_00002880_restart_ice_1289.nc
+ t0ni_00002880_restart_ice_1290.nc
+ t0ni_00002880_restart_ice_1291.nc
+ t0ni_00002880_restart_ice_1292.nc
+ t0ni_00002880_restart_ice_1293.nc
+ t0ni_00002880_restart_ice_1294.nc
+ t0ni_00002880_restart_ice_1295.nc
+ t0ni_00002880_restart_ice_1296.nc
+ t0ni_00002880_restart_ice_1297.nc
+ t0ni_00002880_restart_ice_1298.nc
+ t0ni_00002880_restart_ice_1299.nc
+ t0ni_00002880_restart_ice_1300.nc
+ t0ni_00002880_restart_ice_1301.nc
+ t0ni_00002880_restart_ice_1302.nc
+ t0ni_00002880_restart_ice_1303.nc
+ t0ni_00002880_restart_ice_1304.nc
+ t0ni_00002880_restart_ice_1305.nc
+ t0ni_00002880_restart_ice_1306.nc
+ t0ni_00002880_restart_ice_1307.nc
+ t0ni_00002880_restart_ice_1308.nc
+ t0ni_00002880_restart_ice_1309.nc
+ t0ni_00002880_restart_ice_1310.nc
+ t0ni_00002880_restart_ice_1311.nc
+ t0ni_00002880_restart_ice_1312.nc
+ t0ni_00002880_restart_ice_1313.nc
+ t0ni_00002880_restart_ice_1314.nc
+ t0ni_00002880_restart_ice_1315.nc
+ t0ni_00002880_restart_ice_1316.nc
+ t0ni_00002880_restart_ice_1317.nc
+ t0ni_00002880_restart_ice_1318.nc
+ t0ni_00002880_restart_ice_1319.nc
+ t0ni_00002880_restart_ice_1320.nc
+ t0ni_00002880_restart_ice_1321.nc
+ t0ni_00002880_restart_ice_1322.nc
+ t0ni_00002880_restart_ice_1323.nc
+ t0ni_00002880_restart_ice_1324.nc
+ t0ni_00002880_restart_ice_1325.nc
+ t0ni_00002880_restart_ice_1326.nc
+ t0ni_00002880_restart_ice_1327.nc
+ t0ni_00002880_restart_ice_1328.nc
+ t0ni_00002880_restart_ice_1329.nc
+ t0ni_00002880_restart_ice_1330.nc
+ t0ni_00002880_restart_ice_1331.nc
+ t0ni_00002880_restart_ice_1332.nc
+ t0ni_00002880_restart_ice_1333.nc
+ t0ni_00002880_restart_ice_1334.nc
+ t0ni_00002880_restart_ice_1335.nc
+ t0ni_00002880_restart_ice_1336.nc
+ t0ni_00002880_restart_ice_1337.nc
+ t0ni_00002880_restart_ice_1338.nc
+ t0ni_00002880_restart_ice_1339.nc
+ t0ni_00002880_restart_ice_1340.nc
+ t0ni_00002880_restart_ice_1341.nc
+ t0ni_00002880_restart_ice_1342.nc
+ t0ni_00002880_restart_ice_1343.nc
+ t0ni_00002880_restart_ice_1344.nc
+ t0ni_00002880_restart_ice_1345.nc
+ t0ni_00002880_restart_ice_1346.nc
+ t0ni_00002880_restart_ice_1347.nc
+ t0ni_00002880_restart_ice_1348.nc
+ t0ni_00002880_restart_ice_1349.nc
+ t0ni_00002880_restart_ice_1350.nc
+ t0ni_00002880_restart_ice_1351.nc
+ t0ni_00002880_restart_ice_1352.nc
+ t0ni_00002880_restart_ice_1353.nc
+ t0ni_00002880_restart_ice_1354.nc
+ t0ni_00002880_restart_ice_1355.nc
+ t0ni_00002880_restart_ice_1356.nc
+ t0ni_00002880_restart_ice_1357.nc
+ t0ni_00002880_restart_ice_1358.nc
+ t0ni_00002880_restart_ice_1359.nc
+ t0ni_00002880_restart_ice_1360.nc
+ t0ni_00002880_restart_ice_1361.nc
+ t0ni_00002880_restart_ice_1362.nc
+ t0ni_00002880_restart_ice_1363.nc
+ t0ni_00002880_restart_ice_1364.nc
+ t0ni_00002880_restart_ice_1365.nc
+ t0ni_00002880_restart_ice_1366.nc
+ t0ni_00002880_restart_ice_1367.nc
+ t0ni_00002880_restart_ice_1368.nc
+ t0ni_00002880_restart_ice_1369.nc
+ t0ni_00002880_restart_ice_1370.nc
+ t0ni_00002880_restart_ice_1371.nc
+ t0ni_00002880_restart_ice_1372.nc
+ t0ni_00002880_restart_ice_1373.nc
+ t0ni_00002880_restart_ice_1374.nc
+ t0ni_00002880_restart_ice_1375.nc
+ t0ni_00002880_restart_ice_1376.nc
+ t0ni_00002880_restart_ice_1377.nc
+ t0ni_00002880_restart_ice_1378.nc
+ t0ni_00002880_restart_ice_1379.nc
+ t0ni_00002880_restart_ice_1380.nc
+ t0ni_00002880_restart_ice_1381.nc
+ t0ni_00002880_restart_ice_1382.nc
+ t0ni_00002880_restart_ice_1383.nc
+ t0ni_00002880_restart_ice_1384.nc
+ t0ni_00002880_restart_ice_1385.nc
+ t0ni_00002880_restart_ice_1386.nc
+ t0ni_00002880_restart_ice_1387.nc
+ t0ni_00002880_restart_ice_1388.nc
+ t0ni_00002880_restart_ice_1389.nc
+ t0ni_00002880_restart_ice_1390.nc
+ Size of global arrays:         1442        1050
+ Finding rebuild dimensions from the first file...
+ Rebuilding across dimensions x and y
+ Writing new file_name attribute
+ Writing new TimeStamp attribute
+ Defining variable nav_lon...
+ Defining variable nav_lat...
+ Defining variable nav_lev...
+ Defining variable time_counter...
+ Defining variable frc_voltop...
+ Defining variable frc_volbot...
+ Defining variable frc_temtop...
+ Defining variable frc_tembot...
+ Defining variable frc_sal...
+ Defining variable vol_loc_ini...
+ Defining variable tem_loc_ini...
+ Defining variable sal_loc_ini...
+ Defining variable nn_fsbc...
+ Defining variable kt_ice...
+ Defining variable v_i_htc1...
+ Defining variable v_s_htc1...
+ Defining variable smv_i_htc1...
+ Defining variable oa_i_htc1...
+ Defining variable a_i_htc1...
+ Defining variable t_su_htc1...
+ Defining variable tempt_sl1_htc1...
+ Defining variable tempt_il1_htc1...
+ Defining variable tempt_il2_htc1...
+ Defining variable v_i_htc2...
+ Defining variable v_s_htc2...
+ Defining variable smv_i_htc2...
+ Defining variable oa_i_htc2...
+ Defining variable a_i_htc2...
+ Defining variable t_su_htc2...
+ Defining variable tempt_sl1_htc2...
+ Defining variable tempt_il1_htc2...
+ Defining variable tempt_il2_htc2...
+ Defining variable v_i_htc3...
+ Defining variable v_s_htc3...
+ Defining variable smv_i_htc3...
+ Defining variable oa_i_htc3...
+ Defining variable a_i_htc3...
+ Defining variable t_su_htc3...
+ Defining variable tempt_sl1_htc3...
+ Defining variable tempt_il1_htc3...
+ Defining variable tempt_il2_htc3...
+ Defining variable v_i_htc4...
+ Defining variable v_s_htc4...
+ Defining variable smv_i_htc4...
+ Defining variable oa_i_htc4...
+ Defining variable a_i_htc4...
+ Defining variable t_su_htc4...
+ Defining variable tempt_sl1_htc4...
+ Defining variable tempt_il1_htc4...
+ Defining variable tempt_il2_htc4...
+ Defining variable v_i_htc5...
+ Defining variable v_s_htc5...
+ Defining variable smv_i_htc5...
+ Defining variable oa_i_htc5...
+ Defining variable a_i_htc5...
+ Defining variable t_su_htc5...
+ Defining variable tempt_sl1_htc5...
+ Defining variable tempt_il1_htc5...
+ Defining variable tempt_il2_htc5...
+ Defining variable u_ice...
+ Defining variable v_ice...
+ Defining variable stress1_i...
+ Defining variable stress2_i...
+ Defining variable stress12_i...
+ Defining variable snwice_mass...
+ Defining variable snwice_mass_b...
+ Defining variable sxice_htc1...
+ Defining variable syice_htc1...
+ Defining variable sxxice_htc1...
+ Defining variable syyice_htc1...
+ Defining variable sxyice_htc1...
+ Defining variable sxsn_htc1...
+ Defining variable sysn_htc1...
+ Defining variable sxxsn_htc1...
+ Defining variable syysn_htc1...
+ Defining variable sxysn_htc1...
+ Defining variable sxa_htc1...
+ Defining variable sya_htc1...
+ Defining variable sxxa_htc1...
+ Defining variable syya_htc1...
+ Defining variable sxya_htc1...
+ Defining variable sxc0_htc1...
+ Defining variable syc0_htc1...
+ Defining variable sxxc0_htc1...
+ Defining variable syyc0_htc1...
+ Defining variable sxyc0_htc1...
+ Defining variable sxsal_htc1...
+ Defining variable sysal_htc1...
+ Defining variable sxxsal_htc1...
+ Defining variable syysal_htc1...
+ Defining variable sxysal_htc1...
+ Defining variable sxage_htc1...
+ Defining variable syage_htc1...
+ Defining variable sxxage_htc1...
+ Defining variable syyage_htc1...
+ Defining variable sxyage_htc1...
+ Defining variable sxice_htc2...
+ Defining variable syice_htc2...
+ Defining variable sxxice_htc2...
+ Defining variable syyice_htc2...
+ Defining variable sxyice_htc2...
+ Defining variable sxsn_htc2...
+ Defining variable sysn_htc2...
+ Defining variable sxxsn_htc2...
+ Defining variable syysn_htc2...
+ Defining variable sxysn_htc2...
+ Defining variable sxa_htc2...
+ Defining variable sya_htc2...
+ Defining variable sxxa_htc2...
+ Defining variable syya_htc2...
+ Defining variable sxya_htc2...
+ Defining variable sxc0_htc2...
+ Defining variable syc0_htc2...
+ Defining variable sxxc0_htc2...
+ Defining variable syyc0_htc2...
+ Defining variable sxyc0_htc2...
+ Defining variable sxsal_htc2...
+ Defining variable sysal_htc2...
+ Defining variable sxxsal_htc2...
+ Defining variable syysal_htc2...
+ Defining variable sxysal_htc2...
+ Defining variable sxage_htc2...
+ Defining variable syage_htc2...
+ Defining variable sxxage_htc2...
+ Defining variable syyage_htc2...
+ Defining variable sxyage_htc2...
+ Defining variable sxice_htc3...
+ Defining variable syice_htc3...
+ Defining variable sxxice_htc3...
+ Defining variable syyice_htc3...
+ Defining variable sxyice_htc3...
+ Defining variable sxsn_htc3...
+ Defining variable sysn_htc3...
+ Defining variable sxxsn_htc3...
+ Defining variable syysn_htc3...
+ Defining variable sxysn_htc3...
+ Defining variable sxa_htc3...
+ Defining variable sya_htc3...
+ Defining variable sxxa_htc3...
+ Defining variable syya_htc3...
+ Defining variable sxya_htc3...
+ Defining variable sxc0_htc3...
+ Defining variable syc0_htc3...
+ Defining variable sxxc0_htc3...
+ Defining variable syyc0_htc3...
+ Defining variable sxyc0_htc3...
+ Defining variable sxsal_htc3...
+ Defining variable sysal_htc3...
+ Defining variable sxxsal_htc3...
+ Defining variable syysal_htc3...
+ Defining variable sxysal_htc3...
+ Defining variable sxage_htc3...
+ Defining variable syage_htc3...
+ Defining variable sxxage_htc3...
+ Defining variable syyage_htc3...
+ Defining variable sxyage_htc3...
+ Defining variable sxice_htc4...
+ Defining variable syice_htc4...
+ Defining variable sxxice_htc4...
+ Defining variable syyice_htc4...
+ Defining variable sxyice_htc4...
+ Defining variable sxsn_htc4...
+ Defining variable sysn_htc4...
+ Defining variable sxxsn_htc4...
+ Defining variable syysn_htc4...
+ Defining variable sxysn_htc4...
+ Defining variable sxa_htc4...
+ Defining variable sya_htc4...
+ Defining variable sxxa_htc4...
+ Defining variable syya_htc4...
+ Defining variable sxya_htc4...
+ Defining variable sxc0_htc4...
+ Defining variable syc0_htc4...
+ Defining variable sxxc0_htc4...
+ Defining variable syyc0_htc4...
+ Defining variable sxyc0_htc4...
+ Defining variable sxsal_htc4...
+ Defining variable sysal_htc4...
+ Defining variable sxxsal_htc4...
+ Defining variable syysal_htc4...
+ Defining variable sxysal_htc4...
+ Defining variable sxage_htc4...
+ Defining variable syage_htc4...
+ Defining variable sxxage_htc4...
+ Defining variable syyage_htc4...
+ Defining variable sxyage_htc4...
+ Defining variable sxice_htc5...
+ Defining variable syice_htc5...
+ Defining variable sxxice_htc5...
+ Defining variable syyice_htc5...
+ Defining variable sxyice_htc5...
+ Defining variable sxsn_htc5...
+ Defining variable sysn_htc5...
+ Defining variable sxxsn_htc5...
+ Defining variable syysn_htc5...
+ Defining variable sxysn_htc5...
+ Defining variable sxa_htc5...
+ Defining variable sya_htc5...
+ Defining variable sxxa_htc5...
+ Defining variable syya_htc5...
+ Defining variable sxya_htc5...
+ Defining variable sxc0_htc5...
+ Defining variable syc0_htc5...
+ Defining variable sxxc0_htc5...
+ Defining variable syyc0_htc5...
+ Defining variable sxyc0_htc5...
+ Defining variable sxsal_htc5...
+ Defining variable sysal_htc5...
+ Defining variable sxxsal_htc5...
+ Defining variable syysal_htc5...
+ Defining variable sxysal_htc5...
+ Defining variable sxage_htc5...
+ Defining variable syage_htc5...
+ Defining variable sxxage_htc5...
+ Defining variable syyage_htc5...
+ Defining variable sxyage_htc5...
+ Defining variable sxopw...
+ Defining variable syopw...
+ Defining variable sxxopw...
+ Defining variable syyopw...
+ Defining variable sxyopw...
+ Defining variable sxe_il1_htc1...
+ Defining variable sye_il1_htc1...
+ Defining variable sxxe_il1_htc1...
+ Defining variable syye_il1_htc1...
+ Defining variable sxye_il1_htc1...
+ Defining variable sxe_il2_htc1...
+ Defining variable sye_il2_htc1...
+ Defining variable sxxe_il2_htc1...
+ Defining variable syye_il2_htc1...
+ Defining variable sxye_il2_htc1...
+ Defining variable sxe_il1_htc2...
+ Defining variable sye_il1_htc2...
+ Defining variable sxxe_il1_htc2...
+ Defining variable syye_il1_htc2...
+ Defining variable sxye_il1_htc2...
+ Defining variable sxe_il2_htc2...
+ Defining variable sye_il2_htc2...
+ Defining variable sxxe_il2_htc2...
+ Defining variable syye_il2_htc2...
+ Defining variable sxye_il2_htc2...
+ Defining variable sxe_il1_htc3...
+ Defining variable sye_il1_htc3...
+ Defining variable sxxe_il1_htc3...
+ Defining variable syye_il1_htc3...
+ Defining variable sxye_il1_htc3...
+ Defining variable sxe_il2_htc3...
+ Defining variable sye_il2_htc3...
+ Defining variable sxxe_il2_htc3...
+ Defining variable syye_il2_htc3...
+ Defining variable sxye_il2_htc3...
+ Defining variable sxe_il1_htc4...
+ Defining variable sye_il1_htc4...
+ Defining variable sxxe_il1_htc4...
+ Defining variable syye_il1_htc4...
+ Defining variable sxye_il1_htc4...
+ Defining variable sxe_il2_htc4...
+ Defining variable sye_il2_htc4...
+ Defining variable sxxe_il2_htc4...
+ Defining variable syye_il2_htc4...
+ Defining variable sxye_il2_htc4...
+ Defining variable sxe_il1_htc5...
+ Defining variable sye_il1_htc5...
+ Defining variable sxxe_il1_htc5...
+ Defining variable syye_il1_htc5...
+ Defining variable sxye_il1_htc5...
+ Defining variable sxe_il2_htc5...
+ Defining variable sye_il2_htc5...
+ Defining variable sxxe_il2_htc5...
+ Defining variable syye_il2_htc5...
+ Defining variable sxye_il2_htc5...
+ Finished defining output file.
+ Opening input files...
+ All input files open.
+ Rebuilding data from variable nav_lon...
+ Writing variable nav_lon...
+ Rebuilding data from variable nav_lat...
+ Writing variable nav_lat...
+ Copying data from variable nav_lev...
+ Writing variable nav_lev...
+ Copying data from variable time_counter...
+ Writing variable time_counter...
+ Copying data from variable frc_voltop...
+ Writing variable frc_voltop...
+ Copying data from variable frc_volbot...
+ Writing variable frc_volbot...
+ Copying data from variable frc_temtop...
+ Writing variable frc_temtop...
+ Copying data from variable frc_tembot...
+ Writing variable frc_tembot...
+ Copying data from variable frc_sal...
+ Writing variable frc_sal...
+ Rebuilding data from variable vol_loc_ini...
+ Writing variable vol_loc_ini...
+ Rebuilding data from variable tem_loc_ini...
+ Writing variable tem_loc_ini...
+ Rebuilding data from variable sal_loc_ini...
+ Writing variable sal_loc_ini...
+ Copying data from variable nn_fsbc...
+ Writing variable nn_fsbc...
+ Copying data from variable kt_ice...
+ Writing variable kt_ice...
+ Rebuilding data from variable v_i_htc1...
+ Writing variable v_i_htc1...
+ Rebuilding data from variable v_s_htc1...
+ Writing variable v_s_htc1...
+ Rebuilding data from variable smv_i_htc1...
+ Writing variable smv_i_htc1...
+ Rebuilding data from variable oa_i_htc1...
+ Writing variable oa_i_htc1...
+ Rebuilding data from variable a_i_htc1...
+ Writing variable a_i_htc1...
+ Rebuilding data from variable t_su_htc1...
+ Writing variable t_su_htc1...
+ Rebuilding data from variable tempt_sl1_htc1...
+ Writing variable tempt_sl1_htc1...
+ Rebuilding data from variable tempt_il1_htc1...
+ Writing variable tempt_il1_htc1...
+ Rebuilding data from variable tempt_il2_htc1...
+ Writing variable tempt_il2_htc1...
+ Rebuilding data from variable v_i_htc2...
+ Writing variable v_i_htc2...
+ Rebuilding data from variable v_s_htc2...
+ Writing variable v_s_htc2...
+ Rebuilding data from variable smv_i_htc2...
+ Writing variable smv_i_htc2...
+ Rebuilding data from variable oa_i_htc2...
+ Writing variable oa_i_htc2...
+ Rebuilding data from variable a_i_htc2...
+ Writing variable a_i_htc2...
+ Rebuilding data from variable t_su_htc2...
+ Writing variable t_su_htc2...
+ Rebuilding data from variable tempt_sl1_htc2...
+ Writing variable tempt_sl1_htc2...
+ Rebuilding data from variable tempt_il1_htc2...
+ Writing variable tempt_il1_htc2...
+ Rebuilding data from variable tempt_il2_htc2...
+ Writing variable tempt_il2_htc2...
+ Rebuilding data from variable v_i_htc3...
+ Writing variable v_i_htc3...
+ Rebuilding data from variable v_s_htc3...
+ Writing variable v_s_htc3...
+ Rebuilding data from variable smv_i_htc3...
+ Writing variable smv_i_htc3...
+ Rebuilding data from variable oa_i_htc3...
+ Writing variable oa_i_htc3...
+ Rebuilding data from variable a_i_htc3...
+ Writing variable a_i_htc3...
+ Rebuilding data from variable t_su_htc3...
+ Writing variable t_su_htc3...
+ Rebuilding data from variable tempt_sl1_htc3...
+ Writing variable tempt_sl1_htc3...
+ Rebuilding data from variable tempt_il1_htc3...
+ Writing variable tempt_il1_htc3...
+ Rebuilding data from variable tempt_il2_htc3...
+ Writing variable tempt_il2_htc3...
+ Rebuilding data from variable v_i_htc4...
+ Writing variable v_i_htc4...
+ Rebuilding data from variable v_s_htc4...
+ Writing variable v_s_htc4...
+ Rebuilding data from variable smv_i_htc4...
+ Writing variable smv_i_htc4...
+ Rebuilding data from variable oa_i_htc4...
+ Writing variable oa_i_htc4...
+ Rebuilding data from variable a_i_htc4...
+ Writing variable a_i_htc4...
+ Rebuilding data from variable t_su_htc4...
+ Writing variable t_su_htc4...
+ Rebuilding data from variable tempt_sl1_htc4...
+ Writing variable tempt_sl1_htc4...
+ Rebuilding data from variable tempt_il1_htc4...
+ Writing variable tempt_il1_htc4...
+ Rebuilding data from variable tempt_il2_htc4...
+ Writing variable tempt_il2_htc4...
+ Rebuilding data from variable v_i_htc5...
+ Writing variable v_i_htc5...
+ Rebuilding data from variable v_s_htc5...
+ Writing variable v_s_htc5...
+ Rebuilding data from variable smv_i_htc5...
+ Writing variable smv_i_htc5...
+ Rebuilding data from variable oa_i_htc5...
+ Writing variable oa_i_htc5...
+ Rebuilding data from variable a_i_htc5...
+ Writing variable a_i_htc5...
+ Rebuilding data from variable t_su_htc5...
+ Writing variable t_su_htc5...
+ Rebuilding data from variable tempt_sl1_htc5...
+ Writing variable tempt_sl1_htc5...
+ Rebuilding data from variable tempt_il1_htc5...
+ Writing variable tempt_il1_htc5...
+ Rebuilding data from variable tempt_il2_htc5...
+ Writing variable tempt_il2_htc5...
+ Rebuilding data from variable u_ice...
+ Writing variable u_ice...
+ Rebuilding data from variable v_ice...
+ Writing variable v_ice...
+ Rebuilding data from variable stress1_i...
+ Writing variable stress1_i...
+ Rebuilding data from variable stress2_i...
+ Writing variable stress2_i...
+ Rebuilding data from variable stress12_i...
+ Writing variable stress12_i...
+ Rebuilding data from variable snwice_mass...
+ Writing variable snwice_mass...
+ Rebuilding data from variable snwice_mass_b...
+ Writing variable snwice_mass_b...
+ Rebuilding data from variable sxice_htc1...
+ Writing variable sxice_htc1...
+ Rebuilding data from variable syice_htc1...
+ Writing variable syice_htc1...
+ Rebuilding data from variable sxxice_htc1...
+ Writing variable sxxice_htc1...
+ Rebuilding data from variable syyice_htc1...
+ Writing variable syyice_htc1...
+ Rebuilding data from variable sxyice_htc1...
+ Writing variable sxyice_htc1...
+ Rebuilding data from variable sxsn_htc1...
+ Writing variable sxsn_htc1...
+ Rebuilding data from variable sysn_htc1...
+ Writing variable sysn_htc1...
+ Rebuilding data from variable sxxsn_htc1...
+ Writing variable sxxsn_htc1...
+ Rebuilding data from variable syysn_htc1...
+ Writing variable syysn_htc1...
+ Rebuilding data from variable sxysn_htc1...
+ Writing variable sxysn_htc1...
+ Rebuilding data from variable sxa_htc1...
+ Writing variable sxa_htc1...
+ Rebuilding data from variable sya_htc1...
+ Writing variable sya_htc1...
+ Rebuilding data from variable sxxa_htc1...
+ Writing variable sxxa_htc1...
+ Rebuilding data from variable syya_htc1...
+ Writing variable syya_htc1...
+ Rebuilding data from variable sxya_htc1...
+ Writing variable sxya_htc1...
+ Rebuilding data from variable sxc0_htc1...
+ Writing variable sxc0_htc1...
+ Rebuilding data from variable syc0_htc1...
+ Writing variable syc0_htc1...
+ Rebuilding data from variable sxxc0_htc1...
+ Writing variable sxxc0_htc1...
+ Rebuilding data from variable syyc0_htc1...
+ Writing variable syyc0_htc1...
+ Rebuilding data from variable sxyc0_htc1...
+ Writing variable sxyc0_htc1...
+ Rebuilding data from variable sxsal_htc1...
+ Writing variable sxsal_htc1...
+ Rebuilding data from variable sysal_htc1...
+ Writing variable sysal_htc1...
+ Rebuilding data from variable sxxsal_htc1...
+ Writing variable sxxsal_htc1...
+ Rebuilding data from variable syysal_htc1...
+ Writing variable syysal_htc1...
+ Rebuilding data from variable sxysal_htc1...
+ Writing variable sxysal_htc1...
+ Rebuilding data from variable sxage_htc1...
+ Writing variable sxage_htc1...
+ Rebuilding data from variable syage_htc1...
+ Writing variable syage_htc1...
+ Rebuilding data from variable sxxage_htc1...
+ Writing variable sxxage_htc1...
+ Rebuilding data from variable syyage_htc1...
+ Writing variable syyage_htc1...
+ Rebuilding data from variable sxyage_htc1...
+ Writing variable sxyage_htc1...
+ Rebuilding data from variable sxice_htc2...
+ Writing variable sxice_htc2...
+ Rebuilding data from variable syice_htc2...
+ Writing variable syice_htc2...
+ Rebuilding data from variable sxxice_htc2...
+ Writing variable sxxice_htc2...
+ Rebuilding data from variable syyice_htc2...
+ Writing variable syyice_htc2...
+ Rebuilding data from variable sxyice_htc2...
+ Writing variable sxyice_htc2...
+ Rebuilding data from variable sxsn_htc2...
+ Writing variable sxsn_htc2...
+ Rebuilding data from variable sysn_htc2...
+ Writing variable sysn_htc2...
+ Rebuilding data from variable sxxsn_htc2...
+ Writing variable sxxsn_htc2...
+ Rebuilding data from variable syysn_htc2...
+ Writing variable syysn_htc2...
+ Rebuilding data from variable sxysn_htc2...
+ Writing variable sxysn_htc2...
+ Rebuilding data from variable sxa_htc2...
+ Writing variable sxa_htc2...
+ Rebuilding data from variable sya_htc2...
+ Writing variable sya_htc2...
+ Rebuilding data from variable sxxa_htc2...
+ Writing variable sxxa_htc2...
+ Rebuilding data from variable syya_htc2...
+ Writing variable syya_htc2...
+ Rebuilding data from variable sxya_htc2...
+ Writing variable sxya_htc2...
+ Rebuilding data from variable sxc0_htc2...
+ Writing variable sxc0_htc2...
+ Rebuilding data from variable syc0_htc2...
+ Writing variable syc0_htc2...
+ Rebuilding data from variable sxxc0_htc2...
+ Writing variable sxxc0_htc2...
+ Rebuilding data from variable syyc0_htc2...
+ Writing variable syyc0_htc2...
+ Rebuilding data from variable sxyc0_htc2...
+ Writing variable sxyc0_htc2...
+ Rebuilding data from variable sxsal_htc2...
+ Writing variable sxsal_htc2...
+ Rebuilding data from variable sysal_htc2...
+ Writing variable sysal_htc2...
+ Rebuilding data from variable sxxsal_htc2...
+ Writing variable sxxsal_htc2...
+ Rebuilding data from variable syysal_htc2...
+ Writing variable syysal_htc2...
+ Rebuilding data from variable sxysal_htc2...
+ Writing variable sxysal_htc2...
+ Rebuilding data from variable sxage_htc2...
+ Writing variable sxage_htc2...
+ Rebuilding data from variable syage_htc2...
+ Writing variable syage_htc2...
+ Rebuilding data from variable sxxage_htc2...
+ Writing variable sxxage_htc2...
+ Rebuilding data from variable syyage_htc2...
+ Writing variable syyage_htc2...
+ Rebuilding data from variable sxyage_htc2...
+ Writing variable sxyage_htc2...
+ Rebuilding data from variable sxice_htc3...
+ Writing variable sxice_htc3...
+ Rebuilding data from variable syice_htc3...
+ Writing variable syice_htc3...
+ Rebuilding data from variable sxxice_htc3...
+ Writing variable sxxice_htc3...
+ Rebuilding data from variable syyice_htc3...
+ Writing variable syyice_htc3...
+ Rebuilding data from variable sxyice_htc3...
+ Writing variable sxyice_htc3...
+ Rebuilding data from variable sxsn_htc3...
+ Writing variable sxsn_htc3...
+ Rebuilding data from variable sysn_htc3...
+ Writing variable sysn_htc3...
+ Rebuilding data from variable sxxsn_htc3...
+ Writing variable sxxsn_htc3...
+ Rebuilding data from variable syysn_htc3...
+ Writing variable syysn_htc3...
+ Rebuilding data from variable sxysn_htc3...
+ Writing variable sxysn_htc3...
+ Rebuilding data from variable sxa_htc3...
+ Writing variable sxa_htc3...
+ Rebuilding data from variable sya_htc3...
+ Writing variable sya_htc3...
+ Rebuilding data from variable sxxa_htc3...
+ Writing variable sxxa_htc3...
+ Rebuilding data from variable syya_htc3...
+ Writing variable syya_htc3...
+ Rebuilding data from variable sxya_htc3...
+ Writing variable sxya_htc3...
+ Rebuilding data from variable sxc0_htc3...
+ Writing variable sxc0_htc3...
+ Rebuilding data from variable syc0_htc3...
+ Writing variable syc0_htc3...
+ Rebuilding data from variable sxxc0_htc3...
+ Writing variable sxxc0_htc3...
+ Rebuilding data from variable syyc0_htc3...
+ Writing variable syyc0_htc3...
+ Rebuilding data from variable sxyc0_htc3...
+ Writing variable sxyc0_htc3...
+ Rebuilding data from variable sxsal_htc3...
+ Writing variable sxsal_htc3...
+ Rebuilding data from variable sysal_htc3...
+ Writing variable sysal_htc3...
+ Rebuilding data from variable sxxsal_htc3...
+ Writing variable sxxsal_htc3...
+ Rebuilding data from variable syysal_htc3...
+ Writing variable syysal_htc3...
+ Rebuilding data from variable sxysal_htc3...
+ Writing variable sxysal_htc3...
+ Rebuilding data from variable sxage_htc3...
+ Writing variable sxage_htc3...
+ Rebuilding data from variable syage_htc3...
+ Writing variable syage_htc3...
+ Rebuilding data from variable sxxage_htc3...
+ Writing variable sxxage_htc3...
+ Rebuilding data from variable syyage_htc3...
+ Writing variable syyage_htc3...
+ Rebuilding data from variable sxyage_htc3...
+ Writing variable sxyage_htc3...
+ Rebuilding data from variable sxice_htc4...
+ Writing variable sxice_htc4...
+ Rebuilding data from variable syice_htc4...
+ Writing variable syice_htc4...
+ Rebuilding data from variable sxxice_htc4...
+ Writing variable sxxice_htc4...
+ Rebuilding data from variable syyice_htc4...
+ Writing variable syyice_htc4...
+ Rebuilding data from variable sxyice_htc4...
+ Writing variable sxyice_htc4...
+ Rebuilding data from variable sxsn_htc4...
+ Writing variable sxsn_htc4...
+ Rebuilding data from variable sysn_htc4...
+ Writing variable sysn_htc4...
+ Rebuilding data from variable sxxsn_htc4...
+ Writing variable sxxsn_htc4...
+ Rebuilding data from variable syysn_htc4...
+ Writing variable syysn_htc4...
+ Rebuilding data from variable sxysn_htc4...
+ Writing variable sxysn_htc4...
+ Rebuilding data from variable sxa_htc4...
+ Writing variable sxa_htc4...
+ Rebuilding data from variable sya_htc4...
+ Writing variable sya_htc4...
+ Rebuilding data from variable sxxa_htc4...
+ Writing variable sxxa_htc4...
+ Rebuilding data from variable syya_htc4...
+ Writing variable syya_htc4...
+ Rebuilding data from variable sxya_htc4...
+ Writing variable sxya_htc4...
+ Rebuilding data from variable sxc0_htc4...
+ Writing variable sxc0_htc4...
+ Rebuilding data from variable syc0_htc4...
+ Writing variable syc0_htc4...
+ Rebuilding data from variable sxxc0_htc4...
+ Writing variable sxxc0_htc4...
+ Rebuilding data from variable syyc0_htc4...
+ Writing variable syyc0_htc4...
+ Rebuilding data from variable sxyc0_htc4...
+ Writing variable sxyc0_htc4...
+ Rebuilding data from variable sxsal_htc4...
+ Writing variable sxsal_htc4...
+ Rebuilding data from variable sysal_htc4...
+ Writing variable sysal_htc4...
+ Rebuilding data from variable sxxsal_htc4...
+ Writing variable sxxsal_htc4...
+ Rebuilding data from variable syysal_htc4...
+ Writing variable syysal_htc4...
+ Rebuilding data from variable sxysal_htc4...
+ Writing variable sxysal_htc4...
+ Rebuilding data from variable sxage_htc4...
+ Writing variable sxage_htc4...
+ Rebuilding data from variable syage_htc4...
+ Writing variable syage_htc4...
+ Rebuilding data from variable sxxage_htc4...
+ Writing variable sxxage_htc4...
+ Rebuilding data from variable syyage_htc4...
+ Writing variable syyage_htc4...
+ Rebuilding data from variable sxyage_htc4...
+ Writing variable sxyage_htc4...
+ Rebuilding data from variable sxice_htc5...
+ Writing variable sxice_htc5...
+ Rebuilding data from variable syice_htc5...
+ Writing variable syice_htc5...
+ Rebuilding data from variable sxxice_htc5...
+ Writing variable sxxice_htc5...
+ Rebuilding data from variable syyice_htc5...
+ Writing variable syyice_htc5...
+ Rebuilding data from variable sxyice_htc5...
+ Writing variable sxyice_htc5...
+ Rebuilding data from variable sxsn_htc5...
+ Writing variable sxsn_htc5...
+ Rebuilding data from variable sysn_htc5...
+ Writing variable sysn_htc5...
+ Rebuilding data from variable sxxsn_htc5...
+ Writing variable sxxsn_htc5...
+ Rebuilding data from variable syysn_htc5...
+ Writing variable syysn_htc5...
+ Rebuilding data from variable sxysn_htc5...
+ Writing variable sxysn_htc5...
+ Rebuilding data from variable sxa_htc5...
+ Writing variable sxa_htc5...
+ Rebuilding data from variable sya_htc5...
+ Writing variable sya_htc5...
+ Rebuilding data from variable sxxa_htc5...
+ Writing variable sxxa_htc5...
+ Rebuilding data from variable syya_htc5...
+ Writing variable syya_htc5...
+ Rebuilding data from variable sxya_htc5...
+ Writing variable sxya_htc5...
+ Rebuilding data from variable sxc0_htc5...
+ Writing variable sxc0_htc5...
+ Rebuilding data from variable syc0_htc5...
+ Writing variable syc0_htc5...
+ Rebuilding data from variable sxxc0_htc5...
+ Writing variable sxxc0_htc5...
+ Rebuilding data from variable syyc0_htc5...
+ Writing variable syyc0_htc5...
+ Rebuilding data from variable sxyc0_htc5...
+ Writing variable sxyc0_htc5...
+ Rebuilding data from variable sxsal_htc5...
+ Writing variable sxsal_htc5...
+ Rebuilding data from variable sysal_htc5...
+ Writing variable sysal_htc5...
+ Rebuilding data from variable sxxsal_htc5...
+ Writing variable sxxsal_htc5...
+ Rebuilding data from variable syysal_htc5...
+ Writing variable syysal_htc5...
+ Rebuilding data from variable sxysal_htc5...
+ Writing variable sxysal_htc5...
+ Rebuilding data from variable sxage_htc5...
+ Writing variable sxage_htc5...
+ Rebuilding data from variable syage_htc5...
+ Writing variable syage_htc5...
+ Rebuilding data from variable sxxage_htc5...
+ Writing variable sxxage_htc5...
+ Rebuilding data from variable syyage_htc5...
+ Writing variable syyage_htc5...
+ Rebuilding data from variable sxyage_htc5...
+ Writing variable sxyage_htc5...
+ Rebuilding data from variable sxopw...
+ Writing variable sxopw...
+ Rebuilding data from variable syopw...
+ Writing variable syopw...
+ Rebuilding data from variable sxxopw...
+ Writing variable sxxopw...
+ Rebuilding data from variable syyopw...
+ Writing variable syyopw...
+ Rebuilding data from variable sxyopw...
+ Writing variable sxyopw...
+ Rebuilding data from variable sxe_il1_htc1...
+ Writing variable sxe_il1_htc1...
+ Rebuilding data from variable sye_il1_htc1...
+ Writing variable sye_il1_htc1...
+ Rebuilding data from variable sxxe_il1_htc1...
+ Writing variable sxxe_il1_htc1...
+ Rebuilding data from variable syye_il1_htc1...
+ Writing variable syye_il1_htc1...
+ Rebuilding data from variable sxye_il1_htc1...
+ Writing variable sxye_il1_htc1...
+ Rebuilding data from variable sxe_il2_htc1...
+ Writing variable sxe_il2_htc1...
+ Rebuilding data from variable sye_il2_htc1...
+ Writing variable sye_il2_htc1...
+ Rebuilding data from variable sxxe_il2_htc1...
+ Writing variable sxxe_il2_htc1...
+ Rebuilding data from variable syye_il2_htc1...
+ Writing variable syye_il2_htc1...
+ Rebuilding data from variable sxye_il2_htc1...
+ Writing variable sxye_il2_htc1...
+ Rebuilding data from variable sxe_il1_htc2...
+ Writing variable sxe_il1_htc2...
+ Rebuilding data from variable sye_il1_htc2...
+ Writing variable sye_il1_htc2...
+ Rebuilding data from variable sxxe_il1_htc2...
+ Writing variable sxxe_il1_htc2...
+ Rebuilding data from variable syye_il1_htc2...
+ Writing variable syye_il1_htc2...
+ Rebuilding data from variable sxye_il1_htc2...
+ Writing variable sxye_il1_htc2...
+ Rebuilding data from variable sxe_il2_htc2...
+ Writing variable sxe_il2_htc2...
+ Rebuilding data from variable sye_il2_htc2...
+ Writing variable sye_il2_htc2...
+ Rebuilding data from variable sxxe_il2_htc2...
+ Writing variable sxxe_il2_htc2...
+ Rebuilding data from variable syye_il2_htc2...
+ Writing variable syye_il2_htc2...
+ Rebuilding data from variable sxye_il2_htc2...
+ Writing variable sxye_il2_htc2...
+ Rebuilding data from variable sxe_il1_htc3...
+ Writing variable sxe_il1_htc3...
+ Rebuilding data from variable sye_il1_htc3...
+ Writing variable sye_il1_htc3...
+ Rebuilding data from variable sxxe_il1_htc3...
+ Writing variable sxxe_il1_htc3...
+ Rebuilding data from variable syye_il1_htc3...
+ Writing variable syye_il1_htc3...
+ Rebuilding data from variable sxye_il1_htc3...
+ Writing variable sxye_il1_htc3...
+ Rebuilding data from variable sxe_il2_htc3...
+ Writing variable sxe_il2_htc3...
+ Rebuilding data from variable sye_il2_htc3...
+ Writing variable sye_il2_htc3...
+ Rebuilding data from variable sxxe_il2_htc3...
+ Writing variable sxxe_il2_htc3...
+ Rebuilding data from variable syye_il2_htc3...
+ Writing variable syye_il2_htc3...
+ Rebuilding data from variable sxye_il2_htc3...
+ Writing variable sxye_il2_htc3...
+ Rebuilding data from variable sxe_il1_htc4...
+ Writing variable sxe_il1_htc4...
+ Rebuilding data from variable sye_il1_htc4...
+ Writing variable sye_il1_htc4...
+ Rebuilding data from variable sxxe_il1_htc4...
+ Writing variable sxxe_il1_htc4...
+ Rebuilding data from variable syye_il1_htc4...
+ Writing variable syye_il1_htc4...
+ Rebuilding data from variable sxye_il1_htc4...
+ Writing variable sxye_il1_htc4...
+ Rebuilding data from variable sxe_il2_htc4...
+ Writing variable sxe_il2_htc4...
+ Rebuilding data from variable sye_il2_htc4...
+ Writing variable sye_il2_htc4...
+ Rebuilding data from variable sxxe_il2_htc4...
+ Writing variable sxxe_il2_htc4...
+ Rebuilding data from variable syye_il2_htc4...
+ Writing variable syye_il2_htc4...
+ Rebuilding data from variable sxye_il2_htc4...
+ Writing variable sxye_il2_htc4...
+ Rebuilding data from variable sxe_il1_htc5...
+ Writing variable sxe_il1_htc5...
+ Rebuilding data from variable sye_il1_htc5...
+ Writing variable sye_il1_htc5...
+ Rebuilding data from variable sxxe_il1_htc5...
+ Writing variable sxxe_il1_htc5...
+ Rebuilding data from variable syye_il1_htc5...
+ Writing variable syye_il1_htc5...
+ Rebuilding data from variable sxye_il1_htc5...
+ Writing variable sxye_il1_htc5...
+ Rebuilding data from variable sxe_il2_htc5...
+ Writing variable sxe_il2_htc5...
+ Rebuilding data from variable sye_il2_htc5...
+ Writing variable sye_il2_htc5...
+ Rebuilding data from variable sxxe_il2_htc5...
+ Writing variable sxxe_il2_htc5...
+ Rebuilding data from variable syye_il2_htc5...
+ Writing variable syye_il2_htc5...
+ Rebuilding data from variable sxye_il2_htc5...
+ Writing variable sxye_il2_htc5...
+ Closing input files...
+ Closing output file...
+ NEMO rebuild completed successfully
+ 
+=====================================
+oasis ifs nemo restart files rstas.nc rstos.nc found!
+=====================================
+=====================================
+=====================================
+/gpfs/scratch/bsc32/bsc32627/t0ni/19931101/fc0/runtime/save_ic/19931201 /gpfs/scratch/bsc32/bsc32627/t0ni/19931101/fc0/runtime/save_ic/19931201
+atmos/
+atmos/T511L91/
+atmos/T511L91/t0ni/
+atmos/T511L91/t0ni/t0ni_fc0_1993120100.tar.gz
+coupler/
+coupler/T511-ORCA025/
+coupler/T511-ORCA025/t0ni/
+coupler/T511-ORCA025/t0ni/t0ni_fc0_1993120100_rstos.nc.gz
+coupler/T511-ORCA025/t0ni/t0ni_fc0_1993120100_rstas.nc.gz
+ice/
+ice/ORCA025_LIM3/
+ice/ORCA025_LIM3/t0ni/
+ice/ORCA025_LIM3/t0ni/t0ni_fc0_19931130_restart_ice.nc.gz
+ocean/
+ocean/ORCA025L75/
+ocean/ORCA025L75/t0ni/
+ocean/ORCA025L75/t0ni/t0ni_fc0_19931130_restart.nc.gz
+moved IC_t0ni_19931101_fc0_001_0_19931101-19931130.tar to /gpfs/scratch/bsc32/bsc32627/t0ni/19931101/fc0/runtime/save_ic/ic
+/gpfs/scratch/bsc32/bsc32627/t0ni/19931101/fc0/runtime/save_ic/19931201

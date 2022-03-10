@@ -1,0 +1,12 @@
+#
+# Finished leg at 2021-12-18 08:30:59 after 00:39:07 (hh:mm:ss)
+# CPMIP performance: 3.02 SYPD   19028 CHPSY
+leg_number=1
+leg_start_date="Mon, 01 Nov 1993 00:00:00 +0000"
+leg_end_date="Wed, 01 Dec 1993 00:00:00 +0000"
+#
+# Finished leg at 2021-12-18 09:18:20 after 00:40:10 (hh:mm:ss)
+# CPMIP performance: 3.04 SYPD   18909 CHPSY
+leg_number=2
+leg_start_date="Wed, 01 Dec 1993 00:00:00 +0000"
+leg_end_date="Sat, 01 Jan 1994 00:00:00 +0000"

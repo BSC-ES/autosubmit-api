@@ -1,0 +1,1090 @@
+[INFO] JOBID=19279784
+
+job_name_ptrn='/gpfs/scratch/bsc32/bsc32627/t0ni/LOG_t0ni/t0ni_19931101_fc0_1_CMORATM'
++ job_name_ptrn=/gpfs/scratch/bsc32/bsc32627/t0ni/LOG_t0ni/t0ni_19931101_fc0_1_CMORATM
+echo $(date +%s) > ${job_name_ptrn}_STAT
+date +%s
+++ date +%s
++ echo 1639815513
+
+###################
+# Autosubmit job
+###################
+
+set -xuve
++ set -xuve
+#
+# Architecture
+#
+
+CURRENT_ARCH=marenostrum4
++ CURRENT_ARCH=marenostrum4
+EXPID=t0ni
++ EXPID=t0ni
+ROOTDIR=/gpfs/scratch/bsc32/bsc32627/t0ni
++ ROOTDIR=/gpfs/scratch/bsc32/bsc32627/t0ni
+PROJDEST=auto-ecearth3
++ PROJDEST=auto-ecearth3
+PROJDIR=$ROOTDIR/$PROJDEST
++ PROJDIR=/gpfs/scratch/bsc32/bsc32627/t0ni/auto-ecearth3
+BSC_OUTCLASS=reduced
++ BSC_OUTCLASS=reduced
+CMIP6_OUTCLASS=
++ CMIP6_OUTCLASS=
+CMOR_REALIZATION_INDEX=""
++ CMOR_REALIZATION_INDEX=
+[[ "FALSE" == TRUE ]] && LPJG=TRUE || LPJG=FALSE
++ [[ FALSE == TRUE ]]
++ LPJG=FALSE
+
+export HPCPROJ
++ export HPCPROJ
+
+#
+# General Paths and Conf.
+#
+MODEL=ecearth
++ MODEL=ecearth
+MODEL_RES=HR
++ MODEL_RES=HR
+VERSION=trunk
++ VERSION=trunk
+#MODEL_DIR=${MODELS_DIR}/$MODEL/$VERSION
+START_date=19931101
++ START_date=19931101
+MEMBER=fc0
++ MEMBER=fc0
+SCRATCH_DIR=/gpfs/scratch
++ SCRATCH_DIR=/gpfs/scratch
+CMOR_ACTIVITY_ID=CMIP
++ CMOR_ACTIVITY_ID=CMIP
+CMOR_EXP=piControl
++ CMOR_EXP=piControl
+CMOR_MODEL_ID=EC-EARTH-AOGCM
++ CMOR_MODEL_ID=EC-EARTH-AOGCM
+TEMPLATE_NAME=ecearth3
++ TEMPLATE_NAME=ecearth3
+TASKTYPE=CMORATM
++ TASKTYPE=CMORATM
+#
+# Chunk Management
+#
+CHUNK=1
++ CHUNK=1
+Chunk_start_date=19931101
++ Chunk_start_date=19931101
+Chunk_end_date=19931130
++ Chunk_end_date=19931130
+Chunk_last=FALSE
++ Chunk_last=FALSE
+# In months
+CHUNKSIZE=1
++ CHUNKSIZE=1
+
+RUN_dir=${ROOTDIR}/${START_date}/${MEMBER}/runtime
++ RUN_dir=/gpfs/scratch/bsc32/bsc32627/t0ni/19931101/fc0/runtime
+output_dir_atm=${RUN_dir}/output/ifs/$(printf "%03d\n" ${CHUNK})
+printf "%03d\n" ${CHUNK}
+++ printf '%03d\n' 1
++ output_dir_atm=/gpfs/scratch/bsc32/bsc32627/t0ni/19931101/fc0/runtime/output/ifs/001
+output_dir_oce=${RUN_dir}/output/nemo/$(printf "%03d\n" ${CHUNK})
+printf "%03d\n" ${CHUNK}
+++ printf '%03d\n' 1
++ output_dir_oce=/gpfs/scratch/bsc32/bsc32627/t0ni/19931101/fc0/runtime/output/nemo/001
+output_dir_lpjg=${RUN_dir}/output/lpjg/$(printf "%03d\n" ${CHUNK})
+printf "%03d\n" ${CHUNK}
+++ printf '%03d\n' 1
++ output_dir_lpjg=/gpfs/scratch/bsc32/bsc32627/t0ni/19931101/fc0/runtime/output/lpjg/001
+output_dir_tm5=${RUN_dir}/output/tm5/$(printf "%03d\n" ${CHUNK})
+printf "%03d\n" ${CHUNK}
+++ printf '%03d\n' 1
++ output_dir_tm5=/gpfs/scratch/bsc32/bsc32627/t0ni/19931101/fc0/runtime/output/tm5/001
+
+#
+# Cmorization
+#
+NFRP=6
++ NFRP=6
+NEMO_resolution=ORCA025L75
++ NEMO_resolution=ORCA025L75
+IFS_resolution=T511L91
++ IFS_resolution=T511L91
+PROJ_TYPE=STANDARD
++ PROJ_TYPE=STANDARD
+CMOR_ADD_STARTDATE=FALSE
++ CMOR_ADD_STARTDATE=FALSE
+PRODUCTION_EXP=FALSE
++ PRODUCTION_EXP=FALSE
+CMORIZATION=TRUE
++ CMORIZATION=TRUE
+CMOR_EXP_CUSTOM=FALSE
++ CMOR_EXP_CUSTOM=FALSE
+
+#####################################################################################################################
+# Globals: PROJDIR, CURRENT_ARCH, CMIP6_OUTCLASS, BSC_OUTCLASS, MODEL_RES, NEMO_resolution, IFS_resolution, MEMBER,
+#         Chunk_start_date, CMOR_EXP_CUSTOM, PATH_FLAGS, CMOR_ACTIVITY_ID, CMOR_MODEL_ID
+# Arguments:
+#
+# Returns:
+#   None
+# Purpose: Prepare que environment for running the cmorization process, this method is common to all type of models.
+#          it creates the neccesary folders and defines the list of vars to be used depending of the defined OUTCLASS
+#          type
+#
+#####################################################################################################################
+function setenvcmor() {
+
+  set +ue
+  . ${PROJDIR}/platforms/${CURRENT_ARCH}/configure.sh
+  load_modules_ece2cmor
+  export PYTHONPATH=${PROJDIR}/ece2cmor/:$PYTHONPATH
+  export PYTHONPATH=${PROJDIR}/ece2cmor/ece2cmor3/scripts:$PYTHONPATH
+  define_paths_ece2cmor
+  . ${PROJDIR}/plugins/cmorization.sh
+
+  # set varlist
+  if [[ -z ${CMIP6_OUTCLASS-} && -z ${BSC_OUTCLASS-} ]]; then
+    echo "Classic outclass can't be CMORIZED"
+    exit 1
+  fi
+
+  if [[ -n "${CMIP6_OUTCLASS}" ]] && [[ -n "${BSC_OUTCLASS}" ]]; then
+    echo "only one OUTCLASS should be set"
+    exit 1
+  fi
+
+  if [[ -n "${BSC_OUTCLASS-}" ]] && [[ -z "${CMIP6_OUTCLASS-}" ]]; then
+    REPLACEMENT_TABLES=$(find ${PROJDIR}/outclass/${BSC_OUTCLASS} -name "CMIP6*.json" -type f)
+    if [[ -z ${REPLACEMENT_TABLES} ]]; then
+      echo "No CMIP6 tables have been replaced."
+    else
+      cp ${PROJDIR}/outclass/${BSC_OUTCLASS}/CMIP6*json ${PROJDIR}/ece2cmor/ece2cmor3/resources/tables/.
+    fi
+    EXCEL_FILE=$(echo ${PROJDIR}/outclass/${BSC_OUTCLASS}/*varlist*.json)
+  fi
+
+  if [[ -n "${CMIP6_OUTCLASS}" ]] && [[ -z "${BSC_OUTCLASS}" ]]; then
+    if [[ ${CMIP6_OUTCLASS} == "OMIP/cmip6-experiment-OMIP-omip1" ]] && [[ ${CMOR_MODEL_ID} == "EC-EARTH-AOGCM" ]]; then
+      EXCEL_FILE=$(echo ${ROOTDIR}/ctrl/output-control-files/cmip6/${CMIP6_OUTCLASS}/cmip6-data-request-varlist-OMIP-omip1-EC-EARTH-CC.json)
+    elif [[ ${CMIP6_OUTCLASS} == "ScenarioMIP/EC-EARTH-CC/cmip6-experiment-ScenarioMIP-ssp245" ]] && [[ ${CMOR_MODEL_ID} == "EC-EARTH-AOGCM" ]]; then
+      EXCEL_FILE=$(echo ${ROOTDIR}/ctrl/output-control-files/cmip6/${CMIP6_OUTCLASS}/cmip6-data-request-varlist-ScenarioMIP-ssp245-EC-EARTH-CC.json)
+    else
+      EXCEL_FILE=$(echo ${ROOTDIR}/ctrl/output-control-files/cmip6/${CMIP6_OUTCLASS}/*-varlist-*-*-*${CMOR_MODEL_ID}.json)
+    fi
+  fi
+  ##
+
+  if [[ ${MODEL_RES} == "LR" ]]; then
+    MODEL_NAME="EC-Earth3"
+  elif [[ ${MODEL_RES} == "HR" ]]; then
+    MODEL_NAME="EC-Earth3-HR"
+  elif [[ ${MODEL_RES} == "VHR" ]]; then
+    MODEL_NAME="EC-Earth3-VHR"
+  else
+    echo "Wrong MODEL_RES" $MODEL_RES "is not in LR or HR or VHR"
+    exit
+  fi
+
+  grid=$(echo $NEMO_resolution | cut -f1 -d "L")$(echo $IFS_resolution | cut -f1 -d "L")
+  member_index=$(echo $((10#$(echo ${MEMBER} | cut -c3-) + 1)))
+  cmor_realization_indexing
+
+  startyear=$(echo $Chunk_start_date | cut -c1-4)
+  startmonth=$(echo $Chunk_start_date | cut -c5-6)
+  [[ ! -f $ROOTDIR/LOG_$EXPID/${EXPID}_CMOR_DATASETVERSION ]] && echo v$(date +%Y%m%d) >$ROOTDIR/LOG_${EXPID}/${EXPID}_CMOR_DATASETVERSION
+  export cmordatasetversion=$(cat $ROOTDIR/LOG_${EXPID}/${EXPID}_CMOR_DATASETVERSION)
+  mkdir -p ${RUN_dir}/cmor_outputs
+  if [[ ${CMOR_EXP_CUSTOM} == "TRUE" ]]; then
+    if [[ -z $( grep $CMOR_EXP ${PROJDIR}/ece2cmor/ece2cmor3/resources/tables/CMIP6_CV.json ) ]] || [[ -z $( grep $START_date ${PROJDIR}/ece2cmor/ece2cmor3/resources/tables/CMIP6_CV.json ) ]] ; then
+      python ${PROJDIR}/plugins/cmor_pythonsetup.py --projdir $PROJDIR --template_name $TEMPLATE_NAME --expid $EXPID --cmor_exp $CMOR_EXP --cmor_add_startdate $CMOR_ADD_STARTDATE --startdate $START_date
+    fi
+  fi
+
+  #TODO override defaults this should come from proj.conf
+  #activity_id=CMIP
+  activity_id=$CMOR_ACTIVITY_ID
+  model_id=$CMOR_MODEL_ID
+
+  mkdir -p ${RUN_dir}/cmor_outputs
+  # path for cmor jobs flags/signaling
+  export PATH_FLAGS=${RUN_dir}/flags
+  if [[ ! -d ${PATH_FLAGS} ]]; then
+    mkdir -p ${PATH_FLAGS}
+  fi
+
+  set -ue
+
+}
+
+#####################################################################################################################
+# Globals: CMOR_ACTIVITY_ID, RUN_dir, CMOR_EXP, MEMBER, CMOR_EXP_CUSTOM, BSC_OUTCLASS, CMOR_ADD_STARTDATE, START_date
+# Arguments:
+#   None
+# Returns:
+#   None
+# Purpose: based on the metadadata ( that depends of the type of cmorization to be run ) the cmor templates are generated
+#
+#####################################################################################################################
+function cmor_gen_templates() {
+  . ${PROJDIR}/plugins/cmorization.sh
+  create_sub_experiment_id
+  # cd into the metadata dir to avoid clashes with other cmor jobs
+  metadata_dir=${RUN_dir}/../tmp/cmor/metadata-${CMOR_ACTIVITY_ID}-${component}-${MEMBER}-${startyear}${startmonth}
+  mkdir -p ${metadata_dir}
+  cd ${metadata_dir}
+  ${PROJDIR}/ece2cmor/ece2cmor3/scripts/modify-metadata-template.sh ${activity_id} ${CMOR_EXP} ${model_id} ${PROJDIR}/ece2cmor/ece2cmor3/resources/metadata-templates/cmip6-CMIP-piControl-metadata-template.json
+  metadata_template_oce="${metadata_dir}/metadata*-${activity_id}-${CMOR_EXP}-${model_id}-nemo-template.json"
+  metadata_template_atm="${metadata_dir}/metadata*-${activity_id}-${CMOR_EXP}-${model_id}-ifs-template.json"
+  metadata_template_lpjg="${metadata_dir}/metadata*-${activity_id}-${CMOR_EXP}-${model_id}-lpjg-template.json"
+  metadata_template_tm5="${metadata_dir}/metadata*-${activity_id}-${CMOR_EXP}-${model_id}-tm5-template.json"
+
+  for f in ${metadata_dir}/*${CMOR_EXP}*-*-template.json; do
+    sed -i 's/"realization_index":            "1",/"realization_index":            "'${realization_index}'",/g' $f
+    sed -i '10 a\    "outpath":                      "'${RUN_dir}'/cmor_outputs/cmor_'${component}'_'${CHUNK}'",' $f
+    sed -i '11 a\    "output_path_template":                      "<activity_id><institution_id><source_id><experiment_id><variant_label><table><variable_id><grid_label><'$cmordatasetversion'>",' $f
+    sed -i '15 a\    "variant_info":                 "forcing: Nat.Ant. Member generated from autosubmit member '${MEMBER}'",' $f
+    if [[ -n $sub_experiment_id ]]; then
+      sed -i 's/"sub_experiment_id":            "none",/"sub_experiment_id":            "'${sub_experiment_id}'",/g' $f
+    fi
+  done
+}
+
+#####################################################################################################################
+# Globals: TASKTYPE, MEMBER, CHUNK, EXPID, EXCEL_FILE, RUN_dir, PROJDIR, PATH_FLAGS,
+# Arguments:
+#
+# Returns:
+#   None
+# Purpose: Main cmorization function, common to most models
+#
+#####################################################################################################################
+function cmor() {
+  component=$(echo ${TASKTYPE#CMOR} | tr '[:upper:]' '[:lower:]')
+  skip_alevel_vars=""
+  if [[ ${component} == "oce" ]]; then
+    cmor_model="nemo"
+  elif [[ ${component} == "atm" ]]; then
+    cmor_model="ifs"
+    if [[ "$CMIP6_OUTCLASS" != *"pextra"* ]]; then
+      skip_alevel_vars="--skip_alevel_vars"
+    fi
+  else
+    cmor_model=${component}
+  fi
+  output_dir=output_dir_${component}
+  metadata_template=metadata_template_${component}
+
+  cmor_gen_templates
+  cd ${metadata_dir}
+  find . -type f \! -name "*${cmor_model}*" -delete
+
+  tmpdir=${RUN_dir}/../tmp/cmor/tmp-${component}-${MEMBER}-${startyear}${startmonth}
+  rm -rf $tmpdir
+  mkdir -p $tmpdir
+  rm -rf ${RUN_dir}/cmor_outputs/cmor_${component}_${CHUNK}
+  mkdir -p ${RUN_dir}/cmor_outputs/cmor_${component}_${CHUNK}
+
+  cd ${PROJDIR}/ece2cmor/ece2cmor3
+  ./ece2cmor.py --${cmor_model} --exp ${EXPID} --meta ${!metadata_template} --tmpdir ${tmpdir} --varlist ${EXCEL_FILE} ${!output_dir} $skip_alevel_vars
+  rm -rf ${tmpdir}
+  #fx management
+  if [[ $(printf "%03d\n" ${CHUNK}) == '001' ]]; then
+  #if 1st chunk and lsm, add fx areacella from the templates directory
+    if [[ $component == "lpjg" ]] && [[ -n $IFS_resolution ]] ; then
+      if [ ${CMOR_MODEL_ID} = "EC-EARTH-AOGCM" ]; then
+        dataset="EC-Earth3"
+      else
+        dataset=$(echo $CMOR_MODEL_ID | sed "s/EC-EARTH/EC-Earth3/")
+        # eg: EC-EARTH-HR -> EC-Earth3-HR, EC-EARTH-CC -> EC-Earth3-CC , EC-EARTH-AerChem -> EC-Earth3-AerChem, EC-EARTH-Veg-LR -> EC-EARTH-Veg-LR
+      fi
+      CMORFILENAME=areacella_fx_${dataset}_${CMOR_EXP}_r${member_index}i1p1f1_gr.nc
+      cmordatasetversion=$(cat $ROOTDIR/LOG_${EXPID}/${EXPID}_CMOR_DATASETVERSION) 
+      CMOR_FX_DIR=${RUN_dir}/cmor_outputs/cmor_${component}_${CHUNK}/${CMOR_ACTIVITY_ID}/EC-Earth-Consortium/${dataset}/${CMOR_EXP}/r${member_index}i1p1f1/fx/areacella/gr/$cmordatasetversion
+      mkdir -p $CMOR_FX_DIR
+      [[ ! -f ${CMOR_FX_DIR}/$CMORFILENAME ]] && cp ${PROJDIR}/fx_files/${IFS_resolution}/areacella_fx_EC-Earth3-CC_piControl_r0i0p0f0_gr.nc ${CMOR_FX_DIR}/$CMORFILENAME
+    fi
+  else
+  #if not first chunk, remove the files (because already generated at chunk 1
+    find ${RUN_dir}/cmor_outputs/cmor_${component}_${CHUNK} -type d -name "*fx" -exec rm -rf {} +
+  fi
+  for f in $( find ${RUN_dir}/cmor_outputs/cmor_${component}_${CHUNK} -type f -name "*Eyr*nc"); do
+    if [[ ! -z $(ncdump -h $f | grep "frequency = \"yrPt" ) ]]; then
+      year=$(basename $f | cut -f7 -d"_" | cut -c1-4)
+      cdo settaxis,${year}-12-31,23:00 $f ${f}2
+      cdo setreftime,1850-01-01,00:00 ${f}2 $f
+      rm ${f}2 
+    fi
+  done
+  # set the cmor process to complete
+  touch ${PATH_FLAGS}/cmor_${component}_${CHUNK}
+}
+
+#
+#####################################################################################################################
+# Globals: RUN_dir, CHUNK, cmor_dir, component
+# Arguments:
+#   None
+# Returns:
+#   None
+# Purpose: Function to clean the cmorisation output by looking for .copy files and files with corrupted names.
+#            When running cmorisation twice in the same CHUNK,  some files might end up duplicated or with a bad name.
+#            This funciton cleans the cmor_${CHUNK} before it's transferred.
+#
+#####################################################################################################################
+function clean_cmor() {
+  cmor_dir=${RUN_dir}/cmor_outputs/cmor_${component}_${CHUNK}
+  cd $cmor_dir
+  if [[ ${component} == "lpjg" ]]; then
+    for f in $(find $cmor_dir -type f -name "*nc"); do
+      [[ ! -z $(ncdump -h $f | grep "time:units = \"days since 1850-01-01\" ;") ]] && ncatted -O -a units,time,m,c,"days since 1850-01-01 00:00:00" $f
+    done
+  fi
+  find . -name "*.copy*" -type f -delete
+}
+
+#
+#####################################################################################################################
+# Globals: RUN_dir, CHUNK, Chunk_start_date, Chunk_end_date, cmor_dir, component
+# Arguments:
+#   None
+# Returns:
+#   None
+# Purpose: Function to check number of timesteps of 6hourly files. This is a quick check previous to NCTIME which is run after transfer to esarchive
+#
+#####################################################################################################################
+function check_cmor_timestep() {
+  cmor_dir=${RUN_dir}/cmor_outputs/cmor_${component}_${CHUNK}
+  cd $cmor_dir
+  #Check one directory of each frequency
+  for freq in 6hr day mon; do
+    dir_to_check=""
+    for dir_to_check in $(find $cmor_dir -mindepth 9 -type d | grep -E "$freq" | head -1); do
+      if [[ ! -z $dir_to_check ]]; then
+        if [[ ! -z $(echo $dir_to_check | grep 6hr) ]]; then
+          expected_timesteps=$((($(date -u -d $Chunk_end_date +%s) - $(date -u -d $Chunk_start_date +%s)) / 21600 + 4))
+        elif [[ ! -z $(echo $dir_to_check | grep day) ]]; then
+          expected_timesteps=$((($(date -u -d $Chunk_end_date +%s) - $(date -u -d $Chunk_start_date +%s)) / 86400 + 1))
+        else
+          expected_timesteps=$(($CHUNKSIZE))
+        fi
+        cd $dir_to_check
+        number_of_timesteps=$(
+          for f in *; do
+            cdo -s ntime $f
+          done | awk '{sum += $1} END {print sum}'
+        )
+        if [[ $number_of_timesteps != $expected_timesteps ]]; then
+          echo "Found $number_of_timesteps timesteps in $dir_to_check, when we were expecting $expected_timesteps. Something might have gone wrong with CMORization. Check the outputs."
+          exit 1
+        fi
+        echo $freq $dir_to_check $expected_timesteps $number_of_timesteps
+      fi
+    done
+  done
+}
+#####################################################################################################################
+# Globals: MEMBER, CHUNK, PROJDIR, MODEL_RES, USER_JASMIN,
+# Arguments:
+#   None
+# Returns:
+#   None
+# Purpose: transfer jasmin log files to dedicated server
+#
+#####################################################################################################################
+function transfer_cmor_jasmin() {
+  member_index=$(echo $((10#$(echo ${MEMBER} | cut -c3-) + 1)))
+  DATE=${DATE:-$(date -u +%Y%m%d_%H%M%S)}
+  SRCDIR=${PROJDIR}/ece2cmor/ece2cmor3/cmor_${CHUNK}_${MEMBER}
+  SERVER=jasmin-xfer2.ceda.ac.uk
+  TGTDIR=/group_workspaces/jasmin2/primavera2/upload/EC-Earth-Consortium/EC-Earth-3-${MODEL_RES}/incoming/v$DATE
+  cd $SRCDIR
+  rsync -rvz --omit-dir-times --rsh="ssh -c arcfour" $SRCDIR/ ${USER_JASMIN}@${SERVER}:${TGTDIR}
+}
+######################################################
+#
+# MAIN
+#
+######################################################
+
+if [[ ${CMORIZATION} == '' ]] || [[ ${CMORIZATION} == 'TRUE' ]]; then
+  # prepare environment
+  setenvcmor
+  # execute cmorization for the related component
+  cmor
+  # clean garbage
+  clean_cmor
+  #check number of timesteps of cmor 6hourly output
+  check_cmor_timestep
+else
+  echo "CMORIZATION is disabled but the job ${TASKTYPE} is still in the job list of the experiment, please remove it if you are not using it"
+fi
++ [[ TRUE == '' ]]
++ [[ TRUE == \T\R\U\E ]]
++ setenvcmor
++ set +ue
++ . /gpfs/scratch/bsc32/bsc32627/t0ni/auto-ecearth3/platforms/marenostrum4/configure.sh
+#####################################################################################################################
+# Globals:
+#   PROJDIR
+# Arguments:
+#   None
+# Returns:
+#   None
+# Purpose: main function to prepare execution environment for the underlying platform, that basically consist on
+#   setting up the modules to be used, common environment variables and the common paths
+#####################################################################################################################
+function load_platform_environment() {
+  # load utils/filesystem libraries for common env functions
+  . ${PROJDIR}/platforms/marenostrum4/filesystem.sh
+  . ${PROJDIR}/platforms/marenostrum4/utils.sh
+  #load global environment variables
+  setup_modules
+  #configure all modules needed for run the job
+  setup_environment_vars
+  # define all paths needed
+  setup_paths
+}
+
+#####################################################################################################################
+# Globals:
+#   None
+# Arguments:
+#   None
+# Returns:
+#   None
+# Purpose: Prepare the modules needed to execute ece2cmor component for Marenostrum4 platform
+#####################################################################################################################
+function load_modules_ece2cmor() {
+  set +xuve
+  module purge
+  module load impi/2017.4 intel/2017.4 mkl/2017.4 python/2.7.16 CMOR/3.5.0 CDO/1.8.2 gsl/2.4 nco/4.6.7 git eccodes/2.8.0
+  set -xuve
+}
+
+#####################################################################################################################
+# Globals:
+#   None
+# Arguments:
+#   None
+# Returns:
+#   None
+# Purpose: Prepare the modules needed to execute the OASIS restart generation script for Marenostrum4 platform
+#####################################################################################################################
+function load_modules_oas_rsts_gen() {
+  set +xuve
+  module load hdf5/1.8.19_serial
+  module load netcdf/4.4.1.1_serial
+  module load udunits/2.2.25
+  module load gsl/2.4
+  module load nco/4.6.7
+  module load CDO
+  set -xuve
+}
+
+#####################################################################################################################
+# Globals:
+#  PATH, PROJDIR
+# Arguments:
+#   None
+# Returns:
+#   None
+# Purpose: define the global vars with the path to the grib modules needed to run the ece2cmor module
+#####################################################################################################################
+function define_paths_ece2cmor() {
+  grib_api_path=/apps/ECCODES/2.8.0/INTEL/
+  PATH=${grib_api_path}/bin:${PATH}
+  export GRIB_BIN_PATH=${grib_api_path}/bin
+  export GRIB_DEFINITION_PATH=${PROJDIR}/sources/sources/util/grib_table_126:${grib_api_path}/share/eccodes/definitions
+  export GRIB_SAMPLES_PATH=${grib_api_path}/share/eccodes/ifs_samples/grib1
+}
++ load_modules_ece2cmor
++ set +xuve
+remove mkl/2017.4 (LD_LIBRARY_PATH) 
+remove impi/2017.4 (PATH, MANPATH, LD_LIBRARY_PATH) 
+load impi/2017.4 (PATH, MANPATH, LD_LIBRARY_PATH) 
+Set INTEL compilers as MPI wrappers backend 
+load mkl/2017.4 (LD_LIBRARY_PATH) 
+load PYTHON/2.7.16 (PATH, MANPATH, LD_LIBRARY_PATH, LIBRARY_PATH,
+PKG_CONFIG_PATH, C_INCLUDE_PATH, CPLUS_INCLUDE_PATH, PYTHONHOME) 
+load hdf5/1.8.19 (PATH, LD_LIBRARY_PATH, LIBRARY_PATH, C_INCLUDE_PATH,
+CPLUS_INCLUDE_PATH) 
+load netcdf/4.4.1.1 (PATH, LD_LIBRARY_PATH, NETCDF, HDF5/1.8.19 is used
+internally) 
+load udunits/2.2.25 (PATH, LD_LIBRARY_PATH, LIBRARY_PATH, INFOPATH,
+C_INCLUDE_PATH, CPLUS_INCLUDE_PATH, UDUNITS2_PATH, UDUNITS2_XML_PATH) 
+unload PYTHON/2.7.16 (PATH, MANPATH, LD_LIBRARY_PATH, LIBRARY_PATH,
+PKG_CONFIG_PATH, C_INCLUDE_PATH, CPLUS_INCLUDE_PATH, PYTHONHOME) 
+load PYTHON/2.7.16 (PATH, MANPATH, LD_LIBRARY_PATH, LIBRARY_PATH,
+PKG_CONFIG_PATH, C_INCLUDE_PATH, CPLUS_INCLUDE_PATH, PYTHONHOME) 
+load CMOR/3.5.0 (LD_LIBRARY_PATH, C_INCLUDE_PATH) 
+load CDO/1.8.2 (PATH) 
+load gsl/2.4 (PATH, LD_LIBRARY_PATH, LIBRARY_PATH, MANPATH, INFOPATH,
+C_INCLUDE_PATH, CPLUS_INCLUDE_PATH, PKG_CONFIG_PATH, GSL_DIR) 
+load nco/4.6.7 (PATH, LD_LIBRARY_PATH, LIBRARY_PATH, MANPATH, INFOPATH,
+C_INCLUDE_PATH, CPLUS_INCLUDE_PATH) 
+load GIT/2.22.0 (PATH) 
+load eccodes/2.8.0 (PATH, LD_LIBRARY_PATH, CPATH, INCLUDE, C_INCLUDE_PATH,
+PKG_CONFIG_PATH, PYTHONPATH) 
++ export PYTHONPATH=/gpfs/scratch/bsc32/bsc32627/t0ni/auto-ecearth3/ece2cmor/:/apps/ECCODES/2.8.0/INTEL/lib/python2.7/site-packages:/apps/PYTHON/2.7.16/INTEL/IMPI/lib/python2.7/site-packages
++ PYTHONPATH=/gpfs/scratch/bsc32/bsc32627/t0ni/auto-ecearth3/ece2cmor/:/apps/ECCODES/2.8.0/INTEL/lib/python2.7/site-packages:/apps/PYTHON/2.7.16/INTEL/IMPI/lib/python2.7/site-packages
++ export PYTHONPATH=/gpfs/scratch/bsc32/bsc32627/t0ni/auto-ecearth3/ece2cmor/ece2cmor3/scripts:/gpfs/scratch/bsc32/bsc32627/t0ni/auto-ecearth3/ece2cmor/:/apps/ECCODES/2.8.0/INTEL/lib/python2.7/site-packages:/apps/PYTHON/2.7.16/INTEL/IMPI/lib/python2.7/site-packages
++ PYTHONPATH=/gpfs/scratch/bsc32/bsc32627/t0ni/auto-ecearth3/ece2cmor/ece2cmor3/scripts:/gpfs/scratch/bsc32/bsc32627/t0ni/auto-ecearth3/ece2cmor/:/apps/ECCODES/2.8.0/INTEL/lib/python2.7/site-packages:/apps/PYTHON/2.7.16/INTEL/IMPI/lib/python2.7/site-packages
++ define_paths_ece2cmor
++ grib_api_path=/apps/ECCODES/2.8.0/INTEL/
++ PATH=/apps/ECCODES/2.8.0/INTEL//bin:/apps/ECCODES/2.8.0/INTEL/bin:/apps/GIT/2.22.0/bin:/apps/NCO/4.6.7/INTEL/bin:/apps/GSL/2.4/INTEL/bin:/apps/CDO/1.8.2/INTEL/IMPI/bin:/apps/PYTHON/2.7.16/INTEL/IMPI/bin:/apps/UDUNITS/2.2.25/INTEL/bin:/apps/NETCDF/4.4.1.1/INTEL/IMPI/bin:/apps/HDF5/1.8.19/INTEL/IMPI/bin:/apps/INTEL/2017.4/bin:/apps/INTEL/2017.4/impi/2017.3.196/bin64:/usr/local/bin:/usr/bin:/bin:/usr/games:/usr/lpp/mmfs/bin
++ export GRIB_BIN_PATH=/apps/ECCODES/2.8.0/INTEL//bin
++ GRIB_BIN_PATH=/apps/ECCODES/2.8.0/INTEL//bin
++ export GRIB_DEFINITION_PATH=/gpfs/scratch/bsc32/bsc32627/t0ni/auto-ecearth3/sources/sources/util/grib_table_126:/apps/ECCODES/2.8.0/INTEL//share/eccodes/definitions
++ GRIB_DEFINITION_PATH=/gpfs/scratch/bsc32/bsc32627/t0ni/auto-ecearth3/sources/sources/util/grib_table_126:/apps/ECCODES/2.8.0/INTEL//share/eccodes/definitions
++ export GRIB_SAMPLES_PATH=/apps/ECCODES/2.8.0/INTEL//share/eccodes/ifs_samples/grib1
++ GRIB_SAMPLES_PATH=/apps/ECCODES/2.8.0/INTEL//share/eccodes/ifs_samples/grib1
++ . /gpfs/scratch/bsc32/bsc32627/t0ni/auto-ecearth3/plugins/cmorization.sh
+#####################################################################################################################
+# Globals: CMOR_REALIZATION_INDEX, MEMBER
+# Arguments:
+#
+# Returns:
+#   None
+# Purpose: Set the cmor realization index based on the member list
+#
+#####################################################################################################################
+function cmor_realization_indexing() {
+
+  if [[ ! -z ${CMOR_REALIZATION_INDEX} ]]; then
+    CMOR_REALIZATION_INDEX_LIST=($(echo ${CMOR_REALIZATION_INDEX}))
+    member_index0=$(echo $((10#$(echo ${MEMBER} | cut -c3-))))
+    realization_index=${CMOR_REALIZATION_INDEX_LIST[${member_index0}]}
+  else
+    realization_index=${member_index}
+  fi
+
+}
+
+#####################################################################################################################
+# Globals: CMOR_EXP_CUSTOM BSC_OUTCLASS CMOR_ADD_STARTDATE sub_experiment_id
+# Arguments:
+#
+# Returns:
+#   None
+# Purpose: Creates the subexperiment id according to CMOR_EXP_CUSTOM BSC_OUTCLASS CMOR_ADD_STARTDATE to add it in the CMOR file names
+#
+#####################################################################################################################
+
+function create_sub_experiment_id() {
+  #The logics of the creation of the sub_experiment_id are described in https://earth.bsc.es/gitlab/es/auto-ecearth3/-/issues/1355#note_101060
+  if [[ ${CMOR_EXP_CUSTOM} == "TRUE" ]]; then
+    if [[ -n $(echo ${BSC_OUTCLASS} | grep dcpp) ]] || [[ "${CMOR_ACTIVITY_ID}" == "DCPP" ]]; then
+      if [[ ${CMOR_ADD_STARTDATE} == "TRUE" ]]; then
+        echo TRUE TRUE TRUE
+        sub_experiment_id=s$(echo ${START_date} | cut -c1-8)
+      else
+        echo TRUE TRUE FALSE
+        sub_experiment_id=s$(echo ${START_date} | cut -c1-4)
+      fi
+    else
+      if [[ ${CMOR_ADD_STARTDATE} == "TRUE" ]]; then
+        echo TRUE FALSE TRUE
+        sub_experiment_id=s$(echo ${START_date} | cut -c1-8)
+      else
+        echo TRUE FALSE FALSE
+        sub_experiment_id=""
+      fi
+    fi
+  else
+    if [[ -n $(echo ${BSC_OUTCLASS} | grep dcpp) ]] || [[ "${CMOR_ACTIVITY_ID}" == "DCPP" ]]; then
+      if [[ ${CMOR_ADD_STARTDATE} == "TRUE" ]]; then
+        echo "Running with CMOR_EXP_CUSTOM=False + CMOR_ADD_STARTDATE=True is forbidden, exiting"
+        exit 0
+      else
+        sub_experiment_id=s$(echo ${START_date} | cut -c1-4)
+      fi
+    else
+      if [[ ${CMOR_ADD_STARTDATE} == "TRUE" ]]; then
+        echo "Running with CMOR_EXP_CUSTOM=False + CMOR_ADD_STARTDATE=True is forbidden, exiting"
+        exit 0
+      else
+        sub_experiment_id=""
+      fi
+    fi
+  fi
+
+}
++ [[ -z '' ]]
++ [[ -z reduced ]]
++ [[ -n '' ]]
++ [[ -n reduced ]]
++ [[ -z '' ]]
+find ${PROJDIR}/outclass/${BSC_OUTCLASS} -name "CMIP6*.json" -type f
+++ find /gpfs/scratch/bsc32/bsc32627/t0ni/auto-ecearth3/outclass/reduced -name 'CMIP6*.json' -type f
++ REPLACEMENT_TABLES=/gpfs/scratch/bsc32/bsc32627/t0ni/auto-ecearth3/outclass/reduced/CMIP6_Amon.json
++ [[ -z /gpfs/scratch/bsc32/bsc32627/t0ni/auto-ecearth3/outclass/reduced/CMIP6_Amon.json ]]
++ cp /gpfs/scratch/bsc32/bsc32627/t0ni/auto-ecearth3/outclass/reduced/CMIP6_Amon.json /gpfs/scratch/bsc32/bsc32627/t0ni/auto-ecearth3/ece2cmor/ece2cmor3/resources/tables/.
+echo ${PROJDIR}/outclass/${BSC_OUTCLASS}/*varlist*.json
+++ echo /gpfs/scratch/bsc32/bsc32627/t0ni/auto-ecearth3/outclass/reduced/reduced_varlist.json
++ EXCEL_FILE=/gpfs/scratch/bsc32/bsc32627/t0ni/auto-ecearth3/outclass/reduced/reduced_varlist.json
++ [[ -n '' ]]
++ [[ HR == \L\R ]]
++ [[ HR == \H\R ]]
++ MODEL_NAME=EC-Earth3-HR
+echo $NEMO_resolution | cut -f1 -d "L"
+++ echo ORCA025L75
+++ cut -f1 -d L
+echo $IFS_resolution | cut -f1 -d "L"
+++ echo T511L91
+++ cut -f1 -d L
++ grid=ORCA025T511
+echo $((10#$(echo ${MEMBER} | cut -c3-) + 1))
+echo ${MEMBER} | cut -c3-
++++ echo fc0
++++ cut -c3-
+++ echo 1
++ member_index=1
++ cmor_realization_indexing
++ [[ ! -z '' ]]
++ realization_index=1
+echo $Chunk_start_date | cut -c1-4
+++ cut -c1-4
+++ echo 19931101
++ startyear=1993
+echo $Chunk_start_date | cut -c5-6
+++ echo 19931101
+++ cut -c5-6
++ startmonth=11
++ [[ ! -f /gpfs/scratch/bsc32/bsc32627/t0ni/LOG_t0ni/t0ni_CMOR_DATASETVERSION ]]
+date +%Y%m%d
+++ date +%Y%m%d
++ echo v20211218
+cat $ROOTDIR/LOG_${EXPID}/${EXPID}_CMOR_DATASETVERSION
+++ cat /gpfs/scratch/bsc32/bsc32627/t0ni/LOG_t0ni/t0ni_CMOR_DATASETVERSION
++ export cmordatasetversion=v20211218
++ cmordatasetversion=v20211218
++ mkdir -p /gpfs/scratch/bsc32/bsc32627/t0ni/19931101/fc0/runtime/cmor_outputs
++ [[ FALSE == \T\R\U\E ]]
++ activity_id=CMIP
++ model_id=EC-EARTH-AOGCM
++ mkdir -p /gpfs/scratch/bsc32/bsc32627/t0ni/19931101/fc0/runtime/cmor_outputs
++ export PATH_FLAGS=/gpfs/scratch/bsc32/bsc32627/t0ni/19931101/fc0/runtime/flags
++ PATH_FLAGS=/gpfs/scratch/bsc32/bsc32627/t0ni/19931101/fc0/runtime/flags
++ [[ ! -d /gpfs/scratch/bsc32/bsc32627/t0ni/19931101/fc0/runtime/flags ]]
++ mkdir -p /gpfs/scratch/bsc32/bsc32627/t0ni/19931101/fc0/runtime/flags
++ set -ue
++ cmor
+echo ${TASKTYPE#CMOR} | tr '[:upper:]' '[:lower:]'
+++ tr '[:upper:]' '[:lower:]'
+++ echo ATM
++ component=atm
++ skip_alevel_vars=
++ [[ atm == \o\c\e ]]
++ [[ atm == \a\t\m ]]
++ cmor_model=ifs
++ [[ '' != *\p\e\x\t\r\a* ]]
++ skip_alevel_vars=--skip_alevel_vars
++ output_dir=output_dir_atm
++ metadata_template=metadata_template_atm
++ cmor_gen_templates
++ . /gpfs/scratch/bsc32/bsc32627/t0ni/auto-ecearth3/plugins/cmorization.sh
+#####################################################################################################################
+# Globals: CMOR_REALIZATION_INDEX, MEMBER
+# Arguments:
+#
+# Returns:
+#   None
+# Purpose: Set the cmor realization index based on the member list
+#
+#####################################################################################################################
+function cmor_realization_indexing() {
+
+  if [[ ! -z ${CMOR_REALIZATION_INDEX} ]]; then
+    CMOR_REALIZATION_INDEX_LIST=($(echo ${CMOR_REALIZATION_INDEX}))
+    member_index0=$(echo $((10#$(echo ${MEMBER} | cut -c3-))))
+    realization_index=${CMOR_REALIZATION_INDEX_LIST[${member_index0}]}
+  else
+    realization_index=${member_index}
+  fi
+
+}
+
+#####################################################################################################################
+# Globals: CMOR_EXP_CUSTOM BSC_OUTCLASS CMOR_ADD_STARTDATE sub_experiment_id
+# Arguments:
+#
+# Returns:
+#   None
+# Purpose: Creates the subexperiment id according to CMOR_EXP_CUSTOM BSC_OUTCLASS CMOR_ADD_STARTDATE to add it in the CMOR file names
+#
+#####################################################################################################################
+
+function create_sub_experiment_id() {
+  #The logics of the creation of the sub_experiment_id are described in https://earth.bsc.es/gitlab/es/auto-ecearth3/-/issues/1355#note_101060
+  if [[ ${CMOR_EXP_CUSTOM} == "TRUE" ]]; then
+    if [[ -n $(echo ${BSC_OUTCLASS} | grep dcpp) ]] || [[ "${CMOR_ACTIVITY_ID}" == "DCPP" ]]; then
+      if [[ ${CMOR_ADD_STARTDATE} == "TRUE" ]]; then
+        echo TRUE TRUE TRUE
+        sub_experiment_id=s$(echo ${START_date} | cut -c1-8)
+      else
+        echo TRUE TRUE FALSE
+        sub_experiment_id=s$(echo ${START_date} | cut -c1-4)
+      fi
+    else
+      if [[ ${CMOR_ADD_STARTDATE} == "TRUE" ]]; then
+        echo TRUE FALSE TRUE
+        sub_experiment_id=s$(echo ${START_date} | cut -c1-8)
+      else
+        echo TRUE FALSE FALSE
+        sub_experiment_id=""
+      fi
+    fi
+  else
+    if [[ -n $(echo ${BSC_OUTCLASS} | grep dcpp) ]] || [[ "${CMOR_ACTIVITY_ID}" == "DCPP" ]]; then
+      if [[ ${CMOR_ADD_STARTDATE} == "TRUE" ]]; then
+        echo "Running with CMOR_EXP_CUSTOM=False + CMOR_ADD_STARTDATE=True is forbidden, exiting"
+        exit 0
+      else
+        sub_experiment_id=s$(echo ${START_date} | cut -c1-4)
+      fi
+    else
+      if [[ ${CMOR_ADD_STARTDATE} == "TRUE" ]]; then
+        echo "Running with CMOR_EXP_CUSTOM=False + CMOR_ADD_STARTDATE=True is forbidden, exiting"
+        exit 0
+      else
+        sub_experiment_id=""
+      fi
+    fi
+  fi
+
+}
++ create_sub_experiment_id
++ [[ FALSE == \T\R\U\E ]]
+echo ${BSC_OUTCLASS} | grep dcpp
+++ echo reduced
+++ grep dcpp
++ [[ -n '' ]]
++ [[ CMIP == \D\C\P\P ]]
++ [[ FALSE == \T\R\U\E ]]
++ sub_experiment_id=
++ metadata_dir=/gpfs/scratch/bsc32/bsc32627/t0ni/19931101/fc0/runtime/../tmp/cmor/metadata-CMIP-atm-fc0-199311
++ mkdir -p /gpfs/scratch/bsc32/bsc32627/t0ni/19931101/fc0/runtime/../tmp/cmor/metadata-CMIP-atm-fc0-199311
++ cd /gpfs/scratch/bsc32/bsc32627/t0ni/19931101/fc0/runtime/../tmp/cmor/metadata-CMIP-atm-fc0-199311
++ /gpfs/scratch/bsc32/bsc32627/t0ni/auto-ecearth3/ece2cmor/ece2cmor3/scripts/modify-metadata-template.sh CMIP piControl EC-EARTH-AOGCM /gpfs/scratch/bsc32/bsc32627/t0ni/auto-ecearth3/ece2cmor/ece2cmor3/resources/metadata-templates/cmip6-CMIP-piControl-metadata-template.json
++ metadata_template_oce='/gpfs/scratch/bsc32/bsc32627/t0ni/19931101/fc0/runtime/../tmp/cmor/metadata-CMIP-atm-fc0-199311/metadata*-CMIP-piControl-EC-EARTH-AOGCM-nemo-template.json'
++ metadata_template_atm='/gpfs/scratch/bsc32/bsc32627/t0ni/19931101/fc0/runtime/../tmp/cmor/metadata-CMIP-atm-fc0-199311/metadata*-CMIP-piControl-EC-EARTH-AOGCM-ifs-template.json'
++ metadata_template_lpjg='/gpfs/scratch/bsc32/bsc32627/t0ni/19931101/fc0/runtime/../tmp/cmor/metadata-CMIP-atm-fc0-199311/metadata*-CMIP-piControl-EC-EARTH-AOGCM-lpjg-template.json'
++ metadata_template_tm5='/gpfs/scratch/bsc32/bsc32627/t0ni/19931101/fc0/runtime/../tmp/cmor/metadata-CMIP-atm-fc0-199311/metadata*-CMIP-piControl-EC-EARTH-AOGCM-tm5-template.json'
++ for f in '${metadata_dir}/*${CMOR_EXP}*-*-template.json'
++ sed -i 's/"realization_index":            "1",/"realization_index":            "1",/g' /gpfs/scratch/bsc32/bsc32627/t0ni/19931101/fc0/runtime/../tmp/cmor/metadata-CMIP-atm-fc0-199311/metadata-cmip6-CMIP-piControl-EC-EARTH-AOGCM-ifs-template.json
++ sed -i '10 a\    "outpath":                      "/gpfs/scratch/bsc32/bsc32627/t0ni/19931101/fc0/runtime/cmor_outputs/cmor_atm_1",' /gpfs/scratch/bsc32/bsc32627/t0ni/19931101/fc0/runtime/../tmp/cmor/metadata-CMIP-atm-fc0-199311/metadata-cmip6-CMIP-piControl-EC-EARTH-AOGCM-ifs-template.json
++ sed -i '11 a\    "output_path_template":                      "<activity_id><institution_id><source_id><experiment_id><variant_label><table><variable_id><grid_label><v20211218>",' /gpfs/scratch/bsc32/bsc32627/t0ni/19931101/fc0/runtime/../tmp/cmor/metadata-CMIP-atm-fc0-199311/metadata-cmip6-CMIP-piControl-EC-EARTH-AOGCM-ifs-template.json
++ sed -i '15 a\    "variant_info":                 "forcing: Nat.Ant. Member generated from autosubmit member fc0",' /gpfs/scratch/bsc32/bsc32627/t0ni/19931101/fc0/runtime/../tmp/cmor/metadata-CMIP-atm-fc0-199311/metadata-cmip6-CMIP-piControl-EC-EARTH-AOGCM-ifs-template.json
++ [[ -n '' ]]
++ for f in '${metadata_dir}/*${CMOR_EXP}*-*-template.json'
++ sed -i 's/"realization_index":            "1",/"realization_index":            "1",/g' /gpfs/scratch/bsc32/bsc32627/t0ni/19931101/fc0/runtime/../tmp/cmor/metadata-CMIP-atm-fc0-199311/metadata-cmip6-CMIP-piControl-EC-EARTH-AOGCM-nemo-template.json
++ sed -i '10 a\    "outpath":                      "/gpfs/scratch/bsc32/bsc32627/t0ni/19931101/fc0/runtime/cmor_outputs/cmor_atm_1",' /gpfs/scratch/bsc32/bsc32627/t0ni/19931101/fc0/runtime/../tmp/cmor/metadata-CMIP-atm-fc0-199311/metadata-cmip6-CMIP-piControl-EC-EARTH-AOGCM-nemo-template.json
++ sed -i '11 a\    "output_path_template":                      "<activity_id><institution_id><source_id><experiment_id><variant_label><table><variable_id><grid_label><v20211218>",' /gpfs/scratch/bsc32/bsc32627/t0ni/19931101/fc0/runtime/../tmp/cmor/metadata-CMIP-atm-fc0-199311/metadata-cmip6-CMIP-piControl-EC-EARTH-AOGCM-nemo-template.json
++ sed -i '15 a\    "variant_info":                 "forcing: Nat.Ant. Member generated from autosubmit member fc0",' /gpfs/scratch/bsc32/bsc32627/t0ni/19931101/fc0/runtime/../tmp/cmor/metadata-CMIP-atm-fc0-199311/metadata-cmip6-CMIP-piControl-EC-EARTH-AOGCM-nemo-template.json
++ [[ -n '' ]]
++ cd /gpfs/scratch/bsc32/bsc32627/t0ni/19931101/fc0/runtime/../tmp/cmor/metadata-CMIP-atm-fc0-199311
++ find . -type f '!' -name '*ifs*' -delete
++ tmpdir=/gpfs/scratch/bsc32/bsc32627/t0ni/19931101/fc0/runtime/../tmp/cmor/tmp-atm-fc0-199311
++ rm -rf /gpfs/scratch/bsc32/bsc32627/t0ni/19931101/fc0/runtime/../tmp/cmor/tmp-atm-fc0-199311
++ mkdir -p /gpfs/scratch/bsc32/bsc32627/t0ni/19931101/fc0/runtime/../tmp/cmor/tmp-atm-fc0-199311
++ rm -rf /gpfs/scratch/bsc32/bsc32627/t0ni/19931101/fc0/runtime/cmor_outputs/cmor_atm_1
++ mkdir -p /gpfs/scratch/bsc32/bsc32627/t0ni/19931101/fc0/runtime/cmor_outputs/cmor_atm_1
++ cd /gpfs/scratch/bsc32/bsc32627/t0ni/auto-ecearth3/ece2cmor/ece2cmor3
++ ./ece2cmor.py --ifs --exp t0ni --meta /gpfs/scratch/bsc32/bsc32627/t0ni/19931101/fc0/runtime/../tmp/cmor/metadata-CMIP-atm-fc0-199311/metadata-cmip6-CMIP-piControl-EC-EARTH-AOGCM-ifs-template.json --tmpdir /gpfs/scratch/bsc32/bsc32627/t0ni/19931101/fc0/runtime/../tmp/cmor/tmp-atm-fc0-199311 --varlist /gpfs/scratch/bsc32/bsc32627/t0ni/auto-ecearth3/outclass/reduced/reduced_varlist.json /gpfs/scratch/bsc32/bsc32627/t0ni/19931101/fc0/runtime/output/ifs/001 --skip_alevel_vars
+2021-12-18 09:18:40 DEBUG:git.cmd: Popen(['git', 'version'], cwd=/gpfs/scratch/bsc32/bsc32627/t0ni/auto-ecearth3/ece2cmor/ece2cmor3, universal_newlines=False, shell=None, istream=None)
+2021-12-18 09:18:40 DEBUG:git.cmd: Popen(['git', 'version'], cwd=/gpfs/scratch/bsc32/bsc32627/t0ni/auto-ecearth3/ece2cmor/ece2cmor3, universal_newlines=False, shell=None, istream=None)
+2021-12-18 09:18:40 DEBUG:git.cmd: Popen(['git', 'cat-file', '--batch-check'], cwd=/gpfs/scratch/bsc32/bsc32627/t0ni/auto-ecearth3/ece2cmor, universal_newlines=False, shell=None, istream=<valid stream>)
+2021-12-18 09:18:40 DEBUG:git.cmd: Popen(['git', 'diff', '--cached', '--abbrev=40', '--full-index', '--raw'], cwd=/gpfs/scratch/bsc32/bsc32627/t0ni/auto-ecearth3/ece2cmor, universal_newlines=False, shell=None, istream=None)
+2021-12-18 09:18:40 DEBUG:git.cmd: Popen(['git', 'diff', '--abbrev=40', '--full-index', '--raw'], cwd=/gpfs/scratch/bsc32/bsc32627/t0ni/auto-ecearth3/ece2cmor, universal_newlines=False, shell=None, istream=None)
+2021-12-18 09:18:48 DEBUG:git.cmd: Popen(['git', 'cat-file', '--batch-check'], cwd=/gpfs/scratch/bsc32/bsc32627/t0ni/auto-ecearth3/ece2cmor, universal_newlines=False, shell=None, istream=<valid stream>)
+2021-12-18 09:18:48 DEBUG:git.cmd: Popen(['git', 'diff', '--cached', '--abbrev=40', '--full-index', '--raw'], cwd=/gpfs/scratch/bsc32/bsc32627/t0ni/auto-ecearth3/ece2cmor, universal_newlines=False, shell=None, istream=None)
+2021-12-18 09:18:48 DEBUG:git.cmd: Popen(['git', 'diff', '--abbrev=40', '--full-index', '--raw'], cwd=/gpfs/scratch/bsc32/bsc32627/t0ni/auto-ecearth3/ece2cmor, universal_newlines=False, shell=None, istream=None)
+2021-12-18 09:18:48 INFO:ece2cmor3.ece2cmorlib: Metadata attribute comment: 
+2021-12-18 09:18:48 INFO:ece2cmor3.ece2cmorlib: Metadata attribute parent_source_id: EC-Earth3-Veg
+2021-12-18 09:18:48 INFO:ece2cmor3.ece2cmorlib: Metadata attribute output_path_template: <activity_id><institution_id><source_id><experiment_id><variant_label><table><variable_id><grid_label><v20211218>
+2021-12-18 09:18:48 INFO:ece2cmor3.ece2cmorlib: Metadata attribute variant_info: forcing: Nat.Ant. Member generated from autosubmit member fc0
+2021-12-18 09:18:48 INFO:ece2cmor3.ece2cmorlib: Metadata attribute _cmip6_option: CMIP6
+2021-12-18 09:18:48 INFO:ece2cmor3.ece2cmorlib: Metadata attribute parent_experiment_id: piControl-spinup
+2021-12-18 09:18:48 INFO:ece2cmor3.ece2cmorlib: Metadata attribute _control_vocabulary_file: CMIP6_CV.json
+2021-12-18 09:18:48 INFO:ece2cmor3.ece2cmorlib: Metadata attribute ece2cmor_git_revision: 3aeaaf08bcf171b36c76caf59a1d5c842bec2798-changes
+2021-12-18 09:18:48 INFO:ece2cmor3.ece2cmorlib: Metadata attribute outpath: /gpfs/scratch/bsc32/bsc32627/t0ni/19931101/fc0/runtime/cmor_outputs/cmor_atm_1
+2021-12-18 09:18:48 INFO:ece2cmor3.ece2cmorlib: Metadata attribute physics_index: 1
+2021-12-18 09:18:48 INFO:ece2cmor3.ece2cmorlib: Metadata attribute latest_ece2cmor_version: v1.8.0
+2021-12-18 09:18:48 INFO:ece2cmor3.ece2cmorlib: Metadata attribute sub_experiment: none
+2021-12-18 09:18:48 INFO:ece2cmor3.ece2cmorlib: Metadata attribute tracking_prefix: hdl:21.14100
+2021-12-18 09:18:48 INFO:ece2cmor3.ece2cmorlib: Metadata attribute branch_time_in_child: 0.0D
+2021-12-18 09:18:48 INFO:ece2cmor3.ece2cmorlib: Metadata attribute realization_index: 1
+2021-12-18 09:18:48 INFO:ece2cmor3.ece2cmorlib: Metadata attribute parent_variant_label: r1i1p1f1
+2021-12-18 09:18:48 INFO:ece2cmor3.ece2cmorlib: Metadata attribute forcing_index: 1
+2021-12-18 09:18:48 INFO:ece2cmor3.ece2cmorlib: Metadata attribute source: EC-Earth3 (2019)
+2021-12-18 09:18:48 INFO:ece2cmor3.ece2cmorlib: Metadata attribute grid_label: gr
+2021-12-18 09:18:48 INFO:ece2cmor3.ece2cmorlib: Metadata attribute activity_id: CMIP
+2021-12-18 09:18:48 INFO:ece2cmor3.ece2cmorlib: Metadata attribute #variant_info: uncomment and describe briefly what makes your ripf identifier unique (only needed if i/=1, p/=1 or f/=1)
+2021-12-18 09:18:48 INFO:ece2cmor3.ece2cmorlib: Metadata attribute parent_activity_id: CMIP
+2021-12-18 09:18:48 INFO:ece2cmor3.ece2cmorlib: Metadata attribute institution_id: EC-Earth-Consortium
+2021-12-18 09:18:48 INFO:ece2cmor3.ece2cmorlib: Metadata attribute source_type: AOGCM
+2021-12-18 09:18:48 INFO:ece2cmor3.ece2cmorlib: Metadata attribute grid: T255L91
+2021-12-18 09:18:48 INFO:ece2cmor3.ece2cmorlib: Metadata attribute mip_era: CMIP6
+2021-12-18 09:18:48 INFO:ece2cmor3.ece2cmorlib: Metadata attribute latest_applied_cmor_fixer_version: None
+2021-12-18 09:18:48 INFO:ece2cmor3.ece2cmorlib: Metadata attribute sub_experiment_id: none
+2021-12-18 09:18:48 INFO:ece2cmor3.ece2cmorlib: Metadata attribute branch_time_in_parent: 0.0D
+2021-12-18 09:18:48 INFO:ece2cmor3.ece2cmorlib: Metadata attribute parent_time_units: days since 1850-01-01
+2021-12-18 09:18:48 INFO:ece2cmor3.ece2cmorlib: Metadata attribute branch_method: standard
+2021-12-18 09:18:48 INFO:ece2cmor3.ece2cmorlib: Metadata attribute license: CMIP6 model data produced by EC-Earth-Consortium is licensed under a Creative Commons Attribution-ShareAlike 4.0 International License (https://creativecommons.org/licenses). Consult https://pcmdi.llnl.gov/CMIP6/TermsOfUse for terms of use governing CMIP6 output, including citation requirements and proper acknowledgment. Further information about this data, including some limitations, can be found via the further_info_url (recorded as a global attribute in this file) and at http://www.ec-earth.org. The data producers and data providers make no warranty, either express or implied, including, but not limited to, warranties of merchantability and fitness for a particular purpose. All liabilities arising from the supply of the information (including any liability arising in negligence) are excluded to the fullest extent permitted by law.
+2021-12-18 09:18:48 INFO:ece2cmor3.ece2cmorlib: Metadata attribute initialization_index: 1
+2021-12-18 09:18:48 INFO:ece2cmor3.ece2cmorlib: Metadata attribute parent_mip_era: CMIP6
+2021-12-18 09:18:48 INFO:ece2cmor3.ece2cmorlib: Metadata attribute contact: cmip6-data@ec-earth.org
+2021-12-18 09:18:48 INFO:ece2cmor3.ece2cmorlib: Metadata attribute experiment_id: piControl
+2021-12-18 09:18:48 INFO:ece2cmor3.ece2cmorlib: Metadata attribute source_id: EC-Earth3
+2021-12-18 09:18:48 INFO:ece2cmor3.ece2cmorlib: Metadata attribute nominal_resolution: 100 km
+2021-12-18 09:18:48 INFO:ece2cmor3.ece2cmorlib: Metadata attribute history: processed by ece2cmor v1.8.0, git rev. 3aeaaf08bcf171b36c76caf59a1d5c842bec2798-changes
+
+2021-12-18 09:18:48 INFO:ece2cmor3.cmor_target: CMOR tables data_specs_version : 01.00.33
+2021-12-18 09:18:48 INFO:ece2cmor3.cmor_target: CMOR tables cmor_version : 3.5
+2021-12-18 09:18:48 INFO:ece2cmor3.cmor_target: CMOR tables Conventions : CF-1.7 CMIP-6.2
+2021-12-18 09:18:48 INFO:ece2cmor3.cmor_target: CMOR tables table_date : 18 November 2020
+2021-12-18 09:18:48 INFO:ece2cmor3.taskloader: Found 0 requested cmor target variables for lpjg.
+2021-12-18 09:18:48 INFO:ece2cmor3.taskloader: Found 27 requested cmor target variables for nemo.
+2021-12-18 09:18:48 INFO:ece2cmor3.taskloader: Found 0 requested cmor target variables for tm5.
+2021-12-18 09:18:48 INFO:ece2cmor3.taskloader: Found 28 requested cmor target variables for ifs.
+2021-12-18 09:18:48 INFO:ece2cmor3.taskloader: Created 28 ece2cmor tasks from input variable list.
+2021-12-18 09:18:48 INFO:ece2cmor3.ece2cmorlib: Selected 28 IFS tasks from 28 input tasks
+2021-12-18 09:18:49 INFO:ece2cmor3.grib_filter: Assumed previous month file for /gpfs/scratch/bsc32/bsc32627/t0ni/19931101/fc0/runtime/output/ifs/001/ICMGGt0ni+199311: /gpfs/scratch/bsc32/bsc32627/t0ni/19931101/fc0/runtime/output/ifs/001/ICMGGt0ni+000000
+2021-12-18 09:18:49 INFO:ece2cmor3.grib_filter: Assumed previous month file for /gpfs/scratch/bsc32/bsc32627/t0ni/19931101/fc0/runtime/output/ifs/001/ICMSHt0ni+199311: /gpfs/scratch/bsc32/bsc32627/t0ni/19931101/fc0/runtime/output/ifs/001/ICMSHt0ni+000000
+2021-12-18 09:18:49 INFO:ece2cmor3.ifs2cmor: Inspecting 28 tasks.
+2021-12-18 09:18:49 INFO:ece2cmor3.ifs2cmor: Validated 28 tasks for processing.
+2021-12-18 09:18:49 INFO:ece2cmor3.ifs2cmor: Executing 28 IFS tasks...
+2021-12-18 09:18:49 INFO:ece2cmor3.grib_filter: Filtering grib file /gpfs/scratch/bsc32/bsc32627/t0ni/19931101/fc0/runtime/output/ifs/001/ICMGGt0ni+000000...
+2021-12-18 09:18:49 INFO:ece2cmor3.grib_filter: Filtering grib file /gpfs/scratch/bsc32/bsc32627/t0ni/19931101/fc0/runtime/output/ifs/001/ICMSHt0ni+000000...
+2021-12-18 09:18:49 INFO:ece2cmor3.grib_filter: Filtering grib file /gpfs/scratch/bsc32/bsc32627/t0ni/19931101/fc0/runtime/output/ifs/001/ICMGGt0ni+199311...
+2021-12-18 09:18:53 INFO:ece2cmor3.grib_filter: Filtering grib file /gpfs/scratch/bsc32/bsc32627/t0ni/19931101/fc0/runtime/output/ifs/001/ICMSHt0ni+199311...
+2021-12-18 09:19:11 INFO:ece2cmor3.postproc: Post-processing target land in table fx from file /gpfs/scratch/bsc32/bsc32627/t0ni/19931101/fc0/runtime/output/ifs/001/ICMGGt0ni+000000 with cdo command -setgridtype,regular -seltimestep,1 -selcode,172
+2021-12-18 09:19:12 INFO:ece2cmor3.postproc: Post-processing target sea in table fx from file /gpfs/scratch/bsc32/bsc32627/t0ni/19931101/fc0/runtime/output/ifs/001/ICMGGt0ni+000000 with cdo command -setgridtype,regular -seltimestep,1 -selcode,172
+2021-12-18 09:19:13 INFO:ece2cmor3.ifs2cmor: Post-processing variable 144 for target variable prsn...
+2021-12-18 09:19:13 INFO:ece2cmor3.ifs2cmor: Post-processing variable 132 for target variable va...
+2021-12-18 09:19:13 INFO:ece2cmor3.ifs2cmor: Post-processing variable 151 for target variable psl...
+2021-12-18 09:19:13 INFO:ece2cmor3.ifs2cmor: Post-processing variable 146 for target variable hfss...
+2021-12-18 09:19:13 INFO:ece2cmor3.ifs2cmor: Post-processing variable 166 for target variable vas...
+2021-12-18 09:19:13 INFO:ece2cmor3.ifs2cmor: Post-processing variable 175 for target variable rlds...
+2021-12-18 09:19:13 INFO:ece2cmor3.ifs2cmor: Post-processing variable 205 for target variable mrro...
+2021-12-18 09:19:13 INFO:ece2cmor3.ifs2cmor: Post-processing variable 169 for target variable rsds...
+2021-12-18 09:19:13 INFO:ece2cmor3.postproc: Post-processing target hfss in table Amon from file /gpfs/scratch/bsc32/bsc32627/t0ni/19931101/fc0/runtime/../tmp/cmor/tmp-atm-fc0-199311/t0ni-ifs-1993/146.128.1.6 with cdo command -setgridtype,regular -monmean -selcode,146
+2021-12-18 09:19:13 INFO:ece2cmor3.postproc: Post-processing target mrro in table Lmon from file /gpfs/scratch/bsc32/bsc32627/t0ni/19931101/fc0/runtime/../tmp/cmor/tmp-atm-fc0-199311/t0ni-ifs-1993/205.128.1.6_172.128.1.6 with cdo command -setgridtype,regular -monmean -expr,'var205=(var205)/(var172>0.5)' -selcode,205,205,172
+2021-12-18 09:19:13 INFO:ece2cmor3.postproc: Post-processing target psl in table Amon from file /gpfs/scratch/bsc32/bsc32627/t0ni/19931101/fc0/runtime/../tmp/cmor/tmp-atm-fc0-199311/t0ni-ifs-1993/151.128.1.6 with cdo command -setgridtype,regular -monmean -selcode,151
+2021-12-18 09:19:13 INFO:ece2cmor3.postproc: Post-processing target vas in table Amon from file /gpfs/scratch/bsc32/bsc32627/t0ni/19931101/fc0/runtime/../tmp/cmor/tmp-atm-fc0-199311/t0ni-ifs-1993/166.128.105.6 with cdo command -setgridtype,regular -monmean -selcode,166
+2021-12-18 09:19:13 INFO:ece2cmor3.postproc: Post-processing target rlds in table Amon from file /gpfs/scratch/bsc32/bsc32627/t0ni/19931101/fc0/runtime/../tmp/cmor/tmp-atm-fc0-199311/t0ni-ifs-1993/175.128.1.6 with cdo command -setgridtype,regular -monmean -selcode,175
+2021-12-18 09:19:13 INFO:ece2cmor3.postproc: Post-processing target rsds in table Amon from file /gpfs/scratch/bsc32/bsc32627/t0ni/19931101/fc0/runtime/../tmp/cmor/tmp-atm-fc0-199311/t0ni-ifs-1993/169.128.1.6 with cdo command -setgridtype,regular -monmean -selcode,169
+2021-12-18 09:19:13 INFO:ece2cmor3.postproc: Post-processing target prsn in table Amon from file /gpfs/scratch/bsc32/bsc32627/t0ni/19931101/fc0/runtime/../tmp/cmor/tmp-atm-fc0-199311/t0ni-ifs-1993/144.128.1.6 with cdo command -setgridtype,regular -monmean -selcode,144
+2021-12-18 09:19:13 INFO:ece2cmor3.ifs2cmor: Cmorizing source variable 146 to target variable hfss...
+2021-12-18 09:19:14 INFO:ece2cmor3.ifs2cmor: Cmorizing source variable 144 to target variable prsn...
+2021-12-18 09:19:14 INFO:ece2cmor3.ifs2cmor: Cmorizing source variable 166 to target variable vas...
+2021-12-18 09:19:14 INFO:ece2cmor3.ifs2cmor: Cmorizing source variable 151 to target variable psl...
+2021-12-18 09:19:14 INFO:ece2cmor3.ifs2cmor: Cmorizing source variable 169 to target variable rsds...
+2021-12-18 09:19:14 INFO:ece2cmor3.ifs2cmor: Loading CMOR table Amon...
+2021-12-18 09:19:14 INFO:ece2cmor3.ifs2cmor: Creating time axis using variable hfss...
+2021-12-18 09:19:14 INFO:ece2cmor3.ifs2cmor: Loading CMOR table Amon...
+2021-12-18 09:19:14 INFO:ece2cmor3.ifs2cmor: Creating time axis using variable psl...
+2021-12-18 09:19:14 INFO:ece2cmor3.ifs2cmor: Loading CMOR table Amon...
+2021-12-18 09:19:14 INFO:ece2cmor3.ifs2cmor: Creating time axis using variable vas...
+2021-12-18 09:19:14 INFO:ece2cmor3.ifs2cmor: Loading CMOR table Amon...
+2021-12-18 09:19:14 INFO:ece2cmor3.ifs2cmor: Creating time axis using variable prsn...
+2021-12-18 09:19:15 INFO:ece2cmor3.ifs2cmor: Loading CMOR table Amon...
+2021-12-18 09:19:15 INFO:ece2cmor3.ifs2cmor: Creating time axis using variable rsds...
+2021-12-18 09:19:15 INFO:ece2cmor3.ifs2cmor: Cmorizing source variable 175 to target variable rlds...
+2021-12-18 09:19:15 INFO:ece2cmor3.postproc: Post-processing target va in table Amon from file /gpfs/scratch/bsc32/bsc32627/t0ni/19931101/fc0/runtime/../tmp/cmor/tmp-atm-fc0-199311/t0ni-ifs-1993/132.128.210.6 with cdo command -sp2gpl -monmean -sellevel,85000.,50000.,5000. -selzaxis,pressure -selcode,132
+2021-12-18 09:19:15 INFO:ece2cmor3.ifs2cmor: Loading CMOR table Amon...
+2021-12-18 09:19:15 INFO:ece2cmor3.ifs2cmor: Creating time axis using variable rlds...
+2021-12-18 09:19:16 INFO:ece2cmor3.ifs2cmor: Post-processing variable 96 for target variable rlus...
+2021-12-18 09:19:16 INFO:ece2cmor3.ifs2cmor: Post-processing variable 168 for target variable tdps...
+2021-12-18 09:19:16 INFO:ece2cmor3.ifs2cmor: Post-processing variable 147 for target variable hfls...
+2021-12-18 09:19:16 INFO:ece2cmor3.ifs2cmor: Post-processing variable 179 for target variable rlut...
+2021-12-18 09:19:16 INFO:ece2cmor3.ifs2cmor: Cmorizing source variable 205 to target variable mrro...
+2021-12-18 09:19:16 INFO:ece2cmor3.ifs2cmor: Post-processing variable 143 for target variable prc...
+2021-12-18 09:19:16 INFO:ece2cmor3.postproc: Post-processing target tdps in table Emon from file /gpfs/scratch/bsc32/bsc32627/t0ni/19931101/fc0/runtime/../tmp/cmor/tmp-atm-fc0-199311/t0ni-ifs-1993/168.128.105.6 with cdo command -setgridtype,regular -monmean -selcode,168
+2021-12-18 09:19:16 INFO:ece2cmor3.postproc: Post-processing target rlus in table Amon from file /gpfs/scratch/bsc32/bsc32627/t0ni/19931101/fc0/runtime/../tmp/cmor/tmp-atm-fc0-199311/t0ni-ifs-1993/177.128.1_175.128.1.6 with cdo command -setgridtype,regular -monmean -expr,'var96=var177-var175' -selcode,177,175
+2021-12-18 09:19:16 INFO:ece2cmor3.postproc: Post-processing target hfls in table Amon from file /gpfs/scratch/bsc32/bsc32627/t0ni/19931101/fc0/runtime/../tmp/cmor/tmp-atm-fc0-199311/t0ni-ifs-1993/147.128.1.6 with cdo command -setgridtype,regular -monmean -selcode,147
+2021-12-18 09:19:16 INFO:ece2cmor3.postproc: Post-processing target rlut in table Amon from file /gpfs/scratch/bsc32/bsc32627/t0ni/19931101/fc0/runtime/../tmp/cmor/tmp-atm-fc0-199311/t0ni-ifs-1993/179.128.1.6 with cdo command -setgridtype,regular -monmean -selcode,179
+2021-12-18 09:19:16 INFO:ece2cmor3.postproc: Post-processing target prc in table Amon from file /gpfs/scratch/bsc32/bsc32627/t0ni/19931101/fc0/runtime/../tmp/cmor/tmp-atm-fc0-199311/t0ni-ifs-1993/143.128.1.6 with cdo command -setgridtype,regular -monmean -selcode,143
+2021-12-18 09:19:17 INFO:ece2cmor3.ifs2cmor: Cmorizing source variable 147 to target variable hfls...
+2021-12-18 09:19:17 INFO:ece2cmor3.ifs2cmor: Loading CMOR table Amon...
+2021-12-18 09:19:17 INFO:ece2cmor3.ifs2cmor: Cmorizing source variable 168 to target variable tdps...
+2021-12-18 09:19:17 INFO:ece2cmor3.ifs2cmor: Loading CMOR table Lmon...
+2021-12-18 09:19:17 INFO:ece2cmor3.ifs2cmor: Creating time axis using variable mrro...
+2021-12-18 09:19:17 INFO:ece2cmor3.ifs2cmor: Cmorizing source variable 179 to target variable rlut...
+2021-12-18 09:19:17 INFO:ece2cmor3.ifs2cmor: Loading CMOR table Amon...
+2021-12-18 09:19:17 INFO:ece2cmor3.ifs2cmor: Post-processing variable 212 for target variable rsdt...
+2021-12-18 09:19:17 INFO:ece2cmor3.ifs2cmor: Cmorizing source variable 143 to target variable prc...
+2021-12-18 09:19:17 INFO:ece2cmor3.ifs2cmor: Loading CMOR table Amon...
+2021-12-18 09:19:17 INFO:ece2cmor3.ifs2cmor: Cmorizing source variable 96 to target variable rlus...
+2021-12-18 09:19:17 INFO:ece2cmor3.ifs2cmor: Loading CMOR table Amon...
+2021-12-18 09:19:17 INFO:ece2cmor3.postproc: Post-processing target rsdt in table Amon from file /gpfs/scratch/bsc32/bsc32627/t0ni/19931101/fc0/runtime/../tmp/cmor/tmp-atm-fc0-199311/t0ni-ifs-1993/212.128.1.6 with cdo command -setgridtype,regular -monmean -selcode,212
+2021-12-18 09:19:17 INFO:ece2cmor3.ifs2cmor: Loading CMOR table Emon...
+2021-12-18 09:19:17 INFO:ece2cmor3.ifs2cmor: Creating time axis using variable tdps...
+2021-12-18 09:19:18 INFO:ece2cmor3.ifs2cmor: Post-processing variable 95 for target variable rsus...
+2021-12-18 09:19:18 INFO:ece2cmor3.ifs2cmor: Post-processing variable 97 for target variable rsut...
+2021-12-18 09:19:18 INFO:ece2cmor3.ifs2cmor: Cmorizing source variable 132 to target variable va...
+2021-12-18 09:19:18 INFO:ece2cmor3.ifs2cmor: Post-processing variable 151 for target variable psl...
+2021-12-18 09:19:18 INFO:ece2cmor3.ifs2cmor: Cmorizing source variable 212 to target variable rsdt...
+2021-12-18 09:19:18 INFO:ece2cmor3.ifs2cmor: Loading CMOR table Amon...
+2021-12-18 09:19:18 INFO:ece2cmor3.postproc: Post-processing target rsus in table Amon from file /gpfs/scratch/bsc32/bsc32627/t0ni/19931101/fc0/runtime/../tmp/cmor/tmp-atm-fc0-199311/t0ni-ifs-1993/169.128.1_176.128.1.6 with cdo command -setgridtype,regular -monmean -expr,'var95=var176-var169' -selcode,176,169
+2021-12-18 09:19:18 INFO:ece2cmor3.postproc: Post-processing target rsut in table Amon from file /gpfs/scratch/bsc32/bsc32627/t0ni/19931101/fc0/runtime/../tmp/cmor/tmp-atm-fc0-199311/t0ni-ifs-1993/178.128.1_212.128.1.6 with cdo command -setgridtype,regular -monmean -expr,'var97=var178-var212' -selcode,178,212
+2021-12-18 09:19:18 INFO:ece2cmor3.ifs2cmor: Post-processing variable 164 for target variable clt...
+2021-12-18 09:19:18 INFO:ece2cmor3.ifs2cmor: Post-processing variable 34 for target variable tosa...
+2021-12-18 09:19:18 INFO:ece2cmor3.postproc: Post-processing target psl in table day from file /gpfs/scratch/bsc32/bsc32627/t0ni/19931101/fc0/runtime/../tmp/cmor/tmp-atm-fc0-199311/t0ni-ifs-1993/151.128.1.6 with cdo command -setgridtype,regular -daymean -selcode,151
+2021-12-18 09:19:19 INFO:ece2cmor3.postproc: Post-processing target clt in table Amon from file /gpfs/scratch/bsc32/bsc32627/t0ni/19931101/fc0/runtime/../tmp/cmor/tmp-atm-fc0-199311/t0ni-ifs-1993/164.128.1.6 with cdo command -setgridtype,regular -monmean -selcode,164
+2021-12-18 09:19:19 INFO:ece2cmor3.postproc: Post-processing target tosa in table Amon from file /gpfs/scratch/bsc32/bsc32627/t0ni/19931101/fc0/runtime/../tmp/cmor/tmp-atm-fc0-199311/t0ni-ifs-1993/34.128.1_172.128.1.6 with cdo command -setgridtype,regular -monmean -expr,'var34=(var34)/(var172<=0.5)' -selcode,34,34,172
+2021-12-18 09:19:19 INFO:ece2cmor3.ifs2cmor: Loading CMOR table Amon...
+2021-12-18 09:19:19 INFO:ece2cmor3.ifs2cmor: Creating time axis using variable va...
+2021-12-18 09:19:19 INFO:ece2cmor3.ifs2cmor: Post-processing variable 130 for target variable ta...
+2021-12-18 09:19:19 INFO:ece2cmor3.ifs2cmor: Post-processing variable 167 for target variable tas...
+2021-12-18 09:19:19 INFO:ece2cmor3.ifs2cmor: Cmorizing source variable 151 to target variable psl...
+2021-12-18 09:19:19 INFO:ece2cmor3.ifs2cmor: Cmorizing source variable 164 to target variable clt...
+2021-12-18 09:19:19 INFO:ece2cmor3.ifs2cmor: Loading CMOR table Amon...
+2021-12-18 09:19:19 INFO:ece2cmor3.ifs2cmor: Cmorizing source variable 95 to target variable rsus...
+2021-12-18 09:19:19 INFO:ece2cmor3.ifs2cmor: Loading CMOR table Amon...
+2021-12-18 09:19:19 INFO:ece2cmor3.ifs2cmor: Cmorizing source variable 97 to target variable rsut...
+2021-12-18 09:19:19 INFO:ece2cmor3.ifs2cmor: Loading CMOR table Amon...
+2021-12-18 09:19:19 INFO:ece2cmor3.postproc: Post-processing target tas in table Amon from file /gpfs/scratch/bsc32/bsc32627/t0ni/19931101/fc0/runtime/../tmp/cmor/tmp-atm-fc0-199311/t0ni-ifs-1993/167.128.105.6 with cdo command -setgridtype,regular -monmean -selcode,167
+2021-12-18 09:19:20 INFO:ece2cmor3.ifs2cmor: Loading CMOR table day...
+2021-12-18 09:19:20 INFO:ece2cmor3.ifs2cmor: Cmorizing source variable 167 to target variable tas...
+2021-12-18 09:19:20 INFO:ece2cmor3.ifs2cmor: Creating time axis using variable psl...
+2021-12-18 09:19:20 INFO:ece2cmor3.ifs2cmor: Loading CMOR table Amon...
+2021-12-18 09:19:20 INFO:ece2cmor3.ifs2cmor: Post-processing variable 201 for target variable tasmax...
+2021-12-18 09:19:20 INFO:ece2cmor3.ifs2cmor: Post-processing variable 182 for target variable evspsbl...
+2021-12-18 09:19:20 INFO:ece2cmor3.ifs2cmor: Post-processing variable 202 for target variable tasmin...
+2021-12-18 09:19:20 INFO:ece2cmor3.postproc: Post-processing target tasmax in table Amon from file /gpfs/scratch/bsc32/bsc32627/t0ni/19931101/fc0/runtime/../tmp/cmor/tmp-atm-fc0-199311/t0ni-ifs-1993/201.128.105.6 with cdo command -monmean -daymax -setgridtype,regular -selcode,201
+2021-12-18 09:19:20 INFO:ece2cmor3.postproc: Post-processing target evspsbl in table Amon from file /gpfs/scratch/bsc32/bsc32627/t0ni/19931101/fc0/runtime/../tmp/cmor/tmp-atm-fc0-199311/t0ni-ifs-1993/182.128.1.6 with cdo command -setgridtype,regular -monmean -selcode,182
+2021-12-18 09:19:20 INFO:ece2cmor3.postproc: Post-processing target tasmin in table Amon from file /gpfs/scratch/bsc32/bsc32627/t0ni/19931101/fc0/runtime/../tmp/cmor/tmp-atm-fc0-199311/t0ni-ifs-1993/202.128.105.6 with cdo command -monmean -daymin -setgridtype,regular -selcode,202
+2021-12-18 09:19:20 INFO:ece2cmor3.ifs2cmor: Post-processing variable 131 for target variable ua...
+2021-12-18 09:19:20 INFO:ece2cmor3.ifs2cmor: Post-processing variable 228 for target variable pr...
+2021-12-18 09:19:20 INFO:ece2cmor3.ifs2cmor: Cmorizing source variable 182 to target variable evspsbl...
+2021-12-18 09:19:20 INFO:ece2cmor3.ifs2cmor: Loading CMOR table Amon...
+2021-12-18 09:19:21 INFO:ece2cmor3.postproc: Post-processing target pr in table Amon from file /gpfs/scratch/bsc32/bsc32627/t0ni/19931101/fc0/runtime/../tmp/cmor/tmp-atm-fc0-199311/t0ni-ifs-1993/228.128.1.6 with cdo command -setgridtype,regular -monmean -selcode,228
+2021-12-18 09:19:21 INFO:ece2cmor3.ifs2cmor: Cmorizing source variable 34 to target variable tosa...
+2021-12-18 09:19:21 INFO:ece2cmor3.ifs2cmor: Cmorizing source variable 201 to target variable tasmax...
+2021-12-18 09:19:21 INFO:ece2cmor3.ifs2cmor: Loading CMOR table Amon...
+2021-12-18 09:19:21 INFO:ece2cmor3.ifs2cmor: Post-processing variable 165 for target variable uas...
+2021-12-18 09:19:21 INFO:ece2cmor3.ifs2cmor: Cmorizing source variable 202 to target variable tasmin...
+2021-12-18 09:19:21 INFO:ece2cmor3.ifs2cmor: Loading CMOR table Amon...
+2021-12-18 09:19:21 INFO:ece2cmor3.ifs2cmor: Cmorizing source variable 228 to target variable pr...
+2021-12-18 09:19:21 INFO:ece2cmor3.ifs2cmor: Loading CMOR table Amon...
+2021-12-18 09:19:22 INFO:ece2cmor3.ifs2cmor: Loading CMOR table Amon...
+2021-12-18 09:19:22 INFO:ece2cmor3.ifs2cmor: Creating time axis using variable tosa...
+2021-12-18 09:19:22 INFO:ece2cmor3.postproc: Post-processing target uas in table Amon from file /gpfs/scratch/bsc32/bsc32627/t0ni/19931101/fc0/runtime/../tmp/cmor/tmp-atm-fc0-199311/t0ni-ifs-1993/165.128.105.6 with cdo command -setgridtype,regular -monmean -selcode,165
+2021-12-18 09:19:22 INFO:ece2cmor3.ifs2cmor: Post-processing variable 141 for target variable snw...
+2021-12-18 09:19:22 INFO:ece2cmor3.ifs2cmor: Cmorizing source variable 165 to target variable uas...
+2021-12-18 09:19:22 INFO:ece2cmor3.ifs2cmor: Loading CMOR table Amon...
+2021-12-18 09:19:22 INFO:ece2cmor3.postproc: Post-processing target snw in table LImon from file /gpfs/scratch/bsc32/bsc32627/t0ni/19931101/fc0/runtime/../tmp/cmor/tmp-atm-fc0-199311/t0ni-ifs-1993/141.128.1_172.128.1.6 with cdo command -setgridtype,regular -monmean -expr,'var141=(var141)/(var172>0.5)' -selcode,141,141,172
+2021-12-18 09:19:22 INFO:ece2cmor3.postproc: Post-processing target ua in table Amon from file /gpfs/scratch/bsc32/bsc32627/t0ni/19931101/fc0/runtime/../tmp/cmor/tmp-atm-fc0-199311/t0ni-ifs-1993/131.128.210.6 with cdo command -sp2gpl -monmean -sellevel,85000.,50000.,5000. -selzaxis,pressure -selcode,131
+2021-12-18 09:19:23 INFO:ece2cmor3.postproc: Post-processing target ta in table Amon from file /gpfs/scratch/bsc32/bsc32627/t0ni/19931101/fc0/runtime/../tmp/cmor/tmp-atm-fc0-199311/t0ni-ifs-1993/130.128.210.6 with cdo command -sp2gpl -monmean -sellevel,85000.,50000.,5000. -selzaxis,pressure -selcode,130
+2021-12-18 09:19:25 INFO:ece2cmor3.ifs2cmor: Cmorizing source variable 131 to target variable ua...
+2021-12-18 09:19:25 INFO:ece2cmor3.ifs2cmor: Loading CMOR table Amon...
+2021-12-18 09:19:26 INFO:ece2cmor3.ifs2cmor: Cmorizing source variable 141 to target variable snw...
+2021-12-18 09:19:26 INFO:ece2cmor3.ifs2cmor: Cmorizing source variable 130 to target variable ta...
+2021-12-18 09:19:26 INFO:ece2cmor3.ifs2cmor: Loading CMOR table Amon...
+2021-12-18 09:19:27 INFO:ece2cmor3.ifs2cmor: Loading CMOR table LImon...
+2021-12-18 09:19:27 INFO:ece2cmor3.ifs2cmor: Creating time axis using variable snw...
+2021-12-18 09:19:28 WARNING:ece2cmor3.ifs2cmor: Skipped removal of nonempty work directory /gpfs/scratch/bsc32/bsc32627/t0ni/19931101/fc0/runtime/../tmp/cmor/tmp-atm-fc0-199311/t0ni-ifs-1993
+
+! ------
+! All files were closed successfully. 
+! ------
+! 
++ rm -rf /gpfs/scratch/bsc32/bsc32627/t0ni/19931101/fc0/runtime/../tmp/cmor/tmp-atm-fc0-199311
+printf "%03d\n" ${CHUNK}
+++ printf '%03d\n' 1
++ [[ 001 == \0\0\1 ]]
++ [[ atm == \l\p\j\g ]]
+ find ${RUN_dir}/cmor_outputs/cmor_${component}_${CHUNK} -type f -name "*Eyr*nc"
+++ find /gpfs/scratch/bsc32/bsc32627/t0ni/19931101/fc0/runtime/cmor_outputs/cmor_atm_1 -type f -name '*Eyr*nc'
++ touch /gpfs/scratch/bsc32/bsc32627/t0ni/19931101/fc0/runtime/flags/cmor_atm_1
++ clean_cmor
++ cmor_dir=/gpfs/scratch/bsc32/bsc32627/t0ni/19931101/fc0/runtime/cmor_outputs/cmor_atm_1
++ cd /gpfs/scratch/bsc32/bsc32627/t0ni/19931101/fc0/runtime/cmor_outputs/cmor_atm_1
++ [[ atm == \l\p\j\g ]]
++ find . -name '*.copy*' -type f -delete
++ check_cmor_timestep
++ cmor_dir=/gpfs/scratch/bsc32/bsc32627/t0ni/19931101/fc0/runtime/cmor_outputs/cmor_atm_1
++ cd /gpfs/scratch/bsc32/bsc32627/t0ni/19931101/fc0/runtime/cmor_outputs/cmor_atm_1
++ for freq in 6hr day mon
++ dir_to_check=
+find $cmor_dir -mindepth 9 -type d | grep -E "$freq" | head -1
+++ find /gpfs/scratch/bsc32/bsc32627/t0ni/19931101/fc0/runtime/cmor_outputs/cmor_atm_1 -mindepth 9 -type d
+++ grep -E 6hr
+++ head -1
++ for freq in 6hr day mon
++ dir_to_check=
+find $cmor_dir -mindepth 9 -type d | grep -E "$freq" | head -1
+++ find /gpfs/scratch/bsc32/bsc32627/t0ni/19931101/fc0/runtime/cmor_outputs/cmor_atm_1 -mindepth 9 -type d
+++ grep -E day
+++ head -1
++ for dir_to_check in '$(find $cmor_dir -mindepth 9 -type d | grep -E "$freq" | head -1)'
++ [[ ! -z /gpfs/scratch/bsc32/bsc32627/t0ni/19931101/fc0/runtime/cmor_outputs/cmor_atm_1/CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/day/psl/gr/v20211218 ]]
+echo $dir_to_check | grep 6hr
+++ echo /gpfs/scratch/bsc32/bsc32627/t0ni/19931101/fc0/runtime/cmor_outputs/cmor_atm_1/CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/day/psl/gr/v20211218
+++ grep 6hr
++ [[ ! -z '' ]]
+echo $dir_to_check | grep day
+++ echo /gpfs/scratch/bsc32/bsc32627/t0ni/19931101/fc0/runtime/cmor_outputs/cmor_atm_1/CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/day/psl/gr/v20211218
+++ grep day
++ [[ ! -z /gpfs/scratch/bsc32/bsc32627/t0ni/19931101/fc0/runtime/cmor_outputs/cmor_atm_1/CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/day/psl/gr/v20211218 ]]
+date -u -d $Chunk_end_date +%s
+++ date -u -d 19931130 +%s
+date -u -d $Chunk_start_date +%s
+++ date -u -d 19931101 +%s
++ expected_timesteps=30
++ cd /gpfs/scratch/bsc32/bsc32627/t0ni/19931101/fc0/runtime/cmor_outputs/cmor_atm_1/CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/day/psl/gr/v20211218
+
+          for f in *; do
+            cdo -s ntime $f
+          done | awk '{sum += $1} END {print sum}'
+++ awk '{sum += $1} END {print sum}'
+++ for f in '*'
+++ cdo -s ntime psl_day_EC-Earth3_piControl_r1i1p1f1_gr_19931101-19931130.nc
+        
++ number_of_timesteps=30
++ [[ 30 != 30 ]]
++ echo day /gpfs/scratch/bsc32/bsc32627/t0ni/19931101/fc0/runtime/cmor_outputs/cmor_atm_1/CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/day/psl/gr/v20211218 30 30
++ for freq in 6hr day mon
++ dir_to_check=
+find $cmor_dir -mindepth 9 -type d | grep -E "$freq" | head -1
+++ find /gpfs/scratch/bsc32/bsc32627/t0ni/19931101/fc0/runtime/cmor_outputs/cmor_atm_1 -mindepth 9 -type d
+++ grep -E mon
+++ head -1
++ for dir_to_check in '$(find $cmor_dir -mindepth 9 -type d | grep -E "$freq" | head -1)'
++ [[ ! -z /gpfs/scratch/bsc32/bsc32627/t0ni/19931101/fc0/runtime/cmor_outputs/cmor_atm_1/CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/LImon/snw/gr/v20211218 ]]
+echo $dir_to_check | grep 6hr
+++ echo /gpfs/scratch/bsc32/bsc32627/t0ni/19931101/fc0/runtime/cmor_outputs/cmor_atm_1/CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/LImon/snw/gr/v20211218
+++ grep 6hr
++ [[ ! -z '' ]]
+echo $dir_to_check | grep day
+++ echo /gpfs/scratch/bsc32/bsc32627/t0ni/19931101/fc0/runtime/cmor_outputs/cmor_atm_1/CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/LImon/snw/gr/v20211218
+++ grep day
++ [[ ! -z '' ]]
++ expected_timesteps=1
++ cd /gpfs/scratch/bsc32/bsc32627/t0ni/19931101/fc0/runtime/cmor_outputs/cmor_atm_1/CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/LImon/snw/gr/v20211218
+
+          for f in *; do
+            cdo -s ntime $f
+          done | awk '{sum += $1} END {print sum}'
+++ awk '{sum += $1} END {print sum}'
+++ for f in '*'
+++ cdo -s ntime snw_LImon_EC-Earth3_piControl_r1i1p1f1_gr_199311-199311.nc
+        
++ number_of_timesteps=1
++ [[ 1 != 1 ]]
++ echo mon /gpfs/scratch/bsc32/bsc32627/t0ni/19931101/fc0/runtime/cmor_outputs/cmor_atm_1/CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/LImon/snw/gr/v20211218 1 1
+
+###################
+# Autosubmit tailer
+###################
+set -xuve
++ set -xuve
+echo $(date +%s) >> ${job_name_ptrn}_STAT
+date +%s
+++ date +%s
++ echo 1639815568
+touch ${job_name_ptrn}_COMPLETED
++ touch /gpfs/scratch/bsc32/bsc32627/t0ni/LOG_t0ni/t0ni_19931101_fc0_1_CMORATM_COMPLETED
+exit 0
++ exit 0

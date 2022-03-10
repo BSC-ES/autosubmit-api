@@ -1,0 +1,4476 @@
+[INFO] JOBID=805832
+
+remove openmpi/1.8.1 (PATH, MANPATH, LD_LIBRARY_PATH)
++ . /esarchive/autosubmit/t0ni/proj/auto-ecearth3/plugins/cmorization.sh
+#####################################################################################################################
+# Globals: CMOR_REALIZATION_INDEX, MEMBER
+# Arguments:
+#
+# Returns:
+#   None
+# Purpose: Set the cmor realization index based on the member list
+#
+#####################################################################################################################
+function cmor_realization_indexing() {
+
+  if [[ ! -z ${CMOR_REALIZATION_INDEX} ]]; then
+    CMOR_REALIZATION_INDEX_LIST=($(echo ${CMOR_REALIZATION_INDEX}))
+    member_index0=$(echo $((10#$(echo ${MEMBER} | cut -c3-))))
+    realization_index=${CMOR_REALIZATION_INDEX_LIST[${member_index0}]}
+  else
+    realization_index=${member_index}
+  fi
+
+}
+
+#####################################################################################################################
+# Globals: CMOR_EXP_CUSTOM BSC_OUTCLASS CMOR_ADD_STARTDATE sub_experiment_id
+# Arguments:
+#
+# Returns:
+#   None
+# Purpose: Creates the subexperiment id according to CMOR_EXP_CUSTOM BSC_OUTCLASS CMOR_ADD_STARTDATE to add it in the CMOR file names
+#
+#####################################################################################################################
+
+function create_sub_experiment_id() {
+  #The logics of the creation of the sub_experiment_id are described in https://earth.bsc.es/gitlab/es/auto-ecearth3/-/issues/1355#note_101060
+  if [[ ${CMOR_EXP_CUSTOM} == "TRUE" ]]; then
+    if [[ -n $(echo ${BSC_OUTCLASS} | grep dcpp) ]] || [[ "${CMOR_ACTIVITY_ID}" == "DCPP" ]]; then
+      if [[ ${CMOR_ADD_STARTDATE} == "TRUE" ]]; then
+        echo TRUE TRUE TRUE
+        sub_experiment_id=s$(echo ${START_date} | cut -c1-8)
+      else
+        echo TRUE TRUE FALSE
+        sub_experiment_id=s$(echo ${START_date} | cut -c1-4)
+      fi
+    else
+      if [[ ${CMOR_ADD_STARTDATE} == "TRUE" ]]; then
+        echo TRUE FALSE TRUE
+        sub_experiment_id=s$(echo ${START_date} | cut -c1-8)
+      else
+        echo TRUE FALSE FALSE
+        sub_experiment_id=""
+      fi
+    fi
+  else
+    if [[ -n $(echo ${BSC_OUTCLASS} | grep dcpp) ]] || [[ "${CMOR_ACTIVITY_ID}" == "DCPP" ]]; then
+      if [[ ${CMOR_ADD_STARTDATE} == "TRUE" ]]; then
+        echo "Running with CMOR_EXP_CUSTOM=False + CMOR_ADD_STARTDATE=True is forbidden, exiting"
+        exit 0
+      else
+        sub_experiment_id=s$(echo ${START_date} | cut -c1-4)
+      fi
+    else
+      if [[ ${CMOR_ADD_STARTDATE} == "TRUE" ]]; then
+        echo "Running with CMOR_EXP_CUSTOM=False + CMOR_ADD_STARTDATE=True is forbidden, exiting"
+        exit 0
+      else
+        sub_experiment_id=""
+      fi
+    fi
+  fi
+
+}
++ create_sub_experiment_id
++ [[ FALSE == \T\R\U\E ]]
+echo ${BSC_OUTCLASS} | grep dcpp
+++ echo reduced
+++ grep dcpp
++ [[ -n '' ]]
++ [[ CMIP == \D\C\P\P ]]
++ [[ FALSE == \T\R\U\E ]]
++ sub_experiment_id=
++ echo
++ module purge
++ source /gpfs/projects/bsc32/software/modules_supp/module_wrapper_custom.sh purge
+#!/bin/bash
+
+BINPATH=/apps/modules/3.2.10/Modules/3.2.10/bin/modulecmd
+++ BINPATH=/apps/modules/3.2.10/Modules/3.2.10/bin/modulecmd
+MODULESHELL=sh
+++ MODULESHELL=sh
+
+if [[ -z "$MODULESBEGINENV" ]]; then
+	if [[ -n "$TMPDIR" && $TMPDIR =~ ^/.*/[0-9]+\.tmpdir$ ]]; then
+		export MODULESBEGINENV="$TMPDIR/.modulesbeginenv_$(date +"%Y%m%d%H%M%S%N")"
+	elif [[ -n "$HOME" ]]; then
+		export MODULESBEGINENV="$HOME/.modulesbeginenv"
+	fi
+fi
+++ [[ -z /home/bsc32/bsc32627/.modulesbeginenv ]]
+#if [[ "$_MODULESBEGINENV_" != "$MODULESBEGINENV" ]]; then
+#	unset _MODULESBEGINENV_
+#fi
+
+case $# in
+0 ) # no args: launch help
+	eval `$BINPATH $MODULESHELL help`
+	;;
+1 ) # 1 args: launch it!
+	eval `$BINPATH $MODULESHELL $1`
+	;;
+* ) # 2 or more args: parse it!
+
+	options=$1
+	shift	# delete the option from args
+	i=0
+	for arg in "$@"	# save the rest of args in modulenames array
+	do
+		modulenames[$i]=$arg
+		((i++))
+	done
+
+	array_opts=( add load rm unload swap switch sw show display avail av help whatis initadd initprepend initrm initswitch )
+	process=0
+	for option in "${array_opts[@]}" # check for the options
+	do
+		if [ "${options}" = "$option" ] # will process the args
+		then
+			process=1
+			break
+		fi
+	done
+
+	if [ $process -eq 0 ]  
+	then	
+		# other options, just launch it
+		eval `$BINPATH $MODULESHELL $options ${modulenames[*]}`
+	else
+		# save the names of modulefiles in array_names
+		x=0
+		for LINE in $(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done) ; do array_names[$x]="$LINE" ; ((x++)); done
+		# compare all modulenames from the entry with the existing modulefiles
+		i=0; j=0
+		for modulename in "${modulenames[@]}" 
+		do
+			found=0
+			# split module and version
+			local module=${modulename%/*}
+			version=${modulename#*/} # if no version, then module=version
+			for filename in "${array_names[@]}"
+			do
+				shopt -s nocasematch
+				case "$module" in
+				$filename )
+					if [ "$module" == "$version" ] # default version
+					then
+						array_modules[$i]=$filename
+					else # explicit version number
+						array_modules[$i]="$filename/$version"
+					fi
+					((i++))
+					found=1
+          break
+					;;
+				* )
+					;;
+				esac
+			done
+			if [ $found -eq 0 ] # module not found
+			then
+				unknown_modules[$j]=$modulename
+				((j++))
+			fi	
+		done
+	        eval `$BINPATH $MODULESHELL $options ${array_modules[*]} ${unknown_modules[*]:-}` # launch the right modules
+
+	fi
+	;;
+esac
+++ case $# in
+$BINPATH $MODULESHELL $1
++++ /apps/modules/3.2.10/Modules/3.2.10/bin/modulecmd sh purge
+++ eval LD_LIBRARY_PATH=/opt/lsf/9.1/linux2.6-glibc2.3-x86_64/lib ';export' 'LD_LIBRARY_PATH;MANPATH=/opt/lsf/9.1/man:/usr/local/man:/usr/share/man' ';export' 'MANPATH;PATH=/apps/modules/3.2.10/Modules/3.2.10/bin/:/opt/lsf/9.1/linux2.6-glibc2.3-x86_64/bin:/opt/lsf/9.1/linux2.6-glibc2.3-x86_64/etc:/usr/local/bin:/usr/bin:/bin:/usr/bin/X11:/usr/X11R6/bin:/usr/games:/opt/bin:/opt/ibutils/bin:/usr/lib/mit/bin:/usr/lib/mit/sbin:/opt/intel/mic/bin:.' ';export' 'PATH;XDG_DATA_DIRS=/usr/share:/etc/opt/kde3/share:/opt/kde3/share' ';export' 'XDG_DATA_DIRS;unset' 'CMAKE_PREFIX_PATH;unset' 'CPATH;unset' 'EBDEVELBINUTILS;unset' 'EBDEVELBZIP2;unset' 'EBDEVELGCCCORE;unset' 'EBDEVELGMP;unset' 'EBDEVELLIBFFI;unset' 'EBDEVELLIBREADLINE;unset' 'EBDEVELLIBYAML;unset' 'EBDEVELNCURSES;unset' 'EBDEVELOPENSSL;unset' 'EBDEVELPYTHON;unset' 'EBDEVELPYYAML;unset' 'EBDEVELSQLITE;unset' 'EBDEVELTCL;unset' 'EBDEVELXZ;unset' 'EBDEVELZLIB;unset' 'EBEXTSLISTPYTHON;unset' 'EBPYTHONPREFIXES;unset' 'EBROOTBINUTILS;unset' 'EBROOTBZIP2;unset' 'EBROOTGCCCORE;unset' 'EBROOTGMP;unset' 'EBROOTLIBFFI;unset' 'EBROOTLIBREADLINE;unset' 'EBROOTLIBYAML;unset' 'EBROOTNCURSES;unset' 'EBROOTOPENSSL;unset' 'EBROOTPYTHON;unset' 'EBROOTPYYAML;unset' 'EBROOTSQLITE;unset' 'EBROOTTCL;unset' 'EBROOTXZ;unset' 'EBROOTZLIB;unset' 'EBVERSIONBINUTILS;unset' 'EBVERSIONBZIP2;unset' 'EBVERSIONGCCCORE;unset' 'EBVERSIONGMP;unset' 'EBVERSIONLIBFFI;unset' 'EBVERSIONLIBREADLINE;unset' 'EBVERSIONLIBYAML;unset' 'EBVERSIONNCURSES;unset' 'EBVERSIONOPENSSL;unset' 'EBVERSIONPYTHON;unset' 'EBVERSIONPYYAML;unset' 'EBVERSIONSQLITE;unset' 'EBVERSIONTCL;unset' 'EBVERSIONXZ;unset' 'EBVERSIONZLIB;unset' 'LIBRARY_PATH;unset' 'LOADEDMODULES;unset' 'PKG_CONFIG_PATH;unset' 'PYTHONPATH;unset' '_LMFILES_;'
+LD_LIBRARY_PATH=/opt/lsf/9.1/linux2.6-glibc2.3-x86_64/lib ;export LD_LIBRARY_PATH;MANPATH=/opt/lsf/9.1/man:/usr/local/man:/usr/share/man ;export MANPATH;PATH=/apps/modules/3.2.10/Modules/3.2.10/bin/:/opt/lsf/9.1/linux2.6-glibc2.3-x86_64/bin:/opt/lsf/9.1/linux2.6-glibc2.3-x86_64/etc:/usr/local/bin:/usr/bin:/bin:/usr/bin/X11:/usr/X11R6/bin:/usr/games:/opt/bin:/opt/ibutils/bin:/usr/lib/mit/bin:/usr/lib/mit/sbin:/opt/intel/mic/bin:. ;export PATH;XDG_DATA_DIRS=/usr/share:/etc/opt/kde3/share:/opt/kde3/share ;export XDG_DATA_DIRS;unset CMAKE_PREFIX_PATH;unset CPATH;unset EBDEVELBINUTILS;unset EBDEVELBZIP2;unset EBDEVELGCCCORE;unset EBDEVELGMP;unset EBDEVELLIBFFI;unset EBDEVELLIBREADLINE;unset EBDEVELLIBYAML;unset EBDEVELNCURSES;unset EBDEVELOPENSSL;unset EBDEVELPYTHON;unset EBDEVELPYYAML;unset EBDEVELSQLITE;unset EBDEVELTCL;unset EBDEVELXZ;unset EBDEVELZLIB;unset EBEXTSLISTPYTHON;unset EBPYTHONPREFIXES;unset EBROOTBINUTILS;unset EBROOTBZIP2;unset EBROOTGCCCORE;unset EBROOTGMP;unset EBROOTLIBFFI;unset EBROOTLIBREADLINE;unset EBROOTLIBYAML;unset EBROOTNCURSES;unset EBROOTOPENSSL;unset EBROOTPYTHON;unset EBROOTPYYAML;unset EBROOTSQLITE;unset EBROOTTCL;unset EBROOTXZ;unset EBROOTZLIB;unset EBVERSIONBINUTILS;unset EBVERSIONBZIP2;unset EBVERSIONGCCCORE;unset EBVERSIONGMP;unset EBVERSIONLIBFFI;unset EBVERSIONLIBREADLINE;unset EBVERSIONLIBYAML;unset EBVERSIONNCURSES;unset EBVERSIONOPENSSL;unset EBVERSIONPYTHON;unset EBVERSIONPYYAML;unset EBVERSIONSQLITE;unset EBVERSIONTCL;unset EBVERSIONXZ;unset EBVERSIONZLIB;unset LIBRARY_PATH;unset LOADEDMODULES;unset PKG_CONFIG_PATH;unset PYTHONPATH;unset _LMFILES_;
++++ LD_LIBRARY_PATH=/opt/lsf/9.1/linux2.6-glibc2.3-x86_64/lib
++++ export LD_LIBRARY_PATH
++++ MANPATH=/opt/lsf/9.1/man:/usr/local/man:/usr/share/man
++++ export MANPATH
++++ PATH=/apps/modules/3.2.10/Modules/3.2.10/bin/:/opt/lsf/9.1/linux2.6-glibc2.3-x86_64/bin:/opt/lsf/9.1/linux2.6-glibc2.3-x86_64/etc:/usr/local/bin:/usr/bin:/bin:/usr/bin/X11:/usr/X11R6/bin:/usr/games:/opt/bin:/opt/ibutils/bin:/usr/lib/mit/bin:/usr/lib/mit/sbin:/opt/intel/mic/bin:.
++++ export PATH
++++ XDG_DATA_DIRS=/usr/share:/etc/opt/kde3/share:/opt/kde3/share
++++ export XDG_DATA_DIRS
++++ unset CMAKE_PREFIX_PATH
++++ unset CPATH
++++ unset EBDEVELBINUTILS
++++ unset EBDEVELBZIP2
++++ unset EBDEVELGCCCORE
++++ unset EBDEVELGMP
++++ unset EBDEVELLIBFFI
++++ unset EBDEVELLIBREADLINE
++++ unset EBDEVELLIBYAML
++++ unset EBDEVELNCURSES
++++ unset EBDEVELOPENSSL
++++ unset EBDEVELPYTHON
++++ unset EBDEVELPYYAML
++++ unset EBDEVELSQLITE
++++ unset EBDEVELTCL
++++ unset EBDEVELXZ
++++ unset EBDEVELZLIB
++++ unset EBEXTSLISTPYTHON
++++ unset EBPYTHONPREFIXES
++++ unset EBROOTBINUTILS
++++ unset EBROOTBZIP2
++++ unset EBROOTGCCCORE
++++ unset EBROOTGMP
++++ unset EBROOTLIBFFI
++++ unset EBROOTLIBREADLINE
++++ unset EBROOTLIBYAML
++++ unset EBROOTNCURSES
++++ unset EBROOTOPENSSL
++++ unset EBROOTPYTHON
++++ unset EBROOTPYYAML
++++ unset EBROOTSQLITE
++++ unset EBROOTTCL
++++ unset EBROOTXZ
++++ unset EBROOTZLIB
++++ unset EBVERSIONBINUTILS
++++ unset EBVERSIONBZIP2
++++ unset EBVERSIONGCCCORE
++++ unset EBVERSIONGMP
++++ unset EBVERSIONLIBFFI
++++ unset EBVERSIONLIBREADLINE
++++ unset EBVERSIONLIBYAML
++++ unset EBVERSIONNCURSES
++++ unset EBVERSIONOPENSSL
++++ unset EBVERSIONPYTHON
++++ unset EBVERSIONPYYAML
++++ unset EBVERSIONSQLITE
++++ unset EBVERSIONTCL
++++ unset EBVERSIONXZ
++++ unset EBVERSIONZLIB
++++ unset LIBRARY_PATH
++++ unset LOADEDMODULES
++++ unset PKG_CONFIG_PATH
++++ unset PYTHONPATH
++++ unset _LMFILES_
+
+unset BINPATH array_modules unknown_modules modulenames array_names i j x option options modulename  version found LINE process process array_opts filename arg
+++ unset BINPATH array_modules unknown_modules modulenames array_names i j x option options modulename version found LINE process process array_opts filename arg
+
++ module load Singularity
++ source /gpfs/projects/bsc32/software/modules_supp/module_wrapper_custom.sh load Singularity
+#!/bin/bash
+
+BINPATH=/apps/modules/3.2.10/Modules/3.2.10/bin/modulecmd
+++ BINPATH=/apps/modules/3.2.10/Modules/3.2.10/bin/modulecmd
+MODULESHELL=sh
+++ MODULESHELL=sh
+
+if [[ -z "$MODULESBEGINENV" ]]; then
+	if [[ -n "$TMPDIR" && $TMPDIR =~ ^/.*/[0-9]+\.tmpdir$ ]]; then
+		export MODULESBEGINENV="$TMPDIR/.modulesbeginenv_$(date +"%Y%m%d%H%M%S%N")"
+	elif [[ -n "$HOME" ]]; then
+		export MODULESBEGINENV="$HOME/.modulesbeginenv"
+	fi
+fi
+++ [[ -z /home/bsc32/bsc32627/.modulesbeginenv ]]
+#if [[ "$_MODULESBEGINENV_" != "$MODULESBEGINENV" ]]; then
+#	unset _MODULESBEGINENV_
+#fi
+
+case $# in
+0 ) # no args: launch help
+	eval `$BINPATH $MODULESHELL help`
+	;;
+1 ) # 1 args: launch it!
+	eval `$BINPATH $MODULESHELL $1`
+	;;
+* ) # 2 or more args: parse it!
+
+	options=$1
+	shift	# delete the option from args
+	i=0
+	for arg in "$@"	# save the rest of args in modulenames array
+	do
+		modulenames[$i]=$arg
+		((i++))
+	done
+
+	array_opts=( add load rm unload swap switch sw show display avail av help whatis initadd initprepend initrm initswitch )
+	process=0
+	for option in "${array_opts[@]}" # check for the options
+	do
+		if [ "${options}" = "$option" ] # will process the args
+		then
+			process=1
+			break
+		fi
+	done
+
+	if [ $process -eq 0 ]  
+	then	
+		# other options, just launch it
+		eval `$BINPATH $MODULESHELL $options ${modulenames[*]}`
+	else
+		# save the names of modulefiles in array_names
+		x=0
+		for LINE in $(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done) ; do array_names[$x]="$LINE" ; ((x++)); done
+		# compare all modulenames from the entry with the existing modulefiles
+		i=0; j=0
+		for modulename in "${modulenames[@]}" 
+		do
+			found=0
+			# split module and version
+			local module=${modulename%/*}
+			version=${modulename#*/} # if no version, then module=version
+			for filename in "${array_names[@]}"
+			do
+				shopt -s nocasematch
+				case "$module" in
+				$filename )
+					if [ "$module" == "$version" ] # default version
+					then
+						array_modules[$i]=$filename
+					else # explicit version number
+						array_modules[$i]="$filename/$version"
+					fi
+					((i++))
+					found=1
+          break
+					;;
+				* )
+					;;
+				esac
+			done
+			if [ $found -eq 0 ] # module not found
+			then
+				unknown_modules[$j]=$modulename
+				((j++))
+			fi	
+		done
+	        eval `$BINPATH $MODULESHELL $options ${array_modules[*]} ${unknown_modules[*]:-}` # launch the right modules
+
+	fi
+	;;
+esac
+++ case $# in
+++ options=load
+++ shift
+++ i=0
+++ for arg in '"$@"'
+++ modulenames[$i]=Singularity
+++ (( i++ ))
+++ array_opts=(add load rm unload swap switch sw show display avail av help whatis initadd initprepend initrm initswitch)
+++ process=0
+++ for option in '"${array_opts[@]}"'
+++ '[' load = add ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' load = load ']'
+++ process=1
+++ break
+++ '[' 1 -eq 0 ']'
+++ x=0
+for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done
++++ for i in '${MODULEPATH//:/ }'
++++ /bin/ls -1 /gpfs/projects/bsc32/software/suselinux/11/modules/all
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=ant
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=ANTLR
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=arviz
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=Autoconf
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=Automake
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=Autotools
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=auto-tqdm
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=basemap
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=beautifulsoup4
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=Biggus
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=binutils
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=Bison
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=Blosc
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=bokeh
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=Boost
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=Boruta
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=Bottleneck
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=bscearth.utils
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=bzip2
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=c3s512-protoype
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=c3s512-wp1-datachecker
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=cairo
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=CairoSVG
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=cartoframes
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=Cartopy
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=CDFTOOLS
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=CDO
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=cfgrib
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=cf-python
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=cftime
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=cfunits
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=cf_units
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=CMake
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=cmocean
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=contextily
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=ctd
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=cURL
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=Cython
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=darts
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=dash
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=dask
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=dask-ml
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=dataframe_image
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=dataframe-image
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=DBus
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=descartes
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=diagonals
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=double-conversion
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=Doxygen
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=dqc
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=earthdiagnostics
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=EasyBuild
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=ecCodes
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=eccodes-python
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=ece2cmor
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=ecFlow
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=Eigen
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=eli5
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=entrypoints
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=eofs
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=eo-learn
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=esagora
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=ESMF
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=ESMPy
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=ESMValTool
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=expat
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=f90nml
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=FFmpeg
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=FFTW
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=filesplit
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=filterpy
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=Fiona
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=flex
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=flit
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=flit_core
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=fontconfig
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=foss
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=freetype
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=FriBidi
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=fs
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=fsplit
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=g2clib
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=g2lib
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=GCC
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=GCCcore
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=GDAL
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=geocat.comp
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=geopandas
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=geoplot
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=geopy
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=GEOS
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=gettext
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=Ghostscript
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=git
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=GLib
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=glmnet_py
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=glmnet-py
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=GMP
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=gompi
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=google-cloud-sdk
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=gperf
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=graphviz
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=Graphviz
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=greasy
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=grib_api
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=GSL
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=h5py
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=HDF
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=HDF5
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=help2man
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=htop
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=hwloc
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=hyperopt
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=hypothesis
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=ICU
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=ImageMagick
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=importlib_resources
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=inkscape
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=intltool
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=IOnetCDF
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=IPython
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=ipython_genutils
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=Iris
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=JasPer
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=Java
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=jq
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=jsonschema
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=Julia
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=JUnit
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=jupyterlab
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=jupyterlab-pygments
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=kafka
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=LAME
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=libdap
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=libdrm
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=libevent
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=libffi
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=libgeotiff
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=libGLU
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=libiconv
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=libjpeg-turbo
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=libpciaccess
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=libpng
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=libreadline
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=librsvg
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=libsndfile
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=libsodium
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=LibTIFF
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=libtirpc
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=libtool
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=libunwind
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=libxml2
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=libxslt
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=libyaml
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=lightgbm
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=LittleCMS
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=LLVM
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=lxml
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=LZO
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=M4
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=make
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=makedepend
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=Mako
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=mapclassify
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=mapgenerator
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=matplotlib
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=memory_profiler
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=mercantile
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=Mesa
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=Meson
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=METIS
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=MetPy
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=Met-Py
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=Miniconda2
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=Miniconda3
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=MPFR
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=mpi4py
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=NASM
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=naturalneighbor
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=nbclient
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=nbconvert
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=nbformat
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=nbterm
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=nccmp
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=NCL
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=NCO
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=nctime
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=nc-time-axis
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=ncurses
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=ncview
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=netCDF
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=netcdf4-python
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=netCDF-C++4
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=netCDF-Fortran
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=nettle
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=networkx
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=Ninja
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=NLopt
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=nodejs
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=NSPR
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=NSS
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=numactl
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=numba
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=numexpr
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=numpy
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=oct2py
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=Octave
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=OpenBLAS
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=OpenMPI
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=OpenPGM
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=OpenSSL
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=orca
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=pandas
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=Pandoc
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=pangeo
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=Panoply
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=patool
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=PCRE
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=PCRE2
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=Perl
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=Phantomjs
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=Pillow
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=Pint
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=pixman
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=pkg-config
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=plotly
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=poetry
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=poetry-core
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=portalocker
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=PROJ
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=prompt_toolkit
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=proplot
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=protobuf
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=protobuf-python
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=providentia
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=psyplot
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=pyagrum
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=pybind11
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=pycdo
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=pycodestyle
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=pyglmnet
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=Pygments
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=pyinterp
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=PyKrige
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=pymannkendall
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=pynco
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=pyproj
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=PyQt5
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=pyrsistent
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=pyshp
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=pyslurm
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=pyspark
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=pystan
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=PyTables
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=Python
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=PyTorch
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=PyYAML
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=Qhull
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=Qt5
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=R
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=rasterio
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=re2c
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=regionmask
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=renku
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=reverse_geocoder
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=rich
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=rioxarray
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=rpy2
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=RStudio
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=Rtree
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=Rust
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=ScaLAPACK
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=scikit-build
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=scikit-garden
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=scikit-gstat
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=scikit-learn
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=scipy
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=SciPy-bundle
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=SCons
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=seaborn
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=shap
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=Shapely
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=Singularity
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=SIP
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=SkillMetrics
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=snappy
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=soupsieve
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=Spark
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=spatialindex
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=Sphinx
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=sphinx-gallery
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=sphinx_rtd_theme
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=SQLite
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=statsmodels
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=SuiteSparse
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=SWIG
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=Szip
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=Tcl
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=texinfo
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=textlive
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=threadpoolctl
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=tigramite
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=timezonefinder
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=Tk
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=Tkinter
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=toml
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=traitlets
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=UDUNITS
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=util-linux
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=wheel
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=windspharm
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=workalendar
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=wrf-python
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=X11
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=x264
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=x265
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=xarray
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=xclim
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=xESMF
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=XGBoost
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=xgcm
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=XlsxWriter
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=xorca
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=xorg-macros
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=xproto
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=xskillscore
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=XZ
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=Yasm
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=YAXT
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=ZeroMQ
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=zlib
+++ (( x++ ))
+++ i=0
+++ j=0
+++ for modulename in '"${modulenames[@]}"'
+++ found=0
+++ local module=Singularity
+++ version=Singularity
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ '[' Singularity == Singularity ']'
+++ array_modules[$i]=Singularity
+++ (( i++ ))
+++ found=1
+++ break
+++ '[' 1 -eq 0 ']'
+$BINPATH $MODULESHELL $options ${array_modules[*]} ${unknown_modules[*]:-}
++++ /apps/modules/3.2.10/Modules/3.2.10/bin/modulecmd sh load Singularity
+++ eval CPATH=/gpfs/projects/bsc32/software/suselinux/11/software/Singularity/3.2.0-GCC-8.3.0/include:/gpfs/projects/bsc32/software/suselinux/11/software/binutils/2.32-GCCcore-8.3.0/include:/gpfs/projects/bsc32/software/suselinux/11/software/zlib/1.2.11-GCCcore-8.3.0/include:/gpfs/projects/bsc32/software/suselinux/11/software/GCCcore/8.3.0/include ';export' 'CPATH;EBDEVELBINUTILS=/gpfs/projects/bsc32/software/suselinux/11/software/binutils/2.32-GCCcore-8.3.0/easybuild/binutils-2.32-GCCcore-8.3.0-easybuild-devel' ';export' 'EBDEVELBINUTILS;EBDEVELGCC=/gpfs/projects/bsc32/software/suselinux/11/software/GCC/8.3.0/easybuild/GCC-8.3.0-easybuild-devel' ';export' 'EBDEVELGCC;EBDEVELGCCCORE=/gpfs/projects/bsc32/software/suselinux/11/software/GCCcore/8.3.0/easybuild/GCCcore-8.3.0-easybuild-devel' ';export' 'EBDEVELGCCCORE;EBDEVELSINGULARITY=/gpfs/projects/bsc32/software/suselinux/11/software/Singularity/3.2.0-GCC-8.3.0/easybuild/Singularity-3.2.0-GCC-8.3.0-easybuild-devel' ';export' 'EBDEVELSINGULARITY;EBDEVELZLIB=/gpfs/projects/bsc32/software/suselinux/11/software/zlib/1.2.11-GCCcore-8.3.0/easybuild/zlib-1.2.11-GCCcore-8.3.0-easybuild-devel' ';export' 'EBDEVELZLIB;EBROOTBINUTILS=/gpfs/projects/bsc32/software/suselinux/11/software/binutils/2.32-GCCcore-8.3.0' ';export' 'EBROOTBINUTILS;EBROOTGCC=/gpfs/projects/bsc32/software/suselinux/11/software/GCCcore/8.3.0' ';export' 'EBROOTGCC;EBROOTGCCCORE=/gpfs/projects/bsc32/software/suselinux/11/software/GCCcore/8.3.0' ';export' 'EBROOTGCCCORE;EBROOTSINGULARITY=/gpfs/projects/bsc32/software/suselinux/11/software/Singularity/3.2.0-GCC-8.3.0' ';export' 'EBROOTSINGULARITY;EBROOTZLIB=/gpfs/projects/bsc32/software/suselinux/11/software/zlib/1.2.11-GCCcore-8.3.0' ';export' 'EBROOTZLIB;EBVERSIONBINUTILS=2.32' ';export' 'EBVERSIONBINUTILS;EBVERSIONGCC=8.3.0' ';export' 'EBVERSIONGCC;EBVERSIONGCCCORE=8.3.0' ';export' 'EBVERSIONGCCCORE;EBVERSIONSINGULARITY=3.2.0' ';export' 'EBVERSIONSINGULARITY;EBVERSIONZLIB=1.2.11' ';export' 'EBVERSIONZLIB;LD_LIBRARY_PATH=/gpfs/projects/bsc32/software/suselinux/11/software/Singularity/3.2.0-GCC-8.3.0/lib:/gpfs/projects/bsc32/software/suselinux/11/software/binutils/2.32-GCCcore-8.3.0/lib:/gpfs/projects/bsc32/software/suselinux/11/software/zlib/1.2.11-GCCcore-8.3.0/lib:/gpfs/projects/bsc32/software/suselinux/11/software/GCCcore/8.3.0/lib/gcc/x86_64-pc-linux-gnu/8.3.0:/gpfs/projects/bsc32/software/suselinux/11/software/GCCcore/8.3.0/lib64:/gpfs/projects/bsc32/software/suselinux/11/software/GCCcore/8.3.0/lib:/opt/lsf/9.1/linux2.6-glibc2.3-x86_64/lib' ';export' 'LD_LIBRARY_PATH;LIBRARY_PATH=/gpfs/projects/bsc32/software/suselinux/11/software/Singularity/3.2.0-GCC-8.3.0/lib:/gpfs/projects/bsc32/software/suselinux/11/software/binutils/2.32-GCCcore-8.3.0/lib:/gpfs/projects/bsc32/software/suselinux/11/software/zlib/1.2.11-GCCcore-8.3.0/lib:/gpfs/projects/bsc32/software/suselinux/11/software/GCCcore/8.3.0/lib64:/gpfs/projects/bsc32/software/suselinux/11/software/GCCcore/8.3.0/lib' ';export' 'LIBRARY_PATH;LOADEDMODULES=GCCcore/8.3.0:zlib/1.2.11-GCCcore-8.3.0:binutils/2.32-GCCcore-8.3.0:GCC/8.3.0:Singularity/3.2.0-GCC-8.3.0' ';export' 'LOADEDMODULES;MANPATH=/gpfs/projects/bsc32/software/suselinux/11/software/Singularity/3.2.0-GCC-8.3.0/share/man:/gpfs/projects/bsc32/software/suselinux/11/software/binutils/2.32-GCCcore-8.3.0/share/man:/gpfs/projects/bsc32/software/suselinux/11/software/zlib/1.2.11-GCCcore-8.3.0/share/man:/gpfs/projects/bsc32/software/suselinux/11/software/GCCcore/8.3.0/share/man:/opt/lsf/9.1/man:/usr/local/man:/usr/share/man' ';export' 'MANPATH;PATH=/gpfs/projects/bsc32/software/suselinux/11/software/Singularity/3.2.0-GCC-8.3.0/bin:/gpfs/projects/bsc32/software/suselinux/11/software/binutils/2.32-GCCcore-8.3.0/bin:/gpfs/projects/bsc32/software/suselinux/11/software/GCCcore/8.3.0/bin:/apps/modules/3.2.10/Modules/3.2.10/bin/:/opt/lsf/9.1/linux2.6-glibc2.3-x86_64/bin:/opt/lsf/9.1/linux2.6-glibc2.3-x86_64/etc:/usr/local/bin:/usr/bin:/bin:/usr/bin/X11:/usr/X11R6/bin:/usr/games:/opt/bin:/opt/ibutils/bin:/usr/lib/mit/bin:/usr/lib/mit/sbin:/opt/intel/mic/bin:.' ';export' 'PATH;PKG_CONFIG_PATH=/gpfs/projects/bsc32/software/suselinux/11/software/zlib/1.2.11-GCCcore-8.3.0/lib/pkgconfig' ';export' 'PKG_CONFIG_PATH;XDG_DATA_DIRS=/gpfs/projects/bsc32/software/suselinux/11/software/Singularity/3.2.0-GCC-8.3.0/share:/usr/share:/etc/opt/kde3/share:/opt/kde3/share' ';export' 'XDG_DATA_DIRS;_LMFILES_=/gpfs/projects/bsc32/software/suselinux/11/modules/all/GCCcore/8.3.0:/gpfs/projects/bsc32/software/suselinux/11/modules/all/zlib/1.2.11-GCCcore-8.3.0:/gpfs/projects/bsc32/software/suselinux/11/modules/all/binutils/2.32-GCCcore-8.3.0:/gpfs/projects/bsc32/software/suselinux/11/modules/all/GCC/8.3.0:/gpfs/projects/bsc32/software/suselinux/11/modules/all/Singularity/3.2.0-GCC-8.3.0' ';export' '_LMFILES_;'
+CPATH=/gpfs/projects/bsc32/software/suselinux/11/software/Singularity/3.2.0-GCC-8.3.0/include:/gpfs/projects/bsc32/software/suselinux/11/software/binutils/2.32-GCCcore-8.3.0/include:/gpfs/projects/bsc32/software/suselinux/11/software/zlib/1.2.11-GCCcore-8.3.0/include:/gpfs/projects/bsc32/software/suselinux/11/software/GCCcore/8.3.0/include ;export CPATH;EBDEVELBINUTILS=/gpfs/projects/bsc32/software/suselinux/11/software/binutils/2.32-GCCcore-8.3.0/easybuild/binutils-2.32-GCCcore-8.3.0-easybuild-devel ;export EBDEVELBINUTILS;EBDEVELGCC=/gpfs/projects/bsc32/software/suselinux/11/software/GCC/8.3.0/easybuild/GCC-8.3.0-easybuild-devel ;export EBDEVELGCC;EBDEVELGCCCORE=/gpfs/projects/bsc32/software/suselinux/11/software/GCCcore/8.3.0/easybuild/GCCcore-8.3.0-easybuild-devel ;export EBDEVELGCCCORE;EBDEVELSINGULARITY=/gpfs/projects/bsc32/software/suselinux/11/software/Singularity/3.2.0-GCC-8.3.0/easybuild/Singularity-3.2.0-GCC-8.3.0-easybuild-devel ;export EBDEVELSINGULARITY;EBDEVELZLIB=/gpfs/projects/bsc32/software/suselinux/11/software/zlib/1.2.11-GCCcore-8.3.0/easybuild/zlib-1.2.11-GCCcore-8.3.0-easybuild-devel ;export EBDEVELZLIB;EBROOTBINUTILS=/gpfs/projects/bsc32/software/suselinux/11/software/binutils/2.32-GCCcore-8.3.0 ;export EBROOTBINUTILS;EBROOTGCC=/gpfs/projects/bsc32/software/suselinux/11/software/GCCcore/8.3.0 ;export EBROOTGCC;EBROOTGCCCORE=/gpfs/projects/bsc32/software/suselinux/11/software/GCCcore/8.3.0 ;export EBROOTGCCCORE;EBROOTSINGULARITY=/gpfs/projects/bsc32/software/suselinux/11/software/Singularity/3.2.0-GCC-8.3.0 ;export EBROOTSINGULARITY;EBROOTZLIB=/gpfs/projects/bsc32/software/suselinux/11/software/zlib/1.2.11-GCCcore-8.3.0 ;export EBROOTZLIB;EBVERSIONBINUTILS=2.32 ;export EBVERSIONBINUTILS;EBVERSIONGCC=8.3.0 ;export EBVERSIONGCC;EBVERSIONGCCCORE=8.3.0 ;export EBVERSIONGCCCORE;EBVERSIONSINGULARITY=3.2.0 ;export EBVERSIONSINGULARITY;EBVERSIONZLIB=1.2.11 ;export EBVERSIONZLIB;LD_LIBRARY_PATH=/gpfs/projects/bsc32/software/suselinux/11/software/Singularity/3.2.0-GCC-8.3.0/lib:/gpfs/projects/bsc32/software/suselinux/11/software/binutils/2.32-GCCcore-8.3.0/lib:/gpfs/projects/bsc32/software/suselinux/11/software/zlib/1.2.11-GCCcore-8.3.0/lib:/gpfs/projects/bsc32/software/suselinux/11/software/GCCcore/8.3.0/lib/gcc/x86_64-pc-linux-gnu/8.3.0:/gpfs/projects/bsc32/software/suselinux/11/software/GCCcore/8.3.0/lib64:/gpfs/projects/bsc32/software/suselinux/11/software/GCCcore/8.3.0/lib:/opt/lsf/9.1/linux2.6-glibc2.3-x86_64/lib ;export LD_LIBRARY_PATH;LIBRARY_PATH=/gpfs/projects/bsc32/software/suselinux/11/software/Singularity/3.2.0-GCC-8.3.0/lib:/gpfs/projects/bsc32/software/suselinux/11/software/binutils/2.32-GCCcore-8.3.0/lib:/gpfs/projects/bsc32/software/suselinux/11/software/zlib/1.2.11-GCCcore-8.3.0/lib:/gpfs/projects/bsc32/software/suselinux/11/software/GCCcore/8.3.0/lib64:/gpfs/projects/bsc32/software/suselinux/11/software/GCCcore/8.3.0/lib ;export LIBRARY_PATH;LOADEDMODULES=GCCcore/8.3.0:zlib/1.2.11-GCCcore-8.3.0:binutils/2.32-GCCcore-8.3.0:GCC/8.3.0:Singularity/3.2.0-GCC-8.3.0 ;export LOADEDMODULES;MANPATH=/gpfs/projects/bsc32/software/suselinux/11/software/Singularity/3.2.0-GCC-8.3.0/share/man:/gpfs/projects/bsc32/software/suselinux/11/software/binutils/2.32-GCCcore-8.3.0/share/man:/gpfs/projects/bsc32/software/suselinux/11/software/zlib/1.2.11-GCCcore-8.3.0/share/man:/gpfs/projects/bsc32/software/suselinux/11/software/GCCcore/8.3.0/share/man:/opt/lsf/9.1/man:/usr/local/man:/usr/share/man ;export MANPATH;PATH=/gpfs/projects/bsc32/software/suselinux/11/software/Singularity/3.2.0-GCC-8.3.0/bin:/gpfs/projects/bsc32/software/suselinux/11/software/binutils/2.32-GCCcore-8.3.0/bin:/gpfs/projects/bsc32/software/suselinux/11/software/GCCcore/8.3.0/bin:/apps/modules/3.2.10/Modules/3.2.10/bin/:/opt/lsf/9.1/linux2.6-glibc2.3-x86_64/bin:/opt/lsf/9.1/linux2.6-glibc2.3-x86_64/etc:/usr/local/bin:/usr/bin:/bin:/usr/bin/X11:/usr/X11R6/bin:/usr/games:/opt/bin:/opt/ibutils/bin:/usr/lib/mit/bin:/usr/lib/mit/sbin:/opt/intel/mic/bin:. ;export PATH;PKG_CONFIG_PATH=/gpfs/projects/bsc32/software/suselinux/11/software/zlib/1.2.11-GCCcore-8.3.0/lib/pkgconfig ;export PKG_CONFIG_PATH;XDG_DATA_DIRS=/gpfs/projects/bsc32/software/suselinux/11/software/Singularity/3.2.0-GCC-8.3.0/share:/usr/share:/etc/opt/kde3/share:/opt/kde3/share ;export XDG_DATA_DIRS;_LMFILES_=/gpfs/projects/bsc32/software/suselinux/11/modules/all/GCCcore/8.3.0:/gpfs/projects/bsc32/software/suselinux/11/modules/all/zlib/1.2.11-GCCcore-8.3.0:/gpfs/projects/bsc32/software/suselinux/11/modules/all/binutils/2.32-GCCcore-8.3.0:/gpfs/projects/bsc32/software/suselinux/11/modules/all/GCC/8.3.0:/gpfs/projects/bsc32/software/suselinux/11/modules/all/Singularity/3.2.0-GCC-8.3.0 ;export _LMFILES_;
++++ CPATH=/gpfs/projects/bsc32/software/suselinux/11/software/Singularity/3.2.0-GCC-8.3.0/include:/gpfs/projects/bsc32/software/suselinux/11/software/binutils/2.32-GCCcore-8.3.0/include:/gpfs/projects/bsc32/software/suselinux/11/software/zlib/1.2.11-GCCcore-8.3.0/include:/gpfs/projects/bsc32/software/suselinux/11/software/GCCcore/8.3.0/include
++++ export CPATH
++++ EBDEVELBINUTILS=/gpfs/projects/bsc32/software/suselinux/11/software/binutils/2.32-GCCcore-8.3.0/easybuild/binutils-2.32-GCCcore-8.3.0-easybuild-devel
++++ export EBDEVELBINUTILS
++++ EBDEVELGCC=/gpfs/projects/bsc32/software/suselinux/11/software/GCC/8.3.0/easybuild/GCC-8.3.0-easybuild-devel
++++ export EBDEVELGCC
++++ EBDEVELGCCCORE=/gpfs/projects/bsc32/software/suselinux/11/software/GCCcore/8.3.0/easybuild/GCCcore-8.3.0-easybuild-devel
++++ export EBDEVELGCCCORE
++++ EBDEVELSINGULARITY=/gpfs/projects/bsc32/software/suselinux/11/software/Singularity/3.2.0-GCC-8.3.0/easybuild/Singularity-3.2.0-GCC-8.3.0-easybuild-devel
++++ export EBDEVELSINGULARITY
++++ EBDEVELZLIB=/gpfs/projects/bsc32/software/suselinux/11/software/zlib/1.2.11-GCCcore-8.3.0/easybuild/zlib-1.2.11-GCCcore-8.3.0-easybuild-devel
++++ export EBDEVELZLIB
++++ EBROOTBINUTILS=/gpfs/projects/bsc32/software/suselinux/11/software/binutils/2.32-GCCcore-8.3.0
++++ export EBROOTBINUTILS
++++ EBROOTGCC=/gpfs/projects/bsc32/software/suselinux/11/software/GCCcore/8.3.0
++++ export EBROOTGCC
++++ EBROOTGCCCORE=/gpfs/projects/bsc32/software/suselinux/11/software/GCCcore/8.3.0
++++ export EBROOTGCCCORE
++++ EBROOTSINGULARITY=/gpfs/projects/bsc32/software/suselinux/11/software/Singularity/3.2.0-GCC-8.3.0
++++ export EBROOTSINGULARITY
++++ EBROOTZLIB=/gpfs/projects/bsc32/software/suselinux/11/software/zlib/1.2.11-GCCcore-8.3.0
++++ export EBROOTZLIB
++++ EBVERSIONBINUTILS=2.32
++++ export EBVERSIONBINUTILS
++++ EBVERSIONGCC=8.3.0
++++ export EBVERSIONGCC
++++ EBVERSIONGCCCORE=8.3.0
++++ export EBVERSIONGCCCORE
++++ EBVERSIONSINGULARITY=3.2.0
++++ export EBVERSIONSINGULARITY
++++ EBVERSIONZLIB=1.2.11
++++ export EBVERSIONZLIB
++++ LD_LIBRARY_PATH=/gpfs/projects/bsc32/software/suselinux/11/software/Singularity/3.2.0-GCC-8.3.0/lib:/gpfs/projects/bsc32/software/suselinux/11/software/binutils/2.32-GCCcore-8.3.0/lib:/gpfs/projects/bsc32/software/suselinux/11/software/zlib/1.2.11-GCCcore-8.3.0/lib:/gpfs/projects/bsc32/software/suselinux/11/software/GCCcore/8.3.0/lib/gcc/x86_64-pc-linux-gnu/8.3.0:/gpfs/projects/bsc32/software/suselinux/11/software/GCCcore/8.3.0/lib64:/gpfs/projects/bsc32/software/suselinux/11/software/GCCcore/8.3.0/lib:/opt/lsf/9.1/linux2.6-glibc2.3-x86_64/lib
++++ export LD_LIBRARY_PATH
++++ LIBRARY_PATH=/gpfs/projects/bsc32/software/suselinux/11/software/Singularity/3.2.0-GCC-8.3.0/lib:/gpfs/projects/bsc32/software/suselinux/11/software/binutils/2.32-GCCcore-8.3.0/lib:/gpfs/projects/bsc32/software/suselinux/11/software/zlib/1.2.11-GCCcore-8.3.0/lib:/gpfs/projects/bsc32/software/suselinux/11/software/GCCcore/8.3.0/lib64:/gpfs/projects/bsc32/software/suselinux/11/software/GCCcore/8.3.0/lib
++++ export LIBRARY_PATH
++++ LOADEDMODULES=GCCcore/8.3.0:zlib/1.2.11-GCCcore-8.3.0:binutils/2.32-GCCcore-8.3.0:GCC/8.3.0:Singularity/3.2.0-GCC-8.3.0
++++ export LOADEDMODULES
++++ MANPATH=/gpfs/projects/bsc32/software/suselinux/11/software/Singularity/3.2.0-GCC-8.3.0/share/man:/gpfs/projects/bsc32/software/suselinux/11/software/binutils/2.32-GCCcore-8.3.0/share/man:/gpfs/projects/bsc32/software/suselinux/11/software/zlib/1.2.11-GCCcore-8.3.0/share/man:/gpfs/projects/bsc32/software/suselinux/11/software/GCCcore/8.3.0/share/man:/opt/lsf/9.1/man:/usr/local/man:/usr/share/man
++++ export MANPATH
++++ PATH=/gpfs/projects/bsc32/software/suselinux/11/software/Singularity/3.2.0-GCC-8.3.0/bin:/gpfs/projects/bsc32/software/suselinux/11/software/binutils/2.32-GCCcore-8.3.0/bin:/gpfs/projects/bsc32/software/suselinux/11/software/GCCcore/8.3.0/bin:/apps/modules/3.2.10/Modules/3.2.10/bin/:/opt/lsf/9.1/linux2.6-glibc2.3-x86_64/bin:/opt/lsf/9.1/linux2.6-glibc2.3-x86_64/etc:/usr/local/bin:/usr/bin:/bin:/usr/bin/X11:/usr/X11R6/bin:/usr/games:/opt/bin:/opt/ibutils/bin:/usr/lib/mit/bin:/usr/lib/mit/sbin:/opt/intel/mic/bin:.
++++ export PATH
++++ PKG_CONFIG_PATH=/gpfs/projects/bsc32/software/suselinux/11/software/zlib/1.2.11-GCCcore-8.3.0/lib/pkgconfig
++++ export PKG_CONFIG_PATH
++++ XDG_DATA_DIRS=/gpfs/projects/bsc32/software/suselinux/11/software/Singularity/3.2.0-GCC-8.3.0/share:/usr/share:/etc/opt/kde3/share:/opt/kde3/share
++++ export XDG_DATA_DIRS
++++ _LMFILES_=/gpfs/projects/bsc32/software/suselinux/11/modules/all/GCCcore/8.3.0:/gpfs/projects/bsc32/software/suselinux/11/modules/all/zlib/1.2.11-GCCcore-8.3.0:/gpfs/projects/bsc32/software/suselinux/11/modules/all/binutils/2.32-GCCcore-8.3.0:/gpfs/projects/bsc32/software/suselinux/11/modules/all/GCC/8.3.0:/gpfs/projects/bsc32/software/suselinux/11/modules/all/Singularity/3.2.0-GCC-8.3.0
++++ export _LMFILES_
+
+unset BINPATH array_modules unknown_modules modulenames array_names i j x option options modulename  version found LINE process process array_opts filename arg
+++ unset BINPATH array_modules unknown_modules modulenames array_names i j x option options modulename version found LINE process process array_opts filename arg
+
++ newgrp Earth
++ singularity run /esarchive/software/containers/esmvaltool/esmvaltool-m1.0.0.sif run --check-level relaxed --log-level debug --max-parallel-tasks 4 --config-file /esarchive/autosubmit/t0ni/proj/auto-ecearth3/es-esmvaltool/config-files/config-user.yml --config-developer-file /esarchive/autosubmit/t0ni/proj/auto-ecearth3/es-esmvaltool/config-files/config-developer.yml /gpfs/scratch/bsc32/bsc32627/t0ni/recipe_t0ni_19931101_fc0_2_monitor_ocean.yml
+[33mWARNING:[0m seccomp requested but not enabled, seccomp library is missing or too old
++ module purge
++ source /gpfs/projects/bsc32/software/modules_supp/module_wrapper_custom.sh purge
+#!/bin/bash
+
+BINPATH=/apps/modules/3.2.10/Modules/3.2.10/bin/modulecmd
+++ BINPATH=/apps/modules/3.2.10/Modules/3.2.10/bin/modulecmd
+MODULESHELL=sh
+++ MODULESHELL=sh
+
+if [[ -z "$MODULESBEGINENV" ]]; then
+	if [[ -n "$TMPDIR" && $TMPDIR =~ ^/.*/[0-9]+\.tmpdir$ ]]; then
+		export MODULESBEGINENV="$TMPDIR/.modulesbeginenv_$(date +"%Y%m%d%H%M%S%N")"
+	elif [[ -n "$HOME" ]]; then
+		export MODULESBEGINENV="$HOME/.modulesbeginenv"
+	fi
+fi
+++ [[ -z /home/bsc32/bsc32627/.modulesbeginenv ]]
+#if [[ "$_MODULESBEGINENV_" != "$MODULESBEGINENV" ]]; then
+#	unset _MODULESBEGINENV_
+#fi
+
+case $# in
+0 ) # no args: launch help
+	eval `$BINPATH $MODULESHELL help`
+	;;
+1 ) # 1 args: launch it!
+	eval `$BINPATH $MODULESHELL $1`
+	;;
+* ) # 2 or more args: parse it!
+
+	options=$1
+	shift	# delete the option from args
+	i=0
+	for arg in "$@"	# save the rest of args in modulenames array
+	do
+		modulenames[$i]=$arg
+		((i++))
+	done
+
+	array_opts=( add load rm unload swap switch sw show display avail av help whatis initadd initprepend initrm initswitch )
+	process=0
+	for option in "${array_opts[@]}" # check for the options
+	do
+		if [ "${options}" = "$option" ] # will process the args
+		then
+			process=1
+			break
+		fi
+	done
+
+	if [ $process -eq 0 ]  
+	then	
+		# other options, just launch it
+		eval `$BINPATH $MODULESHELL $options ${modulenames[*]}`
+	else
+		# save the names of modulefiles in array_names
+		x=0
+		for LINE in $(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done) ; do array_names[$x]="$LINE" ; ((x++)); done
+		# compare all modulenames from the entry with the existing modulefiles
+		i=0; j=0
+		for modulename in "${modulenames[@]}" 
+		do
+			found=0
+			# split module and version
+			local module=${modulename%/*}
+			version=${modulename#*/} # if no version, then module=version
+			for filename in "${array_names[@]}"
+			do
+				shopt -s nocasematch
+				case "$module" in
+				$filename )
+					if [ "$module" == "$version" ] # default version
+					then
+						array_modules[$i]=$filename
+					else # explicit version number
+						array_modules[$i]="$filename/$version"
+					fi
+					((i++))
+					found=1
+          break
+					;;
+				* )
+					;;
+				esac
+			done
+			if [ $found -eq 0 ] # module not found
+			then
+				unknown_modules[$j]=$modulename
+				((j++))
+			fi	
+		done
+	        eval `$BINPATH $MODULESHELL $options ${array_modules[*]} ${unknown_modules[*]:-}` # launch the right modules
+
+	fi
+	;;
+esac
+++ case $# in
+$BINPATH $MODULESHELL $1
++++ /apps/modules/3.2.10/Modules/3.2.10/bin/modulecmd sh purge
+++ eval LD_LIBRARY_PATH=/opt/lsf/9.1/linux2.6-glibc2.3-x86_64/lib ';export' 'LD_LIBRARY_PATH;MANPATH=/opt/lsf/9.1/man:/usr/local/man:/usr/share/man' ';export' 'MANPATH;PATH=/apps/modules/3.2.10/Modules/3.2.10/bin/:/opt/lsf/9.1/linux2.6-glibc2.3-x86_64/bin:/opt/lsf/9.1/linux2.6-glibc2.3-x86_64/etc:/usr/local/bin:/usr/bin:/bin:/usr/bin/X11:/usr/X11R6/bin:/usr/games:/opt/bin:/opt/ibutils/bin:/usr/lib/mit/bin:/usr/lib/mit/sbin:/opt/intel/mic/bin:.' ';export' 'PATH;XDG_DATA_DIRS=/usr/share:/etc/opt/kde3/share:/opt/kde3/share' ';export' 'XDG_DATA_DIRS;unset' 'CMAKE_PREFIX_PATH;unset' 'CPATH;unset' 'EBDEVELBINUTILS;unset' 'EBDEVELBZIP2;unset' 'EBDEVELGCCCORE;unset' 'EBDEVELGMP;unset' 'EBDEVELLIBFFI;unset' 'EBDEVELLIBREADLINE;unset' 'EBDEVELLIBYAML;unset' 'EBDEVELNCURSES;unset' 'EBDEVELOPENSSL;unset' 'EBDEVELPYTHON;unset' 'EBDEVELPYYAML;unset' 'EBDEVELSQLITE;unset' 'EBDEVELTCL;unset' 'EBDEVELXZ;unset' 'EBDEVELZLIB;unset' 'EBEXTSLISTPYTHON;unset' 'EBPYTHONPREFIXES;unset' 'EBROOTBINUTILS;unset' 'EBROOTBZIP2;unset' 'EBROOTGCCCORE;unset' 'EBROOTGMP;unset' 'EBROOTLIBFFI;unset' 'EBROOTLIBREADLINE;unset' 'EBROOTLIBYAML;unset' 'EBROOTNCURSES;unset' 'EBROOTOPENSSL;unset' 'EBROOTPYTHON;unset' 'EBROOTPYYAML;unset' 'EBROOTSQLITE;unset' 'EBROOTTCL;unset' 'EBROOTXZ;unset' 'EBROOTZLIB;unset' 'EBVERSIONBINUTILS;unset' 'EBVERSIONBZIP2;unset' 'EBVERSIONGCCCORE;unset' 'EBVERSIONGMP;unset' 'EBVERSIONLIBFFI;unset' 'EBVERSIONLIBREADLINE;unset' 'EBVERSIONLIBYAML;unset' 'EBVERSIONNCURSES;unset' 'EBVERSIONOPENSSL;unset' 'EBVERSIONPYTHON;unset' 'EBVERSIONPYYAML;unset' 'EBVERSIONSQLITE;unset' 'EBVERSIONTCL;unset' 'EBVERSIONXZ;unset' 'EBVERSIONZLIB;unset' 'LIBRARY_PATH;unset' 'LOADEDMODULES;unset' 'PKG_CONFIG_PATH;unset' 'PYTHONPATH;unset' '_LMFILES_;'
+LD_LIBRARY_PATH=/opt/lsf/9.1/linux2.6-glibc2.3-x86_64/lib ;export LD_LIBRARY_PATH;MANPATH=/opt/lsf/9.1/man:/usr/local/man:/usr/share/man ;export MANPATH;PATH=/apps/modules/3.2.10/Modules/3.2.10/bin/:/opt/lsf/9.1/linux2.6-glibc2.3-x86_64/bin:/opt/lsf/9.1/linux2.6-glibc2.3-x86_64/etc:/usr/local/bin:/usr/bin:/bin:/usr/bin/X11:/usr/X11R6/bin:/usr/games:/opt/bin:/opt/ibutils/bin:/usr/lib/mit/bin:/usr/lib/mit/sbin:/opt/intel/mic/bin:. ;export PATH;XDG_DATA_DIRS=/usr/share:/etc/opt/kde3/share:/opt/kde3/share ;export XDG_DATA_DIRS;unset CMAKE_PREFIX_PATH;unset CPATH;unset EBDEVELBINUTILS;unset EBDEVELBZIP2;unset EBDEVELGCCCORE;unset EBDEVELGMP;unset EBDEVELLIBFFI;unset EBDEVELLIBREADLINE;unset EBDEVELLIBYAML;unset EBDEVELNCURSES;unset EBDEVELOPENSSL;unset EBDEVELPYTHON;unset EBDEVELPYYAML;unset EBDEVELSQLITE;unset EBDEVELTCL;unset EBDEVELXZ;unset EBDEVELZLIB;unset EBEXTSLISTPYTHON;unset EBPYTHONPREFIXES;unset EBROOTBINUTILS;unset EBROOTBZIP2;unset EBROOTGCCCORE;unset EBROOTGMP;unset EBROOTLIBFFI;unset EBROOTLIBREADLINE;unset EBROOTLIBYAML;unset EBROOTNCURSES;unset EBROOTOPENSSL;unset EBROOTPYTHON;unset EBROOTPYYAML;unset EBROOTSQLITE;unset EBROOTTCL;unset EBROOTXZ;unset EBROOTZLIB;unset EBVERSIONBINUTILS;unset EBVERSIONBZIP2;unset EBVERSIONGCCCORE;unset EBVERSIONGMP;unset EBVERSIONLIBFFI;unset EBVERSIONLIBREADLINE;unset EBVERSIONLIBYAML;unset EBVERSIONNCURSES;unset EBVERSIONOPENSSL;unset EBVERSIONPYTHON;unset EBVERSIONPYYAML;unset EBVERSIONSQLITE;unset EBVERSIONTCL;unset EBVERSIONXZ;unset EBVERSIONZLIB;unset LIBRARY_PATH;unset LOADEDMODULES;unset PKG_CONFIG_PATH;unset PYTHONPATH;unset _LMFILES_;
++++ LD_LIBRARY_PATH=/opt/lsf/9.1/linux2.6-glibc2.3-x86_64/lib
++++ export LD_LIBRARY_PATH
++++ MANPATH=/opt/lsf/9.1/man:/usr/local/man:/usr/share/man
++++ export MANPATH
++++ PATH=/apps/modules/3.2.10/Modules/3.2.10/bin/:/opt/lsf/9.1/linux2.6-glibc2.3-x86_64/bin:/opt/lsf/9.1/linux2.6-glibc2.3-x86_64/etc:/usr/local/bin:/usr/bin:/bin:/usr/bin/X11:/usr/X11R6/bin:/usr/games:/opt/bin:/opt/ibutils/bin:/usr/lib/mit/bin:/usr/lib/mit/sbin:/opt/intel/mic/bin:.
++++ export PATH
++++ XDG_DATA_DIRS=/usr/share:/etc/opt/kde3/share:/opt/kde3/share
++++ export XDG_DATA_DIRS
++++ unset CMAKE_PREFIX_PATH
++++ unset CPATH
++++ unset EBDEVELBINUTILS
++++ unset EBDEVELBZIP2
++++ unset EBDEVELGCCCORE
++++ unset EBDEVELGMP
++++ unset EBDEVELLIBFFI
++++ unset EBDEVELLIBREADLINE
++++ unset EBDEVELLIBYAML
++++ unset EBDEVELNCURSES
++++ unset EBDEVELOPENSSL
++++ unset EBDEVELPYTHON
++++ unset EBDEVELPYYAML
++++ unset EBDEVELSQLITE
++++ unset EBDEVELTCL
++++ unset EBDEVELXZ
++++ unset EBDEVELZLIB
++++ unset EBEXTSLISTPYTHON
++++ unset EBPYTHONPREFIXES
++++ unset EBROOTBINUTILS
++++ unset EBROOTBZIP2
++++ unset EBROOTGCCCORE
++++ unset EBROOTGMP
++++ unset EBROOTLIBFFI
++++ unset EBROOTLIBREADLINE
++++ unset EBROOTLIBYAML
++++ unset EBROOTNCURSES
++++ unset EBROOTOPENSSL
++++ unset EBROOTPYTHON
++++ unset EBROOTPYYAML
++++ unset EBROOTSQLITE
++++ unset EBROOTTCL
++++ unset EBROOTXZ
++++ unset EBROOTZLIB
++++ unset EBVERSIONBINUTILS
++++ unset EBVERSIONBZIP2
++++ unset EBVERSIONGCCCORE
++++ unset EBVERSIONGMP
++++ unset EBVERSIONLIBFFI
++++ unset EBVERSIONLIBREADLINE
++++ unset EBVERSIONLIBYAML
++++ unset EBVERSIONNCURSES
++++ unset EBVERSIONOPENSSL
++++ unset EBVERSIONPYTHON
++++ unset EBVERSIONPYYAML
++++ unset EBVERSIONSQLITE
++++ unset EBVERSIONTCL
++++ unset EBVERSIONXZ
++++ unset EBVERSIONZLIB
++++ unset LIBRARY_PATH
++++ unset LOADEDMODULES
++++ unset PKG_CONFIG_PATH
++++ unset PYTHONPATH
++++ unset _LMFILES_
+
+unset BINPATH array_modules unknown_modules modulenames array_names i j x option options modulename  version found LINE process process array_opts filename arg
+++ unset BINPATH array_modules unknown_modules modulenames array_names i j x option options modulename version found LINE process process array_opts filename arg
+
++ module load Singularity
++ source /gpfs/projects/bsc32/software/modules_supp/module_wrapper_custom.sh load Singularity
+#!/bin/bash
+
+BINPATH=/apps/modules/3.2.10/Modules/3.2.10/bin/modulecmd
+++ BINPATH=/apps/modules/3.2.10/Modules/3.2.10/bin/modulecmd
+MODULESHELL=sh
+++ MODULESHELL=sh
+
+if [[ -z "$MODULESBEGINENV" ]]; then
+	if [[ -n "$TMPDIR" && $TMPDIR =~ ^/.*/[0-9]+\.tmpdir$ ]]; then
+		export MODULESBEGINENV="$TMPDIR/.modulesbeginenv_$(date +"%Y%m%d%H%M%S%N")"
+	elif [[ -n "$HOME" ]]; then
+		export MODULESBEGINENV="$HOME/.modulesbeginenv"
+	fi
+fi
+++ [[ -z /home/bsc32/bsc32627/.modulesbeginenv ]]
+#if [[ "$_MODULESBEGINENV_" != "$MODULESBEGINENV" ]]; then
+#	unset _MODULESBEGINENV_
+#fi
+
+case $# in
+0 ) # no args: launch help
+	eval `$BINPATH $MODULESHELL help`
+	;;
+1 ) # 1 args: launch it!
+	eval `$BINPATH $MODULESHELL $1`
+	;;
+* ) # 2 or more args: parse it!
+
+	options=$1
+	shift	# delete the option from args
+	i=0
+	for arg in "$@"	# save the rest of args in modulenames array
+	do
+		modulenames[$i]=$arg
+		((i++))
+	done
+
+	array_opts=( add load rm unload swap switch sw show display avail av help whatis initadd initprepend initrm initswitch )
+	process=0
+	for option in "${array_opts[@]}" # check for the options
+	do
+		if [ "${options}" = "$option" ] # will process the args
+		then
+			process=1
+			break
+		fi
+	done
+
+	if [ $process -eq 0 ]  
+	then	
+		# other options, just launch it
+		eval `$BINPATH $MODULESHELL $options ${modulenames[*]}`
+	else
+		# save the names of modulefiles in array_names
+		x=0
+		for LINE in $(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done) ; do array_names[$x]="$LINE" ; ((x++)); done
+		# compare all modulenames from the entry with the existing modulefiles
+		i=0; j=0
+		for modulename in "${modulenames[@]}" 
+		do
+			found=0
+			# split module and version
+			local module=${modulename%/*}
+			version=${modulename#*/} # if no version, then module=version
+			for filename in "${array_names[@]}"
+			do
+				shopt -s nocasematch
+				case "$module" in
+				$filename )
+					if [ "$module" == "$version" ] # default version
+					then
+						array_modules[$i]=$filename
+					else # explicit version number
+						array_modules[$i]="$filename/$version"
+					fi
+					((i++))
+					found=1
+          break
+					;;
+				* )
+					;;
+				esac
+			done
+			if [ $found -eq 0 ] # module not found
+			then
+				unknown_modules[$j]=$modulename
+				((j++))
+			fi	
+		done
+	        eval `$BINPATH $MODULESHELL $options ${array_modules[*]} ${unknown_modules[*]:-}` # launch the right modules
+
+	fi
+	;;
+esac
+++ case $# in
+++ options=load
+++ shift
+++ i=0
+++ for arg in '"$@"'
+++ modulenames[$i]=Singularity
+++ (( i++ ))
+++ array_opts=(add load rm unload swap switch sw show display avail av help whatis initadd initprepend initrm initswitch)
+++ process=0
+++ for option in '"${array_opts[@]}"'
+++ '[' load = add ']'
+++ for option in '"${array_opts[@]}"'
+++ '[' load = load ']'
+++ process=1
+++ break
+++ '[' 1 -eq 0 ']'
+++ x=0
+for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done
++++ for i in '${MODULEPATH//:/ }'
++++ /bin/ls -1 /gpfs/projects/bsc32/software/suselinux/11/modules/all
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=ant
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=ANTLR
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=arviz
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=Autoconf
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=Automake
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=Autotools
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=auto-tqdm
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=basemap
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=beautifulsoup4
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=Biggus
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=binutils
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=Bison
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=Blosc
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=bokeh
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=Boost
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=Boruta
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=Bottleneck
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=bscearth.utils
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=bzip2
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=c3s512-protoype
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=c3s512-wp1-datachecker
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=cairo
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=CairoSVG
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=cartoframes
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=Cartopy
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=CDFTOOLS
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=CDO
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=cfgrib
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=cf-python
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=cftime
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=cfunits
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=cf_units
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=CMake
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=cmocean
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=contextily
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=ctd
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=cURL
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=Cython
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=darts
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=dash
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=dask
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=dask-ml
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=dataframe_image
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=dataframe-image
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=DBus
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=descartes
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=diagonals
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=double-conversion
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=Doxygen
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=dqc
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=earthdiagnostics
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=EasyBuild
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=ecCodes
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=eccodes-python
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=ece2cmor
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=ecFlow
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=Eigen
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=eli5
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=entrypoints
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=eofs
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=eo-learn
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=esagora
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=ESMF
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=ESMPy
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=ESMValTool
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=expat
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=f90nml
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=FFmpeg
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=FFTW
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=filesplit
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=filterpy
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=Fiona
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=flex
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=flit
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=flit_core
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=fontconfig
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=foss
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=freetype
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=FriBidi
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=fs
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=fsplit
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=g2clib
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=g2lib
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=GCC
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=GCCcore
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=GDAL
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=geocat.comp
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=geopandas
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=geoplot
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=geopy
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=GEOS
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=gettext
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=Ghostscript
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=git
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=GLib
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=glmnet_py
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=glmnet-py
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=GMP
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=gompi
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=google-cloud-sdk
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=gperf
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=graphviz
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=Graphviz
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=greasy
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=grib_api
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=GSL
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=h5py
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=HDF
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=HDF5
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=help2man
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=htop
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=hwloc
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=hyperopt
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=hypothesis
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=ICU
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=ImageMagick
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=importlib_resources
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=inkscape
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=intltool
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=IOnetCDF
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=IPython
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=ipython_genutils
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=Iris
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=JasPer
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=Java
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=jq
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=jsonschema
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=Julia
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=JUnit
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=jupyterlab
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=jupyterlab-pygments
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=kafka
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=LAME
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=libdap
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=libdrm
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=libevent
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=libffi
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=libgeotiff
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=libGLU
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=libiconv
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=libjpeg-turbo
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=libpciaccess
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=libpng
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=libreadline
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=librsvg
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=libsndfile
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=libsodium
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=LibTIFF
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=libtirpc
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=libtool
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=libunwind
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=libxml2
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=libxslt
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=libyaml
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=lightgbm
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=LittleCMS
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=LLVM
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=lxml
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=LZO
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=M4
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=make
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=makedepend
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=Mako
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=mapclassify
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=mapgenerator
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=matplotlib
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=memory_profiler
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=mercantile
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=Mesa
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=Meson
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=METIS
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=MetPy
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=Met-Py
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=Miniconda2
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=Miniconda3
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=MPFR
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=mpi4py
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=NASM
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=naturalneighbor
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=nbclient
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=nbconvert
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=nbformat
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=nbterm
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=nccmp
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=NCL
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=NCO
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=nctime
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=nc-time-axis
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=ncurses
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=ncview
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=netCDF
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=netcdf4-python
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=netCDF-C++4
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=netCDF-Fortran
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=nettle
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=networkx
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=Ninja
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=NLopt
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=nodejs
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=NSPR
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=NSS
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=numactl
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=numba
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=numexpr
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=numpy
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=oct2py
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=Octave
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=OpenBLAS
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=OpenMPI
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=OpenPGM
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=OpenSSL
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=orca
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=pandas
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=Pandoc
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=pangeo
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=Panoply
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=patool
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=PCRE
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=PCRE2
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=Perl
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=Phantomjs
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=Pillow
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=Pint
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=pixman
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=pkg-config
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=plotly
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=poetry
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=poetry-core
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=portalocker
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=PROJ
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=prompt_toolkit
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=proplot
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=protobuf
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=protobuf-python
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=providentia
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=psyplot
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=pyagrum
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=pybind11
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=pycdo
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=pycodestyle
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=pyglmnet
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=Pygments
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=pyinterp
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=PyKrige
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=pymannkendall
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=pynco
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=pyproj
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=PyQt5
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=pyrsistent
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=pyshp
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=pyslurm
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=pyspark
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=pystan
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=PyTables
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=Python
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=PyTorch
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=PyYAML
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=Qhull
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=Qt5
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=R
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=rasterio
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=re2c
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=regionmask
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=renku
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=reverse_geocoder
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=rich
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=rioxarray
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=rpy2
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=RStudio
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=Rtree
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=Rust
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=ScaLAPACK
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=scikit-build
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=scikit-garden
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=scikit-gstat
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=scikit-learn
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=scipy
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=SciPy-bundle
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=SCons
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=seaborn
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=shap
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=Shapely
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=Singularity
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=SIP
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=SkillMetrics
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=snappy
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=soupsieve
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=Spark
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=spatialindex
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=Sphinx
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=sphinx-gallery
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=sphinx_rtd_theme
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=SQLite
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=statsmodels
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=SuiteSparse
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=SWIG
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=Szip
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=Tcl
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=texinfo
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=textlive
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=threadpoolctl
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=tigramite
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=timezonefinder
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=Tk
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=Tkinter
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=toml
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=traitlets
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=UDUNITS
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=util-linux
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=wheel
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=windspharm
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=workalendar
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=wrf-python
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=X11
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=x264
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=x265
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=xarray
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=xclim
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=xESMF
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=XGBoost
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=xgcm
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=XlsxWriter
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=xorca
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=xorg-macros
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=xproto
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=xskillscore
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=XZ
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=Yasm
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=YAXT
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=ZeroMQ
+++ (( x++ ))
+++ for LINE in '$(for i in ${MODULEPATH//:/ } ; do /bin/ls -1 $i ; done)'
+++ array_names[$x]=zlib
+++ (( x++ ))
+++ i=0
+++ j=0
+++ for modulename in '"${modulenames[@]}"'
+++ found=0
+++ local module=Singularity
+++ version=Singularity
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ for filename in '"${array_names[@]}"'
+++ shopt -s nocasematch
+++ case "$module" in
+++ '[' Singularity == Singularity ']'
+++ array_modules[$i]=Singularity
+++ (( i++ ))
+++ found=1
+++ break
+++ '[' 1 -eq 0 ']'
+$BINPATH $MODULESHELL $options ${array_modules[*]} ${unknown_modules[*]:-}
++++ /apps/modules/3.2.10/Modules/3.2.10/bin/modulecmd sh load Singularity
+++ eval CPATH=/gpfs/projects/bsc32/software/suselinux/11/software/Singularity/3.2.0-GCC-8.3.0/include:/gpfs/projects/bsc32/software/suselinux/11/software/binutils/2.32-GCCcore-8.3.0/include:/gpfs/projects/bsc32/software/suselinux/11/software/zlib/1.2.11-GCCcore-8.3.0/include:/gpfs/projects/bsc32/software/suselinux/11/software/GCCcore/8.3.0/include ';export' 'CPATH;EBDEVELBINUTILS=/gpfs/projects/bsc32/software/suselinux/11/software/binutils/2.32-GCCcore-8.3.0/easybuild/binutils-2.32-GCCcore-8.3.0-easybuild-devel' ';export' 'EBDEVELBINUTILS;EBDEVELGCC=/gpfs/projects/bsc32/software/suselinux/11/software/GCC/8.3.0/easybuild/GCC-8.3.0-easybuild-devel' ';export' 'EBDEVELGCC;EBDEVELGCCCORE=/gpfs/projects/bsc32/software/suselinux/11/software/GCCcore/8.3.0/easybuild/GCCcore-8.3.0-easybuild-devel' ';export' 'EBDEVELGCCCORE;EBDEVELSINGULARITY=/gpfs/projects/bsc32/software/suselinux/11/software/Singularity/3.2.0-GCC-8.3.0/easybuild/Singularity-3.2.0-GCC-8.3.0-easybuild-devel' ';export' 'EBDEVELSINGULARITY;EBDEVELZLIB=/gpfs/projects/bsc32/software/suselinux/11/software/zlib/1.2.11-GCCcore-8.3.0/easybuild/zlib-1.2.11-GCCcore-8.3.0-easybuild-devel' ';export' 'EBDEVELZLIB;EBROOTBINUTILS=/gpfs/projects/bsc32/software/suselinux/11/software/binutils/2.32-GCCcore-8.3.0' ';export' 'EBROOTBINUTILS;EBROOTGCC=/gpfs/projects/bsc32/software/suselinux/11/software/GCCcore/8.3.0' ';export' 'EBROOTGCC;EBROOTGCCCORE=/gpfs/projects/bsc32/software/suselinux/11/software/GCCcore/8.3.0' ';export' 'EBROOTGCCCORE;EBROOTSINGULARITY=/gpfs/projects/bsc32/software/suselinux/11/software/Singularity/3.2.0-GCC-8.3.0' ';export' 'EBROOTSINGULARITY;EBROOTZLIB=/gpfs/projects/bsc32/software/suselinux/11/software/zlib/1.2.11-GCCcore-8.3.0' ';export' 'EBROOTZLIB;EBVERSIONBINUTILS=2.32' ';export' 'EBVERSIONBINUTILS;EBVERSIONGCC=8.3.0' ';export' 'EBVERSIONGCC;EBVERSIONGCCCORE=8.3.0' ';export' 'EBVERSIONGCCCORE;EBVERSIONSINGULARITY=3.2.0' ';export' 'EBVERSIONSINGULARITY;EBVERSIONZLIB=1.2.11' ';export' 'EBVERSIONZLIB;LD_LIBRARY_PATH=/gpfs/projects/bsc32/software/suselinux/11/software/Singularity/3.2.0-GCC-8.3.0/lib:/gpfs/projects/bsc32/software/suselinux/11/software/binutils/2.32-GCCcore-8.3.0/lib:/gpfs/projects/bsc32/software/suselinux/11/software/zlib/1.2.11-GCCcore-8.3.0/lib:/gpfs/projects/bsc32/software/suselinux/11/software/GCCcore/8.3.0/lib/gcc/x86_64-pc-linux-gnu/8.3.0:/gpfs/projects/bsc32/software/suselinux/11/software/GCCcore/8.3.0/lib64:/gpfs/projects/bsc32/software/suselinux/11/software/GCCcore/8.3.0/lib:/opt/lsf/9.1/linux2.6-glibc2.3-x86_64/lib' ';export' 'LD_LIBRARY_PATH;LIBRARY_PATH=/gpfs/projects/bsc32/software/suselinux/11/software/Singularity/3.2.0-GCC-8.3.0/lib:/gpfs/projects/bsc32/software/suselinux/11/software/binutils/2.32-GCCcore-8.3.0/lib:/gpfs/projects/bsc32/software/suselinux/11/software/zlib/1.2.11-GCCcore-8.3.0/lib:/gpfs/projects/bsc32/software/suselinux/11/software/GCCcore/8.3.0/lib64:/gpfs/projects/bsc32/software/suselinux/11/software/GCCcore/8.3.0/lib' ';export' 'LIBRARY_PATH;LOADEDMODULES=GCCcore/8.3.0:zlib/1.2.11-GCCcore-8.3.0:binutils/2.32-GCCcore-8.3.0:GCC/8.3.0:Singularity/3.2.0-GCC-8.3.0' ';export' 'LOADEDMODULES;MANPATH=/gpfs/projects/bsc32/software/suselinux/11/software/Singularity/3.2.0-GCC-8.3.0/share/man:/gpfs/projects/bsc32/software/suselinux/11/software/binutils/2.32-GCCcore-8.3.0/share/man:/gpfs/projects/bsc32/software/suselinux/11/software/zlib/1.2.11-GCCcore-8.3.0/share/man:/gpfs/projects/bsc32/software/suselinux/11/software/GCCcore/8.3.0/share/man:/opt/lsf/9.1/man:/usr/local/man:/usr/share/man' ';export' 'MANPATH;PATH=/gpfs/projects/bsc32/software/suselinux/11/software/Singularity/3.2.0-GCC-8.3.0/bin:/gpfs/projects/bsc32/software/suselinux/11/software/binutils/2.32-GCCcore-8.3.0/bin:/gpfs/projects/bsc32/software/suselinux/11/software/GCCcore/8.3.0/bin:/apps/modules/3.2.10/Modules/3.2.10/bin/:/opt/lsf/9.1/linux2.6-glibc2.3-x86_64/bin:/opt/lsf/9.1/linux2.6-glibc2.3-x86_64/etc:/usr/local/bin:/usr/bin:/bin:/usr/bin/X11:/usr/X11R6/bin:/usr/games:/opt/bin:/opt/ibutils/bin:/usr/lib/mit/bin:/usr/lib/mit/sbin:/opt/intel/mic/bin:.' ';export' 'PATH;PKG_CONFIG_PATH=/gpfs/projects/bsc32/software/suselinux/11/software/zlib/1.2.11-GCCcore-8.3.0/lib/pkgconfig' ';export' 'PKG_CONFIG_PATH;XDG_DATA_DIRS=/gpfs/projects/bsc32/software/suselinux/11/software/Singularity/3.2.0-GCC-8.3.0/share:/usr/share:/etc/opt/kde3/share:/opt/kde3/share' ';export' 'XDG_DATA_DIRS;_LMFILES_=/gpfs/projects/bsc32/software/suselinux/11/modules/all/GCCcore/8.3.0:/gpfs/projects/bsc32/software/suselinux/11/modules/all/zlib/1.2.11-GCCcore-8.3.0:/gpfs/projects/bsc32/software/suselinux/11/modules/all/binutils/2.32-GCCcore-8.3.0:/gpfs/projects/bsc32/software/suselinux/11/modules/all/GCC/8.3.0:/gpfs/projects/bsc32/software/suselinux/11/modules/all/Singularity/3.2.0-GCC-8.3.0' ';export' '_LMFILES_;'
+CPATH=/gpfs/projects/bsc32/software/suselinux/11/software/Singularity/3.2.0-GCC-8.3.0/include:/gpfs/projects/bsc32/software/suselinux/11/software/binutils/2.32-GCCcore-8.3.0/include:/gpfs/projects/bsc32/software/suselinux/11/software/zlib/1.2.11-GCCcore-8.3.0/include:/gpfs/projects/bsc32/software/suselinux/11/software/GCCcore/8.3.0/include ;export CPATH;EBDEVELBINUTILS=/gpfs/projects/bsc32/software/suselinux/11/software/binutils/2.32-GCCcore-8.3.0/easybuild/binutils-2.32-GCCcore-8.3.0-easybuild-devel ;export EBDEVELBINUTILS;EBDEVELGCC=/gpfs/projects/bsc32/software/suselinux/11/software/GCC/8.3.0/easybuild/GCC-8.3.0-easybuild-devel ;export EBDEVELGCC;EBDEVELGCCCORE=/gpfs/projects/bsc32/software/suselinux/11/software/GCCcore/8.3.0/easybuild/GCCcore-8.3.0-easybuild-devel ;export EBDEVELGCCCORE;EBDEVELSINGULARITY=/gpfs/projects/bsc32/software/suselinux/11/software/Singularity/3.2.0-GCC-8.3.0/easybuild/Singularity-3.2.0-GCC-8.3.0-easybuild-devel ;export EBDEVELSINGULARITY;EBDEVELZLIB=/gpfs/projects/bsc32/software/suselinux/11/software/zlib/1.2.11-GCCcore-8.3.0/easybuild/zlib-1.2.11-GCCcore-8.3.0-easybuild-devel ;export EBDEVELZLIB;EBROOTBINUTILS=/gpfs/projects/bsc32/software/suselinux/11/software/binutils/2.32-GCCcore-8.3.0 ;export EBROOTBINUTILS;EBROOTGCC=/gpfs/projects/bsc32/software/suselinux/11/software/GCCcore/8.3.0 ;export EBROOTGCC;EBROOTGCCCORE=/gpfs/projects/bsc32/software/suselinux/11/software/GCCcore/8.3.0 ;export EBROOTGCCCORE;EBROOTSINGULARITY=/gpfs/projects/bsc32/software/suselinux/11/software/Singularity/3.2.0-GCC-8.3.0 ;export EBROOTSINGULARITY;EBROOTZLIB=/gpfs/projects/bsc32/software/suselinux/11/software/zlib/1.2.11-GCCcore-8.3.0 ;export EBROOTZLIB;EBVERSIONBINUTILS=2.32 ;export EBVERSIONBINUTILS;EBVERSIONGCC=8.3.0 ;export EBVERSIONGCC;EBVERSIONGCCCORE=8.3.0 ;export EBVERSIONGCCCORE;EBVERSIONSINGULARITY=3.2.0 ;export EBVERSIONSINGULARITY;EBVERSIONZLIB=1.2.11 ;export EBVERSIONZLIB;LD_LIBRARY_PATH=/gpfs/projects/bsc32/software/suselinux/11/software/Singularity/3.2.0-GCC-8.3.0/lib:/gpfs/projects/bsc32/software/suselinux/11/software/binutils/2.32-GCCcore-8.3.0/lib:/gpfs/projects/bsc32/software/suselinux/11/software/zlib/1.2.11-GCCcore-8.3.0/lib:/gpfs/projects/bsc32/software/suselinux/11/software/GCCcore/8.3.0/lib/gcc/x86_64-pc-linux-gnu/8.3.0:/gpfs/projects/bsc32/software/suselinux/11/software/GCCcore/8.3.0/lib64:/gpfs/projects/bsc32/software/suselinux/11/software/GCCcore/8.3.0/lib:/opt/lsf/9.1/linux2.6-glibc2.3-x86_64/lib ;export LD_LIBRARY_PATH;LIBRARY_PATH=/gpfs/projects/bsc32/software/suselinux/11/software/Singularity/3.2.0-GCC-8.3.0/lib:/gpfs/projects/bsc32/software/suselinux/11/software/binutils/2.32-GCCcore-8.3.0/lib:/gpfs/projects/bsc32/software/suselinux/11/software/zlib/1.2.11-GCCcore-8.3.0/lib:/gpfs/projects/bsc32/software/suselinux/11/software/GCCcore/8.3.0/lib64:/gpfs/projects/bsc32/software/suselinux/11/software/GCCcore/8.3.0/lib ;export LIBRARY_PATH;LOADEDMODULES=GCCcore/8.3.0:zlib/1.2.11-GCCcore-8.3.0:binutils/2.32-GCCcore-8.3.0:GCC/8.3.0:Singularity/3.2.0-GCC-8.3.0 ;export LOADEDMODULES;MANPATH=/gpfs/projects/bsc32/software/suselinux/11/software/Singularity/3.2.0-GCC-8.3.0/share/man:/gpfs/projects/bsc32/software/suselinux/11/software/binutils/2.32-GCCcore-8.3.0/share/man:/gpfs/projects/bsc32/software/suselinux/11/software/zlib/1.2.11-GCCcore-8.3.0/share/man:/gpfs/projects/bsc32/software/suselinux/11/software/GCCcore/8.3.0/share/man:/opt/lsf/9.1/man:/usr/local/man:/usr/share/man ;export MANPATH;PATH=/gpfs/projects/bsc32/software/suselinux/11/software/Singularity/3.2.0-GCC-8.3.0/bin:/gpfs/projects/bsc32/software/suselinux/11/software/binutils/2.32-GCCcore-8.3.0/bin:/gpfs/projects/bsc32/software/suselinux/11/software/GCCcore/8.3.0/bin:/apps/modules/3.2.10/Modules/3.2.10/bin/:/opt/lsf/9.1/linux2.6-glibc2.3-x86_64/bin:/opt/lsf/9.1/linux2.6-glibc2.3-x86_64/etc:/usr/local/bin:/usr/bin:/bin:/usr/bin/X11:/usr/X11R6/bin:/usr/games:/opt/bin:/opt/ibutils/bin:/usr/lib/mit/bin:/usr/lib/mit/sbin:/opt/intel/mic/bin:. ;export PATH;PKG_CONFIG_PATH=/gpfs/projects/bsc32/software/suselinux/11/software/zlib/1.2.11-GCCcore-8.3.0/lib/pkgconfig ;export PKG_CONFIG_PATH;XDG_DATA_DIRS=/gpfs/projects/bsc32/software/suselinux/11/software/Singularity/3.2.0-GCC-8.3.0/share:/usr/share:/etc/opt/kde3/share:/opt/kde3/share ;export XDG_DATA_DIRS;_LMFILES_=/gpfs/projects/bsc32/software/suselinux/11/modules/all/GCCcore/8.3.0:/gpfs/projects/bsc32/software/suselinux/11/modules/all/zlib/1.2.11-GCCcore-8.3.0:/gpfs/projects/bsc32/software/suselinux/11/modules/all/binutils/2.32-GCCcore-8.3.0:/gpfs/projects/bsc32/software/suselinux/11/modules/all/GCC/8.3.0:/gpfs/projects/bsc32/software/suselinux/11/modules/all/Singularity/3.2.0-GCC-8.3.0 ;export _LMFILES_;
++++ CPATH=/gpfs/projects/bsc32/software/suselinux/11/software/Singularity/3.2.0-GCC-8.3.0/include:/gpfs/projects/bsc32/software/suselinux/11/software/binutils/2.32-GCCcore-8.3.0/include:/gpfs/projects/bsc32/software/suselinux/11/software/zlib/1.2.11-GCCcore-8.3.0/include:/gpfs/projects/bsc32/software/suselinux/11/software/GCCcore/8.3.0/include
++++ export CPATH
++++ EBDEVELBINUTILS=/gpfs/projects/bsc32/software/suselinux/11/software/binutils/2.32-GCCcore-8.3.0/easybuild/binutils-2.32-GCCcore-8.3.0-easybuild-devel
++++ export EBDEVELBINUTILS
++++ EBDEVELGCC=/gpfs/projects/bsc32/software/suselinux/11/software/GCC/8.3.0/easybuild/GCC-8.3.0-easybuild-devel
++++ export EBDEVELGCC
++++ EBDEVELGCCCORE=/gpfs/projects/bsc32/software/suselinux/11/software/GCCcore/8.3.0/easybuild/GCCcore-8.3.0-easybuild-devel
++++ export EBDEVELGCCCORE
++++ EBDEVELSINGULARITY=/gpfs/projects/bsc32/software/suselinux/11/software/Singularity/3.2.0-GCC-8.3.0/easybuild/Singularity-3.2.0-GCC-8.3.0-easybuild-devel
++++ export EBDEVELSINGULARITY
++++ EBDEVELZLIB=/gpfs/projects/bsc32/software/suselinux/11/software/zlib/1.2.11-GCCcore-8.3.0/easybuild/zlib-1.2.11-GCCcore-8.3.0-easybuild-devel
++++ export EBDEVELZLIB
++++ EBROOTBINUTILS=/gpfs/projects/bsc32/software/suselinux/11/software/binutils/2.32-GCCcore-8.3.0
++++ export EBROOTBINUTILS
++++ EBROOTGCC=/gpfs/projects/bsc32/software/suselinux/11/software/GCCcore/8.3.0
++++ export EBROOTGCC
++++ EBROOTGCCCORE=/gpfs/projects/bsc32/software/suselinux/11/software/GCCcore/8.3.0
++++ export EBROOTGCCCORE
++++ EBROOTSINGULARITY=/gpfs/projects/bsc32/software/suselinux/11/software/Singularity/3.2.0-GCC-8.3.0
++++ export EBROOTSINGULARITY
++++ EBROOTZLIB=/gpfs/projects/bsc32/software/suselinux/11/software/zlib/1.2.11-GCCcore-8.3.0
++++ export EBROOTZLIB
++++ EBVERSIONBINUTILS=2.32
++++ export EBVERSIONBINUTILS
++++ EBVERSIONGCC=8.3.0
++++ export EBVERSIONGCC
++++ EBVERSIONGCCCORE=8.3.0
++++ export EBVERSIONGCCCORE
++++ EBVERSIONSINGULARITY=3.2.0
++++ export EBVERSIONSINGULARITY
++++ EBVERSIONZLIB=1.2.11
++++ export EBVERSIONZLIB
++++ LD_LIBRARY_PATH=/gpfs/projects/bsc32/software/suselinux/11/software/Singularity/3.2.0-GCC-8.3.0/lib:/gpfs/projects/bsc32/software/suselinux/11/software/binutils/2.32-GCCcore-8.3.0/lib:/gpfs/projects/bsc32/software/suselinux/11/software/zlib/1.2.11-GCCcore-8.3.0/lib:/gpfs/projects/bsc32/software/suselinux/11/software/GCCcore/8.3.0/lib/gcc/x86_64-pc-linux-gnu/8.3.0:/gpfs/projects/bsc32/software/suselinux/11/software/GCCcore/8.3.0/lib64:/gpfs/projects/bsc32/software/suselinux/11/software/GCCcore/8.3.0/lib:/opt/lsf/9.1/linux2.6-glibc2.3-x86_64/lib
++++ export LD_LIBRARY_PATH
++++ LIBRARY_PATH=/gpfs/projects/bsc32/software/suselinux/11/software/Singularity/3.2.0-GCC-8.3.0/lib:/gpfs/projects/bsc32/software/suselinux/11/software/binutils/2.32-GCCcore-8.3.0/lib:/gpfs/projects/bsc32/software/suselinux/11/software/zlib/1.2.11-GCCcore-8.3.0/lib:/gpfs/projects/bsc32/software/suselinux/11/software/GCCcore/8.3.0/lib64:/gpfs/projects/bsc32/software/suselinux/11/software/GCCcore/8.3.0/lib
++++ export LIBRARY_PATH
++++ LOADEDMODULES=GCCcore/8.3.0:zlib/1.2.11-GCCcore-8.3.0:binutils/2.32-GCCcore-8.3.0:GCC/8.3.0:Singularity/3.2.0-GCC-8.3.0
++++ export LOADEDMODULES
++++ MANPATH=/gpfs/projects/bsc32/software/suselinux/11/software/Singularity/3.2.0-GCC-8.3.0/share/man:/gpfs/projects/bsc32/software/suselinux/11/software/binutils/2.32-GCCcore-8.3.0/share/man:/gpfs/projects/bsc32/software/suselinux/11/software/zlib/1.2.11-GCCcore-8.3.0/share/man:/gpfs/projects/bsc32/software/suselinux/11/software/GCCcore/8.3.0/share/man:/opt/lsf/9.1/man:/usr/local/man:/usr/share/man
++++ export MANPATH
++++ PATH=/gpfs/projects/bsc32/software/suselinux/11/software/Singularity/3.2.0-GCC-8.3.0/bin:/gpfs/projects/bsc32/software/suselinux/11/software/binutils/2.32-GCCcore-8.3.0/bin:/gpfs/projects/bsc32/software/suselinux/11/software/GCCcore/8.3.0/bin:/apps/modules/3.2.10/Modules/3.2.10/bin/:/opt/lsf/9.1/linux2.6-glibc2.3-x86_64/bin:/opt/lsf/9.1/linux2.6-glibc2.3-x86_64/etc:/usr/local/bin:/usr/bin:/bin:/usr/bin/X11:/usr/X11R6/bin:/usr/games:/opt/bin:/opt/ibutils/bin:/usr/lib/mit/bin:/usr/lib/mit/sbin:/opt/intel/mic/bin:.
++++ export PATH
++++ PKG_CONFIG_PATH=/gpfs/projects/bsc32/software/suselinux/11/software/zlib/1.2.11-GCCcore-8.3.0/lib/pkgconfig
++++ export PKG_CONFIG_PATH
++++ XDG_DATA_DIRS=/gpfs/projects/bsc32/software/suselinux/11/software/Singularity/3.2.0-GCC-8.3.0/share:/usr/share:/etc/opt/kde3/share:/opt/kde3/share
++++ export XDG_DATA_DIRS
++++ _LMFILES_=/gpfs/projects/bsc32/software/suselinux/11/modules/all/GCCcore/8.3.0:/gpfs/projects/bsc32/software/suselinux/11/modules/all/zlib/1.2.11-GCCcore-8.3.0:/gpfs/projects/bsc32/software/suselinux/11/modules/all/binutils/2.32-GCCcore-8.3.0:/gpfs/projects/bsc32/software/suselinux/11/modules/all/GCC/8.3.0:/gpfs/projects/bsc32/software/suselinux/11/modules/all/Singularity/3.2.0-GCC-8.3.0
++++ export _LMFILES_
+
+unset BINPATH array_modules unknown_modules modulenames array_names i j x option options modulename  version found LINE process process array_opts filename arg
+++ unset BINPATH array_modules unknown_modules modulenames array_names i j x option options modulename version found LINE process process array_opts filename arg
+
++ newgrp Earth
++ singularity run /esarchive/software/containers/esmvaltool/esmvaltool-m1.0.0.sif run --check-level relaxed --log-level debug --max-parallel-tasks 4 --config-file /esarchive/autosubmit/t0ni/proj/auto-ecearth3/es-esmvaltool/config-files/config-user.yml --config-developer-file /esarchive/autosubmit/t0ni/proj/auto-ecearth3/es-esmvaltool/config-files/config-developer.yml /gpfs/scratch/bsc32/bsc32627/t0ni/recipe_t0ni_19931101_fc0_2_monitor_atmos.yml
+[33mWARNING:[0m seccomp requested but not enabled, seccomp library is missing or too old

@@ -1,0 +1,17 @@
+[INFO] JOBID=19285824
+
+total output 19931101 fc0 5779460
+ &NAMRCF
+ CSTEP   = "     5856",
+ CTIME   = "0000610000    ",
+ NSTEPLPP        = 255*0,
+ IPRGPNSRES      =          38,
+ IPRGPEWRES      =          24,
+ IPRTRWRES       =         228,
+ IPRTRVRES       =           4,
+ GMASS0  =   98294.5318430669     ,
+ GMASSI  =   98294.0679795857     ,
+ NYMLPPGP        =      199312,
+ NYMLPPSP        =      199312
+ /
+common.post Done

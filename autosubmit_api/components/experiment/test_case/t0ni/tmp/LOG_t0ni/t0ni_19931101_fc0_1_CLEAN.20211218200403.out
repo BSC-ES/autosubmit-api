@@ -1,0 +1,30 @@
+[INFO] JOBID=41698
+
+Not saving the IFS restarts
+Not saving the NEMO restarts
+Not saving the OASIS restarts
+moving cmor files .....
+The job 1435208 is PENDING
+The job 1435208 is STATE
+The job 1435212 is PENDING
+The job 1435212 is STATE
+log/001/
+log/001/debug.root.03
+log/001/ifs.stat
+log/001/nout.000000
+log/001/debug.root.02
+log/001/time.step
+log/001/ocean.output
+log/001/debug.root.01
+log/001/solver.stat
+log/001/debug.root.04
+log/001/fort.4
+log/001/ifs.log
+The job 1435215 is PENDING
+The job 1435215 is STATE
+moving ICs files 
+The job 1435216 is PENDING
+The job 1435216 is STATE
+We are now copying the ICM??t0ni+000000 files so they can be used later by CMORATM
+We are now removing /gpfs/scratch/bsc32/bsc32627/t0ni/19931101/fc0/runtime/output/ifs/001
+We are now removing /gpfs/scratch/bsc32/bsc32627/t0ni/19931101/fc0/runtime/output/nemo/001

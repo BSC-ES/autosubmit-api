@@ -1,0 +1,7 @@
+[INFO] JOBID=19279786
+
+
+ Running  /gpfs/scratch/bsc32/bsc32627/t0ni/auto-ecearth3/ece2cmor/ece2cmor3/scripts/modify-metadata-template.sh CMIP piControl EC-EARTH-AOGCM /gpfs/scratch/bsc32/bsc32627/t0ni/auto-ecearth3/ece2cmor/ece2cmor3/resources/metadata-templates/cmip6-CMIP-piControl-metadata-template.json   for  ifs
+ Running  /gpfs/scratch/bsc32/bsc32627/t0ni/auto-ecearth3/ece2cmor/ece2cmor3/scripts/modify-metadata-template.sh CMIP piControl EC-EARTH-AOGCM /gpfs/scratch/bsc32/bsc32627/t0ni/auto-ecearth3/ece2cmor/ece2cmor3/resources/metadata-templates/cmip6-CMIP-piControl-metadata-template.json   for  nemo
+
+mon /gpfs/scratch/bsc32/bsc32627/t0ni/19931101/fc0/runtime/cmor_outputs/cmor_oce_2/CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/Omon/wfonocorr/gn/v20211218 1 1

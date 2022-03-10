@@ -1,0 +1,1485 @@
+[INFO] JOBID=2752
+
+job_name_ptrn='/esarchive/autosubmit/t0ni/tmp/LOG_t0ni/t0ni_PERFORMANCE_METRICS'
++ job_name_ptrn=/esarchive/autosubmit/t0ni/tmp/LOG_t0ni/t0ni_PERFORMANCE_METRICS
+echo $(date +%s) > ${job_name_ptrn}_STAT
+date +%s)
+date +%s
+++ date +%s
++ echo 1639863387
+
+###################
+# Autosubmit job
+###################
+
+#!/bin/bash
+
+if [[ "marenostrum4" != "marenostrum4" ]]; then
+  echo local " is not supported please remove PERFORMANCE_METRICS job from your workflow"
+  exit 1
+fi
++ [[ marenostrum4 != \m\a\r\e\n\o\s\t\r\u\m\4 ]]
+set -xuve
++ set -xuve
+seconds_in_one_day=86400
++ seconds_in_one_day=86400
+ROOTDIR=/esarchive/autosubmit/t0ni
++ ROOTDIR=/esarchive/autosubmit/t0ni
+log_dir=${ROOTDIR}/tmp/LOG_t0ni
++ log_dir=/esarchive/autosubmit/t0ni/tmp/LOG_t0ni
+
+#
+# CPMIP: real computational performance of EC-Earth for CMIP6
+# related issue https://dev.ec-earth.org/issues/532
+#
+# Paper: CPMIP: measurements of real computational performance of Earth system models in CMIP6
+# Venkatramani et all https://www.geosci-model-dev.net/10/19/2017/gmd-10-19-2017.pdf
+#
+function year_factor() {
+
+  CHUNKSIZEUNIT=month
+  case "${CHUNKSIZEUNIT}" in
+  day) year_factor=365 ;;
+  month) year_factor=12 ;;
+  year) year_factor=1 ;;
+  *) error "Unexpected option ${CHUNKSIZE}" ;;
+  esac
+
+  export year_factor
+}
+
+function real_jules_per_simulated_year() {
+
+  year_factor
+
+  job_id=$(grep SLURM /esarchive/autosubmit/t0ni/tmp/LOG_t0ni/*SIM*.out | sort -n | head -n 1 | awk '{print $2}')
+  one_chunk_energy_consumed=$(ssh bsc32627@mn1.bsc.es "sacct -j ${job_id} --noheader --format=ConsumedEnergy --noconvert | head -n 1 |  tr -d "[:space:]"")
+
+  real_jules_per_simulated_year=$(echo "scale=0;( ${year_factor}*${one_chunk_energy_consumed} )" | bc)
+  export real_jules_per_simulated_year
+}
+
+function theoretical_jules_per_simulated_year() {
+
+  #  MareNostrum 4 total cores: 153216 , consumption (linpack) : 1632.00kW
+  theoretical_jules_per_simulated_year=$(echo "scale=0;(${core_hours_per_simulated_year}*3600.0*1632000.0/153216.0 )" | bc)
+
+  export theoretical_jules_per_simulated_year
+
+}
+
+function years_simulated() {
+
+  year_factor
+
+  CHUNKSIZEUNIT=month
+  NUMCHUNKS=2
+  CHUNKSIZE=1
+  years_simulated=$(echo "scale=2; ${CHUNKSIZE}*${NUMCHUNKS}/${year_factor}" | bc)
+
+  export years_simulated
+}
+
+#set -vx
+cd /esarchive/autosubmit/t0ni/tmp
++ cd /esarchive/autosubmit/t0ni/tmp
+#
+# Get remote ece.info
+#
+for file in $(ssh bsc32627@mn1.bsc.es "ls -rt /gpfs/scratch/bsc32/bsc32627/t0ni/*/*/runtime/ece.info"); do
+  date=$(echo ${file} | awk -F'/' '{print $(NF-3)}')
+  member=$(echo ${file} | awk -F'/' '{print $(NF-2)}')
+  filename=t0ni_${date}_${member}_ece.info
+  rsync -avz bsc32627@mn1.bsc.es:${file} ${filename}
+done
+ssh bsc32627@mn1.bsc.es "ls -rt /gpfs/scratch/bsc32/bsc32627/t0ni/*/*/runtime/ece.info")
+ssh bsc32627@mn1.bsc.es "ls -rt /gpfs/scratch/bsc32/bsc32627/t0ni/*/*/runtime/ece.info"
+++ ssh bsc32627@mn1.bsc.es 'ls -rt /gpfs/scratch/bsc32/bsc32627/t0ni/*/*/runtime/ece.info'
+Warning: No xauth data; using fake authentication data for X11 forwarding.
++ for file in '$(ssh bsc32627@mn1.bsc.es "ls -rt /gpfs/scratch/bsc32/bsc32627/t0ni/*/*/runtime/ece.info")'
+echo ${file} | awk -F'/' '{print $(NF-3)}')
+echo ${file} | awk -F'/' '{print $(NF-3)}'
+++ echo /gpfs/scratch/bsc32/bsc32627/t0ni/19931101/fc0/runtime/ece.info
+++ awk -F/ '{print $(NF-3)}'
++ date=19931101
+echo ${file} | awk -F'/' '{print $(NF-2)}')
+echo ${file} | awk -F'/' '{print $(NF-2)}'
+++ echo /gpfs/scratch/bsc32/bsc32627/t0ni/19931101/fc0/runtime/ece.info
+++ awk -F/ '{print $(NF-2)}'
++ member=fc0
++ filename=t0ni_19931101_fc0_ece.info
++ rsync -avz bsc32627@mn1.bsc.es:/gpfs/scratch/bsc32/bsc32627/t0ni/19931101/fc0/runtime/ece.info t0ni_19931101_fc0_ece.info
+Warning: No xauth data; using fake authentication data for X11 forwarding.
+{
+  #
+  echo
+  echo "# CPMIP performance metrics for CMIP6"
+  echo
+  echo "[METRICS]"
+  #
+  # SYPD
+  #
+  # SYPD are simulated years per day for the ESM in a 24 h period on a given platform. This should be collected by
+  # timing a segment of a production run (usually at least a
+  # month, often 1 or more years), not from short test runs.
+  # This is because short runs can give excessive weight to
+  # startup and shutdown costs, and distort the results following Amdahl’s law. This is measured separately in
+  # throughput and speed mode.
+  sim_count=$(grep CPMIP *_ece.info | wc -l)
+  sypd_cumul=$(grep SYPD *_ece.info | awk '{s+=$4}END{print s}')
+  chpsy_cumul=$(grep CHPSY *_ece.info | awk '{s+=$6}END{print s}')
+  sypd=$(echo "scale=2;(${sypd_cumul}/${sim_count})" | bc)
+  core_hours_per_simulated_year=$(echo "scale=2;(${chpsy_cumul}/${sim_count})" | bc)
+  rem=${core_hours_per_simulated_year}
+  echo "# Simulated years per day"
+  echo "SYPD = "${sypd}
+  echo "# Core hours per simulated year"
+  # CHSY are core hours per simulated year. This is measured
+  # as the product of the model runtime for 1 SY and the
+  # number of cores allocated.4 This is measured separately
+  # in throughput and speed mode
+
+  echo "CHSY = "${core_hours_per_simulated_year}
+
+  # JPSY is the energy cost of a simulation, measured in Joules
+  # per simulated year. Energy is one of the key drivers of computing architecture design in the current era.
+  # While direct instrumentation of energy consumption on a chip is still something in development, we generally
+  # have access to the energy cost associated with a platform (including cooling, disks, and so on), measured in
+  # kWh (= 3.6×106 Joules) over a month or a year. Given  the energy E in Joules consumed over a budgeting interval
+  # T (generally 1 month or 1 year, in units of hours), and the aggregate compute hours A on a system (total
+  # cores ×T ) over the same interval T , we can measure the
+  # cost associated with 1 year of a simulation as follows:
+  # JPSY ≡ CHSY × E/A. (6)
+  # Note that this is a very broad measure, and simply proportional to CHSY on a given machine. But it still
+  # is a basis of comparison across machines (as E will vary). In future years as on-chip energy metering matures
+  # and is standardized, we can imagine adding an “actual Joules per SY (AJPSY)” measure, which takes
+  # into account the actual energy used by the model and
+  # its workflow across the simulation lifecycle, including
+  # computation, data movement, and storage. These measures are similar in spirit to some prior measures of
+  # “energy to solution” (Bekas and Curioni, 2010; Cumming
+  # et al., 2014; Charles et al., 2015). The FTTSE metric of
+  # Bekas and Curioni (2010) is very similar to the AJPSY
+  # metric proposed here, and which we believe will replace
+  # JPSY in due course, when direct metering becomes routinely available.
+
+  # Theoretical Joules per simulated year use the linpack results
+
+  theoretical_jules_per_simulated_year
+  echo "# Theoretical Joules per simulated year "
+  echo "TJPSY = " ${theoretical_jules_per_simulated_year}
+
+  # Real Joules per simulated year use the scheduler information
+  real_jules_per_simulated_year
+  echo "# Real Joules per simulated year "
+  echo "RJPSY = " ${real_jules_per_simulated_year}
+
+  #
+  # ASYPD Actual simulated years per day
+  #
+  # ASYPD is the actual SYPD obtained from a typical longrunning simulation with the model. This number may
+  # be lower than SYPD because of system interruptions,
+  # queue wait time, or issues with the model workflow.
+  # This is measured for a long production run by measuring the time between first submission and the date of
+  # arrival of the last history file on the storage file system.
+  # This is measured separately in throughput and speed
+  # mode. For a run of N years in length, ASYPD ≡ N / ( tN − t0 )
+  # where t0 is the time of submission of the first job in the
+  # experiment, and tN is the time stamp of the history file
+  # for year N.
+
+  years_simulated
+
+  years_simulated_in_seconds=$(echo "scale=2; ${years_simulated}*${seconds_in_one_day}" | bc)
+
+  start_date=$(cat *_SIM_STAT | sort -n | head -n1)
+  end_date=$(cat *_POST_STAT | sort -n | tail -n1)
+  asypd=$(echo "scale=2;(${years_simulated_in_seconds}/(${end_date}-${start_date}))" | bc)
+  echo "# Actual simulated years per day"
+  echo "ASYPD = "${asypd}
+  #
+  # RSYPD
+  #
+  start_date=$(cat *_SIM_STAT | sort -n | head -n1)
+  end_date=$(cat *_POST_STAT | sort -n | tail -n1)
+  rsypd=$(echo "scale=2;(${years_simulated_in_seconds}/(${end_date}-${start_date}))" | bc)
+  echo "# Real simulated years per day"
+  echo "RSYPD = "${rsypd}
+  #
+  # Memory bloat
+  #
+  # Ideal from previous measurement (in Mb)
+  # see paper in the header
+  # TODO FIXME
+  ideal=2258
+  rss=$(cat *_SIM*.out | grep "Max Memory :" | tail -n1 | awk '{print $4}')
+  membl=$(echo "scale=2;$rss/$ideal" | bc)
+  echo "# Memory bloat"
+  echo "Memory bloat = "${membl}
+  #
+  # Data Output Cost
+  #
+  # Data output cost is the cost of performing I/O, and is the
+  # difference in cost between model runs with and without I/O. This is measured as the ratio of CHSY with
+  # and without I/O. This is measured differently for systems with synchronous and asynchronous I/O. For synchronous I/O where the computational PEs also perform
+  # I/O, it requires a separate “No I/O” run where we measure the fractional difference in cost:
+  # D ≡ (CHSY − CHSYno I/O) / CHSY  (Eq. 10)
+  # For models using asynchronous I/O such as XIOS, a
+  # separate bank of PEs is allotted for I/O. In this case, it
+  # may be possible to measure it by simply looking at the
+  # allocation fraction of the I/O server, without needing a
+  # second “no I/O” run.
+  # D ≡ ( PM − PI/O ) / PM   (Eq. 11)
+  # However, there may be additional computations performed solely for diagnostic purposes; thus, the method
+  # of Eq. 10 is likely more accurate. Note also that if the
+  # machine allocates by node, we need to account for the
+  # number of nodes, not PEs, allocated for I/O.
+
+  io_cores=$(grep "xio_numproc=" ${ROOTDIR}/tmp/*_SIM*.cmd | head -n1 | awk -F= '{print $2}')
+  total_cores=$(grep "#SBATCH -n" ${ROOTDIR}/tmp/*_SIM*.cmd | head -n1 | awk '{print $3}')
+  data_outpu_cost=$(echo "scale=2;100-100*(${total_cores}-${io_cores})/${total_cores}" | bc)
+
+  echo "# Data Output cost (%)"
+  echo "Data Output cost (%) = "${data_outpu_cost}
+  #
+  # Data intensity
+  #
+  # It is the measure of data produced per compute hour, in GB/CH (core hours).
+  # This is measured as the quotient of data produced per SY,
+  # examining  the output directories and divided by CHSY (core hours per simulated year)
+
+  year_factor
+
+  output_one_chunk_in_bytes=$(grep output $(ls -1 ${log_dir}/*POST* | tail -n 1) | awk '{print $5}')
+  output_one_year_in_bytes=$(echo "scale=0;( ${year_factor}*${output_one_chunk_in_bytes} )" | bc)
+  output_one_year_in_GB=$(echo "scale=2; ${output_one_year_in_bytes}/1000000" | bc)
+
+  data_intensity=$(echo "scale=3; ${output_one_year_in_GB}/${core_hours_per_simulated_year}" | bc)
+
+  echo "# Data intensity (MB/CH)"
+  echo "Data intensity (MB/CH) = "${data_intensity}
+  echo
+  echo "# Job statistics"
+  echo
+  #
+  # Jobs summary
+  #
+  echo "[JOB_STATS]"
+  printf "Job name \t = \t Queue time (H:M:S) \t Run time (H:M:S) \n"
+  for file in $(find . -name '*TOTAL_STATS' -not -name 't0ni_PERFORMANCE_METRICS_TOTAL_STATS*'); do
+    if [[ $(tail -1 ${file} | awk '{print NF}') -lt 4 ]]; then
+      continue
+    fi
+    ts_submit=$(tail -1 ${file} | awk '{print "\x27"substr($1,0,8)" "substr($1,9,2)":"substr($1,11,2)":"substr($1,13,2)"\x27 +%s"}' | xargs date -d)
+    ts_start=$(tail -1 ${file} | awk '{print "\x27"substr($2,0,8)" "substr($2,9,2)":"substr($2,11,2)":"substr($2,13,2)"\x27 +%s"}' | xargs date -d)
+    ts_end=$(tail -1 ${file} | awk '{print "\x27"substr($3,0,8)" "substr($3,9,2)":"substr($3,11,2)":"substr($3,13,2)"\x27 +%s"}' | xargs date -d)
+    tq=$(date -d "0 -${ts_submit} sec + ${ts_start} sec" +%T)
+    tr=$(date -d "0 -${ts_start} sec + ${ts_end} sec" +%T)
+    j=$(basename ${file/_TOTAL_STATS/})
+    printf '%36s = \t %10s \t %10s \n' ${j} ${tq} ${tr}
+  done
+} >t0ni_GENERAL_STATS
++ echo
++ echo '# CPMIP performance metrics for CMIP6'
++ echo
++ echo '[METRICS]'
+grep CPMIP *_ece.info | wc -l)
+grep CPMIP *_ece.info | wc -l
+++ wc -l
+++ grep CPMIP t0ni_19931101_fc0_ece.info
++ sim_count=2
+grep SYPD *_ece.info | awk '{s+=$4}END{print s}')
+grep SYPD *_ece.info | awk '{s+=$4}END{print s}'
+++ grep SYPD t0ni_19931101_fc0_ece.info
+++ awk '{s+=$4}END{print s}'
++ sypd_cumul=6.06
+grep CHPSY *_ece.info | awk '{s+=$6}END{print s}')
+grep CHPSY *_ece.info | awk '{s+=$6}END{print s}'
+++ grep CHPSY t0ni_19931101_fc0_ece.info
+++ awk '{s+=$6}END{print s}'
++ chpsy_cumul=37937
+echo "scale=2;(${sypd_cumul}/${sim_count})" | bc)
+echo "scale=2;(${sypd_cumul}/${sim_count})" | bc
+++ echo 'scale=2;(6.06/2)'
+++ bc
++ sypd=3.03
+echo "scale=2;(${chpsy_cumul}/${sim_count})" | bc)
+echo "scale=2;(${chpsy_cumul}/${sim_count})" | bc
+++ bc
+++ echo 'scale=2;(37937/2)'
++ core_hours_per_simulated_year=18968.50
++ rem=18968.50
++ echo '# Simulated years per day'
++ echo 'SYPD = 3.03'
++ echo '# Core hours per simulated year'
++ echo 'CHSY = 18968.50'
++ theoretical_jules_per_simulated_year
+echo "scale=0;(${core_hours_per_simulated_year}*3600.0*1632000.0/153216.0 )" | bc)
+echo "scale=0;(${core_hours_per_simulated_year}*3600.0*1632000.0/153216.0 )" | bc
+++ echo 'scale=0;(18968.50*3600.0*1632000.0/153216.0 )'
+++ bc
++ theoretical_jules_per_simulated_year=727363533
++ export theoretical_jules_per_simulated_year
++ echo '# Theoretical Joules per simulated year '
++ echo 'TJPSY = ' 727363533
++ real_jules_per_simulated_year
++ year_factor
++ CHUNKSIZEUNIT=month
++ case "${CHUNKSIZEUNIT}" in
++ year_factor=12
++ export year_factor
+grep SLURM /esarchive/autosubmit/t0ni/tmp/LOG_t0ni/*SIM*.out | sort -n | head -n 1 | awk '{print $2}')
+grep SLURM /esarchive/autosubmit/t0ni/tmp/LOG_t0ni/*SIM*.out | sort -n | head -n 1 | awk '{print $2}'
+++ sort -n
+++ awk '{print $2}'
+++ head -n 1
+++ grep SLURM /esarchive/autosubmit/t0ni/tmp/LOG_t0ni/t0ni_19931101_fc0_1_SIM.20211218074458.out /esarchive/autosubmit/t0ni/tmp/LOG_t0ni/t0ni_19931101_fc0_2_SIM.20211218083130.out
++ job_id=
+ssh bsc32627@mn1.bsc.es "sacct -j ${job_id} --noheader --format=ConsumedEnergy --noconvert | head -n 1 |  tr -d "[:space:]"")
+ssh bsc32627@mn1.bsc.es "sacct -j ${job_id} --noheader --format=ConsumedEnergy --noconvert | head -n 1 |  tr -d "[:space:]""
+++ ssh bsc32627@mn1.bsc.es 'sacct -j  --noheader --format=ConsumedEnergy --noconvert | head -n 1 |  tr -d [:space:]'
+Warning: No xauth data; using fake authentication data for X11 forwarding.
+sacct: fatal: Bad job/step specified: --noheader
++ one_chunk_energy_consumed=
+echo "scale=0;( ${year_factor}*${one_chunk_energy_consumed} )" | bc)
+echo "scale=0;( ${year_factor}*${one_chunk_energy_consumed} )" | bc
+++ echo 'scale=0;( 12* )'
+++ bc
+(standard_in) 1: syntax error
++ real_jules_per_simulated_year=
++ export real_jules_per_simulated_year
++ echo '# Real Joules per simulated year '
++ echo 'RJPSY = '
++ years_simulated
++ year_factor
++ CHUNKSIZEUNIT=month
++ case "${CHUNKSIZEUNIT}" in
++ year_factor=12
++ export year_factor
++ CHUNKSIZEUNIT=month
++ NUMCHUNKS=2
++ CHUNKSIZE=1
+echo "scale=2; ${CHUNKSIZE}*${NUMCHUNKS}/${year_factor}" | bc)
+echo "scale=2; ${CHUNKSIZE}*${NUMCHUNKS}/${year_factor}" | bc
+++ echo 'scale=2; 1*2/12'
+++ bc
++ years_simulated=.16
++ export years_simulated
+echo "scale=2; ${years_simulated}*${seconds_in_one_day}" | bc)
+echo "scale=2; ${years_simulated}*${seconds_in_one_day}" | bc
+++ echo 'scale=2; .16*86400'
+++ bc
++ years_simulated_in_seconds=13824.00
+cat *_SIM_STAT | sort -n | head -n1)
+cat *_SIM_STAT | sort -n | head -n1
+++ sort -n
+++ cat t0ni_19931101_fc0_1_SIM_STAT t0ni_19931101_fc0_2_SIM_STAT
+++ head -n1
++ start_date=1639809886
+cat *_POST_STAT | sort -n | tail -n1)
+cat *_POST_STAT | sort -n | tail -n1
+++ cat t0ni_19931101_fc0_1_POST_STAT t0ni_19931101_fc0_2_POST_STAT
+++ sort -n
+++ tail -n1
++ end_date=1639863090
+echo "scale=2;(${years_simulated_in_seconds}/(${end_date}-${start_date}))" | bc)
+echo "scale=2;(${years_simulated_in_seconds}/(${end_date}-${start_date}))" | bc
+++ echo 'scale=2;(13824.00/(1639863090-1639809886))'
+++ bc
++ asypd=.25
++ echo '# Actual simulated years per day'
++ echo 'ASYPD = .25'
+cat *_SIM_STAT | sort -n | head -n1)
+cat *_SIM_STAT | sort -n | head -n1
+++ head -n1
+++ sort -n
+++ cat t0ni_19931101_fc0_1_SIM_STAT t0ni_19931101_fc0_2_SIM_STAT
++ start_date=1639809886
+cat *_POST_STAT | sort -n | tail -n1)
+cat *_POST_STAT | sort -n | tail -n1
+++ sort -n
+++ cat t0ni_19931101_fc0_1_POST_STAT t0ni_19931101_fc0_2_POST_STAT
+++ tail -n1
++ end_date=1639863090
+echo "scale=2;(${years_simulated_in_seconds}/(${end_date}-${start_date}))" | bc)
+echo "scale=2;(${years_simulated_in_seconds}/(${end_date}-${start_date}))" | bc
+++ echo 'scale=2;(13824.00/(1639863090-1639809886))'
+++ bc
++ rsypd=.25
++ echo '# Real simulated years per day'
++ echo 'RSYPD = .25'
++ ideal=2258
+cat *_SIM*.out | grep "Max Memory :" | tail -n1 | awk '{print $4}')
+cat *_SIM*.out | grep "Max Memory :" | tail -n1 | awk '{print $4}'
+++ cat '*_SIM*.out'
+++ tail -n1
+++ awk '{print $4}'
+++ grep 'Max Memory :'
+cat: *_SIM*.out: No such file or directory
++ rss=
+echo "scale=2;$rss/$ideal" | bc)
+echo "scale=2;$rss/$ideal" | bc
+++ echo 'scale=2;/2258'
+++ bc
+(standard_in) 1: syntax error
++ membl=
++ echo '# Memory bloat'
++ echo 'Memory bloat = '
+grep "xio_numproc=" ${ROOTDIR}/tmp/*_SIM*.cmd | head -n1 | awk -F= '{print $2}')
+grep "xio_numproc=" ${ROOTDIR}/tmp/*_SIM*.cmd | head -n1 | awk -F= '{print $2}'
+++ head -n1
+++ awk -F= '{print $2}'
+++ grep xio_numproc= /esarchive/autosubmit/t0ni/tmp/t0ni_19931101_fc0_1_SIM.cmd /esarchive/autosubmit/t0ni/tmp/t0ni_19931101_fc0_2_SIM.cmd
++ io_cores=95
+grep "#SBATCH -n" ${ROOTDIR}/tmp/*_SIM*.cmd | head -n1 | awk '{print $3}')
+grep "#SBATCH -n" ${ROOTDIR}/tmp/*_SIM*.cmd | head -n1 | awk '{print $3}'
+++ awk '{print $3}'
+++ head -n1
+++ grep '#SBATCH -n' /esarchive/autosubmit/t0ni/tmp/t0ni_19931101_fc0_1_SIM.cmd /esarchive/autosubmit/t0ni/tmp/t0ni_19931101_fc0_2_SIM.cmd
++ total_cores=2400
+echo "scale=2;100-100*(${total_cores}-${io_cores})/${total_cores}" | bc)
+echo "scale=2;100-100*(${total_cores}-${io_cores})/${total_cores}" | bc
+++ bc
+++ echo 'scale=2;100-100*(2400-95)/2400'
++ data_outpu_cost=3.96
++ echo '# Data Output cost (%)'
++ echo 'Data Output cost (%) = 3.96'
++ year_factor
++ CHUNKSIZEUNIT=month
++ case "${CHUNKSIZEUNIT}" in
++ year_factor=12
++ export year_factor
+grep output $(ls -1 ${log_dir}/*POST* | tail -n 1) | awk '{print $5}')
+grep output $(ls -1 ${log_dir}/*POST* | tail -n 1) | awk '{print $5}'
+ls -1 ${log_dir}/*POST* | tail -n 1)
+ls -1 ${log_dir}/*POST* | tail -n 1)
+++ awk '{print $5}'
+ls -1 ${log_dir}/*POST* | tail -n 1
++++ tail -n 1
++++ ls -1 /esarchive/autosubmit/t0ni/tmp/LOG_t0ni/t0ni_19931101_fc0_1_POST.20211218200337.err /esarchive/autosubmit/t0ni/tmp/LOG_t0ni/t0ni_19931101_fc0_1_POST.20211218200337.out /esarchive/autosubmit/t0ni/tmp/LOG_t0ni/t0ni_19931101_fc0_2_POST.20211218223119.err /esarchive/autosubmit/t0ni/tmp/LOG_t0ni/t0ni_19931101_fc0_2_POST.20211218223119.out
+++ grep output /esarchive/autosubmit/t0ni/tmp/LOG_t0ni/t0ni_19931101_fc0_2_POST.20211218223119.out
++ output_one_chunk_in_bytes=5779460
+echo "scale=0;( ${year_factor}*${output_one_chunk_in_bytes} )" | bc)
+echo "scale=0;( ${year_factor}*${output_one_chunk_in_bytes} )" | bc
+++ bc
+++ echo 'scale=0;( 12*5779460 )'
++ output_one_year_in_bytes=69353520
+echo "scale=2; ${output_one_year_in_bytes}/1000000" | bc)
+echo "scale=2; ${output_one_year_in_bytes}/1000000" | bc
+++ echo 'scale=2; 69353520/1000000'
+++ bc
++ output_one_year_in_GB=69.35
+echo "scale=3; ${output_one_year_in_GB}/${core_hours_per_simulated_year}" | bc)
+echo "scale=3; ${output_one_year_in_GB}/${core_hours_per_simulated_year}" | bc
+++ echo 'scale=3; 69.35/18968.50'
+++ bc
++ data_intensity=.003
++ echo '# Data intensity (MB/CH)'
++ echo 'Data intensity (MB/CH) = .003'
++ echo
++ echo '# Job statistics'
++ echo
++ echo '[JOB_STATS]'
++ printf 'Job name \t = \t Queue time (H:M:S) \t Run time (H:M:S) \n'
+find . -name '*TOTAL_STATS' -not -name 't0ni_PERFORMANCE_METRICS_TOTAL_STATS*')
+find . -name '*TOTAL_STATS' -not -name 't0ni_PERFORMANCE_METRICS_TOTAL_STATS*'
+++ find . -name '*TOTAL_STATS' -not -name 't0ni_PERFORMANCE_METRICS_TOTAL_STATS*'
++ for file in '$(find . -name '\''*TOTAL_STATS'\'' -not -name '\''t0ni_PERFORMANCE_METRICS_TOTAL_STATS*'\'')'
+tail -1 ${file} | awk '{print NF}')
+tail -1 ${file} | awk '{print NF}'
+++ tail -1 ./t0ni_19931101_fc0_2_EARTHDIAGS_TOTAL_STATS
+++ awk '{print NF}'
++ [[ 1 -lt 4 ]]
++ continue
++ for file in '$(find . -name '\''*TOTAL_STATS'\'' -not -name '\''t0ni_PERFORMANCE_METRICS_TOTAL_STATS*'\'')'
+tail -1 ${file} | awk '{print NF}')
+tail -1 ${file} | awk '{print NF}'
+++ tail -1 ./t0ni_19931101_fc0_2_CMORATM_TOTAL_STATS
+++ awk '{print NF}'
++ [[ 4 -lt 4 ]]
+tail -1 ${file} | awk '{print "\x27"substr($1,0,8)" "substr($1,9,2)":"substr($1,11,2)":"substr($1,13,2)"\x27 +%s"}' | xargs date -d)
+tail -1 ${file} | awk '{print "\x27"substr($1,0,8)" "substr($1,9,2)":"substr($1,11,2)":"substr($1,13,2)"\x27 +%s"}' | xargs date -d
+++ tail -1 ./t0ni_19931101_fc0_2_CMORATM_TOTAL_STATS
+++ awk '{print "\x27"substr($1,0,8)" "substr($1,9,2)":"substr($1,11,2)":"substr($1,13,2)"\x27 +%s"}'
+++ xargs date -d
++ ts_submit=1639815509
+tail -1 ${file} | awk '{print "\x27"substr($2,0,8)" "substr($2,9,2)":"substr($2,11,2)":"substr($2,13,2)"\x27 +%s"}' | xargs date -d)
+tail -1 ${file} | awk '{print "\x27"substr($2,0,8)" "substr($2,9,2)":"substr($2,11,2)":"substr($2,13,2)"\x27 +%s"}' | xargs date -d
+++ tail -1 ./t0ni_19931101_fc0_2_CMORATM_TOTAL_STATS
+++ awk '{print "\x27"substr($2,0,8)" "substr($2,9,2)":"substr($2,11,2)":"substr($2,13,2)"\x27 +%s"}'
+++ xargs date -d
++ ts_start=1639815516
+tail -1 ${file} | awk '{print "\x27"substr($3,0,8)" "substr($3,9,2)":"substr($3,11,2)":"substr($3,13,2)"\x27 +%s"}' | xargs date -d)
+tail -1 ${file} | awk '{print "\x27"substr($3,0,8)" "substr($3,9,2)":"substr($3,11,2)":"substr($3,13,2)"\x27 +%s"}' | xargs date -d
+++ tail -1 ./t0ni_19931101_fc0_2_CMORATM_TOTAL_STATS
+++ awk '{print "\x27"substr($3,0,8)" "substr($3,9,2)":"substr($3,11,2)":"substr($3,13,2)"\x27 +%s"}'
+++ xargs date -d
++ ts_end=1639815571
+date -d "0 -${ts_submit} sec + ${ts_start} sec" +%T)
+date -d "0 -${ts_submit} sec + ${ts_start} sec" +%T
+++ date -d '0 -1639815509 sec + 1639815516 sec' +%T
++ tq=00:00:07
+date -d "0 -${ts_start} sec + ${ts_end} sec" +%T)
+date -d "0 -${ts_start} sec + ${ts_end} sec" +%T
+++ date -d '0 -1639815516 sec + 1639815571 sec' +%T
++ tr=00:00:55
+basename ${file/_TOTAL_STATS/})
+basename ${file/_TOTAL_STATS/}
+++ basename ./t0ni_19931101_fc0_2_CMORATM
++ j=t0ni_19931101_fc0_2_CMORATM
++ printf '%36s = \t %10s \t %10s \n' t0ni_19931101_fc0_2_CMORATM 00:00:07 00:00:55
++ for file in '$(find . -name '\''*TOTAL_STATS'\'' -not -name '\''t0ni_PERFORMANCE_METRICS_TOTAL_STATS*'\'')'
+tail -1 ${file} | awk '{print NF}')
+tail -1 ${file} | awk '{print NF}'
+++ tail -1 ./t0ni_19931101_fc0_1_CLEAN_TOTAL_STATS
+++ awk '{print NF}'
++ [[ 4 -lt 4 ]]
+tail -1 ${file} | awk '{print "\x27"substr($1,0,8)" "substr($1,9,2)":"substr($1,11,2)":"substr($1,13,2)"\x27 +%s"}' | xargs date -d)
+tail -1 ${file} | awk '{print "\x27"substr($1,0,8)" "substr($1,9,2)":"substr($1,11,2)":"substr($1,13,2)"\x27 +%s"}' | xargs date -d
+++ tail -1 ./t0ni_19931101_fc0_1_CLEAN_TOTAL_STATS
+++ awk '{print "\x27"substr($1,0,8)" "substr($1,9,2)":"substr($1,11,2)":"substr($1,13,2)"\x27 +%s"}'
+++ xargs date -d
++ ts_submit=1639854231
+tail -1 ${file} | awk '{print "\x27"substr($2,0,8)" "substr($2,9,2)":"substr($2,11,2)":"substr($2,13,2)"\x27 +%s"}' | xargs date -d)
+tail -1 ${file} | awk '{print "\x27"substr($2,0,8)" "substr($2,9,2)":"substr($2,11,2)":"substr($2,13,2)"\x27 +%s"}' | xargs date -d
+++ tail -1 ./t0ni_19931101_fc0_1_CLEAN_TOTAL_STATS
+++ awk '{print "\x27"substr($2,0,8)" "substr($2,9,2)":"substr($2,11,2)":"substr($2,13,2)"\x27 +%s"}'
+++ xargs date -d
++ ts_start=1639854231
+tail -1 ${file} | awk '{print "\x27"substr($3,0,8)" "substr($3,9,2)":"substr($3,11,2)":"substr($3,13,2)"\x27 +%s"}' | xargs date -d)
+tail -1 ${file} | awk '{print "\x27"substr($3,0,8)" "substr($3,9,2)":"substr($3,11,2)":"substr($3,13,2)"\x27 +%s"}' | xargs date -d
+++ tail -1 ./t0ni_19931101_fc0_1_CLEAN_TOTAL_STATS
+++ awk '{print "\x27"substr($3,0,8)" "substr($3,9,2)":"substr($3,11,2)":"substr($3,13,2)"\x27 +%s"}'
+++ xargs date -d
++ ts_end=1639854495
+date -d "0 -${ts_submit} sec + ${ts_start} sec" +%T)
+date -d "0 -${ts_submit} sec + ${ts_start} sec" +%T
+++ date -d '0 -1639854231 sec + 1639854231 sec' +%T
++ tq=00:00:00
+date -d "0 -${ts_start} sec + ${ts_end} sec" +%T)
+date -d "0 -${ts_start} sec + ${ts_end} sec" +%T
+++ date -d '0 -1639854231 sec + 1639854495 sec' +%T
++ tr=00:04:24
+basename ${file/_TOTAL_STATS/})
+basename ${file/_TOTAL_STATS/}
+++ basename ./t0ni_19931101_fc0_1_CLEAN
++ j=t0ni_19931101_fc0_1_CLEAN
++ printf '%36s = \t %10s \t %10s \n' t0ni_19931101_fc0_1_CLEAN 00:00:00 00:04:24
++ for file in '$(find . -name '\''*TOTAL_STATS'\'' -not -name '\''t0ni_PERFORMANCE_METRICS_TOTAL_STATS*'\'')'
+tail -1 ${file} | awk '{print NF}')
+tail -1 ${file} | awk '{print NF}'
+++ tail -1 ./t0ni_19931101_fc0_2_POST_TOTAL_STATS
+++ awk '{print NF}'
++ [[ 4 -lt 4 ]]
+tail -1 ${file} | awk '{print "\x27"substr($1,0,8)" "substr($1,9,2)":"substr($1,11,2)":"substr($1,13,2)"\x27 +%s"}' | xargs date -d)
+tail -1 ${file} | awk '{print "\x27"substr($1,0,8)" "substr($1,9,2)":"substr($1,11,2)":"substr($1,13,2)"\x27 +%s"}' | xargs date -d
+++ tail -1 ./t0ni_19931101_fc0_2_POST_TOTAL_STATS
+++ xargs date -d
+++ awk '{print "\x27"substr($1,0,8)" "substr($1,9,2)":"substr($1,11,2)":"substr($1,13,2)"\x27 +%s"}'
++ ts_submit=1639854230
+tail -1 ${file} | awk '{print "\x27"substr($2,0,8)" "substr($2,9,2)":"substr($2,11,2)":"substr($2,13,2)"\x27 +%s"}' | xargs date -d)
+tail -1 ${file} | awk '{print "\x27"substr($2,0,8)" "substr($2,9,2)":"substr($2,11,2)":"substr($2,13,2)"\x27 +%s"}' | xargs date -d
+++ tail -1 ./t0ni_19931101_fc0_2_POST_TOTAL_STATS
+++ awk '{print "\x27"substr($2,0,8)" "substr($2,9,2)":"substr($2,11,2)":"substr($2,13,2)"\x27 +%s"}'
+++ xargs date -d
++ ts_start=1639863072
+tail -1 ${file} | awk '{print "\x27"substr($3,0,8)" "substr($3,9,2)":"substr($3,11,2)":"substr($3,13,2)"\x27 +%s"}' | xargs date -d)
+tail -1 ${file} | awk '{print "\x27"substr($3,0,8)" "substr($3,9,2)":"substr($3,11,2)":"substr($3,13,2)"\x27 +%s"}' | xargs date -d
+++ tail -1 ./t0ni_19931101_fc0_2_POST_TOTAL_STATS
+++ awk '{print "\x27"substr($3,0,8)" "substr($3,9,2)":"substr($3,11,2)":"substr($3,13,2)"\x27 +%s"}'
+++ xargs date -d
++ ts_end=1639863090
+date -d "0 -${ts_submit} sec + ${ts_start} sec" +%T)
+date -d "0 -${ts_submit} sec + ${ts_start} sec" +%T
+++ date -d '0 -1639854230 sec + 1639863072 sec' +%T
++ tq=02:27:22
+date -d "0 -${ts_start} sec + ${ts_end} sec" +%T)
+date -d "0 -${ts_start} sec + ${ts_end} sec" +%T
+++ date -d '0 -1639863072 sec + 1639863090 sec' +%T
++ tr=00:00:18
+basename ${file/_TOTAL_STATS/})
+basename ${file/_TOTAL_STATS/}
+++ basename ./t0ni_19931101_fc0_2_POST
++ j=t0ni_19931101_fc0_2_POST
++ printf '%36s = \t %10s \t %10s \n' t0ni_19931101_fc0_2_POST 02:27:22 00:00:18
++ for file in '$(find . -name '\''*TOTAL_STATS'\'' -not -name '\''t0ni_PERFORMANCE_METRICS_TOTAL_STATS*'\'')'
+tail -1 ${file} | awk '{print NF}')
+tail -1 ${file} | awk '{print NF}'
+++ tail -1 ./t0ni_19931101_fc0_INI_TOTAL_STATS
+++ awk '{print NF}'
++ [[ 4 -lt 4 ]]
+tail -1 ${file} | awk '{print "\x27"substr($1,0,8)" "substr($1,9,2)":"substr($1,11,2)":"substr($1,13,2)"\x27 +%s"}' | xargs date -d)
+tail -1 ${file} | awk '{print "\x27"substr($1,0,8)" "substr($1,9,2)":"substr($1,11,2)":"substr($1,13,2)"\x27 +%s"}' | xargs date -d
+++ tail -1 ./t0ni_19931101_fc0_INI_TOTAL_STATS
+++ xargs date -d
+++ awk '{print "\x27"substr($1,0,8)" "substr($1,9,2)":"substr($1,11,2)":"substr($1,13,2)"\x27 +%s"}'
++ ts_submit=1639785076
+tail -1 ${file} | awk '{print "\x27"substr($2,0,8)" "substr($2,9,2)":"substr($2,11,2)":"substr($2,13,2)"\x27 +%s"}' | xargs date -d)
+tail -1 ${file} | awk '{print "\x27"substr($2,0,8)" "substr($2,9,2)":"substr($2,11,2)":"substr($2,13,2)"\x27 +%s"}' | xargs date -d
+++ tail -1 ./t0ni_19931101_fc0_INI_TOTAL_STATS
+++ awk '{print "\x27"substr($2,0,8)" "substr($2,9,2)":"substr($2,11,2)":"substr($2,13,2)"\x27 +%s"}'
+++ xargs date -d
++ ts_start=1639809342
+tail -1 ${file} | awk '{print "\x27"substr($3,0,8)" "substr($3,9,2)":"substr($3,11,2)":"substr($3,13,2)"\x27 +%s"}' | xargs date -d)
+tail -1 ${file} | awk '{print "\x27"substr($3,0,8)" "substr($3,9,2)":"substr($3,11,2)":"substr($3,13,2)"\x27 +%s"}' | xargs date -d
+++ tail -1 ./t0ni_19931101_fc0_INI_TOTAL_STATS
+++ xargs date -d
+++ awk '{print "\x27"substr($3,0,8)" "substr($3,9,2)":"substr($3,11,2)":"substr($3,13,2)"\x27 +%s"}'
++ ts_end=1639809873
+date -d "0 -${ts_submit} sec + ${ts_start} sec" +%T)
+date -d "0 -${ts_submit} sec + ${ts_start} sec" +%T
+++ date -d '0 -1639785076 sec + 1639809342 sec' +%T
++ tq=06:44:26
+date -d "0 -${ts_start} sec + ${ts_end} sec" +%T)
+date -d "0 -${ts_start} sec + ${ts_end} sec" +%T
+++ date -d '0 -1639809342 sec + 1639809873 sec' +%T
++ tr=00:08:51
+basename ${file/_TOTAL_STATS/})
+basename ${file/_TOTAL_STATS/}
+++ basename ./t0ni_19931101_fc0_INI
++ j=t0ni_19931101_fc0_INI
++ printf '%36s = \t %10s \t %10s \n' t0ni_19931101_fc0_INI 06:44:26 00:08:51
++ for file in '$(find . -name '\''*TOTAL_STATS'\'' -not -name '\''t0ni_PERFORMANCE_METRICS_TOTAL_STATS*'\'')'
+tail -1 ${file} | awk '{print NF}')
+tail -1 ${file} | awk '{print NF}'
+++ tail -1 ./t0ni_19931101_fc0_1_POST_TOTAL_STATS
+++ awk '{print NF}'
++ [[ 4 -lt 4 ]]
+tail -1 ${file} | awk '{print "\x27"substr($1,0,8)" "substr($1,9,2)":"substr($1,11,2)":"substr($1,13,2)"\x27 +%s"}' | xargs date -d)
+tail -1 ${file} | awk '{print "\x27"substr($1,0,8)" "substr($1,9,2)":"substr($1,11,2)":"substr($1,13,2)"\x27 +%s"}' | xargs date -d
+++ tail -1 ./t0ni_19931101_fc0_1_POST_TOTAL_STATS
+++ awk '{print "\x27"substr($1,0,8)" "substr($1,9,2)":"substr($1,11,2)":"substr($1,13,2)"\x27 +%s"}'
+++ xargs date -d
++ ts_submit=1639832114
+tail -1 ${file} | awk '{print "\x27"substr($2,0,8)" "substr($2,9,2)":"substr($2,11,2)":"substr($2,13,2)"\x27 +%s"}' | xargs date -d)
+tail -1 ${file} | awk '{print "\x27"substr($2,0,8)" "substr($2,9,2)":"substr($2,11,2)":"substr($2,13,2)"\x27 +%s"}' | xargs date -d
+++ tail -1 ./t0ni_19931101_fc0_1_POST_TOTAL_STATS
+++ awk '{print "\x27"substr($2,0,8)" "substr($2,9,2)":"substr($2,11,2)":"substr($2,13,2)"\x27 +%s"}'
+++ xargs date -d
++ ts_start=1639854210
+tail -1 ${file} | awk '{print "\x27"substr($3,0,8)" "substr($3,9,2)":"substr($3,11,2)":"substr($3,13,2)"\x27 +%s"}' | xargs date -d)
+tail -1 ${file} | awk '{print "\x27"substr($3,0,8)" "substr($3,9,2)":"substr($3,11,2)":"substr($3,13,2)"\x27 +%s"}' | xargs date -d
+++ tail -1 ./t0ni_19931101_fc0_1_POST_TOTAL_STATS
+++ awk '{print "\x27"substr($3,0,8)" "substr($3,9,2)":"substr($3,11,2)":"substr($3,13,2)"\x27 +%s"}'
+++ xargs date -d
++ ts_end=1639854221
+date -d "0 -${ts_submit} sec + ${ts_start} sec" +%T)
+date -d "0 -${ts_submit} sec + ${ts_start} sec" +%T
+++ date -d '0 -1639832114 sec + 1639854210 sec' +%T
++ tq=06:08:16
+date -d "0 -${ts_start} sec + ${ts_end} sec" +%T)
+date -d "0 -${ts_start} sec + ${ts_end} sec" +%T
+++ date -d '0 -1639854210 sec + 1639854221 sec' +%T
++ tr=00:00:11
+basename ${file/_TOTAL_STATS/})
+basename ${file/_TOTAL_STATS/}
+++ basename ./t0ni_19931101_fc0_1_POST
++ j=t0ni_19931101_fc0_1_POST
++ printf '%36s = \t %10s \t %10s \n' t0ni_19931101_fc0_1_POST 06:08:16 00:00:11
++ for file in '$(find . -name '\''*TOTAL_STATS'\'' -not -name '\''t0ni_PERFORMANCE_METRICS_TOTAL_STATS*'\'')'
+tail -1 ${file} | awk '{print NF}')
+tail -1 ${file} | awk '{print NF}'
+++ tail -1 ./t0ni_19931101_fc0_1_SAVEIC_TOTAL_STATS
+++ awk '{print NF}'
++ [[ 4 -lt 4 ]]
+tail -1 ${file} | awk '{print "\x27"substr($1,0,8)" "substr($1,9,2)":"substr($1,11,2)":"substr($1,13,2)"\x27 +%s"}' | xargs date -d)
+tail -1 ${file} | awk '{print "\x27"substr($1,0,8)" "substr($1,9,2)":"substr($1,11,2)":"substr($1,13,2)"\x27 +%s"}' | xargs date -d
+++ tail -1 ./t0ni_19931101_fc0_1_SAVEIC_TOTAL_STATS
+++ awk '{print "\x27"substr($1,0,8)" "substr($1,9,2)":"substr($1,11,2)":"substr($1,13,2)"\x27 +%s"}'
+++ xargs date -d
++ ts_submit=1639812675
+tail -1 ${file} | awk '{print "\x27"substr($2,0,8)" "substr($2,9,2)":"substr($2,11,2)":"substr($2,13,2)"\x27 +%s"}' | xargs date -d)
+tail -1 ${file} | awk '{print "\x27"substr($2,0,8)" "substr($2,9,2)":"substr($2,11,2)":"substr($2,13,2)"\x27 +%s"}' | xargs date -d
+++ tail -1 ./t0ni_19931101_fc0_1_SAVEIC_TOTAL_STATS
+++ awk '{print "\x27"substr($2,0,8)" "substr($2,9,2)":"substr($2,11,2)":"substr($2,13,2)"\x27 +%s"}'
+++ xargs date -d
++ ts_start=1639812679
+tail -1 ${file} | awk '{print "\x27"substr($3,0,8)" "substr($3,9,2)":"substr($3,11,2)":"substr($3,13,2)"\x27 +%s"}' | xargs date -d)
+tail -1 ${file} | awk '{print "\x27"substr($3,0,8)" "substr($3,9,2)":"substr($3,11,2)":"substr($3,13,2)"\x27 +%s"}' | xargs date -d
+++ tail -1 ./t0ni_19931101_fc0_1_SAVEIC_TOTAL_STATS
+++ awk '{print "\x27"substr($3,0,8)" "substr($3,9,2)":"substr($3,11,2)":"substr($3,13,2)"\x27 +%s"}'
+++ xargs date -d
++ ts_end=1639816010
+date -d "0 -${ts_submit} sec + ${ts_start} sec" +%T)
+date -d "0 -${ts_submit} sec + ${ts_start} sec" +%T
+++ date -d '0 -1639812675 sec + 1639812679 sec' +%T
++ tq=00:00:04
+date -d "0 -${ts_start} sec + ${ts_end} sec" +%T)
+date -d "0 -${ts_start} sec + ${ts_end} sec" +%T
+++ date -d '0 -1639812679 sec + 1639816010 sec' +%T
++ tr=00:55:31
+basename ${file/_TOTAL_STATS/})
+basename ${file/_TOTAL_STATS/}
+++ basename ./t0ni_19931101_fc0_1_SAVEIC
++ j=t0ni_19931101_fc0_1_SAVEIC
++ printf '%36s = \t %10s \t %10s \n' t0ni_19931101_fc0_1_SAVEIC 00:00:04 00:55:31
++ for file in '$(find . -name '\''*TOTAL_STATS'\'' -not -name '\''t0ni_PERFORMANCE_METRICS_TOTAL_STATS*'\'')'
+tail -1 ${file} | awk '{print NF}')
+tail -1 ${file} | awk '{print NF}'
+++ tail -1 ./t0ni_19931101_fc0_2_SAVEIC_TOTAL_STATS
+++ awk '{print NF}'
++ [[ 4 -lt 4 ]]
+tail -1 ${file} | awk '{print "\x27"substr($1,0,8)" "substr($1,9,2)":"substr($1,11,2)":"substr($1,13,2)"\x27 +%s"}' | xargs date -d)
+tail -1 ${file} | awk '{print "\x27"substr($1,0,8)" "substr($1,9,2)":"substr($1,11,2)":"substr($1,13,2)"\x27 +%s"}' | xargs date -d
+++ tail -1 ./t0ni_19931101_fc0_2_SAVEIC_TOTAL_STATS
+++ awk '{print "\x27"substr($1,0,8)" "substr($1,9,2)":"substr($1,11,2)":"substr($1,13,2)"\x27 +%s"}'
+++ xargs date -d
++ ts_submit=1639815509
+tail -1 ${file} | awk '{print "\x27"substr($2,0,8)" "substr($2,9,2)":"substr($2,11,2)":"substr($2,13,2)"\x27 +%s"}' | xargs date -d)
+tail -1 ${file} | awk '{print "\x27"substr($2,0,8)" "substr($2,9,2)":"substr($2,11,2)":"substr($2,13,2)"\x27 +%s"}' | xargs date -d
+++ tail -1 ./t0ni_19931101_fc0_2_SAVEIC_TOTAL_STATS
+++ awk '{print "\x27"substr($2,0,8)" "substr($2,9,2)":"substr($2,11,2)":"substr($2,13,2)"\x27 +%s"}'
+++ xargs date -d
++ ts_start=1639815513
+tail -1 ${file} | awk '{print "\x27"substr($3,0,8)" "substr($3,9,2)":"substr($3,11,2)":"substr($3,13,2)"\x27 +%s"}' | xargs date -d)
+tail -1 ${file} | awk '{print "\x27"substr($3,0,8)" "substr($3,9,2)":"substr($3,11,2)":"substr($3,13,2)"\x27 +%s"}' | xargs date -d
+++ tail -1 ./t0ni_19931101_fc0_2_SAVEIC_TOTAL_STATS
+++ xargs date -d
+++ awk '{print "\x27"substr($3,0,8)" "substr($3,9,2)":"substr($3,11,2)":"substr($3,13,2)"\x27 +%s"}'
++ ts_end=1639818983
+date -d "0 -${ts_submit} sec + ${ts_start} sec" +%T)
+date -d "0 -${ts_submit} sec + ${ts_start} sec" +%T
+++ date -d '0 -1639815509 sec + 1639815513 sec' +%T
++ tq=00:00:04
+date -d "0 -${ts_start} sec + ${ts_end} sec" +%T)
+date -d "0 -${ts_start} sec + ${ts_end} sec" +%T
+++ date -d '0 -1639815513 sec + 1639818983 sec' +%T
++ tr=00:57:50
+basename ${file/_TOTAL_STATS/})
+basename ${file/_TOTAL_STATS/}
+++ basename ./t0ni_19931101_fc0_2_SAVEIC
++ j=t0ni_19931101_fc0_2_SAVEIC
++ printf '%36s = \t %10s \t %10s \n' t0ni_19931101_fc0_2_SAVEIC 00:00:04 00:57:50
++ for file in '$(find . -name '\''*TOTAL_STATS'\'' -not -name '\''t0ni_PERFORMANCE_METRICS_TOTAL_STATS*'\'')'
+tail -1 ${file} | awk '{print NF}')
+tail -1 ${file} | awk '{print NF}'
+++ tail -1 ./t0ni_19931101_fc0_2_SIM_TOTAL_STATS
+++ awk '{print NF}'
++ [[ 4 -lt 4 ]]
+tail -1 ${file} | awk '{print "\x27"substr($1,0,8)" "substr($1,9,2)":"substr($1,11,2)":"substr($1,13,2)"\x27 +%s"}' | xargs date -d)
+tail -1 ${file} | awk '{print "\x27"substr($1,0,8)" "substr($1,9,2)":"substr($1,11,2)":"substr($1,13,2)"\x27 +%s"}' | xargs date -d
+++ tail -1 ./t0ni_19931101_fc0_2_SIM_TOTAL_STATS
+++ awk '{print "\x27"substr($1,0,8)" "substr($1,9,2)":"substr($1,11,2)":"substr($1,13,2)"\x27 +%s"}'
+++ xargs date -d
++ ts_submit=1639809882
+tail -1 ${file} | awk '{print "\x27"substr($2,0,8)" "substr($2,9,2)":"substr($2,11,2)":"substr($2,13,2)"\x27 +%s"}' | xargs date -d)
+tail -1 ${file} | awk '{print "\x27"substr($2,0,8)" "substr($2,9,2)":"substr($2,11,2)":"substr($2,13,2)"\x27 +%s"}' | xargs date -d
+++ tail -1 ./t0ni_19931101_fc0_2_SIM_TOTAL_STATS
+++ xargs date -d
+++ awk '{print "\x27"substr($2,0,8)" "substr($2,9,2)":"substr($2,11,2)":"substr($2,13,2)"\x27 +%s"}'
++ ts_start=1639812660
+tail -1 ${file} | awk '{print "\x27"substr($3,0,8)" "substr($3,9,2)":"substr($3,11,2)":"substr($3,13,2)"\x27 +%s"}' | xargs date -d)
+tail -1 ${file} | awk '{print "\x27"substr($3,0,8)" "substr($3,9,2)":"substr($3,11,2)":"substr($3,13,2)"\x27 +%s"}' | xargs date -d
+++ tail -1 ./t0ni_19931101_fc0_2_SIM_TOTAL_STATS
+++ awk '{print "\x27"substr($3,0,8)" "substr($3,9,2)":"substr($3,11,2)":"substr($3,13,2)"\x27 +%s"}'
+++ xargs date -d
++ ts_end=1639815500
+date -d "0 -${ts_submit} sec + ${ts_start} sec" +%T)
+date -d "0 -${ts_submit} sec + ${ts_start} sec" +%T
+++ date -d '0 -1639809882 sec + 1639812660 sec' +%T
++ tq=00:46:18
+date -d "0 -${ts_start} sec + ${ts_end} sec" +%T)
+date -d "0 -${ts_start} sec + ${ts_end} sec" +%T
+++ date -d '0 -1639812660 sec + 1639815500 sec' +%T
++ tr=00:47:20
+basename ${file/_TOTAL_STATS/})
+basename ${file/_TOTAL_STATS/}
+++ basename ./t0ni_19931101_fc0_2_SIM
++ j=t0ni_19931101_fc0_2_SIM
++ printf '%36s = \t %10s \t %10s \n' t0ni_19931101_fc0_2_SIM 00:46:18 00:47:20
++ for file in '$(find . -name '\''*TOTAL_STATS'\'' -not -name '\''t0ni_PERFORMANCE_METRICS_TOTAL_STATS*'\'')'
+tail -1 ${file} | awk '{print NF}')
+tail -1 ${file} | awk '{print NF}'
+++ tail -1 ./t0ni_19931101_fc0_2_NCTIME_TOTAL_STATS
+++ awk '{print NF}'
++ [[ 1 -lt 4 ]]
++ continue
++ for file in '$(find . -name '\''*TOTAL_STATS'\'' -not -name '\''t0ni_PERFORMANCE_METRICS_TOTAL_STATS*'\'')'
+tail -1 ${file} | awk '{print NF}')
+tail -1 ${file} | awk '{print NF}'
+++ tail -1 ./t0ni_SYNCHRONIZE_TOTAL_STATS
+++ awk '{print NF}'
++ [[ 4 -lt 4 ]]
+tail -1 ${file} | awk '{print "\x27"substr($1,0,8)" "substr($1,9,2)":"substr($1,11,2)":"substr($1,13,2)"\x27 +%s"}' | xargs date -d)
+tail -1 ${file} | awk '{print "\x27"substr($1,0,8)" "substr($1,9,2)":"substr($1,11,2)":"substr($1,13,2)"\x27 +%s"}' | xargs date -d
+++ tail -1 ./t0ni_SYNCHRONIZE_TOTAL_STATS
+++ awk '{print "\x27"substr($1,0,8)" "substr($1,9,2)":"substr($1,11,2)":"substr($1,13,2)"\x27 +%s"}'
+++ xargs date -d
++ ts_submit=1639758745
+tail -1 ${file} | awk '{print "\x27"substr($2,0,8)" "substr($2,9,2)":"substr($2,11,2)":"substr($2,13,2)"\x27 +%s"}' | xargs date -d)
+tail -1 ${file} | awk '{print "\x27"substr($2,0,8)" "substr($2,9,2)":"substr($2,11,2)":"substr($2,13,2)"\x27 +%s"}' | xargs date -d
+++ tail -1 ./t0ni_SYNCHRONIZE_TOTAL_STATS
+++ awk '{print "\x27"substr($2,0,8)" "substr($2,9,2)":"substr($2,11,2)":"substr($2,13,2)"\x27 +%s"}'
+++ xargs date -d
++ ts_start=1639758745
+tail -1 ${file} | awk '{print "\x27"substr($3,0,8)" "substr($3,9,2)":"substr($3,11,2)":"substr($3,13,2)"\x27 +%s"}' | xargs date -d)
+tail -1 ${file} | awk '{print "\x27"substr($3,0,8)" "substr($3,9,2)":"substr($3,11,2)":"substr($3,13,2)"\x27 +%s"}' | xargs date -d
+++ tail -1 ./t0ni_SYNCHRONIZE_TOTAL_STATS
+++ awk '{print "\x27"substr($3,0,8)" "substr($3,9,2)":"substr($3,11,2)":"substr($3,13,2)"\x27 +%s"}'
+++ xargs date -d
++ ts_end=1639758986
+date -d "0 -${ts_submit} sec + ${ts_start} sec" +%T)
+date -d "0 -${ts_submit} sec + ${ts_start} sec" +%T
+++ date -d '0 -1639758745 sec + 1639758745 sec' +%T
++ tq=00:00:00
+date -d "0 -${ts_start} sec + ${ts_end} sec" +%T)
+date -d "0 -${ts_start} sec + ${ts_end} sec" +%T
+++ date -d '0 -1639758745 sec + 1639758986 sec' +%T
++ tr=00:04:01
+basename ${file/_TOTAL_STATS/})
+basename ${file/_TOTAL_STATS/}
+++ basename ./t0ni_SYNCHRONIZE
++ j=t0ni_SYNCHRONIZE
++ printf '%36s = \t %10s \t %10s \n' t0ni_SYNCHRONIZE 00:00:00 00:04:01
++ for file in '$(find . -name '\''*TOTAL_STATS'\'' -not -name '\''t0ni_PERFORMANCE_METRICS_TOTAL_STATS*'\'')'
+tail -1 ${file} | awk '{print NF}')
+tail -1 ${file} | awk '{print NF}'
+++ tail -1 ./t0ni_REMOTE_SETUP_TOTAL_STATS
+++ awk '{print NF}'
++ [[ 4 -lt 4 ]]
+tail -1 ${file} | awk '{print "\x27"substr($1,0,8)" "substr($1,9,2)":"substr($1,11,2)":"substr($1,13,2)"\x27 +%s"}' | xargs date -d)
+tail -1 ${file} | awk '{print "\x27"substr($1,0,8)" "substr($1,9,2)":"substr($1,11,2)":"substr($1,13,2)"\x27 +%s"}' | xargs date -d
+++ tail -1 ./t0ni_REMOTE_SETUP_TOTAL_STATS
+++ xargs date -d
+++ awk '{print "\x27"substr($1,0,8)" "substr($1,9,2)":"substr($1,11,2)":"substr($1,13,2)"\x27 +%s"}'
++ ts_submit=1639758994
+tail -1 ${file} | awk '{print "\x27"substr($2,0,8)" "substr($2,9,2)":"substr($2,11,2)":"substr($2,13,2)"\x27 +%s"}' | xargs date -d)
+tail -1 ${file} | awk '{print "\x27"substr($2,0,8)" "substr($2,9,2)":"substr($2,11,2)":"substr($2,13,2)"\x27 +%s"}' | xargs date -d
+++ tail -1 ./t0ni_REMOTE_SETUP_TOTAL_STATS
+++ xargs date -d
+++ awk '{print "\x27"substr($2,0,8)" "substr($2,9,2)":"substr($2,11,2)":"substr($2,13,2)"\x27 +%s"}'
++ ts_start=1639782991
+tail -1 ${file} | awk '{print "\x27"substr($3,0,8)" "substr($3,9,2)":"substr($3,11,2)":"substr($3,13,2)"\x27 +%s"}' | xargs date -d)
+tail -1 ${file} | awk '{print "\x27"substr($3,0,8)" "substr($3,9,2)":"substr($3,11,2)":"substr($3,13,2)"\x27 +%s"}' | xargs date -d
+++ tail -1 ./t0ni_REMOTE_SETUP_TOTAL_STATS
+++ xargs date -d
+++ awk '{print "\x27"substr($3,0,8)" "substr($3,9,2)":"substr($3,11,2)":"substr($3,13,2)"\x27 +%s"}'
++ ts_end=1639785073
+date -d "0 -${ts_submit} sec + ${ts_start} sec" +%T)
+date -d "0 -${ts_submit} sec + ${ts_start} sec" +%T
+++ date -d '0 -1639758994 sec + 1639782991 sec' +%T
++ tq=06:39:57
+date -d "0 -${ts_start} sec + ${ts_end} sec" +%T)
+date -d "0 -${ts_start} sec + ${ts_end} sec" +%T
+++ date -d '0 -1639782991 sec + 1639785073 sec' +%T
++ tr=00:34:42
+basename ${file/_TOTAL_STATS/})
+basename ${file/_TOTAL_STATS/}
+++ basename ./t0ni_REMOTE_SETUP
++ j=t0ni_REMOTE_SETUP
++ printf '%36s = \t %10s \t %10s \n' t0ni_REMOTE_SETUP 06:39:57 00:34:42
++ for file in '$(find . -name '\''*TOTAL_STATS'\'' -not -name '\''t0ni_PERFORMANCE_METRICS_TOTAL_STATS*'\'')'
+tail -1 ${file} | awk '{print NF}')
+tail -1 ${file} | awk '{print NF}'
+++ tail -1 ./t0ni_19931101_fc0_1_SIM_TOTAL_STATS
+++ awk '{print NF}'
++ [[ 4 -lt 4 ]]
+tail -1 ${file} | awk '{print "\x27"substr($1,0,8)" "substr($1,9,2)":"substr($1,11,2)":"substr($1,13,2)"\x27 +%s"}' | xargs date -d)
+tail -1 ${file} | awk '{print "\x27"substr($1,0,8)" "substr($1,9,2)":"substr($1,11,2)":"substr($1,13,2)"\x27 +%s"}' | xargs date -d
+++ tail -1 ./t0ni_19931101_fc0_1_SIM_TOTAL_STATS
+++ xargs date -d
+++ awk '{print "\x27"substr($1,0,8)" "substr($1,9,2)":"substr($1,11,2)":"substr($1,13,2)"\x27 +%s"}'
++ ts_submit=1639809882
+tail -1 ${file} | awk '{print "\x27"substr($2,0,8)" "substr($2,9,2)":"substr($2,11,2)":"substr($2,13,2)"\x27 +%s"}' | xargs date -d)
+tail -1 ${file} | awk '{print "\x27"substr($2,0,8)" "substr($2,9,2)":"substr($2,11,2)":"substr($2,13,2)"\x27 +%s"}' | xargs date -d
+++ tail -1 ./t0ni_19931101_fc0_1_SIM_TOTAL_STATS
+++ xargs date -d
+++ awk '{print "\x27"substr($2,0,8)" "substr($2,9,2)":"substr($2,11,2)":"substr($2,13,2)"\x27 +%s"}'
++ ts_start=1639809886
+tail -1 ${file} | awk '{print "\x27"substr($3,0,8)" "substr($3,9,2)":"substr($3,11,2)":"substr($3,13,2)"\x27 +%s"}' | xargs date -d)
+tail -1 ${file} | awk '{print "\x27"substr($3,0,8)" "substr($3,9,2)":"substr($3,11,2)":"substr($3,13,2)"\x27 +%s"}' | xargs date -d
+++ tail -1 ./t0ni_19931101_fc0_1_SIM_TOTAL_STATS
+++ awk '{print "\x27"substr($3,0,8)" "substr($3,9,2)":"substr($3,11,2)":"substr($3,13,2)"\x27 +%s"}'
+++ xargs date -d
++ ts_end=1639812659
+date -d "0 -${ts_submit} sec + ${ts_start} sec" +%T)
+date -d "0 -${ts_submit} sec + ${ts_start} sec" +%T
+++ date -d '0 -1639809882 sec + 1639809886 sec' +%T
++ tq=00:00:04
+date -d "0 -${ts_start} sec + ${ts_end} sec" +%T)
+date -d "0 -${ts_start} sec + ${ts_end} sec" +%T
+++ date -d '0 -1639809886 sec + 1639812659 sec' +%T
++ tr=00:46:13
+basename ${file/_TOTAL_STATS/})
+basename ${file/_TOTAL_STATS/}
+++ basename ./t0ni_19931101_fc0_1_SIM
++ j=t0ni_19931101_fc0_1_SIM
++ printf '%36s = \t %10s \t %10s \n' t0ni_19931101_fc0_1_SIM 00:00:04 00:46:13
++ for file in '$(find . -name '\''*TOTAL_STATS'\'' -not -name '\''t0ni_PERFORMANCE_METRICS_TOTAL_STATS*'\'')'
+tail -1 ${file} | awk '{print NF}')
+tail -1 ${file} | awk '{print NF}'
+++ tail -1 ./t0ni_19931101_fc0_1_CMOROCE_TOTAL_STATS
+++ awk '{print NF}'
++ [[ 4 -lt 4 ]]
+tail -1 ${file} | awk '{print "\x27"substr($1,0,8)" "substr($1,9,2)":"substr($1,11,2)":"substr($1,13,2)"\x27 +%s"}' | xargs date -d)
+tail -1 ${file} | awk '{print "\x27"substr($1,0,8)" "substr($1,9,2)":"substr($1,11,2)":"substr($1,13,2)"\x27 +%s"}' | xargs date -d
+++ tail -1 ./t0ni_19931101_fc0_1_CMOROCE_TOTAL_STATS
+++ xargs date -d
+++ awk '{print "\x27"substr($1,0,8)" "substr($1,9,2)":"substr($1,11,2)":"substr($1,13,2)"\x27 +%s"}'
++ ts_submit=1639812675
+tail -1 ${file} | awk '{print "\x27"substr($2,0,8)" "substr($2,9,2)":"substr($2,11,2)":"substr($2,13,2)"\x27 +%s"}' | xargs date -d)
+tail -1 ${file} | awk '{print "\x27"substr($2,0,8)" "substr($2,9,2)":"substr($2,11,2)":"substr($2,13,2)"\x27 +%s"}' | xargs date -d
+++ tail -1 ./t0ni_19931101_fc0_1_CMOROCE_TOTAL_STATS
+++ awk '{print "\x27"substr($2,0,8)" "substr($2,9,2)":"substr($2,11,2)":"substr($2,13,2)"\x27 +%s"}'
+++ xargs date -d
++ ts_start=1639831856
+tail -1 ${file} | awk '{print "\x27"substr($3,0,8)" "substr($3,9,2)":"substr($3,11,2)":"substr($3,13,2)"\x27 +%s"}' | xargs date -d)
+tail -1 ${file} | awk '{print "\x27"substr($3,0,8)" "substr($3,9,2)":"substr($3,11,2)":"substr($3,13,2)"\x27 +%s"}' | xargs date -d
+++ tail -1 ./t0ni_19931101_fc0_1_CMOROCE_TOTAL_STATS
+++ xargs date -d
+++ awk '{print "\x27"substr($3,0,8)" "substr($3,9,2)":"substr($3,11,2)":"substr($3,13,2)"\x27 +%s"}'
++ ts_end=1639832099
+date -d "0 -${ts_submit} sec + ${ts_start} sec" +%T)
+date -d "0 -${ts_submit} sec + ${ts_start} sec" +%T
+++ date -d '0 -1639812675 sec + 1639831856 sec' +%T
++ tq=05:19:41
+date -d "0 -${ts_start} sec + ${ts_end} sec" +%T)
+date -d "0 -${ts_start} sec + ${ts_end} sec" +%T
+++ date -d '0 -1639831856 sec + 1639832099 sec' +%T
++ tr=00:04:03
+basename ${file/_TOTAL_STATS/})
+basename ${file/_TOTAL_STATS/}
+++ basename ./t0ni_19931101_fc0_1_CMOROCE
++ j=t0ni_19931101_fc0_1_CMOROCE
++ printf '%36s = \t %10s \t %10s \n' t0ni_19931101_fc0_1_CMOROCE 05:19:41 00:04:03
++ for file in '$(find . -name '\''*TOTAL_STATS'\'' -not -name '\''t0ni_PERFORMANCE_METRICS_TOTAL_STATS*'\'')'
+tail -1 ${file} | awk '{print NF}')
+tail -1 ${file} | awk '{print NF}'
+++ tail -1 ./t0ni_19931101_fc0_2_CMOROCE_TOTAL_STATS
+++ awk '{print NF}'
++ [[ 4 -lt 4 ]]
+tail -1 ${file} | awk '{print "\x27"substr($1,0,8)" "substr($1,9,2)":"substr($1,11,2)":"substr($1,13,2)"\x27 +%s"}' | xargs date -d)
+tail -1 ${file} | awk '{print "\x27"substr($1,0,8)" "substr($1,9,2)":"substr($1,11,2)":"substr($1,13,2)"\x27 +%s"}' | xargs date -d
+++ tail -1 ./t0ni_19931101_fc0_2_CMOROCE_TOTAL_STATS
+++ awk '{print "\x27"substr($1,0,8)" "substr($1,9,2)":"substr($1,11,2)":"substr($1,13,2)"\x27 +%s"}'
+++ xargs date -d
++ ts_submit=1639815509
+tail -1 ${file} | awk '{print "\x27"substr($2,0,8)" "substr($2,9,2)":"substr($2,11,2)":"substr($2,13,2)"\x27 +%s"}' | xargs date -d)
+tail -1 ${file} | awk '{print "\x27"substr($2,0,8)" "substr($2,9,2)":"substr($2,11,2)":"substr($2,13,2)"\x27 +%s"}' | xargs date -d
+++ tail -1 ./t0ni_19931101_fc0_2_CMOROCE_TOTAL_STATS
+++ awk '{print "\x27"substr($2,0,8)" "substr($2,9,2)":"substr($2,11,2)":"substr($2,13,2)"\x27 +%s"}'
+++ xargs date -d
++ ts_start=1639834576
+tail -1 ${file} | awk '{print "\x27"substr($3,0,8)" "substr($3,9,2)":"substr($3,11,2)":"substr($3,13,2)"\x27 +%s"}' | xargs date -d)
+tail -1 ${file} | awk '{print "\x27"substr($3,0,8)" "substr($3,9,2)":"substr($3,11,2)":"substr($3,13,2)"\x27 +%s"}' | xargs date -d
+++ xargs date -d
+++ awk '{print "\x27"substr($3,0,8)" "substr($3,9,2)":"substr($3,11,2)":"substr($3,13,2)"\x27 +%s"}'
+++ tail -1 ./t0ni_19931101_fc0_2_CMOROCE_TOTAL_STATS
++ ts_end=1639834808
+date -d "0 -${ts_submit} sec + ${ts_start} sec" +%T)
+date -d "0 -${ts_submit} sec + ${ts_start} sec" +%T
+++ date -d '0 -1639815509 sec + 1639834576 sec' +%T
++ tq=05:17:47
+date -d "0 -${ts_start} sec + ${ts_end} sec" +%T)
+date -d "0 -${ts_start} sec + ${ts_end} sec" +%T
+++ date -d '0 -1639834576 sec + 1639834808 sec' +%T
++ tr=00:03:52
+basename ${file/_TOTAL_STATS/})
+basename ${file/_TOTAL_STATS/}
+++ basename ./t0ni_19931101_fc0_2_CMOROCE
++ j=t0ni_19931101_fc0_2_CMOROCE
++ printf '%36s = \t %10s \t %10s \n' t0ni_19931101_fc0_2_CMOROCE 05:17:47 00:03:52
++ for file in '$(find . -name '\''*TOTAL_STATS'\'' -not -name '\''t0ni_PERFORMANCE_METRICS_TOTAL_STATS*'\'')'
+tail -1 ${file} | awk '{print NF}')
+tail -1 ${file} | awk '{print NF}'
+++ tail -1 ./t0ni_19931101_fc0_1_MONITOR_TOTAL_STATS
+++ awk '{print NF}'
++ [[ 4 -lt 4 ]]
+tail -1 ${file} | awk '{print "\x27"substr($1,0,8)" "substr($1,9,2)":"substr($1,11,2)":"substr($1,13,2)"\x27 +%s"}' | xargs date -d)
+tail -1 ${file} | awk '{print "\x27"substr($1,0,8)" "substr($1,9,2)":"substr($1,11,2)":"substr($1,13,2)"\x27 +%s"}' | xargs date -d
+++ tail -1 ./t0ni_19931101_fc0_1_MONITOR_TOTAL_STATS
+++ awk '{print "\x27"substr($1,0,8)" "substr($1,9,2)":"substr($1,11,2)":"substr($1,13,2)"\x27 +%s"}'
+++ xargs date -d
++ ts_submit=1639854897
+tail -1 ${file} | awk '{print "\x27"substr($2,0,8)" "substr($2,9,2)":"substr($2,11,2)":"substr($2,13,2)"\x27 +%s"}' | xargs date -d)
+tail -1 ${file} | awk '{print "\x27"substr($2,0,8)" "substr($2,9,2)":"substr($2,11,2)":"substr($2,13,2)"\x27 +%s"}' | xargs date -d
+++ xargs date -d
+++ awk '{print "\x27"substr($2,0,8)" "substr($2,9,2)":"substr($2,11,2)":"substr($2,13,2)"\x27 +%s"}'
+++ tail -1 ./t0ni_19931101_fc0_1_MONITOR_TOTAL_STATS
++ ts_start=1639854900
+tail -1 ${file} | awk '{print "\x27"substr($3,0,8)" "substr($3,9,2)":"substr($3,11,2)":"substr($3,13,2)"\x27 +%s"}' | xargs date -d)
+tail -1 ${file} | awk '{print "\x27"substr($3,0,8)" "substr($3,9,2)":"substr($3,11,2)":"substr($3,13,2)"\x27 +%s"}' | xargs date -d
+++ tail -1 ./t0ni_19931101_fc0_1_MONITOR_TOTAL_STATS
+++ xargs date -d
+++ awk '{print "\x27"substr($3,0,8)" "substr($3,9,2)":"substr($3,11,2)":"substr($3,13,2)"\x27 +%s"}'
++ ts_end=1639855254
+date -d "0 -${ts_submit} sec + ${ts_start} sec" +%T)
+date -d "0 -${ts_submit} sec + ${ts_start} sec" +%T
+++ date -d '0 -1639854897 sec + 1639854900 sec' +%T
++ tq=00:00:03
+date -d "0 -${ts_start} sec + ${ts_end} sec" +%T)
+date -d "0 -${ts_start} sec + ${ts_end} sec" +%T
+++ date -d '0 -1639854900 sec + 1639855254 sec' +%T
++ tr=00:05:54
+basename ${file/_TOTAL_STATS/})
+basename ${file/_TOTAL_STATS/}
+++ basename ./t0ni_19931101_fc0_1_MONITOR
++ j=t0ni_19931101_fc0_1_MONITOR
++ printf '%36s = \t %10s \t %10s \n' t0ni_19931101_fc0_1_MONITOR 00:00:03 00:05:54
++ for file in '$(find . -name '\''*TOTAL_STATS'\'' -not -name '\''t0ni_PERFORMANCE_METRICS_TOTAL_STATS*'\'')'
+tail -1 ${file} | awk '{print NF}')
+tail -1 ${file} | awk '{print NF}'
+++ tail -1 ./t0ni_19931101_fc0_2_CLEAN_TOTAL_STATS
+++ awk '{print NF}'
++ [[ 4 -lt 4 ]]
+tail -1 ${file} | awk '{print "\x27"substr($1,0,8)" "substr($1,9,2)":"substr($1,11,2)":"substr($1,13,2)"\x27 +%s"}' | xargs date -d)
+tail -1 ${file} | awk '{print "\x27"substr($1,0,8)" "substr($1,9,2)":"substr($1,11,2)":"substr($1,13,2)"\x27 +%s"}' | xargs date -d
+++ tail -1 ./t0ni_19931101_fc0_2_CLEAN_TOTAL_STATS
+++ xargs date -d
+++ awk '{print "\x27"substr($1,0,8)" "substr($1,9,2)":"substr($1,11,2)":"substr($1,13,2)"\x27 +%s"}'
++ ts_submit=1639863102
+tail -1 ${file} | awk '{print "\x27"substr($2,0,8)" "substr($2,9,2)":"substr($2,11,2)":"substr($2,13,2)"\x27 +%s"}' | xargs date -d)
+tail -1 ${file} | awk '{print "\x27"substr($2,0,8)" "substr($2,9,2)":"substr($2,11,2)":"substr($2,13,2)"\x27 +%s"}' | xargs date -d
+++ tail -1 ./t0ni_19931101_fc0_2_CLEAN_TOTAL_STATS
+++ xargs date -d
+++ awk '{print "\x27"substr($2,0,8)" "substr($2,9,2)":"substr($2,11,2)":"substr($2,13,2)"\x27 +%s"}'
++ ts_start=1639863102
+tail -1 ${file} | awk '{print "\x27"substr($3,0,8)" "substr($3,9,2)":"substr($3,11,2)":"substr($3,13,2)"\x27 +%s"}' | xargs date -d)
+tail -1 ${file} | awk '{print "\x27"substr($3,0,8)" "substr($3,9,2)":"substr($3,11,2)":"substr($3,13,2)"\x27 +%s"}' | xargs date -d
+++ tail -1 ./t0ni_19931101_fc0_2_CLEAN_TOTAL_STATS
+++ xargs date -d
+++ awk '{print "\x27"substr($3,0,8)" "substr($3,9,2)":"substr($3,11,2)":"substr($3,13,2)"\x27 +%s"}'
++ ts_end=1639863381
+date -d "0 -${ts_submit} sec + ${ts_start} sec" +%T)
+date -d "0 -${ts_submit} sec + ${ts_start} sec" +%T
+++ date -d '0 -1639863102 sec + 1639863102 sec' +%T
++ tq=00:00:00
+date -d "0 -${ts_start} sec + ${ts_end} sec" +%T)
+date -d "0 -${ts_start} sec + ${ts_end} sec" +%T
+++ date -d '0 -1639863102 sec + 1639863381 sec' +%T
++ tr=00:04:39
+basename ${file/_TOTAL_STATS/})
+basename ${file/_TOTAL_STATS/}
+++ basename ./t0ni_19931101_fc0_2_CLEAN
++ j=t0ni_19931101_fc0_2_CLEAN
++ printf '%36s = \t %10s \t %10s \n' t0ni_19931101_fc0_2_CLEAN 00:00:00 00:04:39
++ for file in '$(find . -name '\''*TOTAL_STATS'\'' -not -name '\''t0ni_PERFORMANCE_METRICS_TOTAL_STATS*'\'')'
+tail -1 ${file} | awk '{print NF}')
+tail -1 ${file} | awk '{print NF}'
+++ tail -1 ./t0ni_LOCAL_SETUP_TOTAL_STATS
+++ awk '{print NF}'
++ [[ 4 -lt 4 ]]
+tail -1 ${file} | awk '{print "\x27"substr($1,0,8)" "substr($1,9,2)":"substr($1,11,2)":"substr($1,13,2)"\x27 +%s"}' | xargs date -d)
+tail -1 ${file} | awk '{print "\x27"substr($1,0,8)" "substr($1,9,2)":"substr($1,11,2)":"substr($1,13,2)"\x27 +%s"}' | xargs date -d
+++ tail -1 ./t0ni_LOCAL_SETUP_TOTAL_STATS
+++ awk '{print "\x27"substr($1,0,8)" "substr($1,9,2)":"substr($1,11,2)":"substr($1,13,2)"\x27 +%s"}'
+++ xargs date -d
++ ts_submit=1639758732
+tail -1 ${file} | awk '{print "\x27"substr($2,0,8)" "substr($2,9,2)":"substr($2,11,2)":"substr($2,13,2)"\x27 +%s"}' | xargs date -d)
+tail -1 ${file} | awk '{print "\x27"substr($2,0,8)" "substr($2,9,2)":"substr($2,11,2)":"substr($2,13,2)"\x27 +%s"}' | xargs date -d
+++ tail -1 ./t0ni_LOCAL_SETUP_TOTAL_STATS
+++ xargs date -d
+++ awk '{print "\x27"substr($2,0,8)" "substr($2,9,2)":"substr($2,11,2)":"substr($2,13,2)"\x27 +%s"}'
++ ts_start=1639758732
+tail -1 ${file} | awk '{print "\x27"substr($3,0,8)" "substr($3,9,2)":"substr($3,11,2)":"substr($3,13,2)"\x27 +%s"}' | xargs date -d)
+tail -1 ${file} | awk '{print "\x27"substr($3,0,8)" "substr($3,9,2)":"substr($3,11,2)":"substr($3,13,2)"\x27 +%s"}' | xargs date -d
+++ awk '{print "\x27"substr($3,0,8)" "substr($3,9,2)":"substr($3,11,2)":"substr($3,13,2)"\x27 +%s"}'
+++ xargs date -d
+++ tail -1 ./t0ni_LOCAL_SETUP_TOTAL_STATS
++ ts_end=1639758736
+date -d "0 -${ts_submit} sec + ${ts_start} sec" +%T)
+date -d "0 -${ts_submit} sec + ${ts_start} sec" +%T
+++ date -d '0 -1639758732 sec + 1639758732 sec' +%T
++ tq=00:00:00
+date -d "0 -${ts_start} sec + ${ts_end} sec" +%T)
+date -d "0 -${ts_start} sec + ${ts_end} sec" +%T
+++ date -d '0 -1639758732 sec + 1639758736 sec' +%T
++ tr=00:00:04
+basename ${file/_TOTAL_STATS/})
+basename ${file/_TOTAL_STATS/}
+++ basename ./t0ni_LOCAL_SETUP
++ j=t0ni_LOCAL_SETUP
++ printf '%36s = \t %10s \t %10s \n' t0ni_LOCAL_SETUP 00:00:00 00:00:04
++ for file in '$(find . -name '\''*TOTAL_STATS'\'' -not -name '\''t0ni_PERFORMANCE_METRICS_TOTAL_STATS*'\'')'
+tail -1 ${file} | awk '{print NF}')
+tail -1 ${file} | awk '{print NF}'
+++ tail -1 ./t0ni_19931101_fc0_1_CMORATM_TOTAL_STATS
+++ awk '{print NF}'
++ [[ 4 -lt 4 ]]
+tail -1 ${file} | awk '{print "\x27"substr($1,0,8)" "substr($1,9,2)":"substr($1,11,2)":"substr($1,13,2)"\x27 +%s"}' | xargs date -d)
+tail -1 ${file} | awk '{print "\x27"substr($1,0,8)" "substr($1,9,2)":"substr($1,11,2)":"substr($1,13,2)"\x27 +%s"}' | xargs date -d
+++ tail -1 ./t0ni_19931101_fc0_1_CMORATM_TOTAL_STATS
+++ xargs date -d
+++ awk '{print "\x27"substr($1,0,8)" "substr($1,9,2)":"substr($1,11,2)":"substr($1,13,2)"\x27 +%s"}'
++ ts_submit=1639815509
+tail -1 ${file} | awk '{print "\x27"substr($2,0,8)" "substr($2,9,2)":"substr($2,11,2)":"substr($2,13,2)"\x27 +%s"}' | xargs date -d)
+tail -1 ${file} | awk '{print "\x27"substr($2,0,8)" "substr($2,9,2)":"substr($2,11,2)":"substr($2,13,2)"\x27 +%s"}' | xargs date -d
+++ tail -1 ./t0ni_19931101_fc0_1_CMORATM_TOTAL_STATS
+++ xargs date -d
+++ awk '{print "\x27"substr($2,0,8)" "substr($2,9,2)":"substr($2,11,2)":"substr($2,13,2)"\x27 +%s"}'
++ ts_start=1639815513
+tail -1 ${file} | awk '{print "\x27"substr($3,0,8)" "substr($3,9,2)":"substr($3,11,2)":"substr($3,13,2)"\x27 +%s"}' | xargs date -d)
+tail -1 ${file} | awk '{print "\x27"substr($3,0,8)" "substr($3,9,2)":"substr($3,11,2)":"substr($3,13,2)"\x27 +%s"}' | xargs date -d
+++ tail -1 ./t0ni_19931101_fc0_1_CMORATM_TOTAL_STATS
+++ awk '{print "\x27"substr($3,0,8)" "substr($3,9,2)":"substr($3,11,2)":"substr($3,13,2)"\x27 +%s"}'
+++ xargs date -d
++ ts_end=1639815568
+date -d "0 -${ts_submit} sec + ${ts_start} sec" +%T)
+date -d "0 -${ts_submit} sec + ${ts_start} sec" +%T
+++ date -d '0 -1639815509 sec + 1639815513 sec' +%T
++ tq=00:00:04
+date -d "0 -${ts_start} sec + ${ts_end} sec" +%T)
+date -d "0 -${ts_start} sec + ${ts_end} sec" +%T
+++ date -d '0 -1639815513 sec + 1639815568 sec' +%T
++ tr=00:00:55
+basename ${file/_TOTAL_STATS/})
+basename ${file/_TOTAL_STATS/}
+++ basename ./t0ni_19931101_fc0_1_CMORATM
++ j=t0ni_19931101_fc0_1_CMORATM
++ printf '%36s = \t %10s \t %10s \n' t0ni_19931101_fc0_1_CMORATM 00:00:04 00:00:55
++ for file in '$(find . -name '\''*TOTAL_STATS'\'' -not -name '\''t0ni_PERFORMANCE_METRICS_TOTAL_STATS*'\'')'
+tail -1 ${file} | awk '{print NF}')
+tail -1 ${file} | awk '{print NF}'
+++ tail -1 ./t0ni_19931101_fc0_1_EARTHDIAGS_TOTAL_STATS
+++ awk '{print NF}'
++ [[ 4 -lt 4 ]]
+tail -1 ${file} | awk '{print "\x27"substr($1,0,8)" "substr($1,9,2)":"substr($1,11,2)":"substr($1,13,2)"\x27 +%s"}' | xargs date -d)
+tail -1 ${file} | awk '{print "\x27"substr($1,0,8)" "substr($1,9,2)":"substr($1,11,2)":"substr($1,13,2)"\x27 +%s"}' | xargs date -d
+++ tail -1 ./t0ni_19931101_fc0_1_EARTHDIAGS_TOTAL_STATS
+++ awk '{print "\x27"substr($1,0,8)" "substr($1,9,2)":"substr($1,11,2)":"substr($1,13,2)"\x27 +%s"}'
+++ xargs date -d
++ ts_submit=1639854500
+tail -1 ${file} | awk '{print "\x27"substr($2,0,8)" "substr($2,9,2)":"substr($2,11,2)":"substr($2,13,2)"\x27 +%s"}' | xargs date -d)
+tail -1 ${file} | awk '{print "\x27"substr($2,0,8)" "substr($2,9,2)":"substr($2,11,2)":"substr($2,13,2)"\x27 +%s"}' | xargs date -d
+++ tail -1 ./t0ni_19931101_fc0_1_EARTHDIAGS_TOTAL_STATS
+++ awk '{print "\x27"substr($2,0,8)" "substr($2,9,2)":"substr($2,11,2)":"substr($2,13,2)"\x27 +%s"}'
+++ xargs date -d
++ ts_start=1639854654
+tail -1 ${file} | awk '{print "\x27"substr($3,0,8)" "substr($3,9,2)":"substr($3,11,2)":"substr($3,13,2)"\x27 +%s"}' | xargs date -d)
+tail -1 ${file} | awk '{print "\x27"substr($3,0,8)" "substr($3,9,2)":"substr($3,11,2)":"substr($3,13,2)"\x27 +%s"}' | xargs date -d
+++ tail -1 ./t0ni_19931101_fc0_1_EARTHDIAGS_TOTAL_STATS
+++ awk '{print "\x27"substr($3,0,8)" "substr($3,9,2)":"substr($3,11,2)":"substr($3,13,2)"\x27 +%s"}'
+++ xargs date -d
++ ts_end=1639854881
+date -d "0 -${ts_submit} sec + ${ts_start} sec" +%T)
+date -d "0 -${ts_submit} sec + ${ts_start} sec" +%T
+++ date -d '0 -1639854500 sec + 1639854654 sec' +%T
++ tq=00:02:34
+date -d "0 -${ts_start} sec + ${ts_end} sec" +%T)
+date -d "0 -${ts_start} sec + ${ts_end} sec" +%T
+++ date -d '0 -1639854654 sec + 1639854881 sec' +%T
++ tr=00:03:47
+basename ${file/_TOTAL_STATS/})
+basename ${file/_TOTAL_STATS/}
+++ basename ./t0ni_19931101_fc0_1_EARTHDIAGS
++ j=t0ni_19931101_fc0_1_EARTHDIAGS
++ printf '%36s = \t %10s \t %10s \n' t0ni_19931101_fc0_1_EARTHDIAGS 00:02:34 00:03:47
+#
+# Jobs average time
+#
+{
+  echo
+  echo "# Jobs average time"
+  echo
+  echo "[QUEUE_TIME_AVG]"
+
+  time_avg=$(grep "SIM =" t0ni_GENERAL_STATS | awk '{print $3}' | awk -F':' 'BEGIN{total=0;} {total+=(($1*3600)+($2*60)+$3);} END{a=(total/NR); printf "%02d:%02d:%02d\n",(a/3600),((a/60)%60),(a%60)}')
+  echo "# SIM jobs queue time average (H:M:S)"
+  echo "SIM_QUEUE_TIME_AVG = "${time_avg}
+
+  time_avg=$(grep "POST =" t0ni_GENERAL_STATS | awk '{print $3}' | awk -F':' 'BEGIN{total=0;} {total+=(($1*3600)+($2*60)+$3);} END{a=(total/NR); printf "%02d:%02d:%02d\n",(a/3600),((a/60)%60),(a%60)}')
+  echo "# POST jobs queue time average (H:M:S)"
+  echo "POST_QUEUE_TIME_AVG = "${time_avg}
+
+  time_avg=$(grep "CLEAN =" t0ni_GENERAL_STATS | awk '{print $3}' | awk -F':' 'BEGIN{total=0;} {total+=(($1*3600)+($2*60)+$3);} END{a=(total/NR); printf "%02d:%02d:%02d\n",(a/3600),((a/60)%60),(a%60)}')
+  echo "# CLEAN jobs queue time average (H:M:S)"
+  echo "CLEAN_QUEUE_TIME_AVG = "${time_avg}
+
+  transfer_stats=$(grep "TRANSFER =" t0ni_GENERAL_STATS) && returncode=$? || returncode=$?
+  if [ ${returncode} -eq 0 ]; then
+    if [[ -n "${transfer_stats-}" ]]; then
+      time_avg=$(grep "TRANSFER =" t0ni_GENERAL_STATS | awk '{print $3}' | awk -F':' 'BEGIN{total=0;} {total+=(($1*3600)+($2*60)+$3);} END{a=(total/NR); printf "%02d:%02d:%02d\n",(a/3600),((a/60)%60),(a%60)}')
+      echo "# TRANSFER jobs queue time average (H:M:S)"
+      echo "TRANSFER_QUEUE_TIME_AVG = "${time_avg}
+    fi
+  fi
+
+  echo
+  echo "[RUN_TIME_AVG]"
+
+  time_avg=$(grep "SIM =" t0ni_GENERAL_STATS | awk '{print $4}' | awk -F':' 'BEGIN{total=0;} {total+=(($1*3600)+($2*60)+$3);} END{a=(total/NR); printf "%02d:%02d:%02d\n",(a/3600),((a/60)%60),(a%60)}')
+  echo "# SIM jobs run time average (H:M:S)"
+  echo "SIM_RUN_TIME_AVG = "${time_avg}
+
+  time_avg=$(grep "POST =" t0ni_GENERAL_STATS | awk '{print $4}' | awk -F':' 'BEGIN{total=0;} {total+=(($1*3600)+($2*60)+$3);} END{a=(total/NR); printf "%02d:%02d:%02d\n",(a/3600),((a/60)%60),(a%60)}')
+  echo "# POST jobs run time average (H:M:S)"
+  echo "POST_RUN_TIME_AVG = "${time_avg}
+
+  time_avg=$(grep "CLEAN =" t0ni_GENERAL_STATS | awk '{print $4}' | awk -F':' 'BEGIN{total=0;} {total+=(($1*3600)+($2*60)+$3);} END{a=(total/NR); printf "%02d:%02d:%02d\n",(a/3600),((a/60)%60),(a%60)}')
+  echo "# CLEAN jobs run time average (H:M:S)"
+  echo "CLEAN_RUN_TIME_AVG = "${time_avg}
+
+  if [[ -n "${transfer_stats-}" ]]; then
+    time_avg=$(grep "TRANSFER =" t0ni_GENERAL_STATS | awk '{print $4}' | awk -F':' 'BEGIN{total=0;} {total+=(($1*3600)+($2*60)+$3);} END{a=(total/NR); printf "%02d:%02d:%02d\n",(a/3600),((a/60)%60),(a%60)}')
+    echo "# TRANSFER jobs run time average (H:M:S)"
+    echo "TRANSFER_RUN_TIME_AVG = "${time_avg}
+  fi
+  #
+  # Jobs cumulated time
+  #
+  total_sec=0
+  echo
+  echo "# Jobs cumulated time"
+  echo
+  echo "[QUEUE_TIME_CUM]"
+
+  time_cum=$(grep "${member}_.*_SIM =" t0ni_GENERAL_STATS | awk '{print $3}' | awk -F':' 'BEGIN{total=0;} {total+=(($1*3600)+($2*60)+$3);} END{a=(total); printf "%02d:%02d:%02d\n",(a/3600),((a/60)%60),(a%60)}')
+  sec_cum=$(echo $time_cum | awk -F: '{ print ($1 * 3600) + ($2 * 60) + $3 }')
+  total_sec=$(echo "$sec_cum+$total_sec" | bc)
+  echo "# SIM jobs queue time cumulated (H:M:S)"
+  echo "SIM_QUEUE_TIME_CUM = "${time_cum}
+
+  time_cum=$(grep "${member}_.*_POST =" t0ni_GENERAL_STATS | awk '{print $3}' | awk -F':' 'BEGIN{total=0;} {total+=(($1*3600)+($2*60)+$3);} END{a=(total); printf "%02d:%02d:%02d\n",(a/3600),((a/60)%60),(a%60)}')
+  echo "# POST jobs queue time cumulated (H:M:S)"
+  echo "POST_QUEUE_TIME_CUM = "${time_cum}
+
+  time_cum=$(grep "${member}_.*_CLEAN =" t0ni_GENERAL_STATS | awk '{print $3}' | awk -F':' 'BEGIN{total=0;} {total+=(($1*3600)+($2*60)+$3);} END{a=(total); printf "%02d:%02d:%02d\n",(a/3600),((a/60)%60),(a%60)}')
+  echo "# CLEAN jobs queue time cumulated (H:M:S)"
+  echo "CLEAN_QUEUE_TIME_CUM = "${time_cum}
+
+  time_cum=$(grep "${member}_.*_TRANSFER =" t0ni_GENERAL_STATS | awk '{print $3}' | awk -F':' 'BEGIN{total=0;} {total+=(($1*3600)+($2*60)+$3);} END{a=(total); printf "%02d:%02d:%02d\n",(a/3600),((a/60)%60),(a%60)}')
+  echo "# TRANSFER jobs queue time cumulated (H:M:S)"
+  echo "TRANSFER_QUEUE_TIME_CUM = "${time_cum}
+
+  echo
+  echo "[RUN_TIME_CUM]"
+
+  time_cum=$(grep "${member}_.*_SIM =" t0ni_GENERAL_STATS | awk '{print $4}' | awk -F':' 'BEGIN{total=0;} {total+=(($1*3600)+($2*60)+$3);} END{a=(total); printf "%02d:%02d:%02d\n",(a/3600),((a/60)%60),(a%60)}')
+  sec_cum=$(echo $time_cum | awk -F: '{ print ($1 * 3600) + ($2 * 60) + $3 }')
+  total_sec=$(echo "$sec_cum+$total_sec" | bc)
+  echo "# SIM jobs run time cumulated (H:M:S)"
+  echo "SIM_RUN_TIME_CUM = "${time_cum}
+
+  time_cum=$(grep "${member}_.*_POST =" t0ni_GENERAL_STATS | awk '{print $4}' | awk -F':' 'BEGIN{total=0;} {total+=(($1*3600)+($2*60)+$3);} END{a=(total); printf "%02d:%02d:%02d\n",(a/3600),((a/60)%60),(a%60)}')
+  echo "# POST jobs run time average (H:M:S)"
+  echo "POST_RUN_TIME_CUM = "${time_cum}
+
+  time_cum=$(grep "${member}_.*_CLEAN =" t0ni_GENERAL_STATS | awk '{print $4}' | awk -F':' 'BEGIN{total=0;} {total+=(($1*3600)+($2*60)+$3);} END{a=(total); printf "%02d:%02d:%02d\n",(a/3600),((a/60)%60),(a%60)}')
+  echo "# CLEAN jobs run time average (H:M:S)"
+  echo "CLEAN_RUN_TIME_CUM = "${time_cum}
+
+  time_cum=$(grep "${member}_.*_TRANSFER =" t0ni_GENERAL_STATS | awk '{print $4}' | awk -F':' 'BEGIN{total=0;} {total+=(($1*3600)+($2*60)+$3);} END{a=(total); printf "%02d:%02d:%02d\n",(a/3600),((a/60)%60),(a%60)}')
+  echo "# TRANSFER jobs run time average (H:M:S)"
+  echo "TRANSFER_RUN_TIME_CUM = "${time_cum}
+
+} \
+  >>t0ni_GENERAL_STATS
++ echo
++ echo '# Jobs average time'
++ echo
++ echo '[QUEUE_TIME_AVG]'
+grep "SIM =" t0ni_GENERAL_STATS | awk '{print $3}' | awk -F':' 'BEGIN{total=0;} {total+=(($1*3600)+($2*60)+$3);} END{a=(total/NR); printf "%02d:%02d:%02d\n",(a/3600),((a/60)%60),(a%60)}')
+grep "SIM =" t0ni_GENERAL_STATS | awk '{print $3}' | awk -F':' 'BEGIN{total=0;} {total+=(($1*3600)+($2*60)+$3);} END{a=(total/NR); printf "%02d:%02d:%02d\n",(a/3600),((a/60)%60),(a%60)}'
+++ grep 'SIM =' t0ni_GENERAL_STATS
+++ awk '{print $3}'
+++ awk -F: 'BEGIN{total=0;} {total+=(($1*3600)+($2*60)+$3);} END{a=(total/NR); printf "%02d:%02d:%02d\n",(a/3600),((a/60)%60),(a%60)}'
++ time_avg=00:23:11
++ echo '# SIM jobs queue time average (H:M:S)'
++ echo 'SIM_QUEUE_TIME_AVG = 00:23:11'
+grep "POST =" t0ni_GENERAL_STATS | awk '{print $3}' | awk -F':' 'BEGIN{total=0;} {total+=(($1*3600)+($2*60)+$3);} END{a=(total/NR); printf "%02d:%02d:%02d\n",(a/3600),((a/60)%60),(a%60)}')
+grep "POST =" t0ni_GENERAL_STATS | awk '{print $3}' | awk -F':' 'BEGIN{total=0;} {total+=(($1*3600)+($2*60)+$3);} END{a=(total/NR); printf "%02d:%02d:%02d\n",(a/3600),((a/60)%60),(a%60)}'
+++ grep 'POST =' t0ni_GENERAL_STATS
+++ awk '{print $3}'
+++ awk -F: 'BEGIN{total=0;} {total+=(($1*3600)+($2*60)+$3);} END{a=(total/NR); printf "%02d:%02d:%02d\n",(a/3600),((a/60)%60),(a%60)}'
++ time_avg=04:17:49
++ echo '# POST jobs queue time average (H:M:S)'
++ echo 'POST_QUEUE_TIME_AVG = 04:17:49'
+grep "CLEAN =" t0ni_GENERAL_STATS | awk '{print $3}' | awk -F':' 'BEGIN{total=0;} {total+=(($1*3600)+($2*60)+$3);} END{a=(total/NR); printf "%02d:%02d:%02d\n",(a/3600),((a/60)%60),(a%60)}')
+grep "CLEAN =" t0ni_GENERAL_STATS | awk '{print $3}' | awk -F':' 'BEGIN{total=0;} {total+=(($1*3600)+($2*60)+$3);} END{a=(total/NR); printf "%02d:%02d:%02d\n",(a/3600),((a/60)%60),(a%60)}'
+++ grep 'CLEAN =' t0ni_GENERAL_STATS
+++ awk '{print $3}'
+++ awk -F: 'BEGIN{total=0;} {total+=(($1*3600)+($2*60)+$3);} END{a=(total/NR); printf "%02d:%02d:%02d\n",(a/3600),((a/60)%60),(a%60)}'
++ time_avg=00:00:00
++ echo '# CLEAN jobs queue time average (H:M:S)'
++ echo 'CLEAN_QUEUE_TIME_AVG = 00:00:00'
+grep "TRANSFER =" t0ni_GENERAL_STATS)
+grep "TRANSFER =" t0ni_GENERAL_STATS
+++ grep 'TRANSFER =' t0ni_GENERAL_STATS
++ transfer_stats=
++ returncode=1
++ '[' 1 -eq 0 ']'
++ echo
++ echo '[RUN_TIME_AVG]'
+grep "SIM =" t0ni_GENERAL_STATS | awk '{print $4}' | awk -F':' 'BEGIN{total=0;} {total+=(($1*3600)+($2*60)+$3);} END{a=(total/NR); printf "%02d:%02d:%02d\n",(a/3600),((a/60)%60),(a%60)}')
+grep "SIM =" t0ni_GENERAL_STATS | awk '{print $4}' | awk -F':' 'BEGIN{total=0;} {total+=(($1*3600)+($2*60)+$3);} END{a=(total/NR); printf "%02d:%02d:%02d\n",(a/3600),((a/60)%60),(a%60)}'
+++ grep 'SIM =' t0ni_GENERAL_STATS
+++ awk '{print $4}'
+++ awk -F: 'BEGIN{total=0;} {total+=(($1*3600)+($2*60)+$3);} END{a=(total/NR); printf "%02d:%02d:%02d\n",(a/3600),((a/60)%60),(a%60)}'
++ time_avg=00:46:46
++ echo '# SIM jobs run time average (H:M:S)'
++ echo 'SIM_RUN_TIME_AVG = 00:46:46'
+grep "POST =" t0ni_GENERAL_STATS | awk '{print $4}' | awk -F':' 'BEGIN{total=0;} {total+=(($1*3600)+($2*60)+$3);} END{a=(total/NR); printf "%02d:%02d:%02d\n",(a/3600),((a/60)%60),(a%60)}')
+grep "POST =" t0ni_GENERAL_STATS | awk '{print $4}' | awk -F':' 'BEGIN{total=0;} {total+=(($1*3600)+($2*60)+$3);} END{a=(total/NR); printf "%02d:%02d:%02d\n",(a/3600),((a/60)%60),(a%60)}'
+++ grep 'POST =' t0ni_GENERAL_STATS
+++ awk '{print $4}'
+++ awk -F: 'BEGIN{total=0;} {total+=(($1*3600)+($2*60)+$3);} END{a=(total/NR); printf "%02d:%02d:%02d\n",(a/3600),((a/60)%60),(a%60)}'
++ time_avg=00:00:14
++ echo '# POST jobs run time average (H:M:S)'
++ echo 'POST_RUN_TIME_AVG = 00:00:14'
+grep "CLEAN =" t0ni_GENERAL_STATS | awk '{print $4}' | awk -F':' 'BEGIN{total=0;} {total+=(($1*3600)+($2*60)+$3);} END{a=(total/NR); printf "%02d:%02d:%02d\n",(a/3600),((a/60)%60),(a%60)}')
+grep "CLEAN =" t0ni_GENERAL_STATS | awk '{print $4}' | awk -F':' 'BEGIN{total=0;} {total+=(($1*3600)+($2*60)+$3);} END{a=(total/NR); printf "%02d:%02d:%02d\n",(a/3600),((a/60)%60),(a%60)}'
+++ grep 'CLEAN =' t0ni_GENERAL_STATS
+++ awk '{print $4}'
+++ awk -F: 'BEGIN{total=0;} {total+=(($1*3600)+($2*60)+$3);} END{a=(total/NR); printf "%02d:%02d:%02d\n",(a/3600),((a/60)%60),(a%60)}'
++ time_avg=00:04:31
++ echo '# CLEAN jobs run time average (H:M:S)'
++ echo 'CLEAN_RUN_TIME_AVG = 00:04:31'
++ [[ -n '' ]]
++ total_sec=0
++ echo
++ echo '# Jobs cumulated time'
++ echo
++ echo '[QUEUE_TIME_CUM]'
+grep "${member}_.*_SIM =" t0ni_GENERAL_STATS | awk '{print $3}' | awk -F':' 'BEGIN{total=0;} {total+=(($1*3600)+($2*60)+$3);} END{a=(total); printf "%02d:%02d:%02d\n",(a/3600),((a/60)%60),(a%60)}')
+grep "${member}_.*_SIM =" t0ni_GENERAL_STATS | awk '{print $3}' | awk -F':' 'BEGIN{total=0;} {total+=(($1*3600)+($2*60)+$3);} END{a=(total); printf "%02d:%02d:%02d\n",(a/3600),((a/60)%60),(a%60)}'
+++ grep 'fc0_.*_SIM =' t0ni_GENERAL_STATS
+++ awk '{print $3}'
+++ awk -F: 'BEGIN{total=0;} {total+=(($1*3600)+($2*60)+$3);} END{a=(total); printf "%02d:%02d:%02d\n",(a/3600),((a/60)%60),(a%60)}'
++ time_cum=00:46:22
+echo $time_cum | awk -F: '{ print ($1 * 3600) + ($2 * 60) + $3 }')
+echo $time_cum | awk -F: '{ print ($1 * 3600) + ($2 * 60) + $3 }'
+++ echo 00:46:22
+++ awk -F: '{ print ($1 * 3600) + ($2 * 60) + $3 }'
++ sec_cum=2782
+echo "$sec_cum+$total_sec" | bc)
+echo "$sec_cum+$total_sec" | bc
+++ echo 2782+0
+++ bc
++ total_sec=2782
++ echo '# SIM jobs queue time cumulated (H:M:S)'
++ echo 'SIM_QUEUE_TIME_CUM = 00:46:22'
+grep "${member}_.*_POST =" t0ni_GENERAL_STATS | awk '{print $3}' | awk -F':' 'BEGIN{total=0;} {total+=(($1*3600)+($2*60)+$3);} END{a=(total); printf "%02d:%02d:%02d\n",(a/3600),((a/60)%60),(a%60)}')
+grep "${member}_.*_POST =" t0ni_GENERAL_STATS | awk '{print $3}' | awk -F':' 'BEGIN{total=0;} {total+=(($1*3600)+($2*60)+$3);} END{a=(total); printf "%02d:%02d:%02d\n",(a/3600),((a/60)%60),(a%60)}'
+++ grep 'fc0_.*_POST =' t0ni_GENERAL_STATS
+++ awk '{print $3}'
+++ awk -F: 'BEGIN{total=0;} {total+=(($1*3600)+($2*60)+$3);} END{a=(total); printf "%02d:%02d:%02d\n",(a/3600),((a/60)%60),(a%60)}'
++ time_cum=08:35:38
++ echo '# POST jobs queue time cumulated (H:M:S)'
++ echo 'POST_QUEUE_TIME_CUM = 08:35:38'
+grep "${member}_.*_CLEAN =" t0ni_GENERAL_STATS | awk '{print $3}' | awk -F':' 'BEGIN{total=0;} {total+=(($1*3600)+($2*60)+$3);} END{a=(total); printf "%02d:%02d:%02d\n",(a/3600),((a/60)%60),(a%60)}')
+grep "${member}_.*_CLEAN =" t0ni_GENERAL_STATS | awk '{print $3}' | awk -F':' 'BEGIN{total=0;} {total+=(($1*3600)+($2*60)+$3);} END{a=(total); printf "%02d:%02d:%02d\n",(a/3600),((a/60)%60),(a%60)}'
+++ grep 'fc0_.*_CLEAN =' t0ni_GENERAL_STATS
+++ awk '{print $3}'
+++ awk -F: 'BEGIN{total=0;} {total+=(($1*3600)+($2*60)+$3);} END{a=(total); printf "%02d:%02d:%02d\n",(a/3600),((a/60)%60),(a%60)}'
++ time_cum=00:00:00
++ echo '# CLEAN jobs queue time cumulated (H:M:S)'
++ echo 'CLEAN_QUEUE_TIME_CUM = 00:00:00'
+grep "${member}_.*_TRANSFER =" t0ni_GENERAL_STATS | awk '{print $3}' | awk -F':' 'BEGIN{total=0;} {total+=(($1*3600)+($2*60)+$3);} END{a=(total); printf "%02d:%02d:%02d\n",(a/3600),((a/60)%60),(a%60)}')
+grep "${member}_.*_TRANSFER =" t0ni_GENERAL_STATS | awk '{print $3}' | awk -F':' 'BEGIN{total=0;} {total+=(($1*3600)+($2*60)+$3);} END{a=(total); printf "%02d:%02d:%02d\n",(a/3600),((a/60)%60),(a%60)}'
+++ grep 'fc0_.*_TRANSFER =' t0ni_GENERAL_STATS
+++ awk '{print $3}'
+++ awk -F: 'BEGIN{total=0;} {total+=(($1*3600)+($2*60)+$3);} END{a=(total); printf "%02d:%02d:%02d\n",(a/3600),((a/60)%60),(a%60)}'
++ time_cum=00:00:00
++ echo '# TRANSFER jobs queue time cumulated (H:M:S)'
++ echo 'TRANSFER_QUEUE_TIME_CUM = 00:00:00'
++ echo
++ echo '[RUN_TIME_CUM]'
+grep "${member}_.*_SIM =" t0ni_GENERAL_STATS | awk '{print $4}' | awk -F':' 'BEGIN{total=0;} {total+=(($1*3600)+($2*60)+$3);} END{a=(total); printf "%02d:%02d:%02d\n",(a/3600),((a/60)%60),(a%60)}')
+grep "${member}_.*_SIM =" t0ni_GENERAL_STATS | awk '{print $4}' | awk -F':' 'BEGIN{total=0;} {total+=(($1*3600)+($2*60)+$3);} END{a=(total); printf "%02d:%02d:%02d\n",(a/3600),((a/60)%60),(a%60)}'
+++ grep 'fc0_.*_SIM =' t0ni_GENERAL_STATS
+++ awk '{print $4}'
+++ awk -F: 'BEGIN{total=0;} {total+=(($1*3600)+($2*60)+$3);} END{a=(total); printf "%02d:%02d:%02d\n",(a/3600),((a/60)%60),(a%60)}'
++ time_cum=01:33:33
+echo $time_cum | awk -F: '{ print ($1 * 3600) + ($2 * 60) + $3 }')
+echo $time_cum | awk -F: '{ print ($1 * 3600) + ($2 * 60) + $3 }'
+++ echo 01:33:33
+++ awk -F: '{ print ($1 * 3600) + ($2 * 60) + $3 }'
++ sec_cum=5613
+echo "$sec_cum+$total_sec" | bc)
+echo "$sec_cum+$total_sec" | bc
+++ echo 5613+2782
+++ bc
++ total_sec=8395
++ echo '# SIM jobs run time cumulated (H:M:S)'
++ echo 'SIM_RUN_TIME_CUM = 01:33:33'
+grep "${member}_.*_POST =" t0ni_GENERAL_STATS | awk '{print $4}' | awk -F':' 'BEGIN{total=0;} {total+=(($1*3600)+($2*60)+$3);} END{a=(total); printf "%02d:%02d:%02d\n",(a/3600),((a/60)%60),(a%60)}')
+grep "${member}_.*_POST =" t0ni_GENERAL_STATS | awk '{print $4}' | awk -F':' 'BEGIN{total=0;} {total+=(($1*3600)+($2*60)+$3);} END{a=(total); printf "%02d:%02d:%02d\n",(a/3600),((a/60)%60),(a%60)}'
+++ grep 'fc0_.*_POST =' t0ni_GENERAL_STATS
+++ awk -F: 'BEGIN{total=0;} {total+=(($1*3600)+($2*60)+$3);} END{a=(total); printf "%02d:%02d:%02d\n",(a/3600),((a/60)%60),(a%60)}'
+++ awk '{print $4}'
++ time_cum=00:00:29
++ echo '# POST jobs run time average (H:M:S)'
++ echo 'POST_RUN_TIME_CUM = 00:00:29'
+grep "${member}_.*_CLEAN =" t0ni_GENERAL_STATS | awk '{print $4}' | awk -F':' 'BEGIN{total=0;} {total+=(($1*3600)+($2*60)+$3);} END{a=(total); printf "%02d:%02d:%02d\n",(a/3600),((a/60)%60),(a%60)}')
+grep "${member}_.*_CLEAN =" t0ni_GENERAL_STATS | awk '{print $4}' | awk -F':' 'BEGIN{total=0;} {total+=(($1*3600)+($2*60)+$3);} END{a=(total); printf "%02d:%02d:%02d\n",(a/3600),((a/60)%60),(a%60)}'
+++ grep 'fc0_.*_CLEAN =' t0ni_GENERAL_STATS
+++ awk '{print $4}'
+++ awk -F: 'BEGIN{total=0;} {total+=(($1*3600)+($2*60)+$3);} END{a=(total); printf "%02d:%02d:%02d\n",(a/3600),((a/60)%60),(a%60)}'
++ time_cum=00:09:03
++ echo '# CLEAN jobs run time average (H:M:S)'
++ echo 'CLEAN_RUN_TIME_CUM = 00:09:03'
+grep "${member}_.*_TRANSFER =" t0ni_GENERAL_STATS | awk '{print $4}' | awk -F':' 'BEGIN{total=0;} {total+=(($1*3600)+($2*60)+$3);} END{a=(total); printf "%02d:%02d:%02d\n",(a/3600),((a/60)%60),(a%60)}')
+grep "${member}_.*_TRANSFER =" t0ni_GENERAL_STATS | awk '{print $4}' | awk -F':' 'BEGIN{total=0;} {total+=(($1*3600)+($2*60)+$3);} END{a=(total); printf "%02d:%02d:%02d\n",(a/3600),((a/60)%60),(a%60)}'
+++ grep 'fc0_.*_TRANSFER =' t0ni_GENERAL_STATS
+++ awk '{print $4}'
+++ awk -F: 'BEGIN{total=0;} {total+=(($1*3600)+($2*60)+$3);} END{a=(total); printf "%02d:%02d:%02d\n",(a/3600),((a/60)%60),(a%60)}'
++ time_cum=00:00:00
++ echo '# TRANSFER jobs run time average (H:M:S)'
++ echo 'TRANSFER_RUN_TIME_CUM = 00:00:00'
+
+#
+# sum 1 POST
+#
+time_cum=$(grep "${member}_1_POST =" t0ni_GENERAL_STATS | awk '{print $3}' | awk -F':' 'BEGIN{total=0;} {total+=(($1*3600)+($2*60)+$3);} END{a=(total); printf "%02d:%02d:%02d\n",(a/3600),((a/60)%60),(a%60)}')
+grep "${member}_1_POST =" t0ni_GENERAL_STATS | awk '{print $3}' | awk -F':' 'BEGIN{total=0;} {total+=(($1*3600)+($2*60)+$3);} END{a=(total); printf "%02d:%02d:%02d\n",(a/3600),((a/60)%60),(a%60)}')
+grep "${member}_1_POST =" t0ni_GENERAL_STATS | awk '{print $3}' | awk -F':' 'BEGIN{total=0;} {total+=(($1*3600)+($2*60)+$3);} END{a=(total); printf "%02d:%02d:%02d\n",(a/3600),((a/60)%60),(a%60)}'
+++ grep 'fc0_1_POST =' t0ni_GENERAL_STATS
+++ awk '{print $3}'
+++ awk -F: 'BEGIN{total=0;} {total+=(($1*3600)+($2*60)+$3);} END{a=(total); printf "%02d:%02d:%02d\n",(a/3600),((a/60)%60),(a%60)}'
++ time_cum=06:08:16
+sec_cum=$(echo $time_cum | awk -F: '{ print ($1 * 3600) + ($2 * 60) + $3 }')
+echo $time_cum | awk -F: '{ print ($1 * 3600) + ($2 * 60) + $3 }')
+echo $time_cum | awk -F: '{ print ($1 * 3600) + ($2 * 60) + $3 }'
+++ echo 06:08:16
+++ awk -F: '{ print ($1 * 3600) + ($2 * 60) + $3 }'
++ sec_cum=22096
+total_sec=$(echo "$sec_cum+$total_sec" | bc)
+echo "$sec_cum+$total_sec" | bc)
+echo "$sec_cum+$total_sec" | bc
+++ echo 22096+8395
+++ bc
++ total_sec=30491
+time_cum=$(grep "${member}_1_POST =" t0ni_GENERAL_STATS | awk '{print $4}' | awk -F':' 'BEGIN{total=0;} {total+=(($1*3600)+($2*60)+$3);} END{a=(total); printf "%02d:%02d:%02d\n",(a/3600),((a/60)%60),(a%60)}')
+grep "${member}_1_POST =" t0ni_GENERAL_STATS | awk '{print $4}' | awk -F':' 'BEGIN{total=0;} {total+=(($1*3600)+($2*60)+$3);} END{a=(total); printf "%02d:%02d:%02d\n",(a/3600),((a/60)%60),(a%60)}')
+grep "${member}_1_POST =" t0ni_GENERAL_STATS | awk '{print $4}' | awk -F':' 'BEGIN{total=0;} {total+=(($1*3600)+($2*60)+$3);} END{a=(total); printf "%02d:%02d:%02d\n",(a/3600),((a/60)%60),(a%60)}'
+++ grep 'fc0_1_POST =' t0ni_GENERAL_STATS
+++ awk '{print $4}'
+++ awk -F: 'BEGIN{total=0;} {total+=(($1*3600)+($2*60)+$3);} END{a=(total); printf "%02d:%02d:%02d\n",(a/3600),((a/60)%60),(a%60)}'
++ time_cum=00:00:11
+sec_cum=$(echo $time_cum | awk -F: '{ print ($1 * 3600) + ($2 * 60) + $3 }')
+echo $time_cum | awk -F: '{ print ($1 * 3600) + ($2 * 60) + $3 }')
+echo $time_cum | awk -F: '{ print ($1 * 3600) + ($2 * 60) + $3 }'
+++ echo 00:00:11
+++ awk -F: '{ print ($1 * 3600) + ($2 * 60) + $3 }'
++ sec_cum=11
+total_sec=$(echo "$sec_cum+$total_sec" | bc)
+echo "$sec_cum+$total_sec" | bc)
+echo "$sec_cum+$total_sec" | bc
+++ echo 11+30491
+++ bc
++ total_sec=30502
+#
+# recompute ASYPD
+#
+asypd=$(echo "scale=2;(${years_simulated_in_seconds}/(${total_sec}))" | bc)
+echo "scale=2;(${years_simulated_in_seconds}/(${total_sec}))" | bc)
+echo "scale=2;(${years_simulated_in_seconds}/(${total_sec}))" | bc
+++ bc
+++ echo 'scale=2;(13824.00/(30502))'
++ asypd=.45
+sed -i "s/\(^ASYPD =\).*/ASYPD = $asypd/" t0ni_GENERAL_STATS
++ sed -i 's/\(^ASYPD =\).*/ASYPD = .45/' t0ni_GENERAL_STATS
+
+###################
+# Autosubmit tailer
+###################
+set -xuve
++ set -xuve
+echo $(date +%s) >> ${job_name_ptrn}_STAT
+date +%s)
+date +%s
+++ date +%s
++ echo 1639863395
+touch ${job_name_ptrn}_COMPLETED
++ touch /esarchive/autosubmit/t0ni/tmp/LOG_t0ni/t0ni_PERFORMANCE_METRICS_COMPLETED
+exit 0
++ exit 0

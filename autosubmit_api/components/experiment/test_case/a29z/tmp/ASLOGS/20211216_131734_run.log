@@ -1,0 +1,1442 @@
+2021-12-16 13:17:36,277 
+Checking configuration files...
+[WARNING] 2021-12-16 13:17:36,284 /esarchive/autosubmit/a29z/conf/proj_a29z.conf was not found. Some variables might be missing. If your experiment does not need a proj file, you can ignore this message.
+2021-12-16 13:17:36,285 expdef_a29z.conf OK
+2021-12-16 13:17:36,285 platforms_a29z.conf OK
+2021-12-16 13:17:36,285 jobs_a29z.conf OK
+2021-12-16 13:17:36,287 wrappers OK
+2021-12-16 13:17:36,287 autosubmit_a29z.conf OK
+2021-12-16 13:17:36,287 Configuration files OK
+
+2021-12-16 13:17:36,287 Autosubmit is running with 3.14.0b
+2021-12-16 13:17:36,290 Preparing .lock file to avoid multiple instances with same experiment id
+2021-12-16 13:17:36,310 Custom directives from platform.conf: None
+2021-12-16 13:17:36,310 Custom directives from platform.conf: None
+2021-12-16 13:17:36,310 The Experiment name is: a29z
+2021-12-16 13:17:36,310 Sleep: 10
+2021-12-16 13:17:36,310 Default retrials: 0
+2021-12-16 13:17:36,310 Starting job submission...
+2021-12-16 13:17:36,319 Creating jobs...
+2021-12-16 13:17:36,319 Loading JobList
+2021-12-16 13:17:36,327 Creating LOCAL_SETUP jobs
+2021-12-16 13:17:36,327 Creating REMOTE_SETUP jobs
+2021-12-16 13:17:36,327 Creating INI jobs
+2021-12-16 13:17:36,328 Creating SIM jobs
+2021-12-16 13:17:36,343 Creating POST jobs
+2021-12-16 13:17:36,356 Creating CLEAN jobs
+2021-12-16 13:17:36,368 Creating TRANSFER jobs
+2021-12-16 13:17:36,372 Creating LOCALPOST jobs
+2021-12-16 13:17:36,373 Creating PLOT jobs
+2021-12-16 13:17:36,374 Adding dependencies...
+2021-12-16 13:17:36,374 Adding dependencies for LOCAL_SETUP jobs
+2021-12-16 13:17:36,374 Adding dependencies for REMOTE_SETUP jobs
+2021-12-16 13:17:36,374 Adding dependencies for INI jobs
+2021-12-16 13:17:36,374 Adding dependencies for SIM jobs
+2021-12-16 13:17:36,377 Adding dependencies for POST jobs
+2021-12-16 13:17:36,378 Adding dependencies for CLEAN jobs
+2021-12-16 13:17:36,380 Adding dependencies for TRANSFER jobs
+2021-12-16 13:17:36,380 Adding dependencies for LOCALPOST jobs
+2021-12-16 13:17:36,381 Adding dependencies for PLOT jobs
+2021-12-16 13:17:36,381 Removing redundant dependencies...
+2021-12-16 13:17:36,410 Using existing valid structure.
+2021-12-16 13:17:36,411 Starting from job list restored from /esarchive/autosubmit/a29z/pkl files
+2021-12-16 13:17:36,412 Length of the jobs list: 590
+2021-12-16 13:17:36,412 Loading parameters...
+2021-12-16 13:17:36,412 Parameters load.
+2021-12-16 13:17:36,412 Checking experiment templates...
+2021-12-16 13:17:36,413 Checking scripts...
+2021-12-16 13:17:36,760 147 of 590 checked
+2021-12-16 13:17:37,082 294 of 590 checked
+2021-12-16 13:17:37,401 441 of 590 checked
+2021-12-16 13:17:37,720 588 of 590 checked
+2021-12-16 13:17:37,724 590 of 590 checked
+2021-12-16 13:17:37,726 Scripts OK
+2021-12-16 13:17:37,726 Loading job packages
+2021-12-16 13:17:37,737 Checking job_list current status
+2021-12-16 13:17:37,738 Updating FAILED jobs
+2021-12-16 13:17:37,738 Updating WAITING jobs
+2021-12-16 13:17:37,740 Updating WAITING jobs eligible for be prepared
+2021-12-16 13:17:37,741 Updating Held jobs
+2021-12-16 13:17:37,741 Update finished
+2021-12-16 13:17:37,746 Saving JobList: /esarchive/autosubmit/a29z/pkl/job_list_a29z.pkl
+2021-12-16 13:17:37,755 Job list saved
+2021-12-16 13:17:37,759 Autosubmit is running with v3.14.0b
+2021-12-16 13:17:37,759 Running job data structure
+2021-12-16 13:17:38,078 Checking the connection to all platforms in use
+2021-12-16 13:17:38,770 [transfer_node] Correct user privileges for host bscearth000
+2021-12-16 13:17:41,649 [marenostrum4] Correct user privileges for host mn1.bsc.es
+2021-12-16 13:17:41,649 Running main loop
+2021-12-16 13:17:41,649 Reloading parameters...
+2021-12-16 13:17:41,649 Loading parameters...
+2021-12-16 13:17:41,650 Parameters load.
+2021-12-16 13:17:41,650 
+
+590 of 590 jobs remaining (13:17)
+2021-12-16 13:17:41,651 Sleep: 10
+2021-12-16 13:17:41,651 Number of retrials: 0
+2021-12-16 13:17:41,651 WRAPPER CHECK TIME = 10
+2021-12-16 13:17:41,654 Saving JobList: /esarchive/autosubmit/a29z/pkl/job_list_a29z_backup.pkl
+2021-12-16 13:17:41,666 Job list saved
+2021-12-16 13:17:41,672 Checking jobs for platform=transfer_node
+2021-12-16 13:17:41,675 Checking jobs for platform=marenostrum4
+2021-12-16 13:17:41,675 End of checking
+2021-12-16 13:17:41,675 Updating FAILED jobs
+2021-12-16 13:17:41,676 Updating WAITING jobs
+2021-12-16 13:17:41,677 Updating WAITING jobs eligible for be prepared
+2021-12-16 13:17:41,678 Updating Held jobs
+2021-12-16 13:17:41,678 Update finished
+2021-12-16 13:17:41,684 Saving JobList: /esarchive/autosubmit/a29z/pkl/job_list_a29z.pkl
+2021-12-16 13:17:41,693 Job list saved
+2021-12-16 13:17:41,698 
+Jobs ready for transfer_node: 1
+2021-12-16 13:17:41,700 Number of jobs available: 3
+2021-12-16 13:17:41,700 Number of jobs ready: 1
+2021-12-16 13:17:41,701 Jobs ready for transfer_node: 1
+2021-12-16 13:17:41,704 Creating Scripts
+2021-12-16 13:17:41,715 Sending Files
+2021-12-16 13:17:41,982 /esarchive/scratch/Earth/wuruchi/a29z/LOG_a29z has been created on bscearth000 .
+2021-12-16 13:17:42,193 Submitting
+2021-12-16 13:17:42,243 a29z_LOCAL_SETUP_STAT have been removed
+2021-12-16 13:17:42,248 a29z_LOCAL_SETUP_COMPLETED been removed
+2021-12-16 13:17:42,486 Job ID: 11356
+
+2021-12-16 13:17:42,486 a29z_LOCAL_SETUP submitted
+2021-12-16 13:17:42,628 
+Jobs ready for marenostrum4: 0
+2021-12-16 13:17:42,629 Number of jobs available: 3
+2021-12-16 13:17:42,630 Number of jobs ready: 0
+2021-12-16 13:17:42,633 Updating FAILED jobs
+2021-12-16 13:17:42,633 Updating WAITING jobs
+2021-12-16 13:17:42,635 Updating WAITING jobs eligible for be prepared
+2021-12-16 13:17:42,635 Updating Held jobs
+2021-12-16 13:17:42,636 Update finished
+2021-12-16 13:17:42,638 
+Job Name                           Job Id         Job Status     Job Platform        Job Queue      
+2021-12-16 13:17:42,638 a29z_LOCAL_SETUP                   11356          SUBMITTED      transfer_node       serial         
+2021-12-16 13:17:42,640 Saving JobList: /esarchive/autosubmit/a29z/pkl/job_list_a29z.pkl
+2021-12-16 13:17:42,649 Job list saved
+2021-12-16 13:17:52,664 Reloading parameters...
+2021-12-16 13:17:52,664 Loading parameters...
+2021-12-16 13:17:52,665 Parameters load.
+2021-12-16 13:17:52,665 
+
+590 of 590 jobs remaining (13:17)
+2021-12-16 13:17:52,666 Sleep: 10
+2021-12-16 13:17:52,666 Number of retrials: 0
+2021-12-16 13:17:52,666 WRAPPER CHECK TIME = 10
+2021-12-16 13:17:52,668 Checking jobs for platform=transfer_node
+2021-12-16 13:17:54,888 Successful check job command: nohup kill -0 11356 > /dev/null 2>&1; echo $?
+2021-12-16 13:17:54,888 a29z_LOCAL_SETUP job seems to have completed: checking...
+2021-12-16 13:17:54,897 Job a29z_LOCAL_SETUP is COMPLETED
+2021-12-16 13:17:54,908 a29z_LOCAL_SETUP_STAT file have been transfered
+[WARNING] 2021-12-16 13:17:55,012 /esarchive/autosubmit/a29z/conf/proj_a29z.conf was not found. Some variables might be missing. If your experiment does not need a proj file, you can ignore this message.
+2021-12-16 13:17:55,022 a29z_LOCAL_SETUP_STAT file have been transfered
+2021-12-16 13:17:55,085 Checking jobs for platform=marenostrum4
+2021-12-16 13:17:55,085 End of checking
+2021-12-16 13:17:55,086 Updating FAILED jobs
+2021-12-16 13:17:55,086 Updating WAITING jobs
+2021-12-16 13:17:55,086 Setting job: a29z_REMOTE_SETUP status to: READY (all parents completed)...
+2021-12-16 13:17:55,087 Updating WAITING jobs eligible for be prepared
+2021-12-16 13:17:55,088 Updating Held jobs
+2021-12-16 13:17:55,088 Update finished
+2021-12-16 13:17:55,093 
+Job Name                           Job Id         Job Status     Job Platform        Job Queue      
+2021-12-16 13:17:55,093 a29z_LOCAL_SETUP                   11356          COMPLETED      transfer_node       serial         
+2021-12-16 13:17:55,096 Saving JobList: /esarchive/autosubmit/a29z/pkl/job_list_a29z.pkl
+2021-12-16 13:17:55,105 Job list saved
+2021-12-16 13:17:55,109 
+Jobs ready for transfer_node: 1
+2021-12-16 13:17:55,111 Number of jobs available: 3
+2021-12-16 13:17:55,111 Number of jobs ready: 1
+2021-12-16 13:17:55,112 Jobs ready for transfer_node: 1
+2021-12-16 13:17:55,115 Creating Scripts
+2021-12-16 13:17:55,126 Sending Files
+2021-12-16 13:17:55,394 /esarchive/scratch/Earth/wuruchi/a29z/LOG_a29z has been created on bscearth000 .
+2021-12-16 13:17:55,405 Submitting
+2021-12-16 13:17:55,411 a29z_REMOTE_SETUP_STAT have been removed
+2021-12-16 13:17:55,413 a29z_REMOTE_SETUP_COMPLETED been removed
+2021-12-16 13:17:55,633 Job ID: 11613
+
+2021-12-16 13:17:55,633 a29z_REMOTE_SETUP submitted
+2021-12-16 13:17:55,762 
+Jobs ready for marenostrum4: 0
+2021-12-16 13:17:55,764 Number of jobs available: 3
+2021-12-16 13:17:55,764 Number of jobs ready: 0
+2021-12-16 13:17:55,767 Updating FAILED jobs
+2021-12-16 13:17:55,767 Updating WAITING jobs
+2021-12-16 13:17:55,769 Updating WAITING jobs eligible for be prepared
+2021-12-16 13:17:55,769 Updating Held jobs
+2021-12-16 13:17:55,769 Update finished
+2021-12-16 13:17:55,773 
+Job Name                           Job Id         Job Status     Job Platform        Job Queue      
+2021-12-16 13:17:55,773 a29z_LOCAL_SETUP                   11356          COMPLETED      transfer_node       serial         
+2021-12-16 13:17:55,773 a29z_REMOTE_SETUP                  11613          SUBMITTED      transfer_node       serial         
+2021-12-16 13:17:55,775 Saving JobList: /esarchive/autosubmit/a29z/pkl/job_list_a29z.pkl
+2021-12-16 13:17:55,783 Job list saved
+[WARNING] 2021-12-16 13:18:00,021 /esarchive/autosubmit/a29z/conf/proj_a29z.conf was not found. Some variables might be missing. If your experiment does not need a proj file, you can ignore this message.
+2021-12-16 13:18:00,023 Custom directives from platform.conf: None
+2021-12-16 13:18:00,023 Custom directives from platform.conf: None
+2021-12-16 13:18:05,843 Reloading parameters...
+2021-12-16 13:18:05,843 Loading parameters...
+2021-12-16 13:18:05,844 Parameters load.
+2021-12-16 13:18:05,844 
+
+589 of 590 jobs remaining (13:18)
+2021-12-16 13:18:05,844 Sleep: 10
+2021-12-16 13:18:05,844 Number of retrials: 0
+2021-12-16 13:18:05,844 WRAPPER CHECK TIME = 10
+2021-12-16 13:18:05,848 Saving JobList: /esarchive/autosubmit/a29z/pkl/job_list_a29z_backup.pkl
+2021-12-16 13:18:05,856 Job list saved
+2021-12-16 13:18:05,862 Checking jobs for platform=transfer_node
+2021-12-16 13:18:08,132 Successful check job command: nohup kill -0 11613 > /dev/null 2>&1; echo $?
+2021-12-16 13:18:08,133 a29z_REMOTE_SETUP job seems to have completed: checking...
+2021-12-16 13:18:08,141 Job a29z_REMOTE_SETUP is COMPLETED
+2021-12-16 13:18:08,151 a29z_REMOTE_SETUP_STAT file have been transfered
+[WARNING] 2021-12-16 13:18:08,217 /esarchive/autosubmit/a29z/conf/proj_a29z.conf was not found. Some variables might be missing. If your experiment does not need a proj file, you can ignore this message.
+2021-12-16 13:18:08,425 a29z_REMOTE_SETUP_STAT file have been transfered
+2021-12-16 13:18:08,486 Checking jobs for platform=marenostrum4
+2021-12-16 13:18:08,486 End of checking
+2021-12-16 13:18:08,486 Updating FAILED jobs
+2021-12-16 13:18:08,486 Updating WAITING jobs
+2021-12-16 13:18:08,487 Setting job: a29z_19550501_fc0_INI status to: READY (all parents completed)...
+2021-12-16 13:18:08,487 Setting job: a29z_19550501_fc1_INI status to: READY (all parents completed)...
+2021-12-16 13:18:08,487 Setting job: a29z_19550501_fc2_INI status to: READY (all parents completed)...
+2021-12-16 13:18:08,487 Setting job: a29z_19550501_fc3_INI status to: READY (all parents completed)...
+2021-12-16 13:18:08,487 Setting job: a29z_19550501_fc4_INI status to: READY (all parents completed)...
+2021-12-16 13:18:08,487 Setting job: a29z_19550501_fc5_INI status to: READY (all parents completed)...
+2021-12-16 13:18:08,487 Setting job: a29z_19550501_fc6_INI status to: READY (all parents completed)...
+2021-12-16 13:18:08,487 Setting job: a29z_19551101_fc0_INI status to: READY (all parents completed)...
+2021-12-16 13:18:08,487 Setting job: a29z_19551101_fc1_INI status to: READY (all parents completed)...
+2021-12-16 13:18:08,487 Setting job: a29z_19551101_fc2_INI status to: READY (all parents completed)...
+2021-12-16 13:18:08,487 Setting job: a29z_19551101_fc3_INI status to: READY (all parents completed)...
+2021-12-16 13:18:08,487 Setting job: a29z_19551101_fc4_INI status to: READY (all parents completed)...
+2021-12-16 13:18:08,487 Setting job: a29z_19551101_fc5_INI status to: READY (all parents completed)...
+2021-12-16 13:18:08,487 Setting job: a29z_19551101_fc6_INI status to: READY (all parents completed)...
+2021-12-16 13:18:08,489 Updating WAITING jobs eligible for be prepared
+2021-12-16 13:18:08,489 Updating Held jobs
+2021-12-16 13:18:08,489 Update finished
+2021-12-16 13:18:08,494 
+Job Name                           Job Id         Job Status     Job Platform        Job Queue      
+2021-12-16 13:18:08,494 a29z_LOCAL_SETUP                   11356          COMPLETED      transfer_node       serial         
+2021-12-16 13:18:08,494 a29z_REMOTE_SETUP                  11613          COMPLETED      transfer_node       serial         
+2021-12-16 13:18:08,497 Saving JobList: /esarchive/autosubmit/a29z/pkl/job_list_a29z.pkl
+2021-12-16 13:18:08,506 Job list saved
+2021-12-16 13:18:08,510 
+Jobs ready for transfer_node: 14
+2021-12-16 13:18:08,512 Number of jobs available: 3
+2021-12-16 13:18:08,512 Number of jobs ready: 14
+2021-12-16 13:18:08,513 Jobs ready for transfer_node: 14
+2021-12-16 13:18:08,516 Creating Scripts
+2021-12-16 13:18:08,533 Sending Files
+2021-12-16 13:18:08,901 /esarchive/scratch/Earth/wuruchi/a29z/LOG_a29z has been created on bscearth000 .
+2021-12-16 13:18:09,116 Submitting
+2021-12-16 13:18:09,123 a29z_19550501_fc0_INI_STAT have been removed
+2021-12-16 13:18:09,155 a29z_19550501_fc0_INI_COMPLETED been removed
+2021-12-16 13:18:09,423 Job ID: 12212
+
+2021-12-16 13:18:09,423 a29z_19550501_fc0_INI submitted
+2021-12-16 13:18:09,560 Creating Scripts
+2021-12-16 13:18:09,573 Sending Files
+2021-12-16 13:18:09,991 /esarchive/scratch/Earth/wuruchi/a29z/LOG_a29z has been created on bscearth000 .
+2021-12-16 13:18:10,007 Submitting
+2021-12-16 13:18:10,012 a29z_19550501_fc1_INI_STAT have been removed
+2021-12-16 13:18:10,015 a29z_19550501_fc1_INI_COMPLETED been removed
+2021-12-16 13:18:10,283 Job ID: 12388
+
+2021-12-16 13:18:10,283 a29z_19550501_fc1_INI submitted
+2021-12-16 13:18:10,410 Creating Scripts
+2021-12-16 13:18:10,422 Sending Files
+2021-12-16 13:18:10,689 /esarchive/scratch/Earth/wuruchi/a29z/LOG_a29z has been created on bscearth000 .
+2021-12-16 13:18:10,700 Submitting
+2021-12-16 13:18:10,705 a29z_19550501_fc2_INI_STAT have been removed
+2021-12-16 13:18:10,707 a29z_19550501_fc2_INI_COMPLETED been removed
+2021-12-16 13:18:10,926 Job ID: 12564
+
+2021-12-16 13:18:10,926 a29z_19550501_fc2_INI submitted
+2021-12-16 13:18:11,058 
+Jobs ready for marenostrum4: 0
+2021-12-16 13:18:11,059 Number of jobs available: 3
+2021-12-16 13:18:11,060 Number of jobs ready: 0
+2021-12-16 13:18:11,063 Updating FAILED jobs
+2021-12-16 13:18:11,063 Updating WAITING jobs
+2021-12-16 13:18:11,065 Updating WAITING jobs eligible for be prepared
+2021-12-16 13:18:11,065 Updating Held jobs
+2021-12-16 13:18:11,066 Update finished
+2021-12-16 13:18:11,070 
+Job Name                           Job Id         Job Status     Job Platform        Job Queue      
+2021-12-16 13:18:11,070 a29z_LOCAL_SETUP                   11356          COMPLETED      transfer_node       serial         
+2021-12-16 13:18:11,070 a29z_REMOTE_SETUP                  11613          COMPLETED      transfer_node       serial         
+2021-12-16 13:18:11,070 a29z_19550501_fc0_INI              12212          SUBMITTED      transfer_node       serial         
+2021-12-16 13:18:11,070 a29z_19550501_fc1_INI              12388          SUBMITTED      transfer_node       serial         
+2021-12-16 13:18:11,070 a29z_19550501_fc2_INI              12564          SUBMITTED      transfer_node       serial         
+2021-12-16 13:18:11,072 Saving JobList: /esarchive/autosubmit/a29z/pkl/job_list_a29z.pkl
+2021-12-16 13:18:11,080 Job list saved
+[WARNING] 2021-12-16 13:18:13,229 /esarchive/autosubmit/a29z/conf/proj_a29z.conf was not found. Some variables might be missing. If your experiment does not need a proj file, you can ignore this message.
+2021-12-16 13:18:13,232 Custom directives from platform.conf: None
+2021-12-16 13:18:13,232 Custom directives from platform.conf: None
+2021-12-16 13:18:21,231 Reloading parameters...
+2021-12-16 13:18:21,231 Loading parameters...
+2021-12-16 13:18:21,232 Parameters load.
+2021-12-16 13:18:21,232 
+
+588 of 590 jobs remaining (13:18)
+2021-12-16 13:18:21,232 Sleep: 10
+2021-12-16 13:18:21,232 Number of retrials: 0
+2021-12-16 13:18:21,232 WRAPPER CHECK TIME = 10
+2021-12-16 13:18:21,235 Saving JobList: /esarchive/autosubmit/a29z/pkl/job_list_a29z_backup.pkl
+2021-12-16 13:18:21,244 Job list saved
+2021-12-16 13:18:21,250 Checking jobs for platform=transfer_node
+2021-12-16 13:18:23,520 Successful check job command: nohup kill -0 12388 > /dev/null 2>&1; echo $?
+2021-12-16 13:18:23,520 a29z_19550501_fc1_INI job seems to have completed: checking...
+2021-12-16 13:18:23,557 Job a29z_19550501_fc1_INI is COMPLETED
+2021-12-16 13:18:23,608 a29z_19550501_fc1_INI_STAT file have been transfered
+[WARNING] 2021-12-16 13:18:23,670 /esarchive/autosubmit/a29z/conf/proj_a29z.conf was not found. Some variables might be missing. If your experiment does not need a proj file, you can ignore this message.
+2021-12-16 13:18:23,680 a29z_19550501_fc1_INI_STAT file have been transfered
+2021-12-16 13:18:26,005 Successful check job command: nohup kill -0 12212 > /dev/null 2>&1; echo $?
+2021-12-16 13:18:26,005 a29z_19550501_fc0_INI job seems to have completed: checking...
+2021-12-16 13:18:26,013 Job a29z_19550501_fc0_INI is COMPLETED
+2021-12-16 13:18:26,024 a29z_19550501_fc0_INI_STAT file have been transfered
+[WARNING] 2021-12-16 13:18:26,087 /esarchive/autosubmit/a29z/conf/proj_a29z.conf was not found. Some variables might be missing. If your experiment does not need a proj file, you can ignore this message.
+2021-12-16 13:18:26,098 a29z_19550501_fc0_INI_STAT file have been transfered
+2021-12-16 13:18:28,425 Successful check job command: nohup kill -0 12564 > /dev/null 2>&1; echo $?
+2021-12-16 13:18:28,425 a29z_19550501_fc2_INI job seems to have completed: checking...
+2021-12-16 13:18:28,559 Job a29z_19550501_fc2_INI is COMPLETED
+2021-12-16 13:18:28,570 a29z_19550501_fc2_INI_STAT file have been transfered
+[WARNING] 2021-12-16 13:18:28,636 /esarchive/autosubmit/a29z/conf/proj_a29z.conf was not found. Some variables might be missing. If your experiment does not need a proj file, you can ignore this message.
+2021-12-16 13:18:28,646 a29z_19550501_fc2_INI_STAT file have been transfered
+[WARNING] 2021-12-16 13:18:28,682 /esarchive/autosubmit/a29z/conf/proj_a29z.conf was not found. Some variables might be missing. If your experiment does not need a proj file, you can ignore this message.
+2021-12-16 13:18:28,685 Custom directives from platform.conf: None
+2021-12-16 13:18:28,685 Custom directives from platform.conf: None
+2021-12-16 13:18:28,730 Checking jobs for platform=marenostrum4
+2021-12-16 13:18:28,730 End of checking
+2021-12-16 13:18:28,731 Updating FAILED jobs
+2021-12-16 13:18:28,731 Updating WAITING jobs
+2021-12-16 13:18:28,731 Setting job: a29z_19550501_fc0_1_SIM status to: READY (all parents completed)...
+2021-12-16 13:18:28,731 Setting job: a29z_19550501_fc1_1_SIM status to: READY (all parents completed)...
+2021-12-16 13:18:28,731 Setting job: a29z_19550501_fc2_1_SIM status to: READY (all parents completed)...
+2021-12-16 13:18:28,732 Updating WAITING jobs eligible for be prepared
+2021-12-16 13:18:28,733 Updating Held jobs
+2021-12-16 13:18:28,733 Update finished
+2021-12-16 13:18:28,737 
+Job Name                           Job Id         Job Status     Job Platform        Job Queue      
+2021-12-16 13:18:28,737 a29z_LOCAL_SETUP                   11356          COMPLETED      transfer_node       serial         
+2021-12-16 13:18:28,737 a29z_REMOTE_SETUP                  11613          COMPLETED      transfer_node       serial         
+2021-12-16 13:18:28,737 a29z_19550501_fc0_INI              12212          COMPLETED      transfer_node       serial         
+2021-12-16 13:18:28,737 a29z_19550501_fc1_INI              12388          COMPLETED      transfer_node       serial         
+2021-12-16 13:18:28,737 a29z_19550501_fc2_INI              12564          COMPLETED      transfer_node       serial         
+2021-12-16 13:18:28,740 Saving JobList: /esarchive/autosubmit/a29z/pkl/job_list_a29z.pkl
+2021-12-16 13:18:28,748 Job list saved
+2021-12-16 13:18:28,753 
+Jobs ready for transfer_node: 11
+2021-12-16 13:18:28,754 Number of jobs available: 3
+2021-12-16 13:18:28,755 Number of jobs ready: 11
+2021-12-16 13:18:28,756 Jobs ready for transfer_node: 11
+2021-12-16 13:18:28,759 Creating Scripts
+2021-12-16 13:18:28,812 Sending Files
+2021-12-16 13:18:29,079 /esarchive/scratch/Earth/wuruchi/a29z/LOG_a29z has been created on bscearth000 .
+2021-12-16 13:18:29,090 Submitting
+2021-12-16 13:18:29,093 a29z_19550501_fc3_INI_STAT have been removed
+2021-12-16 13:18:29,096 a29z_19550501_fc3_INI_COMPLETED been removed
+2021-12-16 13:18:29,313 Job ID: 13160
+
+2021-12-16 13:18:29,313 a29z_19550501_fc3_INI submitted
+2021-12-16 13:18:29,445 Creating Scripts
+2021-12-16 13:18:29,457 Sending Files
+2021-12-16 13:18:29,825 /esarchive/scratch/Earth/wuruchi/a29z/LOG_a29z has been created on bscearth000 .
+2021-12-16 13:18:29,836 Submitting
+2021-12-16 13:18:29,840 a29z_19550501_fc4_INI_STAT have been removed
+2021-12-16 13:18:29,842 a29z_19550501_fc4_INI_COMPLETED been removed
+2021-12-16 13:18:30,109 Job ID: 13334
+
+2021-12-16 13:18:30,110 a29z_19550501_fc4_INI submitted
+2021-12-16 13:18:30,242 Creating Scripts
+2021-12-16 13:18:30,254 Sending Files
+2021-12-16 13:18:30,622 /esarchive/scratch/Earth/wuruchi/a29z/LOG_a29z has been created on bscearth000 .
+2021-12-16 13:18:30,634 Submitting
+2021-12-16 13:18:30,638 a29z_19550501_fc5_INI_STAT have been removed
+2021-12-16 13:18:30,641 a29z_19550501_fc5_INI_COMPLETED been removed
+[WARNING] 2021-12-16 13:18:31,100 /esarchive/autosubmit/a29z/conf/proj_a29z.conf was not found. Some variables might be missing. If your experiment does not need a proj file, you can ignore this message.
+2021-12-16 13:18:31,103 Custom directives from platform.conf: None
+2021-12-16 13:18:31,103 Custom directives from platform.conf: None
+[WARNING] 2021-12-16 13:18:33,651 /esarchive/autosubmit/a29z/conf/proj_a29z.conf was not found. Some variables might be missing. If your experiment does not need a proj file, you can ignore this message.
+2021-12-16 13:18:33,654 Custom directives from platform.conf: None
+2021-12-16 13:18:33,654 Custom directives from platform.conf: None
+2021-12-16 13:18:35,914 Job ID: 13680
+
+2021-12-16 13:18:35,914 a29z_19550501_fc5_INI submitted
+2021-12-16 13:18:36,062 
+Jobs ready for marenostrum4: 3
+2021-12-16 13:18:36,064 Number of jobs available: 3
+2021-12-16 13:18:36,065 Number of jobs ready: 3
+2021-12-16 13:18:36,066 Jobs ready for marenostrum4: 3
+2021-12-16 13:18:36,071 Creating Scripts
+2021-12-16 13:18:36,083 Sending Files
+2021-12-16 13:18:36,090 Submitting
+2021-12-16 13:18:36,103 a29z_19550501_fc0_1_SIM_STAT have been removed
+2021-12-16 13:18:36,106 a29z_19550501_fc0_1_SIM_COMPLETED been removed
+2021-12-16 13:18:36,109 Creating Scripts
+2021-12-16 13:18:36,122 Sending Files
+2021-12-16 13:18:36,128 Submitting
+2021-12-16 13:18:36,138 a29z_19550501_fc1_1_SIM_STAT have been removed
+2021-12-16 13:18:36,142 a29z_19550501_fc1_1_SIM_COMPLETED been removed
+2021-12-16 13:18:36,145 Creating Scripts
+2021-12-16 13:18:36,158 Sending Files
+2021-12-16 13:18:36,163 Submitting
+2021-12-16 13:18:36,176 a29z_19550501_fc2_1_SIM_STAT have been removed
+2021-12-16 13:18:36,179 a29z_19550501_fc2_1_SIM_COMPLETED been removed
+2021-12-16 13:18:45,976 Updating FAILED jobs
+2021-12-16 13:18:45,976 Updating WAITING jobs
+2021-12-16 13:18:45,978 Updating WAITING jobs eligible for be prepared
+2021-12-16 13:18:45,978 Updating Held jobs
+2021-12-16 13:18:45,979 Update finished
+2021-12-16 13:18:45,983 
+Job Name                           Job Id         Job Status     Job Platform        Job Queue      
+2021-12-16 13:18:45,983 a29z_LOCAL_SETUP                   11356          COMPLETED      transfer_node       serial         
+2021-12-16 13:18:45,983 a29z_REMOTE_SETUP                  11613          COMPLETED      transfer_node       serial         
+2021-12-16 13:18:45,983 a29z_19550501_fc0_INI              12212          COMPLETED      transfer_node       serial         
+2021-12-16 13:18:45,983 a29z_19550501_fc1_INI              12388          COMPLETED      transfer_node       serial         
+2021-12-16 13:18:45,983 a29z_19550501_fc2_INI              12564          COMPLETED      transfer_node       serial         
+2021-12-16 13:18:45,983 a29z_19550501_fc3_INI              13160          SUBMITTED      transfer_node       serial         
+2021-12-16 13:18:45,983 a29z_19550501_fc4_INI              13334          SUBMITTED      transfer_node       serial         
+2021-12-16 13:18:45,983 a29z_19550501_fc5_INI              13680          SUBMITTED      transfer_node       serial         
+2021-12-16 13:18:45,983 a29z_19550501_fc0_1_SIM            19178197       SUBMITTED      marenostrum4        debug          
+2021-12-16 13:18:45,983 a29z_19550501_fc1_1_SIM            19178199       SUBMITTED      marenostrum4        debug          
+2021-12-16 13:18:45,983 a29z_19550501_fc2_1_SIM            19178200       SUBMITTED      marenostrum4        debug          
+2021-12-16 13:18:45,986 Saving JobList: /esarchive/autosubmit/a29z/pkl/job_list_a29z.pkl
+2021-12-16 13:18:45,994 Job list saved
+2021-12-16 13:18:56,129 Reloading parameters...
+2021-12-16 13:18:56,129 Loading parameters...
+2021-12-16 13:18:56,130 Parameters load.
+2021-12-16 13:18:56,130 
+
+585 of 590 jobs remaining (13:18)
+2021-12-16 13:18:56,130 Sleep: 10
+2021-12-16 13:18:56,130 Number of retrials: 0
+2021-12-16 13:18:56,130 WRAPPER CHECK TIME = 10
+2021-12-16 13:18:56,133 Saving JobList: /esarchive/autosubmit/a29z/pkl/job_list_a29z_backup.pkl
+2021-12-16 13:18:56,141 Job list saved
+2021-12-16 13:18:56,147 Checking jobs for platform=transfer_node
+2021-12-16 13:18:58,418 Successful check job command: nohup kill -0 13160 > /dev/null 2>&1; echo $?
+2021-12-16 13:18:58,418 a29z_19550501_fc3_INI job seems to have completed: checking...
+2021-12-16 13:18:58,581 Job a29z_19550501_fc3_INI is COMPLETED
+2021-12-16 13:18:58,594 a29z_19550501_fc3_INI_STAT file have been transfered
+[WARNING] 2021-12-16 13:18:58,671 /esarchive/autosubmit/a29z/conf/proj_a29z.conf was not found. Some variables might be missing. If your experiment does not need a proj file, you can ignore this message.
+2021-12-16 13:18:58,861 a29z_19550501_fc3_INI_STAT file have been transfered
+2021-12-16 13:19:01,141 Successful check job command: nohup kill -0 13680 > /dev/null 2>&1; echo $?
+2021-12-16 13:19:01,141 a29z_19550501_fc5_INI job seems to have completed: checking...
+2021-12-16 13:19:01,190 Job a29z_19550501_fc5_INI is COMPLETED
+2021-12-16 13:19:01,204 a29z_19550501_fc5_INI_STAT file have been transfered
+[WARNING] 2021-12-16 13:19:01,268 /esarchive/autosubmit/a29z/conf/proj_a29z.conf was not found. Some variables might be missing. If your experiment does not need a proj file, you can ignore this message.
+2021-12-16 13:19:01,277 a29z_19550501_fc5_INI_STAT file have been transfered
+[WARNING] 2021-12-16 13:19:03,685 /esarchive/autosubmit/a29z/conf/proj_a29z.conf was not found. Some variables might be missing. If your experiment does not need a proj file, you can ignore this message.
+2021-12-16 13:19:03,687 Custom directives from platform.conf: None
+2021-12-16 13:19:03,688 Custom directives from platform.conf: None
+2021-12-16 13:19:03,760 Successful check job command: nohup kill -0 13334 > /dev/null 2>&1; echo $?
+2021-12-16 13:19:03,760 a29z_19550501_fc4_INI job seems to have completed: checking...
+2021-12-16 13:19:04,127 Job a29z_19550501_fc4_INI is COMPLETED
+2021-12-16 13:19:04,504 a29z_19550501_fc4_INI_STAT file have been transfered
+[WARNING] 2021-12-16 13:19:04,571 /esarchive/autosubmit/a29z/conf/proj_a29z.conf was not found. Some variables might be missing. If your experiment does not need a proj file, you can ignore this message.
+2021-12-16 13:19:04,660 a29z_19550501_fc4_INI_STAT file have been transfered
+2021-12-16 13:19:04,718 Checking jobs for platform=marenostrum4
+2021-12-16 13:19:04,718 Checking all jobs at once
+[WARNING] 2021-12-16 13:19:06,281 /esarchive/autosubmit/a29z/conf/proj_a29z.conf was not found. Some variables might be missing. If your experiment does not need a proj file, you can ignore this message.
+2021-12-16 13:19:06,283 Custom directives from platform.conf: None
+2021-12-16 13:19:06,284 Custom directives from platform.conf: None
+2021-12-16 13:19:07,799 Successful check job command
+[WARNING] 2021-12-16 13:19:09,584 /esarchive/autosubmit/a29z/conf/proj_a29z.conf was not found. Some variables might be missing. If your experiment does not need a proj file, you can ignore this message.
+2021-12-16 13:19:09,587 Custom directives from platform.conf: None
+2021-12-16 13:19:09,588 Custom directives from platform.conf: None
+2021-12-16 13:19:10,100 Job a29z_19550501_fc2_1_SIM is QUEUING
+2021-12-16 13:19:10,101 a29z_19550501_fc1_1_SIM job seems to have completed: checking...
+2021-12-16 13:19:10,142 Job a29z_19550501_fc1_1_SIM is COMPLETED
+2021-12-16 13:19:10,253 a29z_19550501_fc1_1_SIM_STAT file have been transfered
+[WARNING] 2021-12-16 13:19:10,319 /esarchive/autosubmit/a29z/conf/proj_a29z.conf was not found. Some variables might be missing. If your experiment does not need a proj file, you can ignore this message.
+2021-12-16 13:19:10,328 a29z_19550501_fc1_1_SIM_STAT file have been transfered
+2021-12-16 13:19:10,386 a29z_19550501_fc0_1_SIM job seems to have completed: checking...
+2021-12-16 13:19:10,395 Job a29z_19550501_fc0_1_SIM is COMPLETED
+2021-12-16 13:19:10,406 a29z_19550501_fc0_1_SIM_STAT file have been transfered
+[WARNING] 2021-12-16 13:19:10,471 /esarchive/autosubmit/a29z/conf/proj_a29z.conf was not found. Some variables might be missing. If your experiment does not need a proj file, you can ignore this message.
+2021-12-16 13:19:10,479 a29z_19550501_fc0_1_SIM_STAT file have been transfered
+2021-12-16 13:19:10,538 End of checking
+2021-12-16 13:19:10,538 Updating FAILED jobs
+2021-12-16 13:19:10,539 Updating WAITING jobs
+2021-12-16 13:19:10,539 Setting job: a29z_19550501_fc0_2_SIM status to: READY (all parents completed)...
+2021-12-16 13:19:10,539 Setting job: a29z_19550501_fc1_2_SIM status to: READY (all parents completed)...
+2021-12-16 13:19:10,539 Setting job: a29z_19550501_fc3_1_SIM status to: READY (all parents completed)...
+2021-12-16 13:19:10,539 Setting job: a29z_19550501_fc4_1_SIM status to: READY (all parents completed)...
+2021-12-16 13:19:10,539 Setting job: a29z_19550501_fc5_1_SIM status to: READY (all parents completed)...
+2021-12-16 13:19:10,539 Setting job: a29z_19550501_fc0_1_POST status to: READY (all parents completed)...
+2021-12-16 13:19:10,539 Setting job: a29z_19550501_fc1_1_POST status to: READY (all parents completed)...
+2021-12-16 13:19:10,540 Updating WAITING jobs eligible for be prepared
+2021-12-16 13:19:10,541 Setting job: a29z_19550501_fc2_2_SIM status to: Prepared for be held (all parents queuing, running or completed)...
+2021-12-16 13:19:10,541 Updating Held jobs
+2021-12-16 13:19:10,541 Update finished
+2021-12-16 13:19:10,546 
+Job Name                           Job Id         Job Status     Job Platform        Job Queue      
+2021-12-16 13:19:10,546 a29z_19550501_fc3_INI              13160          COMPLETED      transfer_node       serial         
+2021-12-16 13:19:10,546 a29z_19550501_fc4_INI              13334          COMPLETED      transfer_node       serial         
+2021-12-16 13:19:10,546 a29z_19550501_fc5_INI              13680          COMPLETED      transfer_node       serial         
+2021-12-16 13:19:10,546 a29z_19550501_fc0_1_SIM            19178197       COMPLETED      marenostrum4        debug          
+2021-12-16 13:19:10,546 a29z_19550501_fc1_1_SIM            19178199       COMPLETED      marenostrum4        debug          
+2021-12-16 13:19:10,546 a29z_19550501_fc2_1_SIM            19178200       QUEUING        marenostrum4        debug          
+2021-12-16 13:19:10,549 Saving JobList: /esarchive/autosubmit/a29z/pkl/job_list_a29z.pkl
+2021-12-16 13:19:10,558 Job list saved
+2021-12-16 13:19:10,562 
+Jobs ready for transfer_node: 10
+2021-12-16 13:19:10,564 Number of jobs available: 3
+2021-12-16 13:19:10,565 Number of jobs ready: 10
+2021-12-16 13:19:10,565 Jobs ready for transfer_node: 10
+2021-12-16 13:19:10,568 Creating Scripts
+2021-12-16 13:19:10,582 Sending Files
+2021-12-16 13:19:10,950 /esarchive/scratch/Earth/wuruchi/a29z/LOG_a29z has been created on bscearth000 .
+2021-12-16 13:19:10,961 Submitting
+2021-12-16 13:19:10,965 a29z_19550501_fc0_1_POST_STAT have been removed
+2021-12-16 13:19:10,968 a29z_19550501_fc0_1_POST_COMPLETED been removed
+2021-12-16 13:19:11,281 Job ID: 14787
+
+2021-12-16 13:19:11,281 a29z_19550501_fc0_1_POST submitted
+2021-12-16 13:19:11,415 Creating Scripts
+2021-12-16 13:19:11,428 Sending Files
+2021-12-16 13:19:11,795 /esarchive/scratch/Earth/wuruchi/a29z/LOG_a29z has been created on bscearth000 .
+2021-12-16 13:19:11,808 Submitting
+2021-12-16 13:19:11,812 a29z_19550501_fc1_1_POST_STAT have been removed
+2021-12-16 13:19:11,815 a29z_19550501_fc1_1_POST_COMPLETED been removed
+2021-12-16 13:19:12,034 Job ID: 14966
+
+2021-12-16 13:19:12,034 a29z_19550501_fc1_1_POST submitted
+2021-12-16 13:19:12,168 Creating Scripts
+2021-12-16 13:19:12,181 Sending Files
+2021-12-16 13:19:12,599 /esarchive/scratch/Earth/wuruchi/a29z/LOG_a29z has been created on bscearth000 .
+2021-12-16 13:19:12,773 Submitting
+2021-12-16 13:19:12,777 a29z_19550501_fc6_INI_STAT have been removed
+2021-12-16 13:19:12,780 a29z_19550501_fc6_INI_COMPLETED been removed
+2021-12-16 13:19:12,998 Job ID: 15142
+
+2021-12-16 13:19:12,998 a29z_19550501_fc6_INI submitted
+2021-12-16 13:19:13,128 
+Jobs ready for marenostrum4: 5
+2021-12-16 13:19:13,130 Number of jobs available: 2
+2021-12-16 13:19:13,130 Number of jobs ready: 5
+2021-12-16 13:19:13,131 Jobs ready for marenostrum4: 5
+2021-12-16 13:19:13,137 Creating Scripts
+2021-12-16 13:19:13,149 Sending Files
+2021-12-16 13:19:13,350 Submitting
+2021-12-16 13:19:13,356 a29z_19550501_fc0_2_SIM_STAT have been removed
+2021-12-16 13:19:13,359 a29z_19550501_fc0_2_SIM_COMPLETED been removed
+2021-12-16 13:19:13,362 Creating Scripts
+2021-12-16 13:19:13,376 Sending Files
+2021-12-16 13:19:13,417 Submitting
+2021-12-16 13:19:13,422 a29z_19550501_fc1_2_SIM_STAT have been removed
+2021-12-16 13:19:13,425 a29z_19550501_fc1_2_SIM_COMPLETED been removed
+[WARNING] 2021-12-16 13:19:15,332 /esarchive/autosubmit/a29z/conf/proj_a29z.conf was not found. Some variables might be missing. If your experiment does not need a proj file, you can ignore this message.
+2021-12-16 13:19:15,334 Custom directives from platform.conf: None
+2021-12-16 13:19:15,335 Custom directives from platform.conf: None
+[WARNING] 2021-12-16 13:19:15,487 /esarchive/autosubmit/a29z/conf/proj_a29z.conf was not found. Some variables might be missing. If your experiment does not need a proj file, you can ignore this message.
+2021-12-16 13:19:15,489 Custom directives from platform.conf: None
+2021-12-16 13:19:15,489 Custom directives from platform.conf: None
+2021-12-16 13:19:15,760 Updating FAILED jobs
+2021-12-16 13:19:15,760 Updating WAITING jobs
+2021-12-16 13:19:15,761 Updating WAITING jobs eligible for be prepared
+2021-12-16 13:19:15,762 Updating Held jobs
+2021-12-16 13:19:15,762 Update finished
+2021-12-16 13:19:15,766 
+Job Name                           Job Id         Job Status     Job Platform        Job Queue      
+2021-12-16 13:19:15,766 a29z_19550501_fc3_INI              13160          COMPLETED      transfer_node       serial         
+2021-12-16 13:19:15,766 a29z_19550501_fc4_INI              13334          COMPLETED      transfer_node       serial         
+2021-12-16 13:19:15,766 a29z_19550501_fc5_INI              13680          COMPLETED      transfer_node       serial         
+2021-12-16 13:19:15,767 a29z_19550501_fc0_1_SIM            19178197       COMPLETED      marenostrum4        debug          
+2021-12-16 13:19:15,767 a29z_19550501_fc1_1_SIM            19178199       COMPLETED      marenostrum4        debug          
+2021-12-16 13:19:15,767 a29z_19550501_fc6_INI              15142          SUBMITTED      transfer_node       serial         
+2021-12-16 13:19:15,767 a29z_19550501_fc0_2_SIM            19178202       SUBMITTED      marenostrum4        debug          
+2021-12-16 13:19:15,767 a29z_19550501_fc1_2_SIM            19178203       SUBMITTED      marenostrum4        debug          
+2021-12-16 13:19:15,767 a29z_19550501_fc0_1_POST           14787          SUBMITTED      transfer_node       serial         
+2021-12-16 13:19:15,767 a29z_19550501_fc1_1_POST           14966          SUBMITTED      transfer_node       serial         
+2021-12-16 13:19:15,767 a29z_19550501_fc2_1_SIM            19178200       QUEUING        marenostrum4        debug          
+2021-12-16 13:19:15,769 Saving JobList: /esarchive/autosubmit/a29z/pkl/job_list_a29z.pkl
+2021-12-16 13:19:15,778 Job list saved
+2021-12-16 13:19:15,782 
+Jobs prepared for transfer_node: 0
+2021-12-16 13:19:15,783 Number of jobs available: 0
+2021-12-16 13:19:15,784 Number of jobs prepared: 0
+2021-12-16 13:19:15,785 
+Jobs prepared for marenostrum4: 1
+2021-12-16 13:19:15,787 Number of jobs available: 0
+2021-12-16 13:19:15,787 Number of jobs prepared: 1
+2021-12-16 13:19:15,788 Jobs ready for marenostrum4: 1
+2021-12-16 13:19:15,789 there are currently 5 held jobs
+2021-12-16 13:19:15,791 Updating FAILED jobs
+2021-12-16 13:19:15,791 Updating WAITING jobs
+2021-12-16 13:19:15,792 Updating WAITING jobs eligible for be prepared
+2021-12-16 13:19:15,793 Updating Held jobs
+2021-12-16 13:19:15,793 Update finished
+2021-12-16 13:19:15,797 
+Job Name                           Job Id         Job Status     Job Platform        Job Queue      
+2021-12-16 13:19:15,797 a29z_19550501_fc3_INI              13160          COMPLETED      transfer_node       serial         
+2021-12-16 13:19:15,797 a29z_19550501_fc4_INI              13334          COMPLETED      transfer_node       serial         
+2021-12-16 13:19:15,797 a29z_19550501_fc5_INI              13680          COMPLETED      transfer_node       serial         
+2021-12-16 13:19:15,797 a29z_19550501_fc0_1_SIM            19178197       COMPLETED      marenostrum4        debug          
+2021-12-16 13:19:15,797 a29z_19550501_fc1_1_SIM            19178199       COMPLETED      marenostrum4        debug          
+2021-12-16 13:19:15,797 a29z_19550501_fc6_INI              15142          SUBMITTED      transfer_node       serial         
+2021-12-16 13:19:15,797 a29z_19550501_fc0_2_SIM            19178202       SUBMITTED      marenostrum4        debug          
+2021-12-16 13:19:15,797 a29z_19550501_fc1_2_SIM            19178203       SUBMITTED      marenostrum4        debug          
+2021-12-16 13:19:15,797 a29z_19550501_fc0_1_POST           14787          SUBMITTED      transfer_node       serial         
+2021-12-16 13:19:15,797 a29z_19550501_fc1_1_POST           14966          SUBMITTED      transfer_node       serial         
+2021-12-16 13:19:15,797 a29z_19550501_fc2_1_SIM            19178200       QUEUING        marenostrum4        debug          
+2021-12-16 13:19:15,800 Saving JobList: /esarchive/autosubmit/a29z/pkl/job_list_a29z.pkl
+2021-12-16 13:19:15,808 Job list saved
+2021-12-16 13:19:25,881 Reloading parameters...
+2021-12-16 13:19:25,881 Loading parameters...
+2021-12-16 13:19:25,884 Parameters load.
+2021-12-16 13:19:25,885 
+
+580 of 590 jobs remaining (13:19)
+2021-12-16 13:19:25,885 Sleep: 10
+2021-12-16 13:19:25,886 Number of retrials: 0
+2021-12-16 13:19:25,886 WRAPPER CHECK TIME = 10
+2021-12-16 13:19:25,889 Saving JobList: /esarchive/autosubmit/a29z/pkl/job_list_a29z_backup.pkl
+2021-12-16 13:19:25,905 Job list saved
+2021-12-16 13:19:25,916 Checking jobs for platform=transfer_node
+2021-12-16 13:19:28,136 Successful check job command: nohup kill -0 14787 > /dev/null 2>&1; echo $?
+2021-12-16 13:19:28,136 a29z_19550501_fc0_1_POST job seems to have completed: checking...
+2021-12-16 13:19:28,146 Job a29z_19550501_fc0_1_POST is COMPLETED
+2021-12-16 13:19:28,164 a29z_19550501_fc0_1_POST_STAT file have been transfered
+[WARNING] 2021-12-16 13:19:28,228 /esarchive/autosubmit/a29z/conf/proj_a29z.conf was not found. Some variables might be missing. If your experiment does not need a proj file, you can ignore this message.
+2021-12-16 13:19:28,242 a29z_19550501_fc0_1_POST_STAT file have been transfered
+2021-12-16 13:19:30,580 Successful check job command: nohup kill -0 14966 > /dev/null 2>&1; echo $?
+2021-12-16 13:19:30,581 a29z_19550501_fc1_1_POST job seems to have completed: checking...
+2021-12-16 13:19:30,590 Job a29z_19550501_fc1_1_POST is COMPLETED
+2021-12-16 13:19:30,600 a29z_19550501_fc1_1_POST_STAT file have been transfered
+[WARNING] 2021-12-16 13:19:30,665 /esarchive/autosubmit/a29z/conf/proj_a29z.conf was not found. Some variables might be missing. If your experiment does not need a proj file, you can ignore this message.
+2021-12-16 13:19:30,716 a29z_19550501_fc1_1_POST_STAT file have been transfered
+2021-12-16 13:19:32,990 Successful check job command: nohup kill -0 15142 > /dev/null 2>&1; echo $?
+2021-12-16 13:19:32,991 a29z_19550501_fc6_INI job seems to have completed: checking...
+[WARNING] 2021-12-16 13:19:33,239 /esarchive/autosubmit/a29z/conf/proj_a29z.conf was not found. Some variables might be missing. If your experiment does not need a proj file, you can ignore this message.
+2021-12-16 13:19:33,242 Custom directives from platform.conf: None
+2021-12-16 13:19:33,242 Custom directives from platform.conf: None
+2021-12-16 13:19:33,519 Job a29z_19550501_fc6_INI is COMPLETED
+2021-12-16 13:19:33,988 a29z_19550501_fc6_INI_STAT file have been transfered
+[WARNING] 2021-12-16 13:19:34,052 /esarchive/autosubmit/a29z/conf/proj_a29z.conf was not found. Some variables might be missing. If your experiment does not need a proj file, you can ignore this message.
+2021-12-16 13:19:34,485 a29z_19550501_fc6_INI_STAT file have been transfered
+2021-12-16 13:19:34,546 Checking jobs for platform=marenostrum4
+2021-12-16 13:19:34,546 Checking all jobs at once
+[WARNING] 2021-12-16 13:19:35,679 /esarchive/autosubmit/a29z/conf/proj_a29z.conf was not found. Some variables might be missing. If your experiment does not need a proj file, you can ignore this message.
+2021-12-16 13:19:35,681 Custom directives from platform.conf: None
+2021-12-16 13:19:35,682 Custom directives from platform.conf: None
+2021-12-16 13:19:37,247 Successful check job command
+2021-12-16 13:19:37,247 a29z_19550501_fc2_1_SIM job seems to have completed: checking...
+2021-12-16 13:19:37,275 Job a29z_19550501_fc2_1_SIM is COMPLETED
+2021-12-16 13:19:37,292 a29z_19550501_fc2_1_SIM_STAT file have been transfered
+[WARNING] 2021-12-16 13:19:37,364 /esarchive/autosubmit/a29z/conf/proj_a29z.conf was not found. Some variables might be missing. If your experiment does not need a proj file, you can ignore this message.
+2021-12-16 13:19:37,373 a29z_19550501_fc2_1_SIM_STAT file have been transfered
+2021-12-16 13:19:37,430 a29z_19550501_fc0_2_SIM job seems to have completed: checking...
+2021-12-16 13:19:37,439 Job a29z_19550501_fc0_2_SIM is COMPLETED
+2021-12-16 13:19:37,450 a29z_19550501_fc0_2_SIM_STAT file have been transfered
+[WARNING] 2021-12-16 13:19:37,518 /esarchive/autosubmit/a29z/conf/proj_a29z.conf was not found. Some variables might be missing. If your experiment does not need a proj file, you can ignore this message.
+2021-12-16 13:19:37,526 a29z_19550501_fc0_2_SIM_STAT file have been transfered
+2021-12-16 13:19:37,582 Job a29z_19550501_fc1_2_SIM is RUNNING
+2021-12-16 13:19:37,598 a29z_19550501_fc1_2_SIM_STAT file have been transfered
+2021-12-16 13:19:37,652 End of checking
+2021-12-16 13:19:37,652 Updating FAILED jobs
+2021-12-16 13:19:37,653 Updating WAITING jobs
+2021-12-16 13:19:37,653 Setting job: a29z_19550501_fc6_1_SIM status to: READY (all parents completed)...
+2021-12-16 13:19:37,653 Setting job: a29z_19550501_fc0_2_POST status to: READY (all parents completed)...
+2021-12-16 13:19:37,653 Setting job: a29z_19550501_fc2_1_POST status to: READY (all parents completed)...
+2021-12-16 13:19:37,654 Setting job: a29z_19550501_fc0_1_CLEAN status to: READY (all parents completed)...
+2021-12-16 13:19:37,654 Setting job: a29z_19550501_fc1_1_CLEAN status to: READY (all parents completed)...
+2021-12-16 13:19:37,654 A job in prepared status has all parent completed, job: a29z_19550501_fc2_2_SIM status set to: READY ...
+2021-12-16 13:19:37,654 Updating WAITING jobs eligible for be prepared
+2021-12-16 13:19:37,655 Updating Held jobs
+2021-12-16 13:19:37,655 Update finished
+2021-12-16 13:19:37,659 
+Job Name                           Job Id         Job Status     Job Platform        Job Queue      
+2021-12-16 13:19:37,659 a29z_19550501_fc0_2_SIM            19178202       COMPLETED      marenostrum4        debug          
+2021-12-16 13:19:37,660 a29z_19550501_fc1_1_SIM            19178199       COMPLETED      marenostrum4        debug          
+2021-12-16 13:19:37,660 a29z_19550501_fc2_1_SIM            19178200       COMPLETED      marenostrum4        debug          
+2021-12-16 13:19:37,660 a29z_19550501_fc0_1_POST           14787          COMPLETED      transfer_node       serial         
+2021-12-16 13:19:37,660 a29z_19550501_fc1_1_POST           14966          COMPLETED      transfer_node       serial         
+2021-12-16 13:19:37,660 a29z_19550501_fc1_2_SIM            19178203       RUNNING        marenostrum4        debug          
+2021-12-16 13:19:37,662 Saving JobList: /esarchive/autosubmit/a29z/pkl/job_list_a29z.pkl
+2021-12-16 13:19:37,670 Job list saved
+2021-12-16 13:19:37,675 
+Jobs ready for transfer_node: 9
+2021-12-16 13:19:37,677 Number of jobs available: 3
+2021-12-16 13:19:37,677 Number of jobs ready: 9
+2021-12-16 13:19:37,678 Jobs ready for transfer_node: 9
+2021-12-16 13:19:37,684 Creating Scripts
+2021-12-16 13:19:37,696 Sending Files
+2021-12-16 13:19:37,964 /esarchive/scratch/Earth/wuruchi/a29z/LOG_a29z has been created on bscearth000 .
+2021-12-16 13:19:37,978 Submitting
+2021-12-16 13:19:37,982 a29z_19550501_fc0_2_POST_STAT have been removed
+2021-12-16 13:19:37,985 a29z_19550501_fc0_2_POST_COMPLETED been removed
+2021-12-16 13:19:38,254 Job ID: 15828
+
+2021-12-16 13:19:38,254 a29z_19550501_fc0_2_POST submitted
+2021-12-16 13:19:38,387 Creating Scripts
+2021-12-16 13:19:38,400 Sending Files
+2021-12-16 13:19:38,667 /esarchive/scratch/Earth/wuruchi/a29z/LOG_a29z has been created on bscearth000 .
+2021-12-16 13:19:38,684 Submitting
+2021-12-16 13:19:38,688 a29z_19550501_fc2_1_POST_STAT have been removed
+2021-12-16 13:19:38,690 a29z_19550501_fc2_1_POST_COMPLETED been removed
+2021-12-16 13:19:38,908 Job ID: 16001
+
+2021-12-16 13:19:38,908 a29z_19550501_fc2_1_POST submitted
+2021-12-16 13:19:39,039 Creating Scripts
+2021-12-16 13:19:39,052 Sending Files
+[WARNING] 2021-12-16 13:19:39,064 /esarchive/autosubmit/a29z/conf/proj_a29z.conf was not found. Some variables might be missing. If your experiment does not need a proj file, you can ignore this message.
+2021-12-16 13:19:39,066 Custom directives from platform.conf: None
+2021-12-16 13:19:39,066 Custom directives from platform.conf: None
+2021-12-16 13:19:39,281 /esarchive/scratch/Earth/wuruchi/a29z/LOG_a29z has been created on bscearth000 .
+2021-12-16 13:19:39,293 Submitting
+2021-12-16 13:19:39,297 a29z_19551101_fc0_INI_STAT have been removed
+2021-12-16 13:19:39,299 a29z_19551101_fc0_INI_COMPLETED been removed
+2021-12-16 13:19:39,517 Job ID: 16205
+
+2021-12-16 13:19:39,517 a29z_19551101_fc0_INI submitted
+2021-12-16 13:19:39,651 
+Jobs ready for marenostrum4: 7
+2021-12-16 13:19:39,653 Number of jobs available: 3
+2021-12-16 13:19:39,654 Number of jobs ready: 7
+2021-12-16 13:19:39,655 Jobs ready for marenostrum4: 7
+2021-12-16 13:19:39,661 Creating Scripts
+2021-12-16 13:19:39,675 Sending Files
+2021-12-16 13:19:39,686 Submitting
+2021-12-16 13:19:39,690 a29z_19550501_fc2_2_SIM_STAT have been removed
+2021-12-16 13:19:39,693 a29z_19550501_fc2_2_SIM_COMPLETED been removed
+2021-12-16 13:19:39,696 Creating Scripts
+2021-12-16 13:19:39,711 Sending Files
+2021-12-16 13:19:39,778 Submitting
+2021-12-16 13:19:39,782 a29z_19550501_fc0_1_CLEAN_STAT have been removed
+2021-12-16 13:19:39,784 a29z_19550501_fc0_1_CLEAN_COMPLETED been removed
+2021-12-16 13:19:39,787 Creating Scripts
+2021-12-16 13:19:39,801 Sending Files
+2021-12-16 13:19:39,810 Submitting
+2021-12-16 13:19:39,815 a29z_19550501_fc1_1_CLEAN_STAT have been removed
+2021-12-16 13:19:39,817 a29z_19550501_fc1_1_CLEAN_COMPLETED been removed
+[WARNING] 2021-12-16 13:19:42,378 /esarchive/autosubmit/a29z/conf/proj_a29z.conf was not found. Some variables might be missing. If your experiment does not need a proj file, you can ignore this message.
+2021-12-16 13:19:42,380 Custom directives from platform.conf: None
+2021-12-16 13:19:42,381 Custom directives from platform.conf: None
+[WARNING] 2021-12-16 13:19:42,530 /esarchive/autosubmit/a29z/conf/proj_a29z.conf was not found. Some variables might be missing. If your experiment does not need a proj file, you can ignore this message.
+2021-12-16 13:19:42,532 Custom directives from platform.conf: None
+2021-12-16 13:19:42,532 Custom directives from platform.conf: None
+2021-12-16 13:19:43,349 Updating FAILED jobs
+2021-12-16 13:19:43,349 Updating WAITING jobs
+2021-12-16 13:19:43,351 Updating WAITING jobs eligible for be prepared
+2021-12-16 13:19:43,352 Updating Held jobs
+2021-12-16 13:19:43,352 Update finished
+2021-12-16 13:19:43,356 
+Job Name                           Job Id         Job Status     Job Platform        Job Queue      
+2021-12-16 13:19:43,356 a29z_19550501_fc0_2_SIM            19178202       COMPLETED      marenostrum4        debug          
+2021-12-16 13:19:43,356 a29z_19550501_fc1_1_SIM            19178199       COMPLETED      marenostrum4        debug          
+2021-12-16 13:19:43,356 a29z_19550501_fc2_1_SIM            19178200       COMPLETED      marenostrum4        debug          
+2021-12-16 13:19:43,356 a29z_19550501_fc0_1_POST           14787          COMPLETED      transfer_node       serial         
+2021-12-16 13:19:43,356 a29z_19550501_fc1_1_POST           14966          COMPLETED      transfer_node       serial         
+2021-12-16 13:19:43,356 a29z_19551101_fc0_INI              16205          SUBMITTED      transfer_node       serial         
+2021-12-16 13:19:43,356 a29z_19550501_fc2_2_SIM            19178211       SUBMITTED      marenostrum4        debug          
+2021-12-16 13:19:43,356 a29z_19550501_fc0_2_POST           15828          SUBMITTED      transfer_node       serial         
+2021-12-16 13:19:43,356 a29z_19550501_fc2_1_POST           16001          SUBMITTED      transfer_node       serial         
+2021-12-16 13:19:43,356 a29z_19550501_fc0_1_CLEAN          19178212       SUBMITTED      marenostrum4        debug          
+2021-12-16 13:19:43,356 a29z_19550501_fc1_1_CLEAN          19178213       SUBMITTED      marenostrum4        debug          
+2021-12-16 13:19:43,356 a29z_19550501_fc1_2_SIM            19178203       RUNNING        marenostrum4        debug          
+2021-12-16 13:19:43,359 Saving JobList: /esarchive/autosubmit/a29z/pkl/job_list_a29z.pkl
+2021-12-16 13:19:43,368 Job list saved
+2021-12-16 13:19:53,436 Reloading parameters...
+2021-12-16 13:19:53,436 Loading parameters...
+2021-12-16 13:19:53,436 Parameters load.
+2021-12-16 13:19:53,437 
+
+575 of 590 jobs remaining (13:19)
+2021-12-16 13:19:53,437 Sleep: 10
+2021-12-16 13:19:53,437 Number of retrials: 0
+2021-12-16 13:19:53,437 WRAPPER CHECK TIME = 10
+2021-12-16 13:19:53,439 Saving JobList: /esarchive/autosubmit/a29z/pkl/job_list_a29z_backup.pkl
+2021-12-16 13:19:53,448 Job list saved
+2021-12-16 13:19:53,454 Checking jobs for platform=transfer_node
+2021-12-16 13:19:55,675 Successful check job command: nohup kill -0 16001 > /dev/null 2>&1; echo $?
+2021-12-16 13:19:55,675 a29z_19550501_fc2_1_POST job seems to have completed: checking...
+2021-12-16 13:19:55,866 Job a29z_19550501_fc2_1_POST is COMPLETED
+2021-12-16 13:19:55,961 a29z_19550501_fc2_1_POST_STAT file have been transfered
+[WARNING] 2021-12-16 13:19:56,037 /esarchive/autosubmit/a29z/conf/proj_a29z.conf was not found. Some variables might be missing. If your experiment does not need a proj file, you can ignore this message.
+2021-12-16 13:19:56,218 a29z_19550501_fc2_1_POST_STAT file have been transfered
+2021-12-16 13:19:58,543 Successful check job command: nohup kill -0 15828 > /dev/null 2>&1; echo $?
+2021-12-16 13:19:58,543 a29z_19550501_fc0_2_POST job seems to have completed: checking...
+2021-12-16 13:19:58,552 Job a29z_19550501_fc0_2_POST is COMPLETED
+2021-12-16 13:19:58,565 a29z_19550501_fc0_2_POST_STAT file have been transfered
+[WARNING] 2021-12-16 13:19:58,633 /esarchive/autosubmit/a29z/conf/proj_a29z.conf was not found. Some variables might be missing. If your experiment does not need a proj file, you can ignore this message.
+2021-12-16 13:19:58,646 a29z_19550501_fc0_2_POST_STAT file have been transfered
+2021-12-16 13:20:00,934 Successful check job command: nohup kill -0 16205 > /dev/null 2>&1; echo $?
+2021-12-16 13:20:00,935 a29z_19551101_fc0_INI job seems to have completed: checking...
+2021-12-16 13:20:00,983 Job a29z_19551101_fc0_INI is COMPLETED
+2021-12-16 13:20:00,996 a29z_19551101_fc0_INI_STAT file have been transfered
+[WARNING] 2021-12-16 13:20:01,052 /esarchive/autosubmit/a29z/conf/proj_a29z.conf was not found. Some variables might be missing. If your experiment does not need a proj file, you can ignore this message.
+2021-12-16 13:20:01,056 Custom directives from platform.conf: None
+2021-12-16 13:20:01,056 Custom directives from platform.conf: None
+[WARNING] 2021-12-16 13:20:01,061 /esarchive/autosubmit/a29z/conf/proj_a29z.conf was not found. Some variables might be missing. If your experiment does not need a proj file, you can ignore this message.
+2021-12-16 13:20:01,092 a29z_19551101_fc0_INI_STAT file have been transfered
+2021-12-16 13:20:01,188 Checking jobs for platform=marenostrum4
+2021-12-16 13:20:01,188 Checking all jobs at once
+[WARNING] 2021-12-16 13:20:03,646 /esarchive/autosubmit/a29z/conf/proj_a29z.conf was not found. Some variables might be missing. If your experiment does not need a proj file, you can ignore this message.
+2021-12-16 13:20:03,648 Custom directives from platform.conf: None
+2021-12-16 13:20:03,648 Custom directives from platform.conf: None
+2021-12-16 13:20:04,417 Successful check job command
+2021-12-16 13:20:04,417 a29z_19550501_fc1_1_CLEAN job seems to have completed: checking...
+2021-12-16 13:20:04,431 Job a29z_19550501_fc1_1_CLEAN is COMPLETED
+2021-12-16 13:20:04,448 a29z_19550501_fc1_1_CLEAN_STAT file have been transfered
+[WARNING] 2021-12-16 13:20:04,508 /esarchive/autosubmit/a29z/conf/proj_a29z.conf was not found. Some variables might be missing. If your experiment does not need a proj file, you can ignore this message.
+2021-12-16 13:20:04,518 a29z_19550501_fc1_1_CLEAN_STAT file have been transfered
+2021-12-16 13:20:04,576 a29z_19550501_fc0_1_CLEAN job seems to have completed: checking...
+2021-12-16 13:20:04,587 Job a29z_19550501_fc0_1_CLEAN is COMPLETED
+2021-12-16 13:20:04,597 a29z_19550501_fc0_1_CLEAN_STAT file have been transfered
+[WARNING] 2021-12-16 13:20:04,657 /esarchive/autosubmit/a29z/conf/proj_a29z.conf was not found. Some variables might be missing. If your experiment does not need a proj file, you can ignore this message.
+2021-12-16 13:20:04,668 a29z_19550501_fc0_1_CLEAN_STAT file have been transfered
+2021-12-16 13:20:04,728 a29z_19550501_fc2_2_SIM job seems to have completed: checking...
+2021-12-16 13:20:04,734 Job a29z_19550501_fc2_2_SIM is COMPLETED
+2021-12-16 13:20:04,744 a29z_19550501_fc2_2_SIM_STAT file have been transfered
+[WARNING] 2021-12-16 13:20:04,809 /esarchive/autosubmit/a29z/conf/proj_a29z.conf was not found. Some variables might be missing. If your experiment does not need a proj file, you can ignore this message.
+2021-12-16 13:20:04,858 a29z_19550501_fc2_2_SIM_STAT file have been transfered
+2021-12-16 13:20:04,929 a29z_19550501_fc1_2_SIM job seems to have completed: checking...
+2021-12-16 13:20:04,938 Job a29z_19550501_fc1_2_SIM is COMPLETED
+[WARNING] 2021-12-16 13:20:04,944 /esarchive/autosubmit/a29z/conf/proj_a29z.conf was not found. Some variables might be missing. If your experiment does not need a proj file, you can ignore this message.
+2021-12-16 13:20:04,953 a29z_19550501_fc1_2_SIM_STAT file have been transfered
+2021-12-16 13:20:05,013 End of checking
+2021-12-16 13:20:05,014 Updating FAILED jobs
+2021-12-16 13:20:05,014 Updating WAITING jobs
+2021-12-16 13:20:05,014 Setting job: a29z_19550501_fc0_3_SIM status to: READY (all parents completed)...
+2021-12-16 13:20:05,014 Setting job: a29z_19550501_fc1_3_SIM status to: READY (all parents completed)...
+2021-12-16 13:20:05,014 Setting job: a29z_19551101_fc0_1_SIM status to: READY (all parents completed)...
+2021-12-16 13:20:05,015 Setting job: a29z_19550501_fc1_2_POST status to: READY (all parents completed)...
+2021-12-16 13:20:05,015 Setting job: a29z_19550501_fc2_2_POST status to: READY (all parents completed)...
+2021-12-16 13:20:05,015 Setting job: a29z_19550501_fc0_2_CLEAN status to: READY (all parents completed)...
+2021-12-16 13:20:05,015 Setting job: a29z_19550501_fc2_1_CLEAN status to: READY (all parents completed)...
+2021-12-16 13:20:05,016 Updating WAITING jobs eligible for be prepared
+2021-12-16 13:20:05,017 Updating Held jobs
+2021-12-16 13:20:05,017 Update finished
+2021-12-16 13:20:05,021 
+Job Name                           Job Id         Job Status     Job Platform        Job Queue      
+2021-12-16 13:20:05,021 a29z_19550501_fc0_2_POST           15828          COMPLETED      transfer_node       serial         
+2021-12-16 13:20:05,021 a29z_19550501_fc1_1_POST           14966          COMPLETED      transfer_node       serial         
+2021-12-16 13:20:05,021 a29z_19550501_fc2_1_POST           16001          COMPLETED      transfer_node       serial         
+2021-12-16 13:20:05,021 a29z_19550501_fc0_1_CLEAN          19178212       COMPLETED      marenostrum4        debug          
+2021-12-16 13:20:05,021 a29z_19550501_fc1_1_CLEAN          19178213       COMPLETED      marenostrum4        debug          
+2021-12-16 13:20:05,025 Saving JobList: /esarchive/autosubmit/a29z/pkl/job_list_a29z.pkl
+2021-12-16 13:20:05,033 Job list saved
+2021-12-16 13:20:05,038 
+Jobs ready for transfer_node: 8
+2021-12-16 13:20:05,040 Number of jobs available: 3
+2021-12-16 13:20:05,041 Number of jobs ready: 8
+2021-12-16 13:20:05,042 Jobs ready for transfer_node: 8
+2021-12-16 13:20:05,045 Creating Scripts
+2021-12-16 13:20:05,059 Sending Files
+2021-12-16 13:20:05,277 /esarchive/scratch/Earth/wuruchi/a29z/LOG_a29z has been created on bscearth000 .
+2021-12-16 13:20:05,287 Submitting
+2021-12-16 13:20:05,561 Job ID: 17122
+
+2021-12-16 13:20:05,561 a29z_19550501_fc1_2_POST submitted
+2021-12-16 13:20:05,670 Creating Scripts
+2021-12-16 13:20:05,683 Sending Files
+2021-12-16 13:20:05,950 /esarchive/scratch/Earth/wuruchi/a29z/LOG_a29z has been created on bscearth000 .
+2021-12-16 13:20:05,961 Submitting
+[WARNING] 2021-12-16 13:20:06,106 /esarchive/autosubmit/a29z/conf/proj_a29z.conf was not found. Some variables might be missing. If your experiment does not need a proj file, you can ignore this message.
+2021-12-16 13:20:06,109 Custom directives from platform.conf: None
+2021-12-16 13:20:06,109 Custom directives from platform.conf: None
+2021-12-16 13:20:06,263 Job ID: 17295
+
+2021-12-16 13:20:06,264 a29z_19550501_fc2_2_POST submitted
+2021-12-16 13:20:06,365 Creating Scripts
+2021-12-16 13:20:06,377 Sending Files
+2021-12-16 13:20:06,694 /esarchive/scratch/Earth/wuruchi/a29z/LOG_a29z has been created on bscearth000 .
+2021-12-16 13:20:06,704 Submitting
+2021-12-16 13:20:06,707 a29z_19551101_fc1_INI_STAT have been removed
+2021-12-16 13:20:06,709 a29z_19551101_fc1_INI_COMPLETED been removed
+2021-12-16 13:20:07,112 Job ID: 17551
+
+2021-12-16 13:20:07,112 a29z_19551101_fc1_INI submitted
+2021-12-16 13:20:07,237 
+Jobs ready for marenostrum4: 9
+2021-12-16 13:20:07,239 Number of jobs available: 3
+2021-12-16 13:20:07,240 Number of jobs ready: 9
+2021-12-16 13:20:07,241 Jobs ready for marenostrum4: 9
+2021-12-16 13:20:07,245 Creating Scripts
+2021-12-16 13:20:07,257 Sending Files
+2021-12-16 13:20:07,271 Submitting
+2021-12-16 13:20:07,275 Creating Scripts
+2021-12-16 13:20:07,287 Sending Files
+2021-12-16 13:20:07,294 Submitting
+2021-12-16 13:20:07,298 Creating Scripts
+2021-12-16 13:20:07,310 Sending Files
+2021-12-16 13:20:07,315 Submitting
+[WARNING] 2021-12-16 13:20:09,521 /esarchive/autosubmit/a29z/conf/proj_a29z.conf was not found. Some variables might be missing. If your experiment does not need a proj file, you can ignore this message.
+2021-12-16 13:20:09,523 Custom directives from platform.conf: None
+2021-12-16 13:20:09,523 Custom directives from platform.conf: None
+[WARNING] 2021-12-16 13:20:09,669 /esarchive/autosubmit/a29z/conf/proj_a29z.conf was not found. Some variables might be missing. If your experiment does not need a proj file, you can ignore this message.
+2021-12-16 13:20:09,671 Custom directives from platform.conf: None
+2021-12-16 13:20:09,671 Custom directives from platform.conf: None
+[WARNING] 2021-12-16 13:20:09,822 /esarchive/autosubmit/a29z/conf/proj_a29z.conf was not found. Some variables might be missing. If your experiment does not need a proj file, you can ignore this message.
+2021-12-16 13:20:09,824 Custom directives from platform.conf: None
+2021-12-16 13:20:09,824 Custom directives from platform.conf: None
+[WARNING] 2021-12-16 13:20:09,955 /esarchive/autosubmit/a29z/conf/proj_a29z.conf was not found. Some variables might be missing. If your experiment does not need a proj file, you can ignore this message.
+2021-12-16 13:20:09,957 Custom directives from platform.conf: None
+2021-12-16 13:20:09,957 Custom directives from platform.conf: None
+2021-12-16 13:20:24,000 Updating FAILED jobs
+2021-12-16 13:20:24,001 Updating WAITING jobs
+2021-12-16 13:20:24,002 Updating WAITING jobs eligible for be prepared
+2021-12-16 13:20:24,003 Updating Held jobs
+2021-12-16 13:20:24,003 Update finished
+2021-12-16 13:20:24,006 
+Job Name                           Job Id         Job Status     Job Platform        Job Queue      
+2021-12-16 13:20:24,006 a29z_19550501_fc0_2_POST           15828          COMPLETED      transfer_node       serial         
+2021-12-16 13:20:24,006 a29z_19550501_fc1_1_POST           14966          COMPLETED      transfer_node       serial         
+2021-12-16 13:20:24,006 a29z_19550501_fc2_1_POST           16001          COMPLETED      transfer_node       serial         
+2021-12-16 13:20:24,006 a29z_19550501_fc0_1_CLEAN          19178212       COMPLETED      marenostrum4        debug          
+2021-12-16 13:20:24,007 a29z_19550501_fc1_1_CLEAN          19178213       COMPLETED      marenostrum4        debug          
+2021-12-16 13:20:24,007 a29z_19551101_fc1_INI              17551          SUBMITTED      transfer_node       serial         
+2021-12-16 13:20:24,007 a29z_19550501_fc0_3_SIM            19178220       SUBMITTED      marenostrum4        debug          
+2021-12-16 13:20:24,007 a29z_19550501_fc1_2_POST           17122          SUBMITTED      transfer_node       serial         
+2021-12-16 13:20:24,007 a29z_19550501_fc2_2_POST           17295          SUBMITTED      transfer_node       serial         
+2021-12-16 13:20:24,007 a29z_19550501_fc0_2_CLEAN          19178221       SUBMITTED      marenostrum4        debug          
+2021-12-16 13:20:24,007 a29z_19550501_fc2_1_CLEAN          19178222       SUBMITTED      marenostrum4        debug          
+2021-12-16 13:20:24,009 Saving JobList: /esarchive/autosubmit/a29z/pkl/job_list_a29z.pkl
+2021-12-16 13:20:24,018 Job list saved
+2021-12-16 13:20:34,078 Reloading parameters...
+2021-12-16 13:20:34,079 Loading parameters...
+2021-12-16 13:20:34,079 Parameters load.
+2021-12-16 13:20:34,080 
+
+568 of 590 jobs remaining (13:20)
+2021-12-16 13:20:34,080 Sleep: 10
+2021-12-16 13:20:34,080 Number of retrials: 0
+2021-12-16 13:20:34,080 WRAPPER CHECK TIME = 10
+2021-12-16 13:20:34,083 Saving JobList: /esarchive/autosubmit/a29z/pkl/job_list_a29z_backup.pkl
+2021-12-16 13:20:34,094 Job list saved
+2021-12-16 13:20:34,100 Checking jobs for platform=transfer_node
+2021-12-16 13:20:36,320 Successful check job command: nohup kill -0 17122 > /dev/null 2>&1; echo $?
+2021-12-16 13:20:36,320 a29z_19550501_fc1_2_POST job seems to have completed: checking...
+2021-12-16 13:20:36,345 Job a29z_19550501_fc1_2_POST is COMPLETED
+2021-12-16 13:20:36,356 a29z_19550501_fc1_2_POST_STAT file have been transfered
+[WARNING] 2021-12-16 13:20:36,414 /esarchive/autosubmit/a29z/conf/proj_a29z.conf was not found. Some variables might be missing. If your experiment does not need a proj file, you can ignore this message.
+2021-12-16 13:20:36,422 a29z_19550501_fc1_2_POST_STAT file have been transfered
+2021-12-16 13:20:38,746 Successful check job command: nohup kill -0 17295 > /dev/null 2>&1; echo $?
+2021-12-16 13:20:38,746 a29z_19550501_fc2_2_POST job seems to have completed: checking...
+2021-12-16 13:20:38,756 Job a29z_19550501_fc2_2_POST is COMPLETED
+2021-12-16 13:20:38,766 a29z_19550501_fc2_2_POST_STAT file have been transfered
+[WARNING] 2021-12-16 13:20:38,835 /esarchive/autosubmit/a29z/conf/proj_a29z.conf was not found. Some variables might be missing. If your experiment does not need a proj file, you can ignore this message.
+2021-12-16 13:20:38,847 a29z_19550501_fc2_2_POST_STAT file have been transfered
+2021-12-16 13:20:41,134 Successful check job command: nohup kill -0 17551 > /dev/null 2>&1; echo $?
+2021-12-16 13:20:41,134 a29z_19551101_fc1_INI job seems to have completed: checking...
+2021-12-16 13:20:41,143 Job a29z_19551101_fc1_INI is COMPLETED
+2021-12-16 13:20:41,157 a29z_19551101_fc1_INI_STAT file have been transfered
+[WARNING] 2021-12-16 13:20:41,217 /esarchive/autosubmit/a29z/conf/proj_a29z.conf was not found. Some variables might be missing. If your experiment does not need a proj file, you can ignore this message.
+[WARNING] 2021-12-16 13:20:41,426 /esarchive/autosubmit/a29z/conf/proj_a29z.conf was not found. Some variables might be missing. If your experiment does not need a proj file, you can ignore this message.
+2021-12-16 13:20:41,428 Custom directives from platform.conf: None
+2021-12-16 13:20:41,429 Custom directives from platform.conf: None
+2021-12-16 13:20:41,478 a29z_19551101_fc1_INI_STAT file have been transfered
+2021-12-16 13:20:41,567 Checking jobs for platform=marenostrum4
+2021-12-16 13:20:41,567 Checking all jobs at once
+2021-12-16 13:20:42,987 Successful check job command
+[WARNING] 2021-12-16 13:20:43,848 /esarchive/autosubmit/a29z/conf/proj_a29z.conf was not found. Some variables might be missing. If your experiment does not need a proj file, you can ignore this message.
+2021-12-16 13:20:43,850 Custom directives from platform.conf: None
+2021-12-16 13:20:43,850 Custom directives from platform.conf: None
+2021-12-16 13:20:45,367 Job a29z_19550501_fc2_1_CLEAN is QUEUING
+2021-12-16 13:20:45,368 a29z_19550501_fc0_3_SIM job seems to have completed: checking...
+2021-12-16 13:20:45,564 Job a29z_19550501_fc0_3_SIM is COMPLETED
+2021-12-16 13:20:45,579 a29z_19550501_fc0_3_SIM_STAT file have been transfered
+[WARNING] 2021-12-16 13:20:45,636 /esarchive/autosubmit/a29z/conf/proj_a29z.conf was not found. Some variables might be missing. If your experiment does not need a proj file, you can ignore this message.
+2021-12-16 13:20:45,643 a29z_19550501_fc0_3_SIM_STAT file have been transfered
+2021-12-16 13:20:45,694 Job a29z_19550501_fc0_2_CLEAN is QUEUING
+2021-12-16 13:20:45,694 End of checking
+2021-12-16 13:20:45,695 Updating FAILED jobs
+2021-12-16 13:20:45,695 Updating WAITING jobs
+2021-12-16 13:20:45,695 Setting job: a29z_19551101_fc1_1_SIM status to: READY (all parents completed)...
+2021-12-16 13:20:45,695 Setting job: a29z_19550501_fc0_3_POST status to: READY (all parents completed)...
+2021-12-16 13:20:45,696 Setting job: a29z_19550501_fc1_2_CLEAN status to: READY (all parents completed)...
+2021-12-16 13:20:45,696 Setting job: a29z_19550501_fc2_2_CLEAN status to: READY (all parents completed)...
+2021-12-16 13:20:45,696 Updating WAITING jobs eligible for be prepared
+2021-12-16 13:20:45,697 Setting job: a29z_19550501_fc0_4_SIM status to: Prepared for be held (all parents queuing, running or completed)...
+2021-12-16 13:20:45,697 Setting job: a29z_19550501_fc2_3_SIM status to: Prepared for be held (all parents queuing, running or completed)...
+2021-12-16 13:20:45,697 Updating Held jobs
+2021-12-16 13:20:45,697 Update finished
+2021-12-16 13:20:45,701 
+Job Name                           Job Id         Job Status     Job Platform        Job Queue      
+2021-12-16 13:20:45,701 a29z_19550501_fc1_2_POST           17122          COMPLETED      transfer_node       serial         
+2021-12-16 13:20:45,701 a29z_19550501_fc2_1_POST           16001          COMPLETED      transfer_node       serial         
+2021-12-16 13:20:45,702 a29z_19550501_fc2_2_POST           17295          COMPLETED      transfer_node       serial         
+2021-12-16 13:20:45,702 a29z_19550501_fc0_1_CLEAN          19178212       COMPLETED      marenostrum4        debug          
+2021-12-16 13:20:45,702 a29z_19550501_fc1_1_CLEAN          19178213       COMPLETED      marenostrum4        debug          
+2021-12-16 13:20:45,702 a29z_19550501_fc0_2_CLEAN          19178221       QUEUING        marenostrum4        debug          
+2021-12-16 13:20:45,702 a29z_19550501_fc2_1_CLEAN          19178222       QUEUING        marenostrum4        debug          
+2021-12-16 13:20:45,704 Saving JobList: /esarchive/autosubmit/a29z/pkl/job_list_a29z.pkl
+2021-12-16 13:20:45,712 Job list saved
+2021-12-16 13:20:45,717 
+Jobs ready for transfer_node: 6
+2021-12-16 13:20:45,719 Number of jobs available: 3
+2021-12-16 13:20:45,719 Number of jobs ready: 6
+2021-12-16 13:20:45,720 Jobs ready for transfer_node: 6
+2021-12-16 13:20:45,725 Creating Scripts
+2021-12-16 13:20:45,737 Sending Files
+2021-12-16 13:20:46,105 /esarchive/scratch/Earth/wuruchi/a29z/LOG_a29z has been created on bscearth000 .
+2021-12-16 13:20:46,116 Submitting
+[WARNING] 2021-12-16 13:20:46,229 /esarchive/autosubmit/a29z/conf/proj_a29z.conf was not found. Some variables might be missing. If your experiment does not need a proj file, you can ignore this message.
+2021-12-16 13:20:46,231 Custom directives from platform.conf: None
+2021-12-16 13:20:46,232 Custom directives from platform.conf: None
+2021-12-16 13:20:46,394 Job ID: 18661
+
+2021-12-16 13:20:46,394 a29z_19550501_fc0_3_POST submitted
+2021-12-16 13:20:46,496 Creating Scripts
+2021-12-16 13:20:46,521 Sending Files
+2021-12-16 13:20:46,739 /esarchive/scratch/Earth/wuruchi/a29z/LOG_a29z has been created on bscearth000 .
+2021-12-16 13:20:46,753 Submitting
+2021-12-16 13:20:46,757 a29z_19551101_fc2_INI_STAT have been removed
+2021-12-16 13:20:46,759 a29z_19551101_fc2_INI_COMPLETED been removed
+2021-12-16 13:20:46,977 Job ID: 18921
+
+2021-12-16 13:20:46,977 a29z_19551101_fc2_INI submitted
+2021-12-16 13:20:47,099 Creating Scripts
+2021-12-16 13:20:47,111 Sending Files
+2021-12-16 13:20:47,378 /esarchive/scratch/Earth/wuruchi/a29z/LOG_a29z has been created on bscearth000 .
+2021-12-16 13:20:47,391 Submitting
+2021-12-16 13:20:47,395 a29z_19551101_fc3_INI_STAT have been removed
+2021-12-16 13:20:47,398 a29z_19551101_fc3_INI_COMPLETED been removed
+2021-12-16 13:20:47,659 Job ID: 19094
+
+2021-12-16 13:20:47,659 a29z_19551101_fc3_INI submitted
+2021-12-16 13:20:47,781 
+Jobs ready for marenostrum4: 9
+2021-12-16 13:20:47,783 Number of jobs available: 1
+2021-12-16 13:20:47,783 Number of jobs ready: 9
+2021-12-16 13:20:47,784 Jobs ready for marenostrum4: 9
+2021-12-16 13:20:47,790 Creating Scripts
+2021-12-16 13:20:47,803 Sending Files
+2021-12-16 13:20:47,868 Submitting
+2021-12-16 13:20:49,666 Updating FAILED jobs
+2021-12-16 13:20:49,666 Updating WAITING jobs
+2021-12-16 13:20:49,667 Updating WAITING jobs eligible for be prepared
+2021-12-16 13:20:49,668 Updating Held jobs
+2021-12-16 13:20:49,668 Update finished
+2021-12-16 13:20:49,673 
+Job Name                           Job Id         Job Status     Job Platform        Job Queue      
+2021-12-16 13:20:49,673 a29z_19550501_fc1_2_POST           17122          COMPLETED      transfer_node       serial         
+2021-12-16 13:20:49,673 a29z_19550501_fc2_1_POST           16001          COMPLETED      transfer_node       serial         
+2021-12-16 13:20:49,673 a29z_19550501_fc2_2_POST           17295          COMPLETED      transfer_node       serial         
+2021-12-16 13:20:49,673 a29z_19550501_fc0_1_CLEAN          19178212       COMPLETED      marenostrum4        debug          
+2021-12-16 13:20:49,673 a29z_19550501_fc1_1_CLEAN          19178213       COMPLETED      marenostrum4        debug          
+2021-12-16 13:20:49,673 a29z_19551101_fc2_INI              18921          SUBMITTED      transfer_node       serial         
+2021-12-16 13:20:49,673 a29z_19551101_fc3_INI              19094          SUBMITTED      transfer_node       serial         
+2021-12-16 13:20:49,673 a29z_19550501_fc0_3_POST           18661          SUBMITTED      transfer_node       serial         
+2021-12-16 13:20:49,674 a29z_19550501_fc1_2_CLEAN          19178229       SUBMITTED      marenostrum4        debug          
+2021-12-16 13:20:49,674 a29z_19550501_fc0_2_CLEAN          19178221       QUEUING        marenostrum4        debug          
+2021-12-16 13:20:49,674 a29z_19550501_fc2_1_CLEAN          19178222       QUEUING        marenostrum4        debug          
+2021-12-16 13:20:49,676 Saving JobList: /esarchive/autosubmit/a29z/pkl/job_list_a29z.pkl
+2021-12-16 13:20:49,684 Job list saved
+2021-12-16 13:20:49,688 
+Jobs prepared for transfer_node: 0
+2021-12-16 13:20:49,690 Number of jobs available: 0
+2021-12-16 13:20:49,690 Number of jobs prepared: 0
+2021-12-16 13:20:49,692 
+Jobs prepared for marenostrum4: 2
+2021-12-16 13:20:49,693 Number of jobs available: 0
+2021-12-16 13:20:49,693 Number of jobs prepared: 2
+2021-12-16 13:20:49,694 Jobs ready for marenostrum4: 2
+2021-12-16 13:20:49,695 there are currently 5 held jobs
+2021-12-16 13:20:49,698 Updating FAILED jobs
+2021-12-16 13:20:49,698 Updating WAITING jobs
+2021-12-16 13:20:49,699 Updating WAITING jobs eligible for be prepared
+2021-12-16 13:20:49,700 Updating Held jobs
+2021-12-16 13:20:49,700 Update finished
+2021-12-16 13:20:49,703 
+Job Name                           Job Id         Job Status     Job Platform        Job Queue      
+2021-12-16 13:20:49,703 a29z_19550501_fc1_2_POST           17122          COMPLETED      transfer_node       serial         
+2021-12-16 13:20:49,703 a29z_19550501_fc2_1_POST           16001          COMPLETED      transfer_node       serial         
+2021-12-16 13:20:49,703 a29z_19550501_fc2_2_POST           17295          COMPLETED      transfer_node       serial         
+2021-12-16 13:20:49,703 a29z_19550501_fc0_1_CLEAN          19178212       COMPLETED      marenostrum4        debug          
+2021-12-16 13:20:49,703 a29z_19550501_fc1_1_CLEAN          19178213       COMPLETED      marenostrum4        debug          
+2021-12-16 13:20:49,703 a29z_19551101_fc2_INI              18921          SUBMITTED      transfer_node       serial         
+2021-12-16 13:20:49,703 a29z_19551101_fc3_INI              19094          SUBMITTED      transfer_node       serial         
+2021-12-16 13:20:49,703 a29z_19550501_fc0_3_POST           18661          SUBMITTED      transfer_node       serial         
+2021-12-16 13:20:49,703 a29z_19550501_fc1_2_CLEAN          19178229       SUBMITTED      marenostrum4        debug          
+2021-12-16 13:20:49,703 a29z_19550501_fc0_2_CLEAN          19178221       QUEUING        marenostrum4        debug          
+2021-12-16 13:20:49,704 a29z_19550501_fc2_1_CLEAN          19178222       QUEUING        marenostrum4        debug          
+2021-12-16 13:20:49,706 Saving JobList: /esarchive/autosubmit/a29z/pkl/job_list_a29z.pkl
+2021-12-16 13:20:49,714 Job list saved
+[WARNING] 2021-12-16 13:20:50,649 /esarchive/autosubmit/a29z/conf/proj_a29z.conf was not found. Some variables might be missing. If your experiment does not need a proj file, you can ignore this message.
+2021-12-16 13:20:50,651 Custom directives from platform.conf: None
+2021-12-16 13:20:50,651 Custom directives from platform.conf: None
+2021-12-16 13:20:59,794 Reloading parameters...
+2021-12-16 13:20:59,794 Loading parameters...
+2021-12-16 13:20:59,795 Parameters load.
+2021-12-16 13:20:59,795 
+
+564 of 590 jobs remaining (13:20)
+2021-12-16 13:20:59,795 Sleep: 10
+2021-12-16 13:20:59,795 Number of retrials: 0
+2021-12-16 13:20:59,795 WRAPPER CHECK TIME = 10
+2021-12-16 13:20:59,797 Saving JobList: /esarchive/autosubmit/a29z/pkl/job_list_a29z_backup.pkl
+2021-12-16 13:20:59,806 Job list saved
+2021-12-16 13:20:59,812 Checking jobs for platform=transfer_node
+2021-12-16 13:21:02,083 Successful check job command: nohup kill -0 18921 > /dev/null 2>&1; echo $?
+2021-12-16 13:21:02,083 a29z_19551101_fc2_INI job seems to have completed: checking...
+2021-12-16 13:21:02,094 Job a29z_19551101_fc2_INI is COMPLETED
+2021-12-16 13:21:02,105 a29z_19551101_fc2_INI_STAT file have been transfered
+[WARNING] 2021-12-16 13:21:02,171 /esarchive/autosubmit/a29z/conf/proj_a29z.conf was not found. Some variables might be missing. If your experiment does not need a proj file, you can ignore this message.
+2021-12-16 13:21:02,180 a29z_19551101_fc2_INI_STAT file have been transfered
+2021-12-16 13:21:04,461 Successful check job command: nohup kill -0 18661 > /dev/null 2>&1; echo $?
+2021-12-16 13:21:04,461 a29z_19550501_fc0_3_POST job seems to have completed: checking...
+2021-12-16 13:21:04,468 Job a29z_19550501_fc0_3_POST is COMPLETED
+2021-12-16 13:21:04,478 a29z_19550501_fc0_3_POST_STAT file have been transfered
+[WARNING] 2021-12-16 13:21:04,539 /esarchive/autosubmit/a29z/conf/proj_a29z.conf was not found. Some variables might be missing. If your experiment does not need a proj file, you can ignore this message.
+2021-12-16 13:21:04,550 a29z_19550501_fc0_3_POST_STAT file have been transfered
+2021-12-16 13:21:06,871 Successful check job command: nohup kill -0 19094 > /dev/null 2>&1; echo $?
+2021-12-16 13:21:06,871 a29z_19551101_fc3_INI job seems to have completed: checking...
+[WARNING] 2021-12-16 13:21:07,185 /esarchive/autosubmit/a29z/conf/proj_a29z.conf was not found. Some variables might be missing. If your experiment does not need a proj file, you can ignore this message.
+2021-12-16 13:21:07,188 Custom directives from platform.conf: None
+2021-12-16 13:21:07,188 Custom directives from platform.conf: None
+2021-12-16 13:21:07,261 Job a29z_19551101_fc3_INI is COMPLETED
+2021-12-16 13:21:07,311 a29z_19551101_fc3_INI_STAT file have been transfered
+[WARNING] 2021-12-16 13:21:07,376 /esarchive/autosubmit/a29z/conf/proj_a29z.conf was not found. Some variables might be missing. If your experiment does not need a proj file, you can ignore this message.
+2021-12-16 13:21:07,387 a29z_19551101_fc3_INI_STAT file have been transfered
+2021-12-16 13:21:07,447 Checking jobs for platform=marenostrum4
+2021-12-16 13:21:07,447 Checking all jobs at once
+2021-12-16 13:21:08,767 Successful check job command
+[WARNING] 2021-12-16 13:21:09,552 /esarchive/autosubmit/a29z/conf/proj_a29z.conf was not found. Some variables might be missing. If your experiment does not need a proj file, you can ignore this message.
+2021-12-16 13:21:09,555 Custom directives from platform.conf: None
+2021-12-16 13:21:09,555 Custom directives from platform.conf: None
+2021-12-16 13:21:09,919 a29z_19550501_fc0_2_CLEAN job seems to have completed: checking...
+2021-12-16 13:21:10,020 Job a29z_19550501_fc0_2_CLEAN is COMPLETED
+2021-12-16 13:21:10,040 a29z_19550501_fc0_2_CLEAN_STAT file have been transfered
+[WARNING] 2021-12-16 13:21:10,098 /esarchive/autosubmit/a29z/conf/proj_a29z.conf was not found. Some variables might be missing. If your experiment does not need a proj file, you can ignore this message.
+2021-12-16 13:21:10,106 a29z_19550501_fc0_2_CLEAN_STAT file have been transfered
+2021-12-16 13:21:10,163 a29z_19550501_fc2_1_CLEAN job seems to have completed: checking...
+2021-12-16 13:21:10,196 Job a29z_19550501_fc2_1_CLEAN is COMPLETED
+2021-12-16 13:21:10,311 a29z_19550501_fc2_1_CLEAN_STAT file have been transfered
+[WARNING] 2021-12-16 13:21:10,368 /esarchive/autosubmit/a29z/conf/proj_a29z.conf was not found. Some variables might be missing. If your experiment does not need a proj file, you can ignore this message.
+2021-12-16 13:21:10,376 a29z_19550501_fc2_1_CLEAN_STAT file have been transfered
+2021-12-16 13:21:10,429 Job a29z_19550501_fc1_2_CLEAN is QUEUING
+2021-12-16 13:21:10,429 End of checking
+2021-12-16 13:21:10,430 Updating FAILED jobs
+2021-12-16 13:21:10,430 Updating WAITING jobs
+2021-12-16 13:21:10,430 Setting job: a29z_19551101_fc2_1_SIM status to: READY (all parents completed)...
+2021-12-16 13:21:10,430 Setting job: a29z_19551101_fc3_1_SIM status to: READY (all parents completed)...
+2021-12-16 13:21:10,431 Setting job: a29z_19550501_fc0_3_CLEAN status to: READY (all parents completed)...
+2021-12-16 13:21:10,431 A job in prepared status has all parent completed, job: a29z_19550501_fc0_4_SIM status set to: READY ...
+2021-12-16 13:21:10,431 A job in prepared status has all parent completed, job: a29z_19550501_fc2_3_SIM status set to: READY ...
+2021-12-16 13:21:10,431 Updating WAITING jobs eligible for be prepared
+2021-12-16 13:21:10,432 Updating Held jobs
+2021-12-16 13:21:10,432 Update finished
+2021-12-16 13:21:10,437 
+Job Name                           Job Id         Job Status     Job Platform        Job Queue      
+2021-12-16 13:21:10,437 a29z_19550501_fc2_2_POST           17295          COMPLETED      transfer_node       serial         
+2021-12-16 13:21:10,437 a29z_19550501_fc0_1_CLEAN          19178212       COMPLETED      marenostrum4        debug          
+2021-12-16 13:21:10,437 a29z_19550501_fc0_2_CLEAN          19178221       COMPLETED      marenostrum4        debug          
+2021-12-16 13:21:10,437 a29z_19550501_fc1_1_CLEAN          19178213       COMPLETED      marenostrum4        debug          
+2021-12-16 13:21:10,437 a29z_19550501_fc2_1_CLEAN          19178222       COMPLETED      marenostrum4        debug          
+2021-12-16 13:21:10,437 a29z_19550501_fc1_2_CLEAN          19178229       QUEUING        marenostrum4        debug          
+2021-12-16 13:21:10,439 Saving JobList: /esarchive/autosubmit/a29z/pkl/job_list_a29z.pkl
+2021-12-16 13:21:10,448 Job list saved
+2021-12-16 13:21:10,452 
+Jobs ready for transfer_node: 3
+2021-12-16 13:21:10,454 Number of jobs available: 3
+2021-12-16 13:21:10,454 Number of jobs ready: 3
+2021-12-16 13:21:10,455 Jobs ready for transfer_node: 3
+2021-12-16 13:21:10,458 Creating Scripts
+2021-12-16 13:21:10,470 Sending Files
+2021-12-16 13:21:10,687 /esarchive/scratch/Earth/wuruchi/a29z/LOG_a29z has been created on bscearth000 .
+2021-12-16 13:21:10,698 Submitting
+2021-12-16 13:21:10,702 a29z_19551101_fc4_INI_STAT have been removed
+2021-12-16 13:21:10,705 a29z_19551101_fc4_INI_COMPLETED been removed
+2021-12-16 13:21:10,986 Job ID: 19685
+
+2021-12-16 13:21:10,986 a29z_19551101_fc4_INI submitted
+2021-12-16 13:21:11,109 Creating Scripts
+2021-12-16 13:21:11,121 Sending Files
+2021-12-16 13:21:11,388 /esarchive/scratch/Earth/wuruchi/a29z/LOG_a29z has been created on bscearth000 .
+2021-12-16 13:21:11,400 Submitting
+2021-12-16 13:21:11,404 a29z_19551101_fc5_INI_STAT have been removed
+2021-12-16 13:21:11,406 a29z_19551101_fc5_INI_COMPLETED been removed
+2021-12-16 13:21:11,627 Job ID: 19858
+
+2021-12-16 13:21:11,627 a29z_19551101_fc5_INI submitted
+2021-12-16 13:21:11,754 Creating Scripts
+2021-12-16 13:21:11,766 Sending Files
+2021-12-16 13:21:11,983 /esarchive/scratch/Earth/wuruchi/a29z/LOG_a29z has been created on bscearth000 .
+2021-12-16 13:21:11,995 Submitting
+2021-12-16 13:21:11,999 a29z_19551101_fc6_INI_STAT have been removed
+2021-12-16 13:21:12,002 a29z_19551101_fc6_INI_COMPLETED been removed
+2021-12-16 13:21:12,220 Job ID: 20032
+
+2021-12-16 13:21:12,220 a29z_19551101_fc6_INI submitted
+2021-12-16 13:21:12,348 
+Jobs ready for marenostrum4: 13
+2021-12-16 13:21:12,350 Number of jobs available: 2
+2021-12-16 13:21:12,351 Number of jobs ready: 13
+2021-12-16 13:21:12,352 Jobs ready for marenostrum4: 13
+2021-12-16 13:21:12,357 Creating Scripts
+2021-12-16 13:21:12,369 Sending Files
+2021-12-16 13:21:12,374 Submitting
+2021-12-16 13:21:12,379 Creating Scripts
+2021-12-16 13:21:12,394 Sending Files
+[WARNING] 2021-12-16 13:21:12,395 /esarchive/autosubmit/a29z/conf/proj_a29z.conf was not found. Some variables might be missing. If your experiment does not need a proj file, you can ignore this message.
+2021-12-16 13:21:12,397 Custom directives from platform.conf: None
+2021-12-16 13:21:12,397 Custom directives from platform.conf: None
+2021-12-16 13:21:12,399 Submitting
+2021-12-16 13:21:13,970 Updating FAILED jobs
+2021-12-16 13:21:13,971 Updating WAITING jobs
+2021-12-16 13:21:13,972 Updating WAITING jobs eligible for be prepared
+2021-12-16 13:21:13,973 Updating Held jobs
+2021-12-16 13:21:13,973 Update finished
+2021-12-16 13:21:13,977 
+Job Name                           Job Id         Job Status     Job Platform        Job Queue      
+2021-12-16 13:21:13,977 a29z_19550501_fc2_2_POST           17295          COMPLETED      transfer_node       serial         
+2021-12-16 13:21:13,977 a29z_19550501_fc0_1_CLEAN          19178212       COMPLETED      marenostrum4        debug          
+2021-12-16 13:21:13,977 a29z_19550501_fc0_2_CLEAN          19178221       COMPLETED      marenostrum4        debug          
+2021-12-16 13:21:13,977 a29z_19550501_fc1_1_CLEAN          19178213       COMPLETED      marenostrum4        debug          
+2021-12-16 13:21:13,977 a29z_19550501_fc2_1_CLEAN          19178222       COMPLETED      marenostrum4        debug          
+2021-12-16 13:21:13,977 a29z_19551101_fc4_INI              19685          SUBMITTED      transfer_node       serial         
+2021-12-16 13:21:13,977 a29z_19551101_fc5_INI              19858          SUBMITTED      transfer_node       serial         
+2021-12-16 13:21:13,977 a29z_19551101_fc6_INI              20032          SUBMITTED      transfer_node       serial         
+2021-12-16 13:21:13,977 a29z_19550501_fc0_3_CLEAN          19178230       SUBMITTED      marenostrum4        debug          
+2021-12-16 13:21:13,977 a29z_19550501_fc2_2_CLEAN          19178231       SUBMITTED      marenostrum4        debug          
+2021-12-16 13:21:13,977 a29z_19550501_fc1_2_CLEAN          19178229       QUEUING        marenostrum4        debug          
+2021-12-16 13:21:13,980 Saving JobList: /esarchive/autosubmit/a29z/pkl/job_list_a29z.pkl
+2021-12-16 13:21:13,988 Job list saved
+[WARNING] 2021-12-16 13:21:15,111 /esarchive/autosubmit/a29z/conf/proj_a29z.conf was not found. Some variables might be missing. If your experiment does not need a proj file, you can ignore this message.
+2021-12-16 13:21:15,113 Custom directives from platform.conf: None
+2021-12-16 13:21:15,114 Custom directives from platform.conf: None
+[WARNING] 2021-12-16 13:21:15,381 /esarchive/autosubmit/a29z/conf/proj_a29z.conf was not found. Some variables might be missing. If your experiment does not need a proj file, you can ignore this message.
+2021-12-16 13:21:15,383 Custom directives from platform.conf: None
+2021-12-16 13:21:15,383 Custom directives from platform.conf: None
+2021-12-16 13:21:24,054 Reloading parameters...
+2021-12-16 13:21:24,054 Loading parameters...
+2021-12-16 13:21:24,054 Parameters load.
+2021-12-16 13:21:24,054 
+
+559 of 590 jobs remaining (13:21)
+2021-12-16 13:21:24,055 Sleep: 10
+2021-12-16 13:21:24,055 Number of retrials: 0
+2021-12-16 13:21:24,055 WRAPPER CHECK TIME = 10
+2021-12-16 13:21:24,058 Saving JobList: /esarchive/autosubmit/a29z/pkl/job_list_a29z_backup.pkl
+2021-12-16 13:21:24,071 Job list saved
+2021-12-16 13:21:24,077 Checking jobs for platform=transfer_node
+2021-12-16 13:21:26,298 Successful check job command: nohup kill -0 20032 > /dev/null 2>&1; echo $?
+2021-12-16 13:21:26,298 a29z_19551101_fc6_INI job seems to have completed: checking...
+2021-12-16 13:21:26,449 Job a29z_19551101_fc6_INI is COMPLETED
+2021-12-16 13:21:26,463 a29z_19551101_fc6_INI_STAT file have been transfered
+[WARNING] 2021-12-16 13:21:26,520 /esarchive/autosubmit/a29z/conf/proj_a29z.conf was not found. Some variables might be missing. If your experiment does not need a proj file, you can ignore this message.
+2021-12-16 13:21:26,530 a29z_19551101_fc6_INI_STAT file have been transfered
+2021-12-16 13:21:28,851 Successful check job command: nohup kill -0 19858 > /dev/null 2>&1; echo $?
+2021-12-16 13:21:28,851 a29z_19551101_fc5_INI job seems to have completed: checking...
+2021-12-16 13:21:28,862 Job a29z_19551101_fc5_INI is COMPLETED
+2021-12-16 13:21:28,874 a29z_19551101_fc5_INI_STAT file have been transfered
+[WARNING] 2021-12-16 13:21:28,932 /esarchive/autosubmit/a29z/conf/proj_a29z.conf was not found. Some variables might be missing. If your experiment does not need a proj file, you can ignore this message.
+2021-12-16 13:21:28,944 a29z_19551101_fc5_INI_STAT file have been transfered
+2021-12-16 13:21:31,214 Successful check job command: nohup kill -0 19685 > /dev/null 2>&1; echo $?
+2021-12-16 13:21:31,214 a29z_19551101_fc4_INI job seems to have completed: checking...
+2021-12-16 13:21:31,224 Job a29z_19551101_fc4_INI is COMPLETED
+2021-12-16 13:21:31,237 a29z_19551101_fc4_INI_STAT file have been transfered
+[WARNING] 2021-12-16 13:21:31,296 /esarchive/autosubmit/a29z/conf/proj_a29z.conf was not found. Some variables might be missing. If your experiment does not need a proj file, you can ignore this message.
+2021-12-16 13:21:31,307 a29z_19551101_fc4_INI_STAT file have been transfered
+2021-12-16 13:21:31,362 Checking jobs for platform=marenostrum4
+2021-12-16 13:21:31,362 Checking all jobs at once
+[WARNING] 2021-12-16 13:21:31,532 /esarchive/autosubmit/a29z/conf/proj_a29z.conf was not found. Some variables might be missing. If your experiment does not need a proj file, you can ignore this message.
+2021-12-16 13:21:31,534 Custom directives from platform.conf: None
+2021-12-16 13:21:31,534 Custom directives from platform.conf: None
+2021-12-16 13:21:32,702 Successful check job command
+[WARNING] 2021-12-16 13:21:33,948 /esarchive/autosubmit/a29z/conf/proj_a29z.conf was not found. Some variables might be missing. If your experiment does not need a proj file, you can ignore this message.
+2021-12-16 13:21:33,951 Custom directives from platform.conf: None
+2021-12-16 13:21:33,951 Custom directives from platform.conf: None
+2021-12-16 13:21:34,022 Job a29z_19550501_fc2_2_CLEAN is QUEUING
+2021-12-16 13:21:34,023 a29z_19550501_fc0_3_CLEAN job seems to have completed: checking...
+2021-12-16 13:21:34,070 Job a29z_19550501_fc0_3_CLEAN is COMPLETED
+2021-12-16 13:21:34,090 a29z_19550501_fc0_3_CLEAN_STAT file have been transfered
+[WARNING] 2021-12-16 13:21:34,155 /esarchive/autosubmit/a29z/conf/proj_a29z.conf was not found. Some variables might be missing. If your experiment does not need a proj file, you can ignore this message.
+2021-12-16 13:21:34,204 a29z_19550501_fc0_3_CLEAN_STAT file have been transfered
+2021-12-16 13:21:34,262 a29z_19550501_fc1_2_CLEAN job seems to have completed: checking...
+2021-12-16 13:21:34,282 Job a29z_19550501_fc1_2_CLEAN is COMPLETED
+2021-12-16 13:21:34,297 a29z_19550501_fc1_2_CLEAN_STAT file have been transfered
+[WARNING] 2021-12-16 13:21:34,359 /esarchive/autosubmit/a29z/conf/proj_a29z.conf was not found. Some variables might be missing. If your experiment does not need a proj file, you can ignore this message.
+2021-12-16 13:21:34,368 a29z_19550501_fc1_2_CLEAN_STAT file have been transfered
+2021-12-16 13:21:34,428 End of checking
+2021-12-16 13:21:34,429 Updating FAILED jobs
+2021-12-16 13:21:34,429 Updating WAITING jobs
+2021-12-16 13:21:34,429 Setting job: a29z_19551101_fc4_1_SIM status to: READY (all parents completed)...
+2021-12-16 13:21:34,430 Setting job: a29z_19551101_fc5_1_SIM status to: READY (all parents completed)...
+2021-12-16 13:21:34,430 Setting job: a29z_19551101_fc6_1_SIM status to: READY (all parents completed)...
+2021-12-16 13:21:34,431 Updating WAITING jobs eligible for be prepared
+2021-12-16 13:21:34,431 Updating Held jobs
+2021-12-16 13:21:34,432 Update finished
+2021-12-16 13:21:34,435 
+Job Name                           Job Id         Job Status     Job Platform        Job Queue      
+2021-12-16 13:21:34,435 a29z_19550501_fc0_2_CLEAN          19178221       COMPLETED      marenostrum4        debug          
+2021-12-16 13:21:34,435 a29z_19550501_fc0_3_CLEAN          19178230       COMPLETED      marenostrum4        debug          
+2021-12-16 13:21:34,435 a29z_19550501_fc1_1_CLEAN          19178213       COMPLETED      marenostrum4        debug          
+2021-12-16 13:21:34,435 a29z_19550501_fc1_2_CLEAN          19178229       COMPLETED      marenostrum4        debug          
+2021-12-16 13:21:34,436 a29z_19550501_fc2_1_CLEAN          19178222       COMPLETED      marenostrum4        debug          
+2021-12-16 13:21:34,436 a29z_19550501_fc2_2_CLEAN          19178231       QUEUING        marenostrum4        debug          
+2021-12-16 13:21:34,438 Saving JobList: /esarchive/autosubmit/a29z/pkl/job_list_a29z.pkl
+2021-12-16 13:21:34,447 Job list saved
+2021-12-16 13:21:34,451 
+Jobs ready for transfer_node: 0
+2021-12-16 13:21:34,453 Number of jobs available: 3
+2021-12-16 13:21:34,453 Number of jobs ready: 0
+2021-12-16 13:21:34,455 
+Jobs ready for marenostrum4: 14
+2021-12-16 13:21:34,457 Number of jobs available: 2
+2021-12-16 13:21:34,457 Number of jobs ready: 14
+2021-12-16 13:21:34,458 Jobs ready for marenostrum4: 14
+2021-12-16 13:21:34,463 Creating Scripts
+2021-12-16 13:21:34,476 Sending Files
+2021-12-16 13:21:34,482 Submitting
+2021-12-16 13:21:34,487 Creating Scripts
+2021-12-16 13:21:34,499 Sending Files
+2021-12-16 13:21:34,505 Submitting
+2021-12-16 13:21:36,220 Updating FAILED jobs
+2021-12-16 13:21:36,220 Updating WAITING jobs
+2021-12-16 13:21:36,221 Updating WAITING jobs eligible for be prepared
+2021-12-16 13:21:36,222 Updating Held jobs
+2021-12-16 13:21:36,222 Update finished
+2021-12-16 13:21:36,226 
+Job Name                           Job Id         Job Status     Job Platform        Job Queue      
+2021-12-16 13:21:36,226 a29z_19550501_fc0_2_CLEAN          19178221       COMPLETED      marenostrum4        debug          
+2021-12-16 13:21:36,226 a29z_19550501_fc0_3_CLEAN          19178230       COMPLETED      marenostrum4        debug          
+2021-12-16 13:21:36,226 a29z_19550501_fc1_1_CLEAN          19178213       COMPLETED      marenostrum4        debug          
+2021-12-16 13:21:36,226 a29z_19550501_fc1_2_CLEAN          19178229       COMPLETED      marenostrum4        debug          
+2021-12-16 13:21:36,226 a29z_19550501_fc2_1_CLEAN          19178222       COMPLETED      marenostrum4        debug          
+2021-12-16 13:21:36,226 a29z_19550501_fc0_4_SIM            19178236       SUBMITTED      marenostrum4        debug          
+2021-12-16 13:21:36,226 a29z_19550501_fc1_3_SIM            19178237       SUBMITTED      marenostrum4        debug          
+2021-12-16 13:21:36,226 a29z_19550501_fc2_2_CLEAN          19178231       QUEUING        marenostrum4        debug          
+2021-12-16 13:21:36,228 Saving JobList: /esarchive/autosubmit/a29z/pkl/job_list_a29z.pkl
+2021-12-16 13:21:36,237 Job list saved
+[WARNING] 2021-12-16 13:21:36,308 /esarchive/autosubmit/a29z/conf/proj_a29z.conf was not found. Some variables might be missing. If your experiment does not need a proj file, you can ignore this message.
+2021-12-16 13:21:36,310 Custom directives from platform.conf: None
+2021-12-16 13:21:36,311 Custom directives from platform.conf: None
+[WARNING] 2021-12-16 13:21:39,169 /esarchive/autosubmit/a29z/conf/proj_a29z.conf was not found. Some variables might be missing. If your experiment does not need a proj file, you can ignore this message.
+2021-12-16 13:21:39,171 Custom directives from platform.conf: None
+2021-12-16 13:21:39,172 Custom directives from platform.conf: None
+[WARNING] 2021-12-16 13:21:39,374 /esarchive/autosubmit/a29z/conf/proj_a29z.conf was not found. Some variables might be missing. If your experiment does not need a proj file, you can ignore this message.
+2021-12-16 13:21:39,376 Custom directives from platform.conf: None
+2021-12-16 13:21:39,376 Custom directives from platform.conf: None
+2021-12-16 13:21:46,300 Reloading parameters...
+2021-12-16 13:21:46,300 Loading parameters...
+2021-12-16 13:21:46,300 Parameters load.
+2021-12-16 13:21:46,301 
+
+554 of 590 jobs remaining (13:21)
+2021-12-16 13:21:46,301 Sleep: 10
+2021-12-16 13:21:46,301 Number of retrials: 0
+2021-12-16 13:21:46,301 WRAPPER CHECK TIME = 10
+2021-12-16 13:21:46,303 Saving JobList: /esarchive/autosubmit/a29z/pkl/job_list_a29z_backup.pkl
+2021-12-16 13:21:46,312 Job list saved
+2021-12-16 13:21:46,318 Checking jobs for platform=transfer_node
+2021-12-16 13:21:46,320 Checking jobs for platform=marenostrum4
+2021-12-16 13:21:46,320 Checking all jobs at once
+2021-12-16 13:21:47,591 Successful check job command
+2021-12-16 13:21:49,864 a29z_19550501_fc2_2_CLEAN job seems to have completed: checking...
+2021-12-16 13:21:49,880 Job a29z_19550501_fc2_2_CLEAN is COMPLETED
+2021-12-16 13:21:49,889 a29z_19550501_fc2_2_CLEAN_STAT file have been transfered
+[WARNING] 2021-12-16 13:21:49,946 /esarchive/autosubmit/a29z/conf/proj_a29z.conf was not found. Some variables might be missing. If your experiment does not need a proj file, you can ignore this message.
+2021-12-16 13:21:49,954 a29z_19550501_fc2_2_CLEAN_STAT file have been transfered
+2021-12-16 13:21:50,012 Job a29z_19550501_fc1_3_SIM is QUEUING
+2021-12-16 13:21:50,012 Job a29z_19550501_fc0_4_SIM is RUNNING
+2021-12-16 13:21:50,013 /gpfs/scratch/bsc32/bsc32985/a29z/LOG_a29z/a29z_19550501_fc0_4_SIM_STAT File still no exists.. waiting 5s for a new retry ( retries left: 3)
+[WARNING] 2021-12-16 13:21:54,959 /esarchive/autosubmit/a29z/conf/proj_a29z.conf was not found. Some variables might be missing. If your experiment does not need a proj file, you can ignore this message.
+2021-12-16 13:21:54,962 Custom directives from platform.conf: None
+2021-12-16 13:21:54,963 Custom directives from platform.conf: None
+2021-12-16 13:21:55,029 a29z_19550501_fc0_4_SIM_STAT file have been transfered
+2021-12-16 13:21:55,119 End of checking
+2021-12-16 13:21:55,119 Updating FAILED jobs
+2021-12-16 13:21:55,120 Updating WAITING jobs
+2021-12-16 13:21:55,121 Updating WAITING jobs eligible for be prepared
+2021-12-16 13:21:55,121 Setting job: a29z_19550501_fc0_5_SIM status to: Prepared for be held (all parents queuing, running or completed)...
+2021-12-16 13:21:55,121 Setting job: a29z_19550501_fc1_4_SIM status to: Prepared for be held (all parents queuing, running or completed)...
+2021-12-16 13:21:55,122 Updating Held jobs
+2021-12-16 13:21:55,122 Update finished
+2021-12-16 13:21:55,126 
+Job Name                           Job Id         Job Status     Job Platform        Job Queue      
+2021-12-16 13:21:55,126 a29z_19550501_fc0_3_CLEAN          19178230       COMPLETED      marenostrum4        debug          
+2021-12-16 13:21:55,126 a29z_19550501_fc1_1_CLEAN          19178213       COMPLETED      marenostrum4        debug          
+2021-12-16 13:21:55,126 a29z_19550501_fc1_2_CLEAN          19178229       COMPLETED      marenostrum4        debug          
+2021-12-16 13:21:55,126 a29z_19550501_fc2_1_CLEAN          19178222       COMPLETED      marenostrum4        debug          
+2021-12-16 13:21:55,126 a29z_19550501_fc2_2_CLEAN          19178231       COMPLETED      marenostrum4        debug          
+2021-12-16 13:21:55,126 a29z_19550501_fc0_4_SIM            19178236       RUNNING        marenostrum4        debug          
+2021-12-16 13:21:55,126 a29z_19550501_fc1_3_SIM            19178237       QUEUING        marenostrum4        debug          
+2021-12-16 13:21:55,129 Saving JobList: /esarchive/autosubmit/a29z/pkl/job_list_a29z.pkl
+2021-12-16 13:21:55,137 Job list saved
+2021-12-16 13:21:55,143 
+Jobs ready for transfer_node: 0
+2021-12-16 13:21:55,144 Number of jobs available: 3
+2021-12-16 13:21:55,145 Number of jobs ready: 0
+2021-12-16 13:21:55,146 
+Jobs ready for marenostrum4: 12
+2021-12-16 13:21:55,148 Number of jobs available: 2
+2021-12-16 13:21:55,149 Number of jobs ready: 12
+2021-12-16 13:21:55,150 Jobs ready for marenostrum4: 12
+2021-12-16 13:21:55,158 Creating Scripts
+2021-12-16 13:21:55,171 Sending Files
+2021-12-16 13:21:55,217 Submitting
+2021-12-16 13:21:55,221 Creating Scripts
+2021-12-16 13:21:55,235 Sending Files
+2021-12-16 13:21:55,254 Submitting
+2021-12-16 13:21:55,257 a29z_19550501_fc3_1_SIM_STAT have been removed
+2021-12-16 13:21:55,259 a29z_19550501_fc3_1_SIM_COMPLETED been removed
+2021-12-16 13:21:57,273 Autosubmit will interrupt at the next safe occasion
+2021-12-16 13:22:05,092 Updating FAILED jobs
+2021-12-16 13:22:05,092 Updating WAITING jobs
+2021-12-16 13:22:05,094 Updating WAITING jobs eligible for be prepared
+2021-12-16 13:22:05,094 Updating Held jobs
+2021-12-16 13:22:05,095 Update finished
+2021-12-16 13:22:05,099 
+Job Name                           Job Id         Job Status     Job Platform        Job Queue      
+2021-12-16 13:22:05,099 a29z_19550501_fc0_3_CLEAN          19178230       COMPLETED      marenostrum4        debug          
+2021-12-16 13:22:05,099 a29z_19550501_fc1_1_CLEAN          19178213       COMPLETED      marenostrum4        debug          
+2021-12-16 13:22:05,099 a29z_19550501_fc1_2_CLEAN          19178229       COMPLETED      marenostrum4        debug          
+2021-12-16 13:22:05,099 a29z_19550501_fc2_1_CLEAN          19178222       COMPLETED      marenostrum4        debug          
+2021-12-16 13:22:05,099 a29z_19550501_fc2_2_CLEAN          19178231       COMPLETED      marenostrum4        debug          
+2021-12-16 13:22:05,099 a29z_19550501_fc2_3_SIM            19178241       SUBMITTED      marenostrum4        debug          
+2021-12-16 13:22:05,099 a29z_19550501_fc3_1_SIM            19178244       SUBMITTED      marenostrum4        debug          
+2021-12-16 13:22:05,099 a29z_19550501_fc0_4_SIM            19178236       RUNNING        marenostrum4        debug          
+2021-12-16 13:22:05,099 a29z_19550501_fc1_3_SIM            19178237       QUEUING        marenostrum4        debug          
+2021-12-16 13:22:05,101 Saving JobList: /esarchive/autosubmit/a29z/pkl/job_list_a29z.pkl
+2021-12-16 13:22:05,110 Job list saved
+2021-12-16 13:22:05,115 
+Jobs prepared for transfer_node: 0
+2021-12-16 13:22:05,116 Number of jobs available: 3
+2021-12-16 13:22:05,116 Number of jobs prepared: 0
+2021-12-16 13:22:05,118 
+Jobs prepared for marenostrum4: 2
+2021-12-16 13:22:05,119 Number of jobs available: 0
+2021-12-16 13:22:05,120 Number of jobs prepared: 2
+2021-12-16 13:22:05,121 Jobs ready for marenostrum4: 2
+2021-12-16 13:22:05,122 there are currently 5 held jobs
+2021-12-16 13:22:05,124 Updating FAILED jobs
+2021-12-16 13:22:05,125 Updating WAITING jobs
+2021-12-16 13:22:05,126 Updating WAITING jobs eligible for be prepared
+2021-12-16 13:22:05,127 Updating Held jobs
+2021-12-16 13:22:05,127 Update finished
+2021-12-16 13:22:05,130 
+Job Name                           Job Id         Job Status     Job Platform        Job Queue      
+2021-12-16 13:22:05,130 a29z_19550501_fc0_3_CLEAN          19178230       COMPLETED      marenostrum4        debug          
+2021-12-16 13:22:05,130 a29z_19550501_fc1_1_CLEAN          19178213       COMPLETED      marenostrum4        debug          
+2021-12-16 13:22:05,130 a29z_19550501_fc1_2_CLEAN          19178229       COMPLETED      marenostrum4        debug          
+2021-12-16 13:22:05,130 a29z_19550501_fc2_1_CLEAN          19178222       COMPLETED      marenostrum4        debug          
+2021-12-16 13:22:05,130 a29z_19550501_fc2_2_CLEAN          19178231       COMPLETED      marenostrum4        debug          
+2021-12-16 13:22:05,130 a29z_19550501_fc2_3_SIM            19178241       SUBMITTED      marenostrum4        debug          
+2021-12-16 13:22:05,130 a29z_19550501_fc3_1_SIM            19178244       SUBMITTED      marenostrum4        debug          
+2021-12-16 13:22:05,130 a29z_19550501_fc0_4_SIM            19178236       RUNNING        marenostrum4        debug          
+2021-12-16 13:22:05,130 a29z_19550501_fc1_3_SIM            19178237       QUEUING        marenostrum4        debug          
+2021-12-16 13:22:05,132 Saving JobList: /esarchive/autosubmit/a29z/pkl/job_list_a29z.pkl
+2021-12-16 13:22:05,140 Job list saved
+2021-12-16 13:22:05,216 
+Job Name                           Job Id         Job Status     Job Platform        Job Queue      
+2021-12-16 13:22:05,216 a29z_19550501_fc0_3_CLEAN          19178230       COMPLETED      marenostrum4        debug          
+2021-12-16 13:22:05,216 a29z_19550501_fc1_1_CLEAN          19178213       COMPLETED      marenostrum4        debug          
+2021-12-16 13:22:05,216 a29z_19550501_fc1_2_CLEAN          19178229       COMPLETED      marenostrum4        debug          
+2021-12-16 13:22:05,216 a29z_19550501_fc2_1_CLEAN          19178222       COMPLETED      marenostrum4        debug          
+2021-12-16 13:22:05,216 a29z_19550501_fc2_2_CLEAN          19178231       COMPLETED      marenostrum4        debug          
+2021-12-16 13:22:05,216 a29z_19550501_fc2_3_SIM            19178241       SUBMITTED      marenostrum4        debug          
+2021-12-16 13:22:05,216 a29z_19550501_fc3_1_SIM            19178244       SUBMITTED      marenostrum4        debug          
+2021-12-16 13:22:05,216 a29z_19550501_fc0_4_SIM            19178236       RUNNING        marenostrum4        debug          
+2021-12-16 13:22:05,216 a29z_19550501_fc1_3_SIM            19178237       QUEUING        marenostrum4        debug          
+2021-12-16 13:22:05,218 Saving JobList: /esarchive/autosubmit/a29z/pkl/job_list_a29z.pkl
+2021-12-16 13:22:05,226 Job list saved
+2021-12-16 13:22:15,240 Looking for active threads before closing Autosubmit. Ending the program before these threads finish may result in unexpected behavior. This procedure will last until all threads have finished or the program has waited for more than 30 seconds.
+2021-12-16 13:22:15,240 JOB_data_a29z_19550501_fc0_3_CLEAN is still retrieving outputs, time remaining is 60 seconds.
+2021-12-16 13:22:25,250 JOB_data_a29z_19550501_fc0_3_CLEAN is still retrieving outputs, time remaining is 50 seconds.
+2021-12-16 13:22:35,260 JOB_data_a29z_19550501_fc0_3_CLEAN is still retrieving outputs, time remaining is 40 seconds.
+2021-12-16 13:22:45,271 JOB_data_a29z_19550501_fc2_2_CLEAN is still retrieving outputs, time remaining is 30 seconds.

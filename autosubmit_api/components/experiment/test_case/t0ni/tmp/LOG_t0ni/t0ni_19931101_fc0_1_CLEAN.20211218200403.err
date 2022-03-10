@@ -1,0 +1,3091 @@
+[INFO] JOBID=41698
+
+job_name_ptrn='/gpfs/scratch/bsc32/bsc32627/t0ni/LOG_t0ni/t0ni_19931101_fc0_1_CLEAN'
++ job_name_ptrn=/gpfs/scratch/bsc32/bsc32627/t0ni/LOG_t0ni/t0ni_19931101_fc0_1_CLEAN
+echo $(date +%s) > ${job_name_ptrn}_STAT
+++ date +%s
++ echo 1639854231
+
+###################
+# Autosubmit job
+###################
+
+#!/usr/bin/env bash
+set -xuve
++ set -xuve
+
+########################################################################################################################
+# this job not only removes files in order to free space, but also is in charge of saving all output files,
+# logs and restarts to the HPC's permanent storage.
+# It prepares and saves restart files.
+# It saves original and cmorized outputs.
+# It also does some nudging processing.
+# It uses cleaning.sh, atmospheric_nudging.sh among other files plugins
+# Author: J.R.Berlin (based on existing code)
+########################################################################################################################
+
+#
+# Var instantiation & architecture
+#
+
+STAMP=$(date +%Y_%m_%d_%H_%M)
+++ date +%Y_%m_%d_%H_%M
++ STAMP=2021_12_18_20_03
+CURRENT_ARCH=transfer_node
++ CURRENT_ARCH=transfer_node
+HPCPROJ=bsc32
++ HPCPROJ=bsc32
+HPCARCH=marenostrum4
++ HPCARCH=marenostrum4
+HPCUSER=bsc32627
++ HPCUSER=bsc32627
+HPCHOST=mn1.bsc.es
++ HPCHOST=mn1.bsc.es
+EXPID=t0ni
++ EXPID=t0ni
+JOBNAME=t0ni_19931101_fc0_1_CLEAN
++ JOBNAME=t0ni_19931101_fc0_1_CLEAN
+ROOTDIR=/gpfs/scratch/bsc32/bsc32627/t0ni
++ ROOTDIR=/gpfs/scratch/bsc32/bsc32627/t0ni
+TEMPLATE_NAME=ecearth3
++ TEMPLATE_NAME=ecearth3
+MODEL=ecearth
++ MODEL=ecearth
+PROJDEST=auto-ecearth3
++ PROJDEST=auto-ecearth3
+RERUN=FALSE
++ RERUN=FALSE
+PROJDIR=$ROOTDIR/$PROJDEST
++ PROJDIR=/gpfs/scratch/bsc32/bsc32627/t0ni/auto-ecearth3
+LOGDIR=$ROOTDIR/LOG_$EXPID
++ LOGDIR=/gpfs/scratch/bsc32/bsc32627/t0ni/LOG_t0ni
+CMORIZATION=TRUE
++ CMORIZATION=TRUE
+ECE3_POSTPROC=FALSE
++ ECE3_POSTPROC=FALSE
+SCRATCH_DIR=/gpfs/scratch
++ SCRATCH_DIR=/gpfs/scratch
+START_date=19931101
++ START_date=19931101
+START_date_1=19931031
++ START_date_1=19931031
+MEMBER=fc0
++ MEMBER=fc0
+CMOR_MODEL_ID=EC-EARTH-AOGCM
++ CMOR_MODEL_ID=EC-EARTH-AOGCM
+CMOR_EXP=piControl
++ CMOR_EXP=piControl
+CMOR_ACTIVITY_ID=CMIP
++ CMOR_ACTIVITY_ID=CMIP
+CMOR_REALIZATION_INDEX=""
++ CMOR_REALIZATION_INDEX=
+DTHOST=
++ DTHOST=
+DT_HOST=
++ DT_HOST=
+DT_USER=
++ DT_USER=
+USE_DT_COMMANDS=TRUE
++ USE_DT_COMMANDS=TRUE
+[[ "FALSE" == TRUE ]] && USE_INTERMEDIATE_STORAGE=TRUE || USE_INTERMEDIATE_STORAGE=FALSE
++ [[ FALSE == TRUE ]]
++ USE_INTERMEDIATE_STORAGE=FALSE
+[[ "FALSE" == TRUE ]] && IS_TRANSFER=FALSE || IS_TRANSFER=TRUE
++ [[ FALSE == TRUE ]]
++ IS_TRANSFER=TRUE
+[[ "FALSE" == TRUE ]] && SAVE_RESTARTS=TRUE || SAVE_RESTARTS=FALSE
++ [[ FALSE == TRUE ]]
++ SAVE_RESTARTS=FALSE
+
+# components
+IFS_resolution=T511L91
++ IFS_resolution=T511L91
+nem_grid=ORCA025L75
++ nem_grid=ORCA025L75
+NEMO_RES=ORCA025L75
++ NEMO_RES=ORCA025L75
+PISCES=FALSE
++ PISCES=FALSE
+TEMPLATE_NAME=ecearth3
++ TEMPLATE_NAME=ecearth3
+[[ "FALSE" == TRUE ]] && LPJG=TRUE || LPJG=FALSE
++ [[ FALSE == TRUE ]]
++ LPJG=FALSE
+[[ "FALSE" == TRUE ]] && OSM=TRUE || OSM=FALSE
++ [[ FALSE == TRUE ]]
++ OSM=FALSE
+[[ "FALSE" == TRUE ]] && TM5=TRUE || TM5=FALSE
++ [[ FALSE == TRUE ]]
++ TM5=FALSE
+
+export HPCPROJ
++ export HPCPROJ
+# get the mkdir function of the platform
+. ${PROJDIR}/platforms/${CURRENT_ARCH}/configure.sh
++ . /gpfs/scratch/bsc32/bsc32627/t0ni/auto-ecearth3/platforms/transfer_node/configure.sh
+#####################################################################################################################
+# Globals:
+#   PROJDIR
+# Arguments:
+#   None
+# Returns:
+#   None
+# Purpose: main function to prepare execution environment for the underlying platform, that basically consist on
+#   setting up the modules to be used, common environment variables and the common paths
+#####################################################################################################################
+function load_platform_environment() {
+  # load utils/filesystem libraries for common env functions
+  . ${PROJDIR}/platforms/transfer_node/filesystem.sh
+  . ${PROJDIR}/platforms/transfer_node/utils.sh
+  #configure all modules needed for run the job
+  setup_environment_vars
+  # define all paths needed
+  setup_paths
+}
+
+#####################################################################################################################
+# Globals:
+#   None
+# Arguments:
+#   None
+# Returns:
+#   None
+# Purpose: Prepare the modules needed to execute the OASIS restart generation script for Marenostrum4 platform
+#####################################################################################################################
+function load_modules_oas_rsts_gen() {
+  echo "Function generate_oasis_restarts not available in this platform (transfer_node)"
+}
+
+
+#set environment % architecture definitions
+load_platform_environment
++ load_platform_environment
++ . /gpfs/scratch/bsc32/bsc32627/t0ni/auto-ecearth3/platforms/transfer_node/filesystem.sh
+#####################################################################################################################
+# Functions for handling filesystem operations for DT platform
+# Author: J.R.Berlin
+#####################################################################################################################
+
+# load base library to be used in DT machines, for DT machines it needs to be the Architecture choosen for the experiment
+. ${PROJDIR}/platforms/${HPCARCH}/filesystem.sh
+++ . /gpfs/scratch/bsc32/bsc32627/t0ni/auto-ecearth3/platforms/marenostrum4/filesystem.sh
+#####################################################################################################################
+# Functions for handling filesystem operations for marenostrum4 platform
+# Author: J.R.Berlin
+#####################################################################################################################
+
+. ${PROJDIR}/platforms/common/common.filesystem.sh
++++ . /gpfs/scratch/bsc32/bsc32627/t0ni/auto-ecearth3/platforms/common/common.filesystem.sh
+#####################################################################################################################
+# Common Functions for handling file system operations on the different host types
+# of the supported machines
+# Author/Maintainer: J.R.Berlin
+#####################################################################################################################
+
+#####################################################################################################################
+# Executes mkdir + chmod to handle proper rights in the target folder in esarchive partition
+# Globals:
+#   None
+# Arguments:
+#   target_dir
+# Returns:
+#   None
+#####################################################################################################################
+function mkdir_esarchive() {
+  target_dir=$1
+  mkdir -p ${target_dir}
+  chmod_esarchive ${target_dir}
+}
+
+#####################################################################################################################
+# Executes chmod with g+s so users of a given group doesnt have access problems to certain outputs and files
+# Globals:
+#   None
+# Arguments:
+#   target_dir
+# Returns:
+#   None
+#####################################################################################################################
+function chmod_esarchive() {
+  target_dir=$1
+  chmod =0770,g+s ${target_dir}
+}
+
+
+#####################################################################################################################
+# Globals:
+# RUN_dir,  SCRATCH_TMP_DIR, MEMBER, out_member
+# Arguments:
+#   None
+# Returns:
+#   None
+# Purpose: creates the folder passed as parameter and assign proper group rights
+#
+#####################################################################################################################
+function mkdir_intermediate_storage() {
+  #default group
+  target_group=bsc32
+  target_dir=$1
+  if [[ "$#" -eq 2 ]]; then
+    target_group=$2
+  fi
+
+  if [[ ! -d "${target_dir}" ]]; then
+    sg ${target_group} "mkdir -p ${target_dir}"
+    chmod g+w ${target_dir}
+  fi
+}
+
+#####################################################################################################################
+# Globals:
+#   None,
+# Arguments:
+#   $1: the folder to be removed
+# Returns:
+#   None
+# Purpose: removes the intermediate storage folder passed as parameter
+#
+#####################################################################################################################
+function delete_intermediate_storage() {
+  rm -rf $1 2>/dev/null
+}
+
+#####################################################################################################################
+# Globals:
+#   None,
+# Arguments:
+#   $1: the source folder/file to be copied
+#   $2: the target directory
+# Returns:
+#   None
+# Purpose: copies the intermediate storage folder passed as parameter
+#
+#####################################################################################################################
+function copy_intermediate_storage() {
+  cp -f $1 $2
+}
+
+#####################################################################################################################
+# Globals:
+#   None,
+# Arguments:
+#   $1: the ecm folder whose content we want to enumerate
+# Returns:
+#   None
+# Purpose: enumerate the content of the intermediate storage folder passed as parameter
+#
+#####################################################################################################################
+function list_intermediate_storage() {
+  ls $1
+}
+
+#####################################################################################################################
+# Globals:
+#   None,
+# Arguments:
+#   $1: the folder whose permissions we want to change
+# Returns:
+#   None
+# Purpose: change the permissions of the intermediate storage folder passed as parameter
+#
+#####################################################################################################################
+function chmod_intermediate_storage() {
+  chmod 744 $1
+}
+
+#####################################################################################################################
+# Globals:
+#   None,
+# Arguments:
+#   $1: the folder we want to test
+# Returns:
+#   None
+# Purpose: test the intermediate storage folder passed as parameter
+#
+#####################################################################################################################
+function test_intermediate_storage() {
+  test $1
+}
+
+# check if directory is empty and doesnt contain any file
+#####################################################################################################################
+# Globals:
+# RUN_dir,  SCRATCH_TMP_DIR, MEMBER, out_member
+# Arguments:
+#   None
+# Returns:
+#   None
+# Purpose: Main function for initialization - ifs3
+#
+#####################################################################################################################
+function is_empty_directory() {
+  local target_path=$1
+  local result=false
+  if [[ -z "$(ls -A ${target_path})" ]]; then
+    result=true
+  fi
+  return result
+}
+
+#####################################################################################################################
+# Globals:
+# RUN_dir,
+# Arguments:
+#   source= source directory where are the files to be synchronized
+#   destination=path to the directory that will be synchronized with the source dir
+#   flags=options for the rsync
+# Returns:
+#   None
+# Purpose: synchronizes two directories from different file systems
+#          depending of the context, dt commands will be used by using blocking_rsync,
+#          and rsync otherwise, <how_many_retry_copy_file> attempts will allowed to try to transfer the files in case
+#          of failure
+#####################################################################################################################
+function rsync_with_retry() {
+
+  source=$2
+  destination=$3
+  flags=$1
+  group=$4
+  retry=0
+  how_many_retry_copy_file=5
+  use_dt_rsync=FALSE
+
+  exist_dtrsync=$(echo $(command -v dtrsync))
+  if [[ ! -z "${exist_dtrsync-}" ]]; then
+    use_dt_rsync=TRUE
+  fi
+
+  while [[ $retry -le $how_many_retry_copy_file ]]; do
+
+    t1=$(date +%s)
+    if [[ "${use_dt_rsync-}" == "FALSE" ]]; then
+      USE_DT_COMMANDS=FALSE
+      echo "Calling blocking_rsync with DT_COMMANDS=FALSE since they are not available on this machine"
+    fi
+    blocking_rsync "${flags}" ${source} ${destination} ${group}
+
+    if [[ $? ]]; then
+      t2=$(date +%s)
+      tr=$(date -d "0 -$t1 sec + $t2 sec" +%T)
+      echo "done."
+      break
+    else
+      ((retry++))
+    fi
+  done
+  if [[ $retry -eq how_many_retry_copy_file ]]; then
+    echo "Transfer error in rsync"
+    exit 1
+  fi
+}
+
+#####################################################################################################################
+# Globals:
+# PROJDIR, target_destination, REMOTE_PATH
+# Arguments:
+#   None
+# Returns:
+#   None
+# Purpose: synchronizes the auto-ecearth source folder with changes done in autosubmit auto-ecearth folder of the
+# experiment
+#
+#####################################################################################################################
+function transfer_model() {
+  local folders_that_will_not_be_transferred=""
+  . ${PROJDIR}/plugins/utils.sh
+  source=${PROJDIR}
+  destination=${target_destination}
+  exclusions="--exclude={'templates','utils','test_cases','*.o','*.mod','*.exe','/BLD','ifs-36r4/bin','ifs-36r4/lib/*.a','COMPILE/arch*','COMPILE/cpp*','lpjg/build'}"
+  options="${exclusions} --no-group --delete --force --recursive --links --perms --times --specials --verbose"
+  if [[ "$#" -eq 1 ]]; then
+    folders_that_will_not_be_transferred="$1"
+    for folder in ${folders_that_will_not_be_transferred-}; do
+      options+=" --exclude='${source}/${folder}' "
+    done
+  fi
+  group=$(id -gn)
+  rsync_with_retry "${options}" ${source} "${REMOTE_PATH}${destination}" ${group}
+}
+
+#####################################################################################################################
+# Globals:
+# RUN_dir,
+# Arguments:
+#   filenames: the file or list of files to be moved to the target location,
+#   target_dir: the target directory where the files will be moved
+#   is_transfer: defines if the target filesystem is the intermediate storage or esarchive ( permanent storage)
+# Returns:
+#   None
+# Purpose: move files across different file systems, used mainly in CLEAN and TRANSFER jobs, this is the base function,
+# each platform can have its own custom implementation if needed ( for instance ecmwf-sc40 has its own version of this
+# function, the moved files are removed from the source location
+#
+#####################################################################################################################
+function move_files() {
+  local filenames=$1
+  local target_dir=$2
+  local is_transfer=$3
+
+  if [[ "${is_transfer-}" == "TRUE" ]]; then
+    # we are transferring from Scratch to Esarchive directly
+    blocking_rsync '--no-perms --links --times --recursive --remove-source-files --no-group  --omit-dir-times --chmod=g+rwxs,o-rwx' "${filenames}" ${target_dir} Earth
+  else
+    files_to_send=$(echo "${filenames}")
+    rsync --perms --links --times --recursive --remove-source-files --no-group  --omit-dir-times --chmod=g+rwxs,o-rwx ${files_to_send} ${target_dir}
+  fi
+  # check if there were errors
+  if [[ $? != 0 ]]; then
+    echo "Error occurred on move_files....exiting"
+    exit 1
+  fi
+}
+
+#####################################################################################################################
+# Globals:
+# RUN_dir, ini_data_dir
+# Arguments:
+#   None
+# Returns:
+#   None
+# Purpose: copy the initialization files to inidata directory in the scratch directory of the experiment, the command
+#   creates links to the files instead of copying these physically for optimizing storage
+#
+#####################################################################################################################
+function copy_inidata() {
+  cp --symbolic-link --recursive --force --update ${ini_data_dir} ${RUN_dir}
+}
+
+#####################################################################################################################
+# Globals:
+#
+# Arguments:
+#   src: source folder for the needed restarts
+#   dst: target location where these will be copied
+# Returns:
+#   None
+# Purpose: prepare restarts to be linked in to the inidata folder
+#####################################################################################################################
+function copy_default_restarts() {
+  local src=$1
+  local dst=$2
+  cp --symbolic-link --recursive --force --update ${src} ${dst}
+}
+
+#####################################################################################################################
+# Globals:
+# RUN_dir, SCRATCH_TMP_DIR, MEMBER, ROOTDIR
+# Arguments:
+#   None
+# Returns:
+#   None
+# Purpose: clean up the temporary directories used and set run dir, used in almost all platforms
+#
+#####################################################################################################################
+function setup_paths_transfer() {
+  rm -rf ${SCRATCH_TMP_DIR}
+  mkdir -p ${SCRATCH_TMP_DIR}
+  RUN_dir=${ROOTDIR}/${START_date}/${MEMBER}/runtime
+}
+
+#####################################################################################################################
+# Globals:
+# SCRATCH_DIR, HPCPROJ, HPCUSER, EXPID,PROJDEST
+# Arguments:
+#   None
+# Returns:
+#   None
+# Purpose:  check the existence of the auto-ecearth folder in the experiment folder in the cluster
+#
+#####################################################################################################################
+function check_model_existence() {
+  SCRATCH_MODEL_PATH=${SCRATCH_DIR}/${HPCPROJ}/${HPCUSER}/${EXPID}/${PROJDEST}
+  MODEL_EXISTS="FALSE"
+  if [[ -d ${SCRATCH_MODEL_PATH} ]]; then
+    MODEL_EXISTS="TRUE"
+    export MODEL_EXISTS
+  fi
+}
+
+#####################################################################################################################
+# Globals:
+# PROJDIR, SCRATCH_DIR, HPCPROJ, HPCUSER, EXPID, HPCARCH
+# Arguments:
+#   None
+# Returns:
+#   None
+# Purpose: prepare/load needed libraries in order to execute the synchronize process
+#
+#####################################################################################################################
+function setup_synchronize() {
+  export target_destination=$SCRATCH_DIR/$HPCPROJ/$HPCUSER/$EXPID/
+  export REMOTE_PATH=' '
+  # import custom architecture
+  . ${PROJDIR}/platforms/${HPCARCH}/filesystem.sh
+}
+
+#####################################################################################################################
+# Globals:
+# RUN_dir, USE_REMOTE_HOST, HPCUSER,  HPCHOST
+# Arguments:
+#    source_cmor_dir= source location for the cmorized files , usually the folder that corresponds to the chunk folder
+#    target_cmor_dir= target destination where the files will be moved
+#    is_transfer= indicates if the temporary storage will be used or not
+# Returns:
+#   None
+# Purpose: upper level function to transfer the cmorized outputs either in CLEAN ( when USE_INTERMEDIATE_STORAGE=FALSE )
+#    or the standard TRANSFER, this is the base function and other platforms may have different implementations such as
+#    ecmwf-xc40
+#####################################################################################################################
+function move_cmor_files() {
+  local source_cmor_dir=$1
+  local target_cmor_dir=$2
+  local is_transfer=$3
+  local remote_host=' '
+
+  # used in bscearth000 machine, maybe wise to create a function in platforms for this particular case
+  if [[ "${USE_REMOTE_HOST-}" == "TRUE" ]]; then
+    cmor_folders=$(ssh ${HPCUSER}@${HPCHOST} "ls -d ${source_cmor_dir}/cmor_*_${CHUNK}/" 2>/dev/null) && returncode=$? || returncode=$?
+    if [[ ! -z "${cmor_folders-}" && ${returncode} -eq 0 ]]; then
+      for cmor_remote_dir in ${cmor_folders}; do
+        list_of_cmor_files=$(ssh ${HPCUSER}@${HPCHOST} "ls ${cmor_remote_dir}" 2>/dev/null) && returncode=$? || returncode=$?
+        if [[ ! -z "${list_of_cmor_files-}" && ${returncode} -eq 0 ]]; then
+          echo "moving cmor files ....."
+          move_files ${HPCUSER}@${HPCHOST}:${cmor_remote_dir} ${target_cmor_dir} ${is_transfer}
+          # remove cmor folder after moving the files
+          # if there where some files left behind, this method will throw an exception making the job to crash
+          ssh ${HPCUSER}@${HPCHOST} "find ${cmor_remote_dir} -type d -delete"
+        fi
+      done
+    fi
+  else
+    if [[ -d ${source_cmor_dir} ]]; then
+      echo "moving cmor files ....."
+      cmor_folders=$(ls -d ${source_cmor_dir}/cmor_*_${CHUNK}/ 2>/dev/null) && returncode=$? || returncode=$?
+      if [[ ! -z "${cmor_folders-}" && ${returncode} -eq 0 ]]; then
+        base_storage_cmor_target_dir=${target_cmor_dir}
+        for cmor_remote_dir in ${cmor_folders}; do
+          #defaults when we use intermediate storage structure must be the same in the intermediate storage
+          if [[ "${is_transfer-}" != "TRUE" ]]; then
+            target_cmor_dir=${base_storage_cmor_target_dir}/$(basename ${cmor_remote_dir})
+          fi
+          move_files ${cmor_remote_dir} ${target_cmor_dir} ${is_transfer}
+          # delete the folder, if there where some files left behind, this method will throw an exception making the job to crash
+          find ${cmor_remote_dir} -type d -delete
+        done
+      fi
+    fi
+  fi
+}
+
+#####################################################################################################################
+# Globals:
+# RUN_dir, ROOTDIR, EXPID
+# Arguments:
+#   source_pattern: is the destination path for the output
+#   destination_path: is the name of the final folder of the destination path /
+#   list_of_files_to_copy: list of files to copy
+# Returns:
+#   None
+# Purpose: Local transfer of model output, the function first retrieve the list of files to be transferred and then
+#     if such file is not empty proceed to transfer them
+#####################################################################################################################
+function do_transfer() {
+
+  #  to leave the dt command output in log folder
+  cd ${ROOTDIR}/LOG_${EXPID}
+
+  source_pattern=$1
+  destination_path=$2
+  source_path=$(dirname ${source_pattern[0]})
+  local remote_host=' '
+
+  get_list_of_files_to_copy && returncode=$? || returncode=$?
+  #apply mkdir and let the rsync apply the chmod
+  if [[ ! -z "${list_of_files_to_copy-}" ]]; then
+    mkdir -p ${destination_path}
+    for source_file_name in $list_of_files_to_copy; do
+      echo "transferring file ... "${source_file_name} ${destination_path}
+      blocking_rsync '--no-perms --links --times --recursive --remove-source-files --no-group  --omit-dir-times --chmod=g+rwxs,o-rwx' ${remote_host}${source_file_name} ${destination_path} Earth
+    done
+  fi
+}
+
+#####################################################################################################################
+# Globals:
+# USE_REMOTE_HOST, HPCUSER, HPCHOST, source_pattern
+# Arguments:
+#   None
+# Returns:
+#   None
+# Purpose: get the list of files to be copied to the cluster, used by transfer/clean templates
+#
+#####################################################################################################################
+function get_list_of_files_to_copy() {
+  if [[ "${USE_REMOTE_HOST-}" == "TRUE" ]]; then
+    list_of_files_to_copy=$(ssh ${HPCUSER}@${HPCHOST} "ls ${source_pattern}" 2>/dev/null)
+    remote_host=${HPCUSER}@${HPCHOST}:
+  else
+    list_of_files_to_copy=$(ls ${source_pattern} 2>/dev/null)
+  fi
+}
+
+#####################################################################################################################
+# Globals:
+# RUN_dir,
+# Arguments:
+#   None
+# Returns:
+#   None
+# Purpose: performs the synchronization by transferring the model files to the cluster for preparation before running
+# the experiment, is the common interface for the synchronization template, implementation may be different depending
+# on the underlying architecture where the sync needs to be executed
+#
+#####################################################################################################################
+function do_synchronize() {
+  folders_that_will_not_be_transferred=""
+  if [[ "$#" -eq 1 ]] ; then
+    folders_that_will_not_be_transferred="$1"
+  fi
+  echo "Calling function transfer_model"
+  transfer_model ${folders_that_will_not_be_transferred}
+  echo "common.synchronize Done"
+}
+
+#####################################################################################################################
+# Globals:
+# RUN_dir, INTERMEDIATE_EXP_DIR, MODEL, EXPID
+# Arguments:
+#   None
+# Returns:
+#   None
+# Purpose: Prepare source and target paths for CLEAN/TRANSFER
+#####################################################################################################################
+function setup_paths_localtrans() {
+  src=${INTERMEDIATE_EXP_DIR}
+  local_INTERMEDIATE_EXP_DIR=/gpfs/archive/bsc32/esarchive/exp/${MODEL}
+  destination_folder=${local_INTERMEDIATE_EXP_DIR}/${EXPID}/original_files/
+}
+
+# copy to scratch the platforms files
+#####################################################################################################################
+# Globals:
+# ROOTDIR, PROJDEST, PROJDIR
+# Arguments:
+#   None
+# Returns:
+#   None
+# Purpose: send the initial set of libraries used by the synchronize job in order to be able to run
+#
+#####################################################################################################################
+function copy_platform_environment_to_host() {
+  mkdir -p ${ROOTDIR}/${PROJDEST}/platforms
+  rsync --recursive --links --perms --times --owner --devices --specials --verbose --omit-dir-times ${PROJDIR}/platforms/ ${ROOTDIR}/${PROJDEST}/platforms
+  rsync --recursive --links --perms --times --owner --devices --specials --verbose --omit-dir-times ${PROJDIR}/plugins/ ${ROOTDIR}/${PROJDEST}/plugins
+}
+
+#####################################################################################################################
+# Globals:
+# RUN_dir,  LOGDIR, CHUNK, START_date, MEMBER, STAMP, PATHOUT
+# Arguments:
+#   None
+# Returns:
+#   None
+# Purpose: copy logs to the proper storage location before wiping out the experiment folder ( used by CLEAN_EXPERIMENT )
+#####################################################################################################################
+function save_logs() {
+  echo "We are now storing log files"
+  cd ${LOGDIR}
+  logs_tarfile="logfiles_${EXPID}_${STAMP}.tar"
+  IS_TRANSFER=TRUE
+  prepare_logs && returncode=$? || returncode=$?
+  if [[ ${returncode} -eq 0 ]] || [[ ${returncode} -eq 123 ]]; then
+    [[ ! -f ../${logs_tarfile}.gz ]] && gzip -9 ../${logs_tarfile}
+    local pathout_logfiles="${PATHOUT}/logfiles/"
+    move_files ../${logs_tarfile}.gz ${pathout_logfiles} ${IS_TRANSFER}
+    rm -f ../${logs_tarfile}.gz
+  fi
+}
+
+#####################################################################################################################
+# Globals:
+# INTERMEDIATE_EXP_DIR, EXPID, ROOTDIR, RM ( alias for deleting files )
+# Arguments:
+#   None
+# Returns:
+#   None
+# Purpose: wipe out the experiment folders (used intermediate storage, scratch)
+#####################################################################################################################
+function remove_experiment_folders() {
+  #remove the folder in intermediate storage (if it was used)
+  delete_intermediate_storage ${INTERMEDIATE_EXP_DIR}/${EXPID}
+  #delete scratch folder
+  rm -rf ${ROOTDIR}/*
+  # needed for indicating that the job finished successfully by autosubmit
+  mkdir -p ${ROOTDIR}/LOG_${EXPID}/
+}
+
+#####################################################################################################################
+# any override from the common libraries defined in filesystem.sh or new function goes here
+#####################################################################################################################
+
+#####################################################################################################################
+# Globals:
+#   EXPID, MODEL, INTERMEDIATE_EXP_DIR, EXPID, USE_INTERMEDIATE_STORAGE
+# Arguments:
+#   None
+# Returns:
+#   None
+# Purpose: template function for Marenostrum4 for setting up common paths ( used as setup_paths_transfer_${HPCARCH} )
+#
+#####################################################################################################################
+function setup_paths_transfer_marenostrum4() {
+  #base function
+  setup_paths_transfer
+  #custom settings
+  if [[ "${USE_INTERMEDIATE_STORAGE-}" == "TRUE" ]]; then
+    PATHOUT="${INTERMEDIATE_EXP_DIR}/${EXPID}/"
+  else
+    local_INTERMEDIATE_EXP_DIR=/gpfs/archive/bsc32/esarchive/exp/${MODEL}
+    PATHOUT="${local_INTERMEDIATE_EXP_DIR}/${EXPID}/original_files/"
+  fi
+}
+
+#####################################################################################################################
+# any override from the common libraries defined in filesystem.sh or new function goes here
+#####################################################################################################################
+
+#####################################################################################################################
+# Globals:
+# ROOTDIR, PROJDEST, PROJDIR
+# Arguments:
+#   None
+# Returns:
+#   None
+# Purpose: send the initial set of libraries used by the synchronize job in order to be able to run
+#
+#####################################################################################################################
+function copy_platform_environment_to_host() {
+  echo "DT host doesn´t need to transfer the platforms files"
+}
+
+#####################################################################################################################
+# Globals:
+# HPCARCH
+# Arguments:
+#   None
+# Returns:
+#   None
+# Purpose: Prepare common paths for transfer for the dt machine
+#
+#####################################################################################################################
+function setup_paths_transfer_transfer_node() {
+  setup_paths_transfer_${HPCARCH}
+}
++ . /gpfs/scratch/bsc32/bsc32627/t0ni/auto-ecearth3/platforms/transfer_node/utils.sh
+#####################################################################################################################
+# Functions for handling filesystem operations for data transfer machines part of marenostrum4 platform
+# Author: J.R.Berlin
+#####################################################################################################################
+
+. ${PROJDIR}/platforms/marenostrum4/utils.sh
+++ . /gpfs/scratch/bsc32/bsc32627/t0ni/auto-ecearth3/platforms/marenostrum4/utils.sh
+#####################################################################################################################
+# Functions for handling filesystem operations for marenostrum4 platform
+# Author: J.R.Berlin
+#####################################################################################################################
+
+#. ${PROJDIR}/platforms/common/common.utils.sh
+
+#####################################################################################################################
+# any override from the common libraries defined in filesystem.sh or new function goes here
+#####################################################################################################################
+
+#####################################################################################################################
+# Globals:
+#   None
+# Arguments:
+#   None
+# Returns:
+#   None
+# Purpose: load the common modules required by standard jobs in Marenostrum4
+#####################################################################################################################
+function setup_modules() {
+  set +xuve
+  module purge
+  module load intel/2018.3
+  module load mkl/2018.3
+  module load impi/2018.3
+  module load netcdf/4.2
+  module load hdf5/1.8.19
+  module load perl/5.26
+  module load fftw/3.3.6
+  module load python/2.7.13
+  module load udunits/2.2.25
+  module load gsl/2.4
+  module load nco/4.2.3_netcdf-4.2
+  module load CDO/1.7.2
+  module list
+  set -xuve
+}
+
+#####################################################################################################################
+# Globals:
+#   USER
+# Arguments:
+#   None
+# Returns:
+#   None
+# Purpose: Setup common paths as global variables, required by the different jobs running un the underlying platform
+#           used in nord3, transfer_node and bscearth000 as well
+####################################################################################################################
+function setup_common_paths() {
+  # common globals
+  MODELS_DIR=/gpfs/projects/bsc32/models
+  export SCRATCH=/gpfs/scratch/$(id -gn)/${USER}
+  GROUP=bsc32
+  # check if the machine has the environment tmp var defined
+  SCRATCH_TMP_DIR=${SCRATCH}/${EXPID}/${START_date}/${MEMBER}/tmp/${JOBNAME}
+  #initial conditions dirr for the platform, in order to have this working properly we need
+  #all IC/rst files in place synchronized from bsc32/projects
+  INTERMEDIATE_EXP_DIR=/gpfs/projects/${GROUP}/repository/exp
+  EXTRA_DIR=/gpfs/projects/${GROUP}/repository
+  IC_DIR=/gpfs/projects/${GROUP}/repository/ic
+}
+
+#####################################################################################################################
+# Globals:
+#   None
+# Arguments:
+#   None
+# Returns:
+#   None
+# Purpose: set the global variables and functions to be used by the jobs running in the underlying architecture
+#          used in nord3, transfer_node and bscearth000 as well
+#####################################################################################################################
+function setup_common_environment_vars() {
+  # common globals
+  MODELS_DIR=/gpfs/projects/bsc32/models
+  GROUP=bsc32
+}
+
+#####################################################################################################################
+# Globals:
+#   None
+# Arguments:
+#   None
+# Returns:
+#   None
+# Purpose: set the common set of global variables to be used for the jobs running on the underlying archictecture
+#####################################################################################################################
+function setup_environment_vars() {
+  # common globals
+  setup_common_environment_vars
+  export ECE3_POSTPROC_MACHINE=mn4
+}
+
+#####################################################################################################################
+# Globals:
+#   CURRENT_ARCH, HPCARCH
+# Arguments:
+#   None
+# Returns:
+#   None
+# Purpose: set the global variables refering to common paths to be used by the jobs running in the
+#         underlying architecture, used in nord3, transfer_node and bscearth000 as well
+#####################################################################################################################
+function setup_paths() {
+  setup_common_paths
+  if [[ "${CURRENT_ARCH}" == "${HPCARCH}" ]]; then
+    setup_paths_libs
+  fi
+}
+
+#####################################################################################################################
+# Globals:
+#   USER, PATH
+# Arguments:
+#   None
+# Returns:
+#   None
+# Purpose: auxiliary function to load paths to the different modules that will be load when the job
+#         executes in the cluster
+#####################################################################################################################
+function setup_paths_libs() {
+  grib_api_path=/apps/GRIB/1.14.0/INTEL
+  PATH=${grib_api_path}/bin:${PATH}
+
+  export SCRATCH=/gpfs/scratch/$(id -gn)/${USER}
+  export PATH=/gpfs/projects/bsc32/repository/apps/rebuild_nemo_marenostrum4:${PATH}
+  export PYTHONPATH=${grib_api_path}/lib/python2.7/site-packages/grib_api:${PYTHONPATH-}
+  export GRIB_BIN_PATH=${grib_api_path}/bin
+  export GRIB_DEFINITION_PATH=${grib_api_path}/share/grib_api/definitions
+  export GRIB_SAMPLES_PATH=${grib_api_path}/share/grib_api/ifs_samples/grib1
+}
+
+#####################################################################################################################
+# Globals:
+#   None
+# Arguments:
+#   None
+# Returns:
+#   None
+# Purpose: auxiliary function to load paths to the different modules that will be load when the job
+#          executes in the cluster, used in transfer machines!
+#####################################################################################################################
+function setup_environment_vars_local() {
+  setup_common_environment_vars
+  export ECE3_POSTPROC_MACHINE=mn4
+}
+
+#used in transfer machines !
+
+#####################################################################################################################
+# Globals:
+#   None
+# Arguments:
+#   None
+# Returns:
+#   None
+# Purpose: auxiliary function to set the intermediate storage root path, used in transfer machines, this function
+# overrides the base function in common.filesystem.sh
+#####################################################################################################################
+function setup_paths_local() {
+  echo "MN4 Paths"
+  GROUP=bsc32
+  export INTERMEDIATE_EXP_DIR=/gpfs/projects/${GROUP}/repository/exp
+}
+
+#####################################################################################################################
+# any override from the common libraries defined in filesystem.sh or new function goes below here
+#####################################################################################################################
+
+#####################################################################################################################
+# Globals:
+#   GROUP, USER, EXPID, START_date, MEMBER, GROUP, PATH
+# Arguments:
+#   None
+# Returns:
+#   None
+# Purpose: set the global variables refering to common paths to be used by the jobs running in the
+#         underlying architecture ( initial conditions, grib modules, intermediate storage,etc )
+#####################################################################################################################
+function setup_paths() {
+  setup_common_paths
+}
+
+#####################################################################################################################
+# Globals:
+#   None
+# Arguments:
+#   None
+# Returns:
+#   None
+# Purpose: auxiliary function to common environment vars that will be used when the job
+#          executes in the transfer node
+#####################################################################################################################
+function setup_environment_vars() {
+  setup_common_environment_vars
+  #Machine for the ece3postproc
+  export ECE3_POSTPROC_MACHINE=mn4
+  export SCRATCH=/gpfs/scratch/$(id -gn)/${USER}
+}
++ setup_environment_vars
++ setup_common_environment_vars
++ MODELS_DIR=/gpfs/projects/bsc32/models
++ GROUP=bsc32
++ export ECE3_POSTPROC_MACHINE=mn4
++ ECE3_POSTPROC_MACHINE=mn4
+++ id -gn
++ export SCRATCH=/gpfs/scratch/bsc32/bsc32627
++ SCRATCH=/gpfs/scratch/bsc32/bsc32627
++ setup_paths
++ setup_common_paths
++ MODELS_DIR=/gpfs/projects/bsc32/models
+++ id -gn
++ export SCRATCH=/gpfs/scratch/bsc32/bsc32627
++ SCRATCH=/gpfs/scratch/bsc32/bsc32627
++ GROUP=bsc32
++ SCRATCH_TMP_DIR=/gpfs/scratch/bsc32/bsc32627/t0ni/19931101/fc0/tmp/t0ni_19931101_fc0_1_CLEAN
++ INTERMEDIATE_EXP_DIR=/gpfs/projects/bsc32/repository/exp
++ EXTRA_DIR=/gpfs/projects/bsc32/repository
++ IC_DIR=/gpfs/projects/bsc32/repository/ic
+
+#
+# Chunk Management
+#
+CHUNK=1
++ CHUNK=1
+Chunk_start_date=19931101
++ Chunk_start_date=19931101
+Chunk_end_date=19931130
++ Chunk_end_date=19931130
+Chunk_first=TRUE
++ Chunk_first=TRUE
+Chunk_last=FALSE
++ Chunk_last=FALSE
+RUN_months=1
++ RUN_months=1
+CHUNKSIZE=1
++ CHUNKSIZE=1
+CHUNKSIZEUNIT=month
++ CHUNKSIZEUNIT=month
+numchunks=2
++ numchunks=2
+
+# set the mask for padding the chunk number to three digits
+chunk_zero_padded=$(printf "%03d\n" ${CHUNK})
+++ printf '%03d\n' 1
++ chunk_zero_padded=001
+
+# In months
+RUN_months=1
++ RUN_months=1
+# In days
+RUN_days=30
++ RUN_days=30
+# In hours
+RUN_hours=$((RUN_days * 24))
++ RUN_hours=720
+
+#
+# Nudging management
+#
+ATM_NUDGING=FALSE
++ ATM_NUDGING=FALSE
+ATM_refnud=
++ ATM_refnud=
+OCEAN_STORERST=FALSE
++ OCEAN_STORERST=FALSE
+NEMO_RES=ORCA025L75
++ NEMO_RES=ORCA025L75
+PISCES=FALSE
++ PISCES=FALSE
+
+#
+# Output management
+#
+[[ "FALSE" == TRUE ]] && SAVEMMA=TRUE || SAVEMMA=FALSE
++ [[ FALSE == TRUE ]]
++ SAVEMMA=FALSE
+[[ "FALSE" == TRUE ]] && SAVEDDA=TRUE || SAVEDDA=FALSE
++ [[ FALSE == TRUE ]]
++ SAVEDDA=FALSE
+[[ "FALSE" == TRUE ]] && SAVEMMO=TRUE || SAVEMMO=FALSE
++ [[ FALSE == TRUE ]]
++ SAVEMMO=FALSE
+
+[[ "FALSE" == TRUE ]] && LPJG_SAVE_ICMCL=TRUE || LPJG_SAVE_ICMCL=FALSE
++ [[ FALSE == TRUE ]]
++ LPJG_SAVE_ICMCL=FALSE
+[[ "TRUE" == FALSE ]] && LPJG_SAVE_RESTART=FALSE || LPJG_SAVE_RESTART=TRUE
++ [[ TRUE == FALSE ]]
++ LPJG_SAVE_RESTART=TRUE
+
+[[ "FALSE" == TRUE ]] && DEBUG_MODE=TRUE || DEBUG_MODE=FALSE
++ [[ FALSE == TRUE ]]
++ DEBUG_MODE=FALSE
+
+GZIP=-6
++ GZIP=-6
+
+# Check if DT commands are available in case that CLEAN is done in other platform different that DT nodes
+exist_dtrsync=$(echo $(command -v dtrsync))
++++ command -v dtrsync
+++ echo /gpfs/apps/TRANSFER2/bin/dtrsync
++ exist_dtrsync=/gpfs/apps/TRANSFER2/bin/dtrsync
+if [[ "${USE_INTERMEDIATE_STORAGE-}" == "TRUE" || -z "${exist_dtrsync-}" ]]; then
+  USE_DT_COMMANDS=FALSE
+fi
++ [[ FALSE == \T\R\U\E ]]
++ [[ -z /gpfs/apps/TRANSFER2/bin/dtrsync ]]
+
+#
+# Common functions
+#
+
+
+
+
+
+
+#####################################################################################################################
+# Globals:
+# RUN_dir, CHUNK, EXPID, START_date, MEMBER, Chunk_start_date, Chunk_end_date
+# PATHOUT_RES, OCEAN_STORERST, IC_DIR, NEMO_RES, PATH_IC
+# Arguments:
+#   None
+# Returns:
+#   None
+# Purpose: Save Ocean restart files
+#
+#####################################################################################################################
+function save_oce_ics() {
+
+  PATH_IC=${IC_DIR} # path for initial conditions (ic)
+  # ocean
+  #TODO: if file doesnt exist move_files will clearly throw an exception
+  file="${EXPID}_${START_date}_${MEMBER}_${chunk_zero_padded}_${Chunk_start_date}-${Chunk_end_date}_restart.nc.gz"
+  mkdir_intermediate_storage ${PATH_IC}/ocean/${NEMO_RES}/${EXPID} Earth
+  move_files ${file} ${PATH_IC}/ocean/${NEMO_RES}/${EXPID} ${IS_TRANSFER}
+  # ice
+  file="${EXPID}_${START_date}_${MEMBER}_${chunk_zero_padded}_${Chunk_start_date}-${Chunk_end_date}_restart_ice.nc.gz"
+  mkdir_intermediate_storage ${PATH_IC}/ice/$(echo ${NEMO_RES} | cut -d 'L' -f 1)_LIM3/${EXPID} Earth
+  move_files ${file} ${PATH_IC}/ice/$(echo ${NEMO_RES} | cut -d 'L' -f 1)_LIM3/${EXPID} ${IS_TRANSFER}
+  # PISCES
+  if [[ ${PISCES} != '' ]] && [[ ${PISCES} == 'TRUE' ]]; then
+    file="${EXPID}_${MEMBER}_${Chunk_end_date}_restart_trc.nc.gz"
+    mkdir_intermediate_storage ${PATH_IC}/pisces/${NEMO_RES}/${EXPID} Earth
+    move_files ${file} ${PATH_IC}/pisces/${NEMO_RES}/${EXPID} ${IS_TRANSFER}
+  fi
+}
+
+#####################################################################################################################
+# Globals:
+# LOGDIR,  EXPID, START_date, MEMBER, chunk_zero_padded, Chunk_start_date, Chunk_end_date
+# Arguments:
+#   None
+# Returns:
+#   None
+# Purpose: Prepare mml tar file compressed for transfer
+#####################################################################################################################
+function generate_mml_output() {
+  tarfile="MML_${EXPID}_${START_date}_${MEMBER}_${chunk_zero_padded}_${Chunk_start_date}-${Chunk_end_date}.tar"
+  # Copying the monthly means
+  ls -1 MML_${EXPID}_*.gz | xargs tar --remove-files -cvf ../${tarfile}
+}
+
+#####################################################################################################################
+# Globals:
+# LOGDIR,  EXPID, START_date, MEMBER, chunk_zero_padded, Chunk_start_date, Chunk_end_date
+# Arguments:
+#   None
+# Returns:
+#   None
+# Purpose: Prepare mma tar file compressed for transfer
+#####################################################################################################################
+function generate_mma_output() {
+  tarfile="MMA_${EXPID}_${START_date}_${MEMBER}_${chunk_zero_padded}_${Chunk_start_date}-${Chunk_end_date}.tar"
+  # Copying the monthly means
+  ls -1 MMA_${EXPID}_*.nc.gz | xargs tar --remove-files -cvf ../${tarfile}
+}
+
+#####################################################################################################################
+# Globals: EXPID, RUN_dir, CHUNK, IS_TRANSFER
+# Chunk_start_date, MEMBER, Chunk_end_date
+# PATHOUT_OUT
+# Arguments:
+#   None
+# Returns:
+#   None
+# Purpose: Transfer atmosphere monthly mean (MMA) output files
+#####################################################################################################################
+function save_mma() {
+  generate_mma_output && returncode=$? || returncode=$?
+  if [[ ${returncode} -eq 0 ]]; then
+    cd ..
+    move_files ${tarfile} ${PATHOUT_OUT} ${IS_TRANSFER}
+    cd -
+  fi
+}
+
+#####################################################################################################################
+# Globals: EXPID, RUN_dir, CHUNK, IS_TRANSFER , START_date, MEMBER
+# Chunk_start_date, Chunk_end_date
+# PATHOUT_OUT
+# Arguments:
+#   None
+# Returns:
+#   None
+# Purpose: Transfer OSM (offline surface model) monthly mean (MML) output files
+#####################################################################################################################
+function save_mml() {
+  generate_mml_output && returncode=$? || returncode=$?
+  if [[ ${returncode} -eq 0 ]]; then
+    cd ..
+    move_files ${tarfile} ${PATHOUT_OUT} ${IS_TRANSFER}
+    cd -
+  fi
+}
+
+#####################################################################################################################
+# Globals:
+# LOGDIR,  EXPID, START_date, MEMBER, Chunk_start_date, Chunk_end_date, chunk_zero_padded
+# Arguments:
+#   None
+# Returns:
+#   None
+# Purpose: Prepare dda tar file compressed for transfer
+#####################################################################################################################
+function generate_dda_output() {
+  tarfile="DDA_${EXPID}_${START_date}_${MEMBER}_${chunk_zero_padded}_${Chunk_start_date}-${Chunk_end_date}.tar.gz"
+  echo "moving tar file "
+  ls -1 ICM??${EXPID}+??????.grb | xargs tar --remove-files -zcvf ${tarfile}
+}
+
+#####################################################################################################################
+# Globals: None
+# Arguments:
+#   None
+# Returns:
+#   None
+# Purpose: Transfer atmosphere daily data (GRIB files)
+#####################################################################################################################
+function save_dda() {
+  local icmfiles_path=$1
+  cd ${icmfiles_path}
+  generate_dda_output && returncode=$? || returncode=$?
+  if [[ ${returncode} -eq 0 ]]; then
+    move_files ${tarfile} ${PATHOUT_OUT} ${IS_TRANSFER}
+  fi
+}
+
+#####################################################################################################################
+# Globals: CHUNK, PATHOUT_OUT, TEMPLATE_NAME, IS_TRANSFER, output_dir_osm, output_dir_atm
+# Arguments:
+#   None
+# Returns:
+#   None
+# Purpose: Transfer ICMCL files, only generated when IFS/OSM is coupled to LPJG, depending of the type of template
+# the source path will be different
+#####################################################################################################################
+function save_icmcl() {
+
+  [[ "${TEMPLATE_NAME-}" == "lsm" ]] && icmcl_path=${output_dir_osm} || icmcl_path=${output_dir_atm}
+  [[ "${IS_TRANSFER-}" == "TRUE" ]] && chunkpath=${PATHOUT_OUT}/icmcl || chunkpath=${PATHOUT_OUT}/osm/icmcl
+
+  mkdir_intermediate_storage ${chunkpath} Earth
+
+  declare -a arrFiles
+  shopt -s nullglob
+  arrFiles=(${icmcl_path}/icmcl*.grb)
+  # check if there is any file
+  if [[ ${#arrFiles[@]} -gt 0 ]]; then
+    items=$(printf "%s " "${arrFiles[@]}")
+    move_files "${items}" ${chunkpath} ${IS_TRANSFER}
+  fi
+}
+
+#####################################################################################################################
+# Globals: EXPID, RUN_dir, chunk_zero_padded, Chunk_start_date, MEMBER, Chunk_end_date, PATHOUT_OUT,
+#          SAVEDDA, ECversion, PATHOUT_OUT, SAVEDDA
+# Arguments:
+#   None
+# Returns:
+#   None
+# purpose: Save Ocean output files
+#####################################################################################################################
+function create_mmo() {
+  if [[ -z ${CMORIZATION-} ]] || [[ ${CMORIZATION} == 'FALSE' ]] || [[ ${SAVEMMO} == 'TRUE' ]]; then
+    tarfile="MMO_${EXPID}_${START_date}_${MEMBER}_${chunk_zero_padded}_${Chunk_start_date}-${Chunk_end_date}.tar"
+    # Copying the means available
+    # TODO: if file doesnt exist xargs will clearly throw an exception
+    ls -1 *${EXPID}_*_${Chunk_start_date}_${Chunk_end_date}*.nc | xargs tar -cvf ../${tarfile}
+    cd ..
+    move_files ${tarfile} ${PATHOUT_OUT} ${IS_TRANSFER}
+    cd -
+  fi
+}
+
+#####################################################################################################################
+# Globals: PATH_FLAGS, RUN_months, EXPID, SAVEDDA, ATM_REDUCED_OUTPUT,
+# ATM_REDUCED_DAILY, ATM_SH_CODES, ATM_SH_LEVELS, ATM_GG_CODES, ATM_GG_LEVELS
+#
+# Arguments:
+#   None
+# Returns:
+#   None
+# Purpose:
+#   The function removes the raw data from the runtime´s output and restart storage folders after the clean process has taken place.
+#   for such purpose, a system of flags are created at each of the different stages of the clean, allowing the raw data to be removed
+#   only after the clean process completed successfully. this allows the job to be resumed in case of error and deleting the data once the clean
+#   has been executed successfully, below is explained in detail such system:
+
+# ${PATH_FLAGS} is a folder located in the runtime where all the flags to manage the CLEAN process will be stored, the concerned flags are
+# the following:
+
+# rest_${CHUNK}: check if the clean of all the restarts have taken place for the given chunk, this one will be created if all the restart flags
+# corresponding to the type of experiment (Coupled, Nemo only, IFS only or LSM) are present
+
+# out_${CHUNK}: is the same idea as described above...but for the outputs, exactly same criteria as restarts
+
+# resta_${CHUNK} : flag for the atm restarts
+# resto_${CHUNK} : flag for the ocean restarts
+# restc_${CHUNK} : flag for the coupler restarts ( Oasis )
+# restv_${CHUNK} : flag for the LPJG restarts
+# restl_${CHUNK} : flag for the OSM restarts
+
+# the files mentioned above are deleted altogether and out_${CHUNK} and rest_${CHUNK} are created, to indicate that the process has been carried out
+# correctly later on these are also deleted
+
+# finished_chunk_${CHUNK}: when all outputs (out_${CHUNK}) and restarts (rest_${CHUNK}) have been processed, these flags are deleted and this one is created to indicate that
+# the whole process has been completed
+#####################################################################################################################
+function remove_tail_chunk() {
+
+  cd ${RUN_dir}
+  if [[ -e ${PATH_FLAGS}/rest_${CHUNK} && -e ${PATH_FLAGS}/out_${CHUNK} ]]; then
+
+      if [[ -d ${output_dir_atm} ]] ; then
+        if [[ $( printf "%03d\n" ${CHUNK}) == 001 ]] ; then
+          echo "We are now copying the ICM??${EXPID}+000000 files so they can be used later by CMORATM"
+          cp ${RUN_dir}/output/ifs/001/ICM??${EXPID}+000000 ${RUN_dir}
+          echo "We are now removing ${output_dir_atm}"
+          rm -rf ${output_dir_atm}
+          mkdir ${RUN_dir}/output/ifs/001
+	  mv ${RUN_dir}/ICM??${EXPID}+000000 ${RUN_dir}/output/ifs/001
+        else
+          echo "We are now removing ${output_dir_atm}"
+          rm -rf ${output_dir_atm}
+        fi
+      fi
+
+    if [[ -d ${output_dir_oce} ]]; then
+      echo "We are now removing ${output_dir_oce}"
+      rm -rf ${output_dir_oce}
+    fi
+
+    if [[ "${LPJG-}" == "TRUE" ]]; then
+      echo "We are now removing ${output_dir_lpjg}"
+      rm -rf ${output_dir_lpjg}
+    fi
+
+    if [[ "${OSM-}" == "TRUE" ]]; then
+      echo "We are now removing ${output_dir_osm}"
+      rm -rf ${output_dir_osm}
+    fi
+
+    if [[ "${TM5-}" == "TRUE" ]]; then
+      echo "We are now removing ${output_dir_tm5}"
+      rm -rf ${output_dir_tm5}
+    fi
+
+  fi
+}
+
+#
+# Final condition, before starting next simulation
+#
+
+#####################################################################################################################
+# Globals:
+# PATH_FLAGS, CHUNK
+# Arguments:
+#   None
+# Returns:
+#   None
+# Purpose: check if all the clean process was carried out correctly, the function checks the existence
+# of the flag files and creates finished_chunk_${CHUNK} file to indicate that everything was carried out OK
+#
+#####################################################################################################################
+function check_final_condition() {
+
+  cd ${RUN_dir}
+  if [[ ! -e ${PATH_FLAGS}/finished_chunk_${CHUNK} ]]; then
+
+    # LPJG restarts have a different numbering convention than other restarts,
+    # so they are NOT moved to LPJG_Restart_$chunk
+    # delete restart created by previous chunk, and the one from the last chunk as well
+    if [[ ${CHUNK} -gt 1 ]]; then
+      rm -rf restart/lpjg/$(printf "%03d\n" $((CHUNK - 1)))
+      if [[ "$Chunk_last" == "TRUE" ]]; then
+        rm -rf restart/lpjg/$(printf "%03d\n" ${CHUNK})
+      fi
+    fi
+
+    # Handling of the logs and output traces belongs to previous chunk (if available)
+    rm -rf Output_${CHUNK}
+    rm -f ${PATH_FLAGS}/rest_${CHUNK} ${PATH_FLAGS}/out_${CHUNK}
+    touch ${PATH_FLAGS}/finished_chunk_${CHUNK}
+
+  fi
+}
+
+#
+# Paths management
+#
+
+#####################################################################################################################
+# Globals:
+# PATHOUT, CURRENT_ARCH, RUN_dir, MEMBER, START_date, PATH_FLAGS, PROJDIR
+# Arguments:
+#   None
+# Returns:
+#   None
+# Purpose: prepare all globals concerning paths accordingly depending of the type of experiment and
+# the current architecture where the job will run, load the needed libraries for the correct execution and
+# create the directories needed for the CLEAN process
+#####################################################################################################################
+function setup_paths() {
+
+  # Depending of the platform, we apply the right strategy
+  # setup_paths_transfer
+  setup_paths_transfer_${CURRENT_ARCH}
+
+  PATHOUT_OUT="${PATHOUT}/${START_date}/${MEMBER}/outputs"
+  PATH_FLAGS=${RUN_dir}/flags
+
+  if [[ ! -d ${PATH_FLAGS} ]]; then
+    mkdir -p ${PATH_FLAGS}
+  fi
+
+  if ! test_intermediate_storage "-d ${PATHOUT_OUT}"; then
+    mkdir_intermediate_storage ${PATHOUT_OUT} Earth
+    if ! test_intermediate_storage "-d ${PATHOUT_OUT}"; then
+      echo " OMG we have a problem!"
+      echo " this directory should exist! ${PATHOUT_OUT}"
+      exit
+    fi
+  fi
+
+  cd ${RUN_dir}
+
+  output_dir_atm=""
+  output_dir_oce=""
+  output_dir_lpjg=""
+  output_dir_osm=""
+  output_dir_tm5=""
+
+  # Define paths depending of the type of experiment and some of its features
+  if [ "${TEMPLATE_NAME-}" == "ifs3" ] || [ "${TEMPLATE_NAME-}" == "ecearth3" ]; then
+    output_dir_atm=${RUN_dir}/output/ifs/$(printf "%03d\n" ${CHUNK})
+  fi
+
+  if [ "${TEMPLATE_NAME-}" == "nemo3" ] || [ "${TEMPLATE_NAME-}" == "ecearth3" ]; then
+    output_dir_oce=${RUN_dir}/output/nemo/$(printf "%03d\n" ${CHUNK})
+  fi
+
+  if [[ "${LPJG-}" == "TRUE" ]]; then
+    output_dir_lpjg=${RUN_dir}/output/lpjg/$(printf "%03d\n" ${CHUNK})
+  fi
+
+  if [[ "${OSM-}" == "TRUE" ]]; then
+    output_dir_osm=${RUN_dir}/output/osm/$(printf "%03d\n" ${CHUNK})
+  fi
+
+  if [[ "${TM5-}" == "TRUE" ]]; then
+    output_dir_tm5=${RUN_dir}/output/tm5/$(printf "%03d\n" ${CHUNK})
+  fi
+
+  if [[ ! -d ${RUN_dir} ]]; then
+    exit
+  fi
+
+  # load CLEAN/TRANSFER supporting functions
+  . ${PROJDIR}/plugins/utils.sh
+  . ${PROJDIR}/plugins/transfer.sh
+
+}
+
+#####################################################################################################################
+# Globals:
+# EXPID,  START_date, MEMBER, CHUNK, Chunk_start_date, Chunk_end_date, PATHOUT_RES, IS_TRANSFER, PATH_FLAGS
+# Arguments:
+#   None
+# Returns:
+#   None
+# Purpose: tar the restart files and move these files to the specified target folder, depending of the IS_TRANSFER var,
+#          these files will be move to the intermediate storage or directly to esarchive ( permanent storage )
+#####################################################################################################################
+function save_restart() {
+  local rst_prefix=$1
+  local ec_component=$2
+  local uppercase_rst_prefix=$(echo ${rst_prefix} | tr '[:lower:]' '[:upper:]')
+
+  if [[ "${ec_component-}" == "LPJG" ]]; then
+    # LPJG restarts for this CHUNK are used in the next CHUNK so we remove the ones from the previous CHUNK
+    previous_chunk_start_date=$(date --date "$Chunk_start_date - $CHUNKSIZE $CHUNKSIZEUNIT" +%Y%m%d)
+    previous_chunk_end_date=$(date --date "$Chunk_end_date - $CHUNKSIZE $CHUNKSIZEUNIT" +%Y%m%d)
+    previous_chunk_zero_padded=$(printf "%03d\n" $((${CHUNK} - 1)) )
+    tarfile="${uppercase_rst_prefix}_${EXPID}_${START_date}_${MEMBER}_${previous_chunk_zero_padded}_${previous_chunk_start_date}-${previous_chunk_end_date}.tar.gz"
+    if [[ ! -d restart/lpjg/${previous_chunk_zero_padded} && "${Chunk_first}" != "TRUE" ]]; then
+      echo "restart missing! error!"
+      exit 1
+    fi
+    if [ ${Chunk_first} != "TRUE" ] && [[ "$SAVE_RESTARTS" == "TRUE" ]]; then
+      echo "Saving the LPJG restarts"
+      tar --remove-files -czvf ${tarfile} restart/lpjg/${previous_chunk_zero_padded}
+    else
+      echo "Not saving the LPJG restarts"
+      rm -rf restart/lpjg/${previous_chunk_zero_padded}
+    fi
+  else
+    tarfile="${uppercase_rst_prefix}_${EXPID}_${START_date}_${MEMBER}_${chunk_zero_padded}_${Chunk_start_date}-${Chunk_end_date}.tar"
+    if [[ -d ${ec_component}_Restart_${CHUNK} ]]; then
+      if [[ "$SAVE_RESTARTS" == "TRUE" ]]; then
+        echo "Saving the ${ec_component} restarts"
+        tar --remove-files -cvf ${tarfile} ${ec_component}_Restart_${CHUNK}
+      else
+        echo "Not saving the ${ec_component} restarts"
+        rm -rf ${ec_component}_Restart_${CHUNK}
+      fi
+    fi
+  fi
+  if [[ -f ${tarfile} ]]; then
+    # test for single files cases
+    move_files ${tarfile} ${PATHOUT_RES} ${IS_TRANSFER}
+  fi
+
+  touch ${PATH_FLAGS}/${rst_prefix}_${CHUNK}
+
+}
+
+#####################################################################################################################
+# Globals:
+# CHUNK, RUN_dir, RERUN
+# Arguments:
+#   None
+# Returns:
+#   None
+# Purpose: main function that moves restarts in case of a re-run
+#        ( in case the tar files were generated and generate those that were not )
+#####################################################################################################################
+#
+# Functions for the nudging ( Ocean and Atmosphere )
+#
+
+#####################################################################################################################
+# Globals:
+# ATM_NUDGING, ATM_NUDGING, EXTRA_DIR, IFS_resolution, Chunk_start_date ,start_date_mm, CHUNK
+# Arguments:
+#   None
+# Returns:
+#   None
+# Purpose: prepares the atmospheric nudging in case the feature is enabled for the given experiment
+#####################################################################################################################
+#function setup_atm_nudging(){
+function clean_atm_nudging() {
+
+  # Atmospheric nuding - Lauriance, Omar
+  # Preperation of refence files for Chunk 3
+  # Ref: e007, i05g
+
+  cd ${RUN_dir}
+  if [[ "${ATM_NUDGING-}" != '' ]] && [[ "${ATM_NUDGING-}" == 'TRUE' ]]; then
+    PATHNUDA=${EXTRA_DIR}/nudging/atmos/${IFS_resolution}
+    start_date_mm=$(echo ${Chunk_start_date} | cut -c5-6)
+    start_date_mm=${start_date_mm#0} # Cut leading '0'
+    start_date_yyyy=$(echo ${Chunk_start_date} | cut -c1-4)
+
+    . ${PROJDIR}/plugins/atmospheric_nudging.sh
+
+    if [[ ${CHUNK} -lt $((numchunks - 2)) ]]; then
+      clean_atm_nudg_chunk
+      # atm_nudg_chunk 2
+    fi
+  fi
+}
+
+#
+# Functions for saving the outputs & restarts to permanent storage
+#
+
+#####################################################################################################################
+# Globals:
+# RUN_dir,  PATH_FLAGS, CHUNK, START_date, MEMBER, TEMPLATE_NAME, LPJG, OSM, LPJG_SAVE_RESTART
+# Arguments:
+#   None
+# Returns:
+#   None
+# Purpose: Main function to save the restarts, depending of the type of template, the handling is carried out in a different way
+# a system of flags is in place to allow the job to resume without problems in case an error o problem occurs. these flags are
+# deleted at the end of job
+#####################################################################################################################
+function save_restarts() {
+
+  cd ${RUN_dir}
+  if [[ ! -e ${PATH_FLAGS}/rest_${CHUNK} ]]; then
+
+    PATHOUT_RES="${PATHOUT}/${START_date}/${MEMBER}/restarts"
+    mkdir_intermediate_storage ${PATHOUT_RES} Earth
+
+    #flags for each type of restart is created in save_restart method, the only exception are the ocean restarts
+    # that needs to be done in a different way by invoking the function save_oce_ics
+
+    # use a CASE for template type and we check the existence of flags to be sure we don't process the restarts again
+
+    case "${TEMPLATE_NAME-}" in
+    "ecearth3")
+      # atmos
+      if [[ ! -e ${PATH_FLAGS}/resta_${CHUNK} ]]; then
+        save_restart "resta" "IFS"
+      fi
+
+      # ocean
+      if [[ ! -e ${PATH_FLAGS}/resto_${CHUNK} ]]; then
+        save_restart "resto" "NEMO"
+        # Generating/Handling ocean & sea-ice initial conditions
+        if [[ ${OCEAN_STORERST} != '' ]] && [[ ${OCEAN_STORERST} == 'TRUE' ]]; then
+          save_oce_ics
+        fi
+      fi
+
+      #coupler
+      if [[ ! -e ${PATH_FLAGS}/restc_${CHUNK} ]]; then
+        save_restart "restc" "OASIS"
+      fi
+      ;;
+    "ifs3")
+      # atmos
+      if [[ ! -e ${PATH_FLAGS}/resta_${CHUNK} ]]; then
+        save_restart "resta" "IFS"
+      fi
+      ;;
+    "nemo3")
+      # ocean
+      if [[ ! -e ${PATH_FLAGS}/resto_${CHUNK} ]]; then
+        save_restart "resto" "NEMO"
+        # Generating/Handling ocean & sea-ice initial conditions
+        if [[ ${OCEAN_STORERST} != '' ]] && [[ ${OCEAN_STORERST} == 'TRUE' ]]; then
+          save_oce_ics
+        fi
+      fi
+      ;;
+    "lsm")
+      if [[ "${LPJG}" == "TRUE" ]] && [[ "${OSM}" == "TRUE" ]] && [[ ! -e ${PATH_FLAGS}/restc_${CHUNK} ]]; then
+        save_restart "restc" "OASIS"
+      fi
+      ;;
+    *)
+      echo "CLEAN save restarts - template / model not supported: " + "${TEMPLATE_NAME-}"
+      exit 1
+      ;;
+    esac
+
+    # lpjg - do not save restart if LPJG_SAVE_RESTART == FALSE (recommended for lsm runs or runs which do not end on Jan 1)
+    # TODO disable this when running predictions?
+    [[ "$LPJG_SAVE_RESTART" == FALSE ]] && [[ "$Chunk_last" == "TRUE" ]] && LPJG_SAVE_RESTART=TRUE
+    if [[ "${LPJG}" == "TRUE" ]] && [[ "${LPJG_SAVE_RESTART-}" == "TRUE" ]] && [[ ! -e ${PATH_FLAGS}/restv_${CHUNK} ]]; then
+      save_restart "restv" "LPJG"
+    fi
+
+    # osm
+    if [[ "${OSM}" == "TRUE" ]] && [[ ! -e ${PATH_FLAGS}/restl_${CHUNK} ]]; then
+      save_restart "restl" "OSM"
+    fi
+
+    # tm5
+    if [[ "${TM5}" == "TRUE" ]] && [[ ! -e ${PATH_FLAGS}/restt_${CHUNK} ]]; then
+      save_restart "restt" "TM5"
+    fi
+
+    # common
+    case "${TEMPLATE_NAME-}" in
+    "ecearth3")
+      if [[ -e ${PATH_FLAGS}/restc_${CHUNK} && -e ${PATH_FLAGS}/resta_${CHUNK} && -e ${PATH_FLAGS}/resto_${CHUNK} ]]; then
+        rm -f ${PATH_FLAGS}/restc_${CHUNK} ${PATH_FLAGS}/resta_${CHUNK} ${PATH_FLAGS}/resto_${CHUNK}
+        [[ "$LPJG" == "TRUE" ]] && rm -f ${PATH_FLAGS}/restv_${CHUNK}
+        [[ "$OSM" == "TRUE" ]] && rm -f ${PATH_FLAGS}/restl_${CHUNK}
+        [[ "$TM5" == "TRUE" ]] && rm -f ${PATH_FLAGS}/restt_${CHUNK}
+        touch ${PATH_FLAGS}/rest_${CHUNK}
+      fi
+      ;;
+    "ifs3")
+      if [[ -e ${PATH_FLAGS}/resta_${CHUNK} ]]; then
+        rm -f ${PATH_FLAGS}/resta_${CHUNK}
+        [[ "$LPJG" == "TRUE" ]] && rm -f ${PATH_FLAGS}/restv_${CHUNK}
+        [[ "$OSM" == "TRUE" ]] && rm -f ${PATH_FLAGS}/restl_${CHUNK}
+        [[ "$TM5" == "TRUE" ]] && rm -f ${PATH_FLAGS}/restt_${CHUNK}
+        touch ${PATH_FLAGS}/rest_${CHUNK}
+      fi
+      ;;
+    "nemo3")
+      if [[ -e ${PATH_FLAGS}/resto_${CHUNK} ]]; then
+        rm -f ${PATH_FLAGS}/resto_${CHUNK}
+        [[ "$LPJG" == "TRUE" ]] && rm -f ${PATH_FLAGS}/restv_${CHUNK}
+        [[ "$OSM" == "TRUE" ]] && rm -f ${PATH_FLAGS}/restl_${CHUNK}
+        [[ "$TM5" == "TRUE" ]] && rm -f ${PATH_FLAGS}/restt_${CHUNK}
+        touch ${PATH_FLAGS}/rest_${CHUNK}
+      fi
+      ;;
+    "lsm")
+      [[ "$LPJG" == "TRUE" ]] && [[ "$OSM" == "TRUE" ]] && rm -f ${PATH_FLAGS}/restc_${CHUNK}
+      [[ "$LPJG" == "TRUE" ]] && rm -f ${PATH_FLAGS}/restv_${CHUNK}
+      [[ "$OSM" == "TRUE" ]] && rm -f ${PATH_FLAGS}/restl_${CHUNK}
+      touch ${PATH_FLAGS}/rest_${CHUNK}
+      ;;
+    *)
+      echo "CLEAN - template / model not supported: " + "${TEMPLATE_NAME-}"
+      exit 1
+      ;;
+    esac
+
+  fi
+}
+
+#####################################################################################################################
+# Globals:
+# PATHOUT_LOGS, TEMPLATE_NAME, LPJG, OSM, TM5, RUN_dir, EXPID, START_date, MEMBER, CHUNK
+# Arguments:
+#   None
+# Returns:
+#   None
+# Purpose: the function defines a list of log files to save, separated by spaces, these files will be compressed
+# and then moved to the target destination, additionally
+# the function will check the existence of Lucia logs and add it to the tar
+#####################################################################################################################
+function save_logs() {
+  # We build the log list incrementally
+  PATHOUT_LOGS="${PATHOUT}/logfiles/"
+  cd ${RUN_dir}
+  chunk_zero_padded=$(printf "%03d\n" ${CHUNK})
+  runtime_logdir=log/${chunk_zero_padded}
+
+  if [[ ! -d ${runtime_logdir} ]]; then
+    echo "INFO: ${runtime_logdir} doesn't exits"
+  else
+    tarfile=LOG_${EXPID}_${START_date}_${MEMBER}_${chunk_zero_padded}_${Chunk_start_date}-${Chunk_end_date}.tar.gz
+    tar --remove-files -czvf ${tarfile} ${runtime_logdir}
+    # move files to the target location
+    move_files ${tarfile} ${PATHOUT_LOGS} ${IS_TRANSFER}
+  fi
+}
+
+#####################################################################################################################
+# Globals:
+# ECE3_POSTPROC , START_date, PATH_FLAGS, Chunk_end_date, CHUNK, PATHOUT, MEMBER, Chunk_start_date
+# Chunk_end_date
+# Arguments:
+#   None
+# Returns:
+#   None
+# Purpose: tar the ece3 postprocessed files by tarring them and moving to the specified directory, a flag is
+# created at the end to indicate that it was successfully achieved
+# we might have ece3post output if ECE3_POSTPROC=TRUE or if the job ECE3POST_CCYCLE is enabled
+# so for simplicity we check for ece3post folder
+#####################################################################################################################
+function save_ece3_postproc() {
+
+  if [[ -d ${RUN_dir}/ece3post ]] ; then
+    if [[ "${START_date:4:4}" == "0101" && "${Chunk_end_date:4:4}" == "1231" ]]; then
+      cd ${RUN_dir}
+      if [[ ! -e ${PATH_FLAGS}/ece3post_${CHUNK} ]]; then
+        PATHOUT_ECE3POST="${PATHOUT}/${START_date}/${MEMBER}/ece3post"
+        mkdir_intermediate_storage ${PATHOUT_ECE3POST} Earth
+        tarfile="ECE3POST_${EXPID}_${START_date}_${MEMBER}_${chunk_zero_padded}_${Chunk_start_date}-${Chunk_end_date}.tar.gz"
+        tar -czvf ${tarfile} ece3post/diag/
+        move_files ${tarfile} ${PATHOUT_ECE3POST} ${IS_TRANSFER}
+        touch ${PATH_FLAGS}/ece3post_${CHUNK}
+      fi
+    fi
+  fi
+}
+
+#####################################################################################################################
+# Globals:
+# START_date, PATH_FLAGS, Chunk_end_date, CHUNK, output_dir_atm, LPJG_SAVE_ICMCL, Chunk_start_date
+# Arguments:
+#   None
+# Returns:
+#   None
+# Purpose: save the outputs of IFS3 depending of SAVEMMA and SAVEDDA proj.conf settings, and also save the icmcl
+# by default these are disabled since the standard outputs for all experiments are the cmorized files
+# the function creates a flag to indicate that the files were created and the transferred to the target location successfully(outa_${CHUNK})
+# later this flag is checked in the save_outputs function
+#####################################################################################################################
+function save_outputs_atm() {
+
+  if [[ -d ${output_dir_atm} ]]; then
+    cd ${output_dir_atm}
+    if [[ ! -e ${PATH_FLAGS}/out_${CHUNK} ]]; then
+      if [[ ! -e ${PATH_FLAGS}/outa_${CHUNK} ]]; then
+        [[ ${SAVEMMA} == 'TRUE' ]] && save_mma
+        [[ ${SAVEDDA} == 'TRUE' ]] && save_dda ${output_dir_atm}
+        [[ "${LPJG_SAVE_ICMCL}" == "TRUE" ]] && [[ "${Chunk_start_date:4:4}" == "0101" ]] && [[ "${Chunk_end_date:4:4}" == "1231" ]] && save_icmcl
+        touch ${PATH_FLAGS}/outa_${CHUNK}
+      fi
+    fi
+  fi
+
+}
+
+#####################################################################################################################
+# Globals:
+# output_dir_oce, PATH_FLAGS, CHUNK
+# Arguments:
+#   None
+# Returns:
+#   None
+# Purpose: saves the output (MMO) for the ocean component ( NEMO ) in case the proj.conf setting is enabled,
+# by default this is disabled since the standard outputs for all experiments are the cmorized files
+# the function creates a flag to indicate that the files were created and the transferred to the target location successfully(outo_${CHUNK})
+# later this flag is checked in the save_outputs function
+#####################################################################################################################
+function save_outputs_oce() {
+
+  if [[ -d ${output_dir_oce} ]]; then
+    cd ${output_dir_oce}
+    if [[ ! -e ${PATH_FLAGS}/outo_${CHUNK} ]]; then
+      ECversion='ecearth3'
+      create_mmo
+      touch ${PATH_FLAGS}/outo_${CHUNK}
+    fi
+  fi
+
+}
+
+#####################################################################################################################
+# Globals:
+# output_dir_lpjg, CHUNK, EXPID, START_date, MEMBER, Chunk_start_date, Chunk_end_date, PATH_FLAGS
+# Arguments:
+#   None
+# Returns:
+#   None
+# Purpose: saves the output (MMV) for the LPJG component ( veg ) in case the proj.conf setting is enabled,
+# by default this is disabled, if enabled the files are tarred, the function creates a flag to indicate
+# that the files were created and the transferred to the target location successfully(outv_${CHUNK})
+# later this flag is checked in the save_outputs function
+#####################################################################################################################
+function save_outputs_lpjg() {
+  if [[ -d ${output_dir_lpjg} ]]; then
+    cd ${output_dir_lpjg}
+    if [[ ! -e ${PATH_FLAGS}/outv_${CHUNK} ]]; then
+      tarfile="MMV_${EXPID}_${START_date}_${MEMBER}_${chunk_zero_padded}_${Chunk_start_date}-${Chunk_end_date}.tar"
+      tar -cvf ../${tarfile} .
+      cd ..
+      move_files ${tarfile} ${PATHOUT_OUT} ${IS_TRANSFER}
+      cd ${output_dir_lpjg}
+      touch ${PATH_FLAGS}/outv_${CHUNK}
+    fi
+  fi
+}
+
+#####################################################################################################################
+# Globals:
+# SAVEMMA SAVEDDA, PATH_FLAGS, CHUNK, PATH_FLAGS
+# Arguments:
+#   None
+# Returns:
+#   None
+# Purpose:saves the output for the OSM component in case the proj.conf setting is enabled,
+# by default this is disabled, if enabled the outputs are generated via save_mml and save_dda
+# the function creates a flag to indicate that the files were created and the transferred to the target location successfully (outl_${CHUNK})
+# later this flag is checked in the save_outputs function
+#####################################################################################################################
+function save_outputs_osm() {
+
+  if [[ -d ${output_dir_osm} ]]; then
+    cd ${output_dir_osm}
+    if [[ ! -e ${PATH_FLAGS}/outl_${CHUNK} ]]; then
+      [[ ${SAVEMMA} == 'TRUE' ]] && save_mml
+      [[ ${SAVEDDA} == 'TRUE' ]] && save_dda ${output_dir_osm}
+      save_icmcl
+      touch ${PATH_FLAGS}/outl_${CHUNK}
+    fi
+  fi
+}
+
+#####################################################################################################################
+# Globals:
+# output_dir_tm5, CHUNK, EXPID, START_date, MEMBER, Chunk_start_date, Chunk_end_date, PATH_FLAGS
+# Arguments:
+#   None
+# Returns:
+#   None
+# Purpose: saves the output for the TM5 component in case the proj.conf setting is enabled,
+# by default this is disabled, if enabled the outputs are tarred and moved to the target output folder
+# the function creates a flag to indicate that the files were created and the transferred to the target location successfully (outt_${CHUNK})
+# later this flag is checked in the save_outputs function
+#####################################################################################################################
+function save_outputs_tm5() {
+
+  if [[ -d ${output_dir_tm5} ]]; then
+    cd ${output_dir_tm5}
+    if [[ ! -e ${PATH_FLAGS}/outt_${CHUNK} ]]; then
+      tarfile="MMT_${EXPID}_${START_date}_${MEMBER}_${chunk_zero_padded}_${Chunk_start_date}-${Chunk_end_date}.tar"
+      tar -cvf ../${tarfile} .
+      cd ..
+      move_files ${tarfile} ${PATHOUT_OUT} ${IS_TRANSFER}
+      cd ${output_dir_tm5}
+      touch ${PATH_FLAGS}/outt_${CHUNK}
+    fi
+  fi
+
+}
+
+#####################################################################################################################
+# Globals:
+# PATHOUT_CMOR
+# Arguments:
+#   None
+# Returns:
+#   None
+# Purpose: removes the temporary files generated by the cmorization
+#####################################################################################################################
+function remove_cmor_temp_files() {
+  local cmor_files_path=$1
+  # remove temporary files which might have been left around (#1250)
+  find ${cmor_files_path}/ -mindepth 10 -type f -name '*_gr[a-z|A-Z|0-9]*.nc'
+  find ${cmor_files_path}/ -mindepth 10 -type f -name '*_gn[a-z|A-Z|0-9]*.nc'
+  find ${cmor_files_path}/ -mindepth 10 -type f -name '*_gr[a-z|A-Z|0-9]*.nc' -delete
+  find ${cmor_files_path}/ -mindepth 10 -type f -name '*_gn[a-z|A-Z|0-9]*.nc' -delete
+}
+
+#####################################################################################################################
+# Globals:
+# CMORIZATION, PATHOUT, RUN_dir, CHUNK, IS_TRANSFER
+# Arguments:
+#   None
+# Returns:
+#   None
+# Purpose: saves the output of the cmorization, this is the default output by default for all type of experiments,
+# these are saved by chunk, these outputs are moved to the specified target folder
+#####################################################################################################################
+function save_outputs_cmorization() {
+  . ${PROJDIR}/plugins/cmorization.sh
+  if [[ "${CMORIZATION-}" != '' ]] && [[ ${CMORIZATION} == 'TRUE' ]]; then
+    #
+    # Save CMORIZED output at permanent storage and clean disk
+    #
+
+    #defaults when we use intermediate storage
+    PATHOUT_CMOR=${PATHOUT}/cmorfiles/${START_date}/${MEMBER}
+    # for direct transfer to esarchive we adapt the paths
+    if [[ "${IS_TRANSFER-}" == TRUE ]]; then
+      PATHOUT_CMOR=${PATHOUT}/cmorfiles
+    fi
+
+    cmor_folder=${RUN_dir}/cmor_outputs
+    cmor_folder_list=$(ls -d ${cmor_folder}/cmor_*_${CHUNK} 2>/dev/null) && returncode=$? || returncode=$?
+    if [[ ! -z "${cmor_folder_list-}" && ${returncode} -eq 0 ]]; then
+      # remove temporary files which might have been left around before transfer (#1250)
+      for cmor_tmp_folder in ${cmor_folder_list[@]}; do
+        remove_cmor_temp_files ${cmor_tmp_folder}
+      done
+    fi
+    mkdir_intermediate_storage ${PATHOUT_CMOR} Earth
+    # check if the cmor folder exists
+    if [[ -d ${cmor_folder} ]]; then
+      # move the files
+      move_cmor_files ${cmor_folder} ${PATHOUT_CMOR} ${IS_TRANSFER}
+    fi
+  fi
+}
+
+#####################################################################################################################
+# Globals:
+# # output_dir_tm5, CHUNK, EXPID, START_date, MEMBER, Chunk_start_date, Chunk_end_date, PATH_FLAGS
+#
+# Arguments:
+#   None
+# Returns:
+#   None
+# Purpose: saves the initial condition files if this feature is enabled, the files are compressed and then moved to
+# the specified target directory for such kind of files
+#####################################################################################################################
+function save_ic() {
+  PATHOUT_IC=${PATHOUT}/${START_date}/${MEMBER}/ic
+  mkdir_intermediate_storage ${PATHOUT_IC} Earth
+  remote_ic_folder=${RUN_dir}/save_ic/ic
+  if [[ -d ${remote_ic_folder} ]]; then
+    cd ${remote_ic_folder}
+    filelist=$(echo $(ls -1 IC_*${Chunk_start_date}-${Chunk_end_date}*))
+    if [[ ! -z ${filelist} ]]; then
+      echo "moving ICs files "
+      move_files "${filelist}" ${PATHOUT_IC} ${IS_TRANSFER}
+    fi
+  fi
+}
+
+#####################################################################################################################
+# Globals:
+# RUN_dir, TEMPLATE_NAME, PATH_FLAGS, CHUNK, TEMPLATE_NAME
+# Arguments:
+#   None
+# Returns:
+#   None
+# Purpose: main function for the save of all outputs, there is a flag system that allows to resume the saving of these
+# files if an exception or error occurs, the flags are deleted at the end of the job when all outputs were processed
+# successfully
+#####################################################################################################################
+function save_outputs() {
+
+  cd ${RUN_dir}
+
+  # atmos.
+  save_outputs_atm
+
+  # ocean
+  save_outputs_oce
+
+  # LPJG
+  save_outputs_lpjg
+
+  # OSM
+  save_outputs_osm
+
+  # TM5
+  save_outputs_tm5
+
+  #cmor files
+  save_outputs_cmorization
+
+  # common
+  case "${TEMPLATE_NAME-}" in
+  "ecearth3")
+    if [[ -e ${PATH_FLAGS}/outa_${CHUNK} && -e ${PATH_FLAGS}/outo_${CHUNK} ]]; then
+      touch ${PATH_FLAGS}/out_${CHUNK}
+    fi
+    ;;
+  "ifs3")
+    if [[ -e ${PATH_FLAGS}/outa_${CHUNK} ]]; then
+      touch ${PATH_FLAGS}/out_${CHUNK}
+    fi
+    ;;
+  "nemo3")
+    if [[ -e ${PATH_FLAGS}/outo_${CHUNK} ]]; then
+      touch ${PATH_FLAGS}/out_${CHUNK}
+    fi
+    ;;
+  "lsm")
+    touch ${PATH_FLAGS}/out_${CHUNK}
+    ;;
+  *)
+    echo "CLEAN - template / model not supported: " + "${TEMPLATE_NAME-}"
+    exit 1
+    ;;
+  esac
+}
+
+##########
+## MAIN ##
+##########
+
+if [[ "${DEBUG_MODE-}" == "FALSE" ]]; then
+
+  #
+  # Setup paths
+  #
+
+  setup_paths
+
+  #
+  # Prepare restarts (in case, if some chunks need to be rerun or the experiment is to be extended)
+  #
+
+
+  #
+  # Save restart files at permanent storage
+  # we tar the files, removing the target files after the tar has been created and then we move the tar to the permanent
+  # storage by calling the move_files function
+  # Note: in all cases the .tar files are removed to avoid wasting space
+  #
+
+  save_restarts
+
+  #
+  # Save output files at permanent storage and clean disk (including ece3-postproc outputs depending of the type of experiment )
+  #
+
+  save_outputs
+
+  #
+  # Save LOGS
+  #
+
+  save_logs
+
+  #
+  # Save initial conditions files (ic) to permanent storage
+  #
+
+  save_ic
+
+  #
+  # Nudging Management
+  #
+  if [[ -d ${output_dir_atm} ]]; then
+    clean_atm_nudging
+  fi
+
+  #
+  # Tail of the chunk  (deleted all restart/output folders from scratch after all the clean process took place)
+  #
+
+  remove_tail_chunk
+
+  #
+  # Save ece3-postproc diags at permanent storage
+  #
+
+  if [ "${TEMPLATE_NAME-}" == "ifs3" ] || [ "${TEMPLATE_NAME-}" == "ecearth3" ] || [ "${TEMPLATE_NAME-}" == "lsm" ] ; then
+    save_ece3_postproc
+  fi
+
+  #
+  # Check Final condition, before starting next simulation
+  #
+
+  check_final_condition
+
+fi
++ [[ FALSE == \F\A\L\S\E ]]
++ setup_paths
++ setup_paths_transfer_transfer_node
++ setup_paths_transfer_marenostrum4
++ setup_paths_transfer
++ rm -rf /gpfs/scratch/bsc32/bsc32627/t0ni/19931101/fc0/tmp/t0ni_19931101_fc0_1_CLEAN
++ mkdir -p /gpfs/scratch/bsc32/bsc32627/t0ni/19931101/fc0/tmp/t0ni_19931101_fc0_1_CLEAN
++ RUN_dir=/gpfs/scratch/bsc32/bsc32627/t0ni/19931101/fc0/runtime
++ [[ FALSE == \T\R\U\E ]]
++ local_INTERMEDIATE_EXP_DIR=/gpfs/archive/bsc32/esarchive/exp/ecearth
++ PATHOUT=/gpfs/archive/bsc32/esarchive/exp/ecearth/t0ni/original_files/
++ PATHOUT_OUT=/gpfs/archive/bsc32/esarchive/exp/ecearth/t0ni/original_files//19931101/fc0/outputs
++ PATH_FLAGS=/gpfs/scratch/bsc32/bsc32627/t0ni/19931101/fc0/runtime/flags
++ [[ ! -d /gpfs/scratch/bsc32/bsc32627/t0ni/19931101/fc0/runtime/flags ]]
++ test_intermediate_storage '-d /gpfs/archive/bsc32/esarchive/exp/ecearth/t0ni/original_files//19931101/fc0/outputs'
++ test -d /gpfs/archive/bsc32/esarchive/exp/ecearth/t0ni/original_files//19931101/fc0/outputs
++ mkdir_intermediate_storage /gpfs/archive/bsc32/esarchive/exp/ecearth/t0ni/original_files//19931101/fc0/outputs Earth
++ target_group=bsc32
++ target_dir=/gpfs/archive/bsc32/esarchive/exp/ecearth/t0ni/original_files//19931101/fc0/outputs
++ [[ 2 -eq 2 ]]
++ target_group=Earth
++ [[ ! -d /gpfs/archive/bsc32/esarchive/exp/ecearth/t0ni/original_files//19931101/fc0/outputs ]]
++ sg Earth 'mkdir -p /gpfs/archive/bsc32/esarchive/exp/ecearth/t0ni/original_files//19931101/fc0/outputs'
++ chmod g+w /gpfs/archive/bsc32/esarchive/exp/ecearth/t0ni/original_files//19931101/fc0/outputs
++ test_intermediate_storage '-d /gpfs/archive/bsc32/esarchive/exp/ecearth/t0ni/original_files//19931101/fc0/outputs'
++ test -d /gpfs/archive/bsc32/esarchive/exp/ecearth/t0ni/original_files//19931101/fc0/outputs
++ cd /gpfs/scratch/bsc32/bsc32627/t0ni/19931101/fc0/runtime
++ output_dir_atm=
++ output_dir_oce=
++ output_dir_lpjg=
++ output_dir_osm=
++ output_dir_tm5=
++ '[' ecearth3 == ifs3 ']'
++ '[' ecearth3 == ecearth3 ']'
+++ printf '%03d\n' 1
++ output_dir_atm=/gpfs/scratch/bsc32/bsc32627/t0ni/19931101/fc0/runtime/output/ifs/001
++ '[' ecearth3 == nemo3 ']'
++ '[' ecearth3 == ecearth3 ']'
+++ printf '%03d\n' 1
++ output_dir_oce=/gpfs/scratch/bsc32/bsc32627/t0ni/19931101/fc0/runtime/output/nemo/001
++ [[ FALSE == \T\R\U\E ]]
++ [[ FALSE == \T\R\U\E ]]
++ [[ FALSE == \T\R\U\E ]]
++ [[ ! -d /gpfs/scratch/bsc32/bsc32627/t0ni/19931101/fc0/runtime ]]
++ . /gpfs/scratch/bsc32/bsc32627/t0ni/auto-ecearth3/plugins/utils.sh
+
+
+#####################################################################################################################
+# blocking_rsync using dt_commands
+# Globals:
+#   None
+# Arguments:
+#   options, source, destination, target_group USE_DT_COMMANDS
+# Returns:
+#   None
+#####################################################################################################################
+function blocking_rsync() {
+  options=$1
+  source=$2
+  destination=$3
+  target_group=$4
+  if [[ -z ${USE_DT_COMMANDS-} ]]; then USE_DT_COMMANDS=TRUE; fi
+
+  if [[ ${USE_DT_COMMANDS} == "FALSE" ]]; then
+    sg ${target_group} "rsync ${options} ${source} ${destination}"
+  else
+    t1=$(date +%s)
+    jid=$(dtsgrsync ${target_group} $options $source $destination | awk '{print $4}')
+    if [[ -z ${jid} ]]; then
+      USE_DT_COMMANDS=FALSE
+      blocking_rsync "${options}" ${source} ${destination} ${target_group}
+    else
+      jsc=$(dtq -j $jid | wc -l)
+      jst=$(dtq -j $jid | awk '{print $4}' | tail -1)
+      echo "The job $jid is $jst"
+
+      while [[ $jsc -gt 1 && $jst != "STATE" ]]; do
+        sleep ${sleep_time:-60}
+        jsc=$(dtq -j $jid | wc -l)
+        jst=$(dtq -j $jid | awk '{print $4}' | tail -1)
+        echo "The job $jid is $jst"
+      done
+
+      t2=$(date +%s)
+      tr=$(date -d "0 -$t1 sec + $t2 sec" +%T)
+
+      # exit ok
+      # .err empty and .err file exists
+      if [[ -f dtsgrsync_${jid}.err ]] && [[ ! -s dtsgrsync_${jid}.err ]]; then
+        rm -f dtsgrsync_${jid}*
+        return
+      else
+        echo "the "dtsgrsync_${jid}.err " is not empty"
+        cat dtsgrsync_${jid}.err
+        exit 1
+      fi
+    fi
+  fi
+
+}
+
+# Functions to get the grid size to be used for CDO and S2DV
+#
+# Written by Pablo Echevarria
+#
+# Barcelona Supercomputing Center - Earth Science
+
+#####################################################################################################################
+# Get grid dims
+# Globals:  NEMO_GRID
+# Arguments:
+#   TEMPLATE NEMGRID IFSGRID
+# Returns:
+#   GRID_S2DV GRID_CDO
+#####################################################################################################################
+function get_grid_dims() {
+
+  local MODEL=${TEMPLATE/3/}
+
+  NEMO_GRID=$(echo $NEMGRID | awk -F\L '{print $1}')
+
+  if [[ $MODEL == 'ecearth' ]] || [[ $MODEL == 'ifs' ]] || [[ $MODEL == 'lsm' ]]; then
+    GRID_POST=$IFSGRID
+    case ${IFSGRID} in
+    'T159L62')
+      GRID_CDO='t106grid'
+      GRID_PLOT='320x160'
+      ;; # For cdo, the T159 is the t106
+      # Correspondance betweeen reduced and regular gaussian grid
+    'T255L91' | 'T255L62') GRID_CDO='t170grid' GRID_PLOT='512x256' ;;
+    'T511L91') GRID_CDO='t340grid' GRID_PLOT='1024x512' ;;
+    'T799L62' | 'T799L91')
+      echo "Is the mask ready for this configuration?"
+      stop
+      ;;
+    *)
+      echo "IFS grid is not defined"
+      exit 1
+      ;;
+    esac
+
+  elif [[ $MODEL == 'nemo' ]]; then
+    case $NEMO_GRID in
+    'ORCA2')
+      GRID_POST='T159L62'
+      GRID_CDO='t106grid'
+      GRID_PLOT='320x160'
+      ;;
+    'ORCA1')
+      GRID_POST='T255L91'
+      GRID_CDO='t170grid'
+      GRID_PLOT='512x256'
+      ;;
+    'ORCA025')
+      GRID_POST='T511L91'
+      GRID_CDO='t340grid'
+      GRID_PLOT='1024x512'
+      ;;
+    *)
+      echo "Nemo grid is not defined"
+      exit 1
+      ;;
+    esac
+  else
+    echo "Model is not defined"
+    exit 1
+  fi
+  export GRID_POST
+  export GRID_CDO
+  export GRID_PLOT
+
+}
+
+#####################################################################################################################
+# generate a checksum and store it in a file for the inidata folder
+# Globals:
+#   None
+# Arguments:
+#   Checksum_filename
+# Returns:
+#   None
+#####################################################################################################################
+function inidata_checksum_generate() {
+
+  filename=$1
+
+  if [[ "$filename" == "" ]]; then
+    echo "Filename argument is required to store the checksum results, exiting now"
+    exit 1
+  fi
+
+  # this generates the md5sum for every file present in the experiment inidata folder and a global md5sum of the complete list
+  echo "Generating list of files (and md5sum of each) in the directory, time taken:"
+  files_time="$(time (find inidata/ -type f -exec md5sum {} \; | sort -k 2 &> ${filename}_tmpl_files.txt ) 2>&1 1>/dev/null )"
+  echo "${files_time}"
+
+  # this creates a list of the paths of all the links and files and generates the md5sum for that list
+  echo "Generating list of links in the directory, time taken:"
+  links_time="$(time (find -L inidata/ -type f -exec readlink -f {} \; | sort &> ${filename}_tmpl_links.txt ) 2>&1 1>/dev/null )"
+  echo "${links_time}"
+}
++ . /gpfs/scratch/bsc32/bsc32627/t0ni/auto-ecearth3/plugins/transfer.sh
+#####################################################################################################################
+# Common Functions for handling file system operations to deal with transferring the model output from the
+# HPC to local storage.
+# machines for job handling/management
+# Maintainers: J.R.Berlin
+#####################################################################################################################
+
+. ${PROJDIR}/platforms/${HPCARCH}/utils.sh
+++ . /gpfs/scratch/bsc32/bsc32627/t0ni/auto-ecearth3/platforms/marenostrum4/utils.sh
+#####################################################################################################################
+# Functions for handling filesystem operations for marenostrum4 platform
+# Author: J.R.Berlin
+#####################################################################################################################
+
+#. ${PROJDIR}/platforms/common/common.utils.sh
+
+#####################################################################################################################
+# any override from the common libraries defined in filesystem.sh or new function goes here
+#####################################################################################################################
+
+#####################################################################################################################
+# Globals:
+#   None
+# Arguments:
+#   None
+# Returns:
+#   None
+# Purpose: load the common modules required by standard jobs in Marenostrum4
+#####################################################################################################################
+function setup_modules() {
+  set +xuve
+  module purge
+  module load intel/2018.3
+  module load mkl/2018.3
+  module load impi/2018.3
+  module load netcdf/4.2
+  module load hdf5/1.8.19
+  module load perl/5.26
+  module load fftw/3.3.6
+  module load python/2.7.13
+  module load udunits/2.2.25
+  module load gsl/2.4
+  module load nco/4.2.3_netcdf-4.2
+  module load CDO/1.7.2
+  module list
+  set -xuve
+}
+
+#####################################################################################################################
+# Globals:
+#   USER
+# Arguments:
+#   None
+# Returns:
+#   None
+# Purpose: Setup common paths as global variables, required by the different jobs running un the underlying platform
+#           used in nord3, transfer_node and bscearth000 as well
+####################################################################################################################
+function setup_common_paths() {
+  # common globals
+  MODELS_DIR=/gpfs/projects/bsc32/models
+  export SCRATCH=/gpfs/scratch/$(id -gn)/${USER}
+  GROUP=bsc32
+  # check if the machine has the environment tmp var defined
+  SCRATCH_TMP_DIR=${SCRATCH}/${EXPID}/${START_date}/${MEMBER}/tmp/${JOBNAME}
+  #initial conditions dirr for the platform, in order to have this working properly we need
+  #all IC/rst files in place synchronized from bsc32/projects
+  INTERMEDIATE_EXP_DIR=/gpfs/projects/${GROUP}/repository/exp
+  EXTRA_DIR=/gpfs/projects/${GROUP}/repository
+  IC_DIR=/gpfs/projects/${GROUP}/repository/ic
+}
+
+#####################################################################################################################
+# Globals:
+#   None
+# Arguments:
+#   None
+# Returns:
+#   None
+# Purpose: set the global variables and functions to be used by the jobs running in the underlying architecture
+#          used in nord3, transfer_node and bscearth000 as well
+#####################################################################################################################
+function setup_common_environment_vars() {
+  # common globals
+  MODELS_DIR=/gpfs/projects/bsc32/models
+  GROUP=bsc32
+}
+
+#####################################################################################################################
+# Globals:
+#   None
+# Arguments:
+#   None
+# Returns:
+#   None
+# Purpose: set the common set of global variables to be used for the jobs running on the underlying archictecture
+#####################################################################################################################
+function setup_environment_vars() {
+  # common globals
+  setup_common_environment_vars
+  export ECE3_POSTPROC_MACHINE=mn4
+}
+
+#####################################################################################################################
+# Globals:
+#   CURRENT_ARCH, HPCARCH
+# Arguments:
+#   None
+# Returns:
+#   None
+# Purpose: set the global variables refering to common paths to be used by the jobs running in the
+#         underlying architecture, used in nord3, transfer_node and bscearth000 as well
+#####################################################################################################################
+function setup_paths() {
+  setup_common_paths
+  if [[ "${CURRENT_ARCH}" == "${HPCARCH}" ]]; then
+    setup_paths_libs
+  fi
+}
+
+#####################################################################################################################
+# Globals:
+#   USER, PATH
+# Arguments:
+#   None
+# Returns:
+#   None
+# Purpose: auxiliary function to load paths to the different modules that will be load when the job
+#         executes in the cluster
+#####################################################################################################################
+function setup_paths_libs() {
+  grib_api_path=/apps/GRIB/1.14.0/INTEL
+  PATH=${grib_api_path}/bin:${PATH}
+
+  export SCRATCH=/gpfs/scratch/$(id -gn)/${USER}
+  export PATH=/gpfs/projects/bsc32/repository/apps/rebuild_nemo_marenostrum4:${PATH}
+  export PYTHONPATH=${grib_api_path}/lib/python2.7/site-packages/grib_api:${PYTHONPATH-}
+  export GRIB_BIN_PATH=${grib_api_path}/bin
+  export GRIB_DEFINITION_PATH=${grib_api_path}/share/grib_api/definitions
+  export GRIB_SAMPLES_PATH=${grib_api_path}/share/grib_api/ifs_samples/grib1
+}
+
+#####################################################################################################################
+# Globals:
+#   None
+# Arguments:
+#   None
+# Returns:
+#   None
+# Purpose: auxiliary function to load paths to the different modules that will be load when the job
+#          executes in the cluster, used in transfer machines!
+#####################################################################################################################
+function setup_environment_vars_local() {
+  setup_common_environment_vars
+  export ECE3_POSTPROC_MACHINE=mn4
+}
+
+#used in transfer machines !
+
+#####################################################################################################################
+# Globals:
+#   None
+# Arguments:
+#   None
+# Returns:
+#   None
+# Purpose: auxiliary function to set the intermediate storage root path, used in transfer machines, this function
+# overrides the base function in common.filesystem.sh
+#####################################################################################################################
+function setup_paths_local() {
+  echo "MN4 Paths"
+  GROUP=bsc32
+  export INTERMEDIATE_EXP_DIR=/gpfs/projects/${GROUP}/repository/exp
+}
+
+#####################################################################################################################
+# Globals:
+# EXPID, RUN_dir,  CHUNK, START_date, MEMBER, LPJG, OSM, PATHOUT, CURRENT_ARCH, destination_folder,
+# USE_INTERMEDIATE_STORAGE, MODEL
+# Arguments:
+#   Chunk_START_DATE, Chunk_END_DATE
+#   local_INTERMEDIATE_EXP_DIR, START_date, MEMBER, HPCARCH, INTERMEDIATE_EXP_DIR, EXPID, Chunk_start_date
+#   Chunk_end_date
+# Arguments :
+#   None
+# Returns:
+#   None
+# Purpose: Perform the transfer of the model output and several other type of files generated by the different Auto-EC-
+#   Earth jobs, this function is used in TRANSFER and TRANSFER_MEMBER
+#####################################################################################################################
+function transfer_output() {
+
+  Chunk_start_date=$1 #%Chunk_START_DATE%
+  Chunk_end_date=$2   #%Chunk_END_DATE%
+
+  echo "platform is: ${HPCARCH}"
+  echo "EXPID is: ${EXPID}"
+  echo "start dates: ${START_date}"
+  echo "members per start date: ${MEMBER}"
+
+  setup_paths_localtrans
+  #apply mkdir + chmod will be invoked in each transfer to handle the folder/file rights properly
+  if [[ ! -d ${destination_folder} ]]; then
+    mkdir_esarchive ${destination_folder}
+  fi
+  #needed for TRANSFER_MEMBER
+  if [[ ${USE_INTERMEDIATE_STORAGE-} == "TRUE" ]]; then
+    remote_folder=${src}/${EXPID}/${START_date}/${MEMBER}
+  else
+    remote_folder=${src}/${MODEL}/${EXPID}/original_files/${START_date}/${MEMBER}
+  fi
+  # set the mask for padding the chunk number to three digits
+  chunk_zero_padded=$(printf "%03d\n" ${CHUNK})
+
+  for type in $output_types; do
+    case $type in
+    logfiles)
+      # transfer logs corresponding to the JOBS that have ran
+      do_transfer "${src}/${EXPID}/logfiles/${type}_${EXPID}_${START_date}_${MEMBER}_*" ${destination_folder}/logfiles
+      ;;
+    LOG)
+      # transfer logs corresponding to the model logs that have ran for the given chunk
+      do_transfer "${src}/${EXPID}/logfiles/LOG_${EXPID}_${START_date}_${MEMBER}_${chunk_zero_padded}_${Chunk_start_date}-${Chunk_end_date}.tar*" ${destination_folder}/logfiles
+      ;;
+    MM* | diags)
+      do_transfer "${remote_folder}/outputs/${type}*_*${Chunk_start_date}-${Chunk_end_date}*" ${destination_folder}/${START_date}/${MEMBER}/outputs
+      ;;
+    REST* | restart)
+      do_transfer "${remote_folder}/restarts/${type}_${EXPID}_${START_date}_${MEMBER}_${chunk_zero_padded}_${Chunk_start_date}-${Chunk_end_date}.tar*" ${destination_folder}/${START_date}/${MEMBER}/restarts
+      ;;
+    IC)
+      do_transfer "${remote_folder}/ic/${type}_*${Chunk_start_date}-${Chunk_end_date}*" ${destination_folder}/${START_date}/${MEMBER}/ic
+      ;;
+    ORCA | $(eval echo ${EXPID}_))
+      do_transfer "${remote_folder}/outputs/${type}*${Chunk_start_date}-${Chunk_end_date}*" ${destination_folder}/${START_date}/${MEMBER}/outputs
+      ;;
+    ICM)
+      do_transfer "${remote_folder}/outputs/DDA_${EXPID}_${START_date}_${MEMBER}_${chunk_zero_padded}_${Chunk_start_date}-${Chunk_end_date}.tar*" ${destination_folder}/${START_date}/${MEMBER}/outputs
+      ;;
+    CMOR)
+      move_cmor_files ${src}/${EXPID}/cmorfiles/${START_date}/${MEMBER} ${destination_folder}/cmorfiles "TRUE"
+      # TODO ET check this!
+      #-      move_cmor_files ${src}/${EXPID}/cmorfiles/cmor_${CHUNK}/ ${destination_folder}/cmorfiles "TRUE"
+      #+      move_cmor_files ${src}/${EXPID}/cmorfiles/ ${destination_folder}/cmorfiles "TRUE"
+      ;;
+    ECE3POST)
+      do_transfer "${remote_folder}/ece3post/*_${Chunk_start_date}-${Chunk_end_date}.tar*" ${destination_folder}/${START_date}/${MEMBER}/ece3post
+      ;;
+    runtime)
+      do_transfer ${src}/${EXPID}/runtime/runtime_${EXPID}_${START_date}_${MEMBER}* ${destination_folder}/runtime
+      # TODO ET check this!
+      #-      do_transfer ${src}/${EXPID}/${START_date}/${MEMBER}/runtime* ${destination_folder}/runtime
+      #+      do_transfer "${src}/${EXPID}/${START_date}/${MEMBER}/runtime*" ${destination_folder}/runtime
+      ;;
+    land_param | lpjg_forcing | icmcl)
+      # TODO check correct paths in other cases - should not be remote_folder in first arg!
+      do_transfer "${src}/${EXPID}/${START_date}/${MEMBER}/outputs/osm/${type}/*" ${destination_folder}/${START_date}/${MEMBER}/outputs/${type}
+      ;;
+    *)
+      echo "$type is not a valid model output type"
+      exit 1
+      ;;
+    esac
+
+    if [ "$?" -ne "0" ]; then
+      exit 1
+    fi
+
+  done
+
+}
++ save_restarts
++ cd /gpfs/scratch/bsc32/bsc32627/t0ni/19931101/fc0/runtime
++ [[ ! -e /gpfs/scratch/bsc32/bsc32627/t0ni/19931101/fc0/runtime/flags/rest_1 ]]
++ PATHOUT_RES=/gpfs/archive/bsc32/esarchive/exp/ecearth/t0ni/original_files//19931101/fc0/restarts
++ mkdir_intermediate_storage /gpfs/archive/bsc32/esarchive/exp/ecearth/t0ni/original_files//19931101/fc0/restarts Earth
++ target_group=bsc32
++ target_dir=/gpfs/archive/bsc32/esarchive/exp/ecearth/t0ni/original_files//19931101/fc0/restarts
++ [[ 2 -eq 2 ]]
++ target_group=Earth
++ [[ ! -d /gpfs/archive/bsc32/esarchive/exp/ecearth/t0ni/original_files//19931101/fc0/restarts ]]
++ sg Earth 'mkdir -p /gpfs/archive/bsc32/esarchive/exp/ecearth/t0ni/original_files//19931101/fc0/restarts'
++ chmod g+w /gpfs/archive/bsc32/esarchive/exp/ecearth/t0ni/original_files//19931101/fc0/restarts
++ case "${TEMPLATE_NAME-}" in
++ [[ ! -e /gpfs/scratch/bsc32/bsc32627/t0ni/19931101/fc0/runtime/flags/resta_1 ]]
++ save_restart resta IFS
++ local rst_prefix=resta
++ local ec_component=IFS
+++ echo resta
+++ tr '[:lower:]' '[:upper:]'
++ local uppercase_rst_prefix=RESTA
++ [[ IFS == \L\P\J\G ]]
++ tarfile=RESTA_t0ni_19931101_fc0_001_19931101-19931130.tar
++ [[ -d IFS_Restart_1 ]]
++ [[ FALSE == \T\R\U\E ]]
++ echo 'Not saving the IFS restarts'
++ rm -rf IFS_Restart_1
++ [[ -f RESTA_t0ni_19931101_fc0_001_19931101-19931130.tar ]]
++ touch /gpfs/scratch/bsc32/bsc32627/t0ni/19931101/fc0/runtime/flags/resta_1
++ [[ ! -e /gpfs/scratch/bsc32/bsc32627/t0ni/19931101/fc0/runtime/flags/resto_1 ]]
++ save_restart resto NEMO
++ local rst_prefix=resto
++ local ec_component=NEMO
+++ echo resto
+++ tr '[:lower:]' '[:upper:]'
++ local uppercase_rst_prefix=RESTO
++ [[ NEMO == \L\P\J\G ]]
++ tarfile=RESTO_t0ni_19931101_fc0_001_19931101-19931130.tar
++ [[ -d NEMO_Restart_1 ]]
++ [[ FALSE == \T\R\U\E ]]
++ echo 'Not saving the NEMO restarts'
++ rm -rf NEMO_Restart_1
++ [[ -f RESTO_t0ni_19931101_fc0_001_19931101-19931130.tar ]]
++ touch /gpfs/scratch/bsc32/bsc32627/t0ni/19931101/fc0/runtime/flags/resto_1
++ [[ FALSE != '' ]]
++ [[ FALSE == \T\R\U\E ]]
++ [[ ! -e /gpfs/scratch/bsc32/bsc32627/t0ni/19931101/fc0/runtime/flags/restc_1 ]]
++ save_restart restc OASIS
++ local rst_prefix=restc
++ local ec_component=OASIS
+++ echo restc
+++ tr '[:lower:]' '[:upper:]'
++ local uppercase_rst_prefix=RESTC
++ [[ OASIS == \L\P\J\G ]]
++ tarfile=RESTC_t0ni_19931101_fc0_001_19931101-19931130.tar
++ [[ -d OASIS_Restart_1 ]]
++ [[ FALSE == \T\R\U\E ]]
++ echo 'Not saving the OASIS restarts'
++ rm -rf OASIS_Restart_1
++ [[ -f RESTC_t0ni_19931101_fc0_001_19931101-19931130.tar ]]
++ touch /gpfs/scratch/bsc32/bsc32627/t0ni/19931101/fc0/runtime/flags/restc_1
++ [[ TRUE == FALSE ]]
++ [[ FALSE == \T\R\U\E ]]
++ [[ FALSE == \T\R\U\E ]]
++ [[ FALSE == \T\R\U\E ]]
++ case "${TEMPLATE_NAME-}" in
++ [[ -e /gpfs/scratch/bsc32/bsc32627/t0ni/19931101/fc0/runtime/flags/restc_1 ]]
++ [[ -e /gpfs/scratch/bsc32/bsc32627/t0ni/19931101/fc0/runtime/flags/resta_1 ]]
++ [[ -e /gpfs/scratch/bsc32/bsc32627/t0ni/19931101/fc0/runtime/flags/resto_1 ]]
++ rm -f /gpfs/scratch/bsc32/bsc32627/t0ni/19931101/fc0/runtime/flags/restc_1 /gpfs/scratch/bsc32/bsc32627/t0ni/19931101/fc0/runtime/flags/resta_1 /gpfs/scratch/bsc32/bsc32627/t0ni/19931101/fc0/runtime/flags/resto_1
++ [[ FALSE == \T\R\U\E ]]
++ [[ FALSE == \T\R\U\E ]]
++ [[ FALSE == \T\R\U\E ]]
++ touch /gpfs/scratch/bsc32/bsc32627/t0ni/19931101/fc0/runtime/flags/rest_1
++ save_outputs
++ cd /gpfs/scratch/bsc32/bsc32627/t0ni/19931101/fc0/runtime
++ save_outputs_atm
++ [[ -d /gpfs/scratch/bsc32/bsc32627/t0ni/19931101/fc0/runtime/output/ifs/001 ]]
++ cd /gpfs/scratch/bsc32/bsc32627/t0ni/19931101/fc0/runtime/output/ifs/001
++ [[ ! -e /gpfs/scratch/bsc32/bsc32627/t0ni/19931101/fc0/runtime/flags/out_1 ]]
++ [[ ! -e /gpfs/scratch/bsc32/bsc32627/t0ni/19931101/fc0/runtime/flags/outa_1 ]]
++ [[ FALSE == \T\R\U\E ]]
++ [[ FALSE == \T\R\U\E ]]
++ [[ FALSE == \T\R\U\E ]]
++ touch /gpfs/scratch/bsc32/bsc32627/t0ni/19931101/fc0/runtime/flags/outa_1
++ save_outputs_oce
++ [[ -d /gpfs/scratch/bsc32/bsc32627/t0ni/19931101/fc0/runtime/output/nemo/001 ]]
++ cd /gpfs/scratch/bsc32/bsc32627/t0ni/19931101/fc0/runtime/output/nemo/001
++ [[ ! -e /gpfs/scratch/bsc32/bsc32627/t0ni/19931101/fc0/runtime/flags/outo_1 ]]
++ ECversion=ecearth3
++ create_mmo
++ [[ -z TRUE ]]
++ [[ TRUE == \F\A\L\S\E ]]
++ [[ FALSE == \T\R\U\E ]]
++ touch /gpfs/scratch/bsc32/bsc32627/t0ni/19931101/fc0/runtime/flags/outo_1
++ save_outputs_lpjg
++ [[ -d '' ]]
++ save_outputs_osm
++ [[ -d '' ]]
++ save_outputs_tm5
++ [[ -d '' ]]
++ save_outputs_cmorization
++ . /gpfs/scratch/bsc32/bsc32627/t0ni/auto-ecearth3/plugins/cmorization.sh
+#####################################################################################################################
+# Globals: CMOR_REALIZATION_INDEX, MEMBER
+# Arguments:
+#
+# Returns:
+#   None
+# Purpose: Set the cmor realization index based on the member list
+#
+#####################################################################################################################
+function cmor_realization_indexing() {
+
+  if [[ ! -z ${CMOR_REALIZATION_INDEX} ]]; then
+    CMOR_REALIZATION_INDEX_LIST=($(echo ${CMOR_REALIZATION_INDEX}))
+    member_index0=$(echo $((10#$(echo ${MEMBER} | cut -c3-))))
+    realization_index=${CMOR_REALIZATION_INDEX_LIST[${member_index0}]}
+  else
+    realization_index=${member_index}
+  fi
+
+}
+
+#####################################################################################################################
+# Globals: CMOR_EXP_CUSTOM BSC_OUTCLASS CMOR_ADD_STARTDATE sub_experiment_id
+# Arguments:
+#
+# Returns:
+#   None
+# Purpose: Creates the subexperiment id according to CMOR_EXP_CUSTOM BSC_OUTCLASS CMOR_ADD_STARTDATE to add it in the CMOR file names
+#
+#####################################################################################################################
+
+function create_sub_experiment_id() {
+  #The logics of the creation of the sub_experiment_id are described in https://earth.bsc.es/gitlab/es/auto-ecearth3/-/issues/1355#note_101060
+  if [[ ${CMOR_EXP_CUSTOM} == "TRUE" ]]; then
+    if [[ -n $(echo ${BSC_OUTCLASS} | grep dcpp) ]] || [[ "${CMOR_ACTIVITY_ID}" == "DCPP" ]]; then
+      if [[ ${CMOR_ADD_STARTDATE} == "TRUE" ]]; then
+        echo TRUE TRUE TRUE
+        sub_experiment_id=s$(echo ${START_date} | cut -c1-8)
+      else
+        echo TRUE TRUE FALSE
+        sub_experiment_id=s$(echo ${START_date} | cut -c1-4)
+      fi
+    else
+      if [[ ${CMOR_ADD_STARTDATE} == "TRUE" ]]; then
+        echo TRUE FALSE TRUE
+        sub_experiment_id=s$(echo ${START_date} | cut -c1-8)
+      else
+        echo TRUE FALSE FALSE
+        sub_experiment_id=""
+      fi
+    fi
+  else
+    if [[ -n $(echo ${BSC_OUTCLASS} | grep dcpp) ]] || [[ "${CMOR_ACTIVITY_ID}" == "DCPP" ]]; then
+      if [[ ${CMOR_ADD_STARTDATE} == "TRUE" ]]; then
+        echo "Running with CMOR_EXP_CUSTOM=False + CMOR_ADD_STARTDATE=True is forbidden, exiting"
+        exit 0
+      else
+        sub_experiment_id=s$(echo ${START_date} | cut -c1-4)
+      fi
+    else
+      if [[ ${CMOR_ADD_STARTDATE} == "TRUE" ]]; then
+        echo "Running with CMOR_EXP_CUSTOM=False + CMOR_ADD_STARTDATE=True is forbidden, exiting"
+        exit 0
+      else
+        sub_experiment_id=""
+      fi
+    fi
+  fi
+
+}
++ [[ TRUE != '' ]]
++ [[ TRUE == \T\R\U\E ]]
++ PATHOUT_CMOR=/gpfs/archive/bsc32/esarchive/exp/ecearth/t0ni/original_files//cmorfiles/19931101/fc0
++ [[ TRUE == TRUE ]]
++ PATHOUT_CMOR=/gpfs/archive/bsc32/esarchive/exp/ecearth/t0ni/original_files//cmorfiles
++ cmor_folder=/gpfs/scratch/bsc32/bsc32627/t0ni/19931101/fc0/runtime/cmor_outputs
+++ ls -d /gpfs/scratch/bsc32/bsc32627/t0ni/19931101/fc0/runtime/cmor_outputs/cmor_atm_1 /gpfs/scratch/bsc32/bsc32627/t0ni/19931101/fc0/runtime/cmor_outputs/cmor_oce_1
++ cmor_folder_list='/gpfs/scratch/bsc32/bsc32627/t0ni/19931101/fc0/runtime/cmor_outputs/cmor_atm_1
+/gpfs/scratch/bsc32/bsc32627/t0ni/19931101/fc0/runtime/cmor_outputs/cmor_oce_1'
++ returncode=0
++ [[ ! -z /gpfs/scratch/bsc32/bsc32627/t0ni/19931101/fc0/runtime/cmor_outputs/cmor_atm_1
+/gpfs/scratch/bsc32/bsc32627/t0ni/19931101/fc0/runtime/cmor_outputs/cmor_oce_1 ]]
++ [[ 0 -eq 0 ]]
++ for cmor_tmp_folder in '${cmor_folder_list[@]}'
++ remove_cmor_temp_files /gpfs/scratch/bsc32/bsc32627/t0ni/19931101/fc0/runtime/cmor_outputs/cmor_atm_1
++ local cmor_files_path=/gpfs/scratch/bsc32/bsc32627/t0ni/19931101/fc0/runtime/cmor_outputs/cmor_atm_1
++ find /gpfs/scratch/bsc32/bsc32627/t0ni/19931101/fc0/runtime/cmor_outputs/cmor_atm_1/ -mindepth 10 -type f -name '*_gr[a-z|A-Z|0-9]*.nc'
++ find /gpfs/scratch/bsc32/bsc32627/t0ni/19931101/fc0/runtime/cmor_outputs/cmor_atm_1/ -mindepth 10 -type f -name '*_gn[a-z|A-Z|0-9]*.nc'
++ find /gpfs/scratch/bsc32/bsc32627/t0ni/19931101/fc0/runtime/cmor_outputs/cmor_atm_1/ -mindepth 10 -type f -name '*_gr[a-z|A-Z|0-9]*.nc' -delete
++ find /gpfs/scratch/bsc32/bsc32627/t0ni/19931101/fc0/runtime/cmor_outputs/cmor_atm_1/ -mindepth 10 -type f -name '*_gn[a-z|A-Z|0-9]*.nc' -delete
++ for cmor_tmp_folder in '${cmor_folder_list[@]}'
++ remove_cmor_temp_files /gpfs/scratch/bsc32/bsc32627/t0ni/19931101/fc0/runtime/cmor_outputs/cmor_oce_1
++ local cmor_files_path=/gpfs/scratch/bsc32/bsc32627/t0ni/19931101/fc0/runtime/cmor_outputs/cmor_oce_1
++ find /gpfs/scratch/bsc32/bsc32627/t0ni/19931101/fc0/runtime/cmor_outputs/cmor_oce_1/ -mindepth 10 -type f -name '*_gr[a-z|A-Z|0-9]*.nc'
++ find /gpfs/scratch/bsc32/bsc32627/t0ni/19931101/fc0/runtime/cmor_outputs/cmor_oce_1/ -mindepth 10 -type f -name '*_gn[a-z|A-Z|0-9]*.nc'
++ find /gpfs/scratch/bsc32/bsc32627/t0ni/19931101/fc0/runtime/cmor_outputs/cmor_oce_1/ -mindepth 10 -type f -name '*_gr[a-z|A-Z|0-9]*.nc' -delete
++ find /gpfs/scratch/bsc32/bsc32627/t0ni/19931101/fc0/runtime/cmor_outputs/cmor_oce_1/ -mindepth 10 -type f -name '*_gn[a-z|A-Z|0-9]*.nc' -delete
++ mkdir_intermediate_storage /gpfs/archive/bsc32/esarchive/exp/ecearth/t0ni/original_files//cmorfiles Earth
++ target_group=bsc32
++ target_dir=/gpfs/archive/bsc32/esarchive/exp/ecearth/t0ni/original_files//cmorfiles
++ [[ 2 -eq 2 ]]
++ target_group=Earth
++ [[ ! -d /gpfs/archive/bsc32/esarchive/exp/ecearth/t0ni/original_files//cmorfiles ]]
++ sg Earth 'mkdir -p /gpfs/archive/bsc32/esarchive/exp/ecearth/t0ni/original_files//cmorfiles'
++ chmod g+w /gpfs/archive/bsc32/esarchive/exp/ecearth/t0ni/original_files//cmorfiles
++ [[ -d /gpfs/scratch/bsc32/bsc32627/t0ni/19931101/fc0/runtime/cmor_outputs ]]
++ move_cmor_files /gpfs/scratch/bsc32/bsc32627/t0ni/19931101/fc0/runtime/cmor_outputs /gpfs/archive/bsc32/esarchive/exp/ecearth/t0ni/original_files//cmorfiles TRUE
++ local source_cmor_dir=/gpfs/scratch/bsc32/bsc32627/t0ni/19931101/fc0/runtime/cmor_outputs
++ local target_cmor_dir=/gpfs/archive/bsc32/esarchive/exp/ecearth/t0ni/original_files//cmorfiles
++ local is_transfer=TRUE
++ local 'remote_host= '
++ [[ '' == \T\R\U\E ]]
++ [[ -d /gpfs/scratch/bsc32/bsc32627/t0ni/19931101/fc0/runtime/cmor_outputs ]]
++ echo 'moving cmor files .....'
+++ ls -d /gpfs/scratch/bsc32/bsc32627/t0ni/19931101/fc0/runtime/cmor_outputs/cmor_atm_1/ /gpfs/scratch/bsc32/bsc32627/t0ni/19931101/fc0/runtime/cmor_outputs/cmor_oce_1/
++ cmor_folders='/gpfs/scratch/bsc32/bsc32627/t0ni/19931101/fc0/runtime/cmor_outputs/cmor_atm_1/
+/gpfs/scratch/bsc32/bsc32627/t0ni/19931101/fc0/runtime/cmor_outputs/cmor_oce_1/'
++ returncode=0
++ [[ ! -z /gpfs/scratch/bsc32/bsc32627/t0ni/19931101/fc0/runtime/cmor_outputs/cmor_atm_1/
+/gpfs/scratch/bsc32/bsc32627/t0ni/19931101/fc0/runtime/cmor_outputs/cmor_oce_1/ ]]
++ [[ 0 -eq 0 ]]
++ base_storage_cmor_target_dir=/gpfs/archive/bsc32/esarchive/exp/ecearth/t0ni/original_files//cmorfiles
++ for cmor_remote_dir in '${cmor_folders}'
++ [[ TRUE != \T\R\U\E ]]
++ move_files /gpfs/scratch/bsc32/bsc32627/t0ni/19931101/fc0/runtime/cmor_outputs/cmor_atm_1/ /gpfs/archive/bsc32/esarchive/exp/ecearth/t0ni/original_files//cmorfiles TRUE
++ local filenames=/gpfs/scratch/bsc32/bsc32627/t0ni/19931101/fc0/runtime/cmor_outputs/cmor_atm_1/
++ local target_dir=/gpfs/archive/bsc32/esarchive/exp/ecearth/t0ni/original_files//cmorfiles
++ local is_transfer=TRUE
++ [[ TRUE == \T\R\U\E ]]
++ blocking_rsync '--no-perms --links --times --recursive --remove-source-files --no-group  --omit-dir-times --chmod=g+rwxs,o-rwx' /gpfs/scratch/bsc32/bsc32627/t0ni/19931101/fc0/runtime/cmor_outputs/cmor_atm_1/ /gpfs/archive/bsc32/esarchive/exp/ecearth/t0ni/original_files//cmorfiles Earth
++ options='--no-perms --links --times --recursive --remove-source-files --no-group  --omit-dir-times --chmod=g+rwxs,o-rwx'
++ source=/gpfs/scratch/bsc32/bsc32627/t0ni/19931101/fc0/runtime/cmor_outputs/cmor_atm_1/
++ destination=/gpfs/archive/bsc32/esarchive/exp/ecearth/t0ni/original_files//cmorfiles
++ target_group=Earth
++ [[ -z TRUE ]]
++ [[ TRUE == \F\A\L\S\E ]]
+++ date +%s
++ t1=1639854232
+++ dtsgrsync Earth --no-perms --links --times --recursive --remove-source-files --no-group --omit-dir-times --chmod=g+rwxs,o-rwx /gpfs/scratch/bsc32/bsc32627/t0ni/19931101/fc0/runtime/cmor_outputs/cmor_atm_1/ /gpfs/archive/bsc32/esarchive/exp/ecearth/t0ni/original_files//cmorfiles
+++ awk '{print $4}'
++ jid=1435208
++ [[ -z 1435208 ]]
+++ dtq -j 1435208
+++ wc -l
++ jsc=2
+++ dtq -j 1435208
+++ awk '{print $4}'
+++ tail -1
++ jst=PENDING
++ echo 'The job 1435208 is PENDING'
++ [[ 2 -gt 1 ]]
++ [[ PENDING != \S\T\A\T\E ]]
++ sleep 60
+++ dtq -j 1435208
+++ wc -l
++ jsc=1
+++ awk '{print $4}'
+++ dtq -j 1435208
+++ tail -1
++ jst=STATE
++ echo 'The job 1435208 is STATE'
++ [[ 1 -gt 1 ]]
+++ date +%s
++ t2=1639854292
+++ date -d '0 -1639854232 sec + 1639854292 sec' +%T
++ tr=00:01:00
++ [[ -f dtsgrsync_1435208.err ]]
++ [[ ! -s dtsgrsync_1435208.err ]]
++ rm -f dtsgrsync_1435208.err dtsgrsync_1435208.out
++ return
++ [[ 0 != 0 ]]
++ find /gpfs/scratch/bsc32/bsc32627/t0ni/19931101/fc0/runtime/cmor_outputs/cmor_atm_1/ -type d -delete
++ for cmor_remote_dir in '${cmor_folders}'
++ [[ TRUE != \T\R\U\E ]]
++ move_files /gpfs/scratch/bsc32/bsc32627/t0ni/19931101/fc0/runtime/cmor_outputs/cmor_oce_1/ /gpfs/archive/bsc32/esarchive/exp/ecearth/t0ni/original_files//cmorfiles TRUE
++ local filenames=/gpfs/scratch/bsc32/bsc32627/t0ni/19931101/fc0/runtime/cmor_outputs/cmor_oce_1/
++ local target_dir=/gpfs/archive/bsc32/esarchive/exp/ecearth/t0ni/original_files//cmorfiles
++ local is_transfer=TRUE
++ [[ TRUE == \T\R\U\E ]]
++ blocking_rsync '--no-perms --links --times --recursive --remove-source-files --no-group  --omit-dir-times --chmod=g+rwxs,o-rwx' /gpfs/scratch/bsc32/bsc32627/t0ni/19931101/fc0/runtime/cmor_outputs/cmor_oce_1/ /gpfs/archive/bsc32/esarchive/exp/ecearth/t0ni/original_files//cmorfiles Earth
++ options='--no-perms --links --times --recursive --remove-source-files --no-group  --omit-dir-times --chmod=g+rwxs,o-rwx'
++ source=/gpfs/scratch/bsc32/bsc32627/t0ni/19931101/fc0/runtime/cmor_outputs/cmor_oce_1/
++ destination=/gpfs/archive/bsc32/esarchive/exp/ecearth/t0ni/original_files//cmorfiles
++ target_group=Earth
++ [[ -z TRUE ]]
++ [[ TRUE == \F\A\L\S\E ]]
+++ date +%s
++ t1=1639854301
+++ dtsgrsync Earth --no-perms --links --times --recursive --remove-source-files --no-group --omit-dir-times --chmod=g+rwxs,o-rwx /gpfs/scratch/bsc32/bsc32627/t0ni/19931101/fc0/runtime/cmor_outputs/cmor_oce_1/ /gpfs/archive/bsc32/esarchive/exp/ecearth/t0ni/original_files//cmorfiles
+++ awk '{print $4}'
++ jid=1435212
++ [[ -z 1435212 ]]
+++ dtq -j 1435212
+++ wc -l
++ jsc=2
+++ dtq -j 1435212
+++ awk '{print $4}'
+++ tail -1
++ jst=PENDING
++ echo 'The job 1435212 is PENDING'
++ [[ 2 -gt 1 ]]
++ [[ PENDING != \S\T\A\T\E ]]
++ sleep 60
+++ dtq -j 1435212
+++ wc -l
++ jsc=1
+++ dtq -j 1435212
+++ awk '{print $4}'
+++ tail -1
++ jst=STATE
++ echo 'The job 1435212 is STATE'
++ [[ 1 -gt 1 ]]
+++ date +%s
++ t2=1639854361
+++ date -d '0 -1639854301 sec + 1639854361 sec' +%T
++ tr=00:01:00
++ [[ -f dtsgrsync_1435212.err ]]
++ [[ ! -s dtsgrsync_1435212.err ]]
++ rm -f dtsgrsync_1435212.err dtsgrsync_1435212.out
++ return
++ [[ 0 != 0 ]]
++ find /gpfs/scratch/bsc32/bsc32627/t0ni/19931101/fc0/runtime/cmor_outputs/cmor_oce_1/ -type d -delete
++ case "${TEMPLATE_NAME-}" in
++ [[ -e /gpfs/scratch/bsc32/bsc32627/t0ni/19931101/fc0/runtime/flags/outa_1 ]]
++ [[ -e /gpfs/scratch/bsc32/bsc32627/t0ni/19931101/fc0/runtime/flags/outo_1 ]]
++ touch /gpfs/scratch/bsc32/bsc32627/t0ni/19931101/fc0/runtime/flags/out_1
++ save_logs
++ PATHOUT_LOGS=/gpfs/archive/bsc32/esarchive/exp/ecearth/t0ni/original_files//logfiles/
++ cd /gpfs/scratch/bsc32/bsc32627/t0ni/19931101/fc0/runtime
+++ printf '%03d\n' 1
++ chunk_zero_padded=001
++ runtime_logdir=log/001
++ [[ ! -d log/001 ]]
++ tarfile=LOG_t0ni_19931101_fc0_001_19931101-19931130.tar.gz
++ tar --remove-files -czvf LOG_t0ni_19931101_fc0_001_19931101-19931130.tar.gz log/001
++ move_files LOG_t0ni_19931101_fc0_001_19931101-19931130.tar.gz /gpfs/archive/bsc32/esarchive/exp/ecearth/t0ni/original_files//logfiles/ TRUE
++ local filenames=LOG_t0ni_19931101_fc0_001_19931101-19931130.tar.gz
++ local target_dir=/gpfs/archive/bsc32/esarchive/exp/ecearth/t0ni/original_files//logfiles/
++ local is_transfer=TRUE
++ [[ TRUE == \T\R\U\E ]]
++ blocking_rsync '--no-perms --links --times --recursive --remove-source-files --no-group  --omit-dir-times --chmod=g+rwxs,o-rwx' LOG_t0ni_19931101_fc0_001_19931101-19931130.tar.gz /gpfs/archive/bsc32/esarchive/exp/ecearth/t0ni/original_files//logfiles/ Earth
++ options='--no-perms --links --times --recursive --remove-source-files --no-group  --omit-dir-times --chmod=g+rwxs,o-rwx'
++ source=LOG_t0ni_19931101_fc0_001_19931101-19931130.tar.gz
++ destination=/gpfs/archive/bsc32/esarchive/exp/ecearth/t0ni/original_files//logfiles/
++ target_group=Earth
++ [[ -z TRUE ]]
++ [[ TRUE == \F\A\L\S\E ]]
+++ date +%s
++ t1=1639854371
+++ dtsgrsync Earth --no-perms --links --times --recursive --remove-source-files --no-group --omit-dir-times --chmod=g+rwxs,o-rwx LOG_t0ni_19931101_fc0_001_19931101-19931130.tar.gz /gpfs/archive/bsc32/esarchive/exp/ecearth/t0ni/original_files//logfiles/
+++ awk '{print $4}'
++ jid=1435215
++ [[ -z 1435215 ]]
+++ dtq -j 1435215
+++ wc -l
++ jsc=2
+++ dtq -j 1435215
+++ awk '{print $4}'
+++ tail -1
++ jst=PENDING
++ echo 'The job 1435215 is PENDING'
++ [[ 2 -gt 1 ]]
++ [[ PENDING != \S\T\A\T\E ]]
++ sleep 60
+++ dtq -j 1435215
+++ wc -l
++ jsc=1
+++ dtq -j 1435215
+++ awk '{print $4}'
+++ tail -1
++ jst=STATE
++ echo 'The job 1435215 is STATE'
++ [[ 1 -gt 1 ]]
+++ date +%s
++ t2=1639854432
+++ date -d '0 -1639854371 sec + 1639854432 sec' +%T
++ tr=00:01:01
++ [[ -f dtsgrsync_1435215.err ]]
++ [[ ! -s dtsgrsync_1435215.err ]]
++ rm -f dtsgrsync_1435215.err dtsgrsync_1435215.out
++ return
++ [[ 0 != 0 ]]
++ save_ic
++ PATHOUT_IC=/gpfs/archive/bsc32/esarchive/exp/ecearth/t0ni/original_files//19931101/fc0/ic
++ mkdir_intermediate_storage /gpfs/archive/bsc32/esarchive/exp/ecearth/t0ni/original_files//19931101/fc0/ic Earth
++ target_group=bsc32
++ target_dir=/gpfs/archive/bsc32/esarchive/exp/ecearth/t0ni/original_files//19931101/fc0/ic
++ [[ 2 -eq 2 ]]
++ target_group=Earth
++ [[ ! -d /gpfs/archive/bsc32/esarchive/exp/ecearth/t0ni/original_files//19931101/fc0/ic ]]
++ sg Earth 'mkdir -p /gpfs/archive/bsc32/esarchive/exp/ecearth/t0ni/original_files//19931101/fc0/ic'
++ chmod g+w /gpfs/archive/bsc32/esarchive/exp/ecearth/t0ni/original_files//19931101/fc0/ic
++ remote_ic_folder=/gpfs/scratch/bsc32/bsc32627/t0ni/19931101/fc0/runtime/save_ic/ic
++ [[ -d /gpfs/scratch/bsc32/bsc32627/t0ni/19931101/fc0/runtime/save_ic/ic ]]
++ cd /gpfs/scratch/bsc32/bsc32627/t0ni/19931101/fc0/runtime/save_ic/ic
++++ ls -1 IC_t0ni_19931101_fc0_001_0_19931101-19931130.tar
+++ echo IC_t0ni_19931101_fc0_001_0_19931101-19931130.tar
++ filelist=IC_t0ni_19931101_fc0_001_0_19931101-19931130.tar
++ [[ ! -z IC_t0ni_19931101_fc0_001_0_19931101-19931130.tar ]]
++ echo 'moving ICs files '
++ move_files IC_t0ni_19931101_fc0_001_0_19931101-19931130.tar /gpfs/archive/bsc32/esarchive/exp/ecearth/t0ni/original_files//19931101/fc0/ic TRUE
++ local filenames=IC_t0ni_19931101_fc0_001_0_19931101-19931130.tar
++ local target_dir=/gpfs/archive/bsc32/esarchive/exp/ecearth/t0ni/original_files//19931101/fc0/ic
++ local is_transfer=TRUE
++ [[ TRUE == \T\R\U\E ]]
++ blocking_rsync '--no-perms --links --times --recursive --remove-source-files --no-group  --omit-dir-times --chmod=g+rwxs,o-rwx' IC_t0ni_19931101_fc0_001_0_19931101-19931130.tar /gpfs/archive/bsc32/esarchive/exp/ecearth/t0ni/original_files//19931101/fc0/ic Earth
++ options='--no-perms --links --times --recursive --remove-source-files --no-group  --omit-dir-times --chmod=g+rwxs,o-rwx'
++ source=IC_t0ni_19931101_fc0_001_0_19931101-19931130.tar
++ destination=/gpfs/archive/bsc32/esarchive/exp/ecearth/t0ni/original_files//19931101/fc0/ic
++ target_group=Earth
++ [[ -z TRUE ]]
++ [[ TRUE == \F\A\L\S\E ]]
+++ date +%s
++ t1=1639854432
+++ dtsgrsync Earth --no-perms --links --times --recursive --remove-source-files --no-group --omit-dir-times --chmod=g+rwxs,o-rwx IC_t0ni_19931101_fc0_001_0_19931101-19931130.tar /gpfs/archive/bsc32/esarchive/exp/ecearth/t0ni/original_files//19931101/fc0/ic
+++ awk '{print $4}'
++ jid=1435216
++ [[ -z 1435216 ]]
+++ dtq -j 1435216
+++ wc -l
++ jsc=2
+++ dtq -j 1435216
+++ awk '{print $4}'
+++ tail -1
++ jst=PENDING
++ echo 'The job 1435216 is PENDING'
++ [[ 2 -gt 1 ]]
++ [[ PENDING != \S\T\A\T\E ]]
++ sleep 60
+++ dtq -j 1435216
+++ wc -l
++ jsc=1
+++ dtq -j 1435216
+++ awk '{print $4}'
+++ tail -1
++ jst=STATE
++ echo 'The job 1435216 is STATE'
++ [[ 1 -gt 1 ]]
+++ date +%s
++ t2=1639854493
+++ date -d '0 -1639854432 sec + 1639854493 sec' +%T
++ tr=00:01:01
++ [[ -f dtsgrsync_1435216.err ]]
++ [[ ! -s dtsgrsync_1435216.err ]]
++ rm -f dtsgrsync_1435216.err dtsgrsync_1435216.out
++ return
++ [[ 0 != 0 ]]
++ [[ -d /gpfs/scratch/bsc32/bsc32627/t0ni/19931101/fc0/runtime/output/ifs/001 ]]
++ clean_atm_nudging
++ cd /gpfs/scratch/bsc32/bsc32627/t0ni/19931101/fc0/runtime
++ [[ FALSE != '' ]]
++ [[ FALSE == \T\R\U\E ]]
++ remove_tail_chunk
++ cd /gpfs/scratch/bsc32/bsc32627/t0ni/19931101/fc0/runtime
++ [[ -e /gpfs/scratch/bsc32/bsc32627/t0ni/19931101/fc0/runtime/flags/rest_1 ]]
++ [[ -e /gpfs/scratch/bsc32/bsc32627/t0ni/19931101/fc0/runtime/flags/out_1 ]]
++ [[ -d /gpfs/scratch/bsc32/bsc32627/t0ni/19931101/fc0/runtime/output/ifs/001 ]]
+++ printf '%03d\n' 1
++ [[ 001 == 001 ]]
++ echo 'We are now copying the ICM??t0ni+000000 files so they can be used later by CMORATM'
++ cp /gpfs/scratch/bsc32/bsc32627/t0ni/19931101/fc0/runtime/output/ifs/001/ICMGGt0ni+000000 /gpfs/scratch/bsc32/bsc32627/t0ni/19931101/fc0/runtime/output/ifs/001/ICMSHt0ni+000000 /gpfs/scratch/bsc32/bsc32627/t0ni/19931101/fc0/runtime
++ echo 'We are now removing /gpfs/scratch/bsc32/bsc32627/t0ni/19931101/fc0/runtime/output/ifs/001'
++ rm -rf /gpfs/scratch/bsc32/bsc32627/t0ni/19931101/fc0/runtime/output/ifs/001
++ mkdir /gpfs/scratch/bsc32/bsc32627/t0ni/19931101/fc0/runtime/output/ifs/001
++ mv /gpfs/scratch/bsc32/bsc32627/t0ni/19931101/fc0/runtime/ICMGGt0ni+000000 /gpfs/scratch/bsc32/bsc32627/t0ni/19931101/fc0/runtime/ICMSHt0ni+000000 /gpfs/scratch/bsc32/bsc32627/t0ni/19931101/fc0/runtime/output/ifs/001
++ [[ -d /gpfs/scratch/bsc32/bsc32627/t0ni/19931101/fc0/runtime/output/nemo/001 ]]
++ echo 'We are now removing /gpfs/scratch/bsc32/bsc32627/t0ni/19931101/fc0/runtime/output/nemo/001'
++ rm -rf /gpfs/scratch/bsc32/bsc32627/t0ni/19931101/fc0/runtime/output/nemo/001
++ [[ FALSE == \T\R\U\E ]]
++ [[ FALSE == \T\R\U\E ]]
++ [[ FALSE == \T\R\U\E ]]
++ '[' ecearth3 == ifs3 ']'
++ '[' ecearth3 == ecearth3 ']'
++ save_ece3_postproc
++ [[ -d /gpfs/scratch/bsc32/bsc32627/t0ni/19931101/fc0/runtime/ece3post ]]
++ check_final_condition
++ cd /gpfs/scratch/bsc32/bsc32627/t0ni/19931101/fc0/runtime
++ [[ ! -e /gpfs/scratch/bsc32/bsc32627/t0ni/19931101/fc0/runtime/flags/finished_chunk_1 ]]
++ [[ 1 -gt 1 ]]
++ rm -rf Output_1
++ rm -f /gpfs/scratch/bsc32/bsc32627/t0ni/19931101/fc0/runtime/flags/rest_1 /gpfs/scratch/bsc32/bsc32627/t0ni/19931101/fc0/runtime/flags/out_1
++ touch /gpfs/scratch/bsc32/bsc32627/t0ni/19931101/fc0/runtime/flags/finished_chunk_1
+
+###################
+# Autosubmit tailer
+###################
+set -xuve
++ set -xuve
+echo $(date +%s) >> ${job_name_ptrn}_STAT
+++ date +%s
++ echo 1639854495
+touch ${job_name_ptrn}_COMPLETED
++ touch /gpfs/scratch/bsc32/bsc32627/t0ni/LOG_t0ni/t0ni_19931101_fc0_1_CLEAN_COMPLETED
+exit 0
++ exit 0

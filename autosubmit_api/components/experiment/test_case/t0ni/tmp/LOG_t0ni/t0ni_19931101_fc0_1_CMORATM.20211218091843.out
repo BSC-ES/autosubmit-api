@@ -1,0 +1,91 @@
+[INFO] JOBID=19279784
+
+
+ Running  /gpfs/scratch/bsc32/bsc32627/t0ni/auto-ecearth3/ece2cmor/ece2cmor3/scripts/modify-metadata-template.sh CMIP piControl EC-EARTH-AOGCM /gpfs/scratch/bsc32/bsc32627/t0ni/auto-ecearth3/ece2cmor/ece2cmor3/resources/metadata-templates/cmip6-CMIP-piControl-metadata-template.json   for  ifs
+ Running  /gpfs/scratch/bsc32/bsc32627/t0ni/auto-ecearth3/ece2cmor/ece2cmor3/scripts/modify-metadata-template.sh CMIP piControl EC-EARTH-AOGCM /gpfs/scratch/bsc32/bsc32627/t0ni/auto-ecearth3/ece2cmor/ece2cmor3/resources/metadata-templates/cmip6-CMIP-piControl-metadata-template.json   for  nemo
+
+-->> Could not load xarray!! <<--
+-->> Could not load xarray!! <<--
+-->> Could not load xarray!! <<--
+-->> Could not load xarray!! <<--
+-->> Could not load xarray!! <<--
+-->> Could not load xarray!! <<--
+-->> Could not load xarray!! <<--
+-->> Could not load xarray!! <<--
+-->> Could not load xarray!! <<--
+-->> Could not load xarray!! <<--
+-->> Could not load xarray!! <<--
+-->> Could not load xarray!! <<--
+-->> Could not load xarray!! <<--
+-->> Could not load xarray!! <<--
+-->> Could not load xarray!! <<--
+-->> Could not load xarray!! <<--
+-->> Could not load xarray!! <<--
+-->> Could not load xarray!! <<--
+-->> Could not load xarray!! <<--
+-->> Could not load xarray!! <<--
+-->> Could not load xarray!! <<--
+-->> Could not load xarray!! <<--
+-->> Could not load xarray!! <<--
+-->> Could not load xarray!! <<--
+-->> Could not load xarray!! <<--
+-->> Could not load xarray!! <<--
+-->> Could not load xarray!! <<--
+-->> Could not load xarray!! <<--
+-->> Could not load xarray!! <<--
+-->> Could not load xarray!! <<--
+-->> Could not load xarray!! <<--
+-->> Could not load xarray!! <<--
+-->> Could not load xarray!! <<--
+-->> Could not load xarray!! <<--
+-->> Could not load xarray!! <<--
+-->> Could not load xarray!! <<--
+-->> Could not load xarray!! <<--
+-->> Could not load xarray!! <<--
+-->> Could not load xarray!! <<--
+-->> Could not load xarray!! <<--
+-->> Could not load xarray!! <<--
+-->> Could not load xarray!! <<--
+-->> Could not load xarray!! <<--
+-->> Could not load xarray!! <<--
+-->> Could not load xarray!! <<--
+-->> Could not load xarray!! <<--
+-->> Could not load xarray!! <<--
+-->> Could not load xarray!! <<--
+-->> Could not load xarray!! <<--
+-->> Could not load xarray!! <<--
+-->> Could not load xarray!! <<--
+-->> Could not load xarray!! <<--
+-->> Could not load xarray!! <<--
+-->> Could not load xarray!! <<--
+-->> Could not load xarray!! <<--
+-->> Could not load xarray!! <<--
+-->> Could not load xarray!! <<--
+-->> Could not load xarray!! <<--
+-->> Could not load xarray!! <<--
+-->> Could not load xarray!! <<--
+-->> Could not load xarray!! <<--
+-->> Could not load xarray!! <<--
+-->> Could not load xarray!! <<--
+-->> Could not load xarray!! <<--
+-->> Could not load xarray!! <<--
+-->> Could not load xarray!! <<--
+-->> Could not load xarray!! <<--
+-->> Could not load xarray!! <<--
+-->> Could not load xarray!! <<--
+-->> Could not load xarray!! <<--
+-->> Could not load xarray!! <<--
+-->> Could not load xarray!! <<--
+-->> Could not load xarray!! <<--
+-->> Could not load xarray!! <<--
+-->> Could not load xarray!! <<--
+-->> Could not load xarray!! <<--
+-->> Could not load xarray!! <<--
+-->> Could not load xarray!! <<--
+-->> Could not load xarray!! <<--
+-->> Could not load xarray!! <<--
+-->> Could not load xarray!! <<--
+-->> Could not load xarray!! <<--
+-->> Could not load xarray!! <<--
+day /gpfs/scratch/bsc32/bsc32627/t0ni/19931101/fc0/runtime/cmor_outputs/cmor_atm_1/CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/day/psl/gr/v20211218 30 30
+mon /gpfs/scratch/bsc32/bsc32627/t0ni/19931101/fc0/runtime/cmor_outputs/cmor_atm_1/CMIP/EC-Earth-Consortium/EC-Earth3/piControl/r1i1p1f1/LImon/snw/gr/v20211218 1 1

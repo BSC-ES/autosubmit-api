@@ -1,0 +1,30 @@
+[INFO] JOBID=17122
+
+job_name_ptrn='/esarchive/scratch/Earth/wuruchi/a29z/LOG_a29z/a29z_19550501_fc1_2_POST'
++ job_name_ptrn=/esarchive/scratch/Earth/wuruchi/a29z/LOG_a29z/a29z_19550501_fc1_2_POST
+echo $(date +%s) > ${job_name_ptrn}_STAT
+date +%s)
+date +%s
+++ date +%s
++ echo 1639657408
+
+###################
+# Autosubmit job
+###################
+
+sleep 1
++ sleep 1
+###################
+# Autosubmit tailer
+###################
+set -xuve
++ set -xuve
+echo $(date +%s) >> ${job_name_ptrn}_STAT
+date +%s)
+date +%s
+++ date +%s
++ echo 1639657409
+touch ${job_name_ptrn}_COMPLETED
++ touch /esarchive/scratch/Earth/wuruchi/a29z/LOG_a29z/a29z_19550501_fc1_2_POST_COMPLETED
+exit 0
++ exit 0
