@@ -12,7 +12,6 @@ from bscearth.utils.date import date2str, parse_date
 from typing import Dict, List, Set, Tuple
 # Builder Imports
 from autosubmit_api.config.config_common import AutosubmitConfig
-from bscearth.utils.config_parser import ConfigParserFactory
 from autosubmit_api.config.basicConfig import BasicConfig
 
 class JobListLoader(object):

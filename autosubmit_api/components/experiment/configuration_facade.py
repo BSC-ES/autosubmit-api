@@ -115,8 +115,7 @@ class AutosubmitConfigurationFacade(ConfigurationFacade):
   
   def _process_advanced_config(self):
     """ Advanced Configuration from AutosubmitConfig """
-    # type: () -> None
-    # self.autosubmit_conf = autosubmit_config # AutosubmitConfig(self.expid, BasicConfig, ConfigParserFactory())    
+    # type: () -> None    
     self.autosubmit_conf.reload()    
     self.chunk_unit = self.autosubmit_conf.get_chunk_size_unit()
     self.chunk_size = self.autosubmit_conf.get_chunk_size()    

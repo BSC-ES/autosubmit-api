@@ -55,7 +55,7 @@ class PklOrganizer(object):
       with (open(self.pkl_path, "rb")) as openfile:                
         for item in pickle.load(openfile):
           try:    
-            if self.is_wrapper_type_in_pkl:
+            if len(item) == 13:
               self.current_content.append(PklJob14(*item))
             else:
               self.current_content.append(PklJob(*item))

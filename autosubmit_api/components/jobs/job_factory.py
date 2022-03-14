@@ -194,7 +194,7 @@ class Job:
   
   def set_years_per_sim(self, years_per_sim):
     # type: (float) -> None    
-    self.years_per_sim = round(max(years_per_sim, 0.0), 4)
+    self.years_per_sim = max(years_per_sim, 0.0)
   
   def get_date_ini_end(self, chunk_size, chunk_unit):
     # type: (int, str) -> Tuple[str, str]

@@ -125,4 +125,5 @@ if __name__ == "__main__":
   #   print("Wrapper experiment: {}".format(expid))
   # for expid in experiments:
   #   print("Normal experiment: {}".format(expid))
-  update_old_data()
+  # update_old_data()
+  pass

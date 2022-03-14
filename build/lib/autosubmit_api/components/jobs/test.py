@@ -3,19 +3,28 @@
 import unittest
 from autosubmit_api.components.jobs.joblist_loader import JobListLoader
 
+
+class TestJobListHelper(unittest.TestCase):
+  def setUp(self):
+    pass
+
+  def get_joblist_helper(self):
+    pass
+
 class TestJobListLoader(unittest.TestCase):
   def setUp(self):
-      pass
+    pass
       
   def tearDown(self):
-      pass
+    pass
   
   def test_load(self):    
-    loader = JobListLoader("a29z")
-    loader.load_jobs()
-    self.assertTrue(len(loader.jobs) > 0)
-    for job in loader.jobs:
-      job.do_print()  
+    pass
+    # loader = JobListLoader("a29z")
+    # loader.load_jobs()
+    # self.assertTrue(len(loader.jobs) > 0)
+    # for job in loader.jobs:
+    #   job.do_print()  
   
   # def test_loader(self):
   #   tree = 
