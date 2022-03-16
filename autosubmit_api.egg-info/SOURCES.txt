@@ -148,3 +148,6 @@ autosubmit_api/workers/verify_complete.py
 autosubmit_api/workers/business/__init__.py
 autosubmit_api/workers/business/populate_times.py
 autosubmit_api/workers/business/process_graph_drawings.py
+autosubmit_api/workers/deprecated/__init__.py
+autosubmit_api/workers/deprecated/fix_historic.py
+autosubmit_api/workers/deprecated/fix_historic_energy.py

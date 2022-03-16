@@ -27,7 +27,6 @@ from datetime import datetime, timedelta
 import json
 import requests
 import logging
-from sqlalchemy import create_engine
 from flask_cors import CORS, cross_origin
 # from flask_restful import Resource, Api
 # from flask_restful.utils import cors
@@ -35,13 +34,7 @@ from flask import Flask, request, session, redirect, url_for
 from bscearth.utils.config_parser import ConfigParserFactory
 from bscearth.utils.log import Log
 from database.db_common import get_current_running_exp, update_experiment_description_owner
-# Bad practices block starts
-from experiment.common_requests import get_experiment_tree_structured, get_experiment_tree_pkl
-from experiment.common_requests import get_experiment_pkl, get_experiment_stats, test_run, quick_test_run
-from experiment.common_requests import get_experiment_data, get_experiment_graph, get_experiment_run, get_experiment_summary, get_current_status_log_plus
-from experiment.common_requests import get_quick_view, get_job_history, get_experiment_runs, get_experiment_tree_rundetail
-from experiment.common_requests import get_last_test_archive_status, get_job_log, get_experiment_counters, get_current_configuration_by_expid
-# Bad practices block ends
+import experiment.common_requests as CommonRequests
 import experiment.utils as Utiles
 from performance.performance_metrics import PerformanceMetrics
 from database.db_common import search_experiment_by_id
@@ -157,7 +150,7 @@ def get_current_configuration(expid):
         jwt_token = {"user_id": None}
     valid_user = jwt_token.get("user_id", None)
     app.logger.info('CCONFIG|RECEIVED|' + str(expid))
-    result = get_current_configuration_by_expid(expid, valid_user)
+    result = CommonRequests.get_current_configuration_by_expid(expid, valid_user)
     app.logger.info('CCONFIG|RTIME|' + str(expid) + "|" + str(time.time() - start_time))
     return result
 
@@ -166,7 +159,7 @@ def get_current_configuration(expid):
 def exp_info(expid):
     start_time = time.time()
     app.logger.info('EXPINFO|RECEIVED|' + str(expid))
-    result = get_experiment_data(expid)
+    result = CommonRequests.get_experiment_data(expid)
     app.logger.info('EXPINFO|RTIME|' + str(expid) + "|" + str(time.time() - start_time))
     return result
 
@@ -175,7 +168,7 @@ def exp_info(expid):
 def exp_counters(expid):
     start_time = time.time()
     app.logger.info('EXPCOUNT|RECEIVED|' + str(expid))
-    result = get_experiment_counters(expid)
+    result = CommonRequests.get_experiment_counters(expid)
     app.logger.info('EXPCOUNT|RTIME|' + str(expid) + "|" + str(time.time() - start_time))
     return result
 
@@ -225,7 +218,7 @@ def get_runs(expid):
     """
     start_time = time.time()
     app.logger.info('ERUNS|RECEIVED|{0}'.format(expid))
-    result = get_experiment_runs(expid)
+    result = CommonRequests.get_experiment_runs(expid)
     app.logger.info('ERUNS|RTIME|{0}'.format(str(time.time() - start_time)))
     return result
 
@@ -234,7 +227,7 @@ def get_runs(expid):
 def get_if_running(expid):
     start_time = time.time()
     app.logger.info('IFRUN|RECEIVED|' + str(expid))
-    result = quick_test_run(expid)
+    result = CommonRequests.quick_test_run(expid)
     app.logger.info('IFRUN|RTIME|' + str(expid) + "|" + str(time.time() - start_time))
     return result
 
@@ -243,7 +236,7 @@ def get_if_running(expid):
 def get_log_running(expid):
     start_time = time.time()
     app.logger.info('LOGRUN|RECEIVED|' + str(expid))
-    result = get_current_status_log_plus(expid)
+    result = CommonRequests.get_current_status_log_plus(expid)
     app.logger.info('LOGRUN|RTIME|' + str(expid) + "|" + str(time.time() - start_time))
     return result
 
@@ -252,7 +245,7 @@ def get_log_running(expid):
 def get_expsummary(expid):
     start_time = time.time()
     app.logger.info('SUMMARY|RECEIVED|' + str(expid))
-    result = get_experiment_summary(expid)
+    result = CommonRequests.get_experiment_summary(expid)
     app.logger.info('SUMMARY|RTIME|' + str(expid) + "|" + str(time.time() - start_time))
     return result
 
@@ -270,7 +263,7 @@ def get_exp_performance(expid):
 def get_list_format(expid, layout='standard', grouped='none'):
     start_time = time.time()
     app.logger.info('GRAPH|RECEIVED|' + str(expid) + "~" + str(grouped) + "~" + str(layout))
-    result = get_experiment_graph(expid, layout, grouped)
+    result = CommonRequests.get_experiment_graph(expid, layout, grouped)
     app.logger.info('GRAPH|RTIME|' + str(expid) + "|" + str(time.time() - start_time))
     return result
 
@@ -279,7 +272,7 @@ def get_list_format(expid, layout='standard', grouped='none'):
 def get_exp_tree(expid):
     start_time = time.time()
     app.logger.info('TREE|RECEIVED|' + str(expid))    
-    result = get_experiment_tree_structured(expid)
+    result = CommonRequests.get_experiment_tree_structured(expid)
     app.logger.info('TREE|RTIME|' + str(expid) + "|" + str(time.time() - start_time))
     return result
 
@@ -288,7 +281,7 @@ def get_exp_tree(expid):
 def get_quick_view_data(expid):
     start_time = time.time()
     app.logger.info('QUICK|RECEIVED|' + str(expid))
-    result = get_quick_view(expid)
+    result = CommonRequests.get_quick_view(expid)
     app.logger.info('QUICK|RTIME|{0}|{1}'.format(str(expid), str(time.time() - start_time)))
     return result
 
@@ -300,7 +293,7 @@ def get_experiment_running(expid):
     """
     start_time = time.time()
     app.logger.info('LOG|RECEIVED|' + str(expid))    
-    result = get_experiment_run(expid)
+    result = CommonRequests.get_experiment_log_last_lines(expid)
     app.logger.info('LOG|RTIME|' + str(expid) + "|" + str(time.time() - start_time))
     return result
 
@@ -314,7 +307,7 @@ def get_job_log_from_path(logfile):
     expid = expid[0] if len(expid) > 0 else ""    
     start_time = time.time()
     app.logger.info('JOBLOG|RECEIVED|{0}'.format(expid))
-    result = get_job_log(expid, logfile)
+    result = CommonRequests.get_job_log(expid, logfile)
     app.logger.info('JOBLOG|RTIME|{0}|{1}'.format(expid, str(time.time() - start_time)))
     return result
 
@@ -323,7 +316,7 @@ def get_job_log_from_path(logfile):
 def get_experiment_pklinfo(expid, timeStamp):
     start_time = time.time()
     app.logger.info('GPKL|RECEIVED|' + str(expid) + "~" + str(timeStamp))    
-    result = get_experiment_pkl(expid, timeStamp)
+    result = CommonRequests.get_experiment_pkl(expid)
     app.logger.info('GPKL|RTIME|' + str(expid) + "|" + str(time.time() - start_time))
     return result
 
@@ -332,7 +325,7 @@ def get_experiment_pklinfo(expid, timeStamp):
 def get_experiment_tree_pklinfo(expid, timeStamp):
     start_time = time.time()
     app.logger.info('TPKL|RECEIVED|' + str(expid) + "~" + str(timeStamp))
-    result = get_experiment_tree_pkl(expid, timeStamp)
+    result = CommonRequests.get_experiment_tree_pkl(expid)
     app.logger.info('TPKL|RTIME|' + str(expid) + "|" + str(time.time() - start_time))
     return result
 
@@ -341,7 +334,7 @@ def get_experiment_tree_pklinfo(expid, timeStamp):
 def get_experiment_statistics(expid, filter_period, filter_type):
     start_time = time.time()
     app.logger.info('STAT|RECEIVED|' + str(expid) + "~" + str(filter_period) + "~" + str(filter_type))
-    result = get_experiment_stats(expid, filter_period, filter_type)
+    result = CommonRequests.get_experiment_stats(expid, filter_period, filter_type)
     app.logger.info('STAT|RTIME|' + str(expid) + "|" + str(time.time() - start_time))
     return result
 
@@ -350,7 +343,7 @@ def get_experiment_statistics(expid, filter_period, filter_type):
 def get_exp_job_history(expid, jobname):
     start_time = time.time()
     app.logger.info('HISTORY|RECEIVED|' + str(expid) + "~" + str(jobname))
-    result = get_job_history(expid, jobname)
+    result = CommonRequests.get_job_history(expid, jobname)
     app.logger.info('HISTORY|RTIME|' + str(expid) + "|" + str(time.time() - start_time))
     return result
 
@@ -359,7 +352,7 @@ def get_exp_job_history(expid, jobname):
 def get_experiment_run_job_detail(expid, runid):
     start_time = time.time()
     app.logger.info('RUNDETAIL|RECEIVED|' + str(expid) + "~" + str(runid))    
-    result = get_experiment_tree_rundetail(expid, runid)
+    result = CommonRequests.get_experiment_tree_rundetail(expid, runid)
     app.logger.info('RUNDETAIL|RTIME|' + str(expid) + "|" + str(time.time() - start_time))
     return result
 
@@ -368,7 +361,7 @@ def get_experiment_run_job_detail(expid, runid):
 def get_file_status():
     start_time = time.time()
     app.logger.info('FSTATUS|RECEIVED|')
-    result = get_last_test_archive_status()
+    result = CommonRequests.get_last_test_archive_status()
     app.logger.info('FSTATUS|RTIME|' + str(time.time() - start_time))
     return result
 

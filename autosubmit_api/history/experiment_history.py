@@ -38,6 +38,7 @@ class ExperimentHistory():
     # type: (str, BasicConfig, ExperimentHistoryDbManager, Logging) -> None
     self.expid = expid
     self._log = logger 
+    self.basic_config = basic_config
     self._job_data_dir_path = basic_config.JOBDATA_DIR
     self._historiclog_dir_path = basic_config.HISTORICAL_LOG_DIR
     try:
@@ -174,10 +175,9 @@ class ExperimentHistory():
       self._log.log(str(exp), traceback.format_exc())  
 
   def get_historic_job_data(self, job_name):
-    # type: (str) -> List[Dict[str, Any]]
+    # type: (str) -> List[Dict[str, Any]]    
     result = []
-    all_job_data_dcs = self.manager.get_job_data_dcs_by_name(job_name)    
-    # all_job_data_dcs = [job for job in job_data_dcs if job.status == "COMPLETED"]    
+    all_job_data_dcs = self.manager.get_job_data_dcs_by_name(job_name)          
     post_job_data_dcs = self.manager.get_job_data_dcs_COMPLETED_by_section("POST")
     run_id_to_POST_job_data_dcs = {} # type: Dict[int, List[JobData]]
     run_id_wrapper_code_to_job_data_dcs = {} # type: Dict[Tuple[int, int], List[JobData]]
@@ -192,11 +192,9 @@ class ExperimentHistory():
       if (job_data_dc.run_id, job_data_dc.rowtype) not in run_id_wrapper_code_to_job_data_dcs:
         run_id_wrapper_code_to_job_data_dcs[(job_data_dc.run_id, job_data_dc.rowtype)] = self.manager.get_job_data_dc_COMPLETED_by_wrapper_run_id(job_data_dc.rowtype, job_data_dc.run_id)
     
-    for job_data_dc in all_job_data_dcs:
-      # print("{} -> {}".format(job_data_dc.run_id, job_data_dc.job_name))
+    for job_data_dc in all_job_data_dcs:      
       experiment_run = run_id_to_experiment_run_involved.get(job_data_dc.run_id, None) 
-      jobs_in_package = run_id_wrapper_code_to_job_data_dcs.get((job_data_dc.run_id, job_data_dc.rowtype), [])
-      # jobs_in_package = [job for job in jobs_in_package if job.job_name != job_data_dc.job_name] 
+      jobs_in_package = run_id_wrapper_code_to_job_data_dcs.get((job_data_dc.run_id, job_data_dc.rowtype), [])      
       if experiment_run:
         average_post_time = 0.0
         post_job_data_dcs_in_run = run_id_to_POST_job_data_dcs.get(job_data_dc.run_id, [])
@@ -226,7 +224,9 @@ class ExperimentHistory():
                       "ASYPD": PUtils.calculate_ASYPD_perjob(experiment_run.chunk_unit, experiment_run.chunk_size, job_data_dc.chunk, job_data_dc.queuing_time_considering_package(jobs_in_package) + job_data_dc.running_time, average_post_time, job_data_dc.status_code) if experiment_run else "NA",
                       "SYPD": PUtils.calculate_SYPD_perjob(experiment_run.chunk_unit, experiment_run.chunk_size, job_data_dc.chunk, job_data_dc.running_time, job_data_dc.status_code) if experiment_run else "NA",
                       "run_id": job_data_dc.run_id,
-                      "run_created": experiment_run.created if experiment_run else "NA"
+                      "run_created": experiment_run.created if experiment_run else "NA",
+                      "out": job_data_dc.out,
+                      "err": job_data_dc.err
                       })
     return result
 

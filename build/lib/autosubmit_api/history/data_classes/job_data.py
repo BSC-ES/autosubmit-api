@@ -21,7 +21,7 @@ import collections
 import time
 import autosubmit_api.history.utils as HUtils
 import autosubmit_api.history.database_managers.database_models as Models
-from autosubmit_api.common.utils import Status
+import autosubmit_api.common.utils as common_utils
 from datetime import datetime, timedelta
 from json import dumps, loads
 from typing import List
@@ -117,7 +117,7 @@ class JobData(object):
 
     @property
     def status_code(self):
-        return Status.STRING_TO_CODE.get(self.status, Status.UNKNOWN)
+        return common_utils.Status.STRING_TO_CODE.get(self.status, common_utils.Status.UNKNOWN)
 
     @property
     def children_list(self):
@@ -148,7 +148,7 @@ class JobData(object):
         """
         Returns the finish time timestamp as an integer.
         """
-        if self.last == 1 and self.status_code in [Status.RUNNING]:
+        if self.last == 1 and self.status_code in [common_utils.Status.RUNNING]:
             return int(time.time())
         return int(self._finish)
 
@@ -248,31 +248,29 @@ class JobData(object):
     @property
     def submit_datetime_str(self):
         """
-        Returns the submit datetime as a string with format %Y-%m-%d-%H:%M:%S
+        Returns the submit datetime as a string with format %Y-%m-%d %H:%M:%S
         """
-        o_datetime = self.submit_datetime
-        if o_datetime:
-            return o_datetime.strftime(HUtils.DATETIME_FORMAT)
+        # o_datetime = self.submit
+        if self.submit and self.submit > 0:
+            return common_utils.timestamp_to_datetime_format(self.submit)
         else:
             return None
     @property
     def start_datetime_str(self):
         """
-        Returns the start datetime as a string with format %Y-%m-%d-%H:%M:%S
-        """
-        o_datetime = self.start_datetime
-        if o_datetime:
-            return o_datetime.strftime(HUtils.DATETIME_FORMAT)
+        Returns the start datetime as a string with format %Y-%m-%d %H:%M:%S
+        """        
+        if self.start and self.start > 0:
+            return common_utils.timestamp_to_datetime_format(self.start)
         else:
             return None
     @property
     def finish_datetime_str(self):
         """
-        Returns the finish datetime as a string with format %Y-%m-%d-%H:%M:%S
-        """
-        o_datetime = self.finish_datetime
-        if o_datetime:
-            return o_datetime.strftime(HUtils.DATETIME_FORMAT)
+        Returns the finish datetime as a string with format %Y-%m-%d %H:%M:%S
+        """        
+        if self.finish and self.finish > 0:
+            return common_utils.timestamp_to_datetime_format(self.finish)
         else:
             return None
 
@@ -298,7 +296,7 @@ class JobData(object):
     
     def queuing_time_considering_package(self, jobs_in_package):
         # type: (List[JobData]) -> int        
-        considered_jobs = [job for job in jobs_in_package if job.start < (self.start - 20)]
+        considered_jobs = [job for job in jobs_in_package if job.job_name != self.job_name and job.start < (self.start - 20)]
         if len(considered_jobs) > 0:
             considered_jobs.sort(key=lambda x: x.queuing_time, reverse=True)
             max_queue = max([job.queuing_time + job.running_time for job in considered_jobs])

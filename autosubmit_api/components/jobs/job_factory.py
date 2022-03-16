@@ -60,6 +60,31 @@ class Job:
     return len(self.children_names) > 0
 
   @property
+  def out_file_path(self):
+    if self.out_path_local and len(self.out_path_local) > 0:
+      return self.out_path_local
+    return None
+
+  @property
+  def err_file_path(self):
+    if self.err_path_local and len(self.err_path_local) > 0:
+      return self.err_path_local
+    return None
+
+  @property
+  def package_tag(self):
+    """ Also known as wrapper_tag """
+    # type: () -> str
+    if self.package and len(self.package) > 0:
+      return JUtils.wrapped_title_format.format(self.package)
+    return None
+
+  @property
+  def rm_id(self):
+    # type: () -> int
+    return self._id
+
+  @property
   def queue_time(self):
     # type: () -> int
     """ Queue time fixed is provided. """
@@ -157,7 +182,7 @@ class Job:
     if self.date is not None and self.member == None:
       title += JUtils.sync_tag
     if self.package:
-      title += JUtils.wrapped_title_format.format(self.package_code)
+      title += self.package_tag
     return title
   
   @property

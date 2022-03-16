@@ -38,7 +38,7 @@ def tostamp(string_date):
     except:
       try: 
         timestamp_value = int(time.mktime(datetime.datetime.strptime(string_date,"%Y-%m-%d-%H:%M:%S").timetuple()))
-      except:
+      except:        
         pass
   return timestamp_value
 
@@ -84,6 +84,8 @@ def get_jobs_with_no_outliers(jobs):
   return new_list
 
 def date_plus(date, chunk_unit, chunk, chunk_size=1):
+  if not date:
+    return (None, None)
   previous_date = date
   if chunk is not None and chunk_unit is not None:
       chunk_previous = (chunk - 1) * (chunk_size)
@@ -155,8 +157,13 @@ def get_experiments_from_folder(root_folder):
 
 def timestamp_to_datetime_format(timestamp):
   # type: (int) -> str
-  if timestamp and timestamp > 0:
-    return datetime.datetime.utcfromtimestamp(timestamp).strftime('%Y-%m-%d %H:%M:%S')
+  """ %Y-%m-%d %H:%M:%S """
+  try:
+    if timestamp and timestamp > 0:
+      return datetime.datetime.utcfromtimestamp(timestamp).strftime('%Y-%m-%d %H:%M:%S')
+  except Exception as exp:    
+    print("Timestamp {} cannot be converted to datetime string. {}".format(str(timestamp), str(exp)))
+    return None
   return None
 
 def datechunk_to_year(chunk_unit, chunk_size):

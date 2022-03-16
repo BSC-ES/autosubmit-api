@@ -243,11 +243,11 @@ class TreeRepresentation(object):
         "children_list": list(job.children_names),
         "parents": len(job.parents_names),
         "parent_list": list(job.parents_names),
-        "out": job.out_path_local if job.out_path_local else "NA",
-        "err": job.err_path_local if job.err_path_local else "NA",
+        "out": job.out_file_path,
+        "err": job.err_file_path,
         "tree_parents": job.tree_parent,
         "custom_directives": None,
-        "rm_id": job._id,
+        "rm_id": job.rm_id,
         "status_color": job.status_color
       })
   

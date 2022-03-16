@@ -2177,9 +2177,9 @@ class JobList:
             # Calculating ASYPD
 
             out = os.path.join(
-                path_to_logs, job.out) if job.out != "NA" else "NA"
+                path_to_logs, job.out) if job.out != "NA" else None
             err = os.path.join(
-                path_to_logs, job.err) if job.err != "NA" else "NA"
+                path_to_logs, job.err) if job.err != "NA" else None
             ini_date, end_date = JobList.date_plus(job.date, chunk_unit, job.chunk, chunk_size) if job.date is not None else (
                 date2str(job.date, self.get_date_format), "")
             nodes.append({'id': job.name,
@@ -2294,8 +2294,7 @@ class JobList:
         # Update Level
         allJobs = self.get_all()
         # Validate if the graph data should be updated
-        graph_drawing_data = ExperimentGraphDrawing(
-            self.expid).get_validated_data(self.get_all())
+        graph_drawing_data = ExperimentGraphDrawing(self.expid).get_validated_data(self.get_all())
         if not graph_drawing_data or len(allJobs) > 1000:
             # print('Start Traverse Update.')
             start_time = time()
@@ -2535,9 +2534,9 @@ class JobList:
             # print("{0} {1}".format(job.name, job.queue))
 
             out = os.path.join(
-                path_to_logs, job.out) if job.out != "NA" else "NA"
+                path_to_logs, job.out) if job.out != "NA" else None
             err = os.path.join(
-                path_to_logs, job.err) if job.err != "NA" else "NA"
+                path_to_logs, job.err) if job.err != "NA" else None
             # min_q, min_r, status_retrieved, energy = job_running_to_min[job.name] if job.name in list(
             #     job_running_to_min.keys()) else (-1, -1, "UNKNOWN", 0)
             job_info = job_running_to_min[job.name] if job.name in job_running_to_min.keys(
@@ -2778,13 +2777,13 @@ class JobList:
         """
         try:
             orderedList = list()
-            orderedbfs = list()
+            # orderedbfs = list()
             allJobs = self.get_all()
             visited = list()
-            nochildren = list()
+            # nochildren = list()
             # Find root
             root = list()
-            jobDict = dict()
+            # jobDict = dict()
             for job in allJobs:
                 # jobDict[job.name] = job
                 if job.has_parents() == False:
@@ -2792,8 +2791,7 @@ class JobList:
 
             for item in root:
                 # print(item)
-                self._recursion_traverse_update(
-                    item, 0, visited, item, orderedList)
+                self._recursion_traverse_update(item, 0, visited, item, orderedList)
 
             # return orderedbfs
             return orderedList

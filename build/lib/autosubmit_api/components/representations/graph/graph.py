@@ -206,10 +206,21 @@ class GraphRepresentation(object):
 
   def update_jobs_level(self):
     # type: () -> None
-    job_names_roots = [job.name for job in self.jobs if len(job.parents_names) == 0]
-    for job_name in job_names_roots:
-      self.job_dictionary[job_name].level = 1
-      self._level_update(self.job_dictionary[job_name])
+    def update_level(parent_job):
+      # type: (Job) -> None
+      stack.append(parent_job)
+      while stack:
+        current = stack.pop()
+        current.level += 1
+        for children_job_name in current.children_names:
+          if self.job_dictionary[children_job_name].level == 0:
+            self.job_dictionary[children_job_name].level = current.level
+            stack.append(self.job_dictionary[children_job_name])
+            
+    job_roots_names = [job.name for job in self.jobs if len(job.parents_names) == 0]
+    for job_name in job_roots_names:      
+      stack = []
+      update_level(self.job_dictionary[job_name])
   
   def reset_jobs_coordinates(self):
     """ Mainly for testing purposes """
@@ -261,10 +272,10 @@ class GraphRepresentation(object):
         "children_list": list(job.children_names),
         "parents": len(job.parents_names),
         "parent_list": list(job.parents_names),
-        "out": job.out_path_local if job.out_path_local else "NA",
-        "err": job.err_path_local if job.err_path_local else "NA",       
+        "out": job.out_file_path,
+        "err": job.err_file_path,       
         "custom_directives": None,
-        "rm_id": job._id,
+        "rm_id": job.rm_id,
         "x": job.x_coordinate,
         "y": job.y_coordinate       
       })
@@ -273,13 +284,6 @@ class GraphRepresentation(object):
     # type: (int, int) -> None
     self.max_children_count = max(self.max_children_count, children_count)
     self.max_parent_count = max(self.max_parent_count, parent_count)
-
-  def _level_update(self, parent_job):
-    # type: (Job) -> None
-    for children_job_name in parent_job.children_names:
-      if self.job_dictionary[children_job_name].level == 0:
-        self.job_dictionary[children_job_name].level = parent_job.level + 1
-        self._level_update(self.job_dictionary[children_job_name])
     
   def _assign_coordinates_to_jobs(self, valid_coordinates):
     """ False if valid_coordinates is None OR empty"""

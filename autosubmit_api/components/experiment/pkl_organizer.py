@@ -10,7 +10,11 @@ from typing import List, Dict, Set
 
 
 class PklOrganizer(object):
-  """ Organizes content of the pkl """
+  """ 
+  Identifies dates, members, and sections. Distributes jobs into SIM, POST, TRANSFER, and CLEAN).
+  SIM jobs are sorted by start times. POST, TRANSFER, and CLEAN are sorted by finish time.
+  Warnings are stored in self.warnings.
+  """
   
   def __init__(self, configuration_facade):  
     # type: (AutosubmitConfigurationFacade) -> None
@@ -26,7 +30,7 @@ class PklOrganizer(object):
     self.members = set() # type: Set[str]
     self.sections = set() # type: Set[str]    
     self.section_jobs_map = {} # type: Dict[str, List[Job]]
-    self.is_wrapper_type_in_pkl = is_wrapper_type_in_pkl_version(configuration_facade.get_autosubmit_version())
+    # self.is_wrapper_type_in_pkl = is_wrapper_type_in_pkl_version(configuration_facade.get_autosubmit_version())
     self._process_pkl()   
   
   def prepare_jobs_for_performance_metrics(self):

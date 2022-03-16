@@ -9,7 +9,7 @@ from typing import List, Dict
 from autosubmit_api.components.jobs.job_factory import Job
 
 class JobListHelper(object):
-  """ Loads time (queuing runnning) and packages. """
+  """ Loads time (queuing runnning) and packages. Applies the fix for queue time of jobs in wrappers. """
   def __init__(self, expid, configuration_facade, pkl_organizer, basic_config):
     # type: (str, AutosubmitConfigurationFacade, PklOrganizer, BasicConfig) -> None
     self.basic_config = basic_config # type: BasicConfig

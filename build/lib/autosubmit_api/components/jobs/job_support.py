@@ -13,6 +13,9 @@ class TotalStatsPosition:
   STATUS = 3
 
 class JobSupport:
+  """
+  Provides the methods to get the retrials of a job from the TOTAL_STATS files.
+  """
   def __init__(self, expid, job, basic_config):
     # type: (str, Job, BasicConfig) -> None
     self.expid = expid
@@ -49,6 +52,7 @@ class JobSupport:
         return False
   
   def check_running_after(self, finish_datetime):
+    # type: (datetime) -> bool
     """
     Checks if the job was running after the given date
     """

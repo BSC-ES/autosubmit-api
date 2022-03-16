@@ -13,7 +13,9 @@ class ProjectType:
   SVN = "svn"
 
 class ConfigurationFacade:
-  """ """
+  """ 
+
+  """
   __metaclass__ = ABCMeta
   
   def __init__(self, expid, basic_config):
@@ -24,6 +26,7 @@ class ConfigurationFacade:
     self.pkl_path = "" # type: str
     self.tmp_path = "" # type: str
     self.log_path = "" # type: str
+    self.pkl_filename = "" # type: str
     self.structures_path = "" # type: str
     self.chunk_unit = "" # type: str
     self.chunk_size = "" # type: int
@@ -35,9 +38,9 @@ class ConfigurationFacade:
 
   def _process_basic_config(self):
     # type: () -> None
-    pkl_filename = "job_list_{0}.pkl".format(self.expid)    
+    self.pkl_filename = "job_list_{0}.pkl".format(self.expid)    
     self.experiment_path = os.path.join(self.basic_configuration.LOCAL_ROOT_DIR, self.expid)
-    self.pkl_path = os.path.join(self.basic_configuration.LOCAL_ROOT_DIR, self.expid, "pkl", pkl_filename)
+    self.pkl_path = os.path.join(self.basic_configuration.LOCAL_ROOT_DIR, self.expid, "pkl", self.pkl_filename)
     self.tmp_path = os.path.join(self.basic_configuration.LOCAL_ROOT_DIR, self.expid, self.basic_configuration.LOCAL_TMP_DIR)
     self.log_path = os.path.join(self.basic_configuration.LOCAL_ROOT_DIR, self.expid, "tmp", "LOG_{0}".format(self.expid))
     self.structures_path = self.basic_configuration.STRUCTURES_DIR
@@ -106,7 +109,7 @@ class BasicConfigurationFacade(ConfigurationFacade):
     raise NotImplementedError
 
 class AutosubmitConfigurationFacade(ConfigurationFacade):
-  """ Autosubmit Configuration includes Basic Config """
+  """ Provides an interface to the Configuration of the experiment.  """
   def __init__(self, expid, basic_config, autosubmit_config):
     # type: (str, BasicConfig, AutosubmitConfig) -> None
     super(AutosubmitConfigurationFacade, self).__init__(expid, basic_config)

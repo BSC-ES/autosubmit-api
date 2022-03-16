@@ -5,6 +5,7 @@ import autosubmit_api.history.platform_monitor.test as test_platform
 import autosubmit_api.history.database_managers.test as test_history_database_managers
 import autosubmit_api.components.experiment.test as test_experiment_components
 import autosubmit_api.history.platform_monitor.test as test_slurm_monitor
+import autosubmit_api.components.representations.graph.test as test_graph_representation
 
 
 if __name__ == '__main__':
@@ -17,6 +18,7 @@ if __name__ == '__main__':
   runner.run(unittest.makeSuite(test_history_database_managers.TestExperimentStatusDatabaseManager))
   runner.run(unittest.makeSuite(test_experiment_components.TestPklOrganizer))
   runner.run(unittest.makeSuite(test_slurm_monitor.TestSlurmMonitor))
+  runner.run(unittest.makeSuite(test_graph_representation.TestGraph))
 
   
 

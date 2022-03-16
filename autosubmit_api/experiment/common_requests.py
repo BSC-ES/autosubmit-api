@@ -25,12 +25,9 @@ import time
 import pickle
 import traceback
 import datetime
-import math
 import json
 import multiprocessing
 import subprocess
-import numpy as np
-import socket
 from collections import deque
 
 
@@ -38,28 +35,25 @@ from autosubmit_api.autosubmit_legacy.autosubmit import Autosubmit
 import autosubmit_api.database.db_common as db_common
 import autosubmit_api.experiment.common_db_requests as DbRequests
 import autosubmit_api.database.db_jobdata as JobData
-import autosubmit_api.database.db_structure as DbStructure
+import autosubmit_api.autosubmit_legacy.job.job_utils as LegacyJobUtils
+import autosubmit_api.common.utils as common_utils 
+import autosubmit_api.components.jobs.utils as JUtils
 
 from autosubmit_api.autosubmit_legacy.job.job_list import JobList
 from autosubmit_api.autosubmit_legacy.job.job import Job
-from autosubmit_api.autosubmit_legacy.job.job_utils import SubJobManager, SubJob, SimpleJob, tostamp
+
 from autosubmit_api.performance.utils import calculate_ASYPD_perjob, calculate_SYPD_perjob
 from autosubmit_api.monitor.monitor import Monitor
-from autosubmit_api.common.utils import parse_number_processors, is_version_historical_ready, timestamp_to_datetime_format, datechunk_to_year, Status
+
 from autosubmit_api.statistics.statistics import Statistics
 
 from autosubmit_api.config.basicConfig import BasicConfig
 from autosubmit_api.config.config_common import AutosubmitConfig
 from bscearth.utils.config_parser import ConfigParserFactory
-from bscearth.utils.log import Log
-from bscearth.utils.date import date2str
 
-from autosubmit_api.database.db_jobdata import JobDataStructure, ExperimentGraphDrawing
-from autosubmit_api.database.db_jobdata import DB_VERSION_SCHEMA_CHANGES
 from autosubmit_api.components.representations.tree.tree import TreeRepresentation
 from autosubmit_api.components.representations.graph.graph import GraphRepresentation, GroupedBy, Layout
 
-from autosubmit_api.history.experiment_history import ExperimentHistory
 from autosubmit_api.builders.experiment_history_builder import ExperimentHistoryDirector, ExperimentHistoryBuilder
 from autosubmit_api.builders.configuration_facade_builder import ConfigurationFacadeDirector, AutosubmitConfigurationFacadeBuilder
 from autosubmit_api.builders.joblist_loader_builder import JobListLoaderBuilder, JobListLoaderDirector
@@ -89,8 +83,6 @@ def get_experiment_stats(expid, filter_period, filter_type):
             filter_period = int(filter_period)
 
         job_list_loader = JobListLoaderDirector(JobListLoaderBuilder(expid)).build_loaded_joblist_loader()
-        # job_list = Autosubmit.load_job_list(expid, as_conf, False)
-        # print(len(job_list.get_job_list()))
         considered_jobs = job_list_loader.jobs
         if filter_type and filter_type != 'Any':                
             considered_jobs = [job for job in job_list_loader.jobs if job.section == filter_type]                
@@ -338,11 +330,11 @@ def get_experiment_summary(expid):
                 out = str(item[8]) if len(item) >= 9 else ""
                 err = str(item[9]) if len(item) >= 10 else ""
                 status_color = Monitor.color_status(status_code)
-                status_text = str(Status.VALUE_TO_KEY[status_code])
+                status_text = str(common_utils.Status.VALUE_TO_KEY[status_code])
                 jobs_in_pkl[job_name] = (
                     status_code, status_color, status_text, out, err, priority, id_number)
                 fakeAllJobs.append(
-                    SimpleJob(job_name, tmp_path, status_code))
+                    LegacyJobUtils.SimpleJob(job_name, tmp_path, status_code))
             job_running_to_seconds, job_running_to_runtext, _ = JobList.get_job_times_collection(
                 BasicConfig, fakeAllJobs, expid, job_to_package, package_to_jobs, timeseconds=True)
         # Main Loop
@@ -453,14 +445,12 @@ def quick_test_run(expid):
 
     try:
         name, status = DbRequests.get_specific_experiment_status(expid)
-        # print(status)
         if status != "RUNNING":
             running = False
     except Exception as exp:
         error = True
         error_message = str(exp)
         print(traceback.format_exc())
-        # print(error_message)
 
     return {
         'running': running,
@@ -479,12 +469,10 @@ def test_run(expid):
     """
     running = False
     error = False
-    error_message = ""
-    timediff = 0
+    error_message = ""    
 
     try:
-        error, error_message, running, timediff, _ = _is_exp_running(
-            expid, time_condition=120)
+        error, error_message, running, _, _ = _is_exp_running(expid, time_condition=120)
     except Exception as ex:
         error = True
         error_message = str(ex)
@@ -494,7 +482,7 @@ def test_run(expid):
             'error_message': error_message}
 
 
-def get_experiment_run(expid):
+def get_experiment_log_last_lines(expid):
     """
     Gets last 150 lines of the log content
     """
@@ -510,37 +498,24 @@ def get_experiment_run(expid):
 
     try:
         BasicConfig.read()
-        path = BasicConfig.LOCAL_ROOT_DIR + '/' + expid + '/' + \
-            BasicConfig.LOCAL_TMP_DIR + '/' + BasicConfig.LOCAL_ASLOG_DIR
-        # print(path)
-        reading = os.popen(
-            'ls -t ' + path + ' | grep "run.log"').read() if (os.path.exists(path)) else ""
+        path = BasicConfig.LOCAL_ROOT_DIR + '/' + expid + '/' + BasicConfig.LOCAL_TMP_DIR + '/' + BasicConfig.LOCAL_ASLOG_DIR        
+        reading = os.popen('ls -t ' + path + ' | grep "run.log"').read() if (os.path.exists(path)) else ""
 
         # Finding log files
         if len(reading) == 0:
-            path = BasicConfig.LOCAL_ROOT_DIR + '/' + \
-                expid + '/' + BasicConfig.LOCAL_TMP_DIR
-            reading = os.popen(
-                'ls -t ' + path + ' | grep "run.log"').read() if (os.path.exists(path)) else ""
+            path = BasicConfig.LOCAL_ROOT_DIR + '/' + expid + '/' + BasicConfig.LOCAL_TMP_DIR
+            reading = os.popen('ls -t ' + path + ' | grep "run.log"').read() if (os.path.exists(path)) else ""
 
-        if len(reading) > 0:
-            # run_logs.sort(reverse = True)
-            log_file_name = reading.split()[0]
-            print(log_file_name)
+        if len(reading) > 0:            
+            log_file_name = reading.split()[0]            
             current_stat = os.stat(path + '/' + log_file_name)
-            timest = current_stat.st_mtime
-            log_file_lastmodified = datetime.datetime.utcfromtimestamp(
-                timest).strftime('%Y-%m-%d %H:%M:%S')
-            found = True
-            # line = subprocess.check_output(['tail', '-50', path+'/'+log_file_name])
-            request = 'tail -150 ' + path + '/' + log_file_name
-            print(request)
-            last50 = os.popen(request)
-
-            i = 0
-            for item in last50.readlines():
-                logcontent.append({'index': i, 'content': item[0:-1]})
-                i += 1
+            timest = int(current_stat.st_mtime)
+            log_file_lastmodified = common_utils.timestamp_to_datetime_format(timest) 
+            found = True            
+            request = 'tail -150 ' + path + '/' + log_file_name            
+            last_lines = os.popen(request)            
+            for i, item in enumerate(last_lines.readlines()):
+                logcontent.append({'index': i, 'content': item[0:-1]})                
     except Exception as e:
         error = True
         error_message = str(e)
@@ -564,7 +539,6 @@ def get_job_log(expid, logfile, nlines=150):
     :rtype: list
     """
     # Initializing results:
-    # log_file_name = ""
     found = False
     log_file_lastmodified = ""
     timest = ""
@@ -573,19 +547,15 @@ def get_job_log(expid, logfile, nlines=150):
     logcontent = []
     reading = ""
     BasicConfig.read()
-    logfilepath = os.path.join(BasicConfig.LOCAL_ROOT_DIR, expid,
-                               BasicConfig.LOCAL_TMP_DIR, "LOG_{0}".format(expid), logfile)
+    logfilepath = os.path.join(BasicConfig.LOCAL_ROOT_DIR, expid, BasicConfig.LOCAL_TMP_DIR, "LOG_{0}".format(expid), logfile)
     try:
         if os.path.exists(logfilepath):
             current_stat = os.stat(logfilepath)
             timest = int(current_stat.st_mtime)
-            log_file_lastmodified = datetime.datetime.utcfromtimestamp(
-                timest).strftime('%Y-%m-%d %H:%M:%S')
+            log_file_lastmodified = common_utils.timestamp_to_datetime_format(timest)
             found = True
-            request = "tail -{0} {1}".format(nlines, logfilepath)
-            # print(request)
-            last50 = os.popen(request)
-            # print(type(last50))
+            request = "tail -{0} {1}".format(nlines, logfilepath)            
+            last50 = os.popen(request)            
             i = 0
             for item in last50.readlines():
                 logcontent.append({'index': i, 'content': item[0:-1]})
@@ -604,303 +574,120 @@ def get_job_log(expid, logfile, nlines=150):
         'logcontent': logcontent}
 
 
-def get_experiment_pkl(expid, modTimestamp):
+def get_experiment_pkl(expid):
+    # type: (str) -> Dict[str, Any]
     """
-    Gets the current state of the pkl in a format proper for graph update
+    Gets the current state of the pkl in a format proper for graph update.    
     """
-    pkl_file_name = ""
+    pkl_file_path = ""
     error = False
-    error_message = ""
-    has_changed = False
+    error_message = ""    
     pkl_content = list()
-    timest = 1000000
+    pkl_timestamp = 0
     try:
-        BasicConfig.read()
-        # Chunk info
-        as_conf = AutosubmitConfig(
-            expid, BasicConfig, ConfigParserFactory())
-        as_conf.reload()
-        chunk_unit = as_conf.get_chunk_size_unit()
-        chunk_size = as_conf.get_chunk_size()
-        path = BasicConfig.LOCAL_ROOT_DIR + '/' + expid + '/pkl'
-        reading = os.popen(
-            'ls -t ' + path + ' | grep ".pkl"').read() if (os.path.exists(path)) else ""
-        # pkl_contents = os.listdir(path) if (os.path.exists(path)) else list()
-        # pkl_files = list(filter(lambda x: x.endswith(expid + '.pkl'), pkl_contents))
-        tmp_path = os.path.join(
-            BasicConfig.LOCAL_ROOT_DIR, expid, BasicConfig.LOCAL_TMP_DIR)
-        path_to_logs = os.path.join(
-            BasicConfig.LOCAL_ROOT_DIR, expid, "tmp", "LOG_" + expid)
-        if len(reading) > 0:
-            pkl_file_name = reading.split()[0]
-            current_stat = os.stat(path + '/' + pkl_file_name)
-            timest = int(current_stat.st_mtime)
-            # print(timest)
-            if timest - int(modTimestamp) > 0:
-                has_changed = True
-        else:
-            raise Exception('Empty pkl directory.')
+        autosubmit_config_facade = ConfigurationFacadeDirector(AutosubmitConfigurationFacadeBuilder(expid)).build_autosubmit_configuration_facade()
+        pkl_file_path = autosubmit_config_facade.pkl_path
+        pkl_timestamp = autosubmit_config_facade.get_pkl_last_modified_timestamp()
 
-        if has_changed == True:
-            # Completed Times
-            path_local_root = BasicConfig.LOCAL_ROOT_DIR
-            #path_structure = BasicConfig.STRUCTURES_DIR
-            db_file = os.path.join(path_local_root, "ecearth.db")
-            #conn = DbRequests.create_connection(db_file)
-            #job_times = DbRequests.get_times_detail_by_expid(conn, expid)
-            # End Completed Times
-            # Results
-            job_running_to_min = dict()
-            job_running_to_runtext = dict()
-            # End Results
-            # Dealing with packages
-            job_to_package = dict()
-            package_to_jobs = dict()
-            package_to_package_id = dict()
-            package_to_symbol = dict()
-            #current_table_structure = dict()
-            job_to_package, package_to_jobs, package_to_package_id, package_to_symbol = JobList.retrieve_packages(
-                BasicConfig, expid)
-            # Structure if packages
-            # if (job_to_package):
-            #     current_table_structure = DbStructure.get_structure(
-            #         expid, path_structure)
-            # End of packages
-            jobs_in_pkl = dict()
-            fakeAllJobs = list()
-            path_pkl = os.path.join(path, pkl_file_name)
-            # print(path_pkl)
+        if not os.path.exists(autosubmit_config_facade.pkl_path):            
+            raise Exception("Pkl file {} not found.".format(autosubmit_config_facade.pkl_path))
 
-            if os.path.exists(path_pkl):
-                fd = open(path_pkl, 'r')
-                for item in pickle.load(fd):
-                    status_code = int(item[2])
-                    job_name = item[0]
-                    priority = item[3]
-                    id_number = item[1]
-                    chunk = item[7]
-                    out = str(item[8]) if len(item) >= 9 else ""
-                    err = str(item[9]) if len(item) >= 10 else ""
-                    status_color = Monitor.color_status(status_code)
-                    status_text = str(Status.VALUE_TO_KEY[status_code])
-                    jobs_in_pkl[job_name] = (
-                        status_code, status_color, status_text, out, err, priority, id_number, chunk)
-                    fakeAllJobs.append(
-                        SimpleJob(job_name, tmp_path, status_code))
-                job_running_to_min, job_running_to_runtext, _ = JobList.get_job_times_collection(
-                    BasicConfig, fakeAllJobs, expid, job_to_package, package_to_jobs)
+        job_list_loader = JobListLoaderDirector(JobListLoaderBuilder(expid)).build_loaded_joblist_loader()       
+        package_to_jobs = job_list_loader.joblist_helper.package_to_jobs  
 
-            if len(jobs_in_pkl.keys()) > 0:
-                # Loop through jobs in pkl
-                for job_name in jobs_in_pkl.keys():
-                    status_code, status_color, status_text, out, err, priority, id_number, job_chunk = jobs_in_pkl[
-                        job_name]
-
-                    # time_queue, time_run, status_retrieved, energy = job_running_to_min[job_name] if job_name in job_running_to_min.keys(
-                    # ) else (0, 0, status_text, 0)
-
-                    job_info = job_running_to_min[job_name] if job_name in job_running_to_min.keys(
-                    ) else None
-                    # time_queue = job_info.queue_time if job_info else 0
-                    # time_run = job_info.run_time if job_info else 0
-                    # status_retrieved = job_info.status if job_info else status_text
-                    # energy = job_info.energy if job_info else 0
-
-                    running_text = job_running_to_runtext[job_name] if job_name in job_running_to_runtext.keys(
-                    ) else ("")
-                    pkl_content.append({'name': job_name,
-                                        'rm_id': id_number,
-                                        'status_code': status_code,
-                                        'SYPD': calculate_SYPD_perjob(chunk_unit, chunk_size, job_chunk, job_info.run_time if job_info else 0, status_code),
-                                        'minutes': job_info.run_time if job_info else 0,
-                                        'minutes_queue': job_info.queue_time if job_info else 0,
-                                        'submit': timestamp_to_datetime_format(job_info.submit) if job_info else None,
-                                        'start': timestamp_to_datetime_format(job_info.start) if job_info else None,
-                                        'finish': timestamp_to_datetime_format(job_info.finish) if job_info else None,
-                                        'running_text': running_text,
-                                        'dashed': True if job_name in job_to_package else False,
-                                        'shape': package_to_symbol[job_to_package[job_name]] if job_name in job_to_package else 'dot',
-                                        'package': job_to_package.get(job_name, None) if job_to_package else None,
-                                        'status': status_text,
-                                        'status_color': status_color,
-                                        'out': path_to_logs + "/" + out,
-                                        'err': path_to_logs + "/" + err,
-                                        'priority': priority})
-            else:
-                raise Exception('File {0} does not exist'.format(path))
+        for job in job_list_loader.jobs:
+            pkl_content.append({'name': job.name,
+                                'rm_id': job.rm_id,
+                                'status_code': job.status,
+                                'SYPD': calculate_SYPD_perjob(autosubmit_config_facade.chunk_unit, autosubmit_config_facade.chunk_size, job.chunk, job.run_time, job.status),
+                                'minutes': job.run_time,
+                                'minutes_queue': job.queue_time,
+                                'submit': common_utils.timestamp_to_datetime_format(job.submit),
+                                'start': common_utils.timestamp_to_datetime_format(job.start),
+                                'finish': common_utils.timestamp_to_datetime_format(job.finish),
+                                'running_text': job.running_time_text,
+                                'dashed': True if job.package else False,
+                                'shape': job_list_loader.joblist_helper.package_to_symbol.get(job.package, "dot"),                                
+                                'package': job.package,
+                                'status': job.status_text,
+                                'status_color': job.status_color,
+                                'out': job.out_file_path,
+                                'err': job.err_file_path,                                
+                                'priority': job.priority})
 
     except Exception as e:
         error = True
         error_message = str(e)
 
     return {
-        'pkl_file_name': pkl_file_name,
+        'pkl_file_name': pkl_file_path,
         'error': error,
         'error_message': error_message,
-        'has_changed': has_changed,
+        'has_changed': True,
         'pkl_content': pkl_content,
-        'pkl_timestamp': timest,
-        'packages': package_to_jobs if has_changed == True else {},
+        'pkl_timestamp': pkl_timestamp,
+        'packages': package_to_jobs,
     }
 
 
-def get_experiment_tree_pkl(expid, modTimestamp):
+def get_experiment_tree_pkl(expid):
+    # type: (str) -> Dict[str, Any]
     """
     Gets the current state of the pkl in a format for tree update
     """
-    pkl_file_name = ""
+    pkl_file_path = ""
     error = False
-    error_message = ""
-    # has_changed = False
-    # For Refresh purposes, it always changes
-    has_changed = True
+    error_message = ""    
     pkl_content = list()
     package_to_jobs = {}
-    timest = 1000000
-    source = JobList.get_sourcetag()
-    target = JobList.get_targettag()
-    sync = JobList.get_synctag()
-    check_mark = JobList.get_checkmark()
+    pkl_timestamp = 0
+
     try:
-        BasicConfig.read()
-        # Chunk info
-        as_conf = AutosubmitConfig(
-            expid, BasicConfig, ConfigParserFactory())
-        as_conf.reload()
-        chunk_unit = as_conf.get_chunk_size_unit()
-        chunk_size = as_conf.get_chunk_size()
-        # years_per_sim = datechunk_to_year(chunk_unit, chunk_size)
-        path = BasicConfig.LOCAL_ROOT_DIR + '/' + expid + '/pkl'
-        path_to_logs = os.path.join(
-            BasicConfig.LOCAL_ROOT_DIR, expid, "tmp", "LOG_" + expid)
-        tmp_path = os.path.join(
-            BasicConfig.LOCAL_ROOT_DIR, expid, BasicConfig.LOCAL_TMP_DIR)
-        reading = os.popen(
-            'ls -t ' + path + ' | grep ".pkl"').read() if (os.path.exists(path)) else ""
-        # path_structure = BasicConfig.STRUCTURES_DIR
-        # pkl_contents = os.listdir(path) if (os.path.exists(path)) else list()
-        # pkl_files = list(filter(lambda x: x.endswith(expid + '.pkl'), pkl_contents))
-        # Checking pkl
-        if len(reading) > 0:
-            pkl_file_name = reading.split()[0]
-            current_stat = os.stat(path + '/' + pkl_file_name)
-            timest = int(current_stat.st_mtime)
-            # print(timest)
-            if timest - int(modTimestamp) > 0:
-                has_changed = True
-        else:
-            raise Exception('Empty pkl directory.')
+        autosubmit_config_facade = ConfigurationFacadeDirector(AutosubmitConfigurationFacadeBuilder(expid)).build_autosubmit_configuration_facade()
+        pkl_file_path = autosubmit_config_facade.pkl_path
+        pkl_timestamp = autosubmit_config_facade.get_pkl_last_modified_timestamp()
+        
+        if not os.path.exists(autosubmit_config_facade.pkl_path):            
+            raise Exception("Pkl file {} not found.".format(autosubmit_config_facade.pkl_path))
 
-        if has_changed == True:
-            # Completed Times
-            path_local_root = BasicConfig.LOCAL_ROOT_DIR
-            db_file = os.path.join(path_local_root, "ecearth.db")
-            # conn = DbRequests.create_connection(db_file)
-            # job_times = DbRequests.get_times_detail_by_expid(conn, expid)
-            # End Completed Times
-            # Results
-            job_running_to_min = dict()
-            job_running_to_runtext = dict()
-            # End Results
-            # Try to get packages
-            job_to_package = dict()
-            package_to_jobs = dict()
-            package_to_package_id = dict()
-            package_to_symbol = dict()
-            #current_table_structure = dict()
-            job_to_package, package_to_jobs, package_to_package_id, package_to_symbol = JobList.retrieve_packages(
-                BasicConfig, expid)
-            # if (job_to_package):
-            #     current_table_structure = DbStructure.get_structure(
-            #         expid, path_structure)
-            path_pkl = os.path.join(path, pkl_file_name)
-            # print(path_pkl)
-            jobs_in_pkl = dict()
-            fakeAllJobs = list()
-            if os.path.exists(path_pkl):
-                fd = open(path_pkl, 'r')
-                for item in pickle.load(fd):
-                    status_code = int(item[2])
-                    job_name = item[0]
-                    priority = item[3]
-                    id_number = item[1]
-                    chunk = item[7]
-                    out = str(item[8]) if len(item) >= 9 else ""
-                    err = str(item[9]) if len(item) >= 10 else ""
-                    status_color = Monitor.color_status(status_code)
-                    status_text = str(Status.VALUE_TO_KEY[status_code])
-                    jobs_in_pkl[job_name] = (
-                        status_code, status_color, status_text, out, err, priority, id_number, chunk)
-                    fakeAllJobs.append(
-                        SimpleJob(job_name, tmp_path, status_code))
-                job_running_to_min, job_running_to_runtext, _ = JobList.get_job_times_collection(
-                    BasicConfig, fakeAllJobs, expid, job_to_package, package_to_jobs)
-
-            if len(jobs_in_pkl.keys()) > 0:
-                # fd = open(path_pkl, 'r')
-                for job_name in jobs_in_pkl.keys():
-                    status_code, status_color, status_text, out, err, priority, id_number, job_chunk = jobs_in_pkl[
-                        job_name]
-                    wrapper_tag = ""
-                    wrapper_id = 0
-                    wrapper_name = None
-                    if job_name in job_to_package:
-                        wrapper_name = job_to_package[job_name]
-                        wrapper_id = package_to_package_id[job_to_package[job_name]]
-                        wrapper_tag = " <span class='badge' style='background-color:#94b8b8'>Wrapped " + \
-                            wrapper_id + "</span>"
-                        # for job_wrapped in package_to_jobs[wrapper_name]:
-
-                    # time_queue, time_run, status_retrieved, energy = job_running_to_min[job_name] if job_name in job_running_to_min.keys(
-                    # ) else (0, 0, status_text, 0)
-
-                    job_info = job_running_to_min[job_name] if job_name in job_running_to_min.keys(
-                    ) else None
-                    # time_queue = job_info.queue_time if job_info else 0
-                    # time_run = job_info.run_time if job_info else 0
-                    # status_retrieved = job_info.status if job_info else status_text
-                    # energy = job_info.energy if job_info else 0
-
-                    running_text = job_running_to_runtext[job_name] if job_name in job_running_to_runtext.keys(
-                    ) else ("")
-                    pkl_content.append({'name': job_name,
-                                        'rm_id': id_number,
-                                        'status_code': status_code,
-                                        'SYPD': calculate_SYPD_perjob(chunk_unit, chunk_size, job_chunk, job_info.run_time if job_info else 0, status_code),
-                                        'minutes': job_info.run_time if job_info else 0,
-                                        'minutes_queue': job_info.queue_time if job_info else 0,
-                                        'submit': timestamp_to_datetime_format(job_info.submit) if job_info else None,
-                                        'start': timestamp_to_datetime_format(job_info.start) if job_info else None,
-                                        'finish': timestamp_to_datetime_format(job_info.finish) if job_info else None,
-                                        'running_text': running_text,
-                                        'status': status_text,
-                                        'status_color': status_color,
-                                        'wrapper': wrapper_name,
-                                        'wrapper_tag': wrapper_tag,
-                                        'wrapper_id': wrapper_id,
-                                        'out': path_to_logs + "/" + out,
-                                        'err': path_to_logs + "/" + err,
-                                        'title': Job.getTitle(job_name, status_color, status_text) + ((" ~ " + running_text) if status_code not in [Status.WAITING, Status.WAITING] else ""),
-                                        'priority': priority})
-            else:
-                raise Exception('File {0} does not exist'.format(path))
-
+        job_list_loader = JobListLoaderDirector(JobListLoaderBuilder(expid)).build_loaded_joblist_loader()       
+        package_to_jobs = job_list_loader.joblist_helper.package_to_jobs                 
+        for job in job_list_loader.jobs:
+            pkl_content.append({'name': job.name,
+                                'rm_id': job.rm_id,
+                                'status_code': job.status,
+                                'SYPD': calculate_SYPD_perjob(autosubmit_config_facade.chunk_unit, autosubmit_config_facade.chunk_size, job.chunk, job.run_time, job.status),
+                                'minutes': job.run_time,
+                                'minutes_queue': job.queue_time,
+                                'submit': common_utils.timestamp_to_datetime_format(job.submit),
+                                'start': common_utils.timestamp_to_datetime_format(job.start),
+                                'finish': common_utils.timestamp_to_datetime_format(job.finish),
+                                'running_text': job.running_time_text,
+                                'status': job.status_text,
+                                'status_color': job.status_color,
+                                'wrapper': job.package,
+                                'wrapper_tag': job.package_tag,
+                                'wrapper_id': job.package_code,
+                                'out': job.out_file_path,
+                                'err': job.err_file_path,
+                                'title': job.tree_title,
+                                'priority': job.priority})
     except Exception as e:
         error = True
         error_message = str(e)
 
     return {
-        'pkl_file_name': pkl_file_name,
+        'pkl_file_name': pkl_file_path,
         'error': error,
         'error_message': error_message,
-        'has_changed': has_changed,
+        'has_changed': True,
         'pkl_content': pkl_content,
-        'packages': list(package_to_jobs.keys()),
-        'pkl_timestamp': timest,
-        'source_tag': source,
-        'target_tag': target,
-        'sync_tag': sync,
-        'check_mark': check_mark,
+        'packages': package_to_jobs,
+        'pkl_timestamp': pkl_timestamp,
+        'source_tag': JUtils.source_tag,
+        'target_tag': JUtils.target_tag,
+        'sync_tag': JUtils.sync_tag,
+        'check_mark': JUtils.checkmark_tag,
     }
 
 
@@ -914,7 +701,7 @@ def get_experiment_graph(expid, layout=Layout.STANDARD, grouped=GroupedBy.NO_GRO
         autosubmit_configuration_facade = ConfigurationFacadeDirector(AutosubmitConfigurationFacadeBuilder(expid)).build_autosubmit_configuration_facade()
 
         try:
-            if is_version_historical_ready(autosubmit_configuration_facade.get_autosubmit_version()):  
+            if common_utils.is_version_historical_ready(autosubmit_configuration_facade.get_autosubmit_version()):  
                 job_list_loader = JobListLoaderDirector(JobListLoaderBuilder(expid)).build_loaded_joblist_loader()              
                 graph = GraphRepresentation(expid, job_list_loader, layout, grouped)
                 graph.perform_calculations()                
@@ -932,8 +719,7 @@ def get_experiment_graph(expid, layout=Layout.STANDARD, grouped=GroupedBy.NO_GRO
         job_list = Autosubmit.load_job_list(expid, autosubmit_configuration_facade.autosubmit_conf, notransitive=False)
 
         if job_list.graph == None:
-            raise Exception(
-                "Graph generation is not possible for this experiment.")
+            raise Exception("Graph generation is not possible for this experiment.")
 
         # Platform update
         hpcarch = autosubmit_configuration_facade.get_main_platform()
@@ -980,10 +766,7 @@ def get_experiment_tree_rundetail(expid, run_id):
         notransitive = False
         print("Received Tree RunDetail " + str(expid))
         BasicConfig.read()
-
-
-        tree_structure, current_collection, reference = JobList.get_tree_structured_from_previous_run(expid,
-                                                                                                      BasicConfig, run_id=run_id)
+        tree_structure, current_collection, reference = JobList.get_tree_structured_from_previous_run(expid, BasicConfig, run_id=run_id)
         base_list['tree'] = tree_structure
         base_list['jobs'] = current_collection
         base_list['total'] = len(current_collection)
@@ -1017,7 +800,7 @@ def get_experiment_tree_structured(expid):
         # print("reload successful")
         # If version is higher than 3.13, we can perform the new tree representation algorithm
         try:
-            if is_version_historical_ready(as_conf.get_version()):     
+            if common_utils.is_version_historical_ready(as_conf.get_version()):     
                 job_list_loader = JobListLoaderDirector(JobListLoaderBuilder(expid)).build_loaded_joblist_loader()
                 tree = TreeRepresentation(expid, job_list_loader)                
                 tree.perform_calculations()
@@ -1068,8 +851,7 @@ def retrieve_all_pkl_files():
     Retrieves a list of all pkl files in /esarchive/autosubmit/*/pkl/ with timestamps for comparison purposes
     :return: Dictionary Key: expid, Value: 2-tuple (timestamp, path_to_pkl)
     """
-    all_pkl = os.popen(
-        "find /esarchive/autosubmit/*/pkl/ -name \"*.pkl\"  -printf \"%p %Ts\n\"").read()
+    all_pkl = os.popen("find /esarchive/autosubmit/*/pkl/ -name \"*.pkl\"  -printf \"%p %Ts\n\"").read()
     all_pkl = all_pkl.split("\n")
     # print(all_pkl)
     exp_to_pkl = dict()
@@ -1116,10 +898,8 @@ def generate_all_experiment_data(exp_path, job_path):
     target_experiment_job_file = str(job_path)
     print("Experiment file path: " + target_experiment_file)
     print("Job file path: " + target_experiment_job_file)
-    conn_ecearth = DbRequests.create_connection(
-        "/esarchive/autosubmit/ecearth.db")
-    conn_as_times = DbRequests.create_connection(
-        "/esarchive/autosubmit/as_times.db")
+    conn_ecearth = DbRequests.create_connection("/esarchive/autosubmit/ecearth.db")
+    conn_as_times = DbRequests.create_connection("/esarchive/autosubmit/as_times.db")
     # print("Getting experiments")
     all_experiments = DbRequests._get_exps_complete(conn_ecearth)
     all_detailed = DbRequests.get_exps_detailed_complete(conn_ecearth)
@@ -1151,8 +931,7 @@ def generate_all_experiment_data(exp_path, job_path):
     # job_data_structure = JobDataStructure()
     # if (all_job_times):
     file2 = open(target_experiment_job_file, "w")
-    file2.write(
-        "exp_id|exp_name|job_name|type|submit|start|finish|status|wallclock|procs|threads|tasks|queue|platform|mainplatform|project\n")
+    file2.write("exp_id|exp_name|job_name|type|submit|start|finish|status|wallclock|procs|threads|tasks|queue|platform|mainplatform|project\n")
     for exp_id in valid_id.keys():
         expid = valid_id.get(exp_id, None)
         historical_data = JobDataStructure(expid).get_all_current_job_data()
@@ -1198,7 +977,7 @@ def generate_all_experiment_data(exp_path, job_path):
                         pass
                 file2.write(str(exp_id) + "|" + str(expid) + "|" + str(job.job_name) + "|" + str(job.member) + "|" + str(
                     job.submit) + "|" + str(job.start) + "|" + str(job.finish) + "|" + str(job.status) + "|" + str(job.wallclock) + "|"
-                    + str(parse_number_processors(str(job.ncpus))) + "|" + str(0) + "|" + str(0) + "|" + str(job.qos) + "|" + str(job.platform) + "|" + str(main_platform) + "|"
+                    + str(common_utils.parse_number_processors(str(job.ncpus))) + "|" + str(0) + "|" + str(0) + "|" + str(job.qos) + "|" + str(job.platform) + "|" + str(main_platform) + "|"
                     + str(project) +  "\n")
         else:
             print("Using current data for {}".format(exp_id))
@@ -1221,7 +1000,7 @@ def generate_all_experiment_data(exp_path, job_path):
                                 wallclock, processors, threads, tasks, memory, mem_task, queue, platform, main_platform, project = job_conf_info
                                 file2.write(str(exp_id) + "|" + str(exp_name) + "|" + str(job_name) + "|" + str(job_type) + "|" + str(
                                     submit) + "|" + str(start) + "|" + str(finish) + "|" + str(status) + "|" + str(wallclock) + "|"
-                                    + str(parse_number_processors(str(processors))) + "|" + str(threads) + "|" + str(tasks) + "|" + str(queue) + "|" + str(platform) + "|" + str(main_platform) + "|"
+                                    + str(common_utils.parse_number_processors(str(processors))) + "|" + str(threads) + "|" + str(tasks) + "|" + str(queue) + "|" + str(platform) + "|" + str(main_platform) + "|"
                                     + str(project) +  "\n")
                             else:
                                 print(str(exp_name) + "  | job " +
@@ -1348,7 +1127,7 @@ def verify_last_completed(seconds=300):
             BasicConfig.LOCAL_ROOT_DIR, job_name[:4], BasicConfig.LOCAL_TMP_DIR)
         detail_id, submit, start, finish, status = detail
         submit_time, start_time, finish_time, status_text_res = JobList._job_running_check(
-            Status.COMPLETED, job_name, tmp_path)
+            common_utils.Status.COMPLETED, job_name, tmp_path)
         submit_ts = int(time.mktime(submit_time.timetuple())) if len(
             str(submit_time)) > 0 else 0
         start_ts = int(time.mktime(start_time.timetuple())) if len(
@@ -1384,15 +1163,15 @@ def get_experiment_counters(expid):
     path_pkl = os.path.join(BasicConfig.LOCAL_ROOT_DIR,
                             expid, "pkl", "job_list_{}.pkl".format(expid))
     # Default counter per status
-    experiment_counters = {name: 0 for name in Status.STRING_TO_CODE}
+    experiment_counters = {name: 0 for name in common_utils.Status.STRING_TO_CODE}
     try:
         if os.path.exists(path_pkl):
             fd = open(path_pkl, 'r')
             for item in pickle.load(fd):
                 status_code = int(item[2])
                 total += 1
-                experiment_counters[Status.VALUE_TO_KEY.get(status_code, "UNKNOWN")] = experiment_counters.get(
-                    Status.VALUE_TO_KEY.get(status_code, "UNKNOWN"), 0) + 1
+                experiment_counters[common_utils.Status.VALUE_TO_KEY.get(status_code, "UNKNOWN")] = experiment_counters.get(
+                    common_utils.Status.VALUE_TO_KEY.get(status_code, "UNKNOWN"), 0) + 1
 
         else:
             raise Exception("PKL file not found.")
@@ -1423,12 +1202,8 @@ def get_quick_view(expid):
         BasicConfig.read()
         path_pkl = BasicConfig.LOCAL_ROOT_DIR + '/' + expid + '/pkl'
         pkl_file = os.path.join(path_pkl, "job_list_{0}.pkl".format(expid))
-        path_to_logs = os.path.join(
-            BasicConfig.LOCAL_ROOT_DIR, expid, "tmp", "LOG_" + expid)
-        tmp_path = os.path.join(
-            BasicConfig.LOCAL_ROOT_DIR, expid, BasicConfig.LOCAL_TMP_DIR)
-        # reading = os.popen(pkl_file).read() if (
-        #     os.path.exists(pkl_file)) else None
+        path_to_logs = os.path.join(BasicConfig.LOCAL_ROOT_DIR, expid, "tmp", "LOG_" + expid)
+        tmp_path = os.path.join(BasicConfig.LOCAL_ROOT_DIR, expid, BasicConfig.LOCAL_TMP_DIR)
         if os.path.exists(pkl_file):
             # Retrieving packages
             now_ = time.time()
@@ -1442,13 +1217,13 @@ def get_quick_view(expid):
                 for item in pickle.load(fd):
                     status_code = int(item[2])
                     # counters
-                    if status_code == Status.COMPLETED:
+                    if status_code == common_utils.Status.COMPLETED:
                         completed_count += 1
-                    elif status_code == Status.FAILED:
+                    elif status_code == common_utils.Status.FAILED:
                         failed_count += 1
-                    elif status_code == Status.RUNNING:
+                    elif status_code == common_utils.Status.RUNNING:
                         running_count += 1
-                    elif status_code == Status.QUEUING:
+                    elif status_code == common_utils.Status.QUEUING:
                         queuing_count += 1
                     # end
                     job_name = item[0]
@@ -1457,7 +1232,7 @@ def get_quick_view(expid):
                     out = str(item[8]) if len(item) >= 9 else ""
                     err = str(item[9]) if len(item) >= 10 else ""
                     status_color = Monitor.color_status(status_code)
-                    status_text = str(Status.VALUE_TO_KEY[status_code])
+                    status_text = str(common_utils.Status.VALUE_TO_KEY[status_code])
                     jobs_in_pkl[job_name] = (
                         status_code, status_color, status_text, out, err, priority, id_number)
             except Exception as exp:
@@ -1485,7 +1260,7 @@ def get_quick_view(expid):
                                       'out': "/" + out,
                                       'err': "/" + err,
                                       })
-                    if status_code in [Status.COMPLETED, Status.WAITING, Status.READY]:
+                    if status_code in [common_utils.Status.COMPLETED, common_utils.Status.WAITING, common_utils.Status.READY]:
                         quick_tree_view.append({'title': Job.getTitle(job_name, status_color, status_text) + wrapper_tag,
                                                 'refKey': job_name,
                                                 'data': 'Empty',
@@ -1513,15 +1288,18 @@ def get_job_history(expid, job_name):
     # type: (str, str) -> Dict[str, Any]
     error = False
     error_message = ""
+    path_to_job_logs = ""
     result = None
-    try:        
+    try:
+        BasicConfig.read() 
+        path_to_job_logs = os.path.join(BasicConfig.LOCAL_ROOT_DIR, expid, "tmp", "LOG_" + expid)       
         result = ExperimentHistoryDirector(ExperimentHistoryBuilder(expid)).build_reader_experiment_history().get_historic_job_data(job_name)
     except Exception as exp:
         print(traceback.format_exc())
         error = True
         error_message = str(exp)
         pass
-    return {"error": error, "error_message": error_message, "history": result}
+    return {"error": error, "error_message": error_message, "history": result, "path_to_logs": path_to_job_logs}
 
 
 def get_current_configuration_by_expid(expid, valid_user):
@@ -1615,7 +1393,7 @@ def get_experiment_runs(expid):
         post_jobs = experiment_history.manager.get_job_data_dcs_COMPLETED_by_section("POST")
         run_id_job_name_to_job_data_dc_COMPLETED = {}
         for job_dc in experiment_history.manager.get_job_data_dcs_all():
-            if job_dc.status_code == Status.COMPLETED:
+            if job_dc.status_code == common_utils.Status.COMPLETED:
                 run_id_job_name_to_job_data_dc_COMPLETED[(job_dc.run_id, job_dc.job_name)] = job_dc
         run_id_wrapper_code_to_job_dcs = {}        
         for key, job_dc in run_id_job_name_to_job_data_dc_COMPLETED.items():
@@ -1643,7 +1421,7 @@ def get_experiment_runs(expid):
                    assign_current(joblist_loader.job_dictionary, valid_POST_in_run, experiment_history)
                 result.append({"run_id": experiment_run.run_id, 
                                 "created": experiment_run.created, 
-                                "finish": timestamp_to_datetime_format(experiment_run.finish), 
+                                "finish": common_utils.timestamp_to_datetime_format(experiment_run.finish), 
                                 "chunk_unit": experiment_run.chunk_unit, 
                                 "chunk_size": experiment_run.chunk_size,
                                 "submitted": experiment_run.submitted, 
@@ -1675,8 +1453,7 @@ def read_esarchive(result):
     avg_latency = 1000
     avg_bandwidth = 1000
     if os.path.exists('/esarchive/scratch/pbretonn/monitor-esarchive/plot/io-benchmark/stats-io.txt'):
-        output = subprocess.check_output(
-            ['tail', '-n', '49', '/esarchive/scratch/pbretonn/monitor-esarchive/plot/io-benchmark/stats-io.txt'])
+        output = subprocess.check_output(['tail', '-n', '49', '/esarchive/scratch/pbretonn/monitor-esarchive/plot/io-benchmark/stats-io.txt'])
 
         # lines = lines[:-1]
         # print(lines)
@@ -1720,8 +1497,7 @@ def test_esarchive_status():
         t0 = time.time()
         manager = multiprocessing.Manager()
         result = manager.list()
-        p = multiprocessing.Process(
-            target=read_esarchive, name="ESARCHIVE", args=(result,))
+        p = multiprocessing.Process(target=read_esarchive, name="ESARCHIVE", args=(result,))
         p.start()
         p.join(10)
         if p.is_alive():

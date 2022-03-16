@@ -216,8 +216,7 @@ class JobListLoader(object):
     """
     Updates job out and err logs of the job list
     """               
-    file_names = [name for name in os.listdir(self.configuration_facade.log_path) if fnmatch(
-        name, '*.out') or fnmatch(name, '*.err')]
+    file_names = [name for name in os.listdir(self.configuration_facade.log_path) if fnmatch(name, '*.out') or fnmatch(name, '*.err')]
 
     try:
       out_set = [name for name in file_names if name.split('.')[-1] == 'out']
@@ -226,6 +225,7 @@ class JobListLoader(object):
     except:
       out_set = set()
       new_outs = dict()
+
     try:
       err_set = [name for name in file_names if name.split('.')[-1] == 'err']
       err_set.sort()
@@ -236,8 +236,12 @@ class JobListLoader(object):
 
     for job in self._jobs:
       if job.status in [Status.COMPLETED, Status.FAILED]:
-          job.out_path_local = os.path.join(self.log_path, new_outs.get(job.name, None)) if new_outs.get(job.name, None) else "NA"
-          job.err_path_local = os.path.join(self.log_path, new_errs.get(job.name, None)) if new_errs.get(job.name, None) else "NA"
+        job.out_path_local = os.path.join(self.log_path, new_outs.get(job.name, None)) if new_outs.get(job.name, None) else None
+        job.err_path_local = os.path.join(self.log_path, new_errs.get(job.name, None)) if new_errs.get(job.name, None) else None
+      else:
+        job.out_path_local = None
+        job.err_path_local = None
+
 
   def do_print(self):
     for job in self._jobs:
