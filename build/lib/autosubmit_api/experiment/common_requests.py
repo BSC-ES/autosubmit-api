@@ -651,7 +651,7 @@ def get_experiment_tree_pkl(expid):
             raise Exception("Pkl file {} not found.".format(autosubmit_config_facade.pkl_path))
 
         job_list_loader = JobListLoaderDirector(JobListLoaderBuilder(expid)).build_loaded_joblist_loader()       
-        package_to_jobs = job_list_loader.joblist_helper.package_to_jobs                 
+        package_to_jobs = job_list_loader.joblist_helper.package_to_jobs
         for job in job_list_loader.jobs:
             pkl_content.append({'name': job.name,
                                 'rm_id': job.rm_id,
@@ -682,7 +682,7 @@ def get_experiment_tree_pkl(expid):
         'error_message': error_message,
         'has_changed': True,
         'pkl_content': pkl_content,
-        'packages': package_to_jobs,
+        'packages': list(package_to_jobs.keys()),
         'pkl_timestamp': pkl_timestamp,
         'source_tag': JUtils.source_tag,
         'target_tag': JUtils.target_tag,

@@ -658,23 +658,18 @@ class AutosubmitConfig(object):
         """
         Creates parser objects for configuration files
         """
-        if not os.path.exists(self._conf_parser_file): raise Exception("Required file not found {0}".format(self._conf_parser_file))
-        if not os.path.exists(self._platforms_parser_file): raise Exception("Required file not found {0}".format(self._platforms_parser_file))
-        if not os.path.exists(self._jobs_parser_file): raise Exception("Required file not found {0}".format(self._jobs_parser_file))
-        if not os.path.exists(self._exp_parser_file): raise Exception("Required file not found {0}".format(self._exp_parser_file))
-        self._conf_parser = AutosubmitConfig.get_parser(
-            self.parser_factory, self._conf_parser_file)
-        self._platforms_parser = AutosubmitConfig.get_parser(
-            self.parser_factory, self._platforms_parser_file)
-        self._jobs_parser = AutosubmitConfig.get_parser(
-            self.parser_factory, self._jobs_parser_file)
-        self._exp_parser = AutosubmitConfig.get_parser(
-            self.parser_factory, self._exp_parser_file)
+        if not os.path.exists(self._conf_parser_file): raise IOError("Required file not found {0}".format(self._conf_parser_file))
+        if not os.path.exists(self._platforms_parser_file): raise IOError("Required file not found {0}".format(self._platforms_parser_file))
+        if not os.path.exists(self._jobs_parser_file): raise IOError("Required file not found {0}".format(self._jobs_parser_file))
+        if not os.path.exists(self._exp_parser_file): raise IOError("Required file not found {0}".format(self._exp_parser_file))
+        self._conf_parser = AutosubmitConfig.get_parser(self.parser_factory, self._conf_parser_file)
+        self._platforms_parser = AutosubmitConfig.get_parser(self.parser_factory, self._platforms_parser_file)
+        self._jobs_parser = AutosubmitConfig.get_parser(self.parser_factory, self._jobs_parser_file)
+        self._exp_parser = AutosubmitConfig.get_parser(self.parser_factory, self._exp_parser_file)
         if self._proj_parser_file == '':
             self._proj_parser = None
         else:
-            self._proj_parser = AutosubmitConfig.get_parser(
-                self.parser_factory, self._proj_parser_file)
+            self._proj_parser = AutosubmitConfig.get_parser(self.parser_factory, self._proj_parser_file)
 
     def load_parameters(self):
         """

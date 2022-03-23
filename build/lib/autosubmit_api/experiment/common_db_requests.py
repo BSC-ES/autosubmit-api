@@ -315,6 +315,7 @@ def insert_experiment_status(conn, expid, seconds_diff):
 
 
 def create_connection(db_file):
+    # type: (str) -> sqlite3.Connection
     """ 
     Create a database connection to the SQLite database specified by db_file.  
     :param db_file: database file name  

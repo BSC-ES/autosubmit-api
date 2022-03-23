@@ -44,9 +44,9 @@ class ConfigurationFacade:
     self.tmp_path = os.path.join(self.basic_configuration.LOCAL_ROOT_DIR, self.expid, self.basic_configuration.LOCAL_TMP_DIR)
     self.log_path = os.path.join(self.basic_configuration.LOCAL_ROOT_DIR, self.expid, "tmp", "LOG_{0}".format(self.expid))
     self.structures_path = self.basic_configuration.STRUCTURES_DIR
-    if not os.path.exists(self.experiment_path): raise Exception("Experiment folder {0} not found".format(self.experiment_path))
-    if not os.path.exists(self.pkl_path): raise Exception("Required file {0} not found.".format(self.pkl_path))
-    if not os.path.exists(self.tmp_path): raise Exception("Required folder {0} not found.".format(self.tmp_path))
+    if not os.path.exists(self.experiment_path): raise IOError("Experiment folder {0} not found".format(self.experiment_path))
+    if not os.path.exists(self.pkl_path): raise IOError("Required file {0} not found.".format(self.pkl_path))
+    if not os.path.exists(self.tmp_path): raise IOError("Required folder {0} not found.".format(self.tmp_path))
       
   @abstractmethod
   def _process_advanced_config(self):
@@ -137,15 +137,23 @@ class AutosubmitConfigurationFacade(ConfigurationFacade):
   def get_experiment_last_modified_time_as_datetime(self):
     # type: () -> str
     return timestamp_to_datetime_format(int(self.experiment_stat_data.st_mtime))
+  
+  def get_experiment_created_time_as_datetime(self):
+    # type: () -> str
+    return timestamp_to_datetime_format(int(self.experiment_stat_data.st_ctime))
 
   def get_owner_id(self):
     # type: () -> int    
     return int(self.experiment_stat_data.st_uid)
 
   def get_owner_name(self):
-    # type: () -> str    
-    owner_name = os.popen("id -nu {0}".format(str(self.get_owner_id()))).read().strip()    
-    return str(owner_name)
+    # type: () -> str
+    try:          
+      _, stdout, _ = os.popen3("id -nu {0}".format(str(self.get_owner_id())))       
+      owner_name = stdout.read().strip()   
+      return str(owner_name)
+    except:            
+      return "NA"
 
   def get_autosubmit_version(self):
     # type: () -> str

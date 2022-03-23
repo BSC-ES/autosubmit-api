@@ -181,7 +181,7 @@ class Job:
       title += JUtils.source_tag
     if self.date is not None and self.member == None:
       title += JUtils.sync_tag
-    if self.package:
+    if self.package and len(self.package) > 0:
       title += self.package_tag
     return title
   

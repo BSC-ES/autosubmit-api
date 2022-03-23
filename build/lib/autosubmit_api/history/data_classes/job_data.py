@@ -16,7 +16,6 @@
 # You should have received a copy of the GNU General Public License
 # along with Autosubmit.  If not, see <http://www.gnu.org/licenses/>.
 
-from audioop import reverse
 import collections
 import time
 import autosubmit_api.history.utils as HUtils
@@ -249,8 +248,7 @@ class JobData(object):
     def submit_datetime_str(self):
         """
         Returns the submit datetime as a string with format %Y-%m-%d %H:%M:%S
-        """
-        # o_datetime = self.submit
+        """        
         if self.submit and self.submit > 0:
             return common_utils.timestamp_to_datetime_format(self.submit)
         else:
