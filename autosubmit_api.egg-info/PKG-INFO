@@ -1,6 +1,6 @@
 Metadata-Version: 1.2
 Name: autosubmit-api
-Version: 1.0.6
+Version: 1.0.7
 Summary: An extension to the Autosubmit package that serves its information as an API
 Home-page: https://earth.bsc.es/gitlab/wuruchi/autosubmit_api
 Author: Wilmer Uruchi

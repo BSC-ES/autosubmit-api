@@ -1,6 +1,7 @@
 import unittest
 import autosubmit_api.history.test as test_history
 import autosubmit_api.history.test_strategies as test_energy_strategies
+import autosubmit_api.history.test_job_history as test_job_history
 import autosubmit_api.history.platform_monitor.test as test_platform
 import autosubmit_api.history.database_managers.test as test_history_database_managers
 import autosubmit_api.components.experiment.test as test_experiment_components
@@ -21,6 +22,7 @@ if __name__ == '__main__':
   runner.run(unittest.makeSuite(test_slurm_monitor.TestSlurmMonitor))
   runner.run(unittest.makeSuite(test_graph_representation.TestGraph))
   runner.run(unittest.makeSuite(test_populate_details.TestPopulate))
+  runner.run(unittest.makeSuite(test_job_history.TestJobHistory))
 
   
 

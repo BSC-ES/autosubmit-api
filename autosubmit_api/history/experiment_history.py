@@ -179,12 +179,14 @@ class ExperimentHistory():
     result = []
     all_job_data_dcs = self.manager.get_job_data_dcs_by_name(job_name)          
     post_job_data_dcs = self.manager.get_job_data_dcs_COMPLETED_by_section("POST")
+
     run_id_to_POST_job_data_dcs = {} # type: Dict[int, List[JobData]]
     run_id_wrapper_code_to_job_data_dcs = {} # type: Dict[Tuple[int, int], List[JobData]]
     for job_data_dc in post_job_data_dcs:
       run_id_to_POST_job_data_dcs.setdefault(job_data_dc.run_id, []).append(job_data_dc)
       if (job_data_dc.run_id, job_data_dc.rowtype) not in run_id_wrapper_code_to_job_data_dcs:
         run_id_wrapper_code_to_job_data_dcs[(job_data_dc.run_id, job_data_dc.rowtype)] = self.manager.get_job_data_dc_COMPLETED_by_wrapper_run_id(job_data_dc.rowtype, job_data_dc.run_id)
+    
     run_id_to_experiment_run_involved = {} # type: Dict[int, ExperimentRun]    
     for job_data_dc in all_job_data_dcs:
       if job_data_dc.run_id not in run_id_to_experiment_run_involved:

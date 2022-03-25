@@ -198,8 +198,6 @@ class JobData(object):
         """
         if energy > 0:
             if (energy != self._energy):
-                # print("Updating energy to {0} from {1}.".format(
-                #    energy, self._energy))
                 self.require_update = True
             self._energy = round(energy, 2)
 
@@ -278,9 +276,9 @@ class JobData(object):
         """
         Calculates and returns the running time of the job, in seconds.
         """
-        if self.status in ["RUNNING", "COMPLETED", "FAILED"]:
-            return HUtils.calculate_run_time_in_seconds(self.start, self.finish)                        
-        return 0
+        # if self.status in ["RUNNING", "COMPLETED", "FAILED"]:
+        return HUtils.calculate_run_time_in_seconds(self.start, self.finish)                        
+        # return 0
 
     @property
     def queuing_time(self):
@@ -288,9 +286,9 @@ class JobData(object):
         """
         Calculates and returns the queuing time of the job, in seconds.
         """
-        if self.status in ["SUBMITTED", "QUEUING", "RUNNING", "COMPLETED", "HELD", "PREPARED", "FAILED", "SKIPPED"]:
-            return HUtils.calculate_queue_time_in_seconds(self.submit, self.start)            
-        return 0
+        # if self.status in ["SUBMITTED", "QUEUING", "RUNNING", "COMPLETED", "HELD", "PREPARED", "FAILED", "SKIPPED"]:
+        return HUtils.calculate_queue_time_in_seconds(self.submit, self.start)            
+        # return 0
     
     def queuing_time_considering_package(self, jobs_in_package):
         # type: (List[JobData]) -> int        
@@ -298,9 +296,8 @@ class JobData(object):
         if len(considered_jobs) > 0:
             considered_jobs.sort(key=lambda x: x.queuing_time, reverse=True)
             max_queue = max([job.queuing_time + job.running_time for job in considered_jobs])
-            if self.status in ["SUBMITTED", "QUEUING", "RUNNING", "COMPLETED", "HELD", "PREPARED", "FAILED"]:
-                queue = max(0, int(self.start - self.submit) - int(max_queue))
-                return queue
+            # if self.status in ["SUBMITTED", "QUEUING", "RUNNING", "COMPLETED", "HELD", "PREPARED", "FAILED"]:
+            return max(0, int(self.start - self.submit) - int(max_queue))                
         return self.queuing_time
 
     def delta_queueing_time_considering_package(self, jobs_in_package):

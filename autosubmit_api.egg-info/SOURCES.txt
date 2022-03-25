@@ -104,6 +104,7 @@ autosubmit_api/history/experiment_status_manager.py
 autosubmit_api/history/internal_logging.py
 autosubmit_api/history/strategies.py
 autosubmit_api/history/test.py
+autosubmit_api/history/test_job_history.py
 autosubmit_api/history/test_strategies.py
 autosubmit_api/history/test_utils.py
 autosubmit_api/history/utils.py
