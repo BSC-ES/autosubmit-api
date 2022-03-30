@@ -1136,7 +1136,7 @@ def verify_last_completed(seconds=300):
             str(finish_time)) > 0 else 0
         if (finish_ts != finish):
             #print("\tMust Update")
-            DbRequests.update_job_times(conn, detail_id,
+            DbRequests.update_job_times(detail_id,
                                         int(current_st),
                                         submit_ts,
                                         start_ts,

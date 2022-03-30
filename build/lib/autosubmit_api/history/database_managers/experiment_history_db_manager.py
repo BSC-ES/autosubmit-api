@@ -24,16 +24,10 @@ import autosubmit_api.history.database_managers.database_models as Models
 from autosubmit_api.history.data_classes.job_data import JobData
 from autosubmit_api.history.data_classes.experiment_run import ExperimentRun
 from autosubmit_api.config.basicConfig import BasicConfig
-from abc import ABCMeta, abstractmethod
 from autosubmit_api.history.database_managers.database_manager import DatabaseManager, DEFAULT_JOBDATA_DIR
-from datetime import datetime
 from typing import List
 from collections import namedtuple
 
-# CURRENT_DB_VERSION = 17
-# DB_EXPERIMENT_HEADER_SCHEMA_CHANGES = 14
-# DB_VERSION_SCHEMA_CHANGES = 12
-# DEFAULT_DB_VERSION = 10
 DEFAULT_MAX_COUNTER = 0
 
 class ExperimentHistoryDbManager(DatabaseManager):

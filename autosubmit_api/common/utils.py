@@ -160,7 +160,7 @@ def timestamp_to_datetime_format(timestamp):
   """ %Y-%m-%d %H:%M:%S """
   try:
     if timestamp and timestamp > 0:
-      return datetime.datetime.utcfromtimestamp(timestamp).strftime('%Y-%m-%d %H:%M:%S')
+      return datetime.datetime.fromtimestamp(timestamp).strftime('%Y-%m-%d %H:%M:%S')
   except Exception as exp:    
     print("Timestamp {} cannot be converted to datetime string. {}".format(str(timestamp), str(exp)))
     return None

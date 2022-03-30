@@ -36,7 +36,7 @@ class DatabaseManager():
     # type: (str, BasicConfig) -> None
     self.expid = expid
     self.JOBDATA_DIR = basic_config.JOBDATA_DIR
-    self.LOCAL_ROOT_DIR = basic_config.LOCAL_ROOT_DIR
+    self.LOCAL_ROOT_DIR = basic_config.LOCAL_ROOT_DIR    
     self.db_version = Models.DatabaseVersion.NO_DATABASE.value       
 
   def get_connection(self, path):

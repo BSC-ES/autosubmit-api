@@ -90,9 +90,11 @@ autosubmit_api/database/db_jobdata.py
 autosubmit_api/database/db_manager.py
 autosubmit_api/database/db_structure.py
 autosubmit_api/experiment/__init__.py
+autosubmit_api/experiment/as_times_db_manager.py
 autosubmit_api/experiment/common_db_requests.py
 autosubmit_api/experiment/common_requests.py
 autosubmit_api/experiment/experiment_common.py
+autosubmit_api/experiment/experiment_db_manager.py
 autosubmit_api/experiment/test.py
 autosubmit_api/experiment/utils.py
 autosubmit_api/git/__init__.py
