@@ -40,16 +40,6 @@ In this image you can see the flow of information in the **Autosubmit environmen
 * Gunicorn
 * Unit testing
 
-## Deployment
 
-Our local implementation is currently on `bscesweb04` under the user `webadmin`, make sure you have access to that server and that particular user. Once you have logged in to that machine under that user, follow these steps to start the API:
-
-1. Activate the virtual environment: `source /srv/www/htdocs/AutosubmitAPI/venv27/bin/activate`.
-    1. Once the virtual environment is active, you can uninstall and install `autosubmit_api` using `pip` to verify it is updated. 
-2. Make sure `gunicorn` is not running: `pstree -ap | grep gunicorn`. This method may not be as effective to identify the API service if more than one `gunicorn` instance is running for different services, but so far it is the easy way to do it. If the process is running and you want to start over, `kill -9` it.
-3. To start `gunicorn` for `autosubmit_api` execute: `gunicorn --error-logfile ~/logunicorn0320.txt --timeout 600 -b 0.0.0.0:8081 -w 4 autosubmit_api.app:app --daemon`, where `~/logunicorn0320.txt` is the path to the log file that will be used (it does not need to exist beforehand), `--timeout 600` indicates the number of seconds that `gunicorn` will wait for each process before killing it, `-b 0.0.0.0:8081` is the IP and port that will be used (two services cannot share the same IP and port, `0.0.0.0` is a shortcut for localhost, in practice, the public address will be `http://192.168.11.91:8081`), `autosubmit_api.app:app` is the name of the file that exposes the operations that the API will answer, and `--daemon` is a flag that indicates that this is a background process.
-4. You can test if the process is running with the method mentioned before, or by checking the log files you set in the previous step.
-
-**Autosubmit API** should be UP and RUNNING. 
 
 
