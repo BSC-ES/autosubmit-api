@@ -82,69 +82,70 @@ class TreeRepresentation(object):
           Status.COMPLETED: 0,
           Status.RUNNING: 0,
           Status.QUEUING: 0,
-          Status.FAILED: 0 }
-        dm_jobs = self._date_member_distribution.get((date, member), [])
-        sections = {job.section for job in dm_jobs}
-        section_to_dm_jobs_dict = {section: [job for job in dm_jobs if job.section == section] for section in sections}
-        section_to_dm_jobs_count_dict = {section: len(section_to_dm_jobs_dict[section]) for section in section_to_dm_jobs_dict}
-        section_open = set()
+          Status.FAILED: 0,
+          Status.HELD: 0 }
+        jobs_in_date_member = self._date_member_distribution.get((date, member), [])
+        sections = {job.section for job in jobs_in_date_member}
+        section_to_dm_jobs_dict = {section: [job for job in jobs_in_date_member if job.section == section] for section in sections}        
+        sections_folder_open = set()
         jobs_in_section = OrderedDict()
-        jobs_or_folders_in_member = deque()
-        for job in dm_jobs:
+        jobs_and_folders_in_member = deque()
+        for job in jobs_in_date_member:
           if job.status in status_counters:
             status_counters[job.status] += 1      
-          if section_to_dm_jobs_count_dict[job.section] > 1:
+          if len(section_to_dm_jobs_dict[job.section]) > 1:
             if job.status in self._normal_status:
               jobs_in_section.setdefault(job.section, deque()).append(job.leaf)
             else:
               jobs_in_section.setdefault(job.section, deque()).appendleft(job.leaf)
-              section_open.add(job.section)
+              sections_folder_open.add(job.section)
           else:
             if job.status in self._normal_status:
-              jobs_or_folders_in_member.append(job.leaf)
+              jobs_and_folders_in_member.append(job.leaf)
             else: 
-              jobs_or_folders_in_member.appendleft(job.leaf)
+              jobs_and_folders_in_member.appendleft(job.leaf)
           job.tree_parent.append("{0}_{1}_{2}".format(self.expid, self.joblist_loader.dates_formatted_dict.get(date, None), member))
         
         for section in jobs_in_section:
-          jobs_or_folders_in_member.append({
+          jobs_and_folders_in_member.append({
             'title': section,
             'folder': True,
             'refKey': "{0}_{1}_{2}_{3}".format(self.expid, formatted_date, str(member), str(section)),
             'data': 'Empty',
-            'expanded': True if section in section_open else False,
+            'expanded': True if section in sections_folder_open else False,
             'children': list(jobs_in_section.get(section, []))
           })
         
-        date_member_jobs_count = len(dm_jobs)
-        if date_member_jobs_count > 0:
+        
+        if len(jobs_in_date_member) > 0: # If there is something inside the date-member group, we create it.
           ref_key = "{0}_{1}_{2}".format(self.expid, formatted_date, member)
           folders_in_date.append({
             "title": JUtils.get_folder_date_member_title(self.expid, 
                     formatted_date, 
                     member, 
-                    date_member_jobs_count, 
+                    len(jobs_in_date_member), 
                     status_counters),
             "folder": True,
             "refKey": ref_key,
             "data": "Empty",
             "expanded": False,
-            "children": list(jobs_or_folders_in_member)
+            "children": list(jobs_and_folders_in_member)
           })
           self.result_header[ref_key] = ({
             "completed": status_counters[Status.COMPLETED],
             "running": status_counters[Status.RUNNING],
             "queuing": status_counters[Status.QUEUING],
             "failed": status_counters[Status.FAILED],
-            "total": date_member_jobs_count
+            "held": status_counters[Status.HELD],
+            "total": len(jobs_in_date_member)
           })
 
-      if len(folders_in_date) > 0: # If there is something to add to the tree
-        date_member_title = "{0}_{1}".format(self.expid, formatted_date)
+      if len(folders_in_date) > 0: # If there is something inside the date folder, we create it.
+        date_folder_title = "{0}_{1}".format(self.expid, formatted_date)
         self.result_tree.append({
-          "title": date_member_title,
+          "title": date_folder_title,
           "folder": True,
-          "refKey": date_member_title,
+          "refKey": date_folder_title,
           "data": "Empty",
           "expanded": True,
           "children": list(folders_in_date)
@@ -172,7 +173,8 @@ class TreeRepresentation(object):
           Status.COMPLETED: 0,
           Status.RUNNING: 0,
           Status.QUEUING: 0,
-          Status.FAILED: 0 }
+          Status.FAILED: 0,
+          Status.HELD: 0 }
       if total_count > 0:
         for job in jobs_in_package:
           if job.status in status_counters:
@@ -185,7 +187,8 @@ class TreeRepresentation(object):
                     'failed': status_counters[Status.FAILED], 
                     'running': status_counters[Status.RUNNING], 
                     'queuing': status_counters[Status.QUEUING], 
-                    'total': total_count},
+                    'held': status_counters[Status.HELD],
+                    'total': total_count },
           "expanded": False,
           "children": [job.leaf for job in jobs_in_package]
         })
@@ -194,6 +197,7 @@ class TreeRepresentation(object):
           "running": status_counters[Status.RUNNING],
           "queuing": status_counters[Status.QUEUING],
           "failed": status_counters[Status.FAILED],
+          "held": status_counters[Status.HELD],
           "total": total_count
         })
   
@@ -202,6 +206,7 @@ class TreeRepresentation(object):
     self.result_header["running_tag"] = JUtils.running_tag_with_anchors
     self.result_header["queuing_tag"] = JUtils.queuing_tag_with_anchors    
     self.result_header["failed_tag"] = JUtils.failed_tag_with_anchors
+    self.result_header["held_tag"] = JUtils.held_tag_with_anchors
     self.result_header["checkmark"] = JUtils.checkmark_tag
     self.result_header["packages"] = [package_name for package_name in self.joblist_loader.package_names]    
     self.result_header["chunk_unit"] = self.joblist_loader.chunk_unit

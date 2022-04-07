@@ -12,3 +12,4 @@ portalocker==0.5.7
 pydotplus==2.0.2
 regex
 requests==2.22.0
+graphviz==0.13

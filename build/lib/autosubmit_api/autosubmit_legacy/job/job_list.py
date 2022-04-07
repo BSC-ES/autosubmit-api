@@ -1979,6 +1979,7 @@ class JobList:
                                                                                             'running': running,
                                                                                             'queuing': queueing,
                                                                                             'failed': failed,
+                                                                                            'held': 0,
                                                                                             'total': len(date_member_groups[(date, member)])})
             if len(date_member) > 0:
                 # print(result_exp)
@@ -2050,6 +2051,7 @@ class JobList:
                                                                                    'failed': failed,
                                                                                    'running': running,
                                                                                    'queuing': queueing,
+                                                                                   'held': 0,
                                                                                    'total': len(local_list)})
 
         jobs = [job for job in jobs if job.name not in added_job_names]
@@ -2136,6 +2138,7 @@ class JobList:
                                                               'running': running,
                                                               'queuing': queueing,
                                                               'failed': failed,
+                                                              'held': 0,
                                                               'total': len(jobs_in_package)})
         result_header['completed_tag'] = JobList.get_completed_tag()
         result_header['running_tag'] = JobList.get_running_tag()

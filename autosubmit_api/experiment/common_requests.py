@@ -584,6 +584,7 @@ def get_experiment_pkl(expid):
     error_message = ""    
     pkl_content = list()
     pkl_timestamp = 0
+    package_to_jobs = dict()
     try:
         autosubmit_config_facade = ConfigurationFacadeDirector(AutosubmitConfigurationFacadeBuilder(expid)).build_autosubmit_configuration_facade()
         pkl_file_path = autosubmit_config_facade.pkl_path
@@ -708,7 +709,7 @@ def get_experiment_graph(expid, layout=Layout.STANDARD, grouped=GroupedBy.NO_GRO
                 return graph.get_graph_representation_data()
         except Exception as exp:
             print(traceback.format_exc())
-            print("Graph Representation failed: {0}".format(exp))
+            print("New Graph Representation failed: {0}".format(exp))
 
         # Getting platform data
 
@@ -762,8 +763,7 @@ def get_experiment_tree_rundetail(expid, run_id):
     """
     base_list = dict()
     pkl_timestamp = 10000000
-    try:
-        notransitive = False
+    try:        
         print("Received Tree RunDetail " + str(expid))
         BasicConfig.read()
         tree_structure, current_collection, reference = JobList.get_tree_structured_from_previous_run(expid, BasicConfig, run_id=run_id)
@@ -797,7 +797,6 @@ def get_experiment_tree_structured(expid):
         as_conf = AutosubmitConfig(
             expid, BasicConfig, ConfigParserFactory())        
         as_conf.reload()
-        # print("reload successful")
         # If version is higher than 3.13, we can perform the new tree representation algorithm
         try:
             if common_utils.is_version_historical_ready(as_conf.get_version()):     
@@ -807,7 +806,7 @@ def get_experiment_tree_structured(expid):
                 return tree.get_tree_structure()
         except Exception as exp:
             print(traceback.format_exc())
-            print("Tree Representation failed: {0}".format(exp))
+            print("New Tree Representation failed: {0}".format(exp))
 
         # Getting platform data
         # Main taget HPC
@@ -1046,10 +1045,6 @@ def get_job_conf_list(expid):
     """
     try:
         BasicConfig.read()
-        # Basi = "/esarchive/autosubmit/"
-        # parser_path = os.path.join(BasicConfig.LOCAL_ROOT_DIR, expid, "conf",
-        #                           "expdef_" + expid + ".conf")
-
         as_conf = AutosubmitConfig(expid, BasicConfig, ConfigParserFactory())
         if not as_conf.check_conf_files():
             print('Can not create with invalid configuration')
@@ -1183,6 +1178,7 @@ def get_experiment_counters(expid):
     return {"error": error, "error_message": error_message, "expid": expid, "total": total, "counters": experiment_counters}
 
 
+# TODO: Update to current representation standards and classes
 def get_quick_view(expid):
     """ Lighter View """
     pkl_file_name = ""
@@ -1293,7 +1289,7 @@ def get_job_history(expid, job_name):
     try:
         BasicConfig.read() 
         path_to_job_logs = os.path.join(BasicConfig.LOCAL_ROOT_DIR, expid, "tmp", "LOG_" + expid)       
-        result = ExperimentHistoryDirector(ExperimentHistoryBuilder(expid)).build_reader_experiment_history().get_historic_job_data(job_name)
+        result = ExperimentHistoryDirector(ExperimentHistoryBuilder(expid)).build_reader_experiment_history().get_historic_job_data(job_name)        
     except Exception as exp:
         print(traceback.format_exc())
         error = True
@@ -1455,10 +1451,6 @@ def read_esarchive(result):
     if os.path.exists('/esarchive/scratch/pbretonn/monitor-esarchive/plot/io-benchmark/stats-io.txt'):
         output = subprocess.check_output(['tail', '-n', '49', '/esarchive/scratch/pbretonn/monitor-esarchive/plot/io-benchmark/stats-io.txt'])
 
-        # lines = lines[:-1]
-        # print(lines)
-        # print(last_line)
-
         if len(output) > 0:
             lines = output.split('\n')[:-1]  # Get rid of last line
             last_line = lines[-1].split()
@@ -1481,8 +1473,6 @@ def read_esarchive(result):
                 avg_bandwidth = 90.0
                 avg_latency = 2.0
 
-            # bandwidth_average
-        # print(last_day)
         result.append(True)
     else:
         result.append(False)

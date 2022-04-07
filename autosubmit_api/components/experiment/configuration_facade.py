@@ -129,6 +129,10 @@ class AutosubmitConfigurationFacade(ConfigurationFacade):
   def get_pkl_last_modified_timestamp(self):
     # type: () -> int
     return int(os.stat(self.pkl_path).st_mtime)
+  
+  def get_pkl_last_modified_time_as_datetime(self):
+    # type: () -> str
+    return timestamp_to_datetime_format(self.get_pkl_last_modified_timestamp())
 
   def get_experiment_last_access_time_as_datetime(self):
     # type: () -> str
@@ -140,6 +144,7 @@ class AutosubmitConfigurationFacade(ConfigurationFacade):
   
   def get_experiment_created_time_as_datetime(self):
     # type: () -> str
+    """ Important: Under OpenSUSE, it returns the last modified time."""
     return timestamp_to_datetime_format(int(self.experiment_stat_data.st_ctime))
 
   def get_owner_id(self):
@@ -181,7 +186,14 @@ class AutosubmitConfigurationFacade(ConfigurationFacade):
     return str(self.autosubmit_conf.get_platform_queue(platform_name))
 
   def get_wrapper_qos(self):
+    # type: () -> str
     return str(self.autosubmit_conf.get_wrapper_queue())
+
+  def get_wrapper_type(self):
+    # type: () -> str | None
+    if self.autosubmit_conf.get_wrapper_type().upper() != "NONE":
+      return self.autosubmit_conf.get_wrapper_type().upper()
+    return None
 
   def get_section_wallclock(self, section_name):
     return str(self.autosubmit_conf.get_wallclock(section_name))

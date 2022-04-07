@@ -27,6 +27,7 @@ from bscearth.utils.log import Log
 from autosubmit_api.config.basicConfig import BasicConfig
 from autosubmit_api.config.config_common import AutosubmitConfig
 from autosubmit_api.builders.experiment_history_builder import ExperimentHistoryDirector, ExperimentHistoryBuilder
+from autosubmit_api.builders.configuration_facade_builder import ConfigurationFacadeDirector, AutosubmitConfigurationFacadeBuilder
 from bscearth.utils.config_parser import ConfigParserFactory
 import autosubmit_api.experiment.common_db_requests as DbRequests
 from autosubmit_api.database.db_jobdata import JobDataStructure
@@ -334,6 +335,8 @@ def search_experiment_by_id(searchString, typeExp=None, onlyActive=None, owner=N
     # print(query)
     cursor.execute(query)
     table = cursor.fetchall()
+    cursor.close()
+    conn.close()
     result = list()
     experiment_status = dict()
     experiment_times = dict()
@@ -352,27 +355,27 @@ def search_experiment_by_id(searchString, typeExp=None, onlyActive=None, owner=N
         suspended = 0
         version = "Unknown"
         wrapper = None
-        last_modified = None
-        try:            
-            as_conf = AutosubmitConfig(expid, BasicConfig, ConfigParserFactory())
-            as_conf.reload()
-            version = as_conf.get_version()
-            wrapper = str(as_conf.get_wrapper_type()).upper()
-            wrapper = wrapper if wrapper != "NONE" else None
+        last_modified_timestamp = None
+        last_modified_pkl_datetime = None        
+        try:         
+            autosubmit_config_facade = ConfigurationFacadeDirector(AutosubmitConfigurationFacadeBuilder(expid)).build_autosubmit_configuration_facade()        
+            version = autosubmit_config_facade.get_autosubmit_version()
+            wrapper = autosubmit_config_facade.get_wrapper_type()
+            last_modified_pkl_datetime = autosubmit_config_facade.get_pkl_last_modified_time_as_datetime()            
         except Exception as exp:
             version = "Unknown"
             wrapper = None
+            last_modified_pkl_datetime = None            
             pass
         status = experiment_status.get(expid, "NOT RUNNING")
-        total, completed, last_modified = experiment_times.get(
+        total, completed, last_modified_timestamp = experiment_times.get(
             expid, ("NA", "NA", None))
 
-        # Getting run data from historical database
-        # if version and (version.startswith("3.13") or version
+        # Getting run data from historical database        
 
         try:
             current_run = ExperimentHistoryDirector(ExperimentHistoryBuilder(expid)).build_reader_experiment_history().manager.get_experiment_run_dc_with_max_id()
-            if current_run and current_run.total > 0 and (current_run.total == total or current_run.modified_timestamp > last_modified):
+            if current_run and current_run.total > 0 and (current_run.total == total or current_run.modified_timestamp > last_modified_timestamp):
                 completed = current_run.completed
                 total = current_run.total
                 submitted = current_run.submitted
@@ -380,20 +383,22 @@ def search_experiment_by_id(searchString, typeExp=None, onlyActive=None, owner=N
                 running = current_run.running
                 failed = current_run.failed
                 suspended = current_run.suspended
-                last_modified = current_run.modified_timestamp
+                last_modified_timestamp = current_run.modified_timestamp
         except Exception as exp:
-            print(exp)
+            print("Exception on search_experiment_by_id : {}".format(exp))
             pass
 
         if onlyActive == "active":
             if status == "RUNNING":
                 result.append({'id': row[0], 'name': row[1], 'user': row[2], 'description': row[7],
-                               'hpc': row[6], 'status': status, 'completed': completed, 'total': total, 'version': version, 'wrapper': wrapper,
-                               "submitted": submitted, "queuing": queuing, "running": running, "failed": failed, "suspended": suspended, "modified": datetime.fromtimestamp(last_modified) if last_modified and last_modified > 0 else None})
+                               'hpc': row[6], 'status': status, 'completed': completed, 'total': total, 
+                               'version': version, 'wrapper': wrapper, "submitted": submitted, "queuing": queuing, 
+                               "running": running, "failed": failed, "suspended": suspended, "modified": last_modified_pkl_datetime})
         else:
             result.append({'id': row[0], 'name': row[1], 'user': row[2], 'description': row[7],
-                           'hpc': row[6], 'status': status, 'completed': completed, 'total': total, 'version': version, 'wrapper': wrapper,
-                           "submitted": submitted, "queuing": queuing, "running": running, "failed": failed, "suspended": suspended, "modified": datetime.fromtimestamp(last_modified) if last_modified and last_modified > 0 else None})
+                           'hpc': row[6], 'status': status, 'completed': completed, 'total': total, 
+                           'version': version, 'wrapper': wrapper, "submitted": submitted, "queuing": queuing, 
+                           "running": running, "failed": failed, "suspended": suspended, "modified": last_modified_pkl_datetime})
     return {'experiment': result}
 
 
@@ -416,6 +421,8 @@ def get_current_running_exp():
     # print(query)
     cursor.execute(query)
     table = cursor.fetchall()
+    cursor.close()
+    conn.close()
     result = list()
     experiment_status = dict()
     experiment_times = dict()
@@ -430,24 +437,24 @@ def get_current_running_exp():
         queuing = 0
         running = 0
         failed = 0
-        suspended = 0
-        # modified_times = None
-        last_modified = None
+        suspended = 0        
         user = str(row[2])
         version = "Unknown"
         wrapper = None
+        last_modified_timestamp = None
+        last_modified_pkl_datetime = None
         if (expid in experiment_status):
             status = experiment_status[expid]
         if status == "RUNNING":
             try:
-                as_conf = AutosubmitConfig(
-                    expid, BasicConfig, ConfigParserFactory())
-                as_conf.reload()
-                version = as_conf.get_version()
-                wrapper = str(as_conf.get_wrapper_type()).upper()
-                wrapper = wrapper if wrapper != "NONE" else None
+                autosubmit_config_facade = ConfigurationFacadeDirector(AutosubmitConfigurationFacadeBuilder(expid)).build_autosubmit_configuration_facade()        
+                version = autosubmit_config_facade.get_autosubmit_version()
+                wrapper = autosubmit_config_facade.get_wrapper_type()
+                last_modified_pkl_datetime = autosubmit_config_facade.get_pkl_last_modified_time_as_datetime()
             except Exception as exp:
                 version = "Unknown"
+                wrapper = None
+                last_modified_pkl_datetime = None
                 pass
             if (expid in experiment_times):
                 if len(user) == 0:
@@ -457,11 +464,11 @@ def get_current_running_exp():
                         main_folder = os.stat(path)
                         user = os.popen(
                             'id -nu {0}'.format(str(main_folder.st_uid))).read().strip()
-                total, completed, last_modified = experiment_times[expid]
+                total, completed, last_modified_timestamp = experiment_times[expid]
             # Try to retrieve experiment_run data
             try:
                 current_run = ExperimentHistoryDirector(ExperimentHistoryBuilder(expid)).build_reader_experiment_history().manager.get_experiment_run_dc_with_max_id()
-                if current_run and current_run.total > 0 and (current_run.total == total or current_run.modified_timestamp > last_modified):
+                if current_run and current_run.total > 0 and (current_run.total == total or current_run.modified_timestamp > last_modified_timestamp):
                     completed = current_run.completed
                     total = current_run.total
                     submitted = current_run.submitted
@@ -469,15 +476,14 @@ def get_current_running_exp():
                     running = current_run.running
                     failed = current_run.failed
                     suspended = current_run.suspended
-                    last_modified = current_run.modified_timestamp
-                    # print("{} using historical. queueing {}".format(
-                    #     expid, current_run.queuing))
+                    last_modified_timestamp = current_run.modified_timestamp
             except Exception as exp:
-                print(exp)
+                print("Exception on get_current_running_exp : {}".format(exp))
                 pass
             result.append({'id': row[0], 'name': row[1], 'user': user, 'description': row[7],
-                           'hpc': row[6], 'status': status, 'completed': completed, 'total': total, 'version': version, 'wrapper': wrapper,
-                           "submitted": submitted, "queuing": queuing, "running": running, "failed": failed, "suspended": suspended, "modified": datetime.fromtimestamp(last_modified) if last_modified and last_modified > 0 else None})
+                           'hpc': row[6], 'status': status, 'completed': completed, 'total': total, 
+                           'version': version, 'wrapper': wrapper, "submitted": submitted, "queuing": queuing, 
+                           "running": running, "failed": failed, "suspended": suspended, "modified": last_modified_pkl_datetime})
     return {'experiment': result}
 
 

@@ -34,6 +34,7 @@ setup(
                     'pydotplus==2.0.2',
                     'regex',
                     'requests==2.22.0',
+                    'graphviz==0.13',
                     ],
   include_package_data=True,
   package_data={'autosubmit-api': ['README',

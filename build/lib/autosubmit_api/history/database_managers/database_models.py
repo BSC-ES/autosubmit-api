@@ -46,8 +46,7 @@ ExperimentRunRow14 = collections.namedtuple('ExperimentRunRow', ['run_id', 'crea
 
 ExperimentRunRowBase = collections.namedtuple('ExperimentRunRow', ['run_id', 'created', 'start', 'finish', 'chunk_unit', 'chunk_size', 'completed', 'total', 'failed', 'queuing', 'running', 'submitted'])
 
-ExperimentStatusRow = collections.namedtuple(
-    'ExperimentStatusRow', ['exp_id', 'name', 'status', 'seconds_diff', 'modified'])
+ExperimentStatusRow = collections.namedtuple('ExperimentStatusRow', ['exp_id', 'name', 'status', 'seconds_diff', 'modified'])
 
 
 
