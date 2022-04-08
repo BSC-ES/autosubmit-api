@@ -49,9 +49,8 @@ sys.path.insert(0, os.path.abspath('.'))
 app = Flask(__name__)
 
 # CAS Stuff
-CAS_LOGIN_URL = 'https://cas.bsc.es/cas/login'
-CAS_VERIFY_URL = 'https://cas.bsc.es/cas/serviceValidate'
-TARGET_SERVICE = 'https://earth.bsc.es/autosubmitapp/login'
+CAS_LOGIN_URL = os.environ.get("CAS_LOGIN_URL") # 'https://cas.bsc.es/cas/login'
+CAS_VERIFY_URL = os.environ.get("CAS_VERIFY_URL") # 'https://cas.bsc.es/cas/serviceValidate'
 
 CORS(app)
 gunicorn_logger = logging.getLogger('gunicorn.error')
@@ -64,12 +63,13 @@ app.logger.setLevel(gunicorn_logger.level)
 def login():
     ticket = request.args.get('ticket')
     environment = request.args.get('env')
+    referrer = request.referrer
+    target_service = "{}{}/login".format(referrer, environment)
     if not ticket:
-        route_to_request_ticket = CAS_LOGIN_URL + '?service=' + TARGET_SERVICE              
+        route_to_request_ticket = "{}?service={}".format(CAS_LOGIN_URL, target_service)
         return redirect(route_to_request_ticket)
-    environment = environment if environment is not None else "autosubmitapp" # can be used to target the test environment
-    TARGET_SERVICE = "https://earth.bsc.es/{}/login".format(environment)
-    cas_verify_ticket_route = CAS_VERIFY_URL + '?service=' + TARGET_SERVICE + '&ticket=' + ticket
+    environment = environment if environment is not None else "autosubmitapp" # can be used to target the test environment    
+    cas_verify_ticket_route = CAS_VERIFY_URL + '?service=' + target_service + '&ticket=' + ticket
     response = requests.get(cas_verify_ticket_route)
     user = None
     if response:
@@ -139,7 +139,7 @@ def test_token():
 
 @app.route('/cconfig/<string:expid>', methods=['GET'])
 @cross_origin(expose_headers="Authorization")
-def get_current_configuration(expid):
+def get_current_configuration(expid):            
     start_time = time.time()
     current_token = request.headers.get("Authorization")
     try:
