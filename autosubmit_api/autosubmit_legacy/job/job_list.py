@@ -66,10 +66,13 @@ from autosubmit_api.autosubmit_legacy.job.job_package_persistence import JobPack
 # from autosubmit_api.autosubmit_legacy.job.tree import Tree
 import autosubmit_api.database.db_structure as DbStructure
 from autosubmit_api.database.db_jobdata import JobDataStructure, JobRow, ExperimentGraphDrawing
+from autosubmit_api.builders.experiment_history_builder import ExperimentHistoryDirector, ExperimentHistoryBuilder
+from autosubmit_api.history.data_classes.job_data import JobData
 
 from networkx import DiGraph
 from autosubmit_api.autosubmit_legacy.job.job_utils import transitive_reduction
 from autosubmit_api.common.utils import timestamp_to_datetime_format
+from typing import List, Dict, Tuple
 
 
 class JobList:
@@ -2957,19 +2960,16 @@ class JobList:
         path_local_root = basic_config.LOCAL_ROOT_DIR
         path_structure = basic_config.STRUCTURES_DIR
         db_file = os.path.join(path_local_root, "ecearth.db")
-        # print(db_file)
         conn = DbRequests.create_connection(db_file)
         # job_data = None
         # Job information from worker database
         job_times = DbRequests.get_times_detail_by_expid(conn, expid)
         conn.close()        
         # Job information from job historic data
-        # print("Get current job data structure...")
-        job_data, warning_messages = JobDataStructure(expid, basic_config).get_total_job_data(allJobs, job_times)
-        # print(len(job_data))
-        # for job_dc in job_data:
-        #     print(job_dc.name)
-        #     print(job_dc.)
+        # print("Get current job data structure...")     
+        experiment_history = ExperimentHistoryDirector(ExperimentHistoryBuilder(expid)).build_reader_experiment_history()  
+        job_data = experiment_history.manager.get_all_last_job_data_dcs() if experiment_history.is_header_ready() else None
+        # job_data, warning_messages = JobDataStructure(expid, basic_config).get_total_job_data(allJobs, job_times)
         # Result variables
         job_running_time_seconds = dict()
         job_running_to_runtext = dict()
@@ -3003,10 +3003,11 @@ class JobList:
                                                             current_job_info.submit, current_job_info.start, current_job_info.finish, current_job_info.ncpus, current_job_info.run_id)
                 job_running_to_runtext[sub.name] = job_times_to_text(sub.queue, sub.run, sub.status)
 
-        return (job_running_time_seconds, job_running_to_runtext, warning_messages)
+        return (job_running_time_seconds, job_running_to_runtext, [])
 
     @staticmethod
     def _job_running_check(status_code, name, tmp_path):
+        # type: (int, str, str) -> Tuple[datetime.datetime, datetime.datetime, datetime.datetime, str]
         """
         Receives job data and returns the data from its TOTAL_STATS file in an ordered way.  
         :param status_code: Status of job  
@@ -3018,7 +3019,6 @@ class JobList:
         :return: submit time, start time, end time, status  
         :rtype: 4-tuple in datetime format
         """
-        # name = "a2d0_20161226_001_124_ARCHIVE"
         values = list()
         status_from_job = str(Status.VALUE_TO_KEY[status_code])
         now = datetime.datetime.now()
@@ -3027,7 +3027,6 @@ class JobList:
         finish_time = now
         current_status = status_from_job
         path = os.path.join(tmp_path, name + '_TOTAL_STATS')
-        # print("Looking in " + path)
         if os.path.exists(path):
             request = 'tail -1 ' + path
             last_line = os.popen(request).readline()
@@ -3074,13 +3073,11 @@ class JobList:
         # TOTAL_STATS last line has more than 3 items, status is different from pkl, and status is not "NA"
         if len(values) > 3 and current_status != status_from_job and current_status != "NA":
             current_status = "SUSPICIOUS"
-        # if status_code == Status.RUNNING:
-        #     print(str(submit_time) + "\t" + str(start_time) + "\t" + str(finish_time) + "\t" + current_status)
-        #     print(values) 5483
         return (submit_time, start_time, finish_time, current_status)
 
     @staticmethod
     def retrieve_times(status_code, name, tmp_path, make_exception=False, job_times=None, seconds=False, job_data_collection=None):
+        # type: (int, str, str, bool, Dict[str, Tuple[int, int, int, int, int]], bool, List[JobData]) -> JobRow
         """
         Retrieve job timestamps from database.  
         :param status_code: Code of the Status of the job  
@@ -3114,17 +3111,20 @@ class JobList:
                 #     print(job.job_name)
                 job_data = next(
                     (job for job in job_data_collection if job.job_name == name), None)
-                # print("Job data object found " +
-                #       str(job_data) + " for " + str(name))
                 if job_data:
                     status = Status.VALUE_TO_KEY[status_code]
                     if status == job_data.status:
                         energy = job_data.energy
                         if job_times:
-                            t_submit, t_start, t_finish, _, _ = job_times.get(name, (0, 0, 0, 0, 0))
-                            t_submit = job_data.submit if t_submit == 0 else t_submit
-                            t_start = job_data.start if t_start == 0 else t_start
-                            t_finish = job_data.finish if t_finish == 0 else t_finish
+                            t_submit, t_start, t_finish, _, _ = job_times.get(name, (0, 0, 0, 0, 0))                            
+                            if t_finish - t_start > job_data.running_time:
+                                t_submit = t_submit if t_submit > 0 else job_data.submit
+                                t_start = t_start if t_start > 0 else job_data.start
+                                t_finish = t_finish if t_finish > 0 else job_data.finish
+                            else:
+                                t_submit = job_data.submit if job_data.submit > 0 else t_submit
+                                t_start = job_data.start if job_data.start > 0 else t_start
+                                t_finish = job_data.finish if job_data.finish > 0 else t_finish
                             job_data.submit = t_submit
                             job_data.start = t_start
                             job_data.finish = t_finish
@@ -3135,21 +3135,15 @@ class JobList:
                         # Test if start time does not make sense
                         if t_start >= t_finish:
                             if job_times:
-                                _, c_start, c_finish, _, _ = job_times.get(
-                                    name, (0, t_start, t_finish, 0, 0))
-                                t_start = c_start if t_start > c_start else t_start
-                                # t_finish = t_finish if t_finish < c_finish else c_finish
-                                job_data.start = t_start
+                                _, c_start, _, _, _ = job_times.get(name, (0, t_start, t_finish, 0, 0))
+                                job_data.start = c_start if t_start > c_start else t_start                                                                 
 
                         if seconds == False:
-                            queue_time = math.ceil(
-                                job_data.queuing_time() / 60)
-                            running_time = math.ceil(
-                                job_data.running_time() / 60)
+                            queue_time = math.ceil(job_data.queuing_time / 60)
+                            running_time = math.ceil(job_data.running_time / 60)
                         else:
-                            queue_time = job_data.queuing_time()
-                            running_time = job_data.running_time()
-                            # print(name + "\t" + str(seconds_queued) + "\t" + str(seconds_running))
+                            queue_time = job_data.queuing_time
+                            running_time = job_data.running_time
 
                         if status_code in [Status.SUSPENDED]:
                             t_submit = t_start = t_finish = 0
@@ -3167,21 +3161,16 @@ class JobList:
                     finish_time = mktime(finish_time.timetuple()) if status_code in [
                         Status.FAILED] else 0
                 else:
-                    queuing_for_min = (
-                        datetime.datetime.now() - submit_time)
+                    queuing_for_min = (datetime.datetime.now() - submit_time)
                     running_for_min = datetime.datetime.now() - datetime.datetime.now()
                     submit_time = mktime(submit_time.timetuple())
                     start_time = 0
                     finish_time = 0
 
-                # print("Running check")
-                # print(str(type(submit_time)) + " " + str(submit_time))
-                # print(str(type(start_time)) + " " + str(start_time))
-                # print(str(type(finish_time)) + " " + str(finish_time))
                 submit_time = int(submit_time)
                 start_time = int(start_time)
                 finish_time = int(finish_time)
-                # running_for_min_txt = "<small><b><i>NA</i></b></small> min."
+
                 seconds_queued = queuing_for_min.total_seconds()
                 seconds_running = running_for_min.total_seconds()
 
@@ -3189,9 +3178,8 @@ class JobList:
                 # For job times completed we no longer use timedeltas, but timestamps
                 status = Status.VALUE_TO_KEY[status_code]                
                 if job_times and status_code not in [Status.READY, Status.WAITING, Status.SUSPENDED]:                    
-                    if name in job_times.keys():                        
-                        submit_time, start_time, finish_time, status, detail_id = job_times[
-                            name]
+                    if name in job_times:                        
+                        submit_time, start_time, finish_time, status, detail_id = job_times[name]
                         seconds_running = finish_time - start_time
                         seconds_queued = start_time - submit_time                                                
                         submit_time = int(submit_time)
