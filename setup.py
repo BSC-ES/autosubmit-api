@@ -32,7 +32,7 @@ setup(
                     'paramiko==1.15.0',
                     'portalocker==0.5.7',
                     'pydotplus==2.0.2',
-                    'regex',
+                    'regex==2021.11.10',
                     'requests==2.22.0',
                     'graphviz==0.13',
                     ],
