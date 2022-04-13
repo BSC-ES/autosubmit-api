@@ -1,1 +1,5 @@
 **experiment** contains the `Configuration Facade` and `Pkl Organizer`. The `Configuration Facade` presents a clean interface for all operations involving the configuration of an Autosubmit Experiment. The `Pkl Organizer` deals with the `pkl` file of the experiment, its main function is retrieve the job information from this file and then serve as a dependency for other classes that make use of this information.
+
+**jobs** contains classes that deal with the information of the jobs of an experiment. `Job Factory` provides is in charge of providing the right class for a job in the experiment; although, we tend to use `StandardJob` for most cases. `Job Support` provides extra specific functionality to a job class. `JobList Loader` is in charge of loading the list of jobs and the information of these jobs, it uses `JobList Helper`, which provides specific functionality (e.g. a centralized way to get the queuing and running times).
+
+**representations** contains the classes in charge of generating the `Tree` and `Graph` representations.
