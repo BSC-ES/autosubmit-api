@@ -927,14 +927,13 @@ def generate_all_experiment_data(exp_path, job_path):
         
     # First step was successful, prepare to process jobs
     all_job_times = DbRequests.get_completed_times_detail()
-    # job_data_structure = JobDataStructure()
     # if (all_job_times):
     file2 = open(target_experiment_job_file, "w")
     file2.write("exp_id|exp_name|job_name|type|submit|start|finish|status|wallclock|procs|threads|tasks|queue|platform|mainplatform|project\n")
     for exp_id in valid_id.keys():
         expid = valid_id.get(exp_id, None)
-        historical_data = JobDataStructure(expid).get_all_current_job_data()
-        experiment_runs = JobDataStructure(expid).get_experiment_runs()
+        historical_data = None # JobDataStructure(expid).get_all_current_job_data() TODO: Replace for new implementation
+        experiment_runs = None # JobDataStructure(expid).get_experiment_runs() TODO: Replace for new implementation
         experiment_runs = experiment_runs if experiment_runs else []  
         # print(experiment_runs)      
         experiment_runs_dict = {run.run_id: run for run in experiment_runs}         

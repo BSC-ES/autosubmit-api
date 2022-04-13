@@ -14,8 +14,8 @@ from typing import List, Tuple, Dict
 from autosubmit_api.config.basicConfig import BasicConfig
 BasicConfig.read()
 
-DB_FILE_AS_TIMES = "/esarchive/autosubmit/as_times.db"
-DB_FILES_STATUS = "/esarchive/autosubmit/as_metadata/test/status.db"
+DB_FILE_AS_TIMES = os.path.join(BasicConfig.DB_DIR, BasicConfig.AS_TIMES_DB) # "/esarchive/autosubmit/as_times.db"
+DB_FILES_STATUS = os.path.join(BasicConfig.FILE_STATUS_DIR, BasicConfig.FILE_STATUS_DB) # "/esarchive/autosubmit/as_metadata/test/status.db"
 # PATH_DB_DATA = "/esarchive/autosubmit/as_metadata/data/"
 
 

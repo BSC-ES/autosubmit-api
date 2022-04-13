@@ -36,17 +36,16 @@ class BasicConfig:
         pass
 
     DB_DIR = os.path.join(os.path.expanduser('~'), 'debug', 'autosubmit')
-    STRUCTURES_DIR = os.path.join(
-        '/esarchive', 'autosubmit', 'as_metadata', 'structures')
+    STRUCTURES_DIR = os.path.join('/esarchive', 'autosubmit', 'as_metadata', 'structures')
     GRAPHDATA_DIR = os.path.join('/esarchive', 'autosubmit', 'as_metadata', 'graph')
-    GLOBAL_LOG_DIR = os.path.join(
-        '/esarchive', 'autosubmit', 'Aslogs')
-    JOBDATA_DIR = os.path.join(
-        '/esarchive', 'autosubmit', 'as_metadata', 'data')
+    GLOBAL_LOG_DIR = os.path.join('/esarchive', 'autosubmit', 'Aslogs')
+    JOBDATA_DIR = os.path.join('/esarchive', 'autosubmit', 'as_metadata', 'data')    
     HISTORICAL_LOG_DIR = os.path.join('/esarchive', 'autosubmit', 'as_metadata', 'logs')
+    FILE_STATUS_DIR = os.path.join('/esarchive', 'autosubmit', 'as_metadata', 'test')
     AUTOSUBMIT_API_URL = "http://192.168.11.91:8081"
     DB_FILE = 'autosubmit.db'
     AS_TIMES_DB = 'as_times.db'
+    FILE_STATUS_DB = 'status.db'
     DB_PATH = os.path.join(DB_DIR, DB_FILE)
     ALLOWED_CLIENTS = set(['https://earth.bsc.es/'])
     LOCAL_ROOT_DIR = DB_DIR
@@ -162,6 +161,10 @@ class BasicConfig:
             BasicConfig.AUTOSUBMIT_API_URL = parser.get('autosubmitapi', 'url')
         if parser.has_option('clients', 'authorized'):
             BasicConfig.ALLOWED_CLIENTS = set(parser.get('clients', 'authorized').split())
+        if parser.has_option('statusdb', 'path'):
+            BasicConfig.FILE_STATUS_DIR = parser.get('statusdb', 'path')
+        if parser.has_option('statusdb', 'filename'):
+            BasicConfig.FILE_STATUS_DB = parser.get('statusdb', 'filename')
 
     @staticmethod
     def read():

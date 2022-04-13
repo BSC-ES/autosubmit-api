@@ -34,7 +34,7 @@ class PerformanceMetrics(object):
       self._sim_processors = self.configuration_facade.sim_processors            
     except Exception as exp:
       self.error = True
-      self.error_message = str(exp)
+      self.error_message = "Error while preparing data sources: {0}".format(str(exp))
       print(traceback.format_exc())
       print(str(exp))
     if self.error == False:   
@@ -49,6 +49,7 @@ class PerformanceMetrics(object):
       self._calculate_total_sim_run_time()
       self._calculate_global_metrics()
       self._unify_warnings()
+
   
   def _update_jobs_with_time_data(self):
       self.joblist_helper.update_with_timedata(self.pkl_organizer.sim_jobs)

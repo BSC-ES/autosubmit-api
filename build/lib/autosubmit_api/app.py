@@ -21,9 +21,7 @@ import os
 import jwt
 import sys
 import time
-from flask_jsonpify import jsonify
 from datetime import datetime, timedelta
-import json
 import requests
 import logging
 from flask_cors import CORS, cross_origin
@@ -262,7 +260,21 @@ def get_expsummary(expid):
 def get_exp_performance(expid):
     start_time = time.time()
     app.logger.info('PRF|RECEIVED|' + str(expid))
-    result = PerformanceMetrics(expid, JobListHelperDirector(JobListHelperBuilder(expid)).build_job_list_helper()).to_json() 
+    result = {}
+    try:    
+        result = PerformanceMetrics(expid, JobListHelperDirector(JobListHelperBuilder(expid)).build_job_list_helper()).to_json() 
+    except Exception as exp:
+        result = {"SYPD": None,
+            "ASYPD": None,
+            "RSYPD": None,
+            "CHSY": None,
+            "JPSY": None,
+            "Parallelization": None,
+            "considered": [],
+            "error": True,
+            "error_message": str(exp),
+            "warnings_job_data": [],
+            }
     app.logger.info('PRF|RTIME|' + str(expid) + "|" + str(time.time() - start_time))
     return result
 

@@ -30,7 +30,6 @@ from autosubmit_api.builders.experiment_history_builder import ExperimentHistory
 from autosubmit_api.builders.configuration_facade_builder import ConfigurationFacadeDirector, AutosubmitConfigurationFacadeBuilder
 from bscearth.utils.config_parser import ConfigParserFactory
 import autosubmit_api.experiment.common_db_requests as DbRequests
-from autosubmit_api.database.db_jobdata import JobDataStructure
 from datetime import datetime
 from typing import Dict, Any
 

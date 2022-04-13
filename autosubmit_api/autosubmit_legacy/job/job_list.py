@@ -2968,8 +2968,7 @@ class JobList:
         # Job information from job historic data
         # print("Get current job data structure...")     
         experiment_history = ExperimentHistoryDirector(ExperimentHistoryBuilder(expid)).build_reader_experiment_history()  
-        job_data = experiment_history.manager.get_all_last_job_data_dcs() if experiment_history.is_header_ready() else None
-        # job_data, warning_messages = JobDataStructure(expid, basic_config).get_total_job_data(allJobs, job_times)
+        job_data = experiment_history.manager.get_all_last_job_data_dcs() if experiment_history.is_header_ready() else None        
         # Result variables
         job_running_time_seconds = dict()
         job_running_to_runtext = dict()
