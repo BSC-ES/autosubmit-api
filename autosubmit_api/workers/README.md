@@ -7,4 +7,4 @@ These scripts are currently called from the `crontab`, but you can also execute 
 * **test_esarchive**: Worker that retrieves the information about the status of esarchive.
 * **verify_complete**: This worker makes sure that the information collected by **populate_queue_run_times** is correct for the jobs completed in the last 30 minutes. This is a safety procedure.
 
-Recommendations: Most of these scripts call procedures from other modules of the project. I'd be better if the specific procedures are all under this module. For example, **populate_graph** has its main logic under the `business` folder.
+Suggestions: Most of these scripts call procedures from other modules of the project. I'd be better if the specific procedures are all under this module. For example, **populate_graph** has its main logic under the `business` folder.
