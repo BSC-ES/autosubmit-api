@@ -6,3 +6,5 @@ These scripts are currently called from the `crontab`, but you can also execute 
 * **populate_running_experiments**: This worker goes through all Autosubmit experiments, detects those that are active, and updates accordingly in the corresponding database. Sometimes an experiment can fail to set itself as `ACTIVE`, so this is a backup process that makes sure that the information is correct.
 * **test_esarchive**: Worker that retrieves the information about the status of esarchive.
 * **verify_complete**: This worker makes sure that the information collected by **populate_queue_run_times** is correct for the jobs completed in the last 30 minutes. This is a safety procedure.
+
+Recommendatios: Most of these scripts call procedures from other modules of the project. I'd be better if the specific procedures are all under this module. For example, **populate_graph** has its main logic under the `business` folder.
