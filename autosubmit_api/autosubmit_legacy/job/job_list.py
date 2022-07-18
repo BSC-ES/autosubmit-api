@@ -1404,6 +1404,7 @@ class JobList:
         date_member_groups = {}
         result_header = {}
         result_exp = []
+        result_exp_wrappers = []
         sync_jobs = []
         # members (sections in database)
         members = {job.section for job in job_list if len(job.section) > 0}
@@ -1685,7 +1686,10 @@ class JobList:
                 failed_tag = " <span class='badge' style='background-color:red'>" + \
                     str(failed) + " FAILED</span>"
                 # Wrapper group
-                result_exp.append({'title': 'Wrapper: ' + str(package) + completed_tag + (failed_tag if failed > 0 else '') + (running_tag if running > 0 else '') + (queueing_tag if queueing > 0 else '') + (check_mark if completed == len(jobs_in_package) else ''),
+                # todo: apply sort here
+                # create an auxiliary list to sort
+
+                result_exp_wrappers.append({'title': 'Wrapper: ' + str(package) + completed_tag + (failed_tag if failed > 0 else '') + (running_tag if running > 0 else '') + (queueing_tag if queueing > 0 else '') + (check_mark if completed == len(jobs_in_package) else ''),
                                    'folder': True,
                                    'refKey': 'Wrapper: ' + str(package),
                                    'data': {'completed': completed, 'failed': failed, 'running': running, 'queuing': queueing, 'total': len(jobs_in_package)},
@@ -1763,7 +1767,13 @@ class JobList:
                           'rm_id': job.job_id,
                           'status_color': Monitor.color_status(Status.STRING_TO_CODE[job.status])})
 
+
+        result_exp_wrappers.sort(key=lambda x: x["title"])
+        for wrapper_job in result_exp_wrappers:
+            result_exp.append(wrapper_job)
+
         return result_exp, nodes, result_header
+
 
     def get_tree_structured(self, BasicConfig, chunk_unit=None, chunk_size=1):
         """
@@ -1788,6 +1798,7 @@ class JobList:
         job_name_to_job_title = {}
         sync_jobs = []
         result_exp = []
+        result_exp_wrappers = []
         result_header = {}
         job_dictionary = {}
         year_per_sim = datechunk_to_year(chunk_unit, chunk_size)
@@ -2130,7 +2141,7 @@ class JobList:
                 failed_tag = " <span class='badge' style='background-color:red'>" + \
                     str(failed) + " FAILED</span>"
                 # Wrapper group
-                result_exp.append({'title': 'Wrapper: ' + str(package) + completed_tag + (failed_tag if failed > 0 else '') + (running_tag if running > 0 else '') + (queueing_tag if queueing > 0 else '') + (check_mark if completed == len(jobs_in_package) else ''),
+                result_exp_wrappers.append({'title': 'Wrapper: ' + str(package) + completed_tag + (failed_tag if failed > 0 else '') + (running_tag if running > 0 else '') + (queueing_tag if queueing > 0 else '') + (check_mark if completed == len(jobs_in_package) else ''),
                                    'folder': True,
                                    'refKey': 'Wrapper: ' + str(package),
                                    'data': {'completed': completed, 'failed': failed, 'running': running, 'queuing': queueing, 'total': len(jobs_in_package)},
@@ -2225,6 +2236,11 @@ class JobList:
                           'custom_directives': job.custom_directives,
                           'rm_id': job.id if job.id and job.id > 0 else None,
                           'status_color': Monitor.color_status(job.status)})
+
+            # sort and add these sorted elements to the result list
+        result_exp_wrappers.sort(key=lambda x: x["title"])
+        for wrapper_job in result_exp_wrappers:
+           result_exp.append(wrapper_job)
 
         return result_exp, nodes, result_header
 
