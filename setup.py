@@ -7,13 +7,12 @@ current_path = path.abspath(path.dirname(__file__))
 def get_version():
   with open(path.join(current_path, 'VERSION')) as f:
       return f.read().strip()
-  return "1.0.0"
 
 setup(
   name='autosubmit_api',
   version=get_version(),
   description='An extension to the Autosubmit package that serves its information as an API',
-  url='https://earth.bsc.es/gitlab/wuruchi/autosubmit_api',
+  url='https://earth.bsc.es/gitlab/es/autosubmit_api',
   author='Wilmer Uruchi',
   author_email='wilmer.uruchi@bsc.es',
   license='GNU GPL',
