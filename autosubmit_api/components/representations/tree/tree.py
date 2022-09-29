@@ -164,8 +164,10 @@ class TreeRepresentation(object):
       })
 
   def _generate_package_tree_folders(self):
-    """ Package folders as roots in the tree. """
-    for package_name in self.joblist_loader.package_names:    
+    """ Package folders (wrappers) as roots in the tree. """
+    # sort the list before iterating
+    sorted_wrappers = sorted(self.joblist_loader.package_names)
+    for package_name in sorted_wrappers:
       jobs_in_package = sorted(self.joblist_loader.get_all_jobs_in_package(package_name), key=lambda x: x.chunk)
       simple_title = "Wrapper: {0}".format(package_name)
       total_count = len(jobs_in_package)
