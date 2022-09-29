@@ -166,6 +166,7 @@ class TreeRepresentation(object):
   def _generate_package_tree_folders(self):
     """ Package folders (wrappers) as roots in the tree. """
     # sort the list before iterating
+    result_exp_wrappers = []
     sorted_wrappers = sorted(self.joblist_loader.package_names)
     for package_name in sorted_wrappers:
       jobs_in_package = sorted(self.joblist_loader.get_all_jobs_in_package(package_name), key=lambda x: x.chunk)
@@ -177,11 +178,12 @@ class TreeRepresentation(object):
           Status.QUEUING: 0,
           Status.FAILED: 0,
           Status.HELD: 0 }
+
       if total_count > 0:
         for job in jobs_in_package:
           if job.status in status_counters:
             status_counters[job.status] += 1
-        self.result_tree.append({
+        result_exp_wrappers.append({
           "title": JUtils.get_folder_package_title(package_name, total_count, status_counters),
           "folder": True, 
           "refKey": simple_title,
@@ -194,6 +196,7 @@ class TreeRepresentation(object):
           "expanded": False,
           "children": [job.leaf for job in jobs_in_package]
         })
+
         self.result_header[simple_title] = ({
           "completed" : status_counters[Status.COMPLETED],
           "running": status_counters[Status.RUNNING],
@@ -202,6 +205,22 @@ class TreeRepresentation(object):
           "held": status_counters[Status.HELD],
           "total": total_count
         })
+
+    # add root folder to enclose all the wrappers
+    # If there is something inside the date-member group, we create it.
+    if len(sorted_wrappers) > 0:
+      self.result_tree.append({
+        "title": "Wrappers",
+        "folder": True,
+        "refKey": "Wrappers_{0}".format(self.expid),
+        "data": "Empty",
+        "expanded": False,
+        "children": list(result_exp_wrappers)
+      })
+
+
+
+
   
   def _complement_result_header(self):
     self.result_header["completed_tag"] = JUtils.completed_tag_with_anchors
