@@ -147,7 +147,7 @@ class TreeRepresentation(object):
           "folder": True,
           "refKey": date_folder_title,
           "data": "Empty",
-          "expanded": True,
+          "expanded": True if len(self._distributed_dates) <= 5 else False,
           "children": list(folders_in_date)
         })
 
