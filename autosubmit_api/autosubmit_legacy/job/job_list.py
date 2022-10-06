@@ -1767,10 +1767,20 @@ class JobList:
                           'rm_id': job.job_id,
                           'status_color': Monitor.color_status(Status.STRING_TO_CODE[job.status])})
 
-
+        # sort and add these sorted elements to the result list
         result_exp_wrappers.sort(key=lambda x: x["title"])
-        for wrapper_job in result_exp_wrappers:
-            result_exp.append(wrapper_job)
+
+        # add root folder to enclose all the wrappers
+        # If there is something inside the date-member group, we create it.
+        if len(result_exp_wrappers) > 0:
+             result_exp.append({
+                 "title": "Wrappers",
+                 "folder": True,
+                 "refKey": "Wrappers_{0}".format(expid),
+                 "data": "Empty",
+                 "expanded": False,
+                 "children": list(result_exp_wrappers)
+             })
 
         return result_exp, nodes, result_header
 
@@ -2237,10 +2247,20 @@ class JobList:
                           'rm_id': job.id if job.id and job.id > 0 else None,
                           'status_color': Monitor.color_status(job.status)})
 
-            # sort and add these sorted elements to the result list
+        # sort and add these sorted elements to the result list
         result_exp_wrappers.sort(key=lambda x: x["title"])
-        for wrapper_job in result_exp_wrappers:
-           result_exp.append(wrapper_job)
+
+        # add root folder to enclose all the wrappers
+        # If there is something inside the date-member group, we create it.
+        if len(result_exp_wrappers) > 0:
+             result_exp.append({
+                 "title": "Wrappers",
+                 "folder": True,
+                 "refKey": "Wrappers_{0}".format(self._expid),
+                 "data": "Empty",
+                 "expanded": False,
+                 "children": list(result_exp_wrappers)
+             })
 
         return result_exp, nodes, result_header
 
