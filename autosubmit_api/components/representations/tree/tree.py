@@ -17,7 +17,7 @@ class TreeRepresentation(object):
     self.joblist_loader = job_list_loader
     self._date_member_distribution = {} # type: Dict[Tuple[str, str], List[Job]]
     self._no_date_no_member_jobs = [] # type: List[Job]
-    self._normal_status = {Status.COMPLETED, Status.WAITING, Status.READY} # type: Set
+    self._normal_status = {Status.COMPLETED, Status.WAITING, Status.READY, Status.SUSPENDED} # type: Set
     self.result_tree = list() # type: List
     self.result_header = dict() # type: Dict
     self.average_post_time = 0.0 # type: float
@@ -77,6 +77,8 @@ class TreeRepresentation(object):
     for date in self._distributed_dates:
       folders_in_date = list()
       formatted_date = self.joblist_loader.dates_formatted_dict.get(date, None)
+      all_suspended = True
+      all_waiting = True
       for member in self._distributed_members:
         status_counters = {
           Status.COMPLETED: 0,
@@ -91,6 +93,8 @@ class TreeRepresentation(object):
         jobs_in_section = OrderedDict()
         jobs_and_folders_in_member = deque()
         for job in jobs_in_date_member:
+          all_suspended = all_suspended and job.status is Status.SUSPENDED
+          all_waiting = all_waiting and job.status is Status.WAITING
           if job.status in status_counters:
             status_counters[job.status] += 1      
           if len(section_to_dm_jobs_dict[job.section]) > 1:
@@ -140,6 +144,10 @@ class TreeRepresentation(object):
             "total": len(jobs_in_date_member)
           })
 
+      # for the folders representing those start dates whose members are all in STATE WAITING, COMPLETED or SUSPENDED, we display
+      # these will be displayed collapsed, if there is any job with status fail, this will be displayed expanded
+      # todo: add threshold variable
+
       if len(folders_in_date) > 0: # If there is something inside the date folder, we create it.
         date_folder_title = "{0}_{1}".format(self.expid, formatted_date)
         self.result_tree.append({
@@ -147,7 +155,7 @@ class TreeRepresentation(object):
           "folder": True,
           "refKey": date_folder_title,
           "data": "Empty",
-          "expanded": True if len(self._distributed_dates) <= 5 else False,
+          "expanded": False if len(self._distributed_dates) > 5 and all_waiting or all_suspended else True,
           "children": list(folders_in_date)
         })
 
