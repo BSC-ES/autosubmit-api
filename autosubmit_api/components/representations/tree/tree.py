@@ -79,6 +79,7 @@ class TreeRepresentation(object):
       formatted_date = self.joblist_loader.dates_formatted_dict.get(date, None)
       all_suspended = True
       all_waiting = True
+      total_jobs_startdate = 0
       for member in self._distributed_members:
         status_counters = {
           Status.COMPLETED: 0,
@@ -122,6 +123,7 @@ class TreeRepresentation(object):
         
         
         if len(jobs_in_date_member) > 0: # If there is something inside the date-member group, we create it.
+          total_jobs_startdate += len(jobs_in_date_member)
           ref_key = "{0}_{1}_{2}".format(self.expid, formatted_date, member)
           folders_in_date.append({
             "title": JUtils.get_folder_date_member_title(self.expid, 
@@ -149,7 +151,19 @@ class TreeRepresentation(object):
       # todo: add threshold variable
 
       if len(folders_in_date) > 0: # If there is something inside the date folder, we create it.
-        date_folder_title = "{0}_{1}".format(self.expid, formatted_date)
+        #date_folder_title = "{0}_{1}".format(self.expid, formatted_date)
+
+        if all_suspended or all_waiting:
+           date_tag = JUtils.get_startdate_folder_tag("WAITING", total_jobs_startdate) if all_waiting else JUtils.get_date_folder_tag( "SUSPENDED", total_jobs_startdate)
+           date_folder_title = "{0}_{1}_{2}".format(
+             self.expid,
+             formatted_date,
+             date_tag
+           )
+        else:
+           date_folder_title = "{0}_{1}".format(self.expid, formatted_date)
+
+
         self.result_tree.append({
           "title": date_folder_title,
           "folder": True,
