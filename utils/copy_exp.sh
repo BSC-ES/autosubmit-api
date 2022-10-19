@@ -2,6 +2,8 @@
 # script to copy experiments from production to development environment
 # Author: Cristian Gutierrez
 # params: exp_id (exp in GUI) and userid (must match the bsc home user id)
+# sample usage: ./copy_exp.sh a550 jberlin
+
 
 exp_id=$1
 usr_id=$2
@@ -19,7 +21,7 @@ scp -r \
     bscesautosubmit01:/esarchive/autosubmit/${exp_id}/proj \
     bscesautosubmit01:/esarchive/autosubmit/${exp_id}/status \
     bscesautosubmit01:/esarchive/autosubmit/${exp_id}/tmp\
-    /home/${usr_id}/TO_SEND/
+    /home/Earth/${usr_id}/TO_SEND/
 
 path="~/TO_SEND/"
 
