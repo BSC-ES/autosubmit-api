@@ -57,6 +57,7 @@ from autosubmit_api.autosubmit_legacy.job.job_utils import Dependency
 from autosubmit_api.autosubmit_legacy.job.job_utils import SubJob
 from autosubmit_api.autosubmit_legacy.job.job_utils import SubJobManager, job_times_to_text, datechunk_to_year
 from autosubmit_api.performance.utils import calculate_ASYPD_perjob, calculate_SYPD_perjob
+import autosubmit_api.components.jobs.utils as JUtils
 from autosubmit_api.monitor.monitor import Monitor
 from autosubmit_api.autosubmit_legacy.job.job_common import Status, Type
 from bscearth.utils.date import date2str, parse_date, sum_str_hours
@@ -1457,6 +1458,10 @@ class JobList:
         # Working with date-member groups
         for date in dates.keys():
             date_member = list()
+            all_suspended = True
+            all_waiting = True
+            all_completed = True
+            total_jobs_startdate = 0
             for member in members:
                 completed = 0
                 queueing = 0
@@ -1466,6 +1471,10 @@ class JobList:
                 # already_included = []
                 for job in date_member_groups[(date, member)]:
                     wrapped = ""
+                    all_suspended = all_suspended and job.status == "SUSPENDED"
+                    all_waiting = all_waiting and job.status == "WAITING"
+                    all_completed = all_completed and job.status == "COMPLETED"
+                    total_jobs_startdate += 1
                     # job.job_name in job_to_package.keys():
                     if job.rowtype > 2:
                         wrapped = " <span class='badge' style='background-color:#94b8b8'>Wrapped " + \
@@ -1503,6 +1512,7 @@ class JobList:
                         expid + "_" + str(dates[date]) + "_" + str(member))
                     # Delete included
                     # added_job_names.add(job.job_name)
+                    # todo : this can be replaced with the functions of utils
                 completed_tag = (" <span class='badge' style='background-color:yellow'>" if completed == len(
                     date_member_groups[(date, member)]) else " <span class='badge' style='background-color:#ffffb3'>") + \
                     str(completed) + " / " + \
@@ -1529,11 +1539,19 @@ class JobList:
                                                                                       'total': len(date_member_groups[(date, member)])})
             if len(date_member) > 0:
                 # print(result_exp)
-                result_exp.append({'title': expid + "_" + str(dates[date]),
+                if all_suspended or all_waiting or all_completed:
+                   date_tag = JUtils.get_date_folder_tag("WAITING", total_jobs_startdate) if all_waiting else JUtils.get_date_folder_tag("SUSPENDED", total_jobs_startdate)
+                   if all_completed:
+                     date_tag = JUtils.get_date_folder_tag("COMPLETED", total_jobs_startdate)
+                   date_folder_title = "{0}_{1}_{2}".format( expid, str(dates[date]), date_tag )
+                else:
+                   date_folder_title = expid + "_" + str(dates[date])
+
+                result_exp.append({'title': date_folder_title,
                                    'folder': True,
                                    'refKey': expid + "_" + str(dates[date]),
                                    'data': 'Empty',
-                                   'expanded': True,
+                                   'expanded':  False if len(dates) > 5 and (all_waiting or all_suspended or all_completed) else True,
                                    'children': date_member})
 
          # Printing date - chunk
@@ -1685,9 +1703,6 @@ class JobList:
                     str(queueing) + " QUEUING</span>"
                 failed_tag = " <span class='badge' style='background-color:red'>" + \
                     str(failed) + " FAILED</span>"
-                # Wrapper group
-                # todo: apply sort here
-                # create an auxiliary list to sort
 
                 result_exp_wrappers.append({'title': 'Wrapper: ' + str(package) + completed_tag + (failed_tag if failed > 0 else '') + (running_tag if running > 0 else '') + (queueing_tag if queueing > 0 else '') + (check_mark if completed == len(jobs_in_package) else ''),
                                    'folder': True,
@@ -1892,6 +1907,10 @@ class JobList:
         # Working with date-member groups
         for date in dates.keys():
             date_member = list()
+            all_suspended = True
+            all_waiting = True
+            all_completed = True
+            total_jobs_startdate = 0
             for member in members:
                 completed = 0
                 queueing = 0
@@ -1911,6 +1930,10 @@ class JobList:
                 for job in date_member_list:
                     wrapped = ""
                     # job.name in job_to_package.keys():
+                    all_suspended = all_suspended and job.status == Status.SUSPENDED
+                    all_waiting = all_waiting and job.status == Status.WAITING
+                    all_completed = all_completed and job.status == Status.COMPLETED
+                    total_jobs_startdate+=1
                     if job_to_package.get(job.name, None):
                         wrapped = " <span class='badge' style='background-color:#94b8b8'>Wrapped " + \
                             package_to_package_id[job_to_package[job.name]
@@ -2006,12 +2029,19 @@ class JobList:
                                                                                             'held': 0,
                                                                                             'total': len(date_member_groups[(date, member)])})
             if len(date_member) > 0:
-                # print(result_exp)
-                result_exp.append({'title': self._expid + "_" + str(dates[date]),
+                if all_suspended or all_waiting or all_completed:
+                    date_tag = JUtils.get_date_folder_tag("WAITING", total_jobs_startdate) if all_waiting else JUtils.get_date_folder_tag("SUSPENDED", total_jobs_startdate)
+                    if all_completed:
+                        date_tag = JUtils.get_date_folder_tag("COMPLETED", total_jobs_startdate)
+                    date_folder_title = "{0}_{1}_{2}".format(self._expid, str(dates[date]), date_tag)
+                else:
+                    date_folder_title = self._expid + "_" + str(dates[date])
+
+                result_exp.append({'title': date_folder_title,
                                    'folder': True,
                                    'refKey': self._expid + "_" + str(dates[date]),
                                    'data': 'Empty',
-                                   'expanded': True,
+                                   'expanded': False if len(dates) > 5 and (all_waiting or all_suspended or all_completed) else True,
                                    'children': date_member})
 
         # Printing date - chunk

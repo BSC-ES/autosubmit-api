@@ -95,8 +95,9 @@ def get_folder_held_tag(held_count):
   return ""
 
 
-def get_startdate_folder_tag(title, startdate_count):
-    return " <span class='badge' style='background-color:yellow >{0} {1}</span>".format(startdate_count, title)
+def get_date_folder_tag(title, startdate_count):
+  # type: (str, int) -> str
+  return " <span class='badge' style='background-color:yellow >{0} {1}</span>".format(startdate_count, title)
 
 def get_folder_date_member_title(expid, formatted_date, member, date_member_jobs_count, counters):
   # type: (str, str, str, int, Dict[int, int]) -> str

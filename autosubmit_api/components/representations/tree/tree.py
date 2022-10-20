@@ -79,6 +79,7 @@ class TreeRepresentation(object):
       formatted_date = self.joblist_loader.dates_formatted_dict.get(date, None)
       all_suspended = True
       all_waiting = True
+      all_completed = True
       total_jobs_startdate = 0
       for member in self._distributed_members:
         status_counters = {
@@ -96,6 +97,7 @@ class TreeRepresentation(object):
         for job in jobs_in_date_member:
           all_suspended = all_suspended and job.status is Status.SUSPENDED
           all_waiting = all_waiting and job.status is Status.WAITING
+          all_completed = all_completed and job.status is Status.COMPLETED
           if job.status in status_counters:
             status_counters[job.status] += 1      
           if len(section_to_dm_jobs_dict[job.section]) > 1:
@@ -153,8 +155,10 @@ class TreeRepresentation(object):
       if len(folders_in_date) > 0: # If there is something inside the date folder, we create it.
         #date_folder_title = "{0}_{1}".format(self.expid, formatted_date)
 
-        if all_suspended or all_waiting:
-           date_tag = JUtils.get_startdate_folder_tag("WAITING", total_jobs_startdate) if all_waiting else JUtils.get_date_folder_tag( "SUSPENDED", total_jobs_startdate)
+        if all_suspended or all_waiting or all_completed:
+           date_tag = JUtils.get_date_folder_tag("WAITING", total_jobs_startdate) if all_waiting else JUtils.get_date_folder_tag( "SUSPENDED", total_jobs_startdate)
+           if all_completed:
+             date_tag = JUtils.get_date_folder_tag("COMPLETED", total_jobs_startdate)
            date_folder_title = "{0}_{1}_{2}".format(
              self.expid,
              formatted_date,
@@ -169,7 +173,7 @@ class TreeRepresentation(object):
           "folder": True,
           "refKey": date_folder_title,
           "data": "Empty",
-          "expanded": False if len(self._distributed_dates) > 5 and all_waiting or all_suspended else True,
+          "expanded": False if len(self._distributed_dates) > 5 and (all_waiting or all_suspended or all_completed) else True,
           "children": list(folders_in_date)
         })
 
@@ -298,24 +302,3 @@ class TreeRepresentation(object):
         "rm_id": job.rm_id,
         "status_color": job.status_color
       })
-  
-
-        
-        
-          
-        
-      
-
-      
-      
-
-
-
-
-      
-      
-
-    
-
-
-  
