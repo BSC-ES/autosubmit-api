@@ -1543,7 +1543,11 @@ class JobList:
                    date_tag = JUtils.get_date_folder_tag("WAITING", total_jobs_startdate) if all_waiting else JUtils.get_date_folder_tag("SUSPENDED", total_jobs_startdate)
                    if all_completed:
                      date_tag = JUtils.get_date_folder_tag("COMPLETED", total_jobs_startdate)
-                   date_folder_title = "{0}_{1}_{2}".format( expid, str(dates[date]), date_tag )
+                   date_folder_title = "{0}_{1} {2}".format(
+                       expid,
+                       str(dates[date]),
+                       date_tag
+                   )
                 else:
                    date_folder_title = expid + "_" + str(dates[date])
 
@@ -2033,7 +2037,11 @@ class JobList:
                     date_tag = JUtils.get_date_folder_tag("WAITING", total_jobs_startdate) if all_waiting else JUtils.get_date_folder_tag("SUSPENDED", total_jobs_startdate)
                     if all_completed:
                         date_tag = JUtils.get_date_folder_tag("COMPLETED", total_jobs_startdate)
-                    date_folder_title = "{0}_{1}_{2}".format(self._expid, str(dates[date]), date_tag)
+                    date_folder_title = "{0}_{1} {2}".format(
+                        self._expid,
+                        str(dates[date]),
+                        date_tag
+                    )
                 else:
                     date_folder_title = self._expid + "_" + str(dates[date])
 

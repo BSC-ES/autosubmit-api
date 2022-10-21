@@ -153,13 +153,11 @@ class TreeRepresentation(object):
       # todo: add threshold variable
 
       if len(folders_in_date) > 0: # If there is something inside the date folder, we create it.
-        #date_folder_title = "{0}_{1}".format(self.expid, formatted_date)
-
         if all_suspended or all_waiting or all_completed:
-           date_tag = JUtils.get_date_folder_tag("WAITING", total_jobs_startdate) if all_waiting else JUtils.get_date_folder_tag( "SUSPENDED", total_jobs_startdate)
+           date_tag = JUtils.get_date_folder_tag("WAITING", total_jobs_startdate) if all_waiting else JUtils.get_date_folder_tag("SUSPENDED", total_jobs_startdate)
            if all_completed:
              date_tag = JUtils.get_date_folder_tag("COMPLETED", total_jobs_startdate)
-           date_folder_title = "{0}_{1}_{2}".format(
+           date_folder_title = "{0}_{1} {2}".format(
              self.expid,
              formatted_date,
              date_tag
