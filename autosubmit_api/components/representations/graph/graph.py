@@ -35,7 +35,7 @@ class GraphRepresentation(object):
     # type: (str, JobListLoader, str, str) -> None
     self.expid = expid
     self.layout = layout
-    self.grouped_by = grouped    
+    self.grouped_by = grouped
     self.joblist_loader = job_list_loader
     self.joblist_helper = self.joblist_loader.joblist_helper
     self.jobs = self.joblist_loader.jobs
@@ -48,16 +48,16 @@ class GraphRepresentation(object):
     self.nodes = [] # type: List[Dict[str, Any]]
     self.groups = {} # type: Dict[str, Dict[str, Any]]
     self.max_children_count = 0 # type: int
-    self.max_parent_count = 0 # type: int 
-  
+    self.max_parent_count = 0 # type: int
+
   @property
   def job_count(self):
     return len(self.jobs)
-  
+
   @property
   def edge_count(self):
     return len(self.edges)
-  
+
   def perform_calculations(self):
     # type: () -> None
     """ Calculate Graph Representation """
@@ -87,17 +87,17 @@ class GraphRepresentation(object):
 
   def calculate_valid_drawing(self):
     if len(self.edges) <= 0:
-      raise ValueError("The generation of a drawing requires that the graph model includes edges.")    
+      raise ValueError("The generation of a drawing requires that the graph model includes edges.")
     self.update_jobs_level()
     if self.layout == Layout.STANDARD:
-      self.assign_graphviz_coordinates_to_jobs()                        
+      self.assign_graphviz_coordinates_to_jobs()
     elif self.layout == Layout.LAPLACIAN:
       self.assign_laplacian_coordinates_to_jobs()
     else:
       raise ValueError("You have requested a {0} layout, which is not implemented.".format(self.layout))
     if not self.we_have_valid_graph_drawing:
       self.assign_barycentric_coordinates_to_jobs()
-  
+
   def _calculate_groups(self):
     if self.grouped_by == GroupedBy.STATUS:
       self.groups = self._get_grouped_by_status_dict()
@@ -107,7 +107,7 @@ class GraphRepresentation(object):
       self.groups = dict()
     else:
       raise ValueError("You have provided an invalid grouping selection: {}".format(self.grouped_by))
-  
+
   def _get_grouped_by_status_dict(self):
     # type: () -> Dict[str, Dict[str, Any]]
     groups = {}
@@ -127,13 +127,13 @@ class GraphRepresentation(object):
     for date in self.joblist_loader.dates:
       formatted_date = self.joblist_loader.dates_formatted_dict.get(date, None)
       for member in self.joblist_loader.members:
-        status_counters = {}        
+        status_counters = {}
         group_name = "{}_{}_{}_".format(self.expid, formatted_date, member)
-        jobs_in_date_member = filter(lambda x: x.name.startswith(group_name), self.jobs)        
+        jobs_in_date_member = filter(lambda x: x.name.startswith(group_name), self.jobs)
         if len(jobs_in_date_member) == 0:
           raise Exception("You have configured date {} and member {} in your experiment but there are no jobs that use these settings. \
           Review your configuration, something might be wrong.".format(formatted_date, member))
-        for job in jobs_in_date_member:          
+        for job in jobs_in_date_member:
           status_counters[job.status] = status_counters.setdefault(job.status, 0) + 1
         group_color[group_name] = self._get_defined_group_color(status_counters)
         group_coordinates.append((group_name,
@@ -156,8 +156,8 @@ class GraphRepresentation(object):
       visited.add(group_name)
       for group_triple_compared in group_coordinates:
         group_name_compared, x_j_coordinate, y_j_coordinate = group_triple_compared
-        if group_name_compared not in visited:          
-          if abs(x_i_coordinate - x_j_coordinate) <= 250 and abs(y_i_coordinate - y_j_coordinate) <= 250:            
+        if group_name_compared not in visited:
+          if abs(x_i_coordinate - x_j_coordinate) <= 250 and abs(y_i_coordinate - y_j_coordinate) <= 250:
             if y_i_coordinate > y_j_coordinate:
                 y_i_coordinate = y_i_coordinate + (250 - abs(y_i_coordinate - y_j_coordinate))
             else:
@@ -187,18 +187,18 @@ class GraphRepresentation(object):
     self.we_have_valid_graph_drawing = self._assign_coordinates_to_jobs(self._get_graph_drawing_data())
     self.we_have_valid_graphviz_drawing = self.we_have_valid_graph_drawing
     if not self.we_have_valid_graph_drawing and len(self.jobs) <= SMALL_EXPERIMENT_THRESHOLD:
-      self.assign_graphviz_calculated_coordinates_to_jobs()  
-  
+      self.assign_graphviz_calculated_coordinates_to_jobs()
+
   def assign_graphviz_calculated_coordinates_to_jobs(self):
     """ Runs GraphViz to get the coordinates """
-    self.we_have_valid_graph_drawing = self._assign_coordinates_to_jobs(self._get_calculated_graph_drawing())    
+    self.we_have_valid_graph_drawing = self._assign_coordinates_to_jobs(self._get_calculated_graph_drawing())
     self.we_have_valid_graphviz_drawing = self.we_have_valid_graph_drawing
-  
+
   def assign_laplacian_coordinates_to_jobs(self):
     """ Calculates Laplacian """
     self.we_have_valid_graph_drawing = self._assign_coordinates_to_jobs(self._get_calculated_graph_laplacian_drawing())
     self.we_have_valid_graphviz_drawing = False
-  
+
   def assign_barycentric_coordinates_to_jobs(self):
     """ Calculates coordinates """
     self.we_have_valid_graph_drawing = self._assign_coordinates_to_jobs(self._get_calculated_hierarchical_drawing())
@@ -216,12 +216,12 @@ class GraphRepresentation(object):
           if self.job_dictionary[children_job_name].level == 0:
             self.job_dictionary[children_job_name].level = current.level
             stack.append(self.job_dictionary[children_job_name])
-            
+
     job_roots_names = [job.name for job in self.jobs if len(job.parents_names) == 0]
-    for job_name in job_roots_names:      
+    for job_name in job_roots_names:
       stack = []
       update_level(self.job_dictionary[job_name])
-  
+
   def reset_jobs_coordinates(self):
     """ Mainly for testing purposes """
     for job in self.jobs:
@@ -229,15 +229,16 @@ class GraphRepresentation(object):
 
   def add_normal_edges(self):
     for job in self.jobs:
-      for child_name in job.children_names:        
-        self.edges.append(RealEdge(job.name, child_name, self.joblist_loader.are_these_in_same_package(job.name, child_name)))
-  
+      for child_name in job.children_names:
+        if job.name != child_name:
+          self.edges.append(RealEdge(job.name, child_name, self.joblist_loader.are_these_in_same_package(job.name, child_name)))
+
   def _calculate_average_post_time(self):
-    post_jobs = [job for job in self.jobs if job.section == "POST" and job.status in {Status.COMPLETED}]    
+    post_jobs = [job for job in self.jobs if job.section == "POST" and job.status in {Status.COMPLETED}]
     self.average_post_time = get_average_total_time(post_jobs)
 
   def _generate_node_data(self):
-    for job_name in self.job_dictionary:      
+    for job_name in self.job_dictionary:
       job = self.job_dictionary[job_name]
       self._calculate_max_children_parent(len(job.children_names), len(job.parents_names))
       ini_date, end_date = job.get_date_ini_end(self.joblist_loader.chunk_size, self.joblist_loader.chunk_unit)
@@ -251,7 +252,7 @@ class GraphRepresentation(object):
         "platform_name": job.platform,
         "chunk": job.chunk,
         "package": job.package,
-        "member": job.member,        
+        "member": job.member,
         "date": ini_date,
         "date_plus": end_date,
         "SYPD": PUtils.calculate_SYPD_perjob(self.joblist_loader.chunk_unit, self.joblist_loader.chunk_size, job.chunk, job.run_time, job.status),
@@ -267,27 +268,27 @@ class GraphRepresentation(object):
         "dashed": True if job.package else False,
         "shape": self.joblist_helper.package_to_symbol.get(job.package, "dot"),
         "processors": job.ncpus,
-        "wallclock": job.wallclock,        
+        "wallclock": job.wallclock,
         "children": len(job.children_names),
         "children_list": list(job.children_names),
         "parents": len(job.parents_names),
         "parent_list": list(job.parents_names),
         "out": job.out_file_path,
-        "err": job.err_file_path,       
+        "err": job.err_file_path,
         "custom_directives": None,
         "rm_id": job.rm_id,
         "x": job.x_coordinate,
-        "y": job.y_coordinate       
+        "y": job.y_coordinate
       })
 
   def _calculate_max_children_parent(self, children_count, parent_count):
     # type: (int, int) -> None
     self.max_children_count = max(self.max_children_count, children_count)
     self.max_parent_count = max(self.max_parent_count, parent_count)
-    
+
   def _assign_coordinates_to_jobs(self, valid_coordinates):
     """ False if valid_coordinates is None OR empty"""
-    # type: (Dict[str, Tuple[int, int]] | None) -> bool    
+    # type: (Dict[str, Tuple[int, int]] | None) -> bool
     if valid_coordinates and len(valid_coordinates) > 0:
       for job_name in self.job_dictionary:
         self.job_dictionary[job_name].x_coordinate, self.job_dictionary[job_name].y_coordinate = valid_coordinates[job_name]
@@ -308,7 +309,7 @@ class GraphRepresentation(object):
       if len(node_data) > 1 and node_data[0] == "node":
         coordinates[str(node_data[1])] = (int(float(node_data[2])) * GRAPHVIZ_MULTIPLIER, int(float(node_data[3])) * -GRAPHVIZ_MULTIPLIER)
     return coordinates
-  
+
   def _get_calculated_graph_laplacian_drawing(self):
     # type: () -> Dict[str, Tuple[int, int]]
     coordinates = dict()
@@ -318,7 +319,7 @@ class GraphRepresentation(object):
     for edge in self.edges:
       nx_graph.add_edge(edge._from, edge._to, weight=(3 if edge._is_in_wrapper else 1))
     laplacian_matrix = nx.normalized_laplacian_matrix(nx_graph)
-    eigval, eigvec = sparse.linalg.eigsh(laplacian_matrix, k=4, which="SM")  
+    eigval, eigvec = sparse.linalg.eigsh(laplacian_matrix, k=4, which="SM")
     eigval1 = float(eigval[1])
     eigval2 = float(eigval[2])
     x_coords = eigvec[:, 1] * (self.job_count / eigval1) * 10.0
@@ -326,7 +327,7 @@ class GraphRepresentation(object):
     for i, job_name in enumerate(nx_graph.nodes):
       coordinates[job_name] = (int(x_coords[i]), int(y_coords[i]))
     return coordinates
-  
+
   def _get_calculated_hierarchical_drawing(self):
     # type: () -> Dict[str, Tuple[int, int]]
     coordinates = {}
@@ -334,31 +335,31 @@ class GraphRepresentation(object):
     max_level = max(job.level for job in self.jobs)
     for i in range(2, max_level+1):
       if i == 2:
-        jobs_in_previous_layer = filter(lambda x: x.level == i-1, self.jobs)        
+        jobs_in_previous_layer = filter(lambda x: x.level == i-1, self.jobs)
         for k, job in enumerate(jobs_in_previous_layer):
-          self.job_dictionary[job.name].horizontal_order = (k+1)          
+          self.job_dictionary[job.name].horizontal_order = (k+1)
 
       jobs_in_layer = filter(lambda x: x.level == i, self.jobs)
       for job in jobs_in_layer:
         sum_order = sum(self.job_dictionary[job_name].horizontal_order for job_name in job.parents_names)
         if len(job.parents_names) > 0:
           self.job_dictionary[job.name].barycentric_value = sum_order/len(job.parents_names)
-      
+
       jobs_in_layer.sort(key=lambda x: x.barycentric_value)
       job_names_in_layer = {job.name for job in jobs_in_layer}
       already_assigned_order = set()
       for job in jobs_in_layer:
-        if job.name not in already_assigned_order:          
+        if job.name not in already_assigned_order:
           self.job_dictionary[job.name].horizontal_order = len(already_assigned_order) + 1
           already_assigned_order.add(job.name)
           if job.package and (job.package, job.level) not in processed_packages:
             processed_packages.add((job.package, job.level))
-            job_names_in_package_and_same_level = [job.name for job in jobs_in_layer if job.name in self.joblist_helper.package_to_jobs.get(job.package, [])]            
-            for job_name in job_names_in_package_and_same_level:                            
+            job_names_in_package_and_same_level = [job.name for job in jobs_in_layer if job.name in self.joblist_helper.package_to_jobs.get(job.package, [])]
+            for job_name in job_names_in_package_and_same_level:
               if self.job_dictionary[job_name].name in job_names_in_layer and job_name not in already_assigned_order:
                 self.job_dictionary[job_name].horizontal_order = len(already_assigned_order) + 1
                 already_assigned_order.add(job_name)
-                                    
+
     for job_name in self.job_dictionary:
       # print("{} {} {}".format(job_name, self.job_dictionary[job_name].horizontal_order, self.job_dictionary[job_name].level))
       coordinates[job_name] = (int(self.job_dictionary[job_name].horizontal_order*BARYCENTRIC_X_MULTIPLIER), int(self.job_dictionary[job_name].level*BARYCENTRIC_Y_MULTIPLIER))
@@ -372,10 +373,3 @@ class GraphRepresentation(object):
   #     pairs = set()
   #     for job_name_from in self.joblist_helper.package_to_jobs[package]:
   #       for job_name_to in self.joblist_helper.package_to_jobs[package]:
-          
-        
-
-
-        
-
-

@@ -2340,12 +2340,12 @@ class JobList:
     def get_graph_representation(self, BasicConfig, layout='standard', grouped='none', chunk_unit=None, chunk_size=1):
         """
         Return graph representation in JSON format.\n
-        :param layout: established the type of layour to generate: 'standard', 'laplacian'.  
-        :type layout: string  
-        :param grouped: type of grouping to be applied: 'date-member', 'status'.  
-        :type grouped: string  
-        :return: list of edges, list of nodes  
-        :rtype: JSON format  
+        :param layout: established the type of layour to generate: 'standard', 'laplacian'.
+        :type layout: string
+        :param grouped: type of grouping to be applied: 'date-member', 'status'.
+        :type grouped: string
+        :return: list of edges, list of nodes
+        :rtype: JSON format
         """
         dateformat = self.get_date_format
         node_id = dict()
@@ -2374,7 +2374,7 @@ class JobList:
         # Update Level
         allJobs = self.get_all()
         # Validate if the graph data should be updated
-        graph_drawing_data = ExperimentGraphDrawing(self.expid).get_validated_data(self.get_all())
+        graph_drawing_data = ExperimentGraphDrawing(self.expid, BasicConfig).get_validated_data(self.get_all())
         if not graph_drawing_data or len(allJobs) > 1000:
             # print('Start Traverse Update.')
             start_time = time()
@@ -2851,7 +2851,7 @@ class JobList:
 
     def job_list_traverse_update(self):
         """
-        Traverses current job list and updates attribute 'level' to 
+        Traverses current job list and updates attribute 'level' to
         reflect the hierarchical position of each job according to its dependencies
         :return: list of jobs
         """
@@ -2930,7 +2930,7 @@ class JobList:
 
     def print_with_status(self, statusChange=None):
         """
-        Returns the string representation of the dependency tree of 
+        Returns the string representation of the dependency tree of
         the Job List
 
         :return: String representation
@@ -2991,8 +2991,8 @@ class JobList:
 
     def _recursion_print(self, job, level, statusChange=None):
         """
-        Returns the list of children in a recursive way. Traverses the dependency tree.          
-        :return: parent + list of children  
+        Returns the list of children in a recursive way. Traverses the dependency tree.
+        :return: parent + list of children
         :rtype: String
         """
         result = ""
@@ -3038,11 +3038,11 @@ class JobList:
         # job_data = None
         # Job information from worker database
         job_times = DbRequests.get_times_detail_by_expid(conn, expid)
-        conn.close()        
+        conn.close()
         # Job information from job historic data
-        # print("Get current job data structure...")     
-        experiment_history = ExperimentHistoryDirector(ExperimentHistoryBuilder(expid)).build_reader_experiment_history()  
-        job_data = experiment_history.manager.get_all_last_job_data_dcs() if experiment_history.is_header_ready() else None        
+        # print("Get current job data structure...")
+        experiment_history = ExperimentHistoryDirector(ExperimentHistoryBuilder(expid)).build_reader_experiment_history()
+        job_data = experiment_history.manager.get_all_last_job_data_dcs() if experiment_history.is_header_ready() else None
         # Result variables
         job_running_time_seconds = dict()
         job_running_to_runtext = dict()
@@ -3082,14 +3082,14 @@ class JobList:
     def _job_running_check(status_code, name, tmp_path):
         # type: (int, str, str) -> Tuple[datetime.datetime, datetime.datetime, datetime.datetime, str]
         """
-        Receives job data and returns the data from its TOTAL_STATS file in an ordered way.  
-        :param status_code: Status of job  
-        :type status_code: Integer  
-        :param name: Name of job  
-        :type name: String  
-        :param tmp_path: Path to the tmp folder of the experiment  
-        :type tmp_path: String  
-        :return: submit time, start time, end time, status  
+        Receives job data and returns the data from its TOTAL_STATS file in an ordered way.
+        :param status_code: Status of job
+        :type status_code: Integer
+        :param name: Name of job
+        :type name: String
+        :param tmp_path: Path to the tmp folder of the experiment
+        :type tmp_path: String
+        :return: submit time, start time, end time, status
         :rtype: 4-tuple in datetime format
         """
         values = list()
@@ -3152,18 +3152,18 @@ class JobList:
     def retrieve_times(status_code, name, tmp_path, make_exception=False, job_times=None, seconds=False, job_data_collection=None):
         # type: (int, str, str, bool, Dict[str, Tuple[int, int, int, int, int]], bool, List[JobData]) -> JobRow
         """
-        Retrieve job timestamps from database.  
-        :param status_code: Code of the Status of the job  
-        :type status_code: Integer  
-        :param name: Name of the job  
-        :type name: String  
-        :param tmp_path: Path to the tmp folder of the experiment  
-        :type tmp_path: String  
-        :param make_exception: flag for testing purposes  
+        Retrieve job timestamps from database.
+        :param status_code: Code of the Status of the job
+        :type status_code: Integer
+        :param name: Name of the job
+        :type name: String
+        :param tmp_path: Path to the tmp folder of the experiment
+        :type tmp_path: String
+        :param make_exception: flag for testing purposes
         :type make_exception: Boolean
         :param job_times: Detail from as_times.job_times for the experiment
         :type job_times: Dictionary Key: job name, Value: 5-tuple (submit time, start time, finish time, status, detail id)
-        :return: minutes the job has been queuing, minutes the job has been running, and the text that represents it  
+        :return: minutes the job has been queuing, minutes the job has been running, and the text that represents it
         :rtype: int, int, str
         """
         status = "NA"
@@ -3189,7 +3189,7 @@ class JobList:
                     if status == job_data.status:
                         energy = job_data.energy
                         if job_times:
-                            t_submit, t_start, t_finish, _, _ = job_times.get(name, (0, 0, 0, 0, 0))                            
+                            t_submit, t_start, t_finish, _, _ = job_times.get(name, (0, 0, 0, 0, 0))
                             if t_finish - t_start > job_data.running_time:
                                 t_submit = t_submit if t_submit > 0 else job_data.submit
                                 t_start = t_start if t_start > 0 else job_data.start
@@ -3209,7 +3209,7 @@ class JobList:
                         if t_start >= t_finish:
                             if job_times:
                                 _, c_start, _, _, _ = job_times.get(name, (0, t_start, t_finish, 0, 0))
-                                job_data.start = c_start if t_start > c_start else t_start                                                                 
+                                job_data.start = c_start if t_start > c_start else t_start
 
                         if seconds == False:
                             queue_time = math.ceil(job_data.queuing_time / 60)
@@ -3249,12 +3249,12 @@ class JobList:
 
             else:
                 # For job times completed we no longer use timedeltas, but timestamps
-                status = Status.VALUE_TO_KEY[status_code]                
-                if job_times and status_code not in [Status.READY, Status.WAITING, Status.SUSPENDED]:                    
-                    if name in job_times:                        
+                status = Status.VALUE_TO_KEY[status_code]
+                if job_times and status_code not in [Status.READY, Status.WAITING, Status.SUSPENDED]:
+                    if name in job_times:
                         submit_time, start_time, finish_time, status, detail_id = job_times[name]
                         seconds_running = finish_time - start_time
-                        seconds_queued = start_time - submit_time                                                
+                        seconds_queued = start_time - submit_time
                         submit_time = int(submit_time)
                         start_time = int(start_time)
                         finish_time = int(finish_time)
@@ -3279,15 +3279,15 @@ class JobList:
         else:
             queue_time = seconds_queued
             running_time = seconds_running
-            # print(name + "\t" + str(queue_time) + "\t" + str(running_time))        
-        return JobRow(name, 
-                    int(queue_time), 
-                    int(running_time), 
-                    status, 
-                    energy, 
-                    int(submit_time), 
-                    int(start_time), 
-                    int(finish_time), 
+            # print(name + "\t" + str(queue_time) + "\t" + str(running_time))
+        return JobRow(name,
+                    int(queue_time),
+                    int(running_time),
+                    status,
+                    energy,
+                    int(submit_time),
+                    int(start_time),
+                    int(finish_time),
                     None,
                     None)
 
@@ -3296,13 +3296,13 @@ class JobList:
         """
         Retrieves dictionaries that map the collection of packages in the experiment
 
-        :param basic_config: Basic configuration 
+        :param basic_config: Basic configuration
         :type basic_config: Configuration Object
         :param expid: Experiment Id
         :type expid: String
         :param current_jobs: list of names of current jobs
         :type current_jobs: list
-        :return: job to package, package to jobs, package to package_id, package to symbol  
+        :return: job to package, package to jobs, package to package_id, package to symbol
         :rtype: Dictionary(Job Object, Package_name), Dictionary(Package_name, List of Job Objects), Dictionary(String, String), Dictionary(String, String)
         """
         monitor = Monitor()

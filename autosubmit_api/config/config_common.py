@@ -42,24 +42,56 @@ class AutosubmitConfig(object):
     :type expid: str
     """
 
-    def __init__(self, expid, basic_config, parser_factory):
-        # type: (str, BasicConfig, ConfigParserFactory) -> None
+    def __init__(self, expid, basic_config, parser_factory, extension=".yml"):
+        # type: (str, BasicConfig, ConfigParserFactory, Extension) -> None
         self.expid = expid
 
         self.basic_config = basic_config
 
         self.parser_factory = parser_factory
 
+        # By default check for .yml files first as it is the new standard for AS 4.0
+
         self._conf_parser = None # type: ConfigParser
-        self._conf_parser_file = os.path.join(self.basic_config.LOCAL_ROOT_DIR, expid, "conf", "autosubmit_" + expid + ".conf")
+        self._conf_parser_file = os.path.join(self.basic_config.LOCAL_ROOT_DIR, expid, "conf", "autosubmit_" + expid + extension)
+        if os.path.exists(self._conf_parser_file) == False:
+            if extension == ".yml":
+                self.__init__(expid, basic_config, parser_factory, ".conf")
+            elif extension == ".conf":
+                return None
+
         self._exp_parser = None # type: ConfigParser
-        self._exp_parser_file = os.path.join(self.basic_config.LOCAL_ROOT_DIR, expid, "conf", "expdef_" + expid + ".conf")
+        self._exp_parser_file = os.path.join(self.basic_config.LOCAL_ROOT_DIR, expid, "conf", "expdef_" + expid + extension)
+        if os.path.exists(self._exp_parser_file) == False:
+            if extension == ".yml":
+                self.__init__(expid, basic_config, parser_factory, ".conf")
+            elif extension == ".conf":
+                return None
+
         self._platforms_parser = None # type: ConfigParser
-        self._platforms_parser_file = os.path.join(self.basic_config.LOCAL_ROOT_DIR, expid, "conf", "platforms_" + expid + ".conf")
+        self._platforms_parser_file = os.path.join(self.basic_config.LOCAL_ROOT_DIR, expid, "conf", "platforms_" + expid + extension)
+        if os.path.exists(self._platforms_parser_file) == False:
+            if extension == ".yml":
+                self.__init__(expid, basic_config, parser_factory, ".conf")
+            elif extension == ".conf":
+                return None
+
         self._jobs_parser = None # type: ConfigParser
-        self._jobs_parser_file = os.path.join(self.basic_config.LOCAL_ROOT_DIR, expid, "conf", "jobs_" + expid + ".conf")
+        self._jobs_parser_file = os.path.join(self.basic_config.LOCAL_ROOT_DIR, expid, "conf", "jobs_" + expid + extension)
+        if os.path.exists(self._jobs_parser_file) == False:
+            if extension == ".yml":
+                self.__init__(expid, basic_config, parser_factory, ".conf")
+            elif extension == ".conf":
+                return None
+
         self._proj_parser = None # type: ConfigParser
-        self._proj_parser_file = os.path.join(self.basic_config.LOCAL_ROOT_DIR, expid, "conf", "proj_" + expid + ".conf")
+        self._proj_parser_file = os.path.join(self.basic_config.LOCAL_ROOT_DIR, expid, "conf", "proj_" + expid + extension)
+        if os.path.exists(self._proj_parser_file) == False:
+            if extension == ".yml":
+                self.__init__(expid, basic_config, parser_factory, ".conf")
+            elif extension == ".conf":
+                return None
+
         self.check_proj_file()
 
     @property
@@ -185,7 +217,7 @@ class AutosubmitConfig(object):
 
     def get_platform_queue(self, platform):
         return self._platforms_parser.get_option(platform, 'QUEUE', '')
-    
+
     def get_platform_serial_queue(self, platform):
         return self._platforms_parser.get_option(platform, 'SERIAL_QUEUE', '')
 
@@ -305,7 +337,7 @@ class AutosubmitConfig(object):
     def set_new_user(self, section, new_user):
         """
         Sets new user for given platform
-        :param new_user: 
+        :param new_user:
         :param section: platform name
         :type: str
         """
@@ -343,7 +375,7 @@ class AutosubmitConfig(object):
     def set_new_project(self, section, new_project):
         """
         Sets new project for given platform
-        :param new_project: 
+        :param new_project:
         :param section: platform name
         :type: str
         """
@@ -945,7 +977,7 @@ class AutosubmitConfig(object):
         :return: Unit for the chunk length  Options: {hour, day, month, year}
         :rtype: str
         """
-        
+
         return self._exp_parser.get('experiment', 'CHUNKSIZEUNIT').lower()
 
     def get_chunk_size(self, default=1):
@@ -953,9 +985,9 @@ class AutosubmitConfig(object):
         """
         Chunk Size as defined in the expdef file.
 
-        :return: Chunksize, 1 as default.  
+        :return: Chunksize, 1 as default.
         :rtype: int
-        """        
+        """
         try:
             chunk_size = self._exp_parser.get_option(
                 'experiment', 'CHUNKSIZE', default)
@@ -1114,7 +1146,7 @@ class AutosubmitConfig(object):
 
         :return: safety sleep time
         :rtype: int
-        """        
+        """
         return int(self._conf_parser.get_option('config', 'SAFETYSLEEPTIME', 10))
 
     def set_safetysleeptime(self, sleep_time):
