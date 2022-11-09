@@ -106,8 +106,8 @@ class ExperimentRun():
             # print(len(job_list))
             total_run_time = sum(job.run_time for job in outlier_free_list)
             # print("run {3} yps {0} n {1} run_time {2}".format(years_per_sim, number_SIM, total_run_time, self.run_id))
-            if total_run_time > 0:                
-                return round((years_per_sim * number_SIM * seconds_per_day) / total_run_time, 2)           
+            if total_run_time > 0:
+                return round((years_per_sim * number_SIM * seconds_per_day) / total_run_time, 2)
         return None
 
     def getASYPD(self, job_sim_list, job_post_list, package_jobs):
@@ -241,17 +241,17 @@ class JobData(object):
 
     def calculateASYPD(self, chunk_unit, chunk_size, job_package_data, average_post_time):
         """
-        Calculates ASYPD for a job in a run  
+        Calculates ASYPD for a job in a run
 
-        :param chunk_unit: chunk unit of the experiment  
-        :type chunk_unit: str  
-        :param chunk_size: chunk size of the experiment  
-        :type chunk_size: str  
-        :param job_package_data: jobs in the package (if self belongs to a package)  
-        :type: list()  
-        :param average_post_time: average queuing + running time of the post jobs in the run of self.   
-        :type average_post_time: float  
-        :return: void  
+        :param chunk_unit: chunk unit of the experiment
+        :type chunk_unit: str
+        :param chunk_size: chunk size of the experiment
+        :type chunk_size: str
+        :param job_package_data: jobs in the package (if self belongs to a package)
+        :type: list()
+        :param average_post_time: average queuing + running time of the post jobs in the run of self.
+        :type average_post_time: float
+        :return: void
         :rtype: void
         """
         result_ASYPD = calculate_ASYPD_perjob(
@@ -542,27 +542,27 @@ class MainDataBase():
 
 
 class ExperimentGraphDrawing(MainDataBase):
-    def __init__(self, expid):
+    def __init__(self, expid, basic_config=None):
         """
         Sets and validates graph drawing.
-        :param expid: Name of experiment  
-        :type expid: str  
-        :param allJobs: list of all jobs objects (usually from job_list)  
+        :param expid: Name of experiment
+        :type expid: str
+        :param allJobs: list of all jobs objects (usually from job_list)
         :type allJobs: list()
         """
         MainDataBase.__init__(self, expid)
         BasicConfig.read()
         self.expid = expid
-        self.folder_path = BasicConfig.GRAPHDATA_DIR
+        self.folder_path = BasicConfig.LOCAL_ROOT_DIR if basic_config is None else basic_config.LOCAL_ROOT_DIR
         self.database_path = os.path.join(
-            self.folder_path, "graph_data_" + str(expid) + ".db")
+            self.folder_path, "as_metadata", "graph" , "graph_data_" + str(expid) + ".db")
         self.create_table_query = textwrap.dedent(
             '''CREATE TABLE
-        IF NOT EXISTS experiment_graph_draw (        
+        IF NOT EXISTS experiment_graph_draw (
         id INTEGER PRIMARY KEY,
         job_name text NOT NULL,
         x INTEGER NOT NULL,
-        y INTEGER NOT NULL        
+        y INTEGER NOT NULL
         );''')
 
         if not os.path.exists(self.database_path):
@@ -594,10 +594,10 @@ class ExperimentGraphDrawing(MainDataBase):
         except Exception as exp:
             self.locked = True
 
-    def get_validated_data(self, allJobs):        
+    def get_validated_data(self, allJobs):
         """
-        Validates if should update current graph drawing.  
-        :return: None if graph drawing should be updated, otherwise, it returns the position data.  
+        Validates if should update current graph drawing.
+        :return: None if graph drawing should be updated, otherwise, it returns the position data.
         :rype: None or dict()
         """
         job_names = {job.name for job in allJobs}
@@ -608,16 +608,16 @@ class ExperimentGraphDrawing(MainDataBase):
             self.should_update = True
             # Clear database
             return None
-        return self.current_position_dictionary            
+        return self.current_position_dictionary
         # return None if self.should_update == True else self.current_position_dictionary
 
     def calculate_drawing(self, allJobs, independent=False, num_chunks=48, job_dictionary=None):
         """
         Called in a thread.
-        :param allJobs: list of jobs (usually from job_list object)  
-        :type allJobs: list()  
-        :return: Last row Id  
-        :rtype: int 
+        :param allJobs: list of jobs (usually from job_list object)
+        :type allJobs: list()
+        :return: Last row Id
+        :rtype: int
         """
         lock_name = "calculation_{}_in_progress.lock".format(self.expid) if independent == True else self.lock_name
         lock_path_file = os.path.join(self.folder_path, lock_name)
@@ -677,8 +677,8 @@ class ExperimentGraphDrawing(MainDataBase):
 
     def set_current_position(self):
         """
-        Sets all registers in the proper variables.  
-        current_position_dictionary: JobName -> (x, y)  
+        Sets all registers in the proper variables.
+        current_position_dictionary: JobName -> (x, y)
         current_jobs_set: JobName
         """
         current_table = self._get_current_position()
@@ -689,7 +689,7 @@ class ExperimentGraphDrawing(MainDataBase):
     def _get_current_position(self):
         """
         Get all registers from experiment_graph_draw.\n
-        :return: row content: id, job_name, x, y  
+        :return: row content: id, job_name, x, y
         :rtype: 4-tuple (int, str, int, int)
         """
         try:
@@ -796,7 +796,7 @@ class JobDataStructure(MainDataBase):
             return self.get_current_job_data_last(), []
         else:
             job_data, warnings = self.process_current_run_collection(allJobs, job_worker_database)
-            return job_data, warnings        
+            return job_data, warnings
 
     def process_current_run_collection(self, allJobs, job_worker_database=None):
         """Post-process for job_data.
@@ -1137,11 +1137,11 @@ class JobDataStructure(MainDataBase):
 
     def get_historic_job_data(self, job_name):
         """
-        Get the historic job data for a certain job  
+        Get the historic job data for a certain job
 
-        :param job_name: Name of Job  
-        :type job_name: str  
-        :return: JobData rows that match the job_name  
+        :param job_name: Name of Job
+        :type job_name: str
+        :return: JobData rows that match the job_name
         :rtype: list() of JobData objects
         """
         jobdata = []
@@ -1163,15 +1163,15 @@ class JobDataStructure(MainDataBase):
 
     def get_max_id_experiment_run(self):
         """
-        Get last (max) experiment run object.  
-        :return: ExperimentRun data  
-        :rtype: ExperimentRun object 
+        Get last (max) experiment run object.
+        :return: ExperimentRun data
+        :rtype: ExperimentRun object
         """
         try:
             # expe = list()
             if not os.path.exists(self.database_path):
                 raise Exception("Job data folder not found {0} or the database version is outdated.".format(str(self.database_path)))
-            if self.db_version < DB_VERSION_SCHEMA_CHANGES:                
+            if self.db_version < DB_VERSION_SCHEMA_CHANGES:
                 print("Job database version {0} outdated.".format(str(self.db_version)))
             if os.path.exists(self.database_path) and self.db_version >= DB_VERSION_SCHEMA_CHANGES:
                 modified_time = int(os.stat(self.database_path).st_mtime)
@@ -1186,13 +1186,13 @@ class JobDataStructure(MainDataBase):
                 raise Exception("Job data folder not found {0} or the database version is outdated.".format(
                     str(self.database_path)))
         except Exception as exp:
-            print(str(exp))            
-            print(traceback.format_exc())            
+            print(str(exp))
+            print(traceback.format_exc())
             return None
 
     def get_experiment_runs(self):
         # type: () -> List[ExperimentRun]
-        """ 
+        """
         Get list of experiment runs stored in database
         """
         try:
@@ -1221,7 +1221,7 @@ class JobDataStructure(MainDataBase):
             return None
 
     def get_experiment_run_by_id(self, run_id):
-        """ 
+        """
         Get experiment run stored in database by run_id
         """
         try:
@@ -1318,11 +1318,11 @@ class JobDataStructure(MainDataBase):
 
     def get_current_job_data(self, run_id, all_states=False):
         """
-        Gets the job historical data for a run_id.  
-        :param run_id: Run identifier  
-        :type run_id: int  
-        :param all_states: False if only last=1 should be included, otherwise all rows  
-        :return: List of jobdata rows  
+        Gets the job historical data for a run_id.
+        :param run_id: Run identifier
+        :type run_id: int
+        :param all_states: False if only last=1 should be included, otherwise all rows
+        :return: List of jobdata rows
         :rtype: list() of JobData objects
         """
         try:
@@ -1384,11 +1384,11 @@ class JobDataStructure(MainDataBase):
                         if (jobitem.job_name, jobitem.run_id) not in included_set:
                             included_set.add(
                                 (jobitem.job_name, jobitem.run_id))
-                            
+
                             current_collection.append(JobData(jobitem.id, jobitem.counter, jobitem.job_name, jobitem.created, jobitem.modified, jobitem.submit, jobitem.start, jobitem.finish, jobitem.status, jobitem.rowtype, jobitem.ncpus,
                                                               jobitem.wallclock, jobitem.qos, jobitem.energy, jobitem.date, jobitem.section, jobitem.member, jobitem.chunk, jobitem.last, jobitem.platform, jobitem.job_id, jobitem.extra_data, jobitem.nnodes, jobitem.run_id))
                     # Outlier detection
-                    
+
                     # data = {run_id: [y.running_time() for y in current_collection if y.run_id == run_id]
                     #         for run_id in set([job.run_id for job in current_collection])}
                     # mean_sd = {run_id: (np.mean(data.get(run_id, [0])), np.std(data.get(run_id, [0])))
@@ -1539,9 +1539,9 @@ class JobDataStructure(MainDataBase):
 
     def _get_experiment_run_by_id(self, run_id):
         """
-        :param run_id: Run Identifier  
-        :type run_id: int  
-        :return: First row that matches the run_id  
+        :param run_id: Run Identifier
+        :type run_id: int
+        :return: First row that matches the run_id
         :rtype: Row as Tuple
         """
         try:
@@ -1627,11 +1627,11 @@ class JobDataStructure(MainDataBase):
 
     def _get_current_job_data(self, run_id, all_states=False):
         """
-        Get JobData by run_id.  
-        :param run_id: Run Identifier  
-        :type run_id: int  
-        :param all_states: False if only last=1, True all  
-        :type all_states: bool  
+        Get JobData by run_id.
+        :param run_id: Run Identifier
+        :type run_id: int
+        :param all_states: False if only last=1, True all
+        :type all_states: bool
         """
         try:
             if self.conn:

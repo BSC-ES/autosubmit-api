@@ -29,14 +29,12 @@ import json
 import multiprocessing
 import subprocess
 from collections import deque
-
-
 from autosubmit_api.autosubmit_legacy.autosubmit import Autosubmit
 import autosubmit_api.database.db_common as db_common
 import autosubmit_api.experiment.common_db_requests as DbRequests
 import autosubmit_api.database.db_jobdata as JobData
 import autosubmit_api.autosubmit_legacy.job.job_utils as LegacyJobUtils
-import autosubmit_api.common.utils as common_utils 
+import autosubmit_api.common.utils as common_utils
 import autosubmit_api.components.jobs.utils as JUtils
 
 from autosubmit_api.autosubmit_legacy.job.job_list import JobList
@@ -74,8 +72,8 @@ def get_experiment_stats(expid, filter_period, filter_type):
     error = False
     error_message = ""
     period_fi = ""
-    period_ini = ""    
-    considered_jobs = list()        
+    period_ini = ""
+    considered_jobs = list()
     result = None
     summary = None
     try:
@@ -84,8 +82,8 @@ def get_experiment_stats(expid, filter_period, filter_type):
 
         job_list_loader = JobListLoaderDirector(JobListLoaderBuilder(expid)).build_loaded_joblist_loader()
         considered_jobs = job_list_loader.jobs
-        if filter_type and filter_type != 'Any':                
-            considered_jobs = [job for job in job_list_loader.jobs if job.section == filter_type]                
+        if filter_type and filter_type != 'Any':
+            considered_jobs = [job for job in job_list_loader.jobs if job.section == filter_type]
 
         period_fi = datetime.datetime.now().replace(second=0, microsecond=0)
         if filter_period and filter_period > 0:
@@ -147,7 +145,7 @@ def get_experiment_data(expid):
             'completed_jobs': 0,
             'db_historic_version': "NA"}
     try:
-        autosubmit_config_facade = ConfigurationFacadeDirector(AutosubmitConfigurationFacadeBuilder(expid)).build_autosubmit_configuration_facade()        
+        autosubmit_config_facade = ConfigurationFacadeDirector(AutosubmitConfigurationFacadeBuilder(expid)).build_autosubmit_configuration_facade()
         result["path"] = autosubmit_config_facade.experiment_path
         result["owner_id"] = autosubmit_config_facade.get_owner_id()
         result["owner"] = autosubmit_config_facade.get_owner_name()
@@ -174,7 +172,7 @@ def get_experiment_data(expid):
 
     except Exception as exp:
         result["error"] = True
-        result["error_message"] = str(exp)        
+        result["error_message"] = str(exp)
         pass
     return result
 
@@ -469,7 +467,7 @@ def test_run(expid):
     """
     running = False
     error = False
-    error_message = ""    
+    error_message = ""
 
     try:
         error, error_message, running, _, _ = _is_exp_running(expid, time_condition=120)
@@ -498,7 +496,7 @@ def get_experiment_log_last_lines(expid):
 
     try:
         BasicConfig.read()
-        path = BasicConfig.LOCAL_ROOT_DIR + '/' + expid + '/' + BasicConfig.LOCAL_TMP_DIR + '/' + BasicConfig.LOCAL_ASLOG_DIR        
+        path = BasicConfig.LOCAL_ROOT_DIR + '/' + expid + '/' + BasicConfig.LOCAL_TMP_DIR + '/' + BasicConfig.LOCAL_ASLOG_DIR
         reading = os.popen('ls -t ' + path + ' | grep "run.log"').read() if (os.path.exists(path)) else ""
 
         # Finding log files
@@ -506,16 +504,16 @@ def get_experiment_log_last_lines(expid):
             path = BasicConfig.LOCAL_ROOT_DIR + '/' + expid + '/' + BasicConfig.LOCAL_TMP_DIR
             reading = os.popen('ls -t ' + path + ' | grep "run.log"').read() if (os.path.exists(path)) else ""
 
-        if len(reading) > 0:            
-            log_file_name = reading.split()[0]            
+        if len(reading) > 0:
+            log_file_name = reading.split()[0]
             current_stat = os.stat(path + '/' + log_file_name)
             timest = int(current_stat.st_mtime)
-            log_file_lastmodified = common_utils.timestamp_to_datetime_format(timest) 
-            found = True            
-            request = 'tail -150 ' + path + '/' + log_file_name            
-            last_lines = os.popen(request)            
+            log_file_lastmodified = common_utils.timestamp_to_datetime_format(timest)
+            found = True
+            request = 'tail -150 ' + path + '/' + log_file_name
+            last_lines = os.popen(request)
             for i, item in enumerate(last_lines.readlines()):
-                logcontent.append({'index': i, 'content': item[0:-1]})                
+                logcontent.append({'index': i, 'content': item[0:-1]})
     except Exception as e:
         error = True
         error_message = str(e)
@@ -533,9 +531,9 @@ def get_experiment_log_last_lines(expid):
 def get_job_log(expid, logfile, nlines=150):
     """
     Returns the last 150 lines of the log file. Targets out or err.
-    :param logfilepath: path to the log file 
+    :param logfilepath: path to the log file
     :type logfilepath: str
-    :return: List of string 
+    :return: List of string
     :rtype: list
     """
     # Initializing results:
@@ -554,8 +552,8 @@ def get_job_log(expid, logfile, nlines=150):
             timest = int(current_stat.st_mtime)
             log_file_lastmodified = common_utils.timestamp_to_datetime_format(timest)
             found = True
-            request = "tail -{0} {1}".format(nlines, logfilepath)            
-            last50 = os.popen(request)            
+            request = "tail -{0} {1}".format(nlines, logfilepath)
+            last50 = os.popen(request)
             i = 0
             for item in last50.readlines():
                 logcontent.append({'index': i, 'content': item[0:-1]})
@@ -577,11 +575,11 @@ def get_job_log(expid, logfile, nlines=150):
 def get_experiment_pkl(expid):
     # type: (str) -> Dict[str, Any]
     """
-    Gets the current state of the pkl in a format proper for graph update.    
+    Gets the current state of the pkl in a format proper for graph update.
     """
     pkl_file_path = ""
     error = False
-    error_message = ""    
+    error_message = ""
     pkl_content = list()
     pkl_timestamp = 0
     package_to_jobs = dict()
@@ -590,11 +588,11 @@ def get_experiment_pkl(expid):
         pkl_file_path = autosubmit_config_facade.pkl_path
         pkl_timestamp = autosubmit_config_facade.get_pkl_last_modified_timestamp()
 
-        if not os.path.exists(autosubmit_config_facade.pkl_path):            
+        if not os.path.exists(autosubmit_config_facade.pkl_path):
             raise Exception("Pkl file {} not found.".format(autosubmit_config_facade.pkl_path))
 
-        job_list_loader = JobListLoaderDirector(JobListLoaderBuilder(expid)).build_loaded_joblist_loader()       
-        package_to_jobs = job_list_loader.joblist_helper.package_to_jobs  
+        job_list_loader = JobListLoaderDirector(JobListLoaderBuilder(expid)).build_loaded_joblist_loader()
+        package_to_jobs = job_list_loader.joblist_helper.package_to_jobs
 
         for job in job_list_loader.jobs:
             pkl_content.append({'name': job.name,
@@ -608,12 +606,12 @@ def get_experiment_pkl(expid):
                                 'finish': common_utils.timestamp_to_datetime_format(job.finish),
                                 'running_text': job.running_time_text,
                                 'dashed': True if job.package else False,
-                                'shape': job_list_loader.joblist_helper.package_to_symbol.get(job.package, "dot"),                                
+                                'shape': job_list_loader.joblist_helper.package_to_symbol.get(job.package, "dot"),
                                 'package': job.package,
                                 'status': job.status_text,
                                 'status_color': job.status_color,
                                 'out': job.out_file_path,
-                                'err': job.err_file_path,                                
+                                'err': job.err_file_path,
                                 'priority': job.priority})
 
     except Exception as e:
@@ -638,7 +636,7 @@ def get_experiment_tree_pkl(expid):
     """
     pkl_file_path = ""
     error = False
-    error_message = ""    
+    error_message = ""
     pkl_content = list()
     package_to_jobs = {}
     pkl_timestamp = 0
@@ -647,11 +645,11 @@ def get_experiment_tree_pkl(expid):
         autosubmit_config_facade = ConfigurationFacadeDirector(AutosubmitConfigurationFacadeBuilder(expid)).build_autosubmit_configuration_facade()
         pkl_file_path = autosubmit_config_facade.pkl_path
         pkl_timestamp = autosubmit_config_facade.get_pkl_last_modified_timestamp()
-        
-        if not os.path.exists(autosubmit_config_facade.pkl_path):            
+
+        if not os.path.exists(autosubmit_config_facade.pkl_path):
             raise Exception("Pkl file {} not found.".format(autosubmit_config_facade.pkl_path))
 
-        job_list_loader = JobListLoaderDirector(JobListLoaderBuilder(expid)).build_loaded_joblist_loader()       
+        job_list_loader = JobListLoaderDirector(JobListLoaderBuilder(expid)).build_loaded_joblist_loader()
         package_to_jobs = job_list_loader.joblist_helper.package_to_jobs
         for job in job_list_loader.jobs:
             pkl_content.append({'name': job.name,
@@ -692,53 +690,62 @@ def get_experiment_tree_pkl(expid):
     }
 
 
-def get_experiment_graph(expid, layout=Layout.STANDARD, grouped=GroupedBy.NO_GROUP):
+def get_experiment_graph(expid, log, layout=Layout.STANDARD, grouped=GroupedBy.NO_GROUP):
     """
     Gets graph representation
     """
     base_list = dict()
     pkl_timestamp = 10000000
     try:
-        autosubmit_configuration_facade = ConfigurationFacadeDirector(AutosubmitConfigurationFacadeBuilder(expid)).build_autosubmit_configuration_facade()
+        # autosubmit_configuration_facade = ConfigurationFacadeDirector(AutosubmitConfigurationFacadeBuilder(expid)).build_autosubmit_configuration_facade()
 
+        BasicConfig.read()
+        autosubmit_configuration_facade = AutosubmitConfig(
+            expid, BasicConfig, ConfigParserFactory())
+        autosubmit_configuration_facade.reload()
+        # raise Exception("json config autosubmitgraph: " + str(autosubmit_configuration_facade.__dict__))
         try:
-            if common_utils.is_version_historical_ready(autosubmit_configuration_facade.get_autosubmit_version()):  
-                job_list_loader = JobListLoaderDirector(JobListLoaderBuilder(expid)).build_loaded_joblist_loader()              
+            if common_utils.is_version_historical_ready(autosubmit_configuration_facade.get_version()):
+                job_list_loader = JobListLoaderDirector(JobListLoaderBuilder(expid)).build_loaded_joblist_loader()
                 graph = GraphRepresentation(expid, job_list_loader, layout, grouped)
-                graph.perform_calculations()                
+                graph.perform_calculations()
                 return graph.get_graph_representation_data()
         except Exception as exp:
-            print(traceback.format_exc())
+            # print(traceback.format_exc())
             print("New Graph Representation failed: {0}".format(exp))
+            log.info("Could not generate graph with faster method")
 
         # Getting platform data
+        hpcarch = autosubmit_configuration_facade.get_platform()
 
         # Submitter
-        submitter = Autosubmit._get_submitter(autosubmit_configuration_facade.autosubmit_conf)
-        submitter.load_platforms(autosubmit_configuration_facade.autosubmit_conf)
+        submitter = Autosubmit._get_submitter(autosubmit_configuration_facade)
+        submitter.load_platforms(autosubmit_configuration_facade)
         # JobList construction
-        job_list = Autosubmit.load_job_list(expid, autosubmit_configuration_facade.autosubmit_conf, notransitive=False)
+        job_list = Autosubmit.load_job_list(expid, autosubmit_configuration_facade, notransitive=False)
 
         if job_list.graph == None:
             raise Exception("Graph generation is not possible for this experiment.")
 
         # Platform update
-        hpcarch = autosubmit_configuration_facade.get_main_platform()
         for job in job_list.get_job_list():
             if job.platform_name is None:
                 job.platform_name = hpcarch
-            job.platform = submitter.platforms[job.platform_name.lower(
-            )]
+            job.platform = submitter.platforms[job.platform_name.lower()]
 
         # Chunk unit and chunk size
-        chunk_unit = autosubmit_configuration_facade.chunk_unit
-        chunk_size = autosubmit_configuration_facade.chunk_size
+        chunk_unit = autosubmit_configuration_facade.get_chunk_size_unit()
+        chunk_size = autosubmit_configuration_facade.get_chunk_size()
 
         job_list.sort_by_id()
+
         base_list = job_list.get_graph_representation(
-            BasicConfig, layout, grouped, chunk_unit=chunk_unit, chunk_size=chunk_size)
+            BasicConfig, layout, grouped, chunk_unit=chunk_unit, chunk_size=chunk_size
+        )
+        # raise Exception("Base list graph: ", str(base_list))
     except Exception as e:
         print(traceback.format_exc())
+        log.info("Could not generate Graph and recieved the following exception: " + str(e))
         return {'nodes': [],
                 'edges': [],
                 'fake_edges': [],
@@ -763,7 +770,7 @@ def get_experiment_tree_rundetail(expid, run_id):
     """
     base_list = dict()
     pkl_timestamp = 10000000
-    try:        
+    try:
         print("Received Tree RunDetail " + str(expid))
         BasicConfig.read()
         tree_structure, current_collection, reference = JobList.get_tree_structured_from_previous_run(expid, BasicConfig, run_id=run_id)
@@ -780,7 +787,7 @@ def get_experiment_tree_rundetail(expid, run_id):
     return base_list
 
 
-def get_experiment_tree_structured(expid):
+def get_experiment_tree_structured(expid, log):
     """
     Current version of the tree visualization algorithm.
     :param expid: Name of experiment
@@ -792,21 +799,34 @@ def get_experiment_tree_structured(expid):
     pkl_timestamp = 10000000
     try:
         notransitive = False
-        print("Received Tree Request " + str(expid))
         BasicConfig.read()
-        as_conf = AutosubmitConfig(
-            expid, BasicConfig, ConfigParserFactory())        
-        as_conf.reload()
+
+        # TODO: Encapsulate this following 2 lines or move to the parent function in app.py
+        curr_exp_as_version = db_common.get_autosubmit_version(expid)
+        main, secondary = common_utils.parse_version_number(curr_exp_as_version)
+        if main >= "4":
+            # TODO: new YAML parser
+            test = 1
+        else:
+            log.info("EXPERIMENT VERSION = " + str(curr_exp_as_version))
+            as_conf = AutosubmitConfig(expid, BasicConfig, ConfigParserFactory())
+            as_conf.reload()
+
+
         # If version is higher than 3.13, we can perform the new tree representation algorithm
         try:
-            if common_utils.is_version_historical_ready(as_conf.get_version()):     
+            if common_utils.is_version_historical_ready(as_conf.get_version()):
                 job_list_loader = JobListLoaderDirector(JobListLoaderBuilder(expid)).build_loaded_joblist_loader()
-                tree = TreeRepresentation(expid, job_list_loader)                
+                tree = TreeRepresentation(expid, job_list_loader)
                 tree.perform_calculations()
+                # este return
                 return tree.get_tree_structure()
+            else:
+                log.info("TREE|Not using first method|autosubmit_version=" + as_conf.get_version())
         except Exception as exp:
             print(traceback.format_exc())
             print("New Tree Representation failed: {0}".format(exp))
+            log.info("New Tree Representation failed: {0}".format(exp))
 
         # Getting platform data
         # Main taget HPC
@@ -876,15 +896,15 @@ def _get_hpcarch_project_from_experiment_run_metadata(run_id, experiment_runs_di
         main_platform = ""
         run = experiment_runs_dict.get(run_id, None)
         if run and run.metadata:
-            data = json.loads(run.metadata)                        
-            main_platform = data["exp"]["experiment"].get("HPCARCH", "")            
-            for platform in data["platforms"]:                
+            data = json.loads(run.metadata)
+            main_platform = data["exp"]["experiment"].get("HPCARCH", "")
+            for platform in data["platforms"]:
                 platform_projects[platform] = data["platforms"][platform].get("PROJECT", "")
         else:
             raise Exception("NO METADATA ON RUN {0}".format(run_id))
         print("PLATFORMS")
         print(platform_projects)
-        return (main_platform, platform_projects)        
+        return (main_platform, platform_projects)
     except Exception as exp:
         print(exp)
         return ("", {})
@@ -924,7 +944,7 @@ def generate_all_experiment_data(exp_path, job_path):
                         created) + "|" + format_model(str(model)) + "|" + str(hpc) + "|" + str(wrapper_type) + "|" + str(maxwrapped) + "\n")
                     valid_id[_id] = name
         file1.close()
-        
+
     # First step was successful, prepare to process jobs
     all_job_times = DbRequests.get_completed_times_detail()
     # if (all_job_times):
@@ -934,9 +954,9 @@ def generate_all_experiment_data(exp_path, job_path):
         expid = valid_id.get(exp_id, None)
         historical_data = None # JobDataStructure(expid).get_all_current_job_data() TODO: Replace for new implementation
         experiment_runs = None # JobDataStructure(expid).get_experiment_runs() TODO: Replace for new implementation
-        experiment_runs = experiment_runs if experiment_runs else []  
-        # print(experiment_runs)      
-        experiment_runs_dict = {run.run_id: run for run in experiment_runs}         
+        experiment_runs = experiment_runs if experiment_runs else []
+        # print(experiment_runs)
+        experiment_runs_dict = {run.run_id: run for run in experiment_runs}
         # print("run id -> (,)")
         experiment_runs_main_info = {run.run_id: _get_hpcarch_project_from_experiment_run_metadata(run.run_id, experiment_runs_dict) for run in experiment_runs}
         # print(experiment_runs_main_info)
@@ -947,9 +967,9 @@ def generate_all_experiment_data(exp_path, job_path):
                 job_conf = get_job_conf_list(expid)
             except:
                 pass
-            job_conf_type = {}            
-            for job in historical_data:   
-                # Starting from DB VERSION 17, we go back to calling section -> section, and member -> member; instead of the previous erronous assignment.         
+            job_conf_type = {}
+            for job in historical_data:
+                # Starting from DB VERSION 17, we go back to calling section -> section, and member -> member; instead of the previous erronous assignment.
                 if job.member not in job_conf_type:
                     # Member was confused by section in DB version <= 15
                     if job_conf:
@@ -958,10 +978,10 @@ def generate_all_experiment_data(exp_path, job_path):
                 project = ""
                 if job.run_id:
                     main_platform, platforms = experiment_runs_main_info.get(job.run_id, ("", {}))
-                    project = platforms.get(job.platform, "") 
+                    project = platforms.get(job.platform, "")
                     if len(project) == 0:
                         try:
-                            if job.member in job_conf_type:                        
+                            if job.member in job_conf_type:
                                 job_conf_info, job_type = job_conf_type[job.member]
                                 wallclock, processors, threads, tasks, memory, mem_task, queue, platform, main_platform, project = job_conf_info
                         except:
@@ -1094,7 +1114,7 @@ def get_auto_conf_data(expid):
         max_wrapped = as_conf.get_max_wrapped_jobs()
         return (wrapper_type, max_wrapped)
     except Exception as ex:
-        print("Couldn't retrieve conf data (wrapper info) from {0}. Exception {1}.".format(expid, str(ex)))        
+        print("Couldn't retrieve conf data (wrapper info) from {0}. Exception {1}.".format(expid, str(ex)))
         return ("None", 0)
 
 
@@ -1286,9 +1306,9 @@ def get_job_history(expid, job_name):
     path_to_job_logs = ""
     result = None
     try:
-        BasicConfig.read() 
-        path_to_job_logs = os.path.join(BasicConfig.LOCAL_ROOT_DIR, expid, "tmp", "LOG_" + expid)       
-        result = ExperimentHistoryDirector(ExperimentHistoryBuilder(expid)).build_reader_experiment_history().get_historic_job_data(job_name)        
+        BasicConfig.read()
+        path_to_job_logs = os.path.join(BasicConfig.LOCAL_ROOT_DIR, expid, "tmp", "LOG_" + expid)
+        result = ExperimentHistoryDirector(ExperimentHistoryBuilder(expid)).build_reader_experiment_history().get_historic_job_data(job_name)
     except Exception as exp:
         print(traceback.format_exc())
         error = True
@@ -1297,12 +1317,12 @@ def get_job_history(expid, job_name):
     return {"error": error, "error_message": error_message, "history": result, "path_to_logs": path_to_job_logs}
 
 
-def get_current_configuration_by_expid(expid, valid_user):
+def get_current_configuration_by_expid(expid, valid_user, log):
     """
     Gets the current configuration by expid. The procedure queries the historical database and the filesystem.
-    :param expid: Experiment Identifier  
-    :type expdi: str 
-    :return: configuration content formatted as a JSON object  
+    :param expid: Experiment Identifier
+    :type expdi: str
+    :return: configuration content formatted as a JSON object
     :rtype: Dictionary
     """
     error = False
@@ -1311,6 +1331,18 @@ def get_current_configuration_by_expid(expid, valid_user):
     warning_message = ""
     currentRunConfig = {}
     currentFileSystemConfig = {}
+
+    def removeParameterDuplication(currentDict, keyToRemove, exceptionsKeys=[]):
+        if currentDict and isinstance(currentDict, dict):
+            try:
+                for k, nested_d in currentDict.items():
+                    if k not in exceptionsKeys and isinstance(nested_d, dict):
+                        nested_d.pop(keyToRemove, None)
+            except Exception as exp:
+                log.info("Error while trying to eliminate duplicated key from config.")
+                pass
+        return currentDict
+
     try:
         if not valid_user:
             raise Exception(
@@ -1350,6 +1382,9 @@ def get_current_configuration_by_expid(expid, valid_user):
             currentFileSystemConfig["contains_nones"] = True
             pass
 
+        removeParameterDuplication(currentRunConfig['exp'], "EXPID", ["experiment"])
+        removeParameterDuplication(currentFileSystemConfig['exp'], "EXPID", ["experiment"])
+
     except Exception as exp:
         error = True
         error_message = str(exp)
@@ -1361,7 +1396,7 @@ def get_current_configuration_by_expid(expid, valid_user):
 
 
 def get_experiment_runs(expid):
-    """ 
+    """
     Get runs of the same experiment from historical db
     """
     error = False
@@ -1379,7 +1414,7 @@ def get_experiment_runs(expid):
 
     try:
         # TODO: TEST TEST TEST TEST
-        # Current data        
+        # Current data
         joblist_loader = JobListLoaderDirector(JobListLoaderBuilder(expid)).build_loaded_joblist_loader()
         experiment_history = ExperimentHistoryDirector(ExperimentHistoryBuilder(expid)).build_reader_experiment_history()
         # time_0 = time.time()
@@ -1390,43 +1425,43 @@ def get_experiment_runs(expid):
         for job_dc in experiment_history.manager.get_job_data_dcs_all():
             if job_dc.status_code == common_utils.Status.COMPLETED:
                 run_id_job_name_to_job_data_dc_COMPLETED[(job_dc.run_id, job_dc.job_name)] = job_dc
-        run_id_wrapper_code_to_job_dcs = {}        
+        run_id_wrapper_code_to_job_dcs = {}
         for key, job_dc in run_id_job_name_to_job_data_dc_COMPLETED.items():
             if job_dc.wrapper_code:
                 run_id, _ = key
                 run_id_wrapper_code_to_job_dcs.setdefault((run_id, job_dc.wrapper_code), []).append(job_dc)
-        
-        run_dict_SIM = {} 
+
+        run_dict_SIM = {}
         for job_data_dc in sim_jobs:
             run_dict_SIM.setdefault(job_data_dc.run_id, []).append(job_data_dc)
-        run_dict_POST = {} 
+        run_dict_POST = {}
         for job_data_dc in post_jobs:
             run_dict_POST.setdefault(job_data_dc.run_id, []).append(job_data_dc)
         max_run_id = 0
         # print("Time spent in data retrieval and pre-process: {}".format(time.time() - time_0))
         if experiment_runs:
-            for experiment_run in experiment_runs:              
+            for experiment_run in experiment_runs:
                 max_run_id = max(experiment_run.run_id, max_run_id)
-                valid_SIM_in_run = run_dict_SIM.get(experiment_run.run_id, [])                
+                valid_SIM_in_run = run_dict_SIM.get(experiment_run.run_id, [])
                 valid_POST_in_run = run_dict_POST.get(experiment_run.run_id, [])
                 # The content of the if block try to correct lack of finish time information in the Historical database
                 # It may not be necessary in the future.
                 if max_run_id == experiment_run.run_id:
                    assign_current(joblist_loader.job_dictionary, valid_SIM_in_run, experiment_history)
                    assign_current(joblist_loader.job_dictionary, valid_POST_in_run, experiment_history)
-                result.append({"run_id": experiment_run.run_id, 
-                                "created": experiment_run.created, 
-                                "finish": common_utils.timestamp_to_datetime_format(experiment_run.finish), 
-                                "chunk_unit": experiment_run.chunk_unit, 
+                result.append({"run_id": experiment_run.run_id,
+                                "created": experiment_run.created,
+                                "finish": common_utils.timestamp_to_datetime_format(experiment_run.finish),
+                                "chunk_unit": experiment_run.chunk_unit,
                                 "chunk_size": experiment_run.chunk_size,
-                                "submitted": experiment_run.submitted, 
-                                "queuing": experiment_run.queuing, 
-                                "running": experiment_run.running, 
-                                "completed": experiment_run.completed, 
-                                "failed": experiment_run.failed, 
-                                "total": experiment_run.total, 
-                                "suspended": experiment_run.suspended, 
-                                "SYPD": experiment_run.getSYPD(valid_SIM_in_run), 
+                                "submitted": experiment_run.submitted,
+                                "queuing": experiment_run.queuing,
+                                "running": experiment_run.running,
+                                "completed": experiment_run.completed,
+                                "failed": experiment_run.failed,
+                                "total": experiment_run.total,
+                                "suspended": experiment_run.suspended,
+                                "SYPD": experiment_run.getSYPD(valid_SIM_in_run),
                                 "ASYPD": experiment_run.getASYPD(valid_SIM_in_run, valid_POST_in_run, run_id_wrapper_code_to_job_dcs)})
             result.sort(key=lambda x: x["run_id"], reverse=True)
         else:

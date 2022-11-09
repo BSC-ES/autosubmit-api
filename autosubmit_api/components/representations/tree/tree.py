@@ -10,7 +10,7 @@ from typing import List, Dict, Tuple, Set, Any
 DEFAULT_MEMBER = "DEFAULT"
 
 class TreeRepresentation(object):
-  def __init__(self, expid, job_list_loader):    
+  def __init__(self, expid, job_list_loader):
     # type: (str, JobListLoader) -> None
     self.expid = expid # type: str
     # self.jobs = [] # type: List[Job]
@@ -24,18 +24,18 @@ class TreeRepresentation(object):
     self.nodes = [] # type: List[Dict]
     self._distributed_dates = OrderedDict() # type: OrderedDict[str, None]
     self._distributed_members = OrderedDict() # type: OrderedDict[str, None]
-  
+
 
   def perform_calculations(self):
     # type: () -> None
-    self._distribute_into_date_member_groups()    
+    self._distribute_into_date_member_groups()
     self._generate_date_member_tree_folders()
     self._generate_no_date_no_member_tree_folder()
     self._generate_package_tree_folders()
     self._complement_result_header()
     self._calculate_average_post_time()
     self._generate_node_data()
-  
+
   def get_tree_structure(self):
     # type: () -> Dict[str, Any]
     return {
@@ -47,7 +47,7 @@ class TreeRepresentation(object):
       "error_message": "",
       "pkl_timestamp": get_current_timestamp()
     }
-    
+
   def _distribute_into_date_member_groups(self):
     # type: () -> None
     for job in self.joblist_loader.jobs:
@@ -61,17 +61,17 @@ class TreeRepresentation(object):
         intersection_member_parent = self.joblist_loader.members & parents_members
         intersection_member_children = self.joblist_loader.members & children_members
         if len(intersection_member_parent) > 0 or len(intersection_member_children) > 0:
-          member = intersection_member_parent.pop() if len(intersection_member_parent) > 0 else intersection_member_children.pop()        
+          member = intersection_member_parent.pop() if len(intersection_member_parent) > 0 else intersection_member_children.pop()
           self._date_member_distribution.setdefault((job.date, member), []).append(job)
           self._distributed_dates[job.date] = None
           self._distributed_members[member] = None
-        else:          
+        else:
           self._date_member_distribution.setdefault((job.date, DEFAULT_MEMBER), []).append(job)
           self._distributed_dates[job.date] = None
           self._distributed_members[DEFAULT_MEMBER] = None
       else:
         self._no_date_no_member_jobs.append(job)
-    
+
   def _generate_date_member_tree_folders(self):
     # type: () -> None
     for date in self._distributed_dates:
@@ -90,7 +90,7 @@ class TreeRepresentation(object):
           Status.HELD: 0 }
         jobs_in_date_member = self._date_member_distribution.get((date, member), [])
         sections = {job.section for job in jobs_in_date_member}
-        section_to_dm_jobs_dict = {section: [job for job in jobs_in_date_member if job.section == section] for section in sections}        
+        section_to_dm_jobs_dict = {section: [job for job in jobs_in_date_member if job.section == section] for section in sections}
         sections_folder_open = set()
         jobs_in_section = OrderedDict()
         jobs_and_folders_in_member = deque()
@@ -99,7 +99,7 @@ class TreeRepresentation(object):
           all_waiting = all_waiting and job.status is Status.WAITING
           all_completed = all_completed and job.status is Status.COMPLETED
           if job.status in status_counters:
-            status_counters[job.status] += 1      
+            status_counters[job.status] += 1
           if len(section_to_dm_jobs_dict[job.section]) > 1:
             if job.status in self._normal_status:
               jobs_in_section.setdefault(job.section, deque()).append(job.leaf)
@@ -109,10 +109,10 @@ class TreeRepresentation(object):
           else:
             if job.status in self._normal_status:
               jobs_and_folders_in_member.append(job.leaf)
-            else: 
+            else:
               jobs_and_folders_in_member.appendleft(job.leaf)
           job.tree_parent.append("{0}_{1}_{2}".format(self.expid, self.joblist_loader.dates_formatted_dict.get(date, None), member))
-        
+
         for section in jobs_in_section:
           jobs_and_folders_in_member.append({
             'title': section,
@@ -122,16 +122,16 @@ class TreeRepresentation(object):
             'expanded': True if section in sections_folder_open else False,
             'children': list(jobs_in_section.get(section, []))
           })
-        
-        
+
+
         if len(jobs_in_date_member) > 0: # If there is something inside the date-member group, we create it.
           total_jobs_startdate += len(jobs_in_date_member)
           ref_key = "{0}_{1}_{2}".format(self.expid, formatted_date, member)
           folders_in_date.append({
-            "title": JUtils.get_folder_date_member_title(self.expid, 
-                    formatted_date, 
-                    member, 
-                    len(jobs_in_date_member), 
+            "title": JUtils.get_folder_date_member_title(self.expid,
+                    formatted_date,
+                    member,
+                    len(jobs_in_date_member),
                     status_counters),
             "folder": True,
             "refKey": ref_key,
@@ -177,7 +177,7 @@ class TreeRepresentation(object):
 
   def _generate_no_date_no_member_tree_folder(self):
     """ Generates folder for job with no date and no member """
-    if len(self._no_date_no_member_jobs) > 0:    
+    if len(self._no_date_no_member_jobs) > 0:
       self.result_tree.append({
         "title": "Keys",
         "folder": True,
@@ -209,12 +209,12 @@ class TreeRepresentation(object):
             status_counters[job.status] += 1
         result_exp_wrappers.append({
           "title": JUtils.get_folder_package_title(package_name, total_count, status_counters),
-          "folder": True, 
+          "folder": True,
           "refKey": simple_title,
-          "data": {'completed': status_counters[Status.COMPLETED], 
-                    'failed': status_counters[Status.FAILED], 
-                    'running': status_counters[Status.RUNNING], 
-                    'queuing': status_counters[Status.QUEUING], 
+          "data": {'completed': status_counters[Status.COMPLETED],
+                    'failed': status_counters[Status.FAILED],
+                    'running': status_counters[Status.RUNNING],
+                    'queuing': status_counters[Status.QUEUING],
                     'held': status_counters[Status.HELD],
                     'total': total_count },
           "expanded": False,
@@ -249,16 +249,16 @@ class TreeRepresentation(object):
   def _complement_result_header(self):
     self.result_header["completed_tag"] = JUtils.completed_tag_with_anchors
     self.result_header["running_tag"] = JUtils.running_tag_with_anchors
-    self.result_header["queuing_tag"] = JUtils.queuing_tag_with_anchors    
+    self.result_header["queuing_tag"] = JUtils.queuing_tag_with_anchors
     self.result_header["failed_tag"] = JUtils.failed_tag_with_anchors
     self.result_header["held_tag"] = JUtils.held_tag_with_anchors
     self.result_header["checkmark"] = JUtils.checkmark_tag
-    self.result_header["packages"] = [package_name for package_name in self.joblist_loader.package_names]    
+    self.result_header["packages"] = [package_name for package_name in self.joblist_loader.package_names]
     self.result_header["chunk_unit"] = self.joblist_loader.chunk_unit
     self.result_header["chunk_size"] = self.joblist_loader.chunk_size
 
   def _calculate_average_post_time(self):
-    post_jobs = [job for job in self.joblist_loader.jobs if job.section == "POST" and job.status in {Status.COMPLETED}]    
+    post_jobs = [job for job in self.joblist_loader.jobs if job.section == "POST" and job.status in {Status.COMPLETED}]
     self.average_post_time = get_average_total_time(post_jobs)
 
   def _generate_node_data(self):
