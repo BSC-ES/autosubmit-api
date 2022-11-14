@@ -542,7 +542,7 @@ class MainDataBase():
 
 
 class ExperimentGraphDrawing(MainDataBase):
-    def __init__(self, expid, basic_config=None):
+    def __init__(self, expid):
         """
         Sets and validates graph drawing.
         :param expid: Name of experiment
@@ -553,7 +553,7 @@ class ExperimentGraphDrawing(MainDataBase):
         MainDataBase.__init__(self, expid)
         BasicConfig.read()
         self.expid = expid
-        self.folder_path = BasicConfig.LOCAL_ROOT_DIR if basic_config is None else basic_config.LOCAL_ROOT_DIR
+        self.folder_path = BasicConfig.LOCAL_ROOT_DIR
         self.database_path = os.path.join(
             self.folder_path, "as_metadata", "graph" , "graph_data_" + str(expid) + ".db")
         self.create_table_query = textwrap.dedent(
