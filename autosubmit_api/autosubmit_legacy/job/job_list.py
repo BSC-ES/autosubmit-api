@@ -2374,7 +2374,7 @@ class JobList:
         # Update Level
         allJobs = self.get_all()
         # Validate if the graph data should be updated
-        graph_drawing_data = ExperimentGraphDrawing(self.expid, BasicConfig).get_validated_data(self.get_all())
+        graph_drawing_data = ExperimentGraphDrawing(self.expid).get_validated_data(self.get_all())
         if not graph_drawing_data or len(allJobs) > 1000:
             # print('Start Traverse Update.')
             start_time = time()
