@@ -94,6 +94,20 @@ def get_folder_held_tag(held_count):
     return " <span class='badge' style='background-color:#fa8072; color:#fff'>{0} HELD</span>".format(held_count)
   return ""
 
+
+def get_date_folder_tag(title, startdate_count):
+  # type: (str, int) -> str
+
+  # set the proper color
+  if title == "COMPLETED":
+      color = "yellow"
+  if title == "WAITING":
+      color = "#aaa"
+  if title == "SUSPENDED":
+      color = "orange"
+  tag = "<span class='badge' style='background-color:{0}'>".format(color)
+  return  "{0} {1} / {2} {3} </span>".format(tag, startdate_count, startdate_count, title)
+
 def get_folder_date_member_title(expid, formatted_date, member, date_member_jobs_count, counters):
   # type: (str, str, str, int, Dict[int, int]) -> str
   return "{0}_{1}_{2} {3}{4}{5}{6}{7}{8}".format(

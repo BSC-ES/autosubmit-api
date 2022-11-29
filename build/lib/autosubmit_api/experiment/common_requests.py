@@ -801,17 +801,12 @@ def get_experiment_tree_structured(expid, log):
         notransitive = False
         BasicConfig.read()
 
-        # TODO: Encapsulate this following 2 lines or move to the parent function in app.py
-        curr_exp_as_version = db_common.get_autosubmit_version(expid)
-        main, secondary = common_utils.parse_version_number(curr_exp_as_version)
-        if main >= "4":
-            # TODO: new YAML parser
-            test = 1
-        else:
-            log.info("EXPERIMENT VERSION = " + str(curr_exp_as_version))
-            as_conf = AutosubmitConfig(expid, BasicConfig, ConfigParserFactory())
-            as_conf.reload()
+        # TODO: (AUTOSUBMIT 4) Encapsulate this following 2 lines or move to the parent function in app.py
+        # curr_exp_as_version = db_common.get_autosubmit_version(expid)
+        # main, secondary = common_utils.parse_version_number(curr_exp_as_version)
 
+        as_conf = AutosubmitConfig(expid, BasicConfig, ConfigParserFactory())
+        as_conf.reload()
 
         # If version is higher than 3.13, we can perform the new tree representation algorithm
         try:
