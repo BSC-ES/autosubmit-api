@@ -1328,20 +1328,16 @@ def get_current_configuration_by_expid(expid, valid_user, log):
     currentFileSystemConfig = {}
 
     def removeParameterDuplication(currentDict, keyToRemove, exceptionsKeys=[]):
-        if currentDict and isinstance(currentDict, dict):
+        if "exp" in currentDict.keys() and isinstance(currentDict["exp"], dict):
             try:
-                for k, nested_d in currentDict.items():
+                for k, nested_d in list(currentDict["exp"].items()):
                     if k not in exceptionsKeys and isinstance(nested_d, dict):
                         nested_d.pop(keyToRemove, None)
             except Exception as exp:
                 log.info("Error while trying to eliminate duplicated key from config.")
                 pass
-        return currentDict
 
     try:
-        if not valid_user:
-            raise Exception(
-                "You have to be logged in to access this information.")
         allowedConfigKeys = ['conf', 'exp', 'jobs', 'platforms', 'proj']
         BasicConfig.read()
         historicalDatabase = JobData.JobDataStructure(expid, BasicConfig)
@@ -1375,19 +1371,20 @@ def get_current_configuration_by_expid(expid, valid_user, log):
             warning_message = "The filesystem system configuration can't be retrieved because '{}'".format(
                 exp)
             currentFileSystemConfig["contains_nones"] = True
+            log.info(warning_message)
             pass
 
-        removeParameterDuplication(currentRunConfig['exp'], "EXPID", ["experiment"])
-        removeParameterDuplication(currentFileSystemConfig['exp'], "EXPID", ["experiment"])
+        removeParameterDuplication(currentRunConfig, "EXPID", ["experiment"])
+        removeParameterDuplication(currentFileSystemConfig, "EXPID", ["experiment"])
 
     except Exception as exp:
         error = True
         error_message = str(exp)
         currentRunConfig["contains_nones"] = True
         currentFileSystemConfig["contains_nones"] = True
+        log.info("Exception while generating the configuration: " + error_message)
         pass
     return {"error": error, "error_message": error_message, "warning": warning, "warning_message": warning_message, "configuration_current_run": currentRunConfig, "configuration_filesystem": currentFileSystemConfig, "are_equal": currentRunConfig == currentFileSystemConfig}
-
 
 
 def get_experiment_runs(expid):
