@@ -3310,6 +3310,14 @@ class JobList:
         try:
             packages = JobPackagePersistence(os.path.join(basic_config.LOCAL_ROOT_DIR, expid, "pkl"),
                                              "job_packages_" + expid).load(wrapper=False)
+
+            # if the main table exist but is empty, we try the other one
+            if not (any(packages.keys()) or any(packages.values())):
+                Log.info("Wrapper table empty, trying packages.")
+                packages = JobPackagePersistence(os.path.join(basic_config.LOCAL_ROOT_DIR, expid, "pkl"),
+                                                 "job_packages_" + expid).load(wrapper=True)
+
+
         except Exception as ex:
             print("Wrapper table not found, trying packages.")
             packages = None
