@@ -1,0 +1,14 @@
+autosubmit_legacy
+builders
+common
+components
+config
+database
+experiment
+git
+history
+monitor
+notifications
+performance
+statistics
+workers

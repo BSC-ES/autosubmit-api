@@ -2,16 +2,16 @@
 
 from multiprocessing.sharedctypes import Value
 import networkx as nx
-import autosubmit_api.performance.utils as PUtils
-# import autosubmit_api.common.utils as utils
-from autosubmit_api.common.utils import Status, get_average_total_time
+from ....performance import utils as PUtils
+# import common.utils as utils
+from ....common.utils import Status, get_average_total_time
 from networkx.linalg.laplacianmatrix import laplacian_matrix
-from autosubmit_api.components.jobs.job_factory import Job
-from autosubmit_api.components.jobs.joblist_loader import JobListLoader
-from autosubmit_api.monitor.monitor import Monitor
-from autosubmit_api.database.db_jobdata import ExperimentGraphDrawing
+from ...jobs.job_factory import Job
+from ...jobs.joblist_loader import JobListLoader
+from ....monitor.monitor import Monitor
+from ....database.db_jobdata import ExperimentGraphDrawing
 
-from autosubmit_api.components.representations.graph.edge import Edge, RealEdge
+from .edge import Edge, RealEdge
 from typing import List, Dict, Tuple, Set, Any
 from scipy import sparse
 
@@ -86,8 +86,6 @@ class GraphRepresentation(object):
             "pkl_timestamp": 10000000}
 
   def calculate_valid_drawing(self):
-    if len(self.edges) <= 0:
-      raise ValueError("The generation of a drawing requires that the graph model includes edges.")
     self.update_jobs_level()
     if self.layout == Layout.STANDARD:
       self.assign_graphviz_coordinates_to_jobs()
@@ -129,7 +127,7 @@ class GraphRepresentation(object):
       for member in self.joblist_loader.members:
         status_counters = {}
         group_name = "{}_{}_{}_".format(self.expid, formatted_date, member)
-        jobs_in_date_member = filter(lambda x: x.name.startswith(group_name), self.jobs)
+        jobs_in_date_member = [x for x in self.jobs if x.name.startswith(group_name)]
         if len(jobs_in_date_member) == 0:
           raise Exception("You have configured date {} and member {} in your experiment but there are no jobs that use these settings. \
           Review your configuration, something might be wrong.".format(formatted_date, member))
@@ -304,10 +302,10 @@ class GraphRepresentation(object):
     coordinates = dict()
     graph = Monitor().create_tree_list(self.expid, self.jobs, None, dict(), False, self.job_dictionary)
     graph_viz_result = graph.create("dot", format="plain")
-    for node_data in graph_viz_result.split("\n"):
-      node_data = node_data.split(" ")
-      if len(node_data) > 1 and node_data[0] == "node":
-        coordinates[str(node_data[1])] = (int(float(node_data[2])) * GRAPHVIZ_MULTIPLIER, int(float(node_data[3])) * -GRAPHVIZ_MULTIPLIER)
+    for node_data in graph_viz_result.split(b'\n'):
+      node_data = node_data.split(b' ')
+      if len(node_data) > 1 and node_data[0].decode() == "node":
+        coordinates[str(node_data[1].decode())] = (int(float(node_data[2])) * GRAPHVIZ_MULTIPLIER, int(float(node_data[3])) * -GRAPHVIZ_MULTIPLIER)
     return coordinates
 
   def _get_calculated_graph_laplacian_drawing(self):
@@ -335,11 +333,11 @@ class GraphRepresentation(object):
     max_level = max(job.level for job in self.jobs)
     for i in range(2, max_level+1):
       if i == 2:
-        jobs_in_previous_layer = filter(lambda x: x.level == i-1, self.jobs)
+        jobs_in_previous_layer = [x for x in self.jobs if x.level == i-1]
         for k, job in enumerate(jobs_in_previous_layer):
           self.job_dictionary[job.name].horizontal_order = (k+1)
 
-      jobs_in_layer = filter(lambda x: x.level == i, self.jobs)
+      jobs_in_layer = [x for x in self.jobs if x.level == i]
       for job in jobs_in_layer:
         sum_order = sum(self.job_dictionary[job_name].horizontal_order for job_name in job.parents_names)
         if len(job.parents_names) > 0:

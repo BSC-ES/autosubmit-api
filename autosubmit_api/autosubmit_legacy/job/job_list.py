@@ -21,7 +21,7 @@ try:
     from configparser import SafeConfigParser
 except ImportError:
     # noinspection PyCompatibility
-    from ConfigParser import SafeConfigParser
+    from configparser import SafeConfigParser
 import json
 
 from bscearth.utils.config_parser import ConfigParserFactory
@@ -49,30 +49,30 @@ from shutil import move
 from random import shuffle
 from dateutil.relativedelta import *
 
-from autosubmit_api.autosubmit_legacy.job.job import Job
-from autosubmit_api.config.config_common import AutosubmitConfig
+from .job import Job
+from ...config.config_common import AutosubmitConfig
 from bscearth.utils.log import Log
-from autosubmit_api.autosubmit_legacy.job.job_dict import DicJobs
-from autosubmit_api.autosubmit_legacy.job.job_utils import Dependency
-from autosubmit_api.autosubmit_legacy.job.job_utils import SubJob
-from autosubmit_api.autosubmit_legacy.job.job_utils import SubJobManager, job_times_to_text, datechunk_to_year
-from autosubmit_api.performance.utils import calculate_ASYPD_perjob, calculate_SYPD_perjob
-import autosubmit_api.components.jobs.utils as JUtils
-from autosubmit_api.monitor.monitor import Monitor
-from autosubmit_api.autosubmit_legacy.job.job_common import Status, Type
+from .job_dict import DicJobs
+from .job_utils import Dependency
+from .job_utils import SubJob
+from .job_utils import SubJobManager, job_times_to_text, datechunk_to_year
+from ...performance.utils import calculate_ASYPD_perjob, calculate_SYPD_perjob
+from ...components.jobs import utils as JUtils
+from ...monitor.monitor import Monitor
+from .job_common import Status, Type
 from bscearth.utils.date import date2str, parse_date, sum_str_hours
-import autosubmit_api.experiment.common_db_requests as DbRequests
-from autosubmit_api.autosubmit_legacy.job.job_packages import JobPackageSimple, JobPackageArray, JobPackageThread
-from autosubmit_api.autosubmit_legacy.job.job_package_persistence import JobPackagePersistence
-# from autosubmit_api.autosubmit_legacy.job.tree import Tree
-import autosubmit_api.database.db_structure as DbStructure
-from autosubmit_api.database.db_jobdata import JobDataStructure, JobRow, ExperimentGraphDrawing
-from autosubmit_api.builders.experiment_history_builder import ExperimentHistoryDirector, ExperimentHistoryBuilder
-from autosubmit_api.history.data_classes.job_data import JobData
+from ...experiment import common_db_requests as DbRequests
+from .job_packages import JobPackageSimple, JobPackageArray, JobPackageThread
+from .job_package_persistence import JobPackagePersistence
+# from autosubmit_legacy.job.tree import Tree
+from ...database import db_structure as DbStructure
+from ...database.db_jobdata import JobDataStructure, JobRow, ExperimentGraphDrawing
+from ...builders.experiment_history_builder import ExperimentHistoryDirector, ExperimentHistoryBuilder
+from ...history.data_classes.job_data import JobData
 
 from networkx import DiGraph
-from autosubmit_api.autosubmit_legacy.job.job_utils import transitive_reduction
-from autosubmit_api.common.utils import timestamp_to_datetime_format
+from .job_utils import transitive_reduction
+from ...common.utils import timestamp_to_datetime_format
 from typing import List, Dict, Tuple
 
 
@@ -171,7 +171,7 @@ class JobList:
             self._date_list = date_list
             self._member_list = member_list
 
-            chunk_list = range(chunk_ini, num_chunks + 1)
+            chunk_list = list(range(chunk_ini, num_chunks + 1))
             self._chunk_list = chunk_list
 
             jobs_parser = self._get_jobs_parser()
@@ -221,9 +221,10 @@ class JobList:
                 self._ordered_jobs_by_date_member = self._create_sorted_dict_jobs(
                     wrapper_jobs)
         except AssertionError as e:
-            raise AssertionError(str(e))
+            raise AssertionError("Assertion err:::" + str(e))
         except Exception as e:
             print(e)
+            raise Exception("here: " + str(e))
 
     @staticmethod
     def _add_dependencies(date_list, member_list, chunk_list, dic_jobs, jobs_parser, graph, option="DEPENDENCIES"):
@@ -243,7 +244,7 @@ class JobList:
                 num_jobs = 1
                 if isinstance(job, list):
                     num_jobs = len(job)
-                for i in xrange(num_jobs):
+                for i in range(num_jobs):
                     _job = job[i] if num_jobs > 1 else job
                     JobList._manage_job_dependencies(dic_jobs, _job, date_list, member_list, chunk_list, dependencies_keys,
                                                      dependencies, graph)
@@ -289,23 +290,23 @@ class JobList:
                     for section_chunk in sections_chunks:
                         info = section_chunk.split('*')
                         if info[0] in key:
-                            for relation in xrange(1, len(info)):
+                            for relation in range(1, len(info)):
                                 auxiliar_relation_list = []
                                 for location in info[relation].split('-'):
                                     auxiliar_chunk_list = []
                                     location = location.strip('[').strip(']')
                                     if ':' in location:
                                         if len(location) == 3:
-                                            for chunk_number in xrange(int(location[0]), int(location[2]) + 1):
+                                            for chunk_number in range(int(location[0]), int(location[2]) + 1):
                                                 auxiliar_chunk_list.append(
                                                     chunk_number)
                                         elif len(location) == 2:
                                             if ':' == location[0]:
-                                                for chunk_number in xrange(0, int(location[1]) + 1):
+                                                for chunk_number in range(0, int(location[1]) + 1):
                                                     auxiliar_chunk_list.append(
                                                         chunk_number)
                                             elif ':' == location[1]:
-                                                for chunk_number in xrange(int(location[0]) + 1, len(dic_jobs._chunk_list) - 1):
+                                                for chunk_number in range(int(location[0]) + 1, len(dic_jobs._chunk_list) - 1):
                                                     auxiliar_chunk_list.append(
                                                         chunk_number)
                                     elif ',' in location:
@@ -374,12 +375,10 @@ class JobList:
                     if dependency.delay == -1 or chunk > dependency.delay:
                         if isinstance(parent, list):
                             if job.split is not None:
-                                parent = filter(
-                                    lambda _parent: _parent.split == job.split, parent)[0]
+                                parent = [_parent for _parent in parent if _parent.split == job.split][0]
                             else:
                                 if dependency.splits is not None:
-                                    parent = filter(
-                                        lambda _parent: _parent.split in dependency.splits, parent)
+                                    parent = [_parent for _parent in parent if _parent.split in dependency.splits]
                         if len(dependency.select_chunks_dest) <= 0 or parent.chunk is None:
                             job.add_parent(parent)
                             JobList._add_edge(graph, job, parent)
@@ -503,8 +502,7 @@ class JobList:
                 dict_jobs[date][member] = list()
         num_chunks = len(self._chunk_list)
 
-        filtered_jobs_list = filter(
-            lambda job: job.section in wrapper_jobs, self._job_list)
+        filtered_jobs_list = [job for job in self._job_list if job.section in wrapper_jobs]
 
         filtered_jobs_fake_date_member, fake_original_job_map = self._create_fake_dates_members(
             filtered_jobs_list)
@@ -517,8 +515,8 @@ class JobList:
         for date in self._date_list:
             str_date = self._get_date(date)
             for member in self._member_list:
-                sorted_jobs_list = filter(lambda job: job.name.split("_")[1] == str_date and
-                                          job.name.split("_")[2] == member, filtered_jobs_fake_date_member)
+                sorted_jobs_list = [job for job in filtered_jobs_fake_date_member if job.name.split("_")[1] == str_date and
+                                          job.name.split("_")[2] == member]
 
                 previous_job = sorted_jobs_list[0]
                 section_running_type = sections_running_type_map[previous_job.section]
@@ -923,7 +921,7 @@ class JobList:
         """
         if os.path.exists(filename):
             fd = open(filename, 'rw')
-            return pickle.load(fd)
+            return pickle.load(fd, encoding="latin1")
         else:
             Log.critical('File {0} does not exist'.format(filename))
             return list()
@@ -935,7 +933,6 @@ class JobList:
         :return: loaded job list object
         :rtype: JobList
         """
-        # Log.info("Loading JobList")
         return self._persistence.load(self._persistence_path, self._persistence_file)
 
     def save(self):
@@ -1077,7 +1074,7 @@ class JobList:
             #       str(len(current_structure.keys())))
 
             structure_valid = False
-            if ((current_structure) and (len(self._job_list) == len(current_structure.keys()))):
+            if ((current_structure) and (len(self._job_list) == len(list(current_structure.keys())))):
                 structure_valid = True
                 # print(current_structure.keys())
                 # Structure exists and is valid, use it as a source of dependencies
@@ -1380,7 +1377,7 @@ class JobList:
             for job in job_list:
                 original_job_name = job.job_name
                 job.job_name = job.job_name + \
-                    ("+" * len(filter(lambda x: x == job.job_name, already_included))
+                    ("+" * len([x for x in already_included if x == job.job_name])
                      if job.job_name in already_included else "")
                 already_included.append(original_job_name)
 
@@ -1442,21 +1439,21 @@ class JobList:
                     (key, member), [])
                 # local_short_list = filter(
                 #     lambda x: x.date == key and x.member == member, jobs)
-                local_list = filter(lambda x: (
-                    str(x.date) == str(key) and str(x.section) == str(member)) or x in current_list, job_list)
-                print("Local list {} for {} - {}".format(len(local_list), key, member))
+                local_list = [x for x in job_list if (
+                    str(x.date) == str(key) and str(x.section) == str(member)) or x in current_list]
+                print(("Local list {} for {} - {}".format(len(local_list), key, member)))
                 date_member_groups[(key, member)] = sorted(
-                    local_list, key=lambda x: x.chunk)
+                    local_list, key=lambda x: x.chunk if x.chunk is not None else 0)
                 added_job_names.update({job.job_name for job in local_list})
                 # print(local_list[0].name)
                 # jobs = [job for job in jobs if job not in local_short_list]
                 # jobs.extend(date_member_repetition[(date,member)])
                 # jobs -= local_list
-        print("Spent in main: " + str(time() - start_time))
+        print(("Spent in main: " + str(time() - start_time)))
 
         # Printing date - member groups / date - chunk syncs
         # Working with date-member groups
-        for date in dates.keys():
+        for date in list(dates.keys()):
             date_member = list()
             all_suspended = True
             all_waiting = True
@@ -1566,7 +1563,7 @@ class JobList:
             running = 0
             failed = 0
             date_member = []
-            local_list = filter(lambda x: x.date == date, jobs)
+            local_list = [x for x in jobs if x.date == date]
             if len(local_list) > 0:
                 # already_included = []
                 for job in local_list:
@@ -1641,7 +1638,7 @@ class JobList:
                 #     current_title = current_title + source
                 job_name_to_job_title[job.job_name] = current_title
                 job.job_name = job.job_name + \
-                    ("+" * len(filter(lambda x: x == job.job_name, already_included))
+                    ("+" * len([x for x in already_included if x == job.job_name])
                      if job.job_name in already_included else "")
                 floating_around.append(
                     {'title': current_title,
@@ -1665,7 +1662,7 @@ class JobList:
                 running = 0
                 failed = 0
                 job_objects = sorted([job_name_to_job[name] for name in jobs_in_package if job_name_to_job.get(
-                    name, None)], key=lambda x: x.chunk)
+                    name, None)], key=lambda x: x.chunk if x.chunk is not None else 0)
                 # job_objects = sorted([job for k, job in job_name_to_job.items(
                 # ) if k in jobs_in_package], key=lambda x: x.chunk)
                 jobs_in_wrapper = []
@@ -1692,7 +1689,7 @@ class JobList:
                     #     current_title = current_title + source
                     # Individual Job in wrapper
                     jobs_in_wrapper.append({'title': current_title,
-                                            'refKey': job.job_name + ("+" * len(filter(lambda x: x == job.job_name, already_included)) if job.job_name in already_included else ""),
+                                            'refKey': job.job_name + ("+" * len([x for x in already_included if x == job.job_name]) if job.job_name in already_included else ""),
                                             'data': 'Empty',
                                             'children': []})
                     already_included.append(job.job_name)
@@ -1838,7 +1835,7 @@ class JobList:
         print("Start update job logs.")
         time_0 = time()
         self.update_job_logs(path_to_logs)
-        print("Update logs time {0}".format(time() - time_0))
+        print(("Update logs time {0}".format(time() - time_0)))
         allJobs = self._job_list
         # path_local_root = BasicConfig.LOCAL_ROOT_DIR
         # db_file = os.path.join(path_local_root, "ecearth.db")
@@ -1878,8 +1875,8 @@ class JobList:
 
         # Determine if some jobs with date but no member belong to a date-member group
         for date in dates:  # dates.keys():
-            local_list = filter(lambda x: x.date ==
-                                date and x.member == None, jobs)
+            local_list = [x for x in jobs if x.date ==
+                                date and x.member == None]
             for job in local_list:
                 # Perhaps I exaggerated in my search for optimization
                 parents_members = {parent.member for parent in job._parents}
@@ -1901,15 +1898,15 @@ class JobList:
                     (key, member), [])
                 # local_short_list = filter(
                 #     lambda x: x.date == key and x.member == member, jobs)
-                local_list = filter(lambda x: (
-                    x.date == key and x.member == member) or x in current_list, jobs)
+                local_list = [x for x in jobs if (
+                    x.date == key and x.member == member) or x in current_list]
                 date_member_groups[(key, member)] = sorted(
-                    local_list, key=lambda x: x.chunk)
+                    local_list, key=lambda x: x.chunk if x.chunk is not None else 0)
                 added_job_names.update({job.name for job in local_list})
         # print("Spent in main: " + str(time() - start_time))
         # Printing date - member groups / date - chunk syncs
         # Working with date-member groups
-        for date in dates.keys():
+        for date in list(dates.keys()):
             date_member = list()
             all_suspended = True
             all_waiting = True
@@ -1997,7 +1994,7 @@ class JobList:
                     # added_job_names.add(job.name)
                 # If there are section folders, we add them to children member to the left
                 reversed_date_member_section_jobs = OrderedDict(
-                    reversed(date_member_section_jobs.items()))
+                    reversed(list(date_member_section_jobs.items())))
                 for section_folder in reversed_date_member_section_jobs:
                     children_member.appendleft({
                         'title': section_folder,
@@ -2060,7 +2057,7 @@ class JobList:
             running = 0
             failed = 0
             date_member = []
-            local_list = filter(lambda x: x.date == date, jobs)
+            local_list = [x for x in jobs if x.date == date]
             if len(local_list) > 0:
                 for job in local_list:
                     if job.status == Status.COMPLETED:
@@ -2148,7 +2145,7 @@ class JobList:
                 running = 0
                 failed = 0
                 job_objects = sorted([job_name_to_job[name] for name in jobs_in_package if job_name_to_job.get(
-                    name, None)], key=lambda x: x.chunk)
+                    name, None)], key=lambda x: x.chunk if x.chunk is not None else 0)
                 # job_objects = sorted([job for k, job in job_name_to_job.items(
                 # ) if k in jobs_in_package], key=lambda x: x.chunk)
                 jobs_in_wrapper = []
@@ -2418,7 +2415,7 @@ class JobList:
             BasicConfig, self.expid, [job.name for job in allJobs])
 
         group = 1
-        for package in package_to_symbol.keys():
+        for package in list(package_to_symbol.keys()):
             package_to_group_number[package] = group
             group += 1
 
@@ -2430,7 +2427,7 @@ class JobList:
 
         job_running_to_min, job_running_to_runtext, _ = JobList.get_job_times_collection(
             BasicConfig, allJobs, self.expid, job_to_package, package_to_jobs)
-        print("Spent in times: " + str(time() - start_time_operation))
+        print(("Spent in times: " + str(time() - start_time_operation)))
 
         # Adding edges
         for job in allJobs:
@@ -2440,7 +2437,7 @@ class JobList:
                 maxChildren = num_children
             if num_parent > maxParent:
                 maxParent = num_parent
-            if job._children > 0:
+            if len(job._children) > 0:
                 # current_group = job_to_package.get(job.name, None) # job_to_package[job.name] if job.name in job_to_package else None
                 for child in job._children:
                     if ((node_id[job.name], node_id[child.name]) not in raw_edges):
@@ -2506,21 +2503,20 @@ class JobList:
             start_time = time()
             # Testing Barycentric
             max_level = max([job.level for job in allJobs])
-            print("Levels " + str(max_level))
+            print(("Levels " + str(max_level)))
             # min_level = min([job.level for job in allJobs])
             # Assuming level starts at 1
             for i in range(2, max_level + 1):
 
                 # Order for first layer
                 if i == 2:
-                    jobs_layer_previous = filter(
-                        lambda x: x.level == i - 1, allJobs)
+                    jobs_layer_previous = [x for x in allJobs if x.level == i - 1]
                     k = 1
                     for job_prev in jobs_layer_previous:
                         job_prev.h_order = k
                         k = k + 1
 
-                jobs_layer = filter(lambda x: x.level == i, allJobs)
+                jobs_layer = [x for x in allJobs if x.level == i]
                 # print("Level " + str(i) + " ~ " + str(len(jobs_layer)))
 
                 for job in jobs_layer:
@@ -2541,11 +2537,10 @@ class JobList:
                         already_assigned_order.append(jobs_layer[j - 1].name)
                         jobs_layer[j -
                                    1].h_order = len(already_assigned_order) + 1
-                        if jobs_layer[j - 1].name in job_to_package.keys():
+                        if jobs_layer[j - 1].name in list(job_to_package.keys()):
                             jobs_in_wrapper = package_to_jobs[job_to_package[jobs_layer[j - 1].name]]
                             # jobs_in_wrapper.sort(key=lambda x: x.barycentric_value)
-                            jobs_obj_in_wrapper = filter(
-                                lambda x: x.name in jobs_in_wrapper, allJobs)
+                            jobs_obj_in_wrapper = [x for x in allJobs if x.name in jobs_in_wrapper]
                             jobs_obj_in_wrapper.sort(
                                 key=lambda x: x.barycentric_value)
                             subcount = len(already_assigned_order) + 2
@@ -2565,7 +2560,7 @@ class JobList:
                 mainCoordinates[job.name] = (
                     job.h_order * resize_x, job.level * resize_y)
                 # print(job.name + ": " + str(job.h_order) + ", x: " + str(job.h_order * resize) + ", y: " + str(job.level * resize) + " ~ baryval " + str(job.barycentric_value))
-            print("Seconds spent in Barycentric: " + str(time() - start_time))
+            print(("Seconds spent in Barycentric: " + str(time() - start_time)))
         elif (layout == 'standard' or layout == 'laplacian'):
             # Spectral Drawing of coordinates
             print("Start Construction Laplacian")
@@ -2589,8 +2584,8 @@ class JobList:
 
             for i in range(len(x_coords)):
                 mainCoordinates[allJobs[i].name] = (x_coords[i], y_coords[i])
-            print("Seconds Spent in Laplacian: " +
-                  str(time() - start_time_operation))
+            print(("Seconds Spent in Laplacian: " +
+                  str(time() - start_time_operation)))
 
         # ASYPD : POST jobs in experiment
         post_jobs = [job for job in allJobs if job.section ==
@@ -2601,7 +2596,7 @@ class JobList:
                                           .run_time for job in post_jobs if job_running_to_min.get(job.name, None) is not None) / len(post_jobs), 2)
 
         for job in allJobs:
-            if (len(mainCoordinates.keys())) > 0:
+            if (len(list(mainCoordinates.keys()))) > 0:
                 x, y = mainCoordinates[job.name]
             else:
                 x, y = 0, 0
@@ -2619,8 +2614,8 @@ class JobList:
                 path_to_logs, job.err) if job.err != "NA" else None
             # min_q, min_r, status_retrieved, energy = job_running_to_min[job.name] if job.name in list(
             #     job_running_to_min.keys()) else (-1, -1, "UNKNOWN", 0)
-            job_info = job_running_to_min[job.name] if job.name in job_running_to_min.keys(
-            ) else None
+            job_info = job_running_to_min[job.name] if job.name in list(job_running_to_min.keys(
+            )) else None
             ini_date, end_date = JobList.date_plus(job.date, chunk_unit, job.chunk, chunk_size) if job.date is not None else (
                 date2str(job.date, self.get_date_format), "")
             nodes.append({'id': job.name,
@@ -2639,7 +2634,7 @@ class JobList:
                           'section': job.section,
                           'queue': job.queue,
                           'level': job.level,
-                          'dashed': True if job.name in job_to_package.keys() else False,
+                          'dashed': True if job.name in list(job_to_package.keys()) else False,
                           'shape': package_to_symbol[job_to_package[job.name]] if job.name in job_to_package else 'dot',
                           'processors': job.processors,
                           'wallclock': job.wallclock,
@@ -2677,8 +2672,7 @@ class JobList:
                     final_color = Monitor.color_status(Status.WAITING)
                     group_name = self._expid + "_" + \
                         str(dates[date]) + "_" + member + "_"
-                    local_list = filter(
-                        lambda x: x.name.startswith(group_name), allJobs)
+                    local_list = [x for x in allJobs if x.name.startswith(group_name)]
                     # if group_name not in list(list_groups.keys()):
                     #     list_groups[group_name] = list()
                     # list_groups.setdefault(group_name, [])
@@ -2757,8 +2751,7 @@ class JobList:
                                 str(dates[date]) + "_" + \
                                 member + "_" + str(chunk) + "_"
                             # print("Group Name: {}".format(group_name))
-                            specific_list = filter(
-                                lambda x: x.name.startswith(group_name), allJobs)
+                            specific_list = [x for x in allJobs if x.name.startswith(group_name)]
                             if len(specific_list) > 0:
                                 failed_count = sum(
                                     1 for x in specific_list if x.status == Status.FAILED)
@@ -2822,7 +2815,7 @@ class JobList:
                 # for item in list_groups:
                 #     print("{} -> x: {}, y: {}".format(item, list_groups[item]["x"], list_groups[item]["y"]))
             except Exception as exp:
-                print(traceback.format_exc())
+                print((traceback.format_exc()))
                 print(exp)
         elif grouped == 'status':
             # status_list_waiting = filter(lambda x: x.status == Status.WAITING and x.packed == False, allJobs)
@@ -2943,7 +2936,7 @@ class JobList:
 
         if statusChange is not None:
             result += " with " + bcolors.OKGREEN + \
-                str(len(statusChange.keys())) + \
+                str(len(list(statusChange.keys()))) + \
                 " Changes ##" + bcolors.ENDC + bcolors.ENDC
         else:
             result += "## " + bcolors.ENDC
@@ -3264,7 +3257,7 @@ class JobList:
                     finish_time = 0
 
         except Exception as exp:
-            print(traceback.format_exc())
+            print((traceback.format_exc()))
             return
 
         seconds_queued = seconds_queued * \
@@ -3351,14 +3344,14 @@ class JobList:
                     # package_to_jobs[package_name].append(name)
                 for key in package_to_jobs:
                     package_to_package_id[key] = key.split("_")[2]
-                list_packages = job_to_package.values()
+                list_packages = list(job_to_package.values())
                 for i in range(len(list_packages)):
                     if i % 2 == 0:
                         package_to_symbol[list_packages[i]] = 'square'
                     else:
                         package_to_symbol[list_packages[i]] = 'hexagon'
             except Exception as ex:
-                print(traceback.format_exc())
+                print((traceback.format_exc()))
 
         return (job_to_package, package_to_jobs, package_to_package_id, package_to_symbol)
 

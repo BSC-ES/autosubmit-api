@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/python3.7
 
 # Copyright 2017 Earth Sciences Department, BSC-CNS
 
@@ -18,7 +18,6 @@
 # along with Autosubmit.  If not, see <http://www.gnu.org/licenses/>.
 
 import os
-import jwt
 import sys
 import time
 from datetime import datetime, timedelta
@@ -27,14 +26,16 @@ import logging
 from flask_cors import CORS, cross_origin
 from flask import Flask, request, session, redirect, url_for
 from bscearth.utils.log import Log
-from database.db_common import get_current_running_exp, update_experiment_description_owner
-import experiment.common_requests as CommonRequests
-import experiment.utils as Utiles
-from performance.performance_metrics import PerformanceMetrics
-from database.db_common import search_experiment_by_id
-from config.basicConfig import BasicConfig
-from builders.joblist_helper_builder import JobListHelperBuilder, JobListHelperDirector
-from multiprocessing import Manager
+from .database.db_common import get_current_running_exp, update_experiment_description_owner
+from .experiment import common_requests as CommonRequests
+from .experiment import utils as Utiles
+from .performance.performance_metrics import PerformanceMetrics
+from .database.db_common import search_experiment_by_id
+from .config.basicConfig import BasicConfig
+from .builders.joblist_helper_builder import JobListHelperBuilder, JobListHelperDirector
+from multiprocessing import Manager, Lock
+import jwt
+import sys
 
 JWT_SECRET = os.environ.get("SECRET_KEY")
 JWT_ALGORITHM = "HS256"
@@ -55,12 +56,18 @@ gunicorn_logger = logging.getLogger('gunicorn.error')
 app.logger.handlers = gunicorn_logger.handlers
 app.logger.setLevel(gunicorn_logger.level)
 
+app.logger.info("PYTHON VERSION: " + sys.version)
+
 requests.packages.urllib3.util.ssl_.DEFAULT_CIPHERS += 'HIGH:!DH:!aNULL'
 try:
     requests.packages.urllib3.contrib.pyopenssl.DEFAULT_SSL_CIPHER_LIST += 'HIGH:!DH:!aNULL'
 except AttributeError:
     # no pyopenssl support used / needed / available
     pass
+
+lock = Lock()
+
+CommonRequests.enforceLocal(app.logger)
 
 # CAS Login
 @app.route('/login')
@@ -214,7 +221,7 @@ def search_running():
     Returns the list of all experiments that are currently running.
     """
     if 'username' in session:
-        print("USER {}".format(session['username']))
+        print(("USER {}".format(session['username'])))
     start_time = time.time()
     app.logger.info("Active proceses: " + str(D))
     app.logger.info('RUN|RECEIVED|')
@@ -259,12 +266,12 @@ def get_expsummary(expid):
     start_time = time.time()
     user = request.args.get("loggedUser", default="null", type=str)
     app.logger.info('SUMMARY|RECEIVED|' + str(expid))
-    if user != "null": D[os.getpid()] = [user, "summary", True]
-    result = CommonRequests.get_experiment_summary(expid)
+    if user != "null": lock.acquire(); D[os.getpid()] = [user, "summary", True]; lock.release();
+    result = CommonRequests.get_experiment_summary(expid, app.logger)
     app.logger.info('Process: ' + str(os.getpid()) + " workers: " + str(D))
     app.logger.info('SUMMARY|RTIME|' + str(expid) + "|" + str(time.time() - start_time))
-    if user != "null": D[os.getpid()] = [user, "summary", False]
-    if user != "null": D.pop(os.getpid(), None)
+    if user != "null": lock.acquire(); D[os.getpid()] = [user, "summary", False]; lock.release();
+    if user != "null": lock.acquire(); D.pop(os.getpid(), None); lock.release();
     return result
 
 
@@ -288,7 +295,8 @@ def shutdown(route):
             # app.logger.info("user: " + user)
             # app.logger.info("expid: " + expid)
             app.logger.info("Workers before: " + str(D))
-            for k,v in D.items():
+            lock.acquire()
+            for k,v in list(D.items()):
                 if v[0] == user and v[1] == route and v[-1] == True:
                     if v[2] == expid:
                         D[k] = [user, route, expid, False]
@@ -298,6 +306,7 @@ def shutdown(route):
                     # reboot the worker
                     os.system('kill -HUP ' + str(k))
                     app.logger.info("killed worker " + str(k))
+            lock.release()
             app.logger.info("Workers now: " + str(D))
         except Exception as exp:
             app.logger.info("[CRITICAL] Could not shutdown process " + expid + " by user \"" + user + "\"")
@@ -335,12 +344,12 @@ def get_list_format(expid, layout='standard', grouped='none'):
     # app.logger.info("user: " + user)
     # app.logger.info("expid: " + expid)
     app.logger.info('GRAPH|RECEIVED|' + str(expid) + "~" + str(grouped) + "~" + str(layout))
-    if user != "null": D[os.getpid()] = [user, "graph", expid, True]
+    if user != "null": lock.acquire(); D[os.getpid()] = [user, "graph", expid, True]; lock.release();
     result = CommonRequests.get_experiment_graph(expid, app.logger, layout, grouped)
     app.logger.info('Process: ' + str(os.getpid()) + " graph workers: " + str(D))
     app.logger.info('GRAPH|RTIME|' + str(expid) + "|" + str(time.time() - start_time))
-    if user != "null": D[os.getpid()] = [user, "graph", expid, False]
-    if user != "null": D.pop(os.getpid(), None)
+    if user != "null": lock.acquire(); D[os.getpid()] = [user, "graph", expid, False]; lock.release();
+    if user != "null": lock.acquire(); D.pop(os.getpid(), None); lock.release();
     return result
 
 
@@ -351,12 +360,12 @@ def get_exp_tree(expid):
     # app.logger.info("user: " + user)
     # app.logger.info("expid: " + expid)
     app.logger.info('TREE|RECEIVED|' + str(expid))
-    if user != "null": D[os.getpid()] = [user, "tree", expid, True]
+    if user != "null": lock.acquire(); D[os.getpid()] = [user, "tree", expid, True]; lock.release();
     result = CommonRequests.get_experiment_tree_structured(expid, app.logger)
     app.logger.info('Process: ' + str(os.getpid()) + " tree workers: " + str(D))
     app.logger.info('TREE|RTIME|' + str(expid) + "|" + str(time.time() - start_time))
-    if user != "null": D[os.getpid()] = [user, "tree", expid, False]
-    if user != "null": D.pop(os.getpid(), None)
+    if user != "null": lock.acquire(); D[os.getpid()] = [user, "tree", expid, False]; lock.release();
+    if user != "null": lock.acquire(); D.pop(os.getpid(), None); lock.release();
     return result
 
 

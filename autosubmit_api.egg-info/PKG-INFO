@@ -1,17 +1,14 @@
-Metadata-Version: 1.2
+Metadata-Version: 2.1
 Name: autosubmit-api
-Version: 1.7.0
+Version: 1.0.27
 Summary: An extension to the Autosubmit package that serves its information as an API
-Home-page: https://earth.bsc.es/gitlab/es/autosubmit_api
+Home-page: https://earth.bsc.es/gitlab/wuruchi/autosubmit_api
 Author: Wilmer Uruchi
 Author-email: wilmer.uruchi@bsc.es
 License: GNU GPL
-Description: UNKNOWN
 Keywords: autosubmit,API
-Platform: UNKNOWN
 Classifier: Development Status :: 4 - Beta
 Classifier: Intended Audience :: Developers
 Classifier: License :: OSI Approved :: GNU General Public License v3 (GPLv3)
 Classifier: Operating System :: POSIX :: Linux
-Classifier: Programming Language :: Python :: 2.7
-Requires-Python: >=2.6, !=3.*
+Classifier: Programming Language :: Python :: 3.7

@@ -1,11 +1,11 @@
 import os
 import textwrap
 import traceback
-import sqlite3
+import pysqlite3 as sqlite3
 
 def get_structure(expid, structures_path):
     """
-    Creates file of database and table of experiment structure if it does not exist. 
+    Creates file of database and table of experiment structure if it does not exist.
     Returns current structure as a Dictionary Job Name -> Children's Names
 
     :return: Map from job to children
@@ -44,23 +44,23 @@ def get_structure(expid, structures_path):
                 # if _to not in current_table_structure.keys():
                 #     current_table_structure[_to] = list()
                 # current_table_structure[_from].append(_to)
-            if (len(current_table_structure.keys()) > 0):
+            if (len(list(current_table_structure.keys())) > 0):
                 # print("Return structure")
                 return current_table_structure
             else:
-                return None
+                return dict()
         else:
             # pkl folder not found
             raise Exception("structures folder not found " +
                             str(structures_path))
     except Exception as exp:
-        print(traceback.format_exc())
+        print((traceback.format_exc()))
 
 
 def create_connection(db_file):
-    """ 
-    Create a database connection to the SQLite database specified by db_file.  
-    :param db_file: database file name  
+    """
+    Create a database connection to the SQLite database specified by db_file.
+    :param db_file: database file name
     :return: Connection object or None
     """
     try:
@@ -86,7 +86,7 @@ def create_table(conn, create_table_sql):
 def _get_exp_structure(path):
     """
     Get all registers from experiment_status.\n
-    :return: row content: exp_id, name, status, seconds_diff  
+    :return: row content: exp_id, name, status, seconds_diff
     :rtype: 4-tuple (int, str, str, int)
     """
     try:
@@ -98,7 +98,7 @@ def _get_exp_structure(path):
         rows = cur.fetchall()
         return rows
     except Exception as exp:
-        print(traceback.format_exc())
+        print((traceback.format_exc()))
         return dict()
 
 
@@ -139,7 +139,7 @@ def _create_edge(conn, data):
         cur.executemany(sql, data)
         # return cur.lastrowid
     except sqlite3.Error as e:
-        print("Error on Insert : " + str(type(e).__name__))
+        print(("Error on Insert : " + str(type(e).__name__)))
 
 
 def _delete_table_content(conn):
@@ -154,5 +154,5 @@ def _delete_table_content(conn):
         return True
     except Exception as exp:
         # print(traceback.format_exc())
-        print("Error on Delete _delete_table_content: {}".format(str(exp)))
+        print(("Error on Delete _delete_table_content: {}".format(str(exp))))
         return False
