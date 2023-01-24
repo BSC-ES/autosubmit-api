@@ -29,34 +29,36 @@ import json
 import multiprocessing
 import subprocess
 from collections import deque
-from autosubmit_api.autosubmit_legacy.autosubmit import Autosubmit
-import autosubmit_api.database.db_common as db_common
-import autosubmit_api.experiment.common_db_requests as DbRequests
-import autosubmit_api.database.db_jobdata as JobData
-import autosubmit_api.autosubmit_legacy.job.job_utils as LegacyJobUtils
-import autosubmit_api.common.utils as common_utils
-import autosubmit_api.components.jobs.utils as JUtils
+from ..autosubmit_legacy.autosubmit import Autosubmit
+from ..database import db_common as db_common
+from . import common_db_requests as DbRequests
+from ..database import db_jobdata as JobData
+from ..autosubmit_legacy.job import job_utils as LegacyJobUtils
+from ..common import utils as common_utils
+from ..components.jobs import utils as JUtils
 
-from autosubmit_api.autosubmit_legacy.job.job_list import JobList
-from autosubmit_api.autosubmit_legacy.job.job import Job
+from ..autosubmit_legacy.job.job_list import JobList
+from ..autosubmit_legacy.job.job import Job
 
-from autosubmit_api.performance.utils import calculate_ASYPD_perjob, calculate_SYPD_perjob
-from autosubmit_api.monitor.monitor import Monitor
+from ..performance.utils import calculate_ASYPD_perjob, calculate_SYPD_perjob
+from ..monitor.monitor import Monitor
 
-from autosubmit_api.statistics.statistics import Statistics
+from ..statistics.statistics import Statistics
 
-from autosubmit_api.config.basicConfig import BasicConfig
-from autosubmit_api.config.config_common import AutosubmitConfig
+from ..config.basicConfig import BasicConfig
+from ..config.config_common import AutosubmitConfig
 from bscearth.utils.config_parser import ConfigParserFactory
 
-from autosubmit_api.components.representations.tree.tree import TreeRepresentation
-from autosubmit_api.components.representations.graph.graph import GraphRepresentation, GroupedBy, Layout
+from ..components.representations.tree.tree import TreeRepresentation
+from ..components.representations.graph.graph import GraphRepresentation, GroupedBy, Layout
 
-from autosubmit_api.builders.experiment_history_builder import ExperimentHistoryDirector, ExperimentHistoryBuilder
-from autosubmit_api.builders.configuration_facade_builder import ConfigurationFacadeDirector, AutosubmitConfigurationFacadeBuilder
-from autosubmit_api.builders.joblist_loader_builder import JobListLoaderBuilder, JobListLoaderDirector
-from autosubmit_api.components.jobs.job_support import JobSupport
+from ..builders.experiment_history_builder import ExperimentHistoryDirector, ExperimentHistoryBuilder
+from ..builders.configuration_facade_builder import ConfigurationFacadeDirector, AutosubmitConfigurationFacadeBuilder
+from ..builders.joblist_loader_builder import JobListLoaderBuilder, JobListLoaderDirector
+from ..components.jobs.job_support import JobSupport
 from typing import Dict, Any
+import locale
+from autosubmitconfigparser.config.configcommon import AutosubmitConfig as Autosubmit4Config
 
 BasicConfig.read()
 
@@ -106,7 +108,7 @@ def get_experiment_stats(expid, filter_period, filter_type):
             raise Exception("Autosubmit API couldn't find jobs that match your search critearia (Section: {0}) in the period from {1} to {2}.".format(filter_type, period_ini, period_fi))
 
     except Exception as e:
-        print(traceback.format_exc())
+        print((traceback.format_exc()))
         error_message = str(e)
         error = True
 
@@ -278,7 +280,7 @@ def _is_exp_running(expid, time_condition=300):
         return (error, error_message, is_running, timediff, definite_log_path)
 
 
-def get_experiment_summary(expid):
+def get_experiment_summary(expid, log):
     """
     Gets job summary for the experiment. Consider seconds.
     :param expid: Name of experiment
@@ -319,8 +321,8 @@ def get_experiment_summary(expid):
         fakeAllJobs = list()
 
         if os.path.exists(path_pkl):
-            fd = open(path_pkl, 'r')
-            for item in pickle.load(fd):
+            fd = open(path_pkl, 'rb')
+            for item in pickle.load(fd, encoding="latin1"):
                 status_code = int(item[2])
                 job_name = item[0]
                 priority = item[3]
@@ -335,12 +337,13 @@ def get_experiment_summary(expid):
                     LegacyJobUtils.SimpleJob(job_name, tmp_path, status_code))
             job_running_to_seconds, job_running_to_runtext, _ = JobList.get_job_times_collection(
                 BasicConfig, fakeAllJobs, expid, job_to_package, package_to_jobs, timeseconds=True)
+
         # Main Loop
-        if len(job_running_to_seconds.keys()) > 0:
-            for job_name in jobs_in_pkl.keys():
+        if len(list(job_running_to_seconds.keys())) > 0:
+            for job_name in list(jobs_in_pkl.keys()):
                 # print(value)
-                job_info = job_running_to_seconds[job_name] if job_name in job_running_to_seconds.keys(
-                ) else None
+                job_info = job_running_to_seconds[job_name] if job_name in list(job_running_to_seconds.keys(
+                )) else None
                 queue_seconds = job_info.queue_time if job_info else 0
                 running_seconds = job_info.run_time if job_info else 0
                 status = job_info.status if job_info else "UNKNOWN"
@@ -448,7 +451,7 @@ def quick_test_run(expid):
     except Exception as exp:
         error = True
         error_message = str(exp)
-        print(traceback.format_exc())
+        print((traceback.format_exc()))
 
     return {
         'running': running,
@@ -712,8 +715,8 @@ def get_experiment_graph(expid, log, layout=Layout.STANDARD, grouped=GroupedBy.N
                 return graph.get_graph_representation_data()
         except Exception as exp:
             # print(traceback.format_exc())
-            print("New Graph Representation failed: {0}".format(exp))
-            log.info("Could not generate graph with faster method")
+            print(("New Graph Representation failed: {0}".format(exp)))
+            log.info("Could not generate graph with faster method: " + str(exp))
 
         # Getting platform data
         hpcarch = autosubmit_configuration_facade.get_platform()
@@ -744,7 +747,7 @@ def get_experiment_graph(expid, log, layout=Layout.STANDARD, grouped=GroupedBy.N
         )
         # raise Exception("Base list graph: ", str(base_list))
     except Exception as e:
-        print(traceback.format_exc())
+        print((traceback.format_exc()))
         log.info("Could not generate Graph and recieved the following exception: " + str(e))
         return {'nodes': [],
                 'edges': [],
@@ -771,7 +774,7 @@ def get_experiment_tree_rundetail(expid, run_id):
     base_list = dict()
     pkl_timestamp = 10000000
     try:
-        print("Received Tree RunDetail " + str(expid))
+        print(("Received Tree RunDetail " + str(expid)))
         BasicConfig.read()
         tree_structure, current_collection, reference = JobList.get_tree_structured_from_previous_run(expid, BasicConfig, run_id=run_id)
         base_list['tree'] = tree_structure
@@ -779,7 +782,7 @@ def get_experiment_tree_rundetail(expid, run_id):
         base_list['total'] = len(current_collection)
         base_list['reference'] = reference
     except Exception as e:
-        print(traceback.format_exc())
+        print((traceback.format_exc()))
         return {'tree': [], 'jobs': [], 'total': 0, 'reference': [], 'error': True, 'error_message': str(e), 'pkl_timestamp': 0}
     base_list['error'] = False
     base_list['error_message'] = 'None'
@@ -801,27 +804,33 @@ def get_experiment_tree_structured(expid, log):
         notransitive = False
         BasicConfig.read()
 
-        # TODO: (AUTOSUBMIT 4) Encapsulate this following 2 lines or move to the parent function in app.py
-        # curr_exp_as_version = db_common.get_autosubmit_version(expid)
-        # main, secondary = common_utils.parse_version_number(curr_exp_as_version)
-
-        as_conf = AutosubmitConfig(expid, BasicConfig, ConfigParserFactory())
-        as_conf.reload()
+        # TODO: Encapsulate this following 2 lines or move to the parent function in app.py
+        curr_exp_as_version = db_common.get_autosubmit_version(expid, log)
+        main, secondary = common_utils.parse_version_number(curr_exp_as_version)
+        if main and main >= 4:
+            # TODO: new YAML parser
+            as_conf = Autosubmit4Config(expid)
+            as_conf.reload(True)
+        else:
+            as_conf = AutosubmitConfig(expid, BasicConfig, ConfigParserFactory())
+            as_conf.reload()
 
         # If version is higher than 3.13, we can perform the new tree representation algorithm
         try:
             if common_utils.is_version_historical_ready(as_conf.get_version()):
-                job_list_loader = JobListLoaderDirector(JobListLoaderBuilder(expid)).build_loaded_joblist_loader()
+                if main and main >= 4:
+                    job_list_loader = JobListLoaderDirector(JobListLoaderBuilder(expid)).build_loaded_joblist_loader(None)
+                else:
+                    job_list_loader = JobListLoaderDirector(JobListLoaderBuilder(expid)).build_loaded_joblist_loader(None)
                 tree = TreeRepresentation(expid, job_list_loader)
                 tree.perform_calculations()
-                # este return
                 return tree.get_tree_structure()
-            else:
-                log.info("TREE|Not using first method|autosubmit_version=" + as_conf.get_version())
         except Exception as exp:
-            print(traceback.format_exc())
-            print("New Tree Representation failed: {0}".format(exp))
+            print((traceback.format_exc()))
+            print(("New Tree Representation failed: {0}".format(exp)))
             log.info("New Tree Representation failed: {0}".format(exp))
+
+        log.info("TREE|Not using first method|autosubmit_version=" + as_conf.get_version())
 
         # Getting platform data
         # Main taget HPC
@@ -840,6 +849,7 @@ def get_experiment_tree_structured(expid, log):
                 job.platform_name = hpcarch
             job.platform = submitter.platforms[job.platform_name.lower(
             )]
+
         # Chunk Unit and Size
         chunk_unit = as_conf.get_chunk_size_unit()
         chunk_size = as_conf.get_chunk_size()
@@ -852,7 +862,7 @@ def get_experiment_tree_structured(expid, log):
         base_list['total'] = len(current_collection)
         base_list['reference'] = reference
     except Exception as e:
-        print(traceback.format_exc())
+        print((traceback.format_exc()))
         return {'tree': [], 'jobs': [], 'total': 0, 'reference': [], 'error': True, 'error_message': str(e), 'pkl_timestamp': 0}
     base_list['error'] = False
     base_list['error_message'] = 'None'
@@ -876,8 +886,8 @@ def retrieve_all_pkl_files():
             timestamp = int(honk[1])
             file_name = str(honk[0]).split("/")
             exp_to_pkl[str(file_name[3])] = (timestamp, str(honk[0]))
-            print(file_name[3] + " ~ " +
-                  str(timestamp) + " :: " + str(honk[0]))
+            print((file_name[3] + " ~ " +
+                  str(timestamp) + " :: " + str(honk[0])))
         except Exception as exp:
             pass
     return exp_to_pkl
@@ -910,8 +920,8 @@ def generate_all_experiment_data(exp_path, job_path):
     """
     target_experiment_file = str(exp_path)
     target_experiment_job_file = str(job_path)
-    print("Experiment file path: " + target_experiment_file)
-    print("Job file path: " + target_experiment_job_file)
+    print(("Experiment file path: " + target_experiment_file))
+    print(("Job file path: " + target_experiment_job_file))
     conn_ecearth = DbRequests.create_connection("/esarchive/autosubmit/ecearth.db")
     conn_as_times = DbRequests.create_connection("/esarchive/autosubmit/as_times.db")
     # print("Getting experiments")
@@ -928,11 +938,11 @@ def generate_all_experiment_data(exp_path, job_path):
             wrapper_type, maxwrapped = get_auto_conf_data(name)
             #  description = description.replace('|', '~')
             # print(item)
-            if _id in all_detailed.keys():
+            if _id in list(all_detailed.keys()):
                 user, created, model, branch, hpc = all_detailed[_id]
 
                 completed = total = 0
-                if name in experiment_times.keys():
+                if name in list(experiment_times.keys()):
                     # Exists register of experiment completed and total jobs
                     total, completed, _ = experiment_times[name]
                     file1.write(str(_id) + "|" + str(name) + "|" + str(completed) + "|" + str(total) + "|" + str(user) + "|" + str(autosubmit_version) + "|" + str(
@@ -945,7 +955,7 @@ def generate_all_experiment_data(exp_path, job_path):
     # if (all_job_times):
     file2 = open(target_experiment_job_file, "w")
     file2.write("exp_id|exp_name|job_name|type|submit|start|finish|status|wallclock|procs|threads|tasks|queue|platform|mainplatform|project\n")
-    for exp_id in valid_id.keys():
+    for exp_id in list(valid_id.keys()):
         expid = valid_id.get(exp_id, None)
         historical_data = None # JobDataStructure(expid).get_all_current_job_data() TODO: Replace for new implementation
         experiment_runs = None # JobDataStructure(expid).get_experiment_runs() TODO: Replace for new implementation
@@ -956,7 +966,7 @@ def generate_all_experiment_data(exp_path, job_path):
         experiment_runs_main_info = {run.run_id: _get_hpcarch_project_from_experiment_run_metadata(run.run_id, experiment_runs_dict) for run in experiment_runs}
         # print(experiment_runs_main_info)
         if historical_data:
-            print("Using historical data for {}".format(exp_id))
+            print(("Using historical data for {}".format(exp_id)))
             job_conf = None
             try:
                 job_conf = get_job_conf_list(expid)
@@ -993,8 +1003,8 @@ def generate_all_experiment_data(exp_path, job_path):
                     + str(common_utils.parse_number_processors(str(job.ncpus))) + "|" + str(0) + "|" + str(0) + "|" + str(job.qos) + "|" + str(job.platform) + "|" + str(main_platform) + "|"
                     + str(project) +  "\n")
         else:
-            print("Using current data for {}".format(exp_id))
-            if exp_id in all_job_times.keys():
+            print(("Using current data for {}".format(exp_id)))
+            if exp_id in list(all_job_times.keys()):
                 # print(exp_id)
                 current = all_job_times[exp_id]
                 exp_name = valid_id[exp_id]
@@ -1005,7 +1015,7 @@ def generate_all_experiment_data(exp_path, job_path):
                     job_conf = get_job_conf_list(exp_name)
                     ###
                     if (job_conf):
-                        for job_name in current.keys():
+                        for job_name in list(current.keys()):
                             job_conf_info, job_type = old_searcher(
                                 job_conf, job_name)
                             if (job_conf_info):
@@ -1016,10 +1026,10 @@ def generate_all_experiment_data(exp_path, job_path):
                                     + str(common_utils.parse_number_processors(str(processors))) + "|" + str(threads) + "|" + str(tasks) + "|" + str(queue) + "|" + str(platform) + "|" + str(main_platform) + "|"
                                     + str(project) +  "\n")
                             else:
-                                print(str(exp_name) + "  | job " +
-                                      str(job_name) + " no job conf valid found.")
+                                print((str(exp_name) + "  | job " +
+                                      str(job_name) + " no job conf valid found."))
                     else:
-                        print(str(exp_name) + " conf not valid.")
+                        print((str(exp_name) + " conf not valid."))
     file2.close()
 
 
@@ -1045,7 +1055,7 @@ def old_searcher(section_dict, job_name):
     """
     A very basic implementation to find the type of a job
     """
-    for section in section_dict.keys():
+    for section in list(section_dict.keys()):
         t_name = "_" + section
         # print(t_name)
         if job_name.find(t_name) >= 0:
@@ -1088,8 +1098,8 @@ def get_job_conf_list(expid):
                                tasks, memory, memory_per_task, queue, final_platform, main_platform, project)
         return result
     except Exception as ex:
-        print(str(ex) + "\n" + str(expid) +
-              " : failed to retrieve info from jobs conf.\n")
+        print((str(ex) + "\n" + str(expid) +
+              " : failed to retrieve info from jobs conf.\n"))
         return None
 
 
@@ -1109,7 +1119,7 @@ def get_auto_conf_data(expid):
         max_wrapped = as_conf.get_max_wrapped_jobs()
         return (wrapper_type, max_wrapped)
     except Exception as ex:
-        print("Couldn't retrieve conf data (wrapper info) from {0}. Exception {1}.".format(expid, str(ex)))
+        print(("Couldn't retrieve conf data (wrapper info) from {0}. Exception {1}.".format(expid, str(ex))))
         return ("None", 0)
 
 
@@ -1131,7 +1141,7 @@ def verify_last_completed(seconds=300):
     latest_detail = DbRequests.get_latest_completed_jobs(seconds)
     t_data = time.time() - td0
     # Main Loop
-    for job_name, detail in latest_detail.items():
+    for job_name, detail in list(latest_detail.items()):
         tmp_path = os.path.join(
             BasicConfig.LOCAL_ROOT_DIR, job_name[:4], BasicConfig.LOCAL_TMP_DIR)
         detail_id, submit, start, finish, status = detail
@@ -1176,7 +1186,7 @@ def get_experiment_counters(expid):
     try:
         if os.path.exists(path_pkl):
             fd = open(path_pkl, 'r')
-            for item in pickle.load(fd):
+            for item in pickle.load(fd, encoding="latin1"):
                 status_code = int(item[2])
                 total += 1
                 experiment_counters[common_utils.Status.VALUE_TO_KEY.get(status_code, "UNKNOWN")] = experiment_counters.get(
@@ -1219,12 +1229,12 @@ def get_quick_view(expid):
             now_ = time.time()
             job_to_package, package_to_jobs, package_to_package_id, package_to_symbol = JobList.retrieve_packages(
                 BasicConfig, expid)
-            print("Retrieving packages {0} seconds.".format(
-                str(time.time() - now_)))
+            print(("Retrieving packages {0} seconds.".format(
+                str(time.time() - now_))))
 
             try:
-                fd = open(pkl_file, 'r')
-                for item in pickle.load(fd):
+                fd = open(pkl_file, 'rb')
+                for item in pickle.load(fd, encoding="latin1"):
                     status_code = int(item[2])
                     # counters
                     if status_code == common_utils.Status.COMPLETED:
@@ -1249,17 +1259,17 @@ def get_quick_view(expid):
                 raise Exception(
                     "Autosubmit API couldn't open pkl file. If you are sure that your experiment is running correctly, try again.")
 
-            total_count = len(jobs_in_pkl.keys())
+            total_count = len(list(jobs_in_pkl.keys()))
 
-            if len(jobs_in_pkl.keys()) > 0:
+            if len(list(jobs_in_pkl.keys())) > 0:
                 # fd = open(path_pkl, 'r')
-                for job_name in jobs_in_pkl.keys():
+                for job_name in list(jobs_in_pkl.keys()):
                     status_code, status_color, status_text, out, err, priority, id_number = jobs_in_pkl[
                         job_name]
                     wrapper_tag = ""
                     wrapper_id = 0
                     wrapper_name = ""
-                    if job_name in job_to_package.keys():
+                    if job_name in list(job_to_package.keys()):
                         wrapper_name = job_to_package[job_name]
                         wrapper_id = package_to_package_id[job_to_package[job_name]]
                         wrapper_tag = " <span class='badge' style='background-color:#94b8b8'>Wrapped " + \
@@ -1288,7 +1298,7 @@ def get_quick_view(expid):
         error_message = "Exception: {0}".format(str(exp))
         error = True
         print(error_message)
-        print(traceback.format_exc())
+        print((traceback.format_exc()))
         pass
 
     return {"error": error, "error_message": error_message, "view_data": view_data, "tree_view": list(quick_tree_view), "total": total_count, "completed": completed_count, "failed": failed_count, "running": running_count, "queuing": queuing_count}
@@ -1305,7 +1315,7 @@ def get_job_history(expid, job_name):
         path_to_job_logs = os.path.join(BasicConfig.LOCAL_ROOT_DIR, expid, "tmp", "LOG_" + expid)
         result = ExperimentHistoryDirector(ExperimentHistoryBuilder(expid)).build_reader_experiment_history().get_historic_job_data(job_name)
     except Exception as exp:
-        print(traceback.format_exc())
+        print((traceback.format_exc()))
         error = True
         error_message = str(exp)
         pass
@@ -1351,8 +1361,8 @@ def get_current_configuration_by_expid(expid, valid_user, log):
         if currentMetadata:
             currentRunConfig = {
                 key: currentMetadata[key] for key in currentMetadata if key in allowedConfigKeys}
-        currentRunConfig["contains_nones"] = True if not currentMetadata or None in currentMetadata.values(
-        ) else False
+        currentRunConfig["contains_nones"] = True if not currentMetadata or None in list(currentMetadata.values(
+        )) else False
 
         BasicConfig.read()
         autosubmitConfig = AutosubmitConfig(
@@ -1363,8 +1373,8 @@ def get_current_configuration_by_expid(expid, valid_user, log):
             if currentFileSystemConfigContent:
                 currentFileSystemConfig = {
                     key: currentFileSystemConfigContent[key] for key in currentFileSystemConfigContent if key in allowedConfigKeys}
-            currentFileSystemConfig["contains_nones"] = True if not currentFileSystemConfigContent or None in currentFileSystemConfigContent.values(
-            ) else False
+            currentFileSystemConfig["contains_nones"] = True if not currentFileSystemConfigContent or None in list(currentFileSystemConfigContent.values(
+            )) else False
 
         except Exception as exp:
             warning = True
@@ -1418,7 +1428,7 @@ def get_experiment_runs(expid):
             if job_dc.status_code == common_utils.Status.COMPLETED:
                 run_id_job_name_to_job_data_dc_COMPLETED[(job_dc.run_id, job_dc.job_name)] = job_dc
         run_id_wrapper_code_to_job_dcs = {}
-        for key, job_dc in run_id_job_name_to_job_data_dc_COMPLETED.items():
+        for key, job_dc in list(run_id_job_name_to_job_data_dc_COMPLETED.items()):
             if job_dc.wrapper_code:
                 run_id, _ = key
                 run_id_wrapper_code_to_job_dcs.setdefault((run_id, job_dc.wrapper_code), []).append(job_dc)
@@ -1460,7 +1470,7 @@ def get_experiment_runs(expid):
             error = True
             error_message = "No data"
     except Exception as exp:
-        print(traceback.format_exc())
+        print((traceback.format_exc()))
         error = True
         error_message = str(exp)
         pass
@@ -1533,7 +1543,7 @@ def test_esarchive_status():
         DbRequests.insert_archive_status(
             status, alatency, abandwith, clatency, cbandwidth, rtime)
     except Exception as exp:
-        print(traceback.format_exc())
+        print((traceback.format_exc()))
         # error_message = str(exp)
 
 
@@ -1575,3 +1585,19 @@ def get_last_test_archive_status():
             "bandwidth_warning": bandwidth_warning,
             "response_warning": response_warning,
             }
+
+def enforceLocal(log):
+    try:
+        try:
+            locale.setlocale(locale.LC_ALL, 'en_GB.UTF-8')
+        except Exception as e:
+            try:
+                locale.setlocale(locale.LC_ALL, 'C.utf8')
+            except Exception as e:
+                try:
+                    locale.setlocale(locale.LC_ALL, 'en_GB')
+                except Exception as e:
+                    locale.setlocale(locale.LC_ALL, 'es_ES')
+    except Exception as e:
+        og.info("Locale C.utf8 is not found, using '{0}' as fallback".format("C"))
+        locale.setlocale(locale.LC_ALL, 'C')

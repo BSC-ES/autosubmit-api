@@ -1,7 +1,7 @@
-README.md
 setup.py
 autosubmit_api/__init__.py
 autosubmit_api/app.py
+autosubmit_api/get-pip.py
 autosubmit_api.egg-info/PKG-INFO
 autosubmit_api.egg-info/SOURCES.txt
 autosubmit_api.egg-info/dependency_links.txt
@@ -85,6 +85,7 @@ autosubmit_api/config/__init__.py
 autosubmit_api/config/basicConfig.py
 autosubmit_api/config/config_common.py
 autosubmit_api/database/__init__.py
+autosubmit_api/database/autosubmit.py
 autosubmit_api/database/db_common.py
 autosubmit_api/database/db_jobdata.py
 autosubmit_api/database/db_manager.py
