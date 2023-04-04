@@ -889,7 +889,7 @@ class JobList:
         :return: jobs sorted by ID
         :rtype: list
         """
-        return sorted(self._job_list, key=lambda k: k.id)
+        return sorted(self._job_list, key=lambda k: int(k.id))
 
     def sort_by_type(self):
         """
@@ -2490,7 +2490,7 @@ class JobList:
                     graph = monitor.create_tree_list(
                         self.expid, allJobs, None, dict(), False)
                     result = graph.create('dot', format="plain")
-                    for u in result.split("\n"):
+                    for u in result.decode().split("\n"):
                         splitList = u.split(" ")
                         if len(splitList) > 1 and splitList[0] == "node":
                             mainCoordinates[splitList[1]] = (
@@ -2646,7 +2646,7 @@ class JobList:
                           'status_color': Monitor.color_status(job.status),
                           'err': err,
                           'out': out,
-                          'rm_id': job.id if job.id and job.id > 0 else None,
+                          'rm_id': job.id if job.id and int(job.id) > 0 else None,
                           'minutes_queue': job_info.queue_time if job_info else 0,
                           'minutes': job_info.run_time if job_info else 0,
                           'submit': timestamp_to_datetime_format(job_info.submit) if job_info else None,
