@@ -6,6 +6,8 @@ from ...jobs.job_factory import Job
 from ....common.utils import Status, get_average_total_time, get_current_timestamp
 from collections import deque, OrderedDict
 from typing import List, Dict, Tuple, Set, Any
+from operator import is_not
+from functools import partial
 
 DEFAULT_MEMBER = "DEFAULT"
 
@@ -194,7 +196,7 @@ class TreeRepresentation(object):
     result_exp_wrappers = []
     sorted_wrappers = sorted(self.joblist_loader.package_names)
     for package_name in sorted_wrappers:
-      jobs_in_package = sorted(self.joblist_loader.get_all_jobs_in_package(package_name), key=lambda x: x.chunk if x.chunk is not None else 0)
+      jobs_in_package = sorted( list(filter(partial(is_not, None), self.joblist_loader.get_all_jobs_in_package(package_name))), key=lambda x: x.chunk if x.chunk is not None else 0)
       simple_title = "Wrapper: {0}".format(package_name)
       total_count = len(jobs_in_package)
       status_counters = {
