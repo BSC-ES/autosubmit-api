@@ -65,6 +65,8 @@ BasicConfig.read()
 SAFE_TIME_LIMIT = 300
 SAFE_TIME_LIMIT_STATUS = 180
 
+# global object for logging
+logger = logging.getLogger('gunicorn.error')
 
 def get_experiment_stats(expid, filter_period, filter_type):
     # type: (str, int, str) -> Dict[str, Any]
@@ -1470,10 +1472,13 @@ def get_experiment_runs(expid):
             error = True
             error_message = "No data"
     except Exception as exp:
-        print((traceback.format_exc()))
         error = True
         error_message = str(exp)
+        logger.info( traceback.format_exc() )
+        logger.info("Error: " + error_message)
         pass
+        # for full debug, uncomment this
+        #raise exp
     return {"error": error, "error_message": error_message, "runs": result}
 
 
