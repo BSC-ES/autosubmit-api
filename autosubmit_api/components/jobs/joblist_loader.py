@@ -14,6 +14,10 @@ from typing import Dict, List, Set, Tuple
 from ...config.config_common import AutosubmitConfig
 from ...config.basicConfig import BasicConfig
 import json
+import logging
+
+
+logger = logging.getLogger('gunicorn.error')
 
 class JobListLoader(object):
   """ Class that manages loading the list of jobs from the pkl. Adds other resources. """
@@ -187,14 +191,16 @@ class JobListLoader(object):
     else:
       job_qos = self.configuration_facade.get_section_qos(job.section)
     if len(job_qos.strip()) == 0:
-      job_qos = self.configuration_facade.get_platform_qos(job.platform, job.ncpus)
+        if job.platform != "None":
+             job_qos = self.configuration_facade.get_platform_qos(job.platform, job.ncpus)
     return job_qos
 
   def _determine_wallclock(self, job):
     # type: (Job) -> None
     wallclock = self.configuration_facade.get_section_wallclock(job.section)
     if len(wallclock.strip()) == 0:
-      wallclock = self.configuration_facade.get_platform_max_wallclock(job.platform)
+        if job.platform != "None":
+            wallclock = self.configuration_facade.get_platform_max_wallclock(job.platform)
     return wallclock
 
   def assign_packages_to_jobs(self):

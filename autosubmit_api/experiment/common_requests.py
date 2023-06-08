@@ -28,6 +28,8 @@ import datetime
 import json
 import multiprocessing
 import subprocess
+import logging
+
 from collections import deque
 from ..autosubmit_legacy.autosubmit import Autosubmit
 from ..database import db_common as db_common
@@ -1121,6 +1123,7 @@ def get_auto_conf_data(expid):
         max_wrapped = as_conf.get_max_wrapped_jobs()
         return (wrapper_type, max_wrapped)
     except Exception as ex:
+        logger.info(traceback.format_exc())
         print(("Couldn't retrieve conf data (wrapper info) from {0}. Exception {1}.".format(expid, str(ex))))
         return ("None", 0)
 
@@ -1382,6 +1385,7 @@ def get_current_configuration_by_expid(expid, valid_user, log):
             warning = True
             warning_message = "The filesystem system configuration can't be retrieved because '{}'".format(
                 exp)
+            logger.info(traceback.format_exc())
             currentFileSystemConfig["contains_nones"] = True
             log.info(warning_message)
             pass

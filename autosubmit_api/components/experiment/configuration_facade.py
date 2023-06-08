@@ -190,7 +190,7 @@ class AutosubmitConfigurationFacade(ConfigurationFacade):
 
   def get_wrapper_type(self):
     # type: () -> str | None
-    if self.autosubmit_conf.get_wrapper_type().upper() != "NONE":
+    if self.autosubmit_conf.get_wrapper_type() and self.autosubmit_conf.get_wrapper_type().upper() != "NONE":
       return self.autosubmit_conf.get_wrapper_type().upper()
     return None
 
