@@ -16,6 +16,7 @@
 
 # You should have received a copy of the GNU General Public License
 # along with Autosubmit.  If not, see <http://www.gnu.org/licenses/>.
+
 try:
     # noinspection PyCompatibility
     from configparser import SafeConfigParser
@@ -37,53 +38,29 @@ from bscearth.utils.config_parser import ConfigParserFactory, ConfigParser
 from bscearth.utils.date import parse_date
 from bscearth.utils.log import Log
 from ..config.basicConfig import BasicConfig
-from ..config.IConfigStrategy import IConfigStrategy
-from ..config.ymlConfigStrategy import ymlConfigStrategy
-from ..config.confConfigStrategy import confConfigStrategy
+from abc import ABC, abstractmethod
 
-logger = logging.getLogger('gunicorn.error')
 
-class AutosubmitConfig(object):
+class IConfigStrategy(ABC):
     """
-    Class to handle experiment configuration coming from file or database
+    Public interface for Autosubmit config files
 
     :param expid: experiment identifier
     :type expid: str
-    :configWrapper: IConfigStrategy -> handling strategy for the type of config files used
     """
 
-    def __init__(self, expid, basic_config, parser_factory, extension="yml"):
-        # type: (str, BasicConfig, ConfigParserFactory, Extension) -> None
-
-        self.expid = expid
-        self._configWrapper = None
-        self.basic_config = basic_config
-        self.parser_factory = parser_factory
-
-        # check which type of config files (AS3 or AS4)
-        platform_conf_file = os.path.join(self.basic_config.LOCAL_ROOT_DIR, expid, "conf", "platforms_" + expid + "." + extension)
-        if os.path.exists(platform_conf_file):
-            logger.info("Setting AS4 Config strategy - yml")
-            self._configWrapper = ymlConfigStrategy(expid, basic_config, parser_factory, ".yml")
-        else:
-            logger.info("Setting AS3 Config strategy - conf")
-            self._configWrapper = confConfigStrategy(expid, basic_config, parser_factory, ".conf")
-
-
-    @property
+    @abstractmethod
     def jobs_parser(self):
-        return self._configWrapper.jobs_parser
+        raise NotImplementedError
 
-    @property
+    @abstractmethod
     def experiment_file(self):
         """
         Returns experiment's config file name
         """
-        #return self._exp_parser_file
-        return self._configWrapper.experiment_file
+        return self._exp_parser_file
 
-
-    @property
+    @abstractmethod
     def platforms_parser(self):
         """
         Returns experiment's platforms parser object
@@ -91,9 +68,9 @@ class AutosubmitConfig(object):
         :return: platforms config parser object
         :rtype: SafeConfigParser
         """
-        return self._configWrapper.platforms_parser
+        pass
 
-    @property
+    @abstractmethod
     def platforms_file(self):
         """
         Returns experiment's platforms config file name
@@ -101,40 +78,30 @@ class AutosubmitConfig(object):
         :return: platforms config file's name
         :rtype: str
         """
-        return self._configWrapper.platforms_parser_file
+        pass
 
-    @property
+    @abstractmethod
     def project_file(self):
         """
         Returns project's config file name
         """
-        return self._configWrapper.project_file
-
-    def check_proj_file(self):
-        """
-        Add a section header to the project's configuration file (if not exists)
-        """
         pass
 
-    @property
+    @abstractmethod
     def jobs_file(self):
         """
         Returns project's jobs file name
         """
-        return self._configWrapper.jobs_file()
+        pass
 
+    @abstractmethod
     def get_full_config_as_dict(self):
         """
         Returns full configuration as json object
         """
-        return self._configWrapper.get_full_config_as_dict()
+        pass
 
-    def get_full_config_as_json(self):
-        """
-        Return config as json object
-        """
-        return self._configWrapper.get_full_config_as_json()
-
+    @abstractmethod
     def get_project_dir(self):
         """
         Returns experiment's project directory
@@ -142,9 +109,9 @@ class AutosubmitConfig(object):
         :return: experiment's project directory
         :rtype: str
         """
-        return self._configWrapper.get_project_dir()
+        pass
 
-
+    @abstractmethod
     def get_queue(self, section):
         """
         Get queue for the given job type
@@ -153,22 +120,27 @@ class AutosubmitConfig(object):
         :return: queue
         :rtype: str
         """
-        return self._configWrapper.get_queue(section)
+        pass
 
+    @abstractmethod
     def get_job_platform(self, section):
-        return self._configWrapper.get_job_platform(section)
+        pass
 
+    @abstractmethod
     def get_platform_queue(self, platform):
-        return self._configWrapper.get_platform_queue(platform)
+        pass
 
+    @abstractmethod
     def get_platform_serial_queue(self, platform):
-        return self._configWrapper.get_platform_serial_queue(platform)
+        pass
 
+    @abstractmethod
     def get_platform_project(self, platform):
-        return self._configWrapper.get_platform_project(platform)
+        pass
 
+    @abstractmethod
     def get_platform_wallclock(self, platform):
-        return self._configWrapper.get_platform_wallclock(platform)
+        pass
 
     def get_wallclock(self, section):
         """
@@ -178,7 +150,7 @@ class AutosubmitConfig(object):
         :return: wallclock time
         :rtype: str
         """
-        return self._configWrapper.get_wallclock(section)
+        pass
 
     def get_synchronize(self, section):
         """
@@ -188,7 +160,7 @@ class AutosubmitConfig(object):
         :return: wallclock time
         :rtype: str
         """
-        return self._configWrapper.get_synchronize(section)
+        pass
 
     def get_processors(self, section):
         """
@@ -198,7 +170,7 @@ class AutosubmitConfig(object):
         :return: wallclock time
         :rtype: str
         """
-        return self._configWrapper.get_processors(section)
+        pass
 
     def get_threads(self, section):
         """
@@ -208,7 +180,7 @@ class AutosubmitConfig(object):
         :return: threads needed
         :rtype: str
         """
-        return self._configWrapper.get_threads(section)
+        pass
 
     def get_tasks(self, section):
         """
@@ -218,7 +190,7 @@ class AutosubmitConfig(object):
         :return: tasks (processes) per host
         :rtype: str
         """
-        return self._configWrapper.get_tasks(section)
+        pass
 
     def get_scratch_free_space(self, section):
         """
@@ -228,7 +200,7 @@ class AutosubmitConfig(object):
         :return: percentage of scratch free space needed
         :rtype: int
         """
-        return self._configWrapper.get_scratch_free_space(section)
+        pass
 
     def get_memory(self, section):
         """
@@ -238,7 +210,7 @@ class AutosubmitConfig(object):
         :return: memory needed
         :rtype: str
         """
-        return self._configWrapper.get_memory(section)
+        pass
 
     def get_memory_per_task(self, section):
         """
@@ -248,7 +220,7 @@ class AutosubmitConfig(object):
         :return: memory per task needed
         :rtype: str
         """
-        return self._configWrapper.get_memory_per_task(section)
+        pass
 
     def get_migrate_user_to(self, section):
         """
@@ -257,7 +229,8 @@ class AutosubmitConfig(object):
         :return: migrate user to
         :rtype: str
         """
-        return self.get_migrate_user_to(section)
+        #return self._platforms_parser.get_option(section, 'USER_TO', '').lower()
+        pass
 
     def get_current_user(self, section):
         """
@@ -266,7 +239,7 @@ class AutosubmitConfig(object):
         :return: migrate user to
         :rtype: str
         """
-        return self._configWrapper.get_current_user(section)
+        pass
 
     def get_current_project(self, section):
         """
@@ -275,7 +248,7 @@ class AutosubmitConfig(object):
         :return: migrate user to
         :rtype: str
         """
-        return self._configWrapper.get_current_project(section)
+        return str(self._platforms_data[section]["USER"]).lower()
 
     def set_new_user(self, section, new_user):
         """
@@ -284,7 +257,7 @@ class AutosubmitConfig(object):
         :param section: platform name
         :type: str
         """
-        self._configWrapper.set_new_user(section,new_user)
+        pass
 
     def get_migrate_project_to(self, section):
         """
@@ -293,7 +266,8 @@ class AutosubmitConfig(object):
         :return: migrate project to
         :rtype: str
         """
-        return self._configWrapper.get_migrate_project_to(section)
+        pass
+
 
 
     def set_new_project(self, section, new_project):
@@ -303,7 +277,8 @@ class AutosubmitConfig(object):
         :param section: platform name
         :type: str
         """
-        self._configWrapper.set_new_project(section,new_project)
+        pass
+
 
     def get_custom_directives(self, section):
         """
@@ -313,7 +288,8 @@ class AutosubmitConfig(object):
         :return: custom directives needed
         :rtype: str
         """
-        return  self._configWrapper.get_custom_directives(section)
+        pass
+
 
     def check_conf_files(self):
         """
@@ -323,7 +299,7 @@ class AutosubmitConfig(object):
         :return: True if everything is correct, False if it finds any error
         :rtype: bool
         """
-        return self._configWrapper.check_conf_files()
+        pass
 
     def check_autosubmit_conf(self):
         """
@@ -332,7 +308,7 @@ class AutosubmitConfig(object):
         :return: True if everything is correct, False if it founds any error
         :rtype: bool
         """
-        return self._configWrapper.check_autosubmit_conf()
+        pass
 
     def check_platforms_conf(self):
         """
@@ -341,7 +317,7 @@ class AutosubmitConfig(object):
         :return: True if everything is correct, False if it founds any error
         :rtype: bool
         """
-        return self._configWrapper.check_platforms_conf()
+
 
     def check_jobs_conf(self):
         """
@@ -350,7 +326,8 @@ class AutosubmitConfig(object):
         :return: True if everything is correct, False if it founds any error
         :rtype: bool
         """
-        return self._configWrapper.check_jobs_conf()
+        pass
+
 
     def check_expdef_conf(self):
         """
@@ -359,7 +336,8 @@ class AutosubmitConfig(object):
         :return: True if everything is correct, False if it founds any error
         :rtype: bool
         """
-        return self._configWrapper.check_expdef_conf()
+        pass
+
 
     def check_proj(self):
         """
@@ -368,17 +346,18 @@ class AutosubmitConfig(object):
         :return: True if everything is correct, False if it founds any error
         :rtype: bool
         """
-        return self._configWrapper.check_proj()
+        pass
+
 
     def check_wrapper_conf(self):
-        return
+        pass
+
 
     def reload(self):
         """
         Creates parser objects for configuration files
         """
-        self._configWrapper.reload()
-
+        pass
 
     def load_parameters(self):
         """
@@ -388,7 +367,7 @@ class AutosubmitConfig(object):
         :return: a dictionary containing tuples [parameter_name, parameter_value]
         :rtype: dict
         """
-        return self._configWrapper.load_parameters()
+
 
     def load_project_parameters(self):
         """
@@ -397,7 +376,8 @@ class AutosubmitConfig(object):
         :return: dictionary containing tuples [parameter_name, parameter_value]
         :rtype: dict
         """
-        return self._configWrapper.load_project_parameters()
+        pass
+
 
     def set_expid(self, exp_id):
         """
@@ -406,7 +386,7 @@ class AutosubmitConfig(object):
         :param exp_id: experiment identifier to store
         :type exp_id: str
         """
-        self._configWrapper.set_expid(exp_id)
+
 
     def get_project_type(self):
         """
@@ -415,7 +395,7 @@ class AutosubmitConfig(object):
         :return: project type
         :rtype: str
         """
-        return self._configWrapper.get_project_type()
+        pass
 
     def get_file_project_conf(self):
         """
@@ -424,7 +404,7 @@ class AutosubmitConfig(object):
         :return: path to project config file
         :rtype: str
         """
-        return self._configWrapper.get_file_project_conf()
+        pass
 
     def get_file_jobs_conf(self):
         """
@@ -433,7 +413,6 @@ class AutosubmitConfig(object):
         :return: path to project config file
         :rtype: str
         """
-        return self._configWrapper.get_file_jobs_conf()
 
 
     def get_git_project_origin(self):
@@ -443,7 +422,6 @@ class AutosubmitConfig(object):
         :return: git origin
         :rtype: str
         """
-        return self._configWrapper.get_git_project_origin()
 
     def get_git_project_branch(self):
         """
@@ -452,7 +430,6 @@ class AutosubmitConfig(object):
         :return: git branch
         :rtype: str
         """
-        return self._configWrapper.get_git_project_branch()
 
     def get_git_project_commit(self):
         """
@@ -461,7 +438,6 @@ class AutosubmitConfig(object):
         :return: git commit
         :rtype: str
         """
-        return self._configWrapper.get_git_project_commit()
 
     def get_submodules_list(self):
         """
@@ -470,7 +446,6 @@ class AutosubmitConfig(object):
         :return: submodules to load
         :rtype: list
         """
-        return self._configWrapper.get_submodules_list()
 
     def get_project_destination(self):
         """
@@ -479,7 +454,7 @@ class AutosubmitConfig(object):
         :return: git commit
         :rtype: str
         """
-        return self._configWrapper.get_project_destination()
+
 
     def set_git_project_commit(self, as_conf):
         """
@@ -487,7 +462,6 @@ class AutosubmitConfig(object):
         :param as_conf: Configuration class for exteriment
         :type as_conf: AutosubmitConfig
         """
-        return self._configWrapper.get_git_project_commit(as_conf)
 
     def get_svn_project_url(self):
         """
@@ -496,7 +470,6 @@ class AutosubmitConfig(object):
         :return: subversion project url
         :rtype: str
         """
-        return self._configWrapper.get_svn_project_url()
 
     def get_svn_project_revision(self):
         """
@@ -505,7 +478,6 @@ class AutosubmitConfig(object):
         :return: revision for subversion project
         :rtype: str
         """
-        return self._configWrapper.get_svn_project_revision()
 
     def get_local_project_path(self):
         """
@@ -514,7 +486,6 @@ class AutosubmitConfig(object):
         :return: path to local project
         :rtype: str
         """
-        return self._configWrapper.get_local_project_path()
 
     def get_date_list(self):
         """
@@ -523,7 +494,7 @@ class AutosubmitConfig(object):
         :return: experiment's startdates
         :rtype: list
         """
-        return self._configWrapper.get_date_list()
+
 
     def get_num_chunks(self):
         """
@@ -532,7 +503,6 @@ class AutosubmitConfig(object):
         :return: number of chunks
         :rtype: int
         """
-        return self._configWrapper.get_num_chunks()
 
     def get_chunk_ini(self, default=1):
         """
@@ -542,7 +512,7 @@ class AutosubmitConfig(object):
         :return: initial chunk
         :rtype: int
         """
-        return self._configWrapper.get_chunk_ini(default)
+
 
     def get_chunk_size_unit(self):
         # type: () -> str
@@ -553,7 +523,7 @@ class AutosubmitConfig(object):
         :rtype: str
         """
 
-        return self._configWrapper.get_chunk_size_unit()
+        pass
 
     def get_chunk_size(self, default=1):
         # type: (int) -> int
@@ -563,7 +533,7 @@ class AutosubmitConfig(object):
         :return: Chunksize, 1 as default.
         :rtype: int
         """
-        return self._configWrapper.get_chunk_size(default)
+        pass
 
     def get_member_list(self, run_only=False):
         """
@@ -572,7 +542,7 @@ class AutosubmitConfig(object):
         :return: experiment's members
         :rtype: list
         """
-        return self._configWrapper.get_member_list(run_only)
+        pass
 
     def get_rerun(self):
         """
@@ -582,7 +552,7 @@ class AutosubmitConfig(object):
         :rtype: list
         """
 
-        return self._configWrapper.get_rerun()
+        pass
 
     def get_chunk_list(self):
         """
@@ -591,7 +561,7 @@ class AutosubmitConfig(object):
         :return: experiment's chunks
         :rtype: list
         """
-        return self._configWrapper.get_chunk_list()
+        pass
 
     def get_platform(self):
         """
@@ -600,7 +570,7 @@ class AutosubmitConfig(object):
         :return: main platforms
         :rtype: str
         """
-        return self._configWrapper.get_platform()
+        pass
 
     def set_platform(self, hpc):
         """
@@ -609,7 +579,7 @@ class AutosubmitConfig(object):
         :param hpc: main platforms
         :type: str
         """
-        self._configWrapper.set_platform(hpc)
+        pass
 
     def set_version(self, autosubmit_version):
         """
@@ -618,7 +588,7 @@ class AutosubmitConfig(object):
         :param autosubmit_version: autosubmit's version
         :type autosubmit_version: str
         """
-        return self._configWrapper.set_version(autosubmit_version)
+        pass
 
     def get_version(self):
         """
@@ -627,7 +597,7 @@ class AutosubmitConfig(object):
         :return: version
         :rtype: str
         """
-        return self._configWrapper.get_version()
+        pass
 
     def get_total_jobs(self):
         """
@@ -636,7 +606,7 @@ class AutosubmitConfig(object):
         :return: max number of running jobs
         :rtype: int
         """
-        return self._configWrapper.get_total_jobs()
+        pass
 
     def get_max_wallclock(self):
         """
@@ -644,7 +614,7 @@ class AutosubmitConfig(object):
 
         :rtype: str
         """
-        return self._configWrapper.get_max_wallclock()
+        pass
 
     def get_max_processors(self):
         """
@@ -652,7 +622,7 @@ class AutosubmitConfig(object):
 
         :rtype: str
         """
-        return self._configWrapper.get_max_processors()
+        pass
 
     def get_max_waiting_jobs(self):
         """
@@ -661,7 +631,7 @@ class AutosubmitConfig(object):
         :return: main platforms
         :rtype: int
         """
-        return self._configWrapper.get_max_waiting_jobs()
+        pass
 
     def get_default_job_type(self):
         """
@@ -670,7 +640,7 @@ class AutosubmitConfig(object):
         :return: default type such as bash, python, r..
         :rtype: str
         """
-        return self._configWrapper.get_default_job_type()
+        pass
 
     def get_safetysleeptime(self):
         """
@@ -679,7 +649,7 @@ class AutosubmitConfig(object):
         :return: safety sleep time
         :rtype: int
         """
-        return self._configWrapper.get_safetysleeptime()
+        pass
 
     def set_safetysleeptime(self, sleep_time):
         """
@@ -688,7 +658,7 @@ class AutosubmitConfig(object):
         :param sleep_time: value to set
         :type sleep_time: int
         """
-        self._configWrapper.set_safetysleeptime(sleep_time)
+        pass
 
     def get_retrials(self):
         """
@@ -697,7 +667,7 @@ class AutosubmitConfig(object):
         :return: safety sleep time
         :rtype: int
         """
-        return self._configWrapper.get_retrials()
+        pass
 
     def get_notifications(self):
         """
@@ -706,7 +676,7 @@ class AutosubmitConfig(object):
         :return: if notifications
         :rtype: string
         """
-        return self._configWrapper.get_notifications()
+        pass
 
     def get_remote_dependencies(self):
         """
@@ -715,7 +685,7 @@ class AutosubmitConfig(object):
         :return: if remote dependencies
         :rtype: bool
         """
-        return self._configWrapper.get_remote_dependencies()
+        pass
 
     def get_wrapper_type(self):
         """
@@ -724,7 +694,7 @@ class AutosubmitConfig(object):
         :return: wrapper type (or none)
         :rtype: string
         """
-        return self._configWrapper.get_wrapper_type()
+        pass
 
     def get_wrapper_jobs(self):
         """
@@ -733,7 +703,7 @@ class AutosubmitConfig(object):
         :return: expression (or none)
         :rtype: string
         """
-        return self._configWrapper.get_wrapper_jobs()
+        pass
 
     def get_max_wrapped_jobs(self):
         """
@@ -742,25 +712,27 @@ class AutosubmitConfig(object):
          :return: maximum number of jobs (or total jobs)
          :rtype: string
          """
-        return self._configWrapper.get_max_wrapped_jobs()
+        # return int(self._conf_parser.get_option('wrapper', 'MAXWRAPPEDJOBS', self.get_total_jobs()))
+
+        pass
 
     def get_wrapper_check_time(self):
-        """
+         """
          Returns time to check the status of jobs in the wrapper
 
          :return: wrapper check time
          :rtype: int
          """
-        return self._configWrapper.get_wrapper_check_time()
+         pass
 
     def get_wrapper_machinefiles(self):
         """
-         Returns the strategy for creating the machinefiles in wrapper jobs
+        Returns the strategy for creating the machinefiles in wrapper jobs
 
-         :return: machinefiles function to use
-         :rtype: string
-         """
-        return self._configWrapper.get_wrapper_machinefiles()
+        :return: machinefiles function to use
+        :rtype: string
+        """
+        pass
 
     def get_wrapper_queue(self):
         """
@@ -769,7 +741,7 @@ class AutosubmitConfig(object):
         :return: expression (or none)
         :rtype: string
         """
-        return self._configWrapper.get_wrapper_queue()
+        pass
 
     def get_jobs_sections(self):
         """
@@ -778,7 +750,7 @@ class AutosubmitConfig(object):
         :return: sections
         :rtype: list
         """
-        return self._configWrapper.get_jobs_sections()
+        return self._jobs_parser.sections()
 
     def get_copy_remote_logs(self):
         """
@@ -787,7 +759,7 @@ class AutosubmitConfig(object):
         :return: if logs local copy
         :rtype: bool
         """
-        return self._configWrapper.get_copy_remote_logs()
+        pass
 
     def get_mails_to(self):
         """
@@ -796,7 +768,7 @@ class AutosubmitConfig(object):
         :return: mail address
         :rtype: [str]
         """
-        return self._configWrapper.get_mails_to()
+        pass
 
     def get_communications_library(self):
         """
@@ -805,7 +777,7 @@ class AutosubmitConfig(object):
         :return: communications library
         :rtype: str
         """
-        return self._configWrapper.get_communications_library()
+        pass
 
     def get_storage_type(self):
         """
@@ -814,36 +786,32 @@ class AutosubmitConfig(object):
         :return: communications library
         :rtype: str
         """
-        return self._configWrapper.get_storage_type()
+        pass
 
-    def is_valid_mail_address(self, mail_address):
-        #TODO: push to parent class as static method
-        return self._configWrapper.is_valid_mail_address(mail_address)
-
+    @staticmethod
+    def is_valid_mail_address(mail_address):
+        if re.match('^[_a-z0-9-]+(\.[_a-z0-9-]+)*@[a-z0-9-]+(\.[a-z0-9-]+)*(\.[a-z]{2,4})$', mail_address):
+            return True
+        else:
+            return False
+    @classmethod
     def is_valid_communications_library(self):
-        return self._configWrapper.is_valid_communications_library()
+        library = self.get_communications_library()
+        return library in ['paramiko', 'saga']
 
+    @classmethod
     def is_valid_storage_type(self):
-        return self._configWrapper.is_valid_storage_type()
+        storage_type = self.get_storage_type()
+        return storage_type in ['pkl', 'db']
+
 
     def is_valid_jobs_in_wrapper(self):
-        return self._configWrapper.is_valid_jobs_in_wrapper()
+        pass
 
     def is_valid_git_repository(self):
-        return self._configWrapper.is_valid_git_repository()
+       pass
 
-
-    def get_parser(self, parser_factory, file_path):
+    @staticmethod
+    def get_parser(parser_factory, file_path):
         # type: (ConfigParserFactory, str) -> ConfigParser
-        """
-        Gets parser for given file
-
-        :param parser_factory:
-        :param file_path: path to file to be parsed
-        :type file_path: str
-        :return: parser
-        :rtype: SafeConfigParser
-        """
-        # TODO: this was static method, check usages
-
-        return self._configWrapper.get_parser(parser_factory, file_path)
+        pass

@@ -371,6 +371,9 @@ class DicJobs:
         :param default: value to return if not defined in configuration file
         :type default: object
         """
+        #todo: here should be implemented some of the changes for supporting yaml files
+
+
         if self._parser.has_option(section, option):
             return self._parser.get(section, option)
         else:

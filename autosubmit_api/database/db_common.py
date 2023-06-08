@@ -365,8 +365,6 @@ def search_experiment_by_id(searchString, typeExp=None, onlyActive=None, owner=N
             wrapper = autosubmit_config_facade.get_wrapper_type()
             last_modified_pkl_datetime = autosubmit_config_facade.get_pkl_last_modified_time_as_datetime()
         except Exception as exp:
-            version = "Unknown"
-            wrapper = None
             last_modified_pkl_datetime = None
             pass
         status = experiment_status.get(expid, "NOT RUNNING")
@@ -454,8 +452,6 @@ def get_current_running_exp():
                 wrapper = autosubmit_config_facade.get_wrapper_type()
                 last_modified_pkl_datetime = autosubmit_config_facade.get_pkl_last_modified_time_as_datetime()
             except Exception as exp:
-                version = "Unknown"
-                wrapper = None
                 last_modified_pkl_datetime = None
                 pass
             if (expid in experiment_times):

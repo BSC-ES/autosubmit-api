@@ -19,6 +19,7 @@
 try:
     # noinspection PyCompatibility
     from configparser import SafeConfigParser
+    from autosubmitconfigparser.config.configcommon import AutosubmitConfig
 except ImportError:
     # noinspection PyCompatibility
     from configparser import SafeConfigParser

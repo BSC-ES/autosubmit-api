@@ -75,3 +75,4 @@ dependencies:
     - urllib3==1.26.14
     - werkzeug==2.2.2
     - zipp==3.12.0
+    - autosubmitconfigparser==1.0.27

@@ -201,13 +201,14 @@ class Status:
     HELD = 6
     PREPARED = 7
     SKIPPED = 8
+    DELAYED = 9
     FAILED = -1
     UNKNOWN = -2
     SUSPENDED = -3
     #######
     # Note: any change on constants must be applied on the dict below!!!
     VALUE_TO_KEY = {-3: 'SUSPENDED', -2: 'UNKNOWN', -1: 'FAILED', 0: 'WAITING', 1: 'READY',
-                    2: 'SUBMITTED', 3: 'QUEUING', 4: 'RUNNING', 5: 'COMPLETED', 6: 'HELD', 7: 'PREPARED', 8: 'SKIPPED'}
+                    2: 'SUBMITTED', 3: 'QUEUING', 4: 'RUNNING', 5: 'COMPLETED', 6: 'HELD', 7: 'PREPARED', 8: 'SKIPPED', 9: 'DELAYED'}
     STRING_TO_CODE = {v: k for k, v in list(VALUE_TO_KEY.items())}
 
     def retval(self, value):
