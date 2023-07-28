@@ -153,7 +153,7 @@ class AutosubmitConfigurationFacade(ConfigurationFacade):
   def get_owner_name(self):
     # type: () -> str
     try:
-      _, stdout, _ = os.popen3("id -nu {0}".format(str(self.get_owner_id())))
+      stdout = os.popen("id -nu {0}".format(str(self.get_owner_id())))
       owner_name = stdout.read().strip()
       return str(owner_name)
     except:
