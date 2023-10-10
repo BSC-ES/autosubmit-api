@@ -1,0 +1,39 @@
+2021-12-30 15:52:05,497 Loading jobs...
+2021-12-30 15:52:05,497 
+Checking configuration files...
+[WARNING] 2021-12-30 15:52:05,506 /esarchive/autosubmit/a29z/conf/proj_a29z.conf was not found. Some variables might be missing. If your experiment does not need a proj file, you can ignore this message.
+2021-12-30 15:52:05,507 expdef_a29z.conf OK
+2021-12-30 15:52:05,507 platforms_a29z.conf OK
+2021-12-30 15:52:05,508 jobs_a29z.conf OK
+2021-12-30 15:52:05,509 wrappers OK
+2021-12-30 15:52:05,509 autosubmit_a29z.conf OK
+2021-12-30 15:52:05,509 Configuration files OK
+
+2021-12-30 15:52:05,517 Creating jobs...
+2021-12-30 15:52:05,517 Loading JobList
+2021-12-30 15:52:05,525 Creating LOCAL_SETUP jobs
+2021-12-30 15:52:05,526 Creating REMOTE_SETUP jobs
+2021-12-30 15:52:05,526 Creating INI jobs
+2021-12-30 15:52:05,527 Creating SIM jobs
+2021-12-30 15:52:05,536 Creating POST jobs
+2021-12-30 15:52:05,546 Creating CLEAN jobs
+2021-12-30 15:52:05,555 Creating TRANSFER jobs
+2021-12-30 15:52:05,557 Creating LOCALPOST jobs
+2021-12-30 15:52:05,558 Creating PLOT jobs
+2021-12-30 15:52:05,559 Adding dependencies...
+2021-12-30 15:52:05,559 Adding dependencies for LOCAL_SETUP jobs
+2021-12-30 15:52:05,559 Adding dependencies for REMOTE_SETUP jobs
+2021-12-30 15:52:05,559 Adding dependencies for INI jobs
+2021-12-30 15:52:05,559 Adding dependencies for SIM jobs
+2021-12-30 15:52:05,562 Adding dependencies for POST jobs
+2021-12-30 15:52:05,564 Adding dependencies for CLEAN jobs
+2021-12-30 15:52:05,565 Adding dependencies for TRANSFER jobs
+2021-12-30 15:52:05,566 Adding dependencies for LOCALPOST jobs
+2021-12-30 15:52:05,566 Adding dependencies for PLOT jobs
+2021-12-30 15:52:05,566 Removing redundant dependencies...
+2021-12-30 15:52:05,599 Using existing valid structure.
+2021-12-30 15:52:05,600 Job list restored from /esarchive/autosubmit/a29z/pkl files
+2021-12-30 15:52:06,821 Plotting stats...
+2021-12-30 15:52:06,821 Creating stats file
+2021-12-30 15:52:07,579 Stats created at /esarchive/autosubmit/a29z/stats/a29z_statistics_20211230_1552.pdf
+2021-12-30 15:52:11,805 Stats plot ready

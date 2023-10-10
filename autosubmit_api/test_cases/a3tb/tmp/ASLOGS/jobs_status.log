@@ -1,0 +1,1727 @@
+
+Job Name                           Job Id         Job Status     Job Platform        Job Queue      
+a3tb_19930501_fc01_2_CMORATM       21129645       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_CMORATM       21129646       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_1_SAVEIC        21129326       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_2_SAVEIC        21129435       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_SAVEIC        21129643       COMPLETED      marenostrum4        debug          
+
+Job Name                           Job Id         Job Status     Job Platform        Job Queue      
+a3tb_19930501_fc01_2_CMORATM       21129645       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_CMORATM       21129646       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_1_SAVEIC        21129326       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_2_SAVEIC        21129435       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_SAVEIC        21129643       COMPLETED      marenostrum4        debug          
+
+Job Name                           Job Id         Job Status     Job Platform        Job Queue      
+a3tb_19930501_fc01_2_CMORATM       21129645       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_CMORATM       21129646       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_1_SAVEIC        21129326       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_2_SAVEIC        21129435       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_SAVEIC        21129643       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_INI             21131676       SUBMITTED      marenostrum4        debug          
+
+Job Name                           Job Id         Job Status     Job Platform        Job Queue      
+a3tb_19930501_fc01_2_CMORATM       21129645       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_CMORATM       21129646       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_1_SAVEIC        21129326       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_2_SAVEIC        21129435       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_SAVEIC        21129643       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_INI             21131676       RUNNING        marenostrum4        debug          
+
+Job Name                           Job Id         Job Status     Job Platform        Job Queue      
+a3tb_19930501_fc01_2_CMORATM       21129645       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_CMORATM       21129646       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_1_SAVEIC        21129326       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_2_SAVEIC        21129435       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_SAVEIC        21129643       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_INI             21131676       RUNNING        marenostrum4        debug          
+
+Job Name                           Job Id         Job Status     Job Platform        Job Queue      
+a3tb_19930501_fc01_2_CMORATM       21129645       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_CMORATM       21129646       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_1_SAVEIC        21129326       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_2_SAVEIC        21129435       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_SAVEIC        21129643       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_INI             21131676       RUNNING        marenostrum4        debug          
+
+Job Name                           Job Id         Job Status     Job Platform        Job Queue      
+a3tb_19930501_fc01_2_CMORATM       21129645       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_CMORATM       21129646       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_1_SAVEIC        21129326       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_2_SAVEIC        21129435       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_SAVEIC        21129643       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_INI             21131676       RUNNING        marenostrum4        debug          
+
+Job Name                           Job Id         Job Status     Job Platform        Job Queue      
+a3tb_19930501_fc01_2_CMORATM       21129645       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_CMORATM       21129646       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_1_SAVEIC        21129326       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_2_SAVEIC        21129435       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_SAVEIC        21129643       COMPLETED      marenostrum4        debug          
+
+Job Name                           Job Id         Job Status     Job Platform        Job Queue      
+a3tb_19930501_fc01_2_CMORATM       21129645       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_CMORATM       21129646       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_1_SAVEIC        21129326       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_2_SAVEIC        21129435       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_SAVEIC        21129643       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_1_SIM           21131708       SUBMITTED      marenostrum4        debug          
+
+Job Name                           Job Id         Job Status     Job Platform        Job Queue      
+a3tb_19930501_fc01_2_CMORATM       21129645       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_CMORATM       21129646       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_1_SAVEIC        21129326       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_2_SAVEIC        21129435       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_SAVEIC        21129643       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_1_SIM           21131708       RUNNING        marenostrum4        debug          
+
+Job Name                           Job Id         Job Status     Job Platform        Job Queue      
+a3tb_19930501_fc01_2_CMORATM       21129645       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_CMORATM       21129646       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_1_SAVEIC        21129326       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_2_SAVEIC        21129435       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_SAVEIC        21129643       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_1_SIM           21131708       RUNNING        marenostrum4        debug          
+
+Job Name                           Job Id         Job Status     Job Platform        Job Queue      
+a3tb_19930501_fc01_2_CMORATM       21129645       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_CMORATM       21129646       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_1_SAVEIC        21129326       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_2_SAVEIC        21129435       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_SAVEIC        21129643       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_1_SIM           21131708       RUNNING        marenostrum4        debug          
+
+Job Name                           Job Id         Job Status     Job Platform        Job Queue      
+a3tb_19930501_fc01_2_CMORATM       21129645       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_CMORATM       21129646       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_1_SAVEIC        21129326       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_2_SAVEIC        21129435       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_SAVEIC        21129643       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_1_SIM           21131708       RUNNING        marenostrum4        debug          
+
+Job Name                           Job Id         Job Status     Job Platform        Job Queue      
+a3tb_19930501_fc01_2_CMORATM       21129645       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_CMORATM       21129646       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_1_SAVEIC        21129326       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_2_SAVEIC        21129435       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_SAVEIC        21129643       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_1_SIM           21131708       RUNNING        marenostrum4        debug          
+
+Job Name                           Job Id         Job Status     Job Platform        Job Queue      
+a3tb_19930501_fc01_2_CMORATM       21129645       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_CMORATM       21129646       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_1_SAVEIC        21129326       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_2_SAVEIC        21129435       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_SAVEIC        21129643       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_1_SIM           21131708       RUNNING        marenostrum4        debug          
+
+Job Name                           Job Id         Job Status     Job Platform        Job Queue      
+a3tb_19930501_fc01_2_CMORATM       21129645       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_CMORATM       21129646       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_1_SAVEIC        21129326       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_2_SAVEIC        21129435       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_SAVEIC        21129643       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_1_SIM           21131708       RUNNING        marenostrum4        debug          
+
+Job Name                           Job Id         Job Status     Job Platform        Job Queue      
+a3tb_19930501_fc01_2_CMORATM       21129645       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_CMORATM       21129646       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_1_SAVEIC        21129326       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_2_SAVEIC        21129435       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_SAVEIC        21129643       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_1_SIM           21131708       RUNNING        marenostrum4        debug          
+
+Job Name                           Job Id         Job Status     Job Platform        Job Queue      
+a3tb_19930501_fc01_2_CMORATM       21129645       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_CMORATM       21129646       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_1_SAVEIC        21129326       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_2_SAVEIC        21129435       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_SAVEIC        21129643       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_1_SIM           21131708       RUNNING        marenostrum4        debug          
+
+Job Name                           Job Id         Job Status     Job Platform        Job Queue      
+a3tb_19930501_fc01_2_CMORATM       21129645       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_CMORATM       21129646       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_1_SAVEIC        21129326       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_2_SAVEIC        21129435       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_SAVEIC        21129643       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_1_SIM           21131708       RUNNING        marenostrum4        debug          
+
+Job Name                           Job Id         Job Status     Job Platform        Job Queue      
+a3tb_19930501_fc01_2_CMORATM       21129645       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_CMORATM       21129646       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_1_SAVEIC        21129326       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_2_SAVEIC        21129435       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_SAVEIC        21129643       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_1_SIM           21131708       RUNNING        marenostrum4        debug          
+
+Job Name                           Job Id         Job Status     Job Platform        Job Queue      
+a3tb_19930501_fc01_2_CMORATM       21129645       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_CMORATM       21129646       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_1_SAVEIC        21129326       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_2_SAVEIC        21129435       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_SAVEIC        21129643       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_1_SIM           21131708       RUNNING        marenostrum4        debug          
+
+Job Name                           Job Id         Job Status     Job Platform        Job Queue      
+a3tb_19930501_fc01_2_CMORATM       21129645       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_CMORATM       21129646       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_1_SAVEIC        21129326       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_2_SAVEIC        21129435       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_SAVEIC        21129643       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_1_SIM           21131708       RUNNING        marenostrum4        debug          
+
+Job Name                           Job Id         Job Status     Job Platform        Job Queue      
+a3tb_19930501_fc01_2_CMORATM       21129645       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_CMORATM       21129646       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_1_SAVEIC        21129326       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_2_SAVEIC        21129435       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_SAVEIC        21129643       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_1_SIM           21131708       RUNNING        marenostrum4        debug          
+
+Job Name                           Job Id         Job Status     Job Platform        Job Queue      
+a3tb_19930501_fc01_2_CMORATM       21129645       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_CMORATM       21129646       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_1_SAVEIC        21129326       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_2_SAVEIC        21129435       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_SAVEIC        21129643       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_1_SIM           21131708       RUNNING        marenostrum4        debug          
+
+Job Name                           Job Id         Job Status     Job Platform        Job Queue      
+a3tb_19930501_fc01_2_CMORATM       21129645       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_CMORATM       21129646       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_1_SAVEIC        21129326       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_2_SAVEIC        21129435       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_SAVEIC        21129643       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_1_SIM           21131708       RUNNING        marenostrum4        debug          
+
+Job Name                           Job Id         Job Status     Job Platform        Job Queue      
+a3tb_19930501_fc01_2_CMORATM       21129645       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_CMORATM       21129646       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_1_SAVEIC        21129326       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_2_SAVEIC        21129435       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_SAVEIC        21129643       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_1_SIM           21131708       RUNNING        marenostrum4        debug          
+
+Job Name                           Job Id         Job Status     Job Platform        Job Queue      
+a3tb_19930501_fc01_2_CMORATM       21129645       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_CMORATM       21129646       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_1_SAVEIC        21129326       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_2_SAVEIC        21129435       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_SAVEIC        21129643       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_1_SIM           21131708       RUNNING        marenostrum4        debug          
+
+Job Name                           Job Id         Job Status     Job Platform        Job Queue      
+a3tb_19930501_fc01_2_CMORATM       21129645       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_CMORATM       21129646       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_1_SAVEIC        21129326       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_2_SAVEIC        21129435       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_SAVEIC        21129643       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_1_SIM           21131708       RUNNING        marenostrum4        debug          
+
+Job Name                           Job Id         Job Status     Job Platform        Job Queue      
+a3tb_19930501_fc01_2_CMORATM       21129645       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_CMORATM       21129646       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_1_SAVEIC        21129326       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_2_SAVEIC        21129435       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_SAVEIC        21129643       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_1_SIM           21131708       RUNNING        marenostrum4        debug          
+
+Job Name                           Job Id         Job Status     Job Platform        Job Queue      
+a3tb_19930501_fc01_2_CMORATM       21129645       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_CMORATM       21129646       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_1_SAVEIC        21129326       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_2_SAVEIC        21129435       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_SAVEIC        21129643       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_1_SIM           21131708       RUNNING        marenostrum4        debug          
+
+Job Name                           Job Id         Job Status     Job Platform        Job Queue      
+a3tb_19930501_fc01_2_CMORATM       21129645       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_CMORATM       21129646       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_1_SAVEIC        21129326       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_2_SAVEIC        21129435       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_SAVEIC        21129643       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_1_SIM           21131708       RUNNING        marenostrum4        debug          
+
+Job Name                           Job Id         Job Status     Job Platform        Job Queue      
+a3tb_19930501_fc01_2_CMORATM       21129645       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_CMORATM       21129646       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_1_SAVEIC        21129326       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_2_SAVEIC        21129435       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_SAVEIC        21129643       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_1_SIM           21131708       RUNNING        marenostrum4        debug          
+
+Job Name                           Job Id         Job Status     Job Platform        Job Queue      
+a3tb_19930501_fc01_2_CMORATM       21129645       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_CMORATM       21129646       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_1_SAVEIC        21129326       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_2_SAVEIC        21129435       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_SAVEIC        21129643       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_1_SIM           21131708       RUNNING        marenostrum4        debug          
+
+Job Name                           Job Id         Job Status     Job Platform        Job Queue      
+a3tb_19930501_fc01_2_CMORATM       21129645       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_CMORATM       21129646       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_1_SAVEIC        21129326       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_2_SAVEIC        21129435       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_SAVEIC        21129643       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_1_SIM           21131708       RUNNING        marenostrum4        debug          
+
+Job Name                           Job Id         Job Status     Job Platform        Job Queue      
+a3tb_19930501_fc01_2_CMORATM       21129645       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_CMORATM       21129646       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_1_SAVEIC        21129326       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_2_SAVEIC        21129435       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_SAVEIC        21129643       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_1_SIM           21131708       RUNNING        marenostrum4        debug          
+
+Job Name                           Job Id         Job Status     Job Platform        Job Queue      
+a3tb_19930501_fc01_2_CMORATM       21129645       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_CMORATM       21129646       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_1_SAVEIC        21129326       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_2_SAVEIC        21129435       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_SAVEIC        21129643       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_1_SIM           21131708       RUNNING        marenostrum4        debug          
+
+Job Name                           Job Id         Job Status     Job Platform        Job Queue      
+a3tb_19930501_fc01_2_CMORATM       21129645       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_CMORATM       21129646       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_1_SAVEIC        21129326       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_2_SAVEIC        21129435       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_SAVEIC        21129643       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_1_SIM           21131708       RUNNING        marenostrum4        debug          
+
+Job Name                           Job Id         Job Status     Job Platform        Job Queue      
+a3tb_19930501_fc01_2_CMORATM       21129645       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_CMORATM       21129646       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_1_SAVEIC        21129326       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_2_SAVEIC        21129435       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_SAVEIC        21129643       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_1_SIM           21131708       RUNNING        marenostrum4        debug          
+
+Job Name                           Job Id         Job Status     Job Platform        Job Queue      
+a3tb_19930501_fc01_2_CMORATM       21129645       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_CMORATM       21129646       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_1_SAVEIC        21129326       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_2_SAVEIC        21129435       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_SAVEIC        21129643       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_1_SIM           21131708       RUNNING        marenostrum4        debug          
+
+Job Name                           Job Id         Job Status     Job Platform        Job Queue      
+a3tb_19930501_fc01_2_CMORATM       21129645       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_CMORATM       21129646       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_1_SAVEIC        21129326       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_2_SAVEIC        21129435       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_SAVEIC        21129643       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_1_SIM           21131708       RUNNING        marenostrum4        debug          
+
+Job Name                           Job Id         Job Status     Job Platform        Job Queue      
+a3tb_19930501_fc01_2_CMORATM       21129645       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_CMORATM       21129646       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_1_SAVEIC        21129326       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_2_SAVEIC        21129435       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_SAVEIC        21129643       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_1_SIM           21131708       RUNNING        marenostrum4        debug          
+
+Job Name                           Job Id         Job Status     Job Platform        Job Queue      
+a3tb_19930501_fc01_2_CMORATM       21129645       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_CMORATM       21129646       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_1_SAVEIC        21129326       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_2_SAVEIC        21129435       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_SAVEIC        21129643       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_1_SIM           21131708       RUNNING        marenostrum4        debug          
+
+Job Name                           Job Id         Job Status     Job Platform        Job Queue      
+a3tb_19930501_fc01_2_CMORATM       21129645       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_CMORATM       21129646       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_1_SAVEIC        21129326       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_2_SAVEIC        21129435       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_SAVEIC        21129643       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_1_SIM           21131708       RUNNING        marenostrum4        debug          
+
+Job Name                           Job Id         Job Status     Job Platform        Job Queue      
+a3tb_19930501_fc01_2_CMORATM       21129645       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_CMORATM       21129646       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_1_SAVEIC        21129326       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_2_SAVEIC        21129435       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_SAVEIC        21129643       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_1_SIM           21131708       RUNNING        marenostrum4        debug          
+
+Job Name                           Job Id         Job Status     Job Platform        Job Queue      
+a3tb_19930501_fc01_2_CMORATM       21129645       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_CMORATM       21129646       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_1_SAVEIC        21129326       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_2_SAVEIC        21129435       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_SAVEIC        21129643       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_1_SIM           21131708       RUNNING        marenostrum4        debug          
+
+Job Name                           Job Id         Job Status     Job Platform        Job Queue      
+a3tb_19930501_fc01_2_CMORATM       21129645       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_CMORATM       21129646       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_1_SAVEIC        21129326       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_2_SAVEIC        21129435       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_SAVEIC        21129643       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_1_SIM           21131708       RUNNING        marenostrum4        debug          
+
+Job Name                           Job Id         Job Status     Job Platform        Job Queue      
+a3tb_19930501_fc01_2_CMORATM       21129645       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_CMORATM       21129646       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_1_SAVEIC        21129326       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_2_SAVEIC        21129435       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_SAVEIC        21129643       COMPLETED      marenostrum4        debug          
+
+Job Name                           Job Id         Job Status     Job Platform        Job Queue      
+a3tb_19930501_fc01_2_CMORATM       21129645       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_CMORATM       21129646       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_1_SAVEIC        21129326       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_2_SAVEIC        21129435       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_SAVEIC        21129643       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_2_SIM           21132098       SUBMITTED      marenostrum4        debug          
+a3tb_19930101_fc01_1_CMOROCE       21132099       SUBMITTED      marenostrum4        debug          
+a3tb_19930101_fc01_1_SAVEIC        21132097       SUBMITTED      marenostrum4        debug          
+
+Job Name                           Job Id         Job Status     Job Platform        Job Queue      
+a3tb_19930501_fc01_2_CMORATM       21129645       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_CMORATM       21129646       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_1_SAVEIC        21129326       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_2_SAVEIC        21129435       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_SAVEIC        21129643       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_2_SIM           21132098       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_1_CMOROCE       21132099       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_1_SAVEIC        21132097       QUEUING        marenostrum4        debug          
+
+Job Name                           Job Id         Job Status     Job Platform        Job Queue      
+a3tb_19930501_fc01_2_CMORATM       21129645       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_CMORATM       21129646       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_1_SAVEIC        21129326       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_2_SAVEIC        21129435       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_SAVEIC        21129643       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_2_SIM           21132098       RUNNING        marenostrum4        debug          
+a3tb_19930101_fc01_1_CMOROCE       21132099       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_1_SAVEIC        21132097       QUEUING        marenostrum4        debug          
+
+Job Name                           Job Id         Job Status     Job Platform        Job Queue      
+a3tb_19930501_fc01_2_CMORATM       21129645       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_CMORATM       21129646       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_1_SAVEIC        21129326       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_2_SAVEIC        21129435       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_SAVEIC        21129643       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_2_SIM           21132098       RUNNING        marenostrum4        debug          
+a3tb_19930101_fc01_1_CMOROCE       21132099       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_1_SAVEIC        21132097       QUEUING        marenostrum4        debug          
+
+Job Name                           Job Id         Job Status     Job Platform        Job Queue      
+a3tb_19930501_fc01_2_CMORATM       21129645       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_CMORATM       21129646       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_1_SAVEIC        21129326       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_2_SAVEIC        21129435       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_SAVEIC        21129643       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_2_SIM           21132098       RUNNING        marenostrum4        debug          
+a3tb_19930101_fc01_1_CMOROCE       21132099       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_1_SAVEIC        21132097       QUEUING        marenostrum4        debug          
+
+Job Name                           Job Id         Job Status     Job Platform        Job Queue      
+a3tb_19930501_fc01_2_CMORATM       21129645       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_CMORATM       21129646       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_1_SAVEIC        21129326       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_2_SAVEIC        21129435       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_SAVEIC        21129643       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_2_SIM           21132098       RUNNING        marenostrum4        debug          
+a3tb_19930101_fc01_1_CMOROCE       21132099       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_1_SAVEIC        21132097       QUEUING        marenostrum4        debug          
+
+Job Name                           Job Id         Job Status     Job Platform        Job Queue      
+a3tb_19930501_fc01_2_CMORATM       21129645       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_CMORATM       21129646       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_1_SAVEIC        21129326       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_2_SAVEIC        21129435       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_SAVEIC        21129643       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_2_SIM           21132098       RUNNING        marenostrum4        debug          
+a3tb_19930101_fc01_1_CMOROCE       21132099       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_1_SAVEIC        21132097       QUEUING        marenostrum4        debug          
+
+Job Name                           Job Id         Job Status     Job Platform        Job Queue      
+a3tb_19930501_fc01_2_CMORATM       21129645       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_CMORATM       21129646       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_1_SAVEIC        21129326       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_2_SAVEIC        21129435       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_SAVEIC        21129643       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_2_SIM           21132098       RUNNING        marenostrum4        debug          
+a3tb_19930101_fc01_1_CMOROCE       21132099       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_1_SAVEIC        21132097       QUEUING        marenostrum4        debug          
+
+Job Name                           Job Id         Job Status     Job Platform        Job Queue      
+a3tb_19930501_fc01_2_CMORATM       21129645       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_CMORATM       21129646       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_1_SAVEIC        21129326       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_2_SAVEIC        21129435       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_SAVEIC        21129643       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_2_SIM           21132098       RUNNING        marenostrum4        debug          
+a3tb_19930101_fc01_1_CMOROCE       21132099       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_1_SAVEIC        21132097       QUEUING        marenostrum4        debug          
+
+Job Name                           Job Id         Job Status     Job Platform        Job Queue      
+a3tb_19930501_fc01_2_CMORATM       21129645       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_CMORATM       21129646       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_1_SAVEIC        21129326       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_2_SAVEIC        21129435       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_SAVEIC        21129643       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_2_SIM           21132098       RUNNING        marenostrum4        debug          
+a3tb_19930101_fc01_1_CMOROCE       21132099       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_1_SAVEIC        21132097       QUEUING        marenostrum4        debug          
+
+Job Name                           Job Id         Job Status     Job Platform        Job Queue      
+a3tb_19930501_fc01_2_CMORATM       21129645       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_CMORATM       21129646       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_1_SAVEIC        21129326       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_2_SAVEIC        21129435       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_SAVEIC        21129643       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_2_SIM           21132098       RUNNING        marenostrum4        debug          
+a3tb_19930101_fc01_1_CMOROCE       21132099       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_1_SAVEIC        21132097       QUEUING        marenostrum4        debug          
+
+Job Name                           Job Id         Job Status     Job Platform        Job Queue      
+a3tb_19930501_fc01_2_CMORATM       21129645       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_CMORATM       21129646       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_1_SAVEIC        21129326       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_2_SAVEIC        21129435       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_SAVEIC        21129643       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_2_SIM           21132098       RUNNING        marenostrum4        debug          
+a3tb_19930101_fc01_1_CMOROCE       21132099       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_1_SAVEIC        21132097       QUEUING        marenostrum4        debug          
+
+Job Name                           Job Id         Job Status     Job Platform        Job Queue      
+a3tb_19930501_fc01_2_CMORATM       21129645       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_CMORATM       21129646       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_1_SAVEIC        21129326       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_2_SAVEIC        21129435       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_SAVEIC        21129643       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_2_SIM           21132098       RUNNING        marenostrum4        debug          
+a3tb_19930101_fc01_1_CMOROCE       21132099       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_1_SAVEIC        21132097       QUEUING        marenostrum4        debug          
+
+Job Name                           Job Id         Job Status     Job Platform        Job Queue      
+a3tb_19930501_fc01_2_CMORATM       21129645       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_CMORATM       21129646       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_1_SAVEIC        21129326       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_2_SAVEIC        21129435       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_SAVEIC        21129643       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_2_SIM           21132098       RUNNING        marenostrum4        debug          
+a3tb_19930101_fc01_1_CMOROCE       21132099       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_1_SAVEIC        21132097       QUEUING        marenostrum4        debug          
+
+Job Name                           Job Id         Job Status     Job Platform        Job Queue      
+a3tb_19930501_fc01_2_CMORATM       21129645       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_CMORATM       21129646       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_1_SAVEIC        21129326       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_2_SAVEIC        21129435       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_SAVEIC        21129643       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_2_SIM           21132098       RUNNING        marenostrum4        debug          
+a3tb_19930101_fc01_1_CMOROCE       21132099       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_1_SAVEIC        21132097       QUEUING        marenostrum4        debug          
+
+Job Name                           Job Id         Job Status     Job Platform        Job Queue      
+a3tb_19930501_fc01_2_CMORATM       21129645       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_CMORATM       21129646       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_1_SAVEIC        21129326       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_2_SAVEIC        21129435       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_SAVEIC        21129643       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_2_SIM           21132098       RUNNING        marenostrum4        debug          
+a3tb_19930101_fc01_1_CMOROCE       21132099       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_1_SAVEIC        21132097       QUEUING        marenostrum4        debug          
+
+Job Name                           Job Id         Job Status     Job Platform        Job Queue      
+a3tb_19930501_fc01_2_CMORATM       21129645       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_CMORATM       21129646       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_1_SAVEIC        21129326       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_2_SAVEIC        21129435       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_SAVEIC        21129643       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_2_SIM           21132098       RUNNING        marenostrum4        debug          
+a3tb_19930101_fc01_1_CMOROCE       21132099       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_1_SAVEIC        21132097       QUEUING        marenostrum4        debug          
+
+Job Name                           Job Id         Job Status     Job Platform        Job Queue      
+a3tb_19930501_fc01_2_CMORATM       21129645       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_CMORATM       21129646       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_1_SAVEIC        21129326       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_2_SAVEIC        21129435       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_SAVEIC        21129643       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_2_SIM           21132098       RUNNING        marenostrum4        debug          
+a3tb_19930101_fc01_1_CMOROCE       21132099       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_1_SAVEIC        21132097       QUEUING        marenostrum4        debug          
+
+Job Name                           Job Id         Job Status     Job Platform        Job Queue      
+a3tb_19930501_fc01_2_CMORATM       21129645       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_CMORATM       21129646       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_1_SAVEIC        21129326       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_2_SAVEIC        21129435       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_SAVEIC        21129643       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_2_SIM           21132098       RUNNING        marenostrum4        debug          
+a3tb_19930101_fc01_1_CMOROCE       21132099       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_1_SAVEIC        21132097       QUEUING        marenostrum4        debug          
+
+Job Name                           Job Id         Job Status     Job Platform        Job Queue      
+a3tb_19930501_fc01_2_CMORATM       21129645       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_CMORATM       21129646       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_1_SAVEIC        21129326       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_2_SAVEIC        21129435       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_SAVEIC        21129643       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_2_SIM           21132098       RUNNING        marenostrum4        debug          
+a3tb_19930101_fc01_1_CMOROCE       21132099       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_1_SAVEIC        21132097       QUEUING        marenostrum4        debug          
+
+Job Name                           Job Id         Job Status     Job Platform        Job Queue      
+a3tb_19930501_fc01_2_CMORATM       21129645       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_CMORATM       21129646       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_1_SAVEIC        21129326       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_2_SAVEIC        21129435       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_SAVEIC        21129643       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_2_SIM           21132098       RUNNING        marenostrum4        debug          
+a3tb_19930101_fc01_1_CMOROCE       21132099       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_1_SAVEIC        21132097       QUEUING        marenostrum4        debug          
+
+Job Name                           Job Id         Job Status     Job Platform        Job Queue      
+a3tb_19930501_fc01_2_CMORATM       21129645       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_CMORATM       21129646       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_1_SAVEIC        21129326       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_2_SAVEIC        21129435       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_SAVEIC        21129643       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_2_SIM           21132098       RUNNING        marenostrum4        debug          
+a3tb_19930101_fc01_1_CMOROCE       21132099       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_1_SAVEIC        21132097       QUEUING        marenostrum4        debug          
+
+Job Name                           Job Id         Job Status     Job Platform        Job Queue      
+a3tb_19930501_fc01_2_CMORATM       21129645       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_CMORATM       21129646       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_1_SAVEIC        21129326       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_2_SAVEIC        21129435       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_SAVEIC        21129643       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_2_SIM           21132098       RUNNING        marenostrum4        debug          
+a3tb_19930101_fc01_1_CMOROCE       21132099       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_1_SAVEIC        21132097       QUEUING        marenostrum4        debug          
+
+Job Name                           Job Id         Job Status     Job Platform        Job Queue      
+a3tb_19930501_fc01_2_CMORATM       21129645       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_CMORATM       21129646       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_1_SAVEIC        21129326       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_2_SAVEIC        21129435       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_SAVEIC        21129643       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_2_SIM           21132098       RUNNING        marenostrum4        debug          
+a3tb_19930101_fc01_1_CMOROCE       21132099       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_1_SAVEIC        21132097       QUEUING        marenostrum4        debug          
+
+Job Name                           Job Id         Job Status     Job Platform        Job Queue      
+a3tb_19930501_fc01_2_CMORATM       21129645       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_CMORATM       21129646       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_1_SAVEIC        21129326       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_2_SAVEIC        21129435       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_SAVEIC        21129643       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_2_SIM           21132098       RUNNING        marenostrum4        debug          
+a3tb_19930101_fc01_1_CMOROCE       21132099       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_1_SAVEIC        21132097       QUEUING        marenostrum4        debug          
+
+Job Name                           Job Id         Job Status     Job Platform        Job Queue      
+a3tb_19930501_fc01_2_CMORATM       21129645       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_CMORATM       21129646       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_1_SAVEIC        21129326       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_2_SAVEIC        21129435       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_SAVEIC        21129643       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_2_SIM           21132098       RUNNING        marenostrum4        debug          
+a3tb_19930101_fc01_1_CMOROCE       21132099       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_1_SAVEIC        21132097       QUEUING        marenostrum4        debug          
+
+Job Name                           Job Id         Job Status     Job Platform        Job Queue      
+a3tb_19930501_fc01_2_CMORATM       21129645       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_CMORATM       21129646       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_1_SAVEIC        21129326       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_2_SAVEIC        21129435       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_SAVEIC        21129643       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_2_SIM           21132098       RUNNING        marenostrum4        debug          
+a3tb_19930101_fc01_1_CMOROCE       21132099       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_1_SAVEIC        21132097       QUEUING        marenostrum4        debug          
+
+Job Name                           Job Id         Job Status     Job Platform        Job Queue      
+a3tb_19930501_fc01_2_CMORATM       21129645       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_CMORATM       21129646       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_1_SAVEIC        21129326       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_2_SAVEIC        21129435       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_SAVEIC        21129643       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_2_SIM           21132098       RUNNING        marenostrum4        debug          
+a3tb_19930101_fc01_1_CMOROCE       21132099       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_1_SAVEIC        21132097       QUEUING        marenostrum4        debug          
+
+Job Name                           Job Id         Job Status     Job Platform        Job Queue      
+a3tb_19930501_fc01_2_CMORATM       21129645       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_CMORATM       21129646       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_1_SAVEIC        21129326       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_2_SAVEIC        21129435       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_SAVEIC        21129643       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_2_SIM           21132098       RUNNING        marenostrum4        debug          
+a3tb_19930101_fc01_1_CMOROCE       21132099       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_1_SAVEIC        21132097       QUEUING        marenostrum4        debug          
+
+Job Name                           Job Id         Job Status     Job Platform        Job Queue      
+a3tb_19930501_fc01_2_CMORATM       21129645       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_CMORATM       21129646       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_1_SAVEIC        21129326       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_2_SAVEIC        21129435       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_SAVEIC        21129643       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_2_SIM           21132098       RUNNING        marenostrum4        debug          
+a3tb_19930101_fc01_1_CMOROCE       21132099       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_1_SAVEIC        21132097       QUEUING        marenostrum4        debug          
+
+Job Name                           Job Id         Job Status     Job Platform        Job Queue      
+a3tb_19930501_fc01_2_CMORATM       21129645       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_CMORATM       21129646       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_1_SAVEIC        21129326       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_2_SAVEIC        21129435       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_SAVEIC        21129643       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_2_SIM           21132098       RUNNING        marenostrum4        debug          
+a3tb_19930101_fc01_1_CMOROCE       21132099       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_1_SAVEIC        21132097       QUEUING        marenostrum4        debug          
+
+Job Name                           Job Id         Job Status     Job Platform        Job Queue      
+a3tb_19930501_fc01_2_CMORATM       21129645       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_CMORATM       21129646       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_1_SAVEIC        21129326       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_2_SAVEIC        21129435       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_SAVEIC        21129643       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_2_SIM           21132098       RUNNING        marenostrum4        debug          
+a3tb_19930101_fc01_1_CMOROCE       21132099       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_1_SAVEIC        21132097       QUEUING        marenostrum4        debug          
+
+Job Name                           Job Id         Job Status     Job Platform        Job Queue      
+a3tb_19930501_fc01_2_CMORATM       21129645       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_CMORATM       21129646       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_1_SAVEIC        21129326       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_2_SAVEIC        21129435       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_SAVEIC        21129643       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_1_CMOROCE       21132099       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_1_SAVEIC        21132097       QUEUING        marenostrum4        debug          
+
+Job Name                           Job Id         Job Status     Job Platform        Job Queue      
+a3tb_19930501_fc01_2_CMORATM       21129645       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_CMORATM       21129646       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_1_SAVEIC        21129326       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_2_SAVEIC        21129435       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_SAVEIC        21129643       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_3_SIM           21132554       SUBMITTED      marenostrum4        debug          
+a3tb_19930101_fc01_2_CMOROCE       21132556       SUBMITTED      marenostrum4        debug          
+a3tb_19930101_fc01_1_CMORATM       21132555       SUBMITTED      marenostrum4        debug          
+a3tb_19930101_fc01_2_SAVEIC        21132551       SUBMITTED      marenostrum4        debug          
+a3tb_19930101_fc01_1_CMOROCE       21132099       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_1_SAVEIC        21132097       QUEUING        marenostrum4        debug          
+
+Job Name                           Job Id         Job Status     Job Platform        Job Queue      
+a3tb_19930501_fc01_2_CMORATM       21129645       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_CMORATM       21129646       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_1_SAVEIC        21129326       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_2_SAVEIC        21129435       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_SAVEIC        21129643       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_3_SIM           21132554       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_1_CMOROCE       21132099       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_2_CMOROCE       21132556       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_1_CMORATM       21132555       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_1_SAVEIC        21132097       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_2_SAVEIC        21132551       QUEUING        marenostrum4        debug          
+
+Job Name                           Job Id         Job Status     Job Platform        Job Queue      
+a3tb_19930501_fc01_2_CMORATM       21129645       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_CMORATM       21129646       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_1_SAVEIC        21129326       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_2_SAVEIC        21129435       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_SAVEIC        21129643       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_3_SIM           21132554       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_1_CMOROCE       21132099       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_2_CMOROCE       21132556       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_1_CMORATM       21132555       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_1_SAVEIC        21132097       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_2_SAVEIC        21132551       QUEUING        marenostrum4        debug          
+
+Job Name                           Job Id         Job Status     Job Platform        Job Queue      
+a3tb_19930501_fc01_2_CMORATM       21129645       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_CMORATM       21129646       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_1_SAVEIC        21129326       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_2_SAVEIC        21129435       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_SAVEIC        21129643       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_3_SIM           21132554       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_1_CMOROCE       21132099       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_2_CMOROCE       21132556       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_1_CMORATM       21132555       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_1_SAVEIC        21132097       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_2_SAVEIC        21132551       QUEUING        marenostrum4        debug          
+
+Job Name                           Job Id         Job Status     Job Platform        Job Queue      
+a3tb_19930501_fc01_2_CMORATM       21129645       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_CMORATM       21129646       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_1_SAVEIC        21129326       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_2_SAVEIC        21129435       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_SAVEIC        21129643       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_1_SAVEIC        21132097       RUNNING        marenostrum4        debug          
+a3tb_19930101_fc01_3_SIM           21132554       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_1_CMOROCE       21132099       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_2_CMOROCE       21132556       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_1_CMORATM       21132555       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_2_SAVEIC        21132551       QUEUING        marenostrum4        debug          
+
+Job Name                           Job Id         Job Status     Job Platform        Job Queue      
+a3tb_19930501_fc01_2_CMORATM       21129645       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_CMORATM       21129646       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_1_SAVEIC        21129326       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_2_SAVEIC        21129435       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_SAVEIC        21129643       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_1_SAVEIC        21132097       RUNNING        marenostrum4        debug          
+a3tb_19930101_fc01_3_SIM           21132554       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_1_CMOROCE       21132099       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_2_CMOROCE       21132556       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_1_CMORATM       21132555       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_2_SAVEIC        21132551       QUEUING        marenostrum4        debug          
+
+Job Name                           Job Id         Job Status     Job Platform        Job Queue      
+a3tb_19930501_fc01_2_CMORATM       21129645       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_CMORATM       21129646       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_1_SAVEIC        21129326       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_2_SAVEIC        21129435       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_SAVEIC        21129643       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_1_SAVEIC        21132097       RUNNING        marenostrum4        debug          
+a3tb_19930101_fc01_3_SIM           21132554       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_1_CMOROCE       21132099       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_2_CMOROCE       21132556       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_1_CMORATM       21132555       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_2_SAVEIC        21132551       QUEUING        marenostrum4        debug          
+
+Job Name                           Job Id         Job Status     Job Platform        Job Queue      
+a3tb_19930501_fc01_2_CMORATM       21129645       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_CMORATM       21129646       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_1_SAVEIC        21129326       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_2_SAVEIC        21129435       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_SAVEIC        21129643       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_1_SAVEIC        21132097       RUNNING        marenostrum4        debug          
+a3tb_19930101_fc01_3_SIM           21132554       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_1_CMOROCE       21132099       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_2_CMOROCE       21132556       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_1_CMORATM       21132555       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_2_SAVEIC        21132551       QUEUING        marenostrum4        debug          
+
+Job Name                           Job Id         Job Status     Job Platform        Job Queue      
+a3tb_19930501_fc01_2_CMORATM       21129645       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_CMORATM       21129646       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_1_SAVEIC        21129326       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_2_SAVEIC        21129435       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_SAVEIC        21129643       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_1_SAVEIC        21132097       RUNNING        marenostrum4        debug          
+a3tb_19930101_fc01_3_SIM           21132554       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_1_CMOROCE       21132099       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_2_CMOROCE       21132556       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_1_CMORATM       21132555       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_2_SAVEIC        21132551       QUEUING        marenostrum4        debug          
+
+Job Name                           Job Id         Job Status     Job Platform        Job Queue      
+a3tb_19930501_fc01_2_CMORATM       21129645       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_CMORATM       21129646       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_1_SAVEIC        21129326       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_2_SAVEIC        21129435       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_SAVEIC        21129643       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_1_SAVEIC        21132097       RUNNING        marenostrum4        debug          
+a3tb_19930101_fc01_3_SIM           21132554       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_1_CMOROCE       21132099       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_2_CMOROCE       21132556       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_1_CMORATM       21132555       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_2_SAVEIC        21132551       QUEUING        marenostrum4        debug          
+
+Job Name                           Job Id         Job Status     Job Platform        Job Queue      
+a3tb_19930501_fc01_2_CMORATM       21129645       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_CMORATM       21129646       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_1_SAVEIC        21129326       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_2_SAVEIC        21129435       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_SAVEIC        21129643       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_1_SAVEIC        21132097       RUNNING        marenostrum4        debug          
+a3tb_19930101_fc01_3_SIM           21132554       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_1_CMOROCE       21132099       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_2_CMOROCE       21132556       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_1_CMORATM       21132555       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_2_SAVEIC        21132551       QUEUING        marenostrum4        debug          
+
+Job Name                           Job Id         Job Status     Job Platform        Job Queue      
+a3tb_19930501_fc01_3_CMORATM       21129646       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_1_SAVEIC        21132097       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_1_SAVEIC        21129326       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_2_SAVEIC        21129435       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_SAVEIC        21129643       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_3_SIM           21132554       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_1_CMOROCE       21132099       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_2_CMOROCE       21132556       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_1_CMORATM       21132555       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_2_SAVEIC        21132551       QUEUING        marenostrum4        debug          
+
+Job Name                           Job Id         Job Status     Job Platform        Job Queue      
+a3tb_19930501_fc01_3_CMORATM       21129646       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_1_SAVEIC        21132097       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_1_SAVEIC        21129326       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_2_SAVEIC        21129435       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_SAVEIC        21129643       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_3_SIM           21132554       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_1_CMOROCE       21132099       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_2_CMOROCE       21132556       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_1_CMORATM       21132555       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_2_SAVEIC        21132551       QUEUING        marenostrum4        debug          
+
+Job Name                           Job Id         Job Status     Job Platform        Job Queue      
+a3tb_19930501_fc01_3_CMORATM       21129646       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_1_SAVEIC        21132097       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_1_SAVEIC        21129326       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_2_SAVEIC        21129435       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_SAVEIC        21129643       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_3_SIM           21132554       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_1_CMOROCE       21132099       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_2_CMOROCE       21132556       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_1_CMORATM       21132555       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_2_SAVEIC        21132551       QUEUING        marenostrum4        debug          
+
+Job Name                           Job Id         Job Status     Job Platform        Job Queue      
+a3tb_19930501_fc01_3_CMORATM       21129646       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_1_SAVEIC        21132097       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_1_SAVEIC        21129326       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_2_SAVEIC        21129435       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_SAVEIC        21129643       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_1_CMOROCE       21132099       RUNNING        marenostrum4        debug          
+a3tb_19930101_fc01_3_SIM           21132554       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_2_CMOROCE       21132556       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_1_CMORATM       21132555       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_2_SAVEIC        21132551       QUEUING        marenostrum4        debug          
+
+Job Name                           Job Id         Job Status     Job Platform        Job Queue      
+a3tb_19930501_fc01_3_CMORATM       21129646       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_1_SAVEIC        21132097       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_1_SAVEIC        21129326       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_2_SAVEIC        21129435       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_SAVEIC        21129643       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_1_CMOROCE       21132099       RUNNING        marenostrum4        debug          
+a3tb_19930101_fc01_3_SIM           21132554       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_2_CMOROCE       21132556       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_1_CMORATM       21132555       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_2_SAVEIC        21132551       QUEUING        marenostrum4        debug          
+
+Job Name                           Job Id         Job Status     Job Platform        Job Queue      
+a3tb_19930501_fc01_3_CMORATM       21129646       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_1_SAVEIC        21132097       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_1_SAVEIC        21129326       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_2_SAVEIC        21129435       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_SAVEIC        21129643       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_1_CMOROCE       21132099       RUNNING        marenostrum4        debug          
+a3tb_19930101_fc01_3_SIM           21132554       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_2_CMOROCE       21132556       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_1_CMORATM       21132555       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_2_SAVEIC        21132551       QUEUING        marenostrum4        debug          
+
+Job Name                           Job Id         Job Status     Job Platform        Job Queue      
+a3tb_19930501_fc01_3_CMORATM       21129646       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_1_SAVEIC        21132097       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_1_SAVEIC        21129326       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_2_SAVEIC        21129435       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_SAVEIC        21129643       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_1_CMOROCE       21132099       RUNNING        marenostrum4        debug          
+a3tb_19930101_fc01_3_SIM           21132554       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_2_CMOROCE       21132556       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_1_CMORATM       21132555       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_2_SAVEIC        21132551       QUEUING        marenostrum4        debug          
+
+Job Name                           Job Id         Job Status     Job Platform        Job Queue      
+a3tb_19930501_fc01_3_CMORATM       21129646       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_1_SAVEIC        21132097       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_1_SAVEIC        21129326       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_2_SAVEIC        21129435       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_SAVEIC        21129643       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_3_SIM           21132554       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_2_CMOROCE       21132556       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_1_CMORATM       21132555       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_2_SAVEIC        21132551       QUEUING        marenostrum4        debug          
+
+Job Name                           Job Id         Job Status     Job Platform        Job Queue      
+a3tb_19930501_fc01_3_CMORATM       21129646       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_1_SAVEIC        21132097       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_1_SAVEIC        21129326       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_2_SAVEIC        21129435       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_SAVEIC        21129643       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_3_SIM           21132554       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_2_CMOROCE       21132556       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_1_CMORATM       21132555       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_2_SAVEIC        21132551       QUEUING        marenostrum4        debug          
+
+Job Name                           Job Id         Job Status     Job Platform        Job Queue      
+a3tb_19930501_fc01_3_CMORATM       21129646       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_1_SAVEIC        21132097       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_1_SAVEIC        21129326       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_2_SAVEIC        21129435       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_SAVEIC        21129643       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_3_SIM           21132554       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_2_CMOROCE       21132556       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_1_CMORATM       21132555       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_2_SAVEIC        21132551       QUEUING        marenostrum4        debug          
+
+Job Name                           Job Id         Job Status     Job Platform        Job Queue      
+a3tb_19930501_fc01_3_CMORATM       21129646       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_1_SAVEIC        21132097       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_1_SAVEIC        21129326       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_2_SAVEIC        21129435       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_SAVEIC        21129643       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_3_SIM           21132554       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_2_CMOROCE       21132556       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_1_CMORATM       21132555       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_2_SAVEIC        21132551       QUEUING        marenostrum4        debug          
+
+Job Name                           Job Id         Job Status     Job Platform        Job Queue      
+a3tb_19930501_fc01_3_CMORATM       21129646       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_1_SAVEIC        21132097       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_1_SAVEIC        21129326       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_2_SAVEIC        21129435       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_SAVEIC        21129643       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_3_SIM           21132554       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_2_CMOROCE       21132556       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_1_CMORATM       21132555       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_2_SAVEIC        21132551       QUEUING        marenostrum4        debug          
+
+Job Name                           Job Id         Job Status     Job Platform        Job Queue      
+a3tb_19930501_fc01_3_CMORATM       21129646       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_1_SAVEIC        21132097       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_1_SAVEIC        21129326       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_2_SAVEIC        21129435       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_SAVEIC        21129643       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_3_SIM           21132554       RUNNING        marenostrum4        debug          
+a3tb_19930101_fc01_2_CMOROCE       21132556       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_1_CMORATM       21132555       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_2_SAVEIC        21132551       QUEUING        marenostrum4        debug          
+
+Job Name                           Job Id         Job Status     Job Platform        Job Queue      
+a3tb_19930501_fc01_3_CMORATM       21129646       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_1_SAVEIC        21132097       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_1_SAVEIC        21129326       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_2_SAVEIC        21129435       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_SAVEIC        21129643       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_3_SIM           21132554       RUNNING        marenostrum4        debug          
+a3tb_19930101_fc01_2_CMOROCE       21132556       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_1_CMORATM       21132555       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_2_SAVEIC        21132551       QUEUING        marenostrum4        debug          
+
+Job Name                           Job Id         Job Status     Job Platform        Job Queue      
+a3tb_19930501_fc01_3_CMORATM       21129646       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_1_SAVEIC        21132097       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_1_SAVEIC        21129326       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_2_SAVEIC        21129435       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_SAVEIC        21129643       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_3_SIM           21132554       RUNNING        marenostrum4        debug          
+a3tb_19930101_fc01_2_CMOROCE       21132556       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_1_CMORATM       21132555       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_2_SAVEIC        21132551       QUEUING        marenostrum4        debug          
+
+Job Name                           Job Id         Job Status     Job Platform        Job Queue      
+a3tb_19930501_fc01_3_CMORATM       21129646       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_1_SAVEIC        21132097       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_1_SAVEIC        21129326       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_2_SAVEIC        21129435       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_SAVEIC        21129643       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_3_SIM           21132554       RUNNING        marenostrum4        debug          
+a3tb_19930101_fc01_2_CMOROCE       21132556       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_1_CMORATM       21132555       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_2_SAVEIC        21132551       QUEUING        marenostrum4        debug          
+
+Job Name                           Job Id         Job Status     Job Platform        Job Queue      
+a3tb_19930501_fc01_3_CMORATM       21129646       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_1_SAVEIC        21132097       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_1_SAVEIC        21129326       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_2_SAVEIC        21129435       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_SAVEIC        21129643       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_3_SIM           21132554       RUNNING        marenostrum4        debug          
+a3tb_19930101_fc01_2_CMOROCE       21132556       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_1_CMORATM       21132555       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_2_SAVEIC        21132551       QUEUING        marenostrum4        debug          
+
+Job Name                           Job Id         Job Status     Job Platform        Job Queue      
+a3tb_19930501_fc01_3_CMORATM       21129646       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_1_SAVEIC        21132097       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_1_SAVEIC        21129326       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_2_SAVEIC        21129435       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_SAVEIC        21129643       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_3_SIM           21132554       RUNNING        marenostrum4        debug          
+a3tb_19930101_fc01_2_CMOROCE       21132556       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_1_CMORATM       21132555       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_2_SAVEIC        21132551       QUEUING        marenostrum4        debug          
+
+Job Name                           Job Id         Job Status     Job Platform        Job Queue      
+a3tb_19930501_fc01_3_CMORATM       21129646       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_1_SAVEIC        21132097       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_1_SAVEIC        21129326       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_2_SAVEIC        21129435       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_SAVEIC        21129643       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_3_SIM           21132554       RUNNING        marenostrum4        debug          
+a3tb_19930101_fc01_2_CMOROCE       21132556       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_1_CMORATM       21132555       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_2_SAVEIC        21132551       QUEUING        marenostrum4        debug          
+
+Job Name                           Job Id         Job Status     Job Platform        Job Queue      
+a3tb_19930501_fc01_3_CMORATM       21129646       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_1_SAVEIC        21132097       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_1_SAVEIC        21129326       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_2_SAVEIC        21129435       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_SAVEIC        21129643       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_3_SIM           21132554       RUNNING        marenostrum4        debug          
+a3tb_19930101_fc01_2_CMOROCE       21132556       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_1_CMORATM       21132555       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_2_SAVEIC        21132551       QUEUING        marenostrum4        debug          
+
+Job Name                           Job Id         Job Status     Job Platform        Job Queue      
+a3tb_19930501_fc01_3_CMORATM       21129646       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_1_SAVEIC        21132097       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_1_SAVEIC        21129326       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_2_SAVEIC        21129435       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_SAVEIC        21129643       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_3_SIM           21132554       RUNNING        marenostrum4        debug          
+a3tb_19930101_fc01_2_CMOROCE       21132556       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_1_CMORATM       21132555       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_2_SAVEIC        21132551       QUEUING        marenostrum4        debug          
+
+Job Name                           Job Id         Job Status     Job Platform        Job Queue      
+a3tb_19930501_fc01_3_CMORATM       21129646       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_1_SAVEIC        21132097       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_1_SAVEIC        21129326       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_2_SAVEIC        21129435       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_SAVEIC        21129643       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_3_SIM           21132554       RUNNING        marenostrum4        debug          
+a3tb_19930101_fc01_2_CMOROCE       21132556       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_1_CMORATM       21132555       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_2_SAVEIC        21132551       QUEUING        marenostrum4        debug          
+
+Job Name                           Job Id         Job Status     Job Platform        Job Queue      
+a3tb_19930501_fc01_3_CMORATM       21129646       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_1_SAVEIC        21132097       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_1_SAVEIC        21129326       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_2_SAVEIC        21129435       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_SAVEIC        21129643       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_3_SIM           21132554       RUNNING        marenostrum4        debug          
+a3tb_19930101_fc01_2_CMOROCE       21132556       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_1_CMORATM       21132555       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_2_SAVEIC        21132551       QUEUING        marenostrum4        debug          
+
+Job Name                           Job Id         Job Status     Job Platform        Job Queue      
+a3tb_19930501_fc01_3_CMORATM       21129646       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_1_SAVEIC        21132097       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_1_SAVEIC        21129326       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_2_SAVEIC        21129435       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_SAVEIC        21129643       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_3_SIM           21132554       RUNNING        marenostrum4        debug          
+a3tb_19930101_fc01_2_CMOROCE       21132556       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_1_CMORATM       21132555       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_2_SAVEIC        21132551       QUEUING        marenostrum4        debug          
+
+Job Name                           Job Id         Job Status     Job Platform        Job Queue      
+a3tb_19930501_fc01_3_CMORATM       21129646       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_1_SAVEIC        21132097       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_1_SAVEIC        21129326       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_2_SAVEIC        21129435       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_SAVEIC        21129643       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_3_SIM           21132554       RUNNING        marenostrum4        debug          
+a3tb_19930101_fc01_2_CMOROCE       21132556       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_1_CMORATM       21132555       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_2_SAVEIC        21132551       QUEUING        marenostrum4        debug          
+
+Job Name                           Job Id         Job Status     Job Platform        Job Queue      
+a3tb_19930501_fc01_3_CMORATM       21129646       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_1_SAVEIC        21132097       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_1_SAVEIC        21129326       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_2_SAVEIC        21129435       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_SAVEIC        21129643       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_3_SIM           21132554       RUNNING        marenostrum4        debug          
+a3tb_19930101_fc01_2_CMOROCE       21132556       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_1_CMORATM       21132555       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_2_SAVEIC        21132551       QUEUING        marenostrum4        debug          
+
+Job Name                           Job Id         Job Status     Job Platform        Job Queue      
+a3tb_19930501_fc01_3_CMORATM       21129646       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_1_SAVEIC        21132097       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_1_SAVEIC        21129326       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_2_SAVEIC        21129435       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_SAVEIC        21129643       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_3_SIM           21132554       RUNNING        marenostrum4        debug          
+a3tb_19930101_fc01_2_CMOROCE       21132556       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_1_CMORATM       21132555       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_2_SAVEIC        21132551       QUEUING        marenostrum4        debug          
+
+Job Name                           Job Id         Job Status     Job Platform        Job Queue      
+a3tb_19930501_fc01_3_CMORATM       21129646       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_1_SAVEIC        21132097       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_1_SAVEIC        21129326       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_2_SAVEIC        21129435       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_SAVEIC        21129643       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_3_SIM           21132554       RUNNING        marenostrum4        debug          
+a3tb_19930101_fc01_2_CMOROCE       21132556       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_1_CMORATM       21132555       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_2_SAVEIC        21132551       QUEUING        marenostrum4        debug          
+
+Job Name                           Job Id         Job Status     Job Platform        Job Queue      
+a3tb_19930501_fc01_3_CMORATM       21129646       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_1_SAVEIC        21132097       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_1_SAVEIC        21129326       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_2_SAVEIC        21129435       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_SAVEIC        21129643       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_3_SIM           21132554       RUNNING        marenostrum4        debug          
+a3tb_19930101_fc01_2_CMOROCE       21132556       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_1_CMORATM       21132555       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_2_SAVEIC        21132551       QUEUING        marenostrum4        debug          
+
+Job Name                           Job Id         Job Status     Job Platform        Job Queue      
+a3tb_19930501_fc01_3_CMORATM       21129646       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_1_SAVEIC        21132097       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_1_SAVEIC        21129326       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_2_SAVEIC        21129435       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_SAVEIC        21129643       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_3_SIM           21132554       RUNNING        marenostrum4        debug          
+a3tb_19930101_fc01_2_CMOROCE       21132556       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_1_CMORATM       21132555       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_2_SAVEIC        21132551       QUEUING        marenostrum4        debug          
+
+Job Name                           Job Id         Job Status     Job Platform        Job Queue      
+a3tb_19930501_fc01_3_CMORATM       21129646       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_1_SAVEIC        21132097       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_1_SAVEIC        21129326       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_2_SAVEIC        21129435       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_SAVEIC        21129643       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_3_SIM           21132554       RUNNING        marenostrum4        debug          
+a3tb_19930101_fc01_2_CMOROCE       21132556       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_1_CMORATM       21132555       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_2_SAVEIC        21132551       QUEUING        marenostrum4        debug          
+
+Job Name                           Job Id         Job Status     Job Platform        Job Queue      
+a3tb_19930501_fc01_3_CMORATM       21129646       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_1_SAVEIC        21132097       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_1_SAVEIC        21129326       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_2_SAVEIC        21129435       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_SAVEIC        21129643       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_3_SIM           21132554       RUNNING        marenostrum4        debug          
+a3tb_19930101_fc01_2_CMOROCE       21132556       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_1_CMORATM       21132555       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_2_SAVEIC        21132551       QUEUING        marenostrum4        debug          
+
+Job Name                           Job Id         Job Status     Job Platform        Job Queue      
+a3tb_19930501_fc01_3_CMORATM       21129646       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_1_SAVEIC        21132097       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_1_SAVEIC        21129326       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_2_SAVEIC        21129435       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_SAVEIC        21129643       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_3_SIM           21132554       RUNNING        marenostrum4        debug          
+a3tb_19930101_fc01_2_CMOROCE       21132556       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_1_CMORATM       21132555       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_2_SAVEIC        21132551       QUEUING        marenostrum4        debug          
+
+Job Name                           Job Id         Job Status     Job Platform        Job Queue      
+a3tb_19930501_fc01_3_CMORATM       21129646       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_1_SAVEIC        21132097       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_1_SAVEIC        21129326       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_2_SAVEIC        21129435       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_SAVEIC        21129643       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_3_SIM           21132554       RUNNING        marenostrum4        debug          
+a3tb_19930101_fc01_2_CMOROCE       21132556       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_1_CMORATM       21132555       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_2_SAVEIC        21132551       QUEUING        marenostrum4        debug          
+
+Job Name                           Job Id         Job Status     Job Platform        Job Queue      
+a3tb_19930501_fc01_3_CMORATM       21129646       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_1_SAVEIC        21132097       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_1_SAVEIC        21129326       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_2_SAVEIC        21129435       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_SAVEIC        21129643       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_3_SIM           21132554       RUNNING        marenostrum4        debug          
+a3tb_19930101_fc01_2_CMOROCE       21132556       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_1_CMORATM       21132555       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_2_SAVEIC        21132551       QUEUING        marenostrum4        debug          
+
+Job Name                           Job Id         Job Status     Job Platform        Job Queue      
+a3tb_19930501_fc01_3_CMORATM       21129646       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_1_SAVEIC        21132097       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_1_SAVEIC        21129326       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_2_SAVEIC        21129435       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_SAVEIC        21129643       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_3_SIM           21132554       RUNNING        marenostrum4        debug          
+a3tb_19930101_fc01_2_CMOROCE       21132556       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_1_CMORATM       21132555       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_2_SAVEIC        21132551       QUEUING        marenostrum4        debug          
+
+Job Name                           Job Id         Job Status     Job Platform        Job Queue      
+a3tb_19930501_fc01_3_CMORATM       21129646       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_1_SAVEIC        21132097       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_1_SAVEIC        21129326       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_2_SAVEIC        21129435       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_SAVEIC        21129643       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_3_SIM           21132554       RUNNING        marenostrum4        debug          
+a3tb_19930101_fc01_2_CMOROCE       21132556       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_1_CMORATM       21132555       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_2_SAVEIC        21132551       QUEUING        marenostrum4        debug          
+
+Job Name                           Job Id         Job Status     Job Platform        Job Queue      
+a3tb_19930501_fc01_3_CMORATM       21129646       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_1_SAVEIC        21132097       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_1_SAVEIC        21129326       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_2_SAVEIC        21129435       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_SAVEIC        21129643       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_3_SIM           21132554       RUNNING        marenostrum4        debug          
+a3tb_19930101_fc01_2_CMOROCE       21132556       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_1_CMORATM       21132555       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_2_SAVEIC        21132551       QUEUING        marenostrum4        debug          
+
+Job Name                           Job Id         Job Status     Job Platform        Job Queue      
+a3tb_19930501_fc01_3_CMORATM       21129646       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_1_SAVEIC        21132097       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_1_SAVEIC        21129326       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_2_SAVEIC        21129435       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_SAVEIC        21129643       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_3_SIM           21132554       RUNNING        marenostrum4        debug          
+a3tb_19930101_fc01_2_CMOROCE       21132556       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_1_CMORATM       21132555       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_2_SAVEIC        21132551       QUEUING        marenostrum4        debug          
+
+Job Name                           Job Id         Job Status     Job Platform        Job Queue      
+a3tb_19930501_fc01_3_CMORATM       21129646       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_1_SAVEIC        21132097       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_1_SAVEIC        21129326       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_2_SAVEIC        21129435       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_SAVEIC        21129643       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_3_SIM           21132554       RUNNING        marenostrum4        debug          
+a3tb_19930101_fc01_2_CMOROCE       21132556       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_1_CMORATM       21132555       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_2_SAVEIC        21132551       QUEUING        marenostrum4        debug          
+
+Job Name                           Job Id         Job Status     Job Platform        Job Queue      
+a3tb_19930501_fc01_3_CMORATM       21129646       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_1_SAVEIC        21132097       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_1_SAVEIC        21129326       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_2_SAVEIC        21129435       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_SAVEIC        21129643       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_3_SIM           21132554       RUNNING        marenostrum4        debug          
+a3tb_19930101_fc01_2_CMOROCE       21132556       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_1_CMORATM       21132555       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_2_SAVEIC        21132551       QUEUING        marenostrum4        debug          
+
+Job Name                           Job Id         Job Status     Job Platform        Job Queue      
+a3tb_19930501_fc01_3_CMORATM       21129646       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_1_SAVEIC        21132097       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_1_SAVEIC        21129326       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_2_SAVEIC        21129435       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_SAVEIC        21129643       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_3_SIM           21132554       RUNNING        marenostrum4        debug          
+a3tb_19930101_fc01_2_CMOROCE       21132556       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_1_CMORATM       21132555       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_2_SAVEIC        21132551       QUEUING        marenostrum4        debug          
+
+Job Name                           Job Id         Job Status     Job Platform        Job Queue      
+a3tb_19930501_fc01_3_CMORATM       21129646       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_1_SAVEIC        21132097       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_1_SAVEIC        21129326       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_2_SAVEIC        21129435       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_SAVEIC        21129643       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_3_SIM           21132554       RUNNING        marenostrum4        debug          
+a3tb_19930101_fc01_2_CMOROCE       21132556       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_1_CMORATM       21132555       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_2_SAVEIC        21132551       QUEUING        marenostrum4        debug          
+
+Job Name                           Job Id         Job Status     Job Platform        Job Queue      
+a3tb_19930501_fc01_3_CMORATM       21129646       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_1_SAVEIC        21132097       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_1_SAVEIC        21129326       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_2_SAVEIC        21129435       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_SAVEIC        21129643       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_3_SIM           21132554       RUNNING        marenostrum4        debug          
+a3tb_19930101_fc01_2_CMOROCE       21132556       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_1_CMORATM       21132555       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_2_SAVEIC        21132551       QUEUING        marenostrum4        debug          
+
+Job Name                           Job Id         Job Status     Job Platform        Job Queue      
+a3tb_19930501_fc01_3_CMORATM       21129646       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_1_SAVEIC        21132097       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_1_SAVEIC        21129326       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_2_SAVEIC        21129435       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_SAVEIC        21129643       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_2_CMOROCE       21132556       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_1_CMORATM       21132555       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_2_SAVEIC        21132551       QUEUING        marenostrum4        debug          
+
+Job Name                           Job Id         Job Status     Job Platform        Job Queue      
+a3tb_19930501_fc01_3_CMORATM       21129646       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_1_SAVEIC        21132097       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_1_SAVEIC        21129326       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_2_SAVEIC        21129435       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_SAVEIC        21129643       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_3_CMOROCE       21133446       SUBMITTED      marenostrum4        debug          
+a3tb_19930101_fc01_2_CMORATM       21133444       SUBMITTED      marenostrum4        debug          
+a3tb_19930101_fc01_3_CMORATM       21133445       SUBMITTED      marenostrum4        debug          
+a3tb_19930101_fc01_3_SAVEIC        21133443       SUBMITTED      marenostrum4        debug          
+a3tb_19930101_fc01_2_CMOROCE       21132556       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_1_CMORATM       21132555       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_2_SAVEIC        21132551       QUEUING        marenostrum4        debug          
+
+Job Name                           Job Id         Job Status     Job Platform        Job Queue      
+a3tb_19930501_fc01_3_CMORATM       21129646       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_1_SAVEIC        21132097       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_1_SAVEIC        21129326       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_2_SAVEIC        21129435       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_SAVEIC        21129643       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_2_SAVEIC        21132551       RUNNING        marenostrum4        debug          
+a3tb_19930101_fc01_2_CMOROCE       21132556       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_3_CMOROCE       21133446       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_1_CMORATM       21132555       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_2_CMORATM       21133444       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_3_CMORATM       21133445       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_3_SAVEIC        21133443       QUEUING        marenostrum4        debug          
+
+Job Name                           Job Id         Job Status     Job Platform        Job Queue      
+a3tb_19930501_fc01_3_CMORATM       21129646       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_1_SAVEIC        21132097       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_1_SAVEIC        21129326       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_2_SAVEIC        21129435       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_SAVEIC        21129643       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_2_SAVEIC        21132551       RUNNING        marenostrum4        debug          
+a3tb_19930101_fc01_2_CMOROCE       21132556       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_3_CMOROCE       21133446       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_1_CMORATM       21132555       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_2_CMORATM       21133444       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_3_CMORATM       21133445       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_3_SAVEIC        21133443       QUEUING        marenostrum4        debug          
+
+Job Name                           Job Id         Job Status     Job Platform        Job Queue      
+a3tb_19930501_fc01_3_CMORATM       21129646       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_1_SAVEIC        21132097       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_1_SAVEIC        21129326       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_2_SAVEIC        21129435       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_SAVEIC        21129643       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_2_SAVEIC        21132551       RUNNING        marenostrum4        debug          
+a3tb_19930101_fc01_2_CMOROCE       21132556       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_3_CMOROCE       21133446       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_1_CMORATM       21132555       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_2_CMORATM       21133444       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_3_CMORATM       21133445       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_3_SAVEIC        21133443       QUEUING        marenostrum4        debug          
+
+Job Name                           Job Id         Job Status     Job Platform        Job Queue      
+a3tb_19930501_fc01_3_CMORATM       21129646       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_1_SAVEIC        21132097       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_1_SAVEIC        21129326       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_2_SAVEIC        21129435       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_SAVEIC        21129643       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_2_SAVEIC        21132551       RUNNING        marenostrum4        debug          
+a3tb_19930101_fc01_2_CMOROCE       21132556       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_3_CMOROCE       21133446       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_1_CMORATM       21132555       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_2_CMORATM       21133444       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_3_CMORATM       21133445       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_3_SAVEIC        21133443       QUEUING        marenostrum4        debug          
+
+Job Name                           Job Id         Job Status     Job Platform        Job Queue      
+a3tb_19930501_fc01_3_CMORATM       21129646       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_1_SAVEIC        21132097       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_1_SAVEIC        21129326       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_2_SAVEIC        21129435       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_SAVEIC        21129643       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_2_SAVEIC        21132551       RUNNING        marenostrum4        debug          
+a3tb_19930101_fc01_2_CMOROCE       21132556       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_3_CMOROCE       21133446       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_1_CMORATM       21132555       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_2_CMORATM       21133444       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_3_CMORATM       21133445       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_3_SAVEIC        21133443       QUEUING        marenostrum4        debug          
+
+Job Name                           Job Id         Job Status     Job Platform        Job Queue      
+a3tb_19930501_fc01_3_CMORATM       21129646       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_1_SAVEIC        21132097       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_1_SAVEIC        21129326       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_2_SAVEIC        21129435       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_SAVEIC        21129643       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_2_SAVEIC        21132551       RUNNING        marenostrum4        debug          
+a3tb_19930101_fc01_2_CMOROCE       21132556       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_3_CMOROCE       21133446       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_1_CMORATM       21132555       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_2_CMORATM       21133444       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_3_CMORATM       21133445       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_3_SAVEIC        21133443       QUEUING        marenostrum4        debug          
+
+Job Name                           Job Id         Job Status     Job Platform        Job Queue      
+a3tb_19930501_fc01_3_CMORATM       21129646       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_1_SAVEIC        21132097       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_1_SAVEIC        21129326       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_2_SAVEIC        21129435       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_SAVEIC        21129643       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_2_SAVEIC        21132551       RUNNING        marenostrum4        debug          
+a3tb_19930101_fc01_2_CMOROCE       21132556       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_3_CMOROCE       21133446       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_1_CMORATM       21132555       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_2_CMORATM       21133444       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_3_CMORATM       21133445       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_3_SAVEIC        21133443       QUEUING        marenostrum4        debug          
+
+Job Name                           Job Id         Job Status     Job Platform        Job Queue      
+a3tb_19930501_fc01_3_CMORATM       21129646       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_1_SAVEIC        21132097       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_1_SAVEIC        21129326       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_2_SAVEIC        21129435       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_SAVEIC        21129643       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_2_SAVEIC        21132551       RUNNING        marenostrum4        debug          
+a3tb_19930101_fc01_2_CMOROCE       21132556       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_3_CMOROCE       21133446       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_1_CMORATM       21132555       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_2_CMORATM       21133444       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_3_CMORATM       21133445       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_3_SAVEIC        21133443       QUEUING        marenostrum4        debug          
+
+Job Name                           Job Id         Job Status     Job Platform        Job Queue      
+a3tb_19930101_fc01_1_SAVEIC        21132097       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_2_SAVEIC        21132551       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_1_SAVEIC        21129326       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_2_SAVEIC        21129435       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_SAVEIC        21129643       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_1_CMORATM       21132555       RUNNING        marenostrum4        debug          
+a3tb_19930101_fc01_2_CMOROCE       21132556       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_3_CMOROCE       21133446       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_2_CMORATM       21133444       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_3_CMORATM       21133445       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_3_SAVEIC        21133443       QUEUING        marenostrum4        debug          
+
+Job Name                           Job Id         Job Status     Job Platform        Job Queue      
+a3tb_19930101_fc01_1_SAVEIC        21132097       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_2_SAVEIC        21132551       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_1_SAVEIC        21129326       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_2_SAVEIC        21129435       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_SAVEIC        21129643       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_1_CMORATM       21132555       RUNNING        marenostrum4        debug          
+a3tb_19930101_fc01_2_CMOROCE       21132556       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_3_CMOROCE       21133446       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_2_CMORATM       21133444       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_3_CMORATM       21133445       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_3_SAVEIC        21133443       QUEUING        marenostrum4        debug          
+
+Job Name                           Job Id         Job Status     Job Platform        Job Queue      
+a3tb_19930101_fc01_1_SAVEIC        21132097       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_2_SAVEIC        21132551       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_1_SAVEIC        21129326       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_2_SAVEIC        21129435       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_SAVEIC        21129643       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_1_CMORATM       21132555       RUNNING        marenostrum4        debug          
+a3tb_19930101_fc01_2_CMOROCE       21132556       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_3_CMOROCE       21133446       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_2_CMORATM       21133444       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_3_CMORATM       21133445       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_3_SAVEIC        21133443       QUEUING        marenostrum4        debug          
+
+Job Name                           Job Id         Job Status     Job Platform        Job Queue      
+a3tb_19930101_fc01_1_SAVEIC        21132097       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_2_SAVEIC        21132551       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_1_SAVEIC        21129326       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_2_SAVEIC        21129435       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_SAVEIC        21129643       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_1_CMORATM       21132555       RUNNING        marenostrum4        debug          
+a3tb_19930101_fc01_2_CMOROCE       21132556       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_3_CMOROCE       21133446       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_2_CMORATM       21133444       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_3_CMORATM       21133445       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_3_SAVEIC        21133443       QUEUING        marenostrum4        debug          
+
+Job Name                           Job Id         Job Status     Job Platform        Job Queue      
+a3tb_19930101_fc01_1_SAVEIC        21132097       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_2_SAVEIC        21132551       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_1_SAVEIC        21129326       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_2_SAVEIC        21129435       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_SAVEIC        21129643       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_1_CMORATM       21132555       RUNNING        marenostrum4        debug          
+a3tb_19930101_fc01_2_CMOROCE       21132556       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_3_CMOROCE       21133446       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_2_CMORATM       21133444       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_3_CMORATM       21133445       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_3_SAVEIC        21133443       QUEUING        marenostrum4        debug          
+
+Job Name                           Job Id         Job Status     Job Platform        Job Queue      
+a3tb_19930101_fc01_1_SAVEIC        21132097       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_2_SAVEIC        21132551       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_1_SAVEIC        21129326       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_2_SAVEIC        21129435       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_SAVEIC        21129643       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_1_CMORATM       21132555       RUNNING        marenostrum4        debug          
+a3tb_19930101_fc01_2_CMOROCE       21132556       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_3_CMOROCE       21133446       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_2_CMORATM       21133444       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_3_CMORATM       21133445       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_3_SAVEIC        21133443       QUEUING        marenostrum4        debug          
+
+Job Name                           Job Id         Job Status     Job Platform        Job Queue      
+a3tb_19930101_fc01_1_SAVEIC        21132097       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_2_SAVEIC        21132551       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_1_SAVEIC        21129326       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_2_SAVEIC        21129435       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_SAVEIC        21129643       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_2_CMOROCE       21132556       RUNNING        marenostrum4        debug          
+a3tb_19930101_fc01_3_CMOROCE       21133446       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_2_CMORATM       21133444       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_3_CMORATM       21133445       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_3_SAVEIC        21133443       QUEUING        marenostrum4        debug          
+
+Job Name                           Job Id         Job Status     Job Platform        Job Queue      
+a3tb_19930101_fc01_1_SAVEIC        21132097       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_2_SAVEIC        21132551       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_1_SAVEIC        21129326       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_2_SAVEIC        21129435       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_SAVEIC        21129643       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_2_CMOROCE       21132556       RUNNING        marenostrum4        debug          
+a3tb_19930101_fc01_3_CMOROCE       21133446       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_2_CMORATM       21133444       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_3_CMORATM       21133445       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_3_SAVEIC        21133443       QUEUING        marenostrum4        debug          
+
+Job Name                           Job Id         Job Status     Job Platform        Job Queue      
+a3tb_19930101_fc01_1_SAVEIC        21132097       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_2_SAVEIC        21132551       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_1_SAVEIC        21129326       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_2_SAVEIC        21129435       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_SAVEIC        21129643       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_2_CMOROCE       21132556       RUNNING        marenostrum4        debug          
+a3tb_19930101_fc01_3_CMOROCE       21133446       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_2_CMORATM       21133444       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_3_CMORATM       21133445       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_3_SAVEIC        21133443       QUEUING        marenostrum4        debug          
+
+Job Name                           Job Id         Job Status     Job Platform        Job Queue      
+a3tb_19930101_fc01_1_SAVEIC        21132097       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_2_SAVEIC        21132551       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_1_SAVEIC        21129326       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_2_SAVEIC        21129435       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_SAVEIC        21129643       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_2_CMOROCE       21132556       RUNNING        marenostrum4        debug          
+a3tb_19930101_fc01_3_CMOROCE       21133446       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_2_CMORATM       21133444       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_3_CMORATM       21133445       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_3_SAVEIC        21133443       QUEUING        marenostrum4        debug          
+
+Job Name                           Job Id         Job Status     Job Platform        Job Queue      
+a3tb_19930101_fc01_1_SAVEIC        21132097       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_2_SAVEIC        21132551       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_1_SAVEIC        21129326       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_2_SAVEIC        21129435       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_SAVEIC        21129643       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_3_CMOROCE       21133446       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_2_CMORATM       21133444       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_3_CMORATM       21133445       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_3_SAVEIC        21133443       QUEUING        marenostrum4        debug          
+
+Job Name                           Job Id         Job Status     Job Platform        Job Queue      
+a3tb_19930101_fc01_1_SAVEIC        21132097       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_2_SAVEIC        21132551       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_1_SAVEIC        21129326       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_2_SAVEIC        21129435       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_SAVEIC        21129643       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_3_CMOROCE       21133446       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_2_CMORATM       21133444       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_3_CMORATM       21133445       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_3_SAVEIC        21133443       QUEUING        marenostrum4        debug          
+
+Job Name                           Job Id         Job Status     Job Platform        Job Queue      
+a3tb_19930101_fc01_1_SAVEIC        21132097       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_2_SAVEIC        21132551       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_1_SAVEIC        21129326       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_2_SAVEIC        21129435       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_SAVEIC        21129643       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_3_SAVEIC        21133443       RUNNING        marenostrum4        debug          
+a3tb_19930101_fc01_3_CMOROCE       21133446       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_2_CMORATM       21133444       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_3_CMORATM       21133445       QUEUING        marenostrum4        debug          
+
+Job Name                           Job Id         Job Status     Job Platform        Job Queue      
+a3tb_19930101_fc01_1_SAVEIC        21132097       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_2_SAVEIC        21132551       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_1_SAVEIC        21129326       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_2_SAVEIC        21129435       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_SAVEIC        21129643       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_3_SAVEIC        21133443       RUNNING        marenostrum4        debug          
+a3tb_19930101_fc01_3_CMOROCE       21133446       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_2_CMORATM       21133444       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_3_CMORATM       21133445       QUEUING        marenostrum4        debug          
+
+Job Name                           Job Id         Job Status     Job Platform        Job Queue      
+a3tb_19930101_fc01_1_SAVEIC        21132097       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_2_SAVEIC        21132551       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_1_SAVEIC        21129326       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_2_SAVEIC        21129435       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_SAVEIC        21129643       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_3_SAVEIC        21133443       RUNNING        marenostrum4        debug          
+a3tb_19930101_fc01_3_CMOROCE       21133446       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_2_CMORATM       21133444       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_3_CMORATM       21133445       QUEUING        marenostrum4        debug          
+
+Job Name                           Job Id         Job Status     Job Platform        Job Queue      
+a3tb_19930101_fc01_1_SAVEIC        21132097       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_2_SAVEIC        21132551       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_1_SAVEIC        21129326       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_2_SAVEIC        21129435       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_SAVEIC        21129643       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_3_SAVEIC        21133443       RUNNING        marenostrum4        debug          
+a3tb_19930101_fc01_3_CMOROCE       21133446       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_2_CMORATM       21133444       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_3_CMORATM       21133445       QUEUING        marenostrum4        debug          
+
+Job Name                           Job Id         Job Status     Job Platform        Job Queue      
+a3tb_19930101_fc01_1_SAVEIC        21132097       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_2_SAVEIC        21132551       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_1_SAVEIC        21129326       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_2_SAVEIC        21129435       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_SAVEIC        21129643       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_3_SAVEIC        21133443       RUNNING        marenostrum4        debug          
+a3tb_19930101_fc01_3_CMOROCE       21133446       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_2_CMORATM       21133444       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_3_CMORATM       21133445       QUEUING        marenostrum4        debug          
+
+Job Name                           Job Id         Job Status     Job Platform        Job Queue      
+a3tb_19930101_fc01_1_SAVEIC        21132097       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_2_SAVEIC        21132551       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_1_SAVEIC        21129326       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_2_SAVEIC        21129435       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_SAVEIC        21129643       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_3_SAVEIC        21133443       RUNNING        marenostrum4        debug          
+a3tb_19930101_fc01_3_CMOROCE       21133446       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_2_CMORATM       21133444       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_3_CMORATM       21133445       QUEUING        marenostrum4        debug          
+
+Job Name                           Job Id         Job Status     Job Platform        Job Queue      
+a3tb_19930101_fc01_1_SAVEIC        21132097       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_2_SAVEIC        21132551       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_1_SAVEIC        21129326       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_2_SAVEIC        21129435       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_SAVEIC        21129643       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_3_SAVEIC        21133443       RUNNING        marenostrum4        debug          
+a3tb_19930101_fc01_3_CMOROCE       21133446       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_2_CMORATM       21133444       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_3_CMORATM       21133445       QUEUING        marenostrum4        debug          
+
+Job Name                           Job Id         Job Status     Job Platform        Job Queue      
+a3tb_19930101_fc01_1_SAVEIC        21132097       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_2_SAVEIC        21132551       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_1_SAVEIC        21129326       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_2_SAVEIC        21129435       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_SAVEIC        21129643       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_3_SAVEIC        21133443       RUNNING        marenostrum4        debug          
+a3tb_19930101_fc01_3_CMOROCE       21133446       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_2_CMORATM       21133444       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_3_CMORATM       21133445       QUEUING        marenostrum4        debug          
+
+Job Name                           Job Id         Job Status     Job Platform        Job Queue      
+a3tb_19930101_fc01_2_SAVEIC        21132551       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_3_SAVEIC        21133443       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_1_SAVEIC        21129326       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_2_SAVEIC        21129435       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_SAVEIC        21129643       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_3_CMOROCE       21133446       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_2_CMORATM       21133444       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_3_CMORATM       21133445       QUEUING        marenostrum4        debug          
+
+Job Name                           Job Id         Job Status     Job Platform        Job Queue      
+a3tb_19930101_fc01_2_SAVEIC        21132551       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_3_SAVEIC        21133443       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_1_SAVEIC        21129326       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_2_SAVEIC        21129435       COMPLETED      marenostrum4        debug          
+a3tb_19930501_fc01_3_SAVEIC        21129643       COMPLETED      marenostrum4        debug          
+a3tb_19930101_fc01_2_CMORATM       21133444       RUNNING        marenostrum4        debug          
+a3tb_19930101_fc01_3_CMOROCE       21133446       QUEUING        marenostrum4        debug          
+a3tb_19930101_fc01_3_CMORATM       21133445       QUEUING        marenostrum4        debug          

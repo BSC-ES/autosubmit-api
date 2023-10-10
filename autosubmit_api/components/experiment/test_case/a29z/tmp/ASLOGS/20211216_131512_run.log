@@ -1,0 +1,16 @@
+2021-12-16 13:15:13,842 
+Checking configuration files...
+[WARNING] 2021-12-16 13:15:13,849 /esarchive/autosubmit/a29z/conf/proj_a29z.conf was not found. Some variables might be missing. If your experiment does not need a proj file, you can ignore this message.
+2021-12-16 13:15:13,849 expdef_a29z.conf OK
+2021-12-16 13:15:13,850 platforms_a29z.conf OK
+2021-12-16 13:15:13,850 jobs_a29z.conf OK
+2021-12-16 13:15:13,851 wrappers OK
+2021-12-16 13:15:13,851 autosubmit_a29z.conf OK
+2021-12-16 13:15:13,851 Configuration files OK
+
+2021-12-16 13:15:13,851 Autosubmit is running with 3.14.0b
+[CRITICAL] 2021-12-16 13:15:13,852 Current experiment uses (3.13.0) which is not the running Autosubmit version  
+Please, update the experiment version if you wish to continue using AutoSubmit 3.14.0b
+You can achieve this using the command autosubmit updateversion a29z 
+Or with the -v parameter: autosubmit run a29z -v  [eCode=7067]
+2021-12-16 13:15:13,852 More info at https://autosubmit.readthedocs.io/en/latest/faq.html
