@@ -1,0 +1,67 @@
+2021-12-16 13:14:36,075 Preparing .lock file to avoid multiple instances with same expid.
+2021-12-16 13:14:36,076 
+Checking configuration files...
+[WARNING] 2021-12-16 13:14:36,087 /esarchive/autosubmit/a29z/conf/proj_a29z.conf was not found. Some variables might be missing. If your experiment does not need a proj file, you can ignore this message.
+2021-12-16 13:14:36,088 expdef_a29z.conf OK
+2021-12-16 13:14:36,088 platforms_a29z.conf OK
+2021-12-16 13:14:36,089 jobs_a29z.conf OK
+2021-12-16 13:14:36,090 wrappers OK
+2021-12-16 13:14:36,090 autosubmit_a29z.conf OK
+2021-12-16 13:14:36,090 Configuration files OK
+
+2021-12-16 13:14:36,091 Loading parameters...
+2021-12-16 13:14:36,107 
+Creating the jobs list...
+2021-12-16 13:14:36,115 Creating jobs...
+2021-12-16 13:14:36,115 Loading JobList
+2021-12-16 13:14:36,132 Creating LOCAL_SETUP jobs
+2021-12-16 13:14:36,132 Creating REMOTE_SETUP jobs
+2021-12-16 13:14:36,132 Creating INI jobs
+2021-12-16 13:14:36,133 Creating SIM jobs
+2021-12-16 13:14:36,148 Creating POST jobs
+2021-12-16 13:14:36,162 Creating CLEAN jobs
+2021-12-16 13:14:36,174 Creating TRANSFER jobs
+2021-12-16 13:14:36,178 Creating LOCALPOST jobs
+2021-12-16 13:14:36,179 Creating PLOT jobs
+2021-12-16 13:14:36,180 Adding dependencies...
+2021-12-16 13:14:36,180 Adding dependencies for LOCAL_SETUP jobs
+2021-12-16 13:14:36,180 Adding dependencies for REMOTE_SETUP jobs
+2021-12-16 13:14:36,180 Adding dependencies for INI jobs
+2021-12-16 13:14:36,180 Adding dependencies for SIM jobs
+2021-12-16 13:14:36,183 Adding dependencies for POST jobs
+2021-12-16 13:14:36,185 Adding dependencies for CLEAN jobs
+2021-12-16 13:14:36,186 Adding dependencies for TRANSFER jobs
+2021-12-16 13:14:36,187 Adding dependencies for LOCALPOST jobs
+2021-12-16 13:14:36,187 Adding dependencies for PLOT jobs
+2021-12-16 13:14:36,187 Removing redundant dependencies...
+2021-12-16 13:14:36,240 Using existing valid structure.
+2021-12-16 13:14:36,242 Creating jobs...
+2021-12-16 13:14:36,243 Creating LOCAL_SETUP jobs
+2021-12-16 13:14:36,243 Creating REMOTE_SETUP jobs
+2021-12-16 13:14:36,243 Creating INI jobs
+2021-12-16 13:14:36,244 Creating SIM jobs
+2021-12-16 13:14:36,258 Creating POST jobs
+2021-12-16 13:14:36,271 Creating CLEAN jobs
+2021-12-16 13:14:36,283 Creating TRANSFER jobs
+2021-12-16 13:14:36,287 Creating LOCALPOST jobs
+2021-12-16 13:14:36,288 Creating PLOT jobs
+2021-12-16 13:14:36,289 Adding dependencies...
+2021-12-16 13:14:36,289 Adding dependencies for LOCAL_SETUP jobs
+2021-12-16 13:14:36,289 Adding dependencies for REMOTE_SETUP jobs
+2021-12-16 13:14:36,289 Adding dependencies for INI jobs
+2021-12-16 13:14:36,289 Adding dependencies for SIM jobs
+2021-12-16 13:14:36,292 Adding dependencies for POST jobs
+2021-12-16 13:14:36,293 Adding dependencies for CLEAN jobs
+2021-12-16 13:14:36,295 Adding dependencies for TRANSFER jobs
+2021-12-16 13:14:36,296 Adding dependencies for LOCALPOST jobs
+2021-12-16 13:14:36,296 Adding dependencies for PLOT jobs
+2021-12-16 13:14:36,296 Removing redundant dependencies...
+2021-12-16 13:14:36,323 Updating structure persistence...
+2021-12-16 13:14:36,445 
+Saving the jobs list...
+2021-12-16 13:14:36,451 Saving JobList: /esarchive/autosubmit/a29z/pkl/job_list_a29z.pkl
+2021-12-16 13:14:36,459 Job list saved
+2021-12-16 13:14:36,465 _persistence end: Open file handles: 0: CHR, 1: CHR, 2: CHR, 3: SOCK, 4: REG, 5: REG, 6: REG, 7: REG, 8: REG, 11: FIFO, 12: CHR, 13: FIFO
+2021-12-16 13:14:36,735 
+Job list created successfully
+[WARNING] 2021-12-16 13:14:36,735 Remember to MODIFY the MODEL config files!

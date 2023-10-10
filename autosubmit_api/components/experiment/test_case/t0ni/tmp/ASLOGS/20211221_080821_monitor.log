@@ -1,0 +1,53 @@
+2021-12-21 08:08:21,576 Getting job list...
+2021-12-21 08:08:21,577 
+Checking configuration files...
+2021-12-21 08:08:21,582 expdef_t0ni.conf OK
+2021-12-21 08:08:21,582 platforms_t0ni.conf OK
+2021-12-21 08:08:21,582 jobs_t0ni.conf OK
+2021-12-21 08:08:21,583 wrappers OK
+2021-12-21 08:08:21,583 autosubmit_t0ni.conf OK
+2021-12-21 08:08:21,584 Configuration files OK
+
+2021-12-21 08:08:21,590 Loading project parameters...
+2021-12-21 08:08:21,592 Creating jobs...
+2021-12-21 08:08:21,592 Loading JobList
+2021-12-21 08:08:21,594 Creating LOCAL_SETUP jobs
+2021-12-21 08:08:21,594 Creating SYNCHRONIZE jobs
+2021-12-21 08:08:21,594 Creating REMOTE_SETUP jobs
+2021-12-21 08:08:21,594 Creating INI jobs
+2021-12-21 08:08:21,595 Creating SIM jobs
+2021-12-21 08:08:21,595 Creating CMOROCE jobs
+2021-12-21 08:08:21,595 Creating CMORATM jobs
+2021-12-21 08:08:21,595 Creating POST jobs
+2021-12-21 08:08:21,595 Creating CLEAN jobs
+2021-12-21 08:08:21,595 Creating EARTHDIAGS jobs
+2021-12-21 08:08:21,596 Creating MONITOR jobs
+2021-12-21 08:08:21,596 Creating SAVEIC jobs
+2021-12-21 08:08:21,596 Creating CLEAN_MEMBER jobs
+2021-12-21 08:08:21,596 Creating PERFORMANCE_METRICS jobs
+2021-12-21 08:08:21,596 Creating TRANSFER_MEMBER jobs
+2021-12-21 08:08:21,596 Creating NCTIME jobs
+2021-12-21 08:08:21,596 Creating CLEAN_EXPERIMENT jobs
+2021-12-21 08:08:21,596 Adding dependencies...
+2021-12-21 08:08:21,597 Adding dependencies for LOCAL_SETUP jobs
+2021-12-21 08:08:21,597 Adding dependencies for SYNCHRONIZE jobs
+2021-12-21 08:08:21,597 Adding dependencies for REMOTE_SETUP jobs
+2021-12-21 08:08:21,597 Adding dependencies for INI jobs
+2021-12-21 08:08:21,597 Adding dependencies for SIM jobs
+2021-12-21 08:08:21,597 Adding dependencies for CMOROCE jobs
+2021-12-21 08:08:21,597 Adding dependencies for CMORATM jobs
+2021-12-21 08:08:21,597 Adding dependencies for POST jobs
+2021-12-21 08:08:21,597 Adding dependencies for CLEAN jobs
+2021-12-21 08:08:21,598 Adding dependencies for EARTHDIAGS jobs
+2021-12-21 08:08:21,598 Adding dependencies for MONITOR jobs
+2021-12-21 08:08:21,598 Adding dependencies for SAVEIC jobs
+2021-12-21 08:08:21,598 Adding dependencies for CLEAN_MEMBER jobs
+2021-12-21 08:08:21,598 Adding dependencies for PERFORMANCE_METRICS jobs
+2021-12-21 08:08:21,598 Adding dependencies for TRANSFER_MEMBER jobs
+2021-12-21 08:08:21,598 Adding dependencies for NCTIME jobs
+2021-12-21 08:08:21,598 Adding dependencies for CLEAN_EXPERIMENT jobs
+2021-12-21 08:08:21,598 Removing redundant dependencies...
+2021-12-21 08:08:21,696 Using existing valid structure.
+2021-12-21 08:08:21,696 Job list restored from /esarchive/autosubmit/t0ni/pkl files
+2021-12-21 08:08:21,795 Writing status txt...
+2021-12-21 08:08:21,800 Status txt created at <open file '/esarchive/autosubmit/t0ni/status/t0ni_20211221_0808.txt', mode 'w+' at 0x7fda36cdf150>

@@ -1,0 +1,106 @@
+2021-12-17 17:17:25,547 Preparing .lock file to avoid multiple instances with same expid.
+2021-12-17 17:17:25,548 
+Checking configuration files...
+2021-12-17 17:17:25,587 expdef_t0ni.conf OK
+2021-12-17 17:17:25,591 platforms_t0ni.conf OK
+2021-12-17 17:17:25,593 jobs_t0ni.conf OK
+2021-12-17 17:17:25,595 wrappers OK
+2021-12-17 17:17:25,595 autosubmit_t0ni.conf OK
+2021-12-17 17:17:25,607 Configuration files OK
+
+2021-12-17 17:17:25,614 Custom directives from platform.conf: None
+2021-12-17 17:17:25,615 Custom directives from platform.conf: None
+2021-12-17 17:17:25,616 Custom directives from platform.conf: None
+2021-12-17 17:17:25,618 Using project folder: /esarchive/autosubmit/t0ni/proj
+2021-12-17 17:17:25,618 The project folder exists. SKIPPING...
+2021-12-17 17:17:25,623 Loading parameters...
+2021-12-17 17:17:25,625 Loading project parameters...
+2021-12-17 17:17:25,680 
+Creating the jobs list...
+2021-12-17 17:17:25,720 Loading project parameters...
+2021-12-17 17:17:25,730 Creating jobs...
+2021-12-17 17:17:25,730 Loading JobList
+2021-12-17 17:17:25,743 Creating LOCAL_SETUP jobs
+2021-12-17 17:17:25,743 Creating SYNCHRONIZE jobs
+2021-12-17 17:17:25,743 Creating REMOTE_SETUP jobs
+2021-12-17 17:17:25,744 Creating INI jobs
+2021-12-17 17:17:25,744 Creating SIM jobs
+2021-12-17 17:17:25,745 Creating CMOROCE jobs
+2021-12-17 17:17:25,745 Creating CMORATM jobs
+2021-12-17 17:17:25,746 Creating POST jobs
+2021-12-17 17:17:25,747 Creating CLEAN jobs
+2021-12-17 17:17:25,747 Creating EARTHDIAGS jobs
+2021-12-17 17:17:25,748 Creating MONITOR jobs
+2021-12-17 17:17:25,749 Creating SAVEIC jobs
+2021-12-17 17:17:25,750 Creating CLEAN_MEMBER jobs
+2021-12-17 17:17:25,750 Creating PERFORMANCE_METRICS jobs
+2021-12-17 17:17:25,751 Creating TRANSFER_MEMBER jobs
+2021-12-17 17:17:25,751 Creating NCTIME jobs
+2021-12-17 17:17:25,752 Creating CLEAN_EXPERIMENT jobs
+2021-12-17 17:17:25,753 Adding dependencies...
+2021-12-17 17:17:25,753 Adding dependencies for LOCAL_SETUP jobs
+2021-12-17 17:17:25,753 Adding dependencies for SYNCHRONIZE jobs
+2021-12-17 17:17:25,753 Adding dependencies for REMOTE_SETUP jobs
+2021-12-17 17:17:25,753 Adding dependencies for INI jobs
+2021-12-17 17:17:25,753 Adding dependencies for SIM jobs
+2021-12-17 17:17:25,754 Adding dependencies for CMOROCE jobs
+2021-12-17 17:17:25,754 Adding dependencies for CMORATM jobs
+2021-12-17 17:17:25,755 Adding dependencies for POST jobs
+2021-12-17 17:17:25,755 Adding dependencies for CLEAN jobs
+2021-12-17 17:17:25,756 Adding dependencies for EARTHDIAGS jobs
+2021-12-17 17:17:25,757 Adding dependencies for MONITOR jobs
+2021-12-17 17:17:25,757 Adding dependencies for SAVEIC jobs
+2021-12-17 17:17:25,757 Adding dependencies for CLEAN_MEMBER jobs
+2021-12-17 17:17:25,757 Adding dependencies for PERFORMANCE_METRICS jobs
+2021-12-17 17:17:25,757 Adding dependencies for TRANSFER_MEMBER jobs
+2021-12-17 17:17:25,758 Adding dependencies for NCTIME jobs
+2021-12-17 17:17:25,758 Adding dependencies for CLEAN_EXPERIMENT jobs
+2021-12-17 17:17:25,759 Removing redundant dependencies...
+2021-12-17 17:17:25,836 Using existing valid structure.
+2021-12-17 17:17:25,849 Creating jobs...
+2021-12-17 17:17:25,850 Creating LOCAL_SETUP jobs
+2021-12-17 17:17:25,852 Creating SYNCHRONIZE jobs
+2021-12-17 17:17:25,853 Creating REMOTE_SETUP jobs
+2021-12-17 17:17:25,854 Creating INI jobs
+2021-12-17 17:17:25,855 Creating SIM jobs
+2021-12-17 17:17:25,856 Creating CMOROCE jobs
+2021-12-17 17:17:25,857 Creating CMORATM jobs
+2021-12-17 17:17:25,858 Creating POST jobs
+2021-12-17 17:17:25,860 Creating CLEAN jobs
+2021-12-17 17:17:25,861 Creating EARTHDIAGS jobs
+2021-12-17 17:17:25,862 Creating MONITOR jobs
+2021-12-17 17:17:25,863 Creating SAVEIC jobs
+2021-12-17 17:17:25,864 Creating CLEAN_MEMBER jobs
+2021-12-17 17:17:25,864 Creating PERFORMANCE_METRICS jobs
+2021-12-17 17:17:25,865 Creating TRANSFER_MEMBER jobs
+2021-12-17 17:17:25,866 Creating NCTIME jobs
+2021-12-17 17:17:25,867 Creating CLEAN_EXPERIMENT jobs
+2021-12-17 17:17:25,867 Adding dependencies...
+2021-12-17 17:17:25,868 Adding dependencies for LOCAL_SETUP jobs
+2021-12-17 17:17:25,868 Adding dependencies for SYNCHRONIZE jobs
+2021-12-17 17:17:25,869 Adding dependencies for REMOTE_SETUP jobs
+2021-12-17 17:17:25,869 Adding dependencies for INI jobs
+2021-12-17 17:17:25,869 Adding dependencies for SIM jobs
+2021-12-17 17:17:25,870 Adding dependencies for CMOROCE jobs
+2021-12-17 17:17:25,870 Adding dependencies for CMORATM jobs
+2021-12-17 17:17:25,870 Adding dependencies for POST jobs
+2021-12-17 17:17:25,871 Adding dependencies for CLEAN jobs
+2021-12-17 17:17:25,872 Adding dependencies for EARTHDIAGS jobs
+2021-12-17 17:17:25,872 Adding dependencies for MONITOR jobs
+2021-12-17 17:17:25,873 Adding dependencies for SAVEIC jobs
+2021-12-17 17:17:25,873 Adding dependencies for CLEAN_MEMBER jobs
+2021-12-17 17:17:25,873 Adding dependencies for PERFORMANCE_METRICS jobs
+2021-12-17 17:17:25,873 Adding dependencies for TRANSFER_MEMBER jobs
+2021-12-17 17:17:25,873 Adding dependencies for NCTIME jobs
+2021-12-17 17:17:25,874 Adding dependencies for CLEAN_EXPERIMENT jobs
+2021-12-17 17:17:25,874 Removing redundant dependencies...
+2021-12-17 17:17:25,959 Updating structure persistence...
+2021-12-17 17:17:26,039 
+Saving the jobs list...
+2021-12-17 17:17:26,040 
+Job Name                           Job Id         Job Status     Job Platform        Job Queue      
+2021-12-17 17:17:26,044 Saving JobList: /esarchive/autosubmit/t0ni/pkl/job_list_t0ni.pkl
+2021-12-17 17:17:26,046 Job list saved
+2021-12-17 17:17:26,397 
+Job list created successfully
+[WARNING] 2021-12-17 17:17:26,397 Remember to MODIFY the MODEL config files!
