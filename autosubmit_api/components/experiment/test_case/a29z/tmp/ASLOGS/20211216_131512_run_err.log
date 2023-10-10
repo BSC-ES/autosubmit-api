@@ -1,4 +1,0 @@
-[CRITICAL] 2021-12-16 13:15:13,852 Current experiment uses (3.13.0) which is not the running Autosubmit version  
-Please, update the experiment version if you wish to continue using AutoSubmit 3.14.0b
-You can achieve this using the command autosubmit updateversion a29z 
-Or with the -v parameter: autosubmit run a29z -v  [eCode=7067]
