@@ -78,11 +78,11 @@ def login():
     referrer = request.referrer
     is_allowed = False
     for allowed_client in BasicConfig.ALLOWED_CLIENTS:
-        if referrer.find(allowed_client) >= 0:
+        if referrer and referrer.find(allowed_client) >= 0:
             referrer = allowed_client
             is_allowed = True
     if is_allowed == False:
-        return {'authenticated': False, 'user': None, 'token': None, 'message': "Your client is not authorized for this operation. The API admin needs to add your URL to the list of allowed clients."}
+        return {'authenticated': False, 'user': None, 'token': None, 'message': "Your client is not authorized for this operation. The API admin needs to add your URL to the list of allowed clients."}, 401
 
     target_service = "{}{}/login".format(referrer, environment)
     if not ticket:
@@ -97,7 +97,7 @@ def login():
         user = Utiles.get_cas_user_from_xml(response.content)
     app.logger.info('CAS verify ticket response: user %s', user)
     if not user:
-        return {'authenticated': False, 'user': None, 'token': None, 'message': "Can't verify user."}
+        return {'authenticated': False, 'user': None, 'token': None, 'message': "Can't verify user."}, 401
     else:  # Login successful
         payload = {
             'user_id': user,
