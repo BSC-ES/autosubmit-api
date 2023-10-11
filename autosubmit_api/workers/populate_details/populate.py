@@ -30,6 +30,7 @@ class DetailsProcessor:
     details = self._get_all_details()
     self._create_table_if_not_exists()
     self._clean_table()
+    self._create_listexp_view_if_not_exists()
     return self._insert_many_into_details_table(details)
 
   def _get_experiments(self):
@@ -116,3 +117,14 @@ class DetailsProcessor:
     cur.close()
     conn.commit()
     conn.close()
+
+  def _create_listexp_view_if_not_exists(self):
+    # type: () -> None
+    create_view_query = textwrap.dedent(
+      '''
+      CREATE VIEW IF NOT EXISTS listexp as 
+      select id,name,user,created,model,branch,hpc,description 
+      from experiment left join details on experiment.id = details.exp_id
+      ''')
+    conn = self._get_new_connection()
+    DbRequests.create_table(conn, create_view_query)
