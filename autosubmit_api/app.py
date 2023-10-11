@@ -36,6 +36,9 @@ from .builders.joblist_helper_builder import JobListHelperBuilder, JobListHelper
 from multiprocessing import Manager, Lock
 import jwt
 import sys
+from dotenv import load_dotenv
+
+load_dotenv()
 
 JWT_SECRET = os.environ.get("SECRET_KEY")
 JWT_ALGORITHM = "HS256"

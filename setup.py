@@ -30,6 +30,7 @@ setup(
 			'networkx==2.6.3',
 			'scipy==1.7.3',
 			'paramiko==2.12.0',
+      'python-dotenv',
       'autosubmitconfigparser==1.0.48'
                     ],
   include_package_data=True,
