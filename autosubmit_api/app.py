@@ -37,6 +37,8 @@ from multiprocessing import Manager, Lock
 import jwt
 import sys
 from dotenv import load_dotenv
+from flask_apscheduler import APScheduler
+from .workers import populate_details_db, populate_queue_run_times, populate_running_experiments, populate_graph, verify_complete
 
 load_dotenv()
 
@@ -71,6 +73,55 @@ except AttributeError:
 lock = Lock()
 
 CommonRequests.enforceLocal(app.logger)
+
+# Background Scheduler
+scheduler = APScheduler()
+scheduler.init_app(app)
+scheduler.start()
+
+@scheduler.task('interval', id='populate_details_db', hours=4)
+def worker_populate_details_db():
+    start_time = time.time()
+    app.logger.info('POPDET|RECEIVED')
+    populate_details_db.main()
+    app.logger.info('POPDET|RTIME|' + str(time.time() - start_time))
+    
+@scheduler.task('interval', id='populate_queue_run_times', minutes=3)
+def worker_populate_queue_run_times():
+    start_time = time.time()
+    app.logger.info('POPQUE|RECEIVED')
+    populate_queue_run_times.main()
+    app.logger.info('POPQUE|RTIME|' + str(time.time() - start_time))
+
+@scheduler.task('interval', id='populate_running_experiments', minutes=5)
+def worker_populate_running_experiments():
+    start_time = time.time()
+    app.logger.info('POPREX|RECEIVED')
+    populate_running_experiments.main()
+    app.logger.info('POPREX|RTIME|' + str(time.time() - start_time))
+
+@scheduler.task('interval', id='verify_complete', minutes=10)
+def worker_verify_complete():
+    start_time = time.time()
+    app.logger.info('VRCMPT|RECEIVED')
+    verify_complete.main()
+    app.logger.info('VRCMPT|RTIME|' + str(time.time() - start_time))
+
+@scheduler.task('interval', id='populate_graph', hours=24)
+def worker_populate_graph():
+    start_time = time.time()
+    app.logger.info('POPGRP|RECEIVED')
+    populate_graph.main()
+    app.logger.info('POPGRP|RTIME|' + str(time.time() - start_time))
+
+def populate_all():
+    worker_populate_details_db()
+    worker_populate_queue_run_times()
+    worker_populate_running_experiments()
+    worker_verify_complete()
+    worker_populate_graph()
+
+populate_all()
 
 # CAS Login
 @app.route('/login')

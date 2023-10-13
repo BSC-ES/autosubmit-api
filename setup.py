@@ -31,7 +31,9 @@ setup(
 			'scipy==1.7.3',
 			'paramiko==2.12.0',
       'python-dotenv',
-      'autosubmitconfigparser==1.0.48'
+      'autosubmitconfigparser==1.0.48',
+      'Flask-APScheduler',
+      'gunicorn'
                     ],
   include_package_data=True,
   package_data={'autosubmit-api': ['README',
