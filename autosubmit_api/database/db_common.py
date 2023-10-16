@@ -318,10 +318,10 @@ def search_experiment_by_id(searchString, typeExp=None, onlyActive=None, owner=N
             'Connection to database could not be established: {0}', e.message)
         return False
     if owner:
-        query = "SELECT * FROM listexp WHERE user='{0}'".format(owner)
+        query = "SELECT id,name,user,created,model,branch,hpc,description FROM listexp WHERE user='{0}'".format(owner)
         # print(query)
     else:
-        query = "SELECT * FROM listexp WHERE (name LIKE '" + searchString + \
+        query = "SELECT id,name,user,created,model,branch,hpc,description FROM listexp WHERE (name LIKE '" + searchString + \
             "%' OR description LIKE '%" + searchString + \
                 "%' OR user LIKE '%" + searchString + "%')"
     if typeExp and len(typeExp) > 0:
@@ -416,7 +416,7 @@ def get_current_running_exp():
         Log.error(
             'Connection to database could not be established: {0}', e.message)
         return False
-    query = "SELECT * FROM listexp"
+    query = "SELECT id,name,user,created,model,branch,hpc,description FROM listexp"
     BasicConfig.read()
     # print(query)
     cursor.execute(query)
@@ -491,7 +491,7 @@ def get_experiment_by_id(expid):
     if not check_db():
         return result
     (conn, cursor) = open_conn()
-    query = "SELECT * FROM experiment WHERE name ='" + expid + "'"
+    query = "SELECT id, name, description, autosubmit_version FROM experiment WHERE name ='" + expid + "'"
     cursor.execute(query)
     headers = list(map(lambda attr : attr[0], cursor.description))
     row = cursor.fetchone()

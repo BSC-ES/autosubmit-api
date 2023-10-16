@@ -4,11 +4,11 @@ import subprocess
 import traceback
 import socket
 import pickle
-from ...experiment import common_db_requests as DbRequests
-from ...autosubmit_legacy.job.job_list import JobList
-from ...config.basicConfig import BasicConfig
-from ...autosubmit_legacy.autosubmit import Autosubmit
-from ...common.utils import Status
+from autosubmit_api.experiment import common_db_requests as DbRequests
+from autosubmit_api.autosubmit_legacy.job.job_list import JobList
+from autosubmit_api.config.basicConfig import BasicConfig
+from autosubmit_api.database.autosubmit import Autosubmit
+from autosubmit_api.common.utils import Status
 
 
 SAFE_TIME_LIMIT = 300

@@ -1,4 +1,4 @@
-from ..workers.business import populate_times as PopulateTimes
+from autosubmit_api.workers.business import populate_times as PopulateTimes
 
 
 def main():
