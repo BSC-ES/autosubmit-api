@@ -493,12 +493,14 @@ def get_experiment_by_id(expid):
     (conn, cursor) = open_conn()
     query = "SELECT * FROM experiment WHERE name ='" + expid + "'"
     cursor.execute(query)
+    headers = list(map(lambda attr : attr[0], cursor.description))
     row = cursor.fetchone()
     if row is not None:
-        result['id'] = int(row[0])
-        result['name'] = str(row[1])
-        result['description'] = str(row[4])
-        result['version'] = str(row[3])
+        obj = {header:row[i] for i, header in enumerate(headers)} 
+        result['id'] = obj["id"]
+        result['name'] = obj["name"]
+        result['description'] = obj["description"]
+        result['version'] = obj["autosubmit_version"]
     return result
 
 
