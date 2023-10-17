@@ -2,11 +2,11 @@
 
 import unittest
 import math
-import common.utils_for_testing  as TestUtils
+import autosubmit_api.common.utils_for_testing  as TestUtils
 
-from common.utils import Status
-from components.representations.graph.graph import GraphRepresentation, GroupedBy, Layout
-from builders.joblist_loader_builder import JobListLoaderBuilder, JobListLoaderDirector
+from autosubmit_api.common.utils import Status
+from autosubmit_api.components.representations.graph.graph import GraphRepresentation, GroupedBy, Layout
+from autosubmit_api.builders.joblist_loader_builder import JobListLoaderBuilder, JobListLoaderDirector
 from collections import Counter
 
 CASE_NO_WRAPPERS = "a3tb" # Job count = 55

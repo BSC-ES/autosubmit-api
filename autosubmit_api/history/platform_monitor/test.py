@@ -17,8 +17,8 @@
 # along with Autosubmit.  If not, see <http://www.gnu.org/licenses/>.
 
 import unittest
-from  import platform_utils as utils
-from slurm_monitor import SlurmMonitor
+from autosubmit_api.history.platform_monitor import platform_utils as utils
+from autosubmit_api.history.platform_monitor.slurm_monitor import SlurmMonitor
 
 class TestSlurmMonitor(unittest.TestCase):
   def test_reader_on_simple_wrapper_example_1(self):

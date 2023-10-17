@@ -18,9 +18,9 @@
 
 import unittest
 from collections import namedtuple
-from data_classes.job_data import JobData
-from strategies import StraightWrapperAssociationStrategy, GeneralizedWrapperDistributionStrategy, PlatformInformationHandler, TwoDimWrapperDistributionStrategy
-from platform_monitor.slurm_monitor import SlurmMonitor
+from autosubmit_api.history.data_classes.job_data import JobData
+from autosubmit_api.history.strategies import StraightWrapperAssociationStrategy, GeneralizedWrapperDistributionStrategy, PlatformInformationHandler, TwoDimWrapperDistributionStrategy
+from autosubmit_api.history.platform_monitor.slurm_monitor import SlurmMonitor
 job_dc = namedtuple("Job", ["job_name", "date", "member", "status_str", "children", "children_list"])
 
 class Test2DWrapperDistributionStrategy(unittest.TestCase):

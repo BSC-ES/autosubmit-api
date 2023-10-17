@@ -21,14 +21,14 @@ import time
 import random
 import os
 from shutil import copy2
-from history.database_managers.experiment_history_db_manager import ExperimentHistoryDbManager
-from history.database_managers.experiment_status_db_manager import ExperimentStatusDbManager
+from autosubmit_api.history.database_managers.experiment_history_db_manager import ExperimentHistoryDbManager
+from autosubmit_api.history.database_managers.experiment_status_db_manager import ExperimentStatusDbManager
 # from experiment_status_db_manager import ExperimentStatusDbManager
-from history.data_classes.experiment_run import ExperimentRun
-from history.data_classes.job_data import JobData
-import history.database_managers.database_models as Models
-from config.basicConfig import BasicConfig
-import history.utils as HUtils
+from autosubmit_api.history.data_classes.experiment_run import ExperimentRun
+from autosubmit_api.history.data_classes.job_data import JobData
+import autosubmit_api.history.database_managers.database_models as Models
+from autosubmit_api.config.basicConfig import BasicConfig
+import autosubmit_api.history.utils as HUtils
 
 EXPID_TT00_SOURCE = "test_database.db~"
 EXPID_TT01_SOURCE = "test_database_no_run.db~"

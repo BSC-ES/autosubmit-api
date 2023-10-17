@@ -1,6 +1,6 @@
 import unittest
-from workers.populate_details.populate import DetailsProcessor
-import common.utils_for_testing as TestUtils
+from autosubmit_api.workers.populate_details.populate import DetailsProcessor
+import autosubmit_api.common.utils_for_testing as TestUtils
 
 class TestPopulate(unittest.TestCase):
   def setUp(self):

@@ -1,6 +1,6 @@
 import unittest
-import common.utils_for_testing as TestUtils
-from builders.experiment_history_builder import ExperimentHistoryDirector, ExperimentHistoryBuilder
+import autosubmit_api.common.utils_for_testing as TestUtils
+from autosubmit_api.builders.experiment_history_builder import ExperimentHistoryDirector, ExperimentHistoryBuilder
 
 class TestJobHistory(unittest.TestCase):
 

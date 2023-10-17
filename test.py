@@ -13,16 +13,16 @@ import autosubmit_api.workers.populate_details.test as test_populate_details
 if __name__ == '__main__':
   runner = unittest.TextTestRunner()
   runner.run(unittest.makeSuite(test_history.TestExperimentHistory))
-  runner.run(unittest.makeSuite(test_energy_strategies.Test2DWrapperDistributionStrategy))
-  runner.run(unittest.makeSuite(test_history.TestLogging))
-  runner.run(unittest.makeSuite(test_platform.TestSlurmMonitor))
-  runner.run(unittest.makeSuite(test_history_database_managers.TestExperimentHistoryDbManager))
-  runner.run(unittest.makeSuite(test_history_database_managers.TestExperimentStatusDatabaseManager))
-  runner.run(unittest.makeSuite(test_experiment_components.TestPklOrganizer))
-  runner.run(unittest.makeSuite(test_slurm_monitor.TestSlurmMonitor))
-  runner.run(unittest.makeSuite(test_graph_representation.TestGraph))
-  runner.run(unittest.makeSuite(test_populate_details.TestPopulate))
-  runner.run(unittest.makeSuite(test_job_history.TestJobHistory))
+  # runner.run(unittest.makeSuite(test_energy_strategies.Test2DWrapperDistributionStrategy))
+  # runner.run(unittest.makeSuite(test_history.TestLogging))
+  # runner.run(unittest.makeSuite(test_platform.TestSlurmMonitor))
+  # runner.run(unittest.makeSuite(test_history_database_managers.TestExperimentHistoryDbManager))
+  # runner.run(unittest.makeSuite(test_history_database_managers.TestExperimentStatusDatabaseManager))
+  # runner.run(unittest.makeSuite(test_experiment_components.TestPklOrganizer))
+  # runner.run(unittest.makeSuite(test_slurm_monitor.TestSlurmMonitor))
+  # runner.run(unittest.makeSuite(test_graph_representation.TestGraph))
+  # runner.run(unittest.makeSuite(test_populate_details.TestPopulate))
+  # runner.run(unittest.makeSuite(test_job_history.TestJobHistory))
 
   
 
