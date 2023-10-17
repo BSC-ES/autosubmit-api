@@ -41,7 +41,7 @@ from bscearth.utils.config_parser import ConfigParserFactory
 
 class Monitor:
     """Class to handle monitoring of Jobs at HPC."""
-    _table = dict([(Status.UNKNOWN, 'white'), (Status.WAITING, '#aaa'), (Status.READY, 'lightblue'), (Status.PREPARED, 'lightsalmon'),
+    _table = dict([(Status.UNKNOWN, 'white'), (Status.WAITING, '#aaaaaa'), (Status.READY, 'lightblue'), (Status.PREPARED, 'lightsalmon'),
                    (Status.SUBMITTED, 'cyan'), (Status.HELD,
                                                 'salmon'), (Status.QUEUING, 'lightpink'), (Status.RUNNING, 'green'),
                    (Status.COMPLETED, 'yellow'), (Status.FAILED, 'red'), (Status.SUSPENDED, 'orange'), (Status.SKIPPED, 'lightyellow')])
