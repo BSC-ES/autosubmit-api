@@ -17,22 +17,24 @@
 # You should have received a copy of the GNU General Public License
 # along with Autosubmit.  If not, see <http://www.gnu.org/licenses/>.
 
-import pysqlite3 as sqlite3
+import sqlite3
 import os
-
+from typing import List
 
 class DbManager(object):
     """
     Class to manage an SQLite database.
     """
 
-    def __init__(self, root_path, db_name, db_version):
+    def __init__(self, root_path: str, db_name: str, db_version: int = 1):
         self.root_path = root_path
         self.db_name = db_name
         self.db_version = db_version
         # is_new = not
         if os.path.exists(self._get_db_filepath()):
             self.connection = sqlite3.connect(self._get_db_filepath())
+        elif os.path.exists(self._get_db_filepath() + ".db"):
+            self.connection = sqlite3.connect(self._get_db_filepath() + ".db")
         else:
             self.connection = None
         # if is_new:
@@ -41,22 +43,39 @@ class DbManager(object):
     def disconnect(self):
         """
         Closes the manager connection
-
         """
         if self.connection:
             self.connection.close()
 
-    def create_table(self, table_name, fields):
+    def create_table(self, table_name: str, fields: List[str]):
         """
         Creates a new table with the given fields
         :param table_name: str
-        :param fields: [str]
-
+        :param fields: List[str]
         """
         if self.connection:
             cursor = self.connection.cursor()
             create_command = self.generate_create_table_command(
-                table_name, fields[:])
+                table_name, fields)
+            # print(create_command)
+            cursor.execute(create_command)
+            self.connection.commit()
+
+    def create_view(self, view_name: str, statement: str):
+        """
+        Creates a new view with the given statement
+        
+        Parameters
+        ----------
+        view_name : str
+            Name of the view to create
+        statement : str
+            SQL statement
+        """
+        if self.connection:
+            cursor = self.connection.cursor()
+            create_command = self.generate_create_view_command(view_name, statement)
+            # print(create_command)
             cursor.execute(create_command)
             self.connection.commit()
 
@@ -165,13 +184,11 @@ class DbManager(object):
             if os.path.exists(self._get_db_filepath()):
                 os.remove(self._get_db_filepath())
 
-    def _get_db_filepath(self):
+    def _get_db_filepath(self) -> str:
         """
         Returns the path of the .db file
-        :return path: int
-
         """
-        return os.path.join(self.root_path, self.db_name) + '.db'
+        return os.path.join(self.root_path, self.db_name)
 
     def _initialize_database(self):
         """
@@ -205,17 +222,18 @@ class DbManager(object):
     """
 
     @staticmethod
-    def generate_create_table_command(table_name, fields):
-        create_command = 'CREATE TABLE IF NOT EXISTS ' + \
-            table_name + ' (' + fields.pop(0)
-        for field in fields:
-            create_command += (', ' + field)
-        create_command += ')'
+    def generate_create_table_command(table_name: str, fields: List[str]) -> str:
+        create_command = f'CREATE TABLE IF NOT EXISTS {table_name} ( {", ".join(fields)} )'
+        return create_command
+    
+    @staticmethod
+    def generate_create_view_command(view_name: str, statement: str) -> str:
+        create_command = f'CREATE VIEW IF NOT EXISTS {view_name} as {statement}'
         return create_command
 
     @staticmethod
-    def generate_drop_table_command(table_name):
-        drop_command = 'DROP TABLE IF EXISTS ' + table_name
+    def generate_drop_table_command(table_name: str):
+        drop_command = f'DROP TABLE IF EXISTS {table_name}'
         return drop_command
 
     @staticmethod

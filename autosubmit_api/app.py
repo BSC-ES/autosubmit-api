@@ -26,6 +26,8 @@ import logging
 from flask_cors import CORS, cross_origin
 from flask import Flask, request, session, redirect, url_for
 from bscearth.utils.log import Log
+
+from autosubmit_api.database.extended_db import ExtendedDB
 from .database.db_common import get_current_running_exp, update_experiment_description_owner
 from .experiment import common_requests as CommonRequests
 from .experiment import utils as Utiles
@@ -115,6 +117,12 @@ def worker_populate_graph():
     app.logger.info('POPGRP|RTIME|' + str(time.time() - start_time))
 
 def populate_all():
+    
+    config = BasicConfig()
+    config.read()
+    ext_db = ExtendedDB(config.DB_DIR, config.DB_FILE, config.AS_TIMES_DB)
+    ext_db.prepare_db()
+
     worker_populate_details_db()
     worker_populate_queue_run_times()
     worker_populate_running_experiments()
