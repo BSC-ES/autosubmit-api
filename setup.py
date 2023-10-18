@@ -46,4 +46,9 @@ setup(
     'Operating System :: POSIX :: Linux',
     'Programming Language :: Python :: 3.7',
   ],
+  entry_points={
+        'console_scripts': [
+            'autosubmit_api = autosubmit_api.cli:main',
+        ]
+    }
 )

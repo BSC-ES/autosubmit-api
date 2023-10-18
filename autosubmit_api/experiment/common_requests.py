@@ -1608,5 +1608,5 @@ def enforceLocal(log):
                 except Exception as e:
                     locale.setlocale(locale.LC_ALL, 'es_ES')
     except Exception as e:
-        og.info("Locale C.utf8 is not found, using '{0}' as fallback".format("C"))
+        log.info("Locale C.utf8 is not found, using '{0}' as fallback".format("C"))
         locale.setlocale(locale.LC_ALL, 'C')
