@@ -36,7 +36,7 @@ def prepare_status_db():
     modified text NOT NULL,
     FOREIGN KEY (exp_id) REFERENCES experiment (id)
     );''')
-    drop_table_query = ''' DROP TABLE experiment_status '''
+    # drop_table_query = ''' DROP TABLE experiment_status '''
     # create_table(conn, drop_table_query)
     create_table(conn, create_table_query)
     current_table = _get_exp_status()

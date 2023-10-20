@@ -20,6 +20,8 @@
 import os
 import textwrap
 import time
+
+from autosubmit_api.experiment.common_db_requests import prepare_status_db
 from .database_manager import DatabaseManager, DEFAULT_LOCAL_ROOT_DIR
 from ...config.basicConfig import BasicConfig
 from ...history import utils as HUtils
@@ -39,17 +41,19 @@ class ExperimentStatusDbManager(DatabaseManager):
 
   def validate_status_database(self):
       """ Creates experiment_status table if it does not exist """
-      create_table_query = textwrap.dedent(
-          '''CREATE TABLE
-              IF NOT EXISTS experiment_status (
-              exp_id integer PRIMARY KEY,
-              name text NOT NULL,
-              status text NOT NULL,
-              seconds_diff integer NOT NULL,
-              modified text NOT NULL
-          );'''
-      )
-      self.execute_statement_on_dbfile(self._as_times_file_path, create_table_query)
+      prepare_status_db()
+      # Redundant code
+      # create_table_query = textwrap.dedent(
+      #     '''CREATE TABLE
+      #         IF NOT EXISTS experiment_status (
+      #         exp_id integer PRIMARY KEY,
+      #         name text NOT NULL,
+      #         status text NOT NULL,
+      #         seconds_diff integer NOT NULL,
+      #         modified text NOT NULL
+      #     );'''
+      # )
+      # self.execute_statement_on_dbfile(self._as_times_file_path, create_table_query)
 
   def print_current_table(self):
       for experiment in self._get_experiment_status_content():
