@@ -1,5 +1,6 @@
 import sys
 import argparse
+from typing import List
 from gunicorn.app.wsgiapp import WSGIApplication
 
 
@@ -20,16 +21,18 @@ class StandaloneApplication(WSGIApplication):
             self.cfg.set(key.lower(), value)
 
 
-def start_app_gunicorn(port: int, workers: int):
+def start_app_gunicorn(bind: List[str] = [], workers: int = 1, log_level: str = 'info'):
     
     options = {
         "preload_app": True,
         "timeout": 600
     }
-    if port:
-        options["bind"] = f"127.0.0.1:{port}"
-    if workers:
+    if bind and len(bind) > 0:
+        options["bind"] = bind
+    if workers and workers > 0:
         options["workers"] = workers
+    if log_level:
+        options["loglevel"] = log_level
 
     g_app = StandaloneApplication("autosubmit_api.app:create_app()", options)
     print("gunicorn options: "+str(g_app.options))
@@ -53,15 +56,19 @@ def main():
     start_parser = subparsers.add_parser(
         'start', description="start the API")
     
-    start_parser.add_argument('-p', '--port', type=int, 
-                                   help='the port to serve')
+    start_parser.add_argument('-b', '--bind', action='append', 
+                                   help='the socket to bind')
     start_parser.add_argument('-w', '--workers', type=int, 
-                                   help='number of workers to use')
+                                   help='the number of worker processes for handling requests')
+    start_parser.add_argument('--log-level', type=str, 
+                                   help='the granularity of Error log outputs.')
     
     args = parser.parse_args()
+    print(args)
+    print(args.bind)
 
     if args.command == "start":
-        start_app_gunicorn(args.port, args.workers)
+        start_app_gunicorn(args.bind, args.workers, args.log_level)
     else:
         parser.print_help()
         parser.exit()
