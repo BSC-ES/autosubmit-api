@@ -1,4 +1,5 @@
 import sys
+import os
 import argparse
 from typing import List
 from gunicorn.app.wsgiapp import WSGIApplication
@@ -21,8 +22,10 @@ class StandaloneApplication(WSGIApplication):
             self.cfg.set(key.lower(), value)
 
 
-def start_app_gunicorn(bind: List[str] = [], workers: int = 1, log_level: str = 'info'):
-    
+def start_app_gunicorn(init_bg_tasks: bool = False, bind: List[str] = [], workers: int = 1, log_level: str = 'info', log_file: str = "-"):
+    if init_bg_tasks:
+        os.environ.setdefault("RUN_BACKGROUND_TASKS_ON_START", str(init_bg_tasks))
+
     options = {
         "preload_app": True,
         "timeout": 600
@@ -33,6 +36,8 @@ def start_app_gunicorn(bind: List[str] = [], workers: int = 1, log_level: str = 
         options["workers"] = workers
     if log_level:
         options["loglevel"] = log_level
+    if log_file:
+        options["errorlog"] = log_file
 
     g_app = StandaloneApplication("autosubmit_api.app:create_app()", options)
     print("gunicorn options: "+str(g_app.options))
@@ -56,19 +61,26 @@ def main():
     start_parser = subparsers.add_parser(
         'start', description="start the API")
     
+    # Autosubmit API opts
+    start_parser.add_argument('--init-bg-tasks', action='store_true', 
+                                   help='run background tasks on start. ')
+
+    # Gunicorn args
     start_parser.add_argument('-b', '--bind', action='append', 
                                    help='the socket to bind')
     start_parser.add_argument('-w', '--workers', type=int, 
                                    help='the number of worker processes for handling requests')
     start_parser.add_argument('--log-level', type=str, 
-                                   help='the granularity of Error log outputs.')
+                                   help='the granularity of Error log outputs')
+    start_parser.add_argument('--log-file', type=str, 
+                                   help='The Error log file to write to')
     
     args = parser.parse_args()
     print(args)
     print(args.bind)
 
     if args.command == "start":
-        start_app_gunicorn(args.bind, args.workers, args.log_level)
+        start_app_gunicorn(args.init_bg_tasks, args.bind, args.workers, args.log_level, args.log_file)
     else:
         parser.print_help()
         parser.exit()

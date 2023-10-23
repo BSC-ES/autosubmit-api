@@ -54,6 +54,8 @@ def create_app():
     JWT_ALGORITHM = "HS256"
     JWT_EXP_DELTA_SECONDS = 84000*5  # 5 days
 
+    RUN_BACKGROUND_TASKS_ON_START = True if os.environ.get("RUN_BACKGROUND_TASKS_ON_START") in ["True", "T", "true"] else False # Default dalse
+
     # CAS Stuff
     CAS_LOGIN_URL = os.environ.get("CAS_LOGIN_URL") # e.g: 'https://cas.bsc.es/cas/login'
     CAS_VERIFY_URL = os.environ.get("CAS_VERIFY_URL") # e.g: 'https://cas.bsc.es/cas/serviceValidate'
@@ -122,19 +124,19 @@ def create_app():
         populate_graph.main()
         app.logger.info('POPGRP|RTIME|' + str(time.time() - start_time))
 
-    def populate_all():
-        config = BasicConfig()
-        config.read()
-        ext_db = ExtendedDB(config.DB_DIR, config.DB_FILE, config.AS_TIMES_DB)
-        ext_db.prepare_db()
+    # Prepare DB
+    config = BasicConfig()
+    config.read()
+    ext_db = ExtendedDB(config.DB_DIR, config.DB_FILE, config.AS_TIMES_DB)
+    ext_db.prepare_db()
 
+    if RUN_BACKGROUND_TASKS_ON_START:
+        app.logger.info('Starting populate workers on init...')
         worker_populate_details_db()
         worker_populate_queue_run_times()
         worker_populate_running_experiments()
         worker_verify_complete()
         worker_populate_graph()
-
-    populate_all()
 
     # CAS Login
     @app.route('/login')
