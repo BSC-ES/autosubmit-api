@@ -22,7 +22,7 @@ class StandaloneApplication(WSGIApplication):
             self.cfg.set(key.lower(), value)
 
 
-def start_app_gunicorn(init_bg_tasks: bool = False, bind: List[str] = [], workers: int = 1, log_level: str = 'info', log_file: str = "-"):
+def start_app_gunicorn(init_bg_tasks: bool = False, bind: List[str] = [], workers: int = 1, log_level: str = 'info', log_file: str = "-", daemon: bool = False):
     if init_bg_tasks:
         os.environ.setdefault("RUN_BACKGROUND_TASKS_ON_START", str(init_bg_tasks))
 
@@ -38,6 +38,8 @@ def start_app_gunicorn(init_bg_tasks: bool = False, bind: List[str] = [], worker
         options["loglevel"] = log_level
     if log_file:
         options["errorlog"] = log_file
+    if daemon:
+        options["daemon"] = daemon
 
     g_app = StandaloneApplication("autosubmit_api.app:create_app()", options)
     print("gunicorn options: "+str(g_app.options))
@@ -74,13 +76,15 @@ def main():
                                    help='the granularity of Error log outputs')
     start_parser.add_argument('--log-file', type=str, 
                                    help='The Error log file to write to')
+    start_parser.add_argument('-D', '--daemon', action='store_true',  
+                                   help='Daemonize the Gunicorn process')
     
     args = parser.parse_args()
     print(args)
     print(args.bind)
 
     if args.command == "start":
-        start_app_gunicorn(args.init_bg_tasks, args.bind, args.workers, args.log_level, args.log_file)
+        start_app_gunicorn(args.init_bg_tasks, args.bind, args.workers, args.log_level, args.log_file, args.daemon)
     else:
         parser.print_help()
         parser.exit()
