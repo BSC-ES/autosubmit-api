@@ -22,12 +22,17 @@ class StandaloneApplication(WSGIApplication):
             self.cfg.set(key.lower(), value)
 
 
-def start_app_gunicorn(init_bg_tasks: bool = False, bind: List[str] = [], workers: int = 1, log_level: str = 'info', log_file: str = "-", daemon: bool = False):
+def start_app_gunicorn(init_bg_tasks: bool = False, bind: List[str] = [], workers: int = 1, log_level: str = 'info', log_file: str = "-", daemon: bool = False, **kwargs):
+    
+    # API options
     if init_bg_tasks:
-        os.environ.setdefault("RUN_BACKGROUND_TASKS_ON_START", str(init_bg_tasks))
+        os.environ.setdefault(
+            "RUN_BACKGROUND_TASKS_ON_START", str(init_bg_tasks))
 
-    options = {
+    # Gunicorn options
+    options = { # Options to always have
         "preload_app": True,
+        "capture_output": True,
         "timeout": 600
     }
     if bind and len(bind) > 0:
@@ -42,9 +47,9 @@ def start_app_gunicorn(init_bg_tasks: bool = False, bind: List[str] = [], worker
         options["daemon"] = daemon
 
     g_app = StandaloneApplication("autosubmit_api.app:create_app()", options)
-    print("gunicorn options: "+str(g_app.options))
+    print("Starting with gunicorn options: "+str(g_app.options))
     g_app.run()
-    
+
 
 class MyParser(argparse.ArgumentParser):
     def error(self, message):
@@ -55,36 +60,38 @@ class MyParser(argparse.ArgumentParser):
 
 def main():
     parser = MyParser(prog='Autosubmit API',
-                    description='Autosubmit API CLI')
-    
+                      description='Autosubmit API CLI')
+
     subparsers = parser.add_subparsers(dest='command')
 
     # start parser
     start_parser = subparsers.add_parser(
         'start', description="start the API")
-    
+
     # Autosubmit API opts
-    start_parser.add_argument('--init-bg-tasks', action='store_true', 
-                                   help='run background tasks on start. ')
+    start_parser.add_argument('--init-bg-tasks', action='store_true',
+                              help='run background tasks on start. ')
 
     # Gunicorn args
-    start_parser.add_argument('-b', '--bind', action='append', 
-                                   help='the socket to bind')
-    start_parser.add_argument('-w', '--workers', type=int, 
-                                   help='the number of worker processes for handling requests')
-    start_parser.add_argument('--log-level', type=str, 
-                                   help='the granularity of Error log outputs')
-    start_parser.add_argument('--log-file', type=str, 
-                                   help='The Error log file to write to')
-    start_parser.add_argument('-D', '--daemon', action='store_true',  
-                                   help='Daemonize the Gunicorn process')
-    
+    start_parser.add_argument('-b', '--bind', action='append',
+                              help='the socket to bind')
+    start_parser.add_argument('-w', '--workers', type=int,
+                              help='the number of worker processes for handling requests')
+    start_parser.add_argument('--log-level', type=str,
+                              help='the granularity of Error log outputs')
+    start_parser.add_argument('--log-file', type=str,
+                              help='The Error log file to write to')
+    start_parser.add_argument('-D', '--daemon', action='store_true',
+                              help='Daemonize the Gunicorn process')
+
     args = parser.parse_args()
-    print(args)
-    print(args.bind)
+    print("Starting autosubmit_api with args: "+str(vars(args)))
+
 
     if args.command == "start":
-        start_app_gunicorn(args.init_bg_tasks, args.bind, args.workers, args.log_level, args.log_file, args.daemon)
+        start_app_gunicorn(**vars(args))
+        # start_app_gunicorn(args.init_bg_tasks, args.bind, args.workers,
+        #                    args.log_level, args.log_file, args.daemon)
     else:
         parser.print_help()
         parser.exit()
