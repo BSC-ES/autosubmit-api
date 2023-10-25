@@ -31,32 +31,32 @@ import subprocess
 import logging
 
 from collections import deque
-from ..database import db_common as db_common
-from . import common_db_requests as DbRequests
-from ..database import db_jobdata as JobData
-from ..autosubmit_legacy.job import job_utils as LegacyJobUtils
-from ..common import utils as common_utils
-from ..components.jobs import utils as JUtils
+from autosubmit_api.database import db_common as db_common
+from autosubmit_api.experiment import common_db_requests as DbRequests
+from autosubmit_api.database import db_jobdata as JobData
+from autosubmit_api.autosubmit_legacy.job import job_utils as LegacyJobUtils
+from autosubmit_api.common import utils as common_utils
+from autosubmit_api.components.jobs import utils as JUtils
 
-from ..autosubmit_legacy.job.job_list import JobList
-from ..autosubmit_legacy.job.job import Job
+from autosubmit_api.autosubmit_legacy.job.job_list import JobList
+from autosubmit_api.autosubmit_legacy.job.job import Job
 
-from ..performance.utils import calculate_SYPD_perjob
-from ..monitor.monitor import Monitor
+from autosubmit_api.performance.utils import calculate_SYPD_perjob
+from autosubmit_api.monitor.monitor import Monitor
 
-from ..statistics.statistics import Statistics
+from autosubmit_api.statistics.statistics import Statistics
 
-from ..config.basicConfig import BasicConfig
-from ..config.config_common import AutosubmitConfig
+from autosubmit_api.config.basicConfig import BasicConfig
+from autosubmit_api.config.config_common import AutosubmitConfig
 from bscearth.utils.config_parser import ConfigParserFactory
 
-from ..components.representations.tree.tree import TreeRepresentation
-from ..components.representations.graph.graph import GraphRepresentation, GroupedBy, Layout
+from autosubmit_api.components.representations.tree.tree import TreeRepresentation
+from autosubmit_api.components.representations.graph.graph import GraphRepresentation, GroupedBy, Layout
 
-from ..builders.experiment_history_builder import ExperimentHistoryDirector, ExperimentHistoryBuilder
-from ..builders.configuration_facade_builder import ConfigurationFacadeDirector, AutosubmitConfigurationFacadeBuilder
-from ..builders.joblist_loader_builder import JobListLoaderBuilder, JobListLoaderDirector
-from ..components.jobs.job_support import JobSupport
+from autosubmit_api.builders.experiment_history_builder import ExperimentHistoryDirector, ExperimentHistoryBuilder
+from autosubmit_api.builders.configuration_facade_builder import ConfigurationFacadeDirector, AutosubmitConfigurationFacadeBuilder
+from autosubmit_api.builders.joblist_loader_builder import JobListLoaderBuilder, JobListLoaderDirector
+from autosubmit_api.components.jobs.job_support import JobSupport
 from typing import Dict, Any
 import locale
 from autosubmitconfigparser.config.configcommon import AutosubmitConfig as Autosubmit4Config

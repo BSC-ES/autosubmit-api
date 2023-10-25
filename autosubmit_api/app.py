@@ -17,6 +17,7 @@
 # You should have received a copy of the GNU General Public License
 # along with Autosubmit.  If not, see <http://www.gnu.org/licenses/>.
 
+from functools import wraps
 import os
 import sys
 import time
@@ -24,41 +25,48 @@ from datetime import datetime, timedelta
 import requests
 import logging
 from flask_cors import CORS, cross_origin
-from flask import Flask, request, session, redirect, url_for
-from bscearth.utils.log import Log
+from flask import Flask, request, session, redirect
 
 from autosubmit_api.database.extended_db import ExtendedDB
-from .database.db_common import get_current_running_exp, update_experiment_description_owner
-from .experiment import common_requests as CommonRequests
-from .experiment import utils as Utiles
-from .performance.performance_metrics import PerformanceMetrics
-from .database.db_common import search_experiment_by_id
-from .config.basicConfig import BasicConfig
-from .builders.joblist_helper_builder import JobListHelperBuilder, JobListHelperDirector
+from autosubmit_api.database.db_common import get_current_running_exp, update_experiment_description_owner
+from autosubmit_api.experiment import common_requests as CommonRequests
+from autosubmit_api.experiment import utils as Utiles
+from autosubmit_api.performance.performance_metrics import PerformanceMetrics
+from autosubmit_api.database.db_common import search_experiment_by_id
+from autosubmit_api.config.basicConfig import BasicConfig
+from autosubmit_api.builders.joblist_helper_builder import JobListHelperBuilder, JobListHelperDirector
 from multiprocessing import Manager, Lock
 import jwt
 import sys
 from dotenv import load_dotenv
 from flask_apscheduler import APScheduler
-from .workers import populate_details_db, populate_queue_run_times, populate_running_experiments, populate_graph, verify_complete
+from autosubmit_api.workers import populate_details_db, populate_queue_run_times, populate_running_experiments, populate_graph, verify_complete
+from autosubmit_api.config import JWT_SECRET, JWT_ALGORITHM, JWT_EXP_DELTA_SECONDS, RUN_BACKGROUND_TASKS_ON_START, CAS_LOGIN_URL, CAS_VERIFY_URL
+
+def with_log_run_times(_logger: logging.Logger, _tag: str):
+    def decorator(func):
+        @wraps(func)
+        def inner_wrapper(*args, **kwargs):
+            start_time = time.time()
+            path = ""
+            try:
+                path = request.path
+            except:
+                pass
+            _logger.info('{}|RECEIVED|{}'.format(_tag, path))
+            response = func(*args, **kwargs)  
+            _logger.info('{}|RTIME|{}|{:.3f}'.format(_tag, path,(time.time() - start_time)))
+            return response
+
+        return inner_wrapper
+    return decorator
 
 def create_app():
     """
     Autosubmit Flask application factory
     This function initializes the application properly
     """
-
     load_dotenv()
-
-    JWT_SECRET = os.environ.get("SECRET_KEY", "M87;Z$,o5?MSC(/@#-LbzgE3PH-5ki.ZvS}N.s09v>I#v8I'00THrA-:ykh3HX?") # WARNING: Always provide a SECRET_KEY for production
-    JWT_ALGORITHM = "HS256"
-    JWT_EXP_DELTA_SECONDS = 84000*5  # 5 days
-
-    RUN_BACKGROUND_TASKS_ON_START = True if os.environ.get("RUN_BACKGROUND_TASKS_ON_START") in ["True", "T", "true"] else False # Default dalse
-
-    # CAS Stuff
-    CAS_LOGIN_URL = os.environ.get("CAS_LOGIN_URL") # e.g: 'https://cas.bsc.es/cas/login'
-    CAS_VERIFY_URL = os.environ.get("CAS_VERIFY_URL") # e.g: 'https://cas.bsc.es/cas/serviceValidate'
 
     sys.path.insert(0, os.path.abspath('.'))
 
@@ -90,39 +98,29 @@ def create_app():
     scheduler.start()
 
     @scheduler.task('interval', id='populate_details_db', hours=4)
+    @with_log_run_times(app.logger, "WRKPOPDET")
     def worker_populate_details_db():
-        start_time = time.time()
-        app.logger.info('POPDET|RECEIVED')
         populate_details_db.main()
-        app.logger.info('POPDET|RTIME|' + str(time.time() - start_time))
         
     @scheduler.task('interval', id='populate_queue_run_times', minutes=3)
+    @with_log_run_times(app.logger, "WRKPOPQUE")
     def worker_populate_queue_run_times():
-        start_time = time.time()
-        app.logger.info('POPQUE|RECEIVED')
         populate_queue_run_times.main()
-        app.logger.info('POPQUE|RTIME|' + str(time.time() - start_time))
 
     @scheduler.task('interval', id='populate_running_experiments', minutes=5)
+    @with_log_run_times(app.logger, "WRKPOPREX")
     def worker_populate_running_experiments():
-        start_time = time.time()
-        app.logger.info('POPREX|RECEIVED')
         populate_running_experiments.main()
-        app.logger.info('POPREX|RTIME|' + str(time.time() - start_time))
 
     @scheduler.task('interval', id='verify_complete', minutes=10)
+    @with_log_run_times(app.logger, "WRKVRFCMPT")
     def worker_verify_complete():
-        start_time = time.time()
-        app.logger.info('VRCMPT|RECEIVED')
         verify_complete.main()
-        app.logger.info('VRCMPT|RTIME|' + str(time.time() - start_time))
 
     @scheduler.task('interval', id='populate_graph', hours=24)
+    @with_log_run_times(app.logger, "WRKPOPGRPH")
     def worker_populate_graph():
-        start_time = time.time()
-        app.logger.info('POPGRP|RECEIVED')
         populate_graph.main()
-        app.logger.info('POPGRP|RTIME|' + str(time.time() - start_time))
 
     # Prepare DB
     config = BasicConfig()
@@ -178,11 +176,11 @@ def create_app():
 
     @app.route('/updatedesc', methods=['GET', 'POST'])
     @cross_origin(expose_headers="Authorization")
+    @with_log_run_times(app.logger, "UDESC")
     def update_description():
         """
         Updates the description of an experiment. Requires authenticated user.
         """
-        start_time = time.time()
         expid = None
         new_description = None
         if request.is_json:
@@ -197,18 +195,16 @@ def create_app():
         except Exception as exp:
             jwt_token = {"user_id": None}
         valid_user = jwt_token.get("user_id", None)
-        app.logger.info('UDESC|RECEIVED|')
-        app.logger.info('UDESC|RTIME|' + str(time.time() - start_time))
         return update_experiment_description_owner(expid, new_description, valid_user)
 
 
     @app.route('/tokentest', methods=['GET', 'POST'])
     @cross_origin(expose_headers="Authorization")
+    @with_log_run_times(app.logger, "TTEST")
     def test_token():
         """
         Tests if a token is still valid
         """
-        start_time = time.time()
         current_token = request.headers.get("Authorization")
         try:
             jwt_token = jwt.decode(current_token, JWT_SECRET, JWT_ALGORITHM)
@@ -219,8 +215,6 @@ def create_app():
             jwt_token = {"user_id": None}
 
         valid_user = jwt_token.get("user_id", None)
-        app.logger.info('TTEST|RECEIVED')
-        app.logger.info('TTEST|RTIME|' + str(time.time() - start_time))
         return {
             "isValid": True if valid_user else False,
             "message": "Session expired" if not valid_user else None
@@ -229,129 +223,108 @@ def create_app():
 
     @app.route('/cconfig/<string:expid>', methods=['GET'])
     @cross_origin(expose_headers="Authorization")
+    @with_log_run_times(app.logger, "CCONFIG")
     def get_current_configuration(expid):
-        start_time = time.time()
         current_token = request.headers.get("Authorization")
         try:
             jwt_token = jwt.decode(current_token, JWT_SECRET, JWT_ALGORITHM)
         except Exception as exp:
             jwt_token = {"user_id": None}
         valid_user = jwt_token.get("user_id", None)
-        app.logger.info('CCONFIG|RECEIVED|' + str(expid))
         result = CommonRequests.get_current_configuration_by_expid(expid, valid_user, app.logger)
-        app.logger.info('CCONFIG|RTIME|' + str(expid) + "|" + str(time.time() - start_time))
         return result
 
 
     @app.route('/expinfo/<string:expid>', methods=['GET'])
+    @with_log_run_times(app.logger, "EXPINFO")
     def exp_info(expid):
-        start_time = time.time()
-        app.logger.info('EXPINFO|RECEIVED|' + str(expid))
         result = CommonRequests.get_experiment_data(expid)
-        app.logger.info('EXPINFO|RTIME|' + str(expid) + "|" + str(time.time() - start_time))
         return result
 
 
     @app.route('/expcount/<string:expid>', methods=['GET'])
+    @with_log_run_times(app.logger, "EXPCOUNT")
     def exp_counters(expid):
-        start_time = time.time()
-        app.logger.info('EXPCOUNT|RECEIVED|' + str(expid))
         result = CommonRequests.get_experiment_counters(expid)
-        app.logger.info('EXPCOUNT|RTIME|' + str(expid) + "|" + str(time.time() - start_time))
         return result
 
 
     @app.route('/searchowner/<string:owner>/<string:exptype>/<string:onlyactive>', methods=['GET'])
     @app.route('/searchowner/<string:owner>', methods=['GET'])
+    @with_log_run_times(app.logger, "SOWNER")
     def search_owner(owner, exptype=None, onlyactive=None):
         """
         Same output format as search_expid
         """
-        start_time = time.time()
-        app.logger.info('SOWNER|RECEIVED|' + str(owner) + "|" + str(exptype) + "|" + str(onlyactive))
         result = search_experiment_by_id(searchString=None, owner=owner, typeExp=exptype, onlyActive=onlyactive)
-        app.logger.info('SOWNER|RTIME|' + str(owner) + "|" + str(exptype) + "|" + str(onlyactive) + "|" + str(time.time() - start_time))
         return result
 
 
     @app.route('/search/<string:expid>/<string:exptype>/<string:onlyactive>', methods=['GET'])
     @app.route('/search/<string:expid>', methods=['GET'])
+    @with_log_run_times(app.logger, "SEARCH")
     def search_expid(expid, exptype=None, onlyactive=None):
-        start_time = time.time()
-        app.logger.info('SEARCH|RECEIVED|' + str(expid) + "|" + str(exptype) + "|" + str(onlyactive))
         result = search_experiment_by_id(expid, owner=None, typeExp=exptype, onlyActive=onlyactive)
-        app.logger.info('SEARCH|RTIME|' + str(expid) + "|" + str(exptype) + "|" + str(onlyactive) + "|" + str(time.time() - start_time))
         return result
 
 
     @app.route('/running/', methods=['GET'])
+    @with_log_run_times(app.logger, "RUN")
     def search_running():
         """
         Returns the list of all experiments that are currently running.
         """
         if 'username' in session:
             print(("USER {}".format(session['username'])))
-        start_time = time.time()
         app.logger.info("Active proceses: " + str(D))
-        app.logger.info('RUN|RECEIVED|')
         #app.logger.info("Received Currently Running query ")
         result = get_current_running_exp()
-        app.logger.info('RUN|RTIME|' + str(time.time() - start_time))
         return result
 
 
     @app.route('/runs/<string:expid>', methods=['GET'])
+    @with_log_run_times(app.logger, "ERUNS")
     def get_runs(expid):
         """
         Get list of runs of the same experiment from the historical db
         """
-        start_time = time.time()
-        app.logger.info('ERUNS|RECEIVED|{0}'.format(expid))
         result = CommonRequests.get_experiment_runs(expid)
-        app.logger.info('ERUNS|RTIME|{0}'.format(str(time.time() - start_time)))
         return result
 
 
     @app.route('/ifrun/<string:expid>', methods=['GET'])
+    @with_log_run_times(app.logger, "IFRUN")
     def get_if_running(expid):
-        start_time = time.time()
-        app.logger.info('IFRUN|RECEIVED|' + str(expid))
         result = CommonRequests.quick_test_run(expid)
-        app.logger.info('IFRUN|RTIME|' + str(expid) + "|" + str(time.time() - start_time))
         return result
 
 
     @app.route('/logrun/<string:expid>', methods=['GET'])
+    @with_log_run_times(app.logger, "LOGRUN")
     def get_log_running(expid):
-        start_time = time.time()
-        app.logger.info('LOGRUN|RECEIVED|' + str(expid))
         result = CommonRequests.get_current_status_log_plus(expid)
-        app.logger.info('LOGRUN|RTIME|' + str(expid) + "|" + str(time.time() - start_time))
         return result
 
 
     @app.route('/summary/<string:expid>', methods=['GET'])
+    @with_log_run_times(app.logger, "SUMMARY")
     def get_expsummary(expid):
-        start_time = time.time()
         user = request.args.get("loggedUser", default="null", type=str)
-        app.logger.info('SUMMARY|RECEIVED|' + str(expid))
         if user != "null": lock.acquire(); D[os.getpid()] = [user, "summary", True]; lock.release();
         result = CommonRequests.get_experiment_summary(expid, app.logger)
         app.logger.info('Process: ' + str(os.getpid()) + " workers: " + str(D))
-        app.logger.info('SUMMARY|RTIME|' + str(expid) + "|" + str(time.time() - start_time))
         if user != "null": lock.acquire(); D[os.getpid()] = [user, "summary", False]; lock.release();
         if user != "null": lock.acquire(); D.pop(os.getpid(), None); lock.release();
         return result
 
 
     @app.route('/shutdown/<string:route>')
+    @with_log_run_times(app.logger, "SHUTDOWN")
     def shutdown(route):
         """
         This function is invoked from the frontend (AS-GUI) to kill workers that are no longer needed.
         This call is common in heavy parts of the GUI such as the Tree and Graph generation or Summaries fetching.
         """
-        start_time = time.time()
-
         try:
             user = request.args.get("loggedUser", default="null", type=str)
             expid = request.args.get("expid", default="null", type=str)
@@ -359,7 +332,7 @@ def create_app():
             app.logger.info("Bad parameters for user and expid in route.")
 
         if user != "null":
-            app.logger.info('SHUTDOWN|RECEIVED for route: ' + route + " user: " + user + " expid: " + expid)
+            app.logger.info('SHUTDOWN|DETAILS|route: ' + route + " user: " + user + " expid: " + expid)
             try:
                 # app.logger.info("user: " + user)
                 # app.logger.info("expid: " + expid)
@@ -379,14 +352,12 @@ def create_app():
                 app.logger.info("Workers now: " + str(D))
             except Exception as exp:
                 app.logger.info("[CRITICAL] Could not shutdown process " + expid + " by user \"" + user + "\"")
-        app.logger.info('SHUTDOWN|DONE|RTIME' + "|" + str(time.time() - start_time))
         return ""
 
 
     @app.route('/performance/<string:expid>', methods=['GET'])
+    @with_log_run_times(app.logger, "PRF")
     def get_exp_performance(expid):
-        start_time = time.time()
-        app.logger.info('PRF|RECEIVED|' + str(expid))
         result = {}
         try:
             result = PerformanceMetrics(expid, JobListHelperDirector(JobListHelperBuilder(expid)).build_job_list_helper()).to_json()
@@ -402,128 +373,105 @@ def create_app():
                 "error_message": str(exp),
                 "warnings_job_data": [],
             }
-        app.logger.info('PRF|RTIME|' + str(expid) + "|" + str(time.time() - start_time))
         return result
 
 
     @app.route('/graph/<string:expid>/<string:layout>/<string:grouped>', methods=['GET'])
+    @with_log_run_times(app.logger, "GRAPH")
     def get_list_format(expid, layout='standard', grouped='none'):
-        start_time = time.time()
         user = request.args.get("loggedUser", default="null", type=str)
         # app.logger.info("user: " + user)
         # app.logger.info("expid: " + expid)
-        app.logger.info('GRAPH|RECEIVED|' + str(expid) + "~" + str(grouped) + "~" + str(layout))
         if user != "null": lock.acquire(); D[os.getpid()] = [user, "graph", expid, True]; lock.release();
         result = CommonRequests.get_experiment_graph(expid, app.logger, layout, grouped)
         app.logger.info('Process: ' + str(os.getpid()) + " graph workers: " + str(D))
-        app.logger.info('GRAPH|RTIME|' + str(expid) + "|" + str(time.time() - start_time))
         if user != "null": lock.acquire(); D[os.getpid()] = [user, "graph", expid, False]; lock.release();
         if user != "null": lock.acquire(); D.pop(os.getpid(), None); lock.release();
         return result
 
 
     @app.route('/tree/<string:expid>', methods=['GET'])
+    @with_log_run_times(app.logger, "TREE")
     def get_exp_tree(expid):
-        start_time = time.time()
         user = request.args.get("loggedUser", default="null", type=str)
         # app.logger.info("user: " + user)
         # app.logger.info("expid: " + expid)
-        app.logger.info('TREE|RECEIVED|' + str(expid))
         if user != "null": lock.acquire(); D[os.getpid()] = [user, "tree", expid, True]; lock.release();
         result = CommonRequests.get_experiment_tree_structured(expid, app.logger)
         app.logger.info('Process: ' + str(os.getpid()) + " tree workers: " + str(D))
-        app.logger.info('TREE|RTIME|' + str(expid) + "|" + str(time.time() - start_time))
         if user != "null": lock.acquire(); D[os.getpid()] = [user, "tree", expid, False]; lock.release();
         if user != "null": lock.acquire(); D.pop(os.getpid(), None); lock.release();
         return result
 
 
     @app.route('/quick/<string:expid>', methods=['GET'])
+    @with_log_run_times(app.logger, "QUICK")
     def get_quick_view_data(expid):
-        start_time = time.time()
-        app.logger.info('QUICK|RECEIVED|' + str(expid))
         result = CommonRequests.get_quick_view(expid)
-        app.logger.info('QUICK|RTIME|{0}|{1}'.format(str(expid), str(time.time() - start_time)))
         return result
 
 
     @app.route('/exprun/<string:expid>', methods=['GET'])
+    @with_log_run_times(app.logger, "LOG")
     def get_experiment_running(expid):
         """
         Finds log and gets the last 150 lines
         """
-        start_time = time.time()
-        app.logger.info('LOG|RECEIVED|' + str(expid))
         result = CommonRequests.get_experiment_log_last_lines(expid)
-        app.logger.info('LOG|RTIME|' + str(expid) + "|" + str(time.time() - start_time))
         return result
 
 
     @app.route('/joblog/<string:logfile>', methods=['GET'])
+    @with_log_run_times(app.logger, "JOBLOG")
     def get_job_log_from_path(logfile):
         """
         Get log from path
         """
         expid = logfile.split('_') if logfile is not None else ""
         expid = expid[0] if len(expid) > 0 else ""
-        start_time = time.time()
-        app.logger.info('JOBLOG|RECEIVED|{0}'.format(expid))
         result = CommonRequests.get_job_log(expid, logfile)
-        app.logger.info('JOBLOG|RTIME|{0}|{1}'.format(expid, str(time.time() - start_time)))
         return result
 
 
     @app.route('/pklinfo/<string:expid>/<string:timeStamp>', methods=['GET'])
+    @with_log_run_times(app.logger, "GPKL")
     def get_experiment_pklinfo(expid, timeStamp):
-        start_time = time.time()
-        app.logger.info('GPKL|RECEIVED|' + str(expid) + "~" + str(timeStamp))
         result = CommonRequests.get_experiment_pkl(expid)
-        app.logger.info('GPKL|RTIME|' + str(expid) + "|" + str(time.time() - start_time))
         return result
 
 
     @app.route('/pkltreeinfo/<string:expid>/<string:timeStamp>', methods=['GET'])
+    @with_log_run_times(app.logger, "TPKL")
     def get_experiment_tree_pklinfo(expid, timeStamp):
-        start_time = time.time()
-        app.logger.info('TPKL|RECEIVED|' + str(expid) + "~" + str(timeStamp))
         result = CommonRequests.get_experiment_tree_pkl(expid)
-        app.logger.info('TPKL|RTIME|' + str(expid) + "|" + str(time.time() - start_time))
         return result
 
 
     @app.route('/stats/<string:expid>/<string:filter_period>/<string:filter_type>')
+    @with_log_run_times(app.logger, "STAT")
     def get_experiment_statistics(expid, filter_period, filter_type):
-        start_time = time.time()
-        app.logger.info('STAT|RECEIVED|' + str(expid) + "~" + str(filter_period) + "~" + str(filter_type))
         result = CommonRequests.get_experiment_stats(expid, filter_period, filter_type)
-        app.logger.info('STAT|RTIME|' + str(expid) + "|" + str(time.time() - start_time))
         return result
 
 
     @app.route('/history/<string:expid>/<string:jobname>')
+    @with_log_run_times(app.logger, "HISTORY")
     def get_exp_job_history(expid, jobname):
-        start_time = time.time()
-        app.logger.info('HISTORY|RECEIVED|' + str(expid) + "~" + str(jobname))
         result = CommonRequests.get_job_history(expid, jobname)
-        app.logger.info('HISTORY|RTIME|' + str(expid) + "|" + str(time.time() - start_time))
         return result
 
 
     @app.route('/rundetail/<string:expid>/<string:runid>')
+    @with_log_run_times(app.logger, "RUNDETAIL")
     def get_experiment_run_job_detail(expid, runid):
-        start_time = time.time()
-        app.logger.info('RUNDETAIL|RECEIVED|' + str(expid) + "~" + str(runid))
         result = CommonRequests.get_experiment_tree_rundetail(expid, runid)
-        app.logger.info('RUNDETAIL|RTIME|' + str(expid) + "|" + str(time.time() - start_time))
         return result
 
 
     @app.route('/filestatus/')
+    @with_log_run_times(app.logger, "FSTATUS")
     def get_file_status():
-        start_time = time.time()
-        app.logger.info('FSTATUS|RECEIVED|')
         result = CommonRequests.get_last_test_archive_status()
-        app.logger.info('FSTATUS|RTIME|' + str(time.time() - start_time))
         return result
 
 

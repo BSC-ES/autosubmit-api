@@ -1,6 +1,7 @@
 
 from inspect import trace
 import os
+from sqlite3 import Connection
 import textwrap
 import traceback
 from ...experiment import common_db_requests as DbRequests
