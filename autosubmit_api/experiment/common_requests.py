@@ -31,7 +31,6 @@ import subprocess
 import logging
 
 from collections import deque
-from autosubmit.autosubmit import Autosubmit
 from ..database import db_common as db_common
 from . import common_db_requests as DbRequests
 from ..database import db_jobdata as JobData
@@ -42,7 +41,7 @@ from ..components.jobs import utils as JUtils
 from ..autosubmit_legacy.job.job_list import JobList
 from ..autosubmit_legacy.job.job import Job
 
-from ..performance.utils import calculate_ASYPD_perjob, calculate_SYPD_perjob
+from ..performance.utils import calculate_SYPD_perjob
 from ..monitor.monitor import Monitor
 
 from ..statistics.statistics import Statistics
@@ -61,7 +60,6 @@ from ..components.jobs.job_support import JobSupport
 from typing import Dict, Any
 import locale
 from autosubmitconfigparser.config.configcommon import AutosubmitConfig as Autosubmit4Config
-from autosubmitconfigparser.config.configcommon import BasicConfig as BasicConfigAS4
 
 BasicConfig.read()
 
@@ -714,7 +712,7 @@ def get_experiment_graph(expid, log, layout=Layout.STANDARD, grouped=GroupedBy.N
             graph.perform_calculations()
             return graph.get_graph_representation_data()
         else:
-            raise ValueError('Auosubmit version is not supported')
+            raise ValueError('Autosubmit version is not supported')
 
     except Exception as e:
         print((traceback.format_exc()))
@@ -764,8 +762,7 @@ def get_experiment_tree_structured(expid, log):
     :return: Dictionary [Variable Name] to Value
     :rtype: Dictionary Key: String, Value: Object
     """
-    base_list = dict()
-    pkl_timestamp = 10000000
+
     try:
         notransitive = False
         BasicConfig.read()
@@ -774,66 +771,25 @@ def get_experiment_tree_structured(expid, log):
         curr_exp_as_version = db_common.get_autosubmit_version(expid, log)
         main, secondary = common_utils.parse_version_number(curr_exp_as_version)
         if main and main >= 4:
-            # TODO: new YAML parser
             as_conf = Autosubmit4Config(expid)
             as_conf.reload(True)
         else:
             as_conf = AutosubmitConfig(expid, BasicConfig, ConfigParserFactory())
             as_conf.reload()
 
-        # If version is higher than 3.13, we can perform the new tree representation algorithm
-        try:
-            if common_utils.is_version_historical_ready(as_conf.get_version()):
-                if main and main >= 4:
-                    job_list_loader = JobListLoaderDirector(JobListLoaderBuilder(expid)).build_loaded_joblist_loader(None)
-                else:
-                    job_list_loader = JobListLoaderDirector(JobListLoaderBuilder(expid)).build_loaded_joblist_loader(None)
-                tree = TreeRepresentation(expid, job_list_loader)
-                tree.perform_calculations()
-                return tree.get_tree_structure()
-        except Exception as exp:
-            print((traceback.format_exc()))
-            print(("New Tree Representation failed: {0}".format(exp)))
-            log.info("New Tree Representation failed: {0}".format(exp))
-
-        log.info("TREE|Not using first method|autosubmit_version=" + as_conf.get_version())
-
-        # Getting platform data
-        # Main taget HPC
-        hpcarch = as_conf.get_platform()
-
-        # Submitter
-        submitter = Autosubmit._get_submitter(as_conf)
-        submitter.load_platforms(as_conf)
-        # JobList construction
-        job_list = Autosubmit.load_job_list(
-            expid, as_conf, notransitive=notransitive)
-        # print("Job list build completed")
-        # Platform update
-        for job in job_list.get_job_list():
-            if job.platform_name is None:
-                job.platform_name = hpcarch
-            job.platform = submitter.platforms[job.platform_name.lower(
-            )]
-
-        # Chunk Unit and Size
-        chunk_unit = as_conf.get_chunk_size_unit()
-        chunk_size = as_conf.get_chunk_size()
-
-        tree_structure, current_collection, reference = job_list.get_tree_structured(
-            BasicConfig, chunk_unit=chunk_unit, chunk_size=chunk_size)
-
-        base_list['tree'] = tree_structure
-        base_list['jobs'] = current_collection
-        base_list['total'] = len(current_collection)
-        base_list['reference'] = reference
+        if common_utils.is_version_historical_ready(as_conf.get_version()):
+            job_list_loader = JobListLoaderDirector(JobListLoaderBuilder(expid)).build_loaded_joblist_loader(None)
+            tree = TreeRepresentation(expid, job_list_loader)
+            tree.perform_calculations()
+            return tree.get_tree_structure()
+        else:
+            raise ValueError('Autosubmit version is not supported')
+        
     except Exception as e:
         print((traceback.format_exc()))
+        print(("New Tree Representation failed: {0}".format(e)))
+        log.info("New Tree Representation failed: {0}".format(e))
         return {'tree': [], 'jobs': [], 'total': 0, 'reference': [], 'error': True, 'error_message': str(e), 'pkl_timestamp': 0}
-    base_list['error'] = False
-    base_list['error_message'] = 'None'
-    base_list['pkl_timestamp'] = pkl_timestamp
-    return base_list
 
 
 def retrieve_all_pkl_files():
