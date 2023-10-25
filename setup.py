@@ -36,6 +36,7 @@ setup(
         'paramiko~=2.12.0',
         'python-dotenv',
         'autosubmitconfigparser~=1.0.48',
+        'autosubmit>=3.13',
         'Flask-APScheduler',
         'gunicorn'
     ],

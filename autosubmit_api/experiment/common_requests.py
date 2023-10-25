@@ -31,7 +31,7 @@ import subprocess
 import logging
 
 from collections import deque
-from ..autosubmit_legacy.autosubmit import Autosubmit
+from autosubmit.autosubmit import Autosubmit
 from ..database import db_common as db_common
 from . import common_db_requests as DbRequests
 from ..database import db_jobdata as JobData
@@ -61,6 +61,7 @@ from ..components.jobs.job_support import JobSupport
 from typing import Dict, Any
 import locale
 from autosubmitconfigparser.config.configcommon import AutosubmitConfig as Autosubmit4Config
+from autosubmitconfigparser.config.configcommon import BasicConfig as BasicConfigAS4
 
 BasicConfig.read()
 
@@ -701,57 +702,23 @@ def get_experiment_graph(expid, log, layout=Layout.STANDARD, grouped=GroupedBy.N
     """
     Gets graph representation
     """
-    base_list = dict()
-    pkl_timestamp = 10000000
     try:
-        # autosubmit_configuration_facade = ConfigurationFacadeDirector(AutosubmitConfigurationFacadeBuilder(expid)).build_autosubmit_configuration_facade()
-
         BasicConfig.read()
         autosubmit_configuration_facade = AutosubmitConfig(
             expid, BasicConfig, ConfigParserFactory())
         autosubmit_configuration_facade.reload()
-        # raise Exception("json config autosubmitgraph: " + str(autosubmit_configuration_facade.__dict__))
-        try:
-            if common_utils.is_version_historical_ready(autosubmit_configuration_facade.get_version()):
-                job_list_loader = JobListLoaderDirector(JobListLoaderBuilder(expid)).build_loaded_joblist_loader()
-                graph = GraphRepresentation(expid, job_list_loader, layout, grouped)
-                graph.perform_calculations()
-                return graph.get_graph_representation_data()
-        except Exception as exp:
-            # print(traceback.format_exc())
-            print(("New Graph Representation failed: {0}".format(exp)))
-            log.info("Could not generate graph with faster method: " + str(exp))
 
-        # Getting platform data
-        hpcarch = autosubmit_configuration_facade.get_platform()
+        if common_utils.is_version_historical_ready(autosubmit_configuration_facade.get_version()):
+            job_list_loader = JobListLoaderDirector(JobListLoaderBuilder(expid)).build_loaded_joblist_loader()
+            graph = GraphRepresentation(expid, job_list_loader, layout, grouped)
+            graph.perform_calculations()
+            return graph.get_graph_representation_data()
+        else:
+            raise ValueError('Auosubmit version is not supported')
 
-        # Submitter
-        submitter = Autosubmit._get_submitter(autosubmit_configuration_facade)
-        submitter.load_platforms(autosubmit_configuration_facade)
-        # JobList construction
-        job_list = Autosubmit.load_job_list(expid, autosubmit_configuration_facade, notransitive=False)
-
-        if job_list.graph == None:
-            raise Exception("Graph generation is not possible for this experiment.")
-
-        # Platform update
-        for job in job_list.get_job_list():
-            if job.platform_name is None:
-                job.platform_name = hpcarch
-            job.platform = submitter.platforms[job.platform_name.lower()]
-
-        # Chunk unit and chunk size
-        chunk_unit = autosubmit_configuration_facade.get_chunk_size_unit()
-        chunk_size = autosubmit_configuration_facade.get_chunk_size()
-
-        job_list.sort_by_id()
-
-        base_list = job_list.get_graph_representation(
-            BasicConfig, layout, grouped, chunk_unit=chunk_unit, chunk_size=chunk_size
-        )
-        # raise Exception("Base list graph: ", str(base_list))
     except Exception as e:
         print((traceback.format_exc()))
+        print(("New Graph Representation failed: {0}".format(e)))
         log.info("Could not generate Graph and recieved the following exception: " + str(e))
         return {'nodes': [],
                 'edges': [],
@@ -765,11 +732,6 @@ def get_experiment_graph(expid, log, layout=Layout.STANDARD, grouped=GroupedBy.N
                 'max_parents': 0,
                 'total_jobs': 0,
                 'pkl_timestamp': 0}
-
-    base_list['error'] = False
-    base_list['error_message'] = ""
-    base_list['pkl_timestamp'] = pkl_timestamp
-    return base_list
 
 
 def get_experiment_tree_rundetail(expid, run_id):

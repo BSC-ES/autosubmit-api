@@ -13,7 +13,7 @@ from ....database.db_jobdata import ExperimentGraphDrawing
 
 from .edge import Edge, RealEdge
 from typing import List, Dict, Tuple, Set, Any
-from scipy import sparse
+from scipy.sparse import linalg
 
 GRAPHVIZ_MULTIPLIER = 90
 SMALL_EXPERIMENT_THRESHOLD = 1000
@@ -317,7 +317,7 @@ class GraphRepresentation(object):
     for edge in self.edges:
       nx_graph.add_edge(edge._from, edge._to, weight=(3 if edge._is_in_wrapper else 1))
     laplacian_matrix = nx.normalized_laplacian_matrix(nx_graph)
-    eigval, eigvec = sparse.linalg.eigsh(laplacian_matrix, k=4, which="SM")
+    eigval, eigvec = linalg.eigsh(laplacian_matrix, k=4, which="SM")
     eigval1 = float(eigval[1])
     eigval2 = float(eigval[2])
     x_coords = eigvec[:, 1] * (self.job_count / eigval1) * 10.0
