@@ -36,7 +36,7 @@ from pyparsing import nestedExpr
 from bscearth.utils.config_parser import ConfigParserFactory, ConfigParser
 from bscearth.utils.date import parse_date
 from bscearth.utils.log import Log
-from ..config.basicConfig import BasicConfig
+from ..config.basicConfig import APIBasicConfig
 from ..config.IConfigStrategy import IConfigStrategy
 
 logger = logging.getLogger('gunicorn.error')
@@ -50,7 +50,7 @@ class confConfigStrategy(IConfigStrategy):
     """
 
     def __init__(self, expid, basic_config, parser_factory, extension=".conf"):
-        # type: (str, BasicConfig, ConfigParserFactory, Extension) -> None
+        # type: (str, APIBasicConfig, ConfigParserFactory, Extension) -> None
 
         self.expid = expid
         self.basic_config = basic_config
@@ -183,7 +183,7 @@ class confConfigStrategy(IConfigStrategy):
         :return: experiment's project directory
         :rtype: str
         """
-        dir_templates = os.path.join(self.basic_config.LOCAL_ROOT_DIR, self.expid, BasicConfig.LOCAL_PROJ_DIR,
+        dir_templates = os.path.join(self.basic_config.LOCAL_ROOT_DIR, self.expid, APIBasicConfig.LOCAL_PROJ_DIR,
                                      self.get_project_destination())
         return dir_templates
 

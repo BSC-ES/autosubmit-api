@@ -1,5 +1,5 @@
 import os
-from ...config.basicConfig import BasicConfig
+from ...config.basicConfig import APIBasicConfig
 from .job_factory import Job
 from bscearth.utils.date import parse_date
 from .utils import is_a_completed_retrial
@@ -17,7 +17,7 @@ class JobSupport:
   Provides the methods to get the retrials of a job from the TOTAL_STATS files.
   """
   def __init__(self, expid, job, basic_config):
-    # type: (str, Job, BasicConfig) -> None
+    # type: (str, Job, APIBasicConfig) -> None
     self.expid = expid
     self.job = job
     self.basic_config = basic_config

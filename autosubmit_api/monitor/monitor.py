@@ -31,7 +31,7 @@ import copy
 import subprocess
 
 from ..autosubmit_legacy.job.job_common import Status
-from ..config.basicConfig import BasicConfig
+from ..config.basicConfig import APIBasicConfig
 from ..config.config_common import AutosubmitConfigResolver
 from bscearth.utils.log import Log
 from bscearth.utils.config_parser import ConfigParserFactory
@@ -284,7 +284,7 @@ class Monitor:
         Log.info('Plotting...')
         now = time.localtime()
         output_date = time.strftime("%Y%m%d_%H%M", now)
-        output_file = os.path.join(BasicConfig.LOCAL_ROOT_DIR, expid, "plot", expid + "_" + output_date + "." +
+        output_file = os.path.join(APIBasicConfig.LOCAL_ROOT_DIR, expid, "plot", expid + "_" + output_date + "." +
                                    output_format)
         # print(expid)
         # print(len(joblist))
@@ -353,7 +353,7 @@ class Monitor:
         now = time.localtime()
         output_date = time.strftime("%Y%m%d_%H%M", now)
         file_path = os.path.join(
-            BasicConfig.LOCAL_ROOT_DIR, expid, "status", expid + "_" + output_date + ".txt")
+            APIBasicConfig.LOCAL_ROOT_DIR, expid, "status", expid + "_" + output_date + ".txt")
 
         if not os.path.exists(os.path.dirname(file_path)):
             os.makedirs(os.path.dirname(file_path))
@@ -415,11 +415,11 @@ class Monitor:
         now = time.localtime()
         output_date = time.strftime("%Y%m%d_%H%M", now)
 
-        directory = os.path.join(BasicConfig.LOCAL_ROOT_DIR, expid, "stats")
+        directory = os.path.join(APIBasicConfig.LOCAL_ROOT_DIR, expid, "stats")
         if not os.path.exists(directory):
             os.makedirs(directory)
 
-        output_file = os.path.join(BasicConfig.LOCAL_ROOT_DIR, expid, "stats", expid + "_statistics_" + output_date +
+        output_file = os.path.join(APIBasicConfig.LOCAL_ROOT_DIR, expid, "stats", expid + "_statistics_" + output_date +
                                    "." + output_format)
 
         # create_bar_diagram(expid, joblist, self.get_general_stats(expid), output_file, period_ini, period_fi)
@@ -439,7 +439,7 @@ class Monitor:
         :param expid: experiment's identifier
         :type expid: str
         """
-        search_dir = os.path.join(BasicConfig.LOCAL_ROOT_DIR, expid, "plot")
+        search_dir = os.path.join(APIBasicConfig.LOCAL_ROOT_DIR, expid, "plot")
         chdir(search_dir)
         files = list(filter(path.isfile, listdir(search_dir)))
         files = [path.join(search_dir, f)
@@ -460,7 +460,7 @@ class Monitor:
         :param expid: experiment's identifier
         :type expid: str
         """
-        search_dir = os.path.join(BasicConfig.LOCAL_ROOT_DIR, expid, "plot")
+        search_dir = os.path.join(APIBasicConfig.LOCAL_ROOT_DIR, expid, "plot")
         chdir(search_dir)
         files = list(filter(path.isfile, listdir(search_dir)))
         files = [path.join(search_dir, f) for f in files if 'statistics' in f]
@@ -475,7 +475,7 @@ class Monitor:
     def get_general_stats(expid):
         general_stats = []
         general_stats_path = os.path.join(
-            BasicConfig.LOCAL_ROOT_DIR, expid, "tmp", expid + "_GENERAL_STATS")
+            APIBasicConfig.LOCAL_ROOT_DIR, expid, "tmp", expid + "_GENERAL_STATS")
         parser = AutosubmitConfigResolver.get_parser(
             ConfigParserFactory(), general_stats_path)
         for section in parser.sections():

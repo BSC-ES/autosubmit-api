@@ -6,7 +6,7 @@ import textwrap
 import traceback
 from ...experiment import common_db_requests as DbRequests
 from ...builders.configuration_facade_builder import ConfigurationFacadeDirector, AutosubmitConfigurationFacadeBuilder
-from ...config.basicConfig import BasicConfig
+from ...config.basicConfig import APIBasicConfig
 from configparser import ParsingError
 from collections import namedtuple
 from typing import List, Dict, Any, Tuple
@@ -19,7 +19,7 @@ Experiment = namedtuple("Experiment", ['id', 'name'])
 
 class DetailsProcessor:
   def __init__(self, basic_config):
-    # type: (BasicConfig) -> None
+    # type: (APIBasicConfig) -> None
     self.basic_config = basic_config
     self.main_database_path = os.path.join(self.basic_config.LOCAL_ROOT_DIR, self.basic_config.DB_FILE)
 

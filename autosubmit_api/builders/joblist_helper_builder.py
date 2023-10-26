@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-from ..config.basicConfig import BasicConfig
+from ..config.basicConfig import APIBasicConfig
 from .configuration_facade_builder import AutosubmitConfigurationFacadeBuilder, ConfigurationFacadeDirector
 from .basic_builder import BasicBuilder
 from .pkl_organizer_builder import PklOrganizerBuilder, PklOrganizerDirector
@@ -67,7 +67,7 @@ class JobListHelperDirector:
       self.builder.generate_basic_config()
 
   def build_job_list_helper(self, basic_config=None):
-    # type: (BasicConfig) -> JobListHelper
+    # type: (APIBasicConfig) -> JobListHelper
     self._set_basic_config(basic_config)
     self.builder.generate_autosubmit_configuration_facade()
     self.builder.generate_pkl_organizer()

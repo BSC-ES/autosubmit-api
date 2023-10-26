@@ -3,7 +3,7 @@ from ...autosubmit_legacy.job.job_list import JobList
 from ...database.db_jobdata import JobDataStructure, JobRow
 from ..experiment.configuration_facade import AutosubmitConfigurationFacade
 from ..experiment.pkl_organizer import PklOrganizer
-from ...config.basicConfig import BasicConfig
+from ...config.basicConfig import APIBasicConfig
 from ...autosubmit_legacy.job.job_utils import datechunk_to_year
 from typing import List, Dict
 from .job_factory import Job
@@ -11,8 +11,8 @@ from .job_factory import Job
 class JobListHelper(object):
   """ Loads time (queuing runnning) and packages. Applies the fix for queue time of jobs in wrappers. """
   def __init__(self, expid, configuration_facade, pkl_organizer, basic_config):
-    # type: (str, AutosubmitConfigurationFacade, PklOrganizer, BasicConfig) -> None
-    self.basic_config = basic_config # type: BasicConfig
+    # type: (str, AutosubmitConfigurationFacade, PklOrganizer, APIBasicConfig) -> None
+    self.basic_config = basic_config # type: APIBasicConfig
     self.configuration_facade = configuration_facade # type: AutosubmitConfigurationFacade
     self.pkl_organizer = pkl_organizer # type: PklOrganizer
     self.job_to_package = {} # type: Dict[str, str]

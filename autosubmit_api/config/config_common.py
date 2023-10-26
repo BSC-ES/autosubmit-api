@@ -21,7 +21,7 @@ import os
 import logging
 
 from bscearth.utils.config_parser import ConfigParserFactory, ConfigParser
-from autosubmit_api.config.basicConfig import BasicConfig
+from autosubmit_api.config.basicConfig import APIBasicConfig
 from autosubmit_api.config.ymlConfigStrategy import ymlConfigStrategy
 from autosubmit_api.config.confConfigStrategy import confConfigStrategy
 
@@ -38,7 +38,7 @@ class AutosubmitConfigResolver(object):
     """
 
     def __init__(self, expid, basic_config, parser_factory):
-        # type: (str, BasicConfig, ConfigParserFactory) -> None
+        # type: (str, APIBasicConfig, ConfigParserFactory) -> None
 
         self.expid = expid
         self._configWrapper = None

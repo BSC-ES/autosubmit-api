@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-from ..config.basicConfig import BasicConfig
+from ..config.basicConfig import APIBasicConfig
 from ..config.config_common import AutosubmitConfigResolver
 from .basic_builder import BasicBuilder
 from ..components.experiment.configuration_facade import AutosubmitConfigurationFacade, BasicConfigurationFacade, ConfigurationFacade
@@ -64,12 +64,12 @@ class ConfigurationFacadeDirector(object):
       self.builder.generate_basic_config()
 
   def build_basic_configuration_facade(self, basic_config=None):
-    # type: (BasicConfig) -> BasicConfigurationFacade
+    # type: (APIBasicConfig) -> BasicConfigurationFacade
     self._set_basic_config(basic_config)
     return self.builder.make_configuration_facade()
 
   def build_autosubmit_configuration_facade(self, basic_config=None):
-    # type: (BasicConfig) -> AutosubmitConfigurationFacade
+    # type: (APIBasicConfig) -> AutosubmitConfigurationFacade
     self._set_basic_config(basic_config)
     self.builder.generate_autosubmit_config()
     return self.builder.make_configuration_facade()

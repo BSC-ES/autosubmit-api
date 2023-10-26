@@ -46,7 +46,7 @@ from autosubmit_api.monitor.monitor import Monitor
 
 from autosubmit_api.statistics.statistics import Statistics
 
-from autosubmit_api.config.basicConfig import BasicConfig
+from autosubmit_api.config.basicConfig import APIBasicConfig
 from autosubmit_api.config.config_common import AutosubmitConfigResolver
 from bscearth.utils.config_parser import ConfigParserFactory
 
@@ -61,7 +61,7 @@ from typing import Dict, Any
 import locale
 from autosubmitconfigparser.config.configcommon import AutosubmitConfig as Autosubmit4Config
 
-BasicConfig.read()
+APIBasicConfig.read()
 
 SAFE_TIME_LIMIT = 300
 SAFE_TIME_LIMIT_STATUS = 180
@@ -95,7 +95,7 @@ def get_experiment_stats(expid, filter_period, filter_type):
             period_ini = period_fi - datetime.timedelta(hours=filter_period)
             filtered_jobs = []
             for job in considered_jobs:
-                job_support = JobSupport(expid, job, BasicConfig)
+                job_support = JobSupport(expid, job, APIBasicConfig)
                 if job_support.check_started_after(period_ini) or job_support.check_running_after(period_ini):
                     filtered_jobs.append(job)
             considered_jobs = filtered_jobs
@@ -103,7 +103,7 @@ def get_experiment_stats(expid, filter_period, filter_type):
             period_ini = None
 
         if len(considered_jobs) > 0:
-            statistics = Statistics(expid=expid, jobs=considered_jobs, start=period_ini, end=period_fi, queue_time_fix={}, basic_config=BasicConfig)
+            statistics = Statistics(expid=expid, jobs=considered_jobs, start=period_ini, end=period_fi, queue_time_fix={}, basic_config=APIBasicConfig)
             result = statistics.get_statistics()
             statistics.calculate_summary()
             summary = statistics.get_summary_as_dict()
@@ -210,17 +210,17 @@ def _is_exp_running(expid, time_condition=300):
     timediff = 0
     definite_log_path = None
     try:
-        BasicConfig.read()
-        pathlog_aslog = BasicConfig.LOCAL_ROOT_DIR + '/' + expid + '/' + \
-            BasicConfig.LOCAL_TMP_DIR + '/' + BasicConfig.LOCAL_ASLOG_DIR
-        pathlog_tmp = BasicConfig.LOCAL_ROOT_DIR + '/' + \
-            expid + '/' + BasicConfig.LOCAL_TMP_DIR
+        APIBasicConfig.read()
+        pathlog_aslog = APIBasicConfig.LOCAL_ROOT_DIR + '/' + expid + '/' + \
+            APIBasicConfig.LOCAL_TMP_DIR + '/' + APIBasicConfig.LOCAL_ASLOG_DIR
+        pathlog_tmp = APIBasicConfig.LOCAL_ROOT_DIR + '/' + \
+            expid + '/' + APIBasicConfig.LOCAL_TMP_DIR
         # Basic Configuration
         look_old_folder = False
         current_version = None
         try:
             as_conf = AutosubmitConfigResolver(
-                expid, BasicConfig, ConfigParserFactory())
+                expid, APIBasicConfig, ConfigParserFactory())
             as_conf.reload()
             current_version = as_conf.get_version()
         except Exception as exp:
@@ -290,7 +290,7 @@ def get_experiment_summary(expid, log):
     :rtype expid: str
     :return: Object
     """
-    BasicConfig.read()
+    APIBasicConfig.read()
 
     running = suspended = queuing = failed = submitted = total_q_time = total_r_time = 0
     q_count = r_count = 0
@@ -304,10 +304,10 @@ def get_experiment_summary(expid, log):
     error_message = ""
     try:
         # Basic paths
-        BasicConfig.read()
-        path = BasicConfig.LOCAL_ROOT_DIR + '/' + expid + '/pkl'
+        APIBasicConfig.read()
+        path = APIBasicConfig.LOCAL_ROOT_DIR + '/' + expid + '/pkl'
         tmp_path = os.path.join(
-            BasicConfig.LOCAL_ROOT_DIR, expid, BasicConfig.LOCAL_TMP_DIR)
+            APIBasicConfig.LOCAL_ROOT_DIR, expid, APIBasicConfig.LOCAL_TMP_DIR)
         pkl_filename = "job_list_" + str(expid) + ".pkl"
         path_pkl = path + "/" + pkl_filename
         # Try to get packages
@@ -316,7 +316,7 @@ def get_experiment_summary(expid, log):
         package_to_package_id = dict()
         package_to_symbol = dict()
         job_to_package, package_to_jobs, package_to_package_id, package_to_symbol = JobList.retrieve_packages(
-            BasicConfig, expid)
+            APIBasicConfig, expid)
         # Basic data
         job_running_to_seconds = dict()
         job_running_to_runtext = dict()
@@ -339,7 +339,7 @@ def get_experiment_summary(expid, log):
                 fakeAllJobs.append(
                     LegacyJobUtils.SimpleJob(job_name, tmp_path, status_code))
             job_running_to_seconds, job_running_to_runtext, _ = JobList.get_job_times_collection(
-                BasicConfig, fakeAllJobs, expid, job_to_package, package_to_jobs, timeseconds=True)
+                APIBasicConfig, fakeAllJobs, expid, job_to_package, package_to_jobs, timeseconds=True)
 
         # Main Loop
         if len(list(job_running_to_seconds.keys())) > 0:
@@ -501,13 +501,13 @@ def get_experiment_log_last_lines(expid):
     reading = ""
 
     try:
-        BasicConfig.read()
-        path = BasicConfig.LOCAL_ROOT_DIR + '/' + expid + '/' + BasicConfig.LOCAL_TMP_DIR + '/' + BasicConfig.LOCAL_ASLOG_DIR
+        APIBasicConfig.read()
+        path = APIBasicConfig.LOCAL_ROOT_DIR + '/' + expid + '/' + APIBasicConfig.LOCAL_TMP_DIR + '/' + APIBasicConfig.LOCAL_ASLOG_DIR
         reading = os.popen('ls -t ' + path + ' | grep "run.log"').read() if (os.path.exists(path)) else ""
 
         # Finding log files
         if len(reading) == 0:
-            path = BasicConfig.LOCAL_ROOT_DIR + '/' + expid + '/' + BasicConfig.LOCAL_TMP_DIR
+            path = APIBasicConfig.LOCAL_ROOT_DIR + '/' + expid + '/' + APIBasicConfig.LOCAL_TMP_DIR
             reading = os.popen('ls -t ' + path + ' | grep "run.log"').read() if (os.path.exists(path)) else ""
 
         if len(reading) > 0:
@@ -550,8 +550,8 @@ def get_job_log(expid, logfile, nlines=150):
     error_message = ""
     logcontent = []
     reading = ""
-    BasicConfig.read()
-    logfilepath = os.path.join(BasicConfig.LOCAL_ROOT_DIR, expid, BasicConfig.LOCAL_TMP_DIR, "LOG_{0}".format(expid), logfile)
+    APIBasicConfig.read()
+    logfilepath = os.path.join(APIBasicConfig.LOCAL_ROOT_DIR, expid, APIBasicConfig.LOCAL_TMP_DIR, "LOG_{0}".format(expid), logfile)
     try:
         if os.path.exists(logfilepath):
             current_stat = os.stat(logfilepath)
@@ -701,9 +701,9 @@ def get_experiment_graph(expid, log, layout=Layout.STANDARD, grouped=GroupedBy.N
     Gets graph representation
     """
     try:
-        BasicConfig.read()
+        APIBasicConfig.read()
         autosubmit_configuration_facade = AutosubmitConfigResolver(
-            expid, BasicConfig, ConfigParserFactory())
+            expid, APIBasicConfig, ConfigParserFactory())
         autosubmit_configuration_facade.reload()
 
         if common_utils.is_version_historical_ready(autosubmit_configuration_facade.get_version()):
@@ -739,8 +739,8 @@ def get_experiment_tree_rundetail(expid, run_id):
     pkl_timestamp = 10000000
     try:
         print(("Received Tree RunDetail " + str(expid)))
-        BasicConfig.read()
-        tree_structure, current_collection, reference = JobList.get_tree_structured_from_previous_run(expid, BasicConfig, run_id=run_id)
+        APIBasicConfig.read()
+        tree_structure, current_collection, reference = JobList.get_tree_structured_from_previous_run(expid, APIBasicConfig, run_id=run_id)
         base_list['tree'] = tree_structure
         base_list['jobs'] = current_collection
         base_list['total'] = len(current_collection)
@@ -765,7 +765,7 @@ def get_experiment_tree_structured(expid, log):
 
     try:
         notransitive = False
-        BasicConfig.read()
+        APIBasicConfig.read()
 
         # TODO: Encapsulate this following 2 lines or move to the parent function in app.py
         curr_exp_as_version = db_common.get_autosubmit_version(expid, log)
@@ -774,7 +774,7 @@ def get_experiment_tree_structured(expid, log):
             as_conf = Autosubmit4Config(expid)
             as_conf.reload(True)
         else:
-            as_conf = AutosubmitConfigResolver(expid, BasicConfig, ConfigParserFactory())
+            as_conf = AutosubmitConfigResolver(expid, APIBasicConfig, ConfigParserFactory())
             as_conf.reload()
 
         if common_utils.is_version_historical_ready(as_conf.get_version()):
@@ -990,8 +990,8 @@ def get_job_conf_list(expid):
     Gets list of jobs with attributes from parser
     """
     try:
-        BasicConfig.read()
-        as_conf = AutosubmitConfigResolver(expid, BasicConfig, ConfigParserFactory())
+        APIBasicConfig.read()
+        as_conf = AutosubmitConfigResolver(expid, APIBasicConfig, ConfigParserFactory())
         if not as_conf.check_conf_files():
             print('Can not create with invalid configuration')
             return None
@@ -1032,8 +1032,8 @@ def get_auto_conf_data(expid):
     try:
         wrapper_type = "None"
         max_wrapped = 0
-        BasicConfig.read()
-        as_conf = AutosubmitConfigResolver(expid, BasicConfig, ConfigParserFactory())
+        APIBasicConfig.read()
+        as_conf = AutosubmitConfigResolver(expid, APIBasicConfig, ConfigParserFactory())
         if not as_conf.check_conf_files():
             #print('Can not create with invalid configuration')
             return (wrapper_type, max_wrapped)
@@ -1052,11 +1052,11 @@ def verify_last_completed(seconds=300):
     """
     # Basic info
     t0 = time.time()
-    BasicConfig.read()
+    APIBasicConfig.read()
     # Current timestamp
     current_st = time.time()
     # Connection
-    path = BasicConfig.LOCAL_ROOT_DIR
+    path = APIBasicConfig.LOCAL_ROOT_DIR
     db_file = os.path.join(path, DbRequests.DB_FILE_AS_TIMES)
     conn = DbRequests.create_connection(db_file)
     # Current latest detail
@@ -1066,7 +1066,7 @@ def verify_last_completed(seconds=300):
     # Main Loop
     for job_name, detail in list(latest_detail.items()):
         tmp_path = os.path.join(
-            BasicConfig.LOCAL_ROOT_DIR, job_name[:4], BasicConfig.LOCAL_TMP_DIR)
+            APIBasicConfig.LOCAL_ROOT_DIR, job_name[:4], APIBasicConfig.LOCAL_TMP_DIR)
         detail_id, submit, start, finish, status = detail
         submit_time, start_time, finish_time, status_text_res = JobList._job_running_check(
             common_utils.Status.COMPLETED, job_name, tmp_path)
@@ -1101,8 +1101,8 @@ def get_experiment_counters(expid):
     error_message = ""
     total = 0
     experiment_counters = dict()
-    BasicConfig.read()
-    path_pkl = os.path.join(BasicConfig.LOCAL_ROOT_DIR,
+    APIBasicConfig.read()
+    path_pkl = os.path.join(APIBasicConfig.LOCAL_ROOT_DIR,
                             expid, "pkl", "job_list_{}.pkl".format(expid))
     # Default counter per status
     experiment_counters = {name: 0 for name in common_utils.Status.STRING_TO_CODE}
@@ -1142,16 +1142,16 @@ def get_quick_view(expid):
     fakeAllJobs = []
     total_count = completed_count = failed_count = running_count = queuing_count = 0
     try:
-        BasicConfig.read()
-        path_pkl = BasicConfig.LOCAL_ROOT_DIR + '/' + expid + '/pkl'
+        APIBasicConfig.read()
+        path_pkl = APIBasicConfig.LOCAL_ROOT_DIR + '/' + expid + '/pkl'
         pkl_file = os.path.join(path_pkl, "job_list_{0}.pkl".format(expid))
-        path_to_logs = os.path.join(BasicConfig.LOCAL_ROOT_DIR, expid, "tmp", "LOG_" + expid)
-        tmp_path = os.path.join(BasicConfig.LOCAL_ROOT_DIR, expid, BasicConfig.LOCAL_TMP_DIR)
+        path_to_logs = os.path.join(APIBasicConfig.LOCAL_ROOT_DIR, expid, "tmp", "LOG_" + expid)
+        tmp_path = os.path.join(APIBasicConfig.LOCAL_ROOT_DIR, expid, APIBasicConfig.LOCAL_TMP_DIR)
         if os.path.exists(pkl_file):
             # Retrieving packages
             now_ = time.time()
             job_to_package, package_to_jobs, package_to_package_id, package_to_symbol = JobList.retrieve_packages(
-                BasicConfig, expid)
+                APIBasicConfig, expid)
             print(("Retrieving packages {0} seconds.".format(
                 str(time.time() - now_))))
 
@@ -1234,8 +1234,8 @@ def get_job_history(expid, job_name):
     path_to_job_logs = ""
     result = None
     try:
-        BasicConfig.read()
-        path_to_job_logs = os.path.join(BasicConfig.LOCAL_ROOT_DIR, expid, "tmp", "LOG_" + expid)
+        APIBasicConfig.read()
+        path_to_job_logs = os.path.join(APIBasicConfig.LOCAL_ROOT_DIR, expid, "tmp", "LOG_" + expid)
         result = ExperimentHistoryDirector(ExperimentHistoryBuilder(expid)).build_reader_experiment_history().get_historic_job_data(job_name)
     except Exception as exp:
         print((traceback.format_exc()))
@@ -1272,8 +1272,8 @@ def get_current_configuration_by_expid(expid, valid_user, log):
 
     try:
         allowedConfigKeys = ['conf', 'exp', 'jobs', 'platforms', 'proj']
-        BasicConfig.read()
-        historicalDatabase = JobData.JobDataStructure(expid, BasicConfig)
+        APIBasicConfig.read()
+        historicalDatabase = JobData.JobDataStructure(expid, APIBasicConfig)
         experimentRun = historicalDatabase.get_max_id_experiment_run()
         currentMetadata = json.loads(
             experimentRun.metadata) if experimentRun and experimentRun.metadata else None
@@ -1287,9 +1287,9 @@ def get_current_configuration_by_expid(expid, valid_user, log):
         currentRunConfig["contains_nones"] = True if not currentMetadata or None in list(currentMetadata.values(
         )) else False
 
-        BasicConfig.read()
+        APIBasicConfig.read()
         autosubmitConfig = AutosubmitConfigResolver(
-            expid, BasicConfig, ConfigParserFactory())
+            expid, APIBasicConfig, ConfigParserFactory())
         try:
             autosubmitConfig.reload()
             currentFileSystemConfigContent = autosubmitConfig.get_full_config_as_dict()

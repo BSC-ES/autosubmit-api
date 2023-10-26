@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-from ..config.basicConfig import BasicConfig
+from ..config.basicConfig import APIBasicConfig
 from ..components.experiment.pkl_organizer import PklOrganizer
 from .configuration_facade_builder import AutosubmitConfigurationFacadeBuilder, ConfigurationFacadeDirector
 from .basic_builder import BasicBuilder
@@ -40,7 +40,7 @@ class PklOrganizerDirector:
       self.builder.generate_basic_config()
 
   def build_pkl_organizer(self, basic_config=None):
-    # type: (BasicConfig) -> PklOrganizer
+    # type: (APIBasicConfig) -> PklOrganizer
     self._set_basic_config(basic_config)
     self.builder.generate_autosubmit_configuration_facade()
     return self.builder.make_pkl_organizer()

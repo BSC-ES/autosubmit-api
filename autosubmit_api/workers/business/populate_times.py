@@ -6,7 +6,7 @@ import socket
 import pickle
 from autosubmit_api.experiment import common_db_requests as DbRequests
 from autosubmit_api.autosubmit_legacy.job.job_list import JobList
-from autosubmit_api.config.basicConfig import BasicConfig
+from autosubmit_api.config.basicConfig import APIBasicConfig
 from autosubmit_api.database.autosubmit import Autosubmit
 from autosubmit_api.common.utils import Status
 
@@ -23,8 +23,8 @@ def process_completed_times(time_condition=60):
     try:
         t0 = time.time()
         DEBUG = False
-        BasicConfig.read()
-        path = BasicConfig.LOCAL_ROOT_DIR
+        APIBasicConfig.read()
+        path = APIBasicConfig.LOCAL_ROOT_DIR
         # Time test for data retrieval
         # All experiment from file system
         currentDirectories = subprocess.Popen(['ls', '-t', path],
@@ -66,16 +66,16 @@ def process_completed_times(time_condition=60):
                 # Pkl exists but is not registered in the table
                 # INSERT
                 print("Pkl of " + exp_str + " exists but not in the table: INSERT")
-                current_id = _process_pkl_insert_times(exp_str, full_path, timest, BasicConfig, DEBUG)
+                current_id = _process_pkl_insert_times(exp_str, full_path, timest, APIBasicConfig, DEBUG)
                 _process_details_insert_or_update(exp_str, experiments_table_exp_id, experiments_table_exp_id in details_table_ids_set)
             else:
                 exp_id, created, modified, total_jobs, completed_jobs = current_table[exp_str]
                 time_diff = int(timest - modified)
                 print("Pkl of " + exp_str + " exists")
-                current_id = _process_pkl_insert_times(exp_str, full_path, timest, BasicConfig, DEBUG)
+                current_id = _process_pkl_insert_times(exp_str, full_path, timest, APIBasicConfig, DEBUG)
                 if time_diff > time_condition:
                     # Update table
-                    _process_pkl_update_times(exp_str, full_path, timest, BasicConfig, exp_id, DEBUG)
+                    _process_pkl_update_times(exp_str, full_path, timest, APIBasicConfig, exp_id, DEBUG)
                     _process_details_insert_or_update(exp_str, experiments_table_exp_id, experiments_table_exp_id in details_table_ids_set)
                 DbRequests.update_experiment_times_only_modified(exp_id, timest)
             t1 = time.time()

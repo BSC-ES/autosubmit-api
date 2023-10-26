@@ -25,7 +25,7 @@ from pysqlite3 import dbapi2
 import pysqlite3 as sqlite3
 
 from bscearth.utils.log import Log
-from ..config.basicConfig import BasicConfig
+from ..config.basicConfig import APIBasicConfig
 from ..config.config_common import AutosubmitConfigResolver
 from ..builders.experiment_history_builder import ExperimentHistoryDirector, ExperimentHistoryBuilder
 from ..builders.configuration_facade_builder import ConfigurationFacadeDirector, AutosubmitConfigurationFacadeBuilder
@@ -56,7 +56,7 @@ def create_db(qry):
     except sqlite3.Error:
         close_conn(conn, cursor)
         Log.error('The database can not be created.' +
-                  'DB file:' + BasicConfig.DB_PATH)
+                  'DB file:' + APIBasicConfig.DB_PATH)
         return False
 
     conn.commit()
@@ -70,10 +70,10 @@ def check_db():
 
     :return: None if exists, terminates program if not
     """
-    BasicConfig.read()
-    if not os.path.exists(BasicConfig.DB_PATH):
+    APIBasicConfig.read()
+    if not os.path.exists(APIBasicConfig.DB_PATH):
         Log.error('Some problem has happened...check the database file.' +
-                  'DB file:' + BasicConfig.DB_PATH)
+                  'DB file:' + APIBasicConfig.DB_PATH)
         return False
     return True
 
@@ -87,9 +87,9 @@ def open_conn(check_version=True):
     :return: connection object, cursor object
     :rtype: sqlite3.Connection, sqlite3.Cursor
     """
-    BasicConfig.read()
-    print((BasicConfig.DB_PATH))
-    conn = sqlite3.connect(BasicConfig.DB_PATH)
+    APIBasicConfig.read()
+    print((APIBasicConfig.DB_PATH))
+    conn = sqlite3.connect(APIBasicConfig.DB_PATH)
     cursor = conn.cursor()
 
     # Getting database version
@@ -417,7 +417,7 @@ def get_current_running_exp():
             'Connection to database could not be established: {0}', e.message)
         return False
     query = "SELECT id,name,user,created,model,branch,hpc,description FROM listexp"
-    BasicConfig.read()
+    APIBasicConfig.read()
     # print(query)
     cursor.execute(query)
     table = cursor.fetchall()
@@ -457,7 +457,7 @@ def get_current_running_exp():
             if (expid in experiment_times):
                 if len(user) == 0:
                     # Retrieve user from path
-                    path = BasicConfig.LOCAL_ROOT_DIR + '/' + expid
+                    path = APIBasicConfig.LOCAL_ROOT_DIR + '/' + expid
                     if (os.path.exists(path)):
                         main_folder = os.stat(path)
                         user = os.popen(

@@ -27,7 +27,7 @@ from networkx import DiGraph
 from networkx import dfs_edges
 from networkx import NetworkXError
 from .job_package_persistence import JobPackagePersistence
-from ...config.basicConfig import BasicConfig
+from ...config.basicConfig import APIBasicConfig
 
 
 def transitive_reduction(graph):
@@ -61,7 +61,7 @@ def get_job_package_code(expid, job_name):
     :rtype: int or None
     """
     try:
-        basic_conf = BasicConfig()
+        basic_conf = APIBasicConfig()
         basic_conf.read()
         packages_wrapper = JobPackagePersistence(os.path.join(basic_conf.LOCAL_ROOT_DIR, expid, "pkl"),"job_packages_" + expid).load(wrapper=True)
         packages_wrapper_plus = JobPackagePersistence(os.path.join(basic_conf.LOCAL_ROOT_DIR, expid, "pkl"),"job_packages_" + expid).load(wrapper=False)

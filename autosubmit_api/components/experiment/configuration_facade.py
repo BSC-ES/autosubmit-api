@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 import os
-from ...config.basicConfig import BasicConfig
+from ...config.basicConfig import APIBasicConfig
 from ..jobs.job_factory import SimJob, Job
 from ...config.config_common import AutosubmitConfigResolver
 from bscearth.utils.config_parser import ConfigParserFactory
@@ -18,8 +18,8 @@ class ConfigurationFacade(metaclass=ABCMeta):
   """
 
   def __init__(self, expid, basic_config):
-    # type: (str, BasicConfig) -> None
-    self.basic_configuration = basic_config # type: BasicConfig
+    # type: (str, APIBasicConfig) -> None
+    self.basic_configuration = basic_config # type: APIBasicConfig
     self.expid = expid # type: str
     self.experiment_path = "" # type: str
     self.pkl_path = "" # type: str
@@ -83,7 +83,7 @@ class ConfigurationFacade(metaclass=ABCMeta):
 class BasicConfigurationFacade(ConfigurationFacade):
   """ BasicConfig and paths """
   def __init__(self, expid, basic_config):
-    # type: (str, BasicConfig) -> None
+    # type: (str, APIBasicConfig) -> None
     super(BasicConfigurationFacade, self).__init__(expid, basic_config)
 
   def _process_advanced_config(self):
@@ -110,7 +110,7 @@ class BasicConfigurationFacade(ConfigurationFacade):
 class AutosubmitConfigurationFacade(ConfigurationFacade):
   """ Provides an interface to the Configuration of the experiment.  """
   def __init__(self, expid, basic_config, autosubmit_config):
-    # type: (str, BasicConfig, AutosubmitConfigResolver) -> None
+    # type: (str, APIBasicConfig, AutosubmitConfigResolver) -> None
     super(AutosubmitConfigurationFacade, self).__init__(expid, basic_config)
     self.autosubmit_conf = autosubmit_config
     self._process_advanced_config()

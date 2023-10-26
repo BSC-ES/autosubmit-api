@@ -2,13 +2,13 @@
 
 import history.database_managers.database_models as Models
 from history.database_managers.database_manager import DatabaseManager
-from config.basicConfig import BasicConfig
+from config.basicConfig import APIBasicConfig
 from typing import List
 
 class ExperimentDbManager(DatabaseManager):
   # The current implementation only handles the experiment table. The details table is ignored because it is handled by a different worker.
   def __init__(self, basic_config, expid):
-    # type: (BasicConfig, str) -> None
+    # type: (APIBasicConfig, str) -> None
     super(ExperimentDbManager, self).__init__(expid, basic_config)
     self.basic_config = basic_config
     self._ecearth_file_path = self.basic_config.DB_PATH

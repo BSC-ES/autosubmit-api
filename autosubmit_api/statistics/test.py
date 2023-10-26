@@ -6,7 +6,7 @@ from statistics.statistics import Statistics
 from monitor.monitor import Monitor
 # from autosubmitAPIwu.job.job_common import Status
 from autosubmit_legacy.job.job_utils import SubJobManager, SubJob
-from config.basicConfig import BasicConfig
+from config.basicConfig import APIBasicConfig
 from config.config_common import AutosubmitConfigResolver
 from bscearth.utils.config_parser import ConfigParserFactory
 from autosubmit_legacy.autosubmit import Autosubmit
@@ -26,16 +26,16 @@ class TestStatistics(unittest.TestCase):
     ft = "Any"
     results = None
     subjobs = list()
-    BasicConfig.read()
-    path_structure = BasicConfig.STRUCTURES_DIR
-    path_local_root = BasicConfig.LOCAL_ROOT_DIR
-    as_conf = AutosubmitConfigResolver(expid, BasicConfig, ConfigParserFactory())
+    APIBasicConfig.read()
+    path_structure = APIBasicConfig.STRUCTURES_DIR
+    path_local_root = APIBasicConfig.LOCAL_ROOT_DIR
+    as_conf = AutosubmitConfigResolver(expid, APIBasicConfig, ConfigParserFactory())
     as_conf.reload()
     job_list = Autosubmit.load_job_list(expid, as_conf, False)
     jobs_considered = [job for job in job_list.get_job_list() if job.status not in [
             Status.READY, Status.WAITING]]
     job_to_package, package_to_jobs, _, _ = JobList.retrieve_packages(
-            BasicConfig, expid, [job.name for job in job_list.get_job_list()])
+            APIBasicConfig, expid, [job.name for job in job_list.get_job_list()])
     db_file = os.path.join(path_local_root, "ecearth.db")
     conn = DbRequests.create_connection(db_file)
     # Job information from worker database

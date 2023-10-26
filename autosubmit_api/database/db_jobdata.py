@@ -33,7 +33,7 @@ from datetime import datetime, timedelta
 from json import dumps, loads
 from time import mktime
 # from networkx import DiGraph
-from ..config.basicConfig import BasicConfig
+from ..config.basicConfig import APIBasicConfig
 from ..monitor.monitor import Monitor
 from ..autosubmit_legacy.job.job_utils import job_times_to_text, getTitle
 from ..performance.utils import calculate_ASYPD_perjob, calculate_SYPD_perjob
@@ -552,9 +552,9 @@ class ExperimentGraphDrawing(MainDataBase):
         :type allJobs: list()
         """
         MainDataBase.__init__(self, expid)
-        BasicConfig.read()
+        APIBasicConfig.read()
         self.expid = expid
-        self.folder_path = BasicConfig.LOCAL_ROOT_DIR
+        self.folder_path = APIBasicConfig.LOCAL_ROOT_DIR
         self.database_path = os.path.join(
             self.folder_path, "as_metadata", "graph" , "graph_data_" + str(expid) + ".db")
         self.create_table_query = textwrap.dedent(

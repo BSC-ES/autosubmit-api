@@ -2,7 +2,7 @@ import os
 import time
 from common.utils import get_experiments_from_folder
 # from autosubmitAPIwu.job.job_utils import get_job_package_code
-from config.basicConfig import BasicConfig
+from config.basicConfig import APIBasicConfig
 from history.database_managers.experiment_history_db_manager import ExperimentHistoryDbManager
 # from components.jobs.joblist_loader import JobListLoader
 from builders.joblist_loader_builder import JobListLoaderBuilder, JobListLoaderDirector
@@ -11,21 +11,21 @@ from history.experiment_history import ExperimentHistory
 from history.platform_monitor.slurm_monitor import SlurmMonitor
 from history.strategies import PlatformInformationHandler, SingleAssociationStrategy, StraightWrapperAssociationStrategy, TwoDimWrapperDistributionStrategy, GeneralizedWrapperDistributionStrategy
 
-BasicConfig.read()
+APIBasicConfig.read()
 
 ignore_list = ["a4a6"]
 
 def get_version17_wrapper_experiments():
-  experiments = get_experiments_from_folder(BasicConfig.LOCAL_ROOT_DIR)
+  experiments = get_experiments_from_folder(APIBasicConfig.LOCAL_ROOT_DIR)
   wrapper_experiments = []
   normal_experiments = []
   for exp in experiments:
     try:
-      pkl_path = os.path.join(BasicConfig.LOCAL_ROOT_DIR, exp, "pkl", "job_list_{0}.pkl".format(exp))
+      pkl_path = os.path.join(APIBasicConfig.LOCAL_ROOT_DIR, exp, "pkl", "job_list_{0}.pkl".format(exp))
       if os.path.exists(pkl_path):
         time_diff = int(time.time()) - int(os.stat(pkl_path).st_mtime)
         if time_diff <= 86400:
-          manager = ExperimentHistoryDbManager(exp, BasicConfig)
+          manager = ExperimentHistoryDbManager(exp, APIBasicConfig)
           if manager.my_database_exists():
             if manager._get_pragma_version() >= 17:
               experiment_run = manager.get_experiment_run_dc_with_max_id()
@@ -92,16 +92,16 @@ def update_old_data():
           # print("Jobs in wrapper {}".format(len(job_data_dcs_completed_in_wrapper)))
           job_data_dcs_to_update = []
           if len(job_data_dcs_completed_in_wrapper) > 0:
-            info_handler = PlatformInformationHandler(StraightWrapperAssociationStrategy(BasicConfig.HISTORICAL_LOG_DIR))
+            info_handler = PlatformInformationHandler(StraightWrapperAssociationStrategy(APIBasicConfig.HISTORICAL_LOG_DIR))
             job_data_dcs_to_update = info_handler.execute_distribution(job_data_dc, job_data_dcs_completed_in_wrapper, slurm_monitor)
             if len(job_data_dcs_to_update) == 0:
-              info_handler.strategy = TwoDimWrapperDistributionStrategy(BasicConfig.HISTORICAL_LOG_DIR)
+              info_handler.strategy = TwoDimWrapperDistributionStrategy(APIBasicConfig.HISTORICAL_LOG_DIR)
               job_data_dcs_to_update = info_handler.execute_distribution(job_data_dc, job_data_dcs_completed_in_wrapper, slurm_monitor)
             if len(job_data_dcs_to_update) == 0:
-              info_handler.strategy = GeneralizedWrapperDistributionStrategy(BasicConfig.HISTORICAL_LOG_DIR)
+              info_handler.strategy = GeneralizedWrapperDistributionStrategy(APIBasicConfig.HISTORICAL_LOG_DIR)
               job_data_dcs_to_update = info_handler.execute_distribution(job_data_dc, job_data_dcs_completed_in_wrapper, slurm_monitor)
           else:
-            info_handler = PlatformInformationHandler(SingleAssociationStrategy(BasicConfig.HISTORICAL_LOG_DIR))
+            info_handler = PlatformInformationHandler(SingleAssociationStrategy(APIBasicConfig.HISTORICAL_LOG_DIR))
             job_data_dcs_to_update = info_handler.execute_distribution(job_data_dc, job_data_dcs_completed_in_wrapper, slurm_monitor)
           updates_count = history.manager.update_list_job_data_dc_by_each_id(job_data_dcs_to_update)
           # if updates_count > 0:

@@ -33,7 +33,7 @@ from autosubmit_api.experiment import common_requests as CommonRequests
 from autosubmit_api.experiment import utils as Utiles
 from autosubmit_api.performance.performance_metrics import PerformanceMetrics
 from autosubmit_api.database.db_common import search_experiment_by_id
-from autosubmit_api.config.basicConfig import BasicConfig
+from autosubmit_api.config.basicConfig import APIBasicConfig
 from autosubmit_api.builders.joblist_helper_builder import JobListHelperBuilder, JobListHelperDirector
 from multiprocessing import Manager, Lock
 import jwt
@@ -121,7 +121,7 @@ def create_app():
         populate_graph.main()
 
     # Prepare DB
-    config = BasicConfig()
+    config = APIBasicConfig()
     config.read()
     ext_db = ExtendedDB(config.DB_DIR, config.DB_FILE, config.AS_TIMES_DB)
     ext_db.prepare_db()
@@ -137,12 +137,12 @@ def create_app():
     # CAS Login
     @app.route('/login')
     def login():
-        BasicConfig.read()
+        APIBasicConfig.read()
         ticket = request.args.get('ticket')
         environment = request.args.get('env')
         referrer = request.referrer
         is_allowed = False
-        for allowed_client in BasicConfig.ALLOWED_CLIENTS:
+        for allowed_client in APIBasicConfig.ALLOWED_CLIENTS:
             if referrer and referrer.find(allowed_client) >= 0:
                 referrer = allowed_client
                 is_allowed = True

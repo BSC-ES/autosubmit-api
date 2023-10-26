@@ -20,7 +20,7 @@ import pysqlite3 as sqlite3
 import os
 from .. import utils as HUtils
 from . import database_models as Models
-from ...config.basicConfig import BasicConfig
+from ...config.basicConfig import APIBasicConfig
 from abc import ABCMeta, abstractmethod
 
 DEFAULT_JOBDATA_DIR = os.path.join('/esarchive', 'autosubmit', 'as_metadata', 'data')
@@ -32,7 +32,7 @@ class DatabaseManager(metaclass=ABCMeta):
   AS_TIMES_DB_NAME = "as_times.db" # default AS_TIMES location
   ECEARTH_DB_NAME = "ecearth.db" # default EC_EARTH_DB_NAME location
   def __init__(self, expid, basic_config):
-    # type: (str, BasicConfig) -> None
+    # type: (str, APIBasicConfig) -> None
     self.expid = expid
     self.JOBDATA_DIR = basic_config.JOBDATA_DIR
     self.LOCAL_ROOT_DIR = basic_config.LOCAL_ROOT_DIR

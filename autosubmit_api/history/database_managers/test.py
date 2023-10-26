@@ -27,7 +27,7 @@ from autosubmit_api.history.database_managers.experiment_status_db_manager impor
 from autosubmit_api.history.data_classes.experiment_run import ExperimentRun
 from autosubmit_api.history.data_classes.job_data import JobData
 import autosubmit_api.history.database_managers.database_models as Models
-from autosubmit_api.config.basicConfig import BasicConfig
+from autosubmit_api.config.basicConfig import APIBasicConfig
 import autosubmit_api.history.utils as HUtils
 
 EXPID_TT00_SOURCE = "test_database.db~"
@@ -35,14 +35,14 @@ EXPID_TT01_SOURCE = "test_database_no_run.db~"
 EXPID = "t024"
 EXPID_NONE = "t027"
 # BasicConfig.read()
-JOBDATA_DIR = BasicConfig.JOBDATA_DIR
-LOCAL_ROOT_DIR = BasicConfig.LOCAL_ROOT_DIR
+JOBDATA_DIR = APIBasicConfig.JOBDATA_DIR
+LOCAL_ROOT_DIR = APIBasicConfig.LOCAL_ROOT_DIR
 
 class TestExperimentStatusDatabaseManager(unittest.TestCase):
   """ Covers Experiment Status Database Manager """
   def setUp(self):
-    BasicConfig.read()
-    self.exp_status_db = ExperimentStatusDbManager(EXPID, BasicConfig)
+    APIBasicConfig.read()
+    self.exp_status_db = ExperimentStatusDbManager(EXPID, APIBasicConfig)
     if self.exp_status_db.get_experiment_status_row_by_expid(EXPID) == None:
       self.exp_status_db.create_exp_status(7375, "t024", "NOT RUNNING")
 
@@ -77,14 +77,14 @@ class TestExperimentStatusDatabaseManager(unittest.TestCase):
 class TestExperimentHistoryDbManager(unittest.TestCase):
   """ Covers Experiment History Database Manager and Data Models """
   def setUp(self):
-    BasicConfig.read()
+    APIBasicConfig.read()
     source_path_tt00 = os.path.join(JOBDATA_DIR, EXPID_TT00_SOURCE)
     self.target_path_tt00 = os.path.join(JOBDATA_DIR, "job_data_{0}.db".format(EXPID))
     copy2(source_path_tt00, self.target_path_tt00)
     source_path_tt01 = os.path.join(JOBDATA_DIR, EXPID_TT01_SOURCE)
     self.target_path_tt01 = os.path.join(JOBDATA_DIR, "job_data_{0}.db".format(EXPID_NONE))
     copy2(source_path_tt01, self.target_path_tt01)
-    self.experiment_database = ExperimentHistoryDbManager(EXPID, BasicConfig)
+    self.experiment_database = ExperimentHistoryDbManager(EXPID, APIBasicConfig)
     self.experiment_database.initialize()
 
   def tearDown(self):
@@ -200,7 +200,7 @@ class TestExperimentHistoryDbManager(unittest.TestCase):
     self.experiment_database.update_many_job_data_change_status(backup_changes)
 
   def test_job_data_maxcounter(self):
-    new_job_data = ExperimentHistoryDbManager(EXPID_NONE, BasicConfig)
+    new_job_data = ExperimentHistoryDbManager(EXPID_NONE, APIBasicConfig)
     new_job_data.initialize()
     max_empty_table_counter = new_job_data.get_job_data_max_counter()
     self.assertTrue(max_empty_table_counter == 0)
@@ -253,7 +253,7 @@ class TestExperimentHistoryDbManager(unittest.TestCase):
     self.assertIsNotNone(experiment_run)
 
   def test_if_database_not_exists(self):
-    exp_manager = ExperimentHistoryDbManager("0000", BasicConfig)
+    exp_manager = ExperimentHistoryDbManager("0000", APIBasicConfig)
     self.assertTrue(exp_manager.my_database_exists() == False)
 
 

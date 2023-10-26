@@ -24,7 +24,7 @@ from xml.dom.minidom import parseString
 from .paramiko_platform import ParamikoPlatform
 from .headers.slurm_header import SlurmHeader
 from .wrappers.wrapper_factory import SlurmWrapperFactory
-from ...config.basicConfig import BasicConfig
+from ...config.basicConfig import APIBasicConfig
 
 
 class SlurmPlatform(ParamikoPlatform):
@@ -50,10 +50,10 @@ class SlurmPlatform(ParamikoPlatform):
         self._allow_wrappers = True
         self.update_cmds()
 
-        exp_id_path = os.path.join(BasicConfig.LOCAL_ROOT_DIR, self.expid)
+        exp_id_path = os.path.join(APIBasicConfig.LOCAL_ROOT_DIR, self.expid)
         tmp_path = os.path.join(exp_id_path, "tmp")
         self._submit_script_path = os.path.join(
-            tmp_path, BasicConfig.LOCAL_ASLOG_DIR, "submit_" + self.name + ".sh")
+            tmp_path, APIBasicConfig.LOCAL_ASLOG_DIR, "submit_" + self.name + ".sh")
         # No need to write from API
         # self._submit_script_file = open(self._submit_script_path, 'w').close()
 

@@ -1,10 +1,10 @@
 from .populate_details.populate import DetailsProcessor
-from ..config.basicConfig import BasicConfig
+from ..config.basicConfig import APIBasicConfig
 
-BasicConfig.read()
+APIBasicConfig.read()
 
 def main():
-  DetailsProcessor(BasicConfig).process()
+  DetailsProcessor(APIBasicConfig).process()
 
 if __name__ == "__main__":
   main()

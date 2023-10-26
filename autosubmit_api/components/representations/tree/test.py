@@ -13,7 +13,7 @@ from config.config_common import AutosubmitConfigResolver
 
 from common.utils import Status
 from components.jobs.joblist_helper import JobListHelper
-from config.basicConfig import BasicConfig
+from config.basicConfig import APIBasicConfig
 
 class TestTreeRepresentation(unittest.TestCase):
   def setUp(self):

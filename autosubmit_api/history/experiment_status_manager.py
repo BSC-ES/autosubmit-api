@@ -20,7 +20,7 @@ import os
 import time
 import subprocess
 from .experiment_status import ExperimentStatus
-from ..config.basicConfig import BasicConfig
+from ..config.basicConfig import APIBasicConfig
 from ..experiment.common_requests import _is_exp_running
 from ..common.utils import get_experiments_from_folder
 from typing import Dict, Set
@@ -32,8 +32,8 @@ from . import utils as HUtils
 class ExperimentStatusManager(object):
   """ Manages the update of the status table. """
   def __init__(self):
-    BasicConfig.read()
-    self._basic_config = BasicConfig
+    APIBasicConfig.read()
+    self._basic_config = APIBasicConfig
     self._experiments_updated = set()
     self._local_root_path = self._basic_config.LOCAL_ROOT_DIR
     self._base_experiment_status = ExperimentStatus("0000")

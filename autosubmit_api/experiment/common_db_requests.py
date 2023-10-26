@@ -11,11 +11,11 @@ from datetime import datetime
 from collections import OrderedDict
 from typing import List, Tuple, Dict
 
-from ..config.basicConfig import BasicConfig
-BasicConfig.read()
+from ..config.basicConfig import APIBasicConfig
+APIBasicConfig.read()
 
-DB_FILE_AS_TIMES = os.path.join(BasicConfig.DB_DIR, BasicConfig.AS_TIMES_DB) # "/esarchive/autosubmit/as_times.db"
-DB_FILES_STATUS = os.path.join(BasicConfig.LOCAL_ROOT_DIR, "as_metadata", "test", BasicConfig.FILE_STATUS_DB) # "/esarchive/autosubmit/as_metadata/test/status.db"
+DB_FILE_AS_TIMES = os.path.join(APIBasicConfig.DB_DIR, APIBasicConfig.AS_TIMES_DB) # "/esarchive/autosubmit/as_times.db"
+DB_FILES_STATUS = os.path.join(APIBasicConfig.LOCAL_ROOT_DIR, "as_metadata", "test", APIBasicConfig.FILE_STATUS_DB) # "/esarchive/autosubmit/as_metadata/test/status.db"
 # PATH_DB_DATA = "/esarchive/autosubmit/as_metadata/data/"
 
 
@@ -170,7 +170,7 @@ def insert_experiment_times_header(expid, timest, total_jobs, completed_jobs, de
     :rtype: Integer
     """
     try:
-        current_id = _get_id_db(create_connection(BasicConfig.DB_PATH), expid)
+        current_id = _get_id_db(create_connection(APIBasicConfig.DB_PATH), expid)
         if (current_id):
             if (debug == True):
                 print(("INSERTING INTO EXPERIMENT_TIMES " + str(current_id) + "\t" + str(expid) +
@@ -274,7 +274,7 @@ def _insert_into_ecearth_details(exp_id, user, created, model, branch, hpc):
     :return: Id
     :rtype: int
     """
-    conn = create_connection(BasicConfig.DB_PATH)
+    conn = create_connection(APIBasicConfig.DB_PATH)
     if conn:
         try:
             sql = ''' INSERT INTO details(exp_id, user, created, model, branch, hpc) VALUES(?,?,?,?,?,?) '''
@@ -539,7 +539,7 @@ def get_exps_base():
     :param expid:
     :return:
     """
-    conn = create_connection(BasicConfig.DB_PATH)
+    conn = create_connection(APIBasicConfig.DB_PATH)
     result = dict()
     conn.text_factory = str
     cur = conn.cursor()
@@ -564,7 +564,7 @@ def get_exps_detailed_complete():
     :param expid:
     :return: Dictionary exp_id -> (user, created, model, branch, hpc)
     """
-    all_details = _get_exps_detailed_complete(create_connection(BasicConfig.DB_PATH))
+    all_details = _get_exps_detailed_complete(create_connection(APIBasicConfig.DB_PATH))
     result = dict()
     if (all_details):
         for item in all_details:
@@ -612,7 +612,7 @@ def _get_exp_times():
     :rtype: 6-tuple (int, str, int, int, int, int)
     """
     try:
-        conn = create_connection(os.path.join(BasicConfig.DB_DIR, BasicConfig.AS_TIMES_DB))
+        conn = create_connection(os.path.join(APIBasicConfig.DB_DIR, APIBasicConfig.AS_TIMES_DB))
         conn.text_factory = str
         cur = conn.cursor()
         cur.execute(
@@ -635,7 +635,7 @@ def _get_exp_times_by_expid(expid):
     :rtype: 6-tuple (int, str, str, str, int, int)
     """
     try:
-        conn = create_connection(os.path.join(BasicConfig.DB_DIR, BasicConfig.AS_TIMES_DB))
+        conn = create_connection(os.path.join(APIBasicConfig.DB_DIR, APIBasicConfig.AS_TIMES_DB))
         conn.text_factory = str
         cur = conn.cursor()
         cur.execute(
@@ -657,7 +657,7 @@ def _get_job_times(exp_id):
     :rtype: list of 9-tuple: (detail_id, exp_id, job_name, created, modified, submit_time, start_time, finish_time, status)
     """
     try:
-        conn = create_connection(os.path.join(BasicConfig.DB_DIR, BasicConfig.AS_TIMES_DB))
+        conn = create_connection(os.path.join(APIBasicConfig.DB_DIR, APIBasicConfig.AS_TIMES_DB))
         cur = conn.cursor()
         cur.execute("SELECT detail_id, exp_id, job_name, created, modified, submit_time, start_time, finish_time, status FROM job_times WHERE exp_id=?", (exp_id,))
         rows = cur.fetchall()
@@ -676,7 +676,7 @@ def _get_latest_completed_jobs(seconds=300):
     """
     current_ts = time.time()
     try:
-        conn = create_connection(os.path.join(BasicConfig.DB_DIR, BasicConfig.AS_TIMES_DB))
+        conn = create_connection(os.path.join(APIBasicConfig.DB_DIR, APIBasicConfig.AS_TIMES_DB))
         cur = conn.cursor()
         cur.execute("SELECT detail_id, exp_id, job_name, created, modified, submit_time, start_time, finish_time, status FROM job_times WHERE (? - modified)<=? AND status='COMPLETED'", (current_ts, seconds))
         rows = cur.fetchall()
@@ -696,7 +696,7 @@ def _get_all_job_times():
     :rtype: 9-tuple (int, int, str, int, int, int, int, int, str)
     """
     try:
-        conn = create_connection(os.path.join(BasicConfig.DB_DIR, BasicConfig.AS_TIMES_DB))
+        conn = create_connection(os.path.join(APIBasicConfig.DB_DIR, APIBasicConfig.AS_TIMES_DB))
         cur = conn.cursor()
         cur.execute(
             "SELECT detail_id, exp_id, job_name, created, modified, submit_time, start_time, finish_time, status FROM job_times")
@@ -717,7 +717,7 @@ def _delete_from_job_times_detail(detail_id):
     :type detail_id: int
     """
     try:
-        conn = create_connection(os.path.join(BasicConfig.DB_DIR, BasicConfig.AS_TIMES_DB))
+        conn = create_connection(os.path.join(APIBasicConfig.DB_DIR, APIBasicConfig.AS_TIMES_DB))
         cur = conn.cursor()
         #print("Cursor defined")
         cur.execute(
@@ -738,7 +738,7 @@ def _delete_from_job_times_detail(detail_id):
 
 def _delete_many_from_job_times_detail(detail_list):
     try:
-        conn = create_connection(os.path.join(BasicConfig.DB_DIR, BasicConfig.AS_TIMES_DB))
+        conn = create_connection(os.path.join(APIBasicConfig.DB_DIR, APIBasicConfig.AS_TIMES_DB))
         cur = conn.cursor()
         #print("Cursor defined")
         cur.executemany(
@@ -780,7 +780,7 @@ def _delete_from_experiment_times(exp_id):
     :type exp_id: int
     """
     try:
-        conn = create_connection(os.path.join(BasicConfig.DB_DIR, BasicConfig.AS_TIMES_DB))
+        conn = create_connection(os.path.join(APIBasicConfig.DB_DIR, APIBasicConfig.AS_TIMES_DB))
         cur = conn.cursor()
         cur.execute("DELETE FROM experiment_times WHERE exp_id=?", (exp_id,))
         conn.commit()
@@ -801,7 +801,7 @@ def _delete_from_job_times(exp_id):
     :type exp_id: int
     """
     try:
-        conn = create_connection(os.path.join(BasicConfig.DB_DIR, BasicConfig.AS_TIMES_DB))
+        conn = create_connection(os.path.join(APIBasicConfig.DB_DIR, APIBasicConfig.AS_TIMES_DB))
         cur = conn.cursor()
         cur.execute("DELETE FROM job_times WHERE exp_id=?", (exp_id,))
         conn.commit()
@@ -821,7 +821,7 @@ def _get_exp_status():
     :rtype: 4-tuple (int, str, str, int)
     """
     try:
-        conn = create_connection(os.path.join(BasicConfig.DB_DIR, BasicConfig.AS_TIMES_DB))
+        conn = create_connection(os.path.join(APIBasicConfig.DB_DIR, APIBasicConfig.AS_TIMES_DB))
         conn.text_factory = str
         cur = conn.cursor()
         cur.execute(
@@ -838,7 +838,7 @@ def _get_exp_only_active():
     Get all registers of experiments ACTIVE
     """
     try:
-        conn = create_connection(os.path.join(BasicConfig.DB_DIR, BasicConfig.AS_TIMES_DB))
+        conn = create_connection(os.path.join(APIBasicConfig.DB_DIR, APIBasicConfig.AS_TIMES_DB))
         conn.text_factory = str
         cur = conn.cursor()
         cur.execute("select name, status, total_jobs from currently_running")
@@ -858,7 +858,7 @@ def _get_specific_exp_status(expid):
     """
     try:
         # print("Honk")
-        conn = create_connection(os.path.join(BasicConfig.DB_DIR, BasicConfig.AS_TIMES_DB))
+        conn = create_connection(os.path.join(APIBasicConfig.DB_DIR, APIBasicConfig.AS_TIMES_DB))
         cur = conn.cursor()
         cur.execute(
             "SELECT exp_id, name, status, seconds_diff FROM experiment_status WHERE name=?", (expid,))
@@ -879,7 +879,7 @@ def _get_exp_status_running():
     :rtype: 4-tuple (int, str, str, int)
     """
     try:
-        conn = create_connection(os.path.join(BasicConfig.DB_DIR, BasicConfig.AS_TIMES_DB))
+        conn = create_connection(os.path.join(APIBasicConfig.DB_DIR, APIBasicConfig.AS_TIMES_DB))
         conn.text_factory = str
         cur = conn.cursor()
         cur.execute(
@@ -898,7 +898,7 @@ def _create_exp_status(row_content):
     :return:
     """
     try:
-        conn = create_connection(os.path.join(BasicConfig.DB_DIR, BasicConfig.AS_TIMES_DB))
+        conn = create_connection(os.path.join(APIBasicConfig.DB_DIR, APIBasicConfig.AS_TIMES_DB))
         sql = ''' INSERT INTO experiment_status(exp_id, name, status, seconds_diff, modified) VALUES(?,?,?,?,?) '''
         # print(row_content)
         cur = conn.cursor()
@@ -947,7 +947,7 @@ def update_exp_status(expid, status, seconds_diff):
     :rtype: Integer
     """
     try:
-        conn = create_connection(os.path.join(BasicConfig.DB_DIR, BasicConfig.AS_TIMES_DB))
+        conn = create_connection(os.path.join(APIBasicConfig.DB_DIR, APIBasicConfig.AS_TIMES_DB))
         sql = ''' UPDATE experiment_status SET status = ?, seconds_diff = ?, modified = ? WHERE name = ? '''
         cur = conn.cursor()
         cur.execute(sql, (status, seconds_diff,
@@ -965,7 +965,7 @@ def _update_ecearth_details(exp_id, user, created, model, branch, hpc):
     """
     Updates ecearth.db table details.
     """
-    conn = create_connection(BasicConfig.DB_PATH)
+    conn = create_connection(APIBasicConfig.DB_PATH)
     if conn:
         try:
             sql = ''' UPDATE details SET user=?, created=?, model=?, branch=?, hpc=? where exp_id=? '''
@@ -984,7 +984,7 @@ def update_experiment_times(exp_id, modified, completed_jobs, total_jobs, debug=
     Update existing experiment times header
     """
     try:
-        conn = create_connection(os.path.join(BasicConfig.DB_DIR, BasicConfig.AS_TIMES_DB))
+        conn = create_connection(os.path.join(APIBasicConfig.DB_DIR, APIBasicConfig.AS_TIMES_DB))
         if (debug == True):
             print(("UPDATE experiment_times " + str(exp_id) + "\t" +
                   str(completed_jobs) + "\t" + str(total_jobs)))
@@ -1004,7 +1004,7 @@ def update_experiment_times(exp_id, modified, completed_jobs, total_jobs, debug=
 
 def update_experiment_times_only_modified(exp_id, modified):
     try:
-        conn = create_connection(os.path.join(BasicConfig.DB_DIR, BasicConfig.AS_TIMES_DB))
+        conn = create_connection(os.path.join(APIBasicConfig.DB_DIR, APIBasicConfig.AS_TIMES_DB))
         sql = ''' UPDATE experiment_times SET modified = ? WHERE exp_id = ? '''
         cur = conn.cursor()
         cur.execute(sql, (int(modified), exp_id))
@@ -1029,7 +1029,7 @@ def update_job_times(detail_id, modified, submit_time, start_time, finish_time, 
     :type modified: Integer. \n
     """
     try:
-        conn = create_connection(os.path.join(BasicConfig.DB_DIR, BasicConfig.AS_TIMES_DB))
+        conn = create_connection(os.path.join(APIBasicConfig.DB_DIR, APIBasicConfig.AS_TIMES_DB))
         if (debug == True):
             print(("UPDATING JOB TIMES " + str(detail_id) + " ~ " + str(modified) + "\t" +
                   str(submit_time) + "\t" + str(start_time) + "\t" + str(finish_time) + "\t" + str(status)))
@@ -1062,7 +1062,7 @@ def update_job_times(detail_id, modified, submit_time, start_time, finish_time, 
 
 def update_many_job_times(list_jobs):
     try:
-        conn = create_connection(os.path.join(BasicConfig.DB_DIR, BasicConfig.AS_TIMES_DB))
+        conn = create_connection(os.path.join(APIBasicConfig.DB_DIR, APIBasicConfig.AS_TIMES_DB))
         sql = ''' UPDATE job_times SET modified = ?, submit_time = ?, start_time = ?, finish_time = ?, status = ? WHERE detail_id = ? '''
         cur = conn.cursor()
         cur.executemany(sql, list_jobs)

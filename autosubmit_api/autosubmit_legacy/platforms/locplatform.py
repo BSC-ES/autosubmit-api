@@ -24,7 +24,7 @@ import subprocess
 from .paramiko_platform import ParamikoPlatform
 from .headers.local_header import LocalHeader
 
-from ...config.basicConfig import BasicConfig
+from ...config.basicConfig import APIBasicConfig
 from bscearth.utils.log import Log
 
 
@@ -52,7 +52,7 @@ class LocalPlatform(ParamikoPlatform):
         """
         Updates commands for platforms
         """
-        self.root_dir = os.path.join(BasicConfig.LOCAL_ROOT_DIR, self.expid)
+        self.root_dir = os.path.join(APIBasicConfig.LOCAL_ROOT_DIR, self.expid)
         self.remote_log_dir = os.path.join(
             self.root_dir, "tmp", 'LOG_' + self.expid)
         self.cancel_cmd = "kill -SIGINT"
