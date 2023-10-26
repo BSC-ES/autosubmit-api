@@ -47,7 +47,7 @@ from autosubmit_api.monitor.monitor import Monitor
 from autosubmit_api.statistics.statistics import Statistics
 
 from autosubmit_api.config.basicConfig import BasicConfig
-from autosubmit_api.config.config_common import AutosubmitConfig
+from autosubmit_api.config.config_common import AutosubmitConfigResolver
 from bscearth.utils.config_parser import ConfigParserFactory
 
 from autosubmit_api.components.representations.tree.tree import TreeRepresentation
@@ -219,7 +219,7 @@ def _is_exp_running(expid, time_condition=300):
         look_old_folder = False
         current_version = None
         try:
-            as_conf = AutosubmitConfig(
+            as_conf = AutosubmitConfigResolver(
                 expid, BasicConfig, ConfigParserFactory())
             as_conf.reload()
             current_version = as_conf.get_version()
@@ -702,7 +702,7 @@ def get_experiment_graph(expid, log, layout=Layout.STANDARD, grouped=GroupedBy.N
     """
     try:
         BasicConfig.read()
-        autosubmit_configuration_facade = AutosubmitConfig(
+        autosubmit_configuration_facade = AutosubmitConfigResolver(
             expid, BasicConfig, ConfigParserFactory())
         autosubmit_configuration_facade.reload()
 
@@ -774,7 +774,7 @@ def get_experiment_tree_structured(expid, log):
             as_conf = Autosubmit4Config(expid)
             as_conf.reload(True)
         else:
-            as_conf = AutosubmitConfig(expid, BasicConfig, ConfigParserFactory())
+            as_conf = AutosubmitConfigResolver(expid, BasicConfig, ConfigParserFactory())
             as_conf.reload()
 
         if common_utils.is_version_historical_ready(as_conf.get_version()):
@@ -991,7 +991,7 @@ def get_job_conf_list(expid):
     """
     try:
         BasicConfig.read()
-        as_conf = AutosubmitConfig(expid, BasicConfig, ConfigParserFactory())
+        as_conf = AutosubmitConfigResolver(expid, BasicConfig, ConfigParserFactory())
         if not as_conf.check_conf_files():
             print('Can not create with invalid configuration')
             return None
@@ -1033,7 +1033,7 @@ def get_auto_conf_data(expid):
         wrapper_type = "None"
         max_wrapped = 0
         BasicConfig.read()
-        as_conf = AutosubmitConfig(expid, BasicConfig, ConfigParserFactory())
+        as_conf = AutosubmitConfigResolver(expid, BasicConfig, ConfigParserFactory())
         if not as_conf.check_conf_files():
             #print('Can not create with invalid configuration')
             return (wrapper_type, max_wrapped)
@@ -1288,7 +1288,7 @@ def get_current_configuration_by_expid(expid, valid_user, log):
         )) else False
 
         BasicConfig.read()
-        autosubmitConfig = AutosubmitConfig(
+        autosubmitConfig = AutosubmitConfigResolver(
             expid, BasicConfig, ConfigParserFactory())
         try:
             autosubmitConfig.reload()

@@ -11,7 +11,7 @@ from ...autosubmit_legacy.job.job_common import Status
 from bscearth.utils.date import date2str, parse_date
 from typing import Dict, List, Set, Tuple
 # Builder Imports
-from ...config.config_common import AutosubmitConfig
+from ...config.config_common import AutosubmitConfigResolver
 from ...config.basicConfig import BasicConfig
 import json
 import logging

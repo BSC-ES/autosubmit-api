@@ -42,7 +42,7 @@ import argparse
 
 sys.path.insert(0, os.path.abspath('.'))
 from autosubmit_api.config.basicConfig import BasicConfig
-from autosubmit_api.config.config_common import AutosubmitConfig
+from autosubmit_api.config.config_common import AutosubmitConfigResolver
 from bscearth.utils.config_parser import ConfigParserFactory
 from autosubmit_api.autosubmit_legacy.job.job_common import Status
 from autosubmit_api.git.autosubmit_git import AutosubmitGit
@@ -685,7 +685,7 @@ class Autosubmit:
                     Autosubmit._prepare_conf_files(
                         exp_id, hpc, Autosubmit.autosubmit_version, dummy)
                     #####
-                    autosubmit_config = AutosubmitConfig(
+                    autosubmit_config = AutosubmitConfigResolver(
                         copy_id, BasicConfig, ConfigParserFactory())
                     if autosubmit_config.check_conf_files():
                         project_type = autosubmit_config.get_project_type()
@@ -805,7 +805,7 @@ class Autosubmit:
             tmp_path, BasicConfig.LOCAL_ASLOG_DIR, 'generate.log'))
         os.system('clear')
         signal.signal(signal.SIGINT, signal_handler)
-        as_conf = AutosubmitConfig(expid, BasicConfig, ConfigParserFactory())
+        as_conf = AutosubmitConfigResolver(expid, BasicConfig, ConfigParserFactory())
         if not as_conf.check_conf_files():
             Log.critical('Can not generate scripts with invalid configuration')
             return False
@@ -1021,7 +1021,7 @@ class Autosubmit:
 
                 signal.signal(signal.SIGINT, signal_handler)
 
-                as_conf = AutosubmitConfig(
+                as_conf = AutosubmitConfigResolver(
                     expid, BasicConfig, ConfigParserFactory())
                 if not as_conf.check_conf_files():
                     Log.critical('Can not run with invalid configuration')
@@ -1363,7 +1363,7 @@ class Autosubmit:
                                   BasicConfig.LOCAL_TMP_DIR, BasicConfig.LOCAL_ASLOG_DIR, 'monitor.log'))
         Log.info("Getting job list...")
 
-        as_conf = AutosubmitConfig(expid, BasicConfig, ConfigParserFactory())
+        as_conf = AutosubmitConfigResolver(expid, BasicConfig, ConfigParserFactory())
         if not as_conf.check_conf_files():
             Log.critical('Can not run with invalid configuration')
             return False
@@ -1523,7 +1523,7 @@ class Autosubmit:
                                   BasicConfig.LOCAL_TMP_DIR, BasicConfig.LOCAL_ASLOG_DIR, 'statistics.log'))
         Log.info("Loading jobs...")
 
-        as_conf = AutosubmitConfig(expid, BasicConfig, ConfigParserFactory())
+        as_conf = AutosubmitConfigResolver(expid, BasicConfig, ConfigParserFactory())
         if not as_conf.check_conf_files():
             Log.critical('Can not run with invalid configuration')
             return False
@@ -1595,7 +1595,7 @@ class Autosubmit:
             Log.set_file(os.path.join(BasicConfig.LOCAL_ROOT_DIR, expid,
                                       BasicConfig.LOCAL_TMP_DIR, BasicConfig.LOCAL_ASLOG_DIR, 'clean_exp.log'))
         if project:
-            autosubmit_config = AutosubmitConfig(
+            autosubmit_config = AutosubmitConfigResolver(
                 expid, BasicConfig, ConfigParserFactory())
             if not autosubmit_config.check_conf_files():
                 Log.critical(
@@ -1650,7 +1650,7 @@ class Autosubmit:
         Log.set_file(os.path.join(BasicConfig.LOCAL_ROOT_DIR, expid,
                                   BasicConfig.LOCAL_TMP_DIR, BasicConfig.LOCAL_ASLOG_DIR, 'recovery.log'))
 
-        as_conf = AutosubmitConfig(expid, BasicConfig, ConfigParserFactory())
+        as_conf = AutosubmitConfigResolver(expid, BasicConfig, ConfigParserFactory())
         if not as_conf.check_conf_files():
             Log.critical('Can not run with invalid configuration')
             return False
@@ -1762,7 +1762,7 @@ class Autosubmit:
 
         if offer:
             Log.info('Migrating experiment {0}'.format(experiment_id))
-            as_conf = AutosubmitConfig(
+            as_conf = AutosubmitConfigResolver(
                 experiment_id, BasicConfig, ConfigParserFactory())
             if not as_conf.check_conf_files():
                 Log.critical('Can not proceed with invalid configuration')
@@ -1899,7 +1899,7 @@ class Autosubmit:
                 Log.critical("The experiment cannot be picked up")
                 return False
             Log.info("Local files/dirs have been successfully picked up")
-            as_conf = AutosubmitConfig(
+            as_conf = AutosubmitConfigResolver(
                 experiment_id, BasicConfig, ConfigParserFactory())
             if not as_conf.check_conf_files():
                 Log.critical('Can not proceed with invalid configuration')
@@ -1968,7 +1968,7 @@ class Autosubmit:
                                 BasicConfig.LOCAL_TMP_DIR, BasicConfig.LOCAL_ASLOG_DIR, 'check_exp.log')
         Log.set_file(log_file)
 
-        as_conf = AutosubmitConfig(
+        as_conf = AutosubmitConfigResolver(
             experiment_id, BasicConfig, ConfigParserFactory())
         if not as_conf.check_conf_files():
             return False
@@ -2037,7 +2037,7 @@ class Autosubmit:
             os.path.getmtime(experiment_file))
 
         try:
-            as_conf = AutosubmitConfig(
+            as_conf = AutosubmitConfigResolver(
                 experiment_id, BasicConfig, ConfigParserFactory())
             as_conf.reload()
 
@@ -2411,7 +2411,7 @@ class Autosubmit:
         BasicConfig.read()
         Log.set_file(os.path.join(BasicConfig.LOCAL_ROOT_DIR, expid,
                                   BasicConfig.LOCAL_TMP_DIR, BasicConfig.LOCAL_ASLOG_DIR, 'refresh.log'))
-        as_conf = AutosubmitConfig(expid, BasicConfig, ConfigParserFactory())
+        as_conf = AutosubmitConfigResolver(expid, BasicConfig, ConfigParserFactory())
         as_conf.reload()
         if not as_conf.check_expdef_conf():
             Log.critical('Can not copy with invalid configuration')
@@ -2620,7 +2620,7 @@ class Autosubmit:
                 Log.set_file(os.path.join(
                     tmp_path, BasicConfig.LOCAL_ASLOG_DIR, 'create_exp.log'))
 
-                as_conf = AutosubmitConfig(
+                as_conf = AutosubmitConfigResolver(
                     expid, BasicConfig, ConfigParserFactory())
                 if not as_conf.check_conf_files():
                     Log.critical('Can not create with invalid configuration')
@@ -2890,7 +2890,7 @@ class Autosubmit:
                 Log.debug('Status of jobs to change: {0}', filter_status)
                 Log.debug('Sections to change: {0}', filter_section)
                 wrongExpid = 0
-                as_conf = AutosubmitConfig(
+                as_conf = AutosubmitConfigResolver(
                     expid, BasicConfig, ConfigParserFactory())
                 if not as_conf.check_conf_files():
                     Log.critical('Can not run with invalid configuration')
@@ -3087,7 +3087,7 @@ class Autosubmit:
         :param dummy: if True, creates a dummy experiment adding some default values
         :type dummy: bool
         """
-        as_conf = AutosubmitConfig(exp_id, BasicConfig, ConfigParserFactory())
+        as_conf = AutosubmitConfigResolver(exp_id, BasicConfig, ConfigParserFactory())
         as_conf.set_version(autosubmit_version)
         as_conf.set_expid(exp_id)
         as_conf.set_platform(hpc)
@@ -3323,7 +3323,7 @@ class Autosubmit:
 
     @staticmethod
     def _change_conf(testid, hpc, start_date, member, chunks, branch, random_select=False):
-        as_conf = AutosubmitConfig(testid, BasicConfig, ConfigParserFactory())
+        as_conf = AutosubmitConfigResolver(testid, BasicConfig, ConfigParserFactory())
         exp_parser = as_conf.get_parser(
             ConfigParserFactory(), as_conf.experiment_file)
         if exp_parser.get_bool_option('rerun', "RERUN", True):

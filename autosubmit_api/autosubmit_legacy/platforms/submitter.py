@@ -18,7 +18,7 @@
 # along with Autosubmit.  If not, see <http: www.gnu.org / licenses / >.
 
 
-from ...config.config_common import AutosubmitConfig
+from ...config.config_common import AutosubmitConfigResolver
 
 
 class Submitter:

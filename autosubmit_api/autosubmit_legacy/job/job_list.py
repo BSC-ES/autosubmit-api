@@ -50,7 +50,7 @@ from random import shuffle
 from dateutil.relativedelta import *
 
 from .job import Job
-from ...config.config_common import AutosubmitConfig
+from ...config.config_common import AutosubmitConfigResolver
 from bscearth.utils.log import Log
 from .job_dict import DicJobs
 from .job_utils import Dependency
@@ -109,7 +109,7 @@ class JobList:
         self.sections_checked = set()
         self._wrapper_queue = None
         try:
-            as_conf = AutosubmitConfig(
+            as_conf = AutosubmitConfigResolver(
                 self.expid, config, ConfigParserFactory())
             as_conf.reload()
             self._wrapper_queue = as_conf.get_wrapper_queue()

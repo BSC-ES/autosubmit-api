@@ -2,7 +2,7 @@
 import os
 from ...config.basicConfig import BasicConfig
 from ..jobs.job_factory import SimJob, Job
-from ...config.config_common import AutosubmitConfig
+from ...config.config_common import AutosubmitConfigResolver
 from bscearth.utils.config_parser import ConfigParserFactory
 from abc import ABCMeta, abstractmethod
 from ...common.utils import JobSection, parse_number_processors, timestamp_to_datetime_format, datechunk_to_year
@@ -110,7 +110,7 @@ class BasicConfigurationFacade(ConfigurationFacade):
 class AutosubmitConfigurationFacade(ConfigurationFacade):
   """ Provides an interface to the Configuration of the experiment.  """
   def __init__(self, expid, basic_config, autosubmit_config):
-    # type: (str, BasicConfig, AutosubmitConfig) -> None
+    # type: (str, BasicConfig, AutosubmitConfigResolver) -> None
     super(AutosubmitConfigurationFacade, self).__init__(expid, basic_config)
     self.autosubmit_conf = autosubmit_config
     self._process_advanced_config()

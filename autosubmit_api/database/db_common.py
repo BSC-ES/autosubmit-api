@@ -26,7 +26,7 @@ import pysqlite3 as sqlite3
 
 from bscearth.utils.log import Log
 from ..config.basicConfig import BasicConfig
-from ..config.config_common import AutosubmitConfig
+from ..config.config_common import AutosubmitConfigResolver
 from ..builders.experiment_history_builder import ExperimentHistoryDirector, ExperimentHistoryBuilder
 from ..builders.configuration_facade_builder import ConfigurationFacadeDirector, AutosubmitConfigurationFacadeBuilder
 from bscearth.utils.config_parser import ConfigParserFactory

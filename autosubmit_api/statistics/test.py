@@ -7,7 +7,7 @@ from monitor.monitor import Monitor
 # from autosubmitAPIwu.job.job_common import Status
 from autosubmit_legacy.job.job_utils import SubJobManager, SubJob
 from config.basicConfig import BasicConfig
-from config.config_common import AutosubmitConfig
+from config.config_common import AutosubmitConfigResolver
 from bscearth.utils.config_parser import ConfigParserFactory
 from autosubmit_legacy.autosubmit import Autosubmit
 from autosubmit_legacy.job.job_list import JobList
@@ -29,7 +29,7 @@ class TestStatistics(unittest.TestCase):
     BasicConfig.read()
     path_structure = BasicConfig.STRUCTURES_DIR
     path_local_root = BasicConfig.LOCAL_ROOT_DIR
-    as_conf = AutosubmitConfig(expid, BasicConfig, ConfigParserFactory())
+    as_conf = AutosubmitConfigResolver(expid, BasicConfig, ConfigParserFactory())
     as_conf.reload()
     job_list = Autosubmit.load_job_list(expid, as_conf, False)
     jobs_considered = [job for job in job_list.get_job_list() if job.status not in [

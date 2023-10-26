@@ -23,7 +23,7 @@ import time
 import os
 
 from ...config.basicConfig import BasicConfig
-from ...config.config_common import AutosubmitConfig
+from ...config.config_common import AutosubmitConfigResolver
 from .saga_platform import SagaPlatform
 from .submitter import Submitter
 

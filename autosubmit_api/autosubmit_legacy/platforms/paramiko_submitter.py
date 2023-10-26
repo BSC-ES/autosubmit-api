@@ -25,7 +25,7 @@ import os
 from bscearth.utils.log import Log
 
 from ...config.basicConfig import BasicConfig
-from ...config.config_common import AutosubmitConfig
+from ...config.config_common import AutosubmitConfigResolver
 from .submitter import Submitter
 from .psplatform import PsPlatform
 from .lsfplatform import LsfPlatform

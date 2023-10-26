@@ -38,7 +38,6 @@ from autosubmit_api.builders.joblist_helper_builder import JobListHelperBuilder,
 from multiprocessing import Manager, Lock
 import jwt
 import sys
-from dotenv import load_dotenv
 from flask_apscheduler import APScheduler
 from autosubmit_api.workers import populate_details_db, populate_queue_run_times, populate_running_experiments, populate_graph, verify_complete
 from autosubmit_api.config import JWT_SECRET, JWT_ALGORITHM, JWT_EXP_DELTA_SECONDS, RUN_BACKGROUND_TASKS_ON_START, CAS_LOGIN_URL, CAS_VERIFY_URL
@@ -66,7 +65,6 @@ def create_app():
     Autosubmit Flask application factory
     This function initializes the application properly
     """
-    load_dotenv()
 
     sys.path.insert(0, os.path.abspath('.'))
 

@@ -26,7 +26,7 @@ import string
 from datetime import datetime
 from ..database import db_common as db_common
 from ..config.basicConfig import BasicConfig
-from ..config.config_common import AutosubmitConfig
+from ..config.config_common import AutosubmitConfigResolver
 from bscearth.utils.config_parser import ConfigParserFactory
 from bscearth.utils.log import Log
 

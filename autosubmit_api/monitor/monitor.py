@@ -32,7 +32,7 @@ import subprocess
 
 from ..autosubmit_legacy.job.job_common import Status
 from ..config.basicConfig import BasicConfig
-from ..config.config_common import AutosubmitConfig
+from ..config.config_common import AutosubmitConfigResolver
 from bscearth.utils.log import Log
 from bscearth.utils.config_parser import ConfigParserFactory
 
@@ -476,7 +476,7 @@ class Monitor:
         general_stats = []
         general_stats_path = os.path.join(
             BasicConfig.LOCAL_ROOT_DIR, expid, "tmp", expid + "_GENERAL_STATS")
-        parser = AutosubmitConfig.get_parser(
+        parser = AutosubmitConfigResolver.get_parser(
             ConfigParserFactory(), general_stats_path)
         for section in parser.sections():
             general_stats.append((section, ''))
