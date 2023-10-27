@@ -158,7 +158,7 @@ class ymlConfigStrategy(IConfigStrategy):
         return self._conf_parser.get_synchronize(section)
 
     def get_processors(self, section):
-        return self._conf_parser.get_processors(section)
+        return self._conf_parser.jobs_data.get(section, {}).get("PROCESSORS", "1")
 
     def get_threads(self, section):
         return self._conf_parser.get_threads(section)
