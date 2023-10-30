@@ -47,9 +47,9 @@ class ymlConfigStrategy(IConfigStrategy):
     :param expid: experiment identifier
     :type expid: str
     """
-    def __init__(self, expid, basic_config, parser_factory, extension=".yml"):
+    def __init__(self, expid, basic_config = APIBasicConfig, parser_factory = None, extension=".yml"):
         logger.info("Creating AS4 Parser !!!!!")
-        self._conf_parser = Autosubmit4Config(expid)
+        self._conf_parser = Autosubmit4Config(expid, basic_config)
         self._conf_parser.reload(True)
 
     def jobs_parser(self):
