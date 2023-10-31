@@ -5,7 +5,7 @@ import time
 import pickle
 import textwrap
 import traceback
-import pysqlite3 as sqlite3
+import sqlite3
 import copy
 from datetime import datetime
 from collections import OrderedDict

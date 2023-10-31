@@ -8,9 +8,6 @@ from ...builders.configuration_facade_builder import ConfigurationFacadeDirector
 from ...config.basicConfig import BasicConfig
 from configparser import ParsingError
 from collections import namedtuple
-from pysqlite3 import dbapi2
-import pysqlite3 as sqlite3
-from pysqlite3 import Connection
 from typing import List, Dict, Any, Tuple
 
 ExperimentDetails = namedtuple("ExperimentDetails", ['owner', 'created', 'model', 'branch', 'hpc'])
