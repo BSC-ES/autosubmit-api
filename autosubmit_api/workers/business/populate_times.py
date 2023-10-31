@@ -1,14 +1,17 @@
+import datetime
 import os
+import pwd
 import time
 import subprocess
 import traceback
 import socket
 import pickle
+from autosubmit_api.config.config_common import AutosubmitConfigResolver
 from autosubmit_api.experiment import common_db_requests as DbRequests
 from autosubmit_api.autosubmit_legacy.job.job_list import JobList
 from autosubmit_api.config.basicConfig import APIBasicConfig
-from autosubmit_api.database.autosubmit import Autosubmit
 from autosubmit_api.common.utils import Status
+from bscearth.utils.config_parser import ConfigParserFactory
 
 
 SAFE_TIME_LIMIT = 300
@@ -87,12 +90,58 @@ def process_completed_times(time_condition=60):
         print((traceback.format_exc()))
         print(str(ex))
 
+
+def _describe_experiment(experiment_id):
+    user = ""
+    created = ""
+    model = ""
+    branch = ""
+    hpc = ""
+    APIBasicConfig.read()
+    exp_path = os.path.join(APIBasicConfig.LOCAL_ROOT_DIR, experiment_id)
+    if not os.path.exists(exp_path):
+        return user, created, model, branch, hpc
+
+    user = os.stat(exp_path).st_uid
+    try:
+        user = pwd.getpwuid(user).pw_name
+    except:
+        pass
+
+    created = datetime.datetime.fromtimestamp(
+        os.path.getmtime(exp_path))
+
+    try:
+        as_conf = AutosubmitConfigResolver(
+            experiment_id, APIBasicConfig, ConfigParserFactory())
+        as_conf.reload()
+
+        project_type = as_conf.get_project_type()
+        if project_type != "none":
+            if not as_conf.check_proj():
+                return False
+        if (as_conf.get_svn_project_url()):
+            model = as_conf.get_svn_project_url()
+            branch = as_conf.get_svn_project_url()
+        else:
+            model = as_conf.get_git_project_origin()
+            branch = as_conf.get_git_project_branch()
+        if model is "":
+            model = "Not Found"
+        if branch is "":
+            branch = "Not Found"
+        hpc = as_conf.get_platform()
+    except:
+        pass
+    return user, created, model, branch, hpc
+
+
 def _process_details_insert_or_update(expid, exp_id, current_details):
   """
   Decides whether the experiment should be inserted or updated in the details table.
-  :param expid: name of experiment
+  :param expid: name of experiment e.g: a001
   :type expid: str
-  :param exp_id: id of experiment
+  :param exp_id: id of experiment e.g: 1
   :type exp_id: int
   :param current_details: True if it exp_id exists in details table, False otherwise
   :rtype: bool
@@ -102,7 +151,7 @@ def _process_details_insert_or_update(expid, exp_id, current_details):
   result = False
   if exp_id:
     try:
-      user, created, model, branch, hpc = Autosubmit.describe(expid)
+      user, created, model, branch, hpc = _describe_experiment(expid)
       if current_details:
           # Update
           result = DbRequests._update_ecearth_details(exp_id, user, created, model, branch, hpc)
