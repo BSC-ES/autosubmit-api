@@ -8,7 +8,6 @@ current_path = path.abspath(path.dirname(__file__))
 def get_version():
     with open(path.join(current_path, 'VERSION')) as f:
         return f.read().strip()
-    return "1.0.0"
 
 
 setup(
