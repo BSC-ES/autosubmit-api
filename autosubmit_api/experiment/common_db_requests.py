@@ -928,6 +928,7 @@ def _get_id_db(conn, expid):
         return row[0]
     except Exception as exp:
         print(("Couldn't get exp_id for {0}".format(expid)))
+        print(traceback.format_exc())
         return None
 
 

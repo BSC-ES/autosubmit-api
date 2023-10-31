@@ -3026,7 +3026,7 @@ class JobList:
         # Getting information
         path_local_root = basic_config.LOCAL_ROOT_DIR
         path_structure = basic_config.STRUCTURES_DIR
-        db_file = os.path.join(path_local_root, "ecearth.db")
+        db_file = os.path.join(path_local_root, basic_config.DB_FILE)
         conn = DbRequests.create_connection(db_file)
         # job_data = None
         # Job information from worker database

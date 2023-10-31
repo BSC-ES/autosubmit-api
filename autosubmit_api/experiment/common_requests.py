@@ -178,7 +178,7 @@ def get_experiment_data(expid):
     except Exception as exp:
         result["error"] = True
         result["error_message"] = str(exp)
-        pass
+        print((traceback.format_exc()))
     return result
 
 
