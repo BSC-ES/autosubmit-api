@@ -9,18 +9,18 @@ from components.experiment.pkl_organizer import PklOrganizer
 from components.experiment.configuration_facade import AutosubmitConfigurationFacade
 # from autosubmitAPIwu.config.basicConfig import BasicConfig
 from bscearth.utils.config_parser import ConfigParserFactory
-from config.config_common import AutosubmitConfig
+from config.config_common import AutosubmitConfigResolver
 
 from common.utils import Status
 from components.jobs.joblist_helper import JobListHelper
-from config.basicConfig import BasicConfig
+from config.basicConfig import APIBasicConfig
 
 class TestTreeRepresentation(unittest.TestCase):
   def setUp(self):
     # BasicConfig.read()
     basic_config = UtilsForTesting.get_mock_basic_config()
     self.EXPID = "a28v"
-    self.autosubmit_config = AutosubmitConfig(self.EXPID, basic_config, ConfigParserFactory())
+    self.autosubmit_config = AutosubmitConfigResolver(self.EXPID, basic_config, ConfigParserFactory())
     self.autosubmit_config.reload()
     self.configuration_facade = AutosubmitConfigurationFacade(self.EXPID, basic_config, self.autosubmit_config)
     self.pkl_organizer = PklOrganizer(self.configuration_facade)

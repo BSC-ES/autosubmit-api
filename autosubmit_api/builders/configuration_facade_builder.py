@@ -1,6 +1,6 @@
 #!/usr/bin/env python
-from ..config.basicConfig import BasicConfig
-from ..config.config_common import AutosubmitConfig
+from ..config.basicConfig import APIBasicConfig
+from ..config.config_common import AutosubmitConfigResolver
 from .basic_builder import BasicBuilder
 from ..components.experiment.configuration_facade import AutosubmitConfigurationFacade, BasicConfigurationFacade, ConfigurationFacade
 from bscearth.utils.config_parser import ConfigParserFactory
@@ -42,7 +42,7 @@ class AutosubmitConfigurationFacadeBuilder(Builder):
 
   def generate_autosubmit_config(self):
     self._validate_basic_config()
-    self.autosubmit_config = AutosubmitConfig(self.expid, self.basic_config, ConfigParserFactory())
+    self.autosubmit_config = AutosubmitConfigResolver(self.expid, self.basic_config, ConfigParserFactory())
 
   def make_configuration_facade(self):
     # type: () -> ConfigurationFacade
@@ -64,12 +64,12 @@ class ConfigurationFacadeDirector(object):
       self.builder.generate_basic_config()
 
   def build_basic_configuration_facade(self, basic_config=None):
-    # type: (BasicConfig) -> BasicConfigurationFacade
+    # type: (APIBasicConfig) -> BasicConfigurationFacade
     self._set_basic_config(basic_config)
     return self.builder.make_configuration_facade()
 
   def build_autosubmit_configuration_facade(self, basic_config=None):
-    # type: (BasicConfig) -> AutosubmitConfigurationFacade
+    # type: (APIBasicConfig) -> AutosubmitConfigurationFacade
     self._set_basic_config(basic_config)
     self.builder.generate_autosubmit_config()
     return self.builder.make_configuration_facade()

@@ -23,7 +23,7 @@ from .. import utils as HUtils
 from .. database_managers import database_models as Models
 from .. data_classes.job_data import JobData
 from ..data_classes.experiment_run import ExperimentRun
-from ...config.basicConfig import BasicConfig
+from ...config.basicConfig import APIBasicConfig
 from .database_manager import DatabaseManager, DEFAULT_JOBDATA_DIR
 from typing import List
 from collections import namedtuple
@@ -34,7 +34,7 @@ class ExperimentHistoryDbManager(DatabaseManager):
   """ Manages actions directly on the database.
   """
   def __init__(self, expid, basic_config):
-    # type: (str, BasicConfig) -> None
+    # type: (str, APIBasicConfig) -> None
     """ Requires expid and jobdata_dir_path. """
     super(ExperimentHistoryDbManager, self).__init__(expid, basic_config)
     self._set_schema_changes()

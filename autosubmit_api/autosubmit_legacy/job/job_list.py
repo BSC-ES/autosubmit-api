@@ -50,7 +50,7 @@ from random import shuffle
 from dateutil.relativedelta import *
 
 from .job import Job
-from ...config.config_common import AutosubmitConfig
+from ...config.config_common import AutosubmitConfigResolver
 from bscearth.utils.log import Log
 from .job_dict import DicJobs
 from .job_utils import Dependency
@@ -109,7 +109,7 @@ class JobList:
         self.sections_checked = set()
         self._wrapper_queue = None
         try:
-            as_conf = AutosubmitConfig(
+            as_conf = AutosubmitConfigResolver(
                 self.expid, config, ConfigParserFactory())
             as_conf.reload()
             self._wrapper_queue = as_conf.get_wrapper_queue()
@@ -3026,7 +3026,7 @@ class JobList:
         # Getting information
         path_local_root = basic_config.LOCAL_ROOT_DIR
         path_structure = basic_config.STRUCTURES_DIR
-        db_file = os.path.join(path_local_root, "ecearth.db")
+        db_file = os.path.join(path_local_root, basic_config.DB_FILE)
         conn = DbRequests.create_connection(db_file)
         # job_data = None
         # Job information from worker database

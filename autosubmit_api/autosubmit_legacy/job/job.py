@@ -30,7 +30,7 @@ from collections import OrderedDict
 
 from ...monitor.monitor import Monitor
 from .job_common import Status, Type
-from ...config.basicConfig import BasicConfig
+from ...config.basicConfig import APIBasicConfig
 from .job_common import StatisticsSnippetBash, StatisticsSnippetPython
 from .job_common import StatisticsSnippetR, StatisticsSnippetEmpty
 #from autosubmitAPIwu.config.config_common import AutosubmitConfig
@@ -104,7 +104,7 @@ class Job(object):
         self.expid = name.split('_')[0]
         self.parameters = dict()
         self._tmp_path = os.path.join(
-            BasicConfig.LOCAL_ROOT_DIR, self.expid, BasicConfig.LOCAL_TMP_DIR)
+            APIBasicConfig.LOCAL_ROOT_DIR, self.expid, APIBasicConfig.LOCAL_TMP_DIR)
         self.write_start = False
         self._platform = None
         self.check = 'True'
@@ -728,7 +728,7 @@ class Job(object):
         parameters['CURRENT_LOGDIR'] = job_platform.get_files_path()
 
         parameters['ROOTDIR'] = os.path.join(
-            BasicConfig.LOCAL_ROOT_DIR, self.expid)
+            APIBasicConfig.LOCAL_ROOT_DIR, self.expid)
         parameters['PROJDIR'] = as_conf.get_project_dir()
 
         parameters['NUMMEMBERS'] = len(as_conf.get_member_list())

@@ -33,7 +33,7 @@ from datetime import datetime, timedelta
 from json import dumps, loads
 from time import mktime
 # from networkx import DiGraph
-from ..config.basicConfig import BasicConfig
+from ..config.basicConfig import APIBasicConfig
 from ..monitor.monitor import Monitor
 from ..autosubmit_legacy.job.job_utils import job_times_to_text, getTitle
 from ..performance.utils import calculate_ASYPD_perjob, calculate_SYPD_perjob
@@ -552,9 +552,9 @@ class ExperimentGraphDrawing(MainDataBase):
         :type allJobs: list()
         """
         MainDataBase.__init__(self, expid)
-        BasicConfig.read()
+        APIBasicConfig.read()
         self.expid = expid
-        self.folder_path = BasicConfig.LOCAL_ROOT_DIR
+        self.folder_path = APIBasicConfig.LOCAL_ROOT_DIR
         self.database_path = os.path.join(
             self.folder_path, "as_metadata", "graph" , "graph_data_" + str(expid) + ".db")
         self.create_table_query = textwrap.dedent(
@@ -568,6 +568,8 @@ class ExperimentGraphDrawing(MainDataBase):
 
         if not os.path.exists(self.database_path):
             os.umask(0)
+            if not os.path.exists(os.path.dirname(self.database_path)):
+                os.makedirs(os.path.dirname(self.database_path))
             os.open(self.database_path, os.O_WRONLY | os.O_CREAT, 0o777)
             self.conn = self.create_connection(self.database_path)
             self.create_table()
@@ -638,8 +640,8 @@ class ExperimentGraphDrawing(MainDataBase):
                         ['dot', '-Gnslimit=2', '-Gnslimit1=2', '-Gmaxiter={}'.format(maxiter), '-Gsplines=none', '-v'], format="plain")
                 else:
                     result = graph.create('dot', format="plain")
-                for u in result.split("\n"):
-                    splitList = u.split(" ")
+                for u in result.split(b"\n"):
+                    splitList = u.split(b" ")
                     if len(splitList) > 1 and splitList[0] == "node":
                         self.coordinates.append((splitList[1], int(
                             float(splitList[2]) * 90), int(float(splitList[3]) * -90)))

@@ -20,22 +20,22 @@ import unittest
 import traceback
 import os
 import time
-import common.utils_for_testing as UtilsForTesting
-import performance.utils as PUtils
+import autosubmit_api.common.utils_for_testing as UtilsForTesting
+import autosubmit_api.performance.utils as PUtils
 from shutil import copy2
 from collections import namedtuple
-from history.internal_logging import Logging
-from strategies import StraightWrapperAssociationStrategy, GeneralizedWrapperDistributionStrategy, PlatformInformationHandler
-from config.basicConfig import BasicConfig
-from platform_monitor.slurm_monitor import SlurmMonitor
-from builders.experiment_history_builder import ExperimentHistoryDirector, ExperimentHistoryBuilder
+from autosubmit_api.history.internal_logging import Logging
+from autosubmit_api.history.strategies import StraightWrapperAssociationStrategy, GeneralizedWrapperDistributionStrategy, PlatformInformationHandler
+from autosubmit_api.config.basicConfig import APIBasicConfig
+from autosubmit_api.history.platform_monitor.slurm_monitor import SlurmMonitor
+from autosubmit_api.builders.experiment_history_builder import ExperimentHistoryDirector, ExperimentHistoryBuilder
 EXPID_TT00_SOURCE = "test_database.db~"
 EXPID_TT01_SOURCE = "test_database_no_run.db~"
 EXPID = "tt00"
 EXPID_NONE = "tt01"
 # BasicConfig.read()
-JOBDATA_DIR = BasicConfig.JOBDATA_DIR
-LOCAL_ROOT_DIR = BasicConfig.LOCAL_ROOT_DIR
+JOBDATA_DIR = APIBasicConfig.JOBDATA_DIR
+LOCAL_ROOT_DIR = APIBasicConfig.LOCAL_ROOT_DIR
 job = namedtuple("Job", ["name", "date", "member", "status_str", "children"])
 
 class TestExperimentHistory(unittest.TestCase):
@@ -43,7 +43,7 @@ class TestExperimentHistory(unittest.TestCase):
   # def setUpClass(cls):
   #   cls.exp = ExperimentHistory("tt00") # example database
   def setUp(self):
-    BasicConfig.read()
+    APIBasicConfig.read()
     source_path_tt00 = os.path.join(JOBDATA_DIR, EXPID_TT00_SOURCE)
     self.target_path_tt00 = os.path.join(JOBDATA_DIR, "job_data_{0}.db".format(EXPID))
     copy2(source_path_tt00, self.target_path_tt00)
@@ -340,13 +340,13 @@ class TestExperimentHistory(unittest.TestCase):
 class TestLogging(unittest.TestCase):
 
   def setUp(self):
-    BasicConfig.read()
+    APIBasicConfig.read()
     message = "No Message"
     try:
       raise Exception("Setup test exception")
     except:
       message = traceback.format_exc()
-    self.log = Logging("tt00", BasicConfig)
+    self.log = Logging("tt00", APIBasicConfig)
     self.exp_message = "Exception message"
     self.trace_message = message
 

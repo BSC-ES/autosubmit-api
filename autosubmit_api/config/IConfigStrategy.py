@@ -37,7 +37,7 @@ from pyparsing import nestedExpr
 from bscearth.utils.config_parser import ConfigParserFactory, ConfigParser
 from bscearth.utils.date import parse_date
 from bscearth.utils.log import Log
-from ..config.basicConfig import BasicConfig
+from ..config.basicConfig import APIBasicConfig
 from abc import ABC, abstractmethod
 
 

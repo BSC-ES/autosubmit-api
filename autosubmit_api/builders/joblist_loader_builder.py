@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-from ..config.basicConfig import BasicConfig
+from ..config.basicConfig import APIBasicConfig
 from .basic_builder import BasicBuilder
 from ..components.jobs.joblist_loader import JobListLoader
 from .joblist_helper_builder import JobListHelperBuilder, JobListHelperDirector
@@ -35,7 +35,7 @@ class JobListLoaderDirector:
       self.builder.generate_basic_config()
 
   def build_loaded_joblist_loader(self, basic_config=None):
-    # type: (BasicConfig) -> JobListLoader
+    # type: (APIBasicConfig) -> JobListLoader
     self._set_basic_config(basic_config)
     self.builder.generate_joblist_helper()
     joblist_loader = self.builder.make_joblist_loader()

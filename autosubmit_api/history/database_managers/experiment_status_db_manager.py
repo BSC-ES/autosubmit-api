@@ -20,8 +20,10 @@
 import os
 import textwrap
 import time
+
+from autosubmit_api.experiment.common_db_requests import prepare_status_db
 from .database_manager import DatabaseManager, DEFAULT_LOCAL_ROOT_DIR
-from ...config.basicConfig import BasicConfig
+from ...config.basicConfig import APIBasicConfig
 from ...history import utils as HUtils
 from ...history.database_managers import database_models as Models
 from typing import List
@@ -29,27 +31,29 @@ from typing import List
 class ExperimentStatusDbManager(DatabaseManager):
   """ Manages the actions on the status database """
   def __init__(self, expid, basic_config):
-    # type: (str, BasicConfig) -> None
+    # type: (str, APIBasicConfig) -> None
     super(ExperimentStatusDbManager, self).__init__(expid, basic_config)
-    self._as_times_file_path = os.path.join(BasicConfig.DB_DIR, self.AS_TIMES_DB_NAME)
-    self._ecearth_file_path = os.path.join(BasicConfig.DB_DIR, BasicConfig.DB_FILE)
-    self._pkl_file_path = os.path.join(BasicConfig.LOCAL_ROOT_DIR, self.expid, "pkl", "job_list_{0}.pkl".format(self.expid))
+    self._as_times_file_path = os.path.join(APIBasicConfig.DB_DIR, self.AS_TIMES_DB_NAME)
+    self._ecearth_file_path = os.path.join(APIBasicConfig.DB_DIR, APIBasicConfig.DB_FILE)
+    self._pkl_file_path = os.path.join(APIBasicConfig.LOCAL_ROOT_DIR, self.expid, "pkl", "job_list_{0}.pkl".format(self.expid))
     self.default_experiment_status_row = Models.ExperimentStatusRow(0, "DEFAULT", "NOT RUNNING", 0, "")
 
 
   def validate_status_database(self):
       """ Creates experiment_status table if it does not exist """
-      create_table_query = textwrap.dedent(
-          '''CREATE TABLE
-              IF NOT EXISTS experiment_status (
-              exp_id integer PRIMARY KEY,
-              name text NOT NULL,
-              status text NOT NULL,
-              seconds_diff integer NOT NULL,
-              modified text NOT NULL
-          );'''
-      )
-      self.execute_statement_on_dbfile(self._as_times_file_path, create_table_query)
+      prepare_status_db()
+      # Redundant code
+      # create_table_query = textwrap.dedent(
+      #     '''CREATE TABLE
+      #         IF NOT EXISTS experiment_status (
+      #         exp_id integer PRIMARY KEY,
+      #         name text NOT NULL,
+      #         status text NOT NULL,
+      #         seconds_diff integer NOT NULL,
+      #         modified text NOT NULL
+      #     );'''
+      # )
+      # self.execute_statement_on_dbfile(self._as_times_file_path, create_table_query)
 
   def print_current_table(self):
       for experiment in self._get_experiment_status_content():

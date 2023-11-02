@@ -16,44 +16,29 @@
 
 # You should have received a copy of the GNU General Public License
 # along with Autosubmit.  If not, see <http://www.gnu.org/licenses/>.
-try:
-    # noinspection PyCompatibility
-    from configparser import SafeConfigParser
-    from autosubmitconfigparser.config.configcommon import AutosubmitConfig as Autosubmit4Config
-except ImportError:
-    # noinspection PyCompatibility
-    from configparser import SafeConfigParser
-
 
 import os
-import re
-import subprocess
-import json
 import logging
-import locale
 
-from pyparsing import nestedExpr
 from bscearth.utils.config_parser import ConfigParserFactory, ConfigParser
-from bscearth.utils.date import parse_date
-from bscearth.utils.log import Log
-from ..config.basicConfig import BasicConfig
-from ..config.IConfigStrategy import IConfigStrategy
-from ..config.ymlConfigStrategy import ymlConfigStrategy
-from ..config.confConfigStrategy import confConfigStrategy
+from autosubmit_api.config.basicConfig import APIBasicConfig
+from autosubmit_api.config.ymlConfigStrategy import ymlConfigStrategy
+from autosubmit_api.config.confConfigStrategy import confConfigStrategy
 
 logger = logging.getLogger('gunicorn.error')
 
-class AutosubmitConfig(object):
+class AutosubmitConfigResolver(object):
     """
     Class to handle experiment configuration coming from file or database
+    Decides which strategy to use
 
     :param expid: experiment identifier
     :type expid: str
     :configWrapper: IConfigStrategy -> handling strategy for the type of config files used
     """
 
-    def __init__(self, expid, basic_config, parser_factory, extension="yml"):
-        # type: (str, BasicConfig, ConfigParserFactory, Extension) -> None
+    def __init__(self, expid, basic_config, parser_factory):
+        # type: (str, APIBasicConfig, ConfigParserFactory) -> None
 
         self.expid = expid
         self._configWrapper = None

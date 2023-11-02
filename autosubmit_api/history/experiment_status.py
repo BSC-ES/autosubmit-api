@@ -20,7 +20,7 @@ import traceback
 from .database_managers.experiment_status_db_manager import ExperimentStatusDbManager
 from .database_managers.database_manager import DEFAULT_LOCAL_ROOT_DIR, DEFAULT_HISTORICAL_LOGS_DIR
 from .internal_logging import Logging
-from ..config.basicConfig import BasicConfig
+from ..config.basicConfig import APIBasicConfig
 from typing import List
 from .database_managers.database_models import ExperimentStatusRow
 
@@ -30,15 +30,15 @@ class ExperimentStatus():
     # type: (str) -> None
     self.expid = expid # type: str
     print(expid)
-    BasicConfig.read()
+    APIBasicConfig.read()
     try:
-      self.manager = ExperimentStatusDbManager(self.expid, BasicConfig)
+      self.manager = ExperimentStatusDbManager(self.expid, APIBasicConfig)
     except Exception as exp:
       message = "Error while trying to update {0} in experiment_status.".format(str(self.expid))
       print(message)
       print(str(exp))
       print()
-      Logging(self.expid, BasicConfig).log(message, traceback.format_exc())
+      Logging(self.expid, APIBasicConfig).log(message, traceback.format_exc())
       self.manager = None
 
   def validate_database(self):

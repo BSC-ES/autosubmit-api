@@ -23,7 +23,7 @@ from shutil import rmtree
 import subprocess
 import shutil
 
-from ..config.basicConfig import BasicConfig
+from ..config.basicConfig import APIBasicConfig
 from bscearth.utils.log import Log
 
 
@@ -46,7 +46,7 @@ class AutosubmitGit:
         :param as_conf: experiment configuration
         :type as_conf: autosubmit.config.AutosubmitConfig
         """
-        proj_dir = os.path.join(BasicConfig.LOCAL_ROOT_DIR, as_conf.expid, BasicConfig.LOCAL_PROJ_DIR)
+        proj_dir = os.path.join(APIBasicConfig.LOCAL_ROOT_DIR, as_conf.expid, APIBasicConfig.LOCAL_PROJ_DIR)
         dirname_path = as_conf.get_project_dir()
         Log.debug("Checking git directory status...")
         if path.isdir(dirname_path):
@@ -86,7 +86,7 @@ class AutosubmitGit:
         :param as_conf: experiment configuration
         :type as_conf: autosubmit.config.AutosubmitConfig
         """
-        proj_dir = os.path.join(BasicConfig.LOCAL_ROOT_DIR, as_conf.expid, BasicConfig.LOCAL_PROJ_DIR)
+        proj_dir = os.path.join(APIBasicConfig.LOCAL_ROOT_DIR, as_conf.expid, APIBasicConfig.LOCAL_PROJ_DIR)
         dirname_path = as_conf.get_project_dir()
         if path.isdir(dirname_path):
             Log.debug("Checking git directory status...")
@@ -130,7 +130,7 @@ class AutosubmitGit:
         git_project_commit = as_conf.get_git_project_commit()
         git_project_submodules = as_conf.get_submodules_list()
         project_destination = as_conf.get_project_destination()
-        project_path = os.path.join(BasicConfig.LOCAL_ROOT_DIR, as_conf.expid, BasicConfig.LOCAL_PROJ_DIR)
+        project_path = os.path.join(APIBasicConfig.LOCAL_ROOT_DIR, as_conf.expid, APIBasicConfig.LOCAL_PROJ_DIR)
         git_path = as_conf.get_project_dir()
 
         if os.path.exists(project_path):

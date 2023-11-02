@@ -28,14 +28,14 @@ from ..history.data_classes.job_data import JobData
 from ..history.data_classes.experiment_run import ExperimentRun
 from ..history.platform_monitor.slurm_monitor import SlurmMonitor
 from ..history.internal_logging import Logging
-from ..config.basicConfig import BasicConfig
+from ..config.basicConfig import APIBasicConfig
 from typing import List, Dict, Tuple, Any
 
 SECONDS_WAIT_PLATFORM = 60
 
 class ExperimentHistory():
   def __init__(self, expid, basic_config, experiment_history_db_manager, logger):
-    # type: (str, BasicConfig, ExperimentHistoryDbManager, Logging) -> None
+    # type: (str, APIBasicConfig, ExperimentHistoryDbManager, Logging) -> None
     self.expid = expid
     self._log = logger
     self.basic_config = basic_config

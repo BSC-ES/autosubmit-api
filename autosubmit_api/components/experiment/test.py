@@ -2,10 +2,10 @@
 
 import unittest
 from mock import Mock
-from components.jobs.job_factory import SimJob
-from components.experiment.pkl_organizer import PklOrganizer
-from builders.configuration_facade_builder import ConfigurationFacadeDirector, AutosubmitConfigurationFacadeBuilder
-from common.utils_for_testing import get_mock_basic_config
+from autosubmit_api.components.jobs.job_factory import SimJob
+from autosubmit_api.components.experiment.pkl_organizer import PklOrganizer
+from autosubmit_api.builders.configuration_facade_builder import ConfigurationFacadeDirector, AutosubmitConfigurationFacadeBuilder
+from autosubmit_api.common.utils_for_testing import get_mock_basic_config
 
 class TestConfigurationFacade(unittest.TestCase):
   def setUp(self):

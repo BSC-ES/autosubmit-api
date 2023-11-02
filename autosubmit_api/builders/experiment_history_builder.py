@@ -1,7 +1,7 @@
 #!/usr/bin/python3.7
 from ..history.experiment_history import ExperimentHistory
 from ..history.internal_logging import Logging
-from ..config.basicConfig import BasicConfig
+from ..config.basicConfig import APIBasicConfig
 from ..history.database_managers.experiment_history_db_manager import ExperimentHistoryDbManager
 from .basic_builder import BasicBuilder
 from abc import ABCMeta, abstractmethod
@@ -67,7 +67,7 @@ class ExperimentHistoryDirector(object):
     self.builder = builder
 
   def build_current_experiment_history(self, basic_config=None):
-    # type: (BasicConfig) -> ExperimentHistory
+    # type: (APIBasicConfig) -> ExperimentHistory
     """ Builds ExperimentHistory updated to current version. """
     if basic_config:
       self.builder.set_basic_config(basic_config)
@@ -79,7 +79,7 @@ class ExperimentHistoryDirector(object):
     return self.builder.make_experiment_history()
 
   def build_reader_experiment_history(self, basic_config=None):
-    # type: (BasicConfig) -> ExperimentHistory
+    # type: (APIBasicConfig) -> ExperimentHistory
     """ Buids ExperimentHistory that doesn't update to current version automatically. """
     if basic_config:
       self.builder.set_basic_config(basic_config)

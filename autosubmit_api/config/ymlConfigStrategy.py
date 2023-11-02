@@ -35,7 +35,7 @@ from pyparsing import nestedExpr
 from bscearth.utils.config_parser import ConfigParserFactory, ConfigParser
 from bscearth.utils.date import parse_date
 from bscearth.utils.log import Log
-from ..config.basicConfig import BasicConfig
+from ..config.basicConfig import APIBasicConfig
 from ..config.IConfigStrategy import IConfigStrategy
 
 logger = logging.getLogger('gunicorn.error')
@@ -47,9 +47,9 @@ class ymlConfigStrategy(IConfigStrategy):
     :param expid: experiment identifier
     :type expid: str
     """
-    def __init__(self, expid, basic_config, parser_factory, extension=".yml"):
+    def __init__(self, expid, basic_config = APIBasicConfig, parser_factory = None, extension=".yml"):
         logger.info("Creating AS4 Parser !!!!!")
-        self._conf_parser = Autosubmit4Config(expid)
+        self._conf_parser = Autosubmit4Config(expid, basic_config)
         self._conf_parser.reload(True)
 
     def jobs_parser(self):
@@ -158,7 +158,7 @@ class ymlConfigStrategy(IConfigStrategy):
         return self._conf_parser.get_synchronize(section)
 
     def get_processors(self, section):
-        return self._conf_parser.get_processors(section)
+        return self._conf_parser.jobs_data.get(section, {}).get("PROCESSORS", "1")
 
     def get_threads(self, section):
         return self._conf_parser.get_threads(section)

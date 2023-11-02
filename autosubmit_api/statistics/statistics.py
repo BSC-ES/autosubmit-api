@@ -1,7 +1,7 @@
 #!/bin/env/python
 from ..components.jobs import utils as JobUtils
 from datetime import datetime, timedelta
-from ..config.basicConfig import BasicConfig
+from ..config.basicConfig import APIBasicConfig
 from ..components.jobs.job_factory import Job
 from .job_stat import JobStat
 from .stats_summary import StatsSummary
@@ -16,7 +16,7 @@ _FAILED_RETRIAL = 0
 class Statistics(object):
 
     def __init__(self, expid, jobs, start, end, queue_time_fix, basic_config):
-        # type: (str, List[Job], datetime, datetime, Dict[str, int], BasicConfig) -> None
+        # type: (str, List[Job], datetime, datetime, Dict[str, int], APIBasicConfig) -> None
         """
         """
         self.expid = expid

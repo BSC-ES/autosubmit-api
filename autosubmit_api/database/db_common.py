@@ -25,8 +25,8 @@ from pysqlite3 import dbapi2
 import pysqlite3 as sqlite3
 
 from bscearth.utils.log import Log
-from ..config.basicConfig import BasicConfig
-from ..config.config_common import AutosubmitConfig
+from ..config.basicConfig import APIBasicConfig
+from ..config.config_common import AutosubmitConfigResolver
 from ..builders.experiment_history_builder import ExperimentHistoryDirector, ExperimentHistoryBuilder
 from ..builders.configuration_facade_builder import ConfigurationFacadeDirector, AutosubmitConfigurationFacadeBuilder
 from bscearth.utils.config_parser import ConfigParserFactory
@@ -56,7 +56,7 @@ def create_db(qry):
     except sqlite3.Error:
         close_conn(conn, cursor)
         Log.error('The database can not be created.' +
-                  'DB file:' + BasicConfig.DB_PATH)
+                  'DB file:' + APIBasicConfig.DB_PATH)
         return False
 
     conn.commit()
@@ -70,10 +70,10 @@ def check_db():
 
     :return: None if exists, terminates program if not
     """
-    BasicConfig.read()
-    if not os.path.exists(BasicConfig.DB_PATH):
+    APIBasicConfig.read()
+    if not os.path.exists(APIBasicConfig.DB_PATH):
         Log.error('Some problem has happened...check the database file.' +
-                  'DB file:' + BasicConfig.DB_PATH)
+                  'DB file:' + APIBasicConfig.DB_PATH)
         return False
     return True
 
@@ -87,9 +87,9 @@ def open_conn(check_version=True):
     :return: connection object, cursor object
     :rtype: sqlite3.Connection, sqlite3.Cursor
     """
-    BasicConfig.read()
-    print((BasicConfig.DB_PATH))
-    conn = sqlite3.connect(BasicConfig.DB_PATH)
+    APIBasicConfig.read()
+    print((APIBasicConfig.DB_PATH))
+    conn = sqlite3.connect(APIBasicConfig.DB_PATH)
     cursor = conn.cursor()
 
     # Getting database version
@@ -318,10 +318,10 @@ def search_experiment_by_id(searchString, typeExp=None, onlyActive=None, owner=N
             'Connection to database could not be established: {0}', e.message)
         return False
     if owner:
-        query = "SELECT * FROM listexp WHERE user='{0}'".format(owner)
+        query = "SELECT id,name,user,created,model,branch,hpc,description FROM listexp WHERE user='{0}'".format(owner)
         # print(query)
     else:
-        query = "SELECT * FROM listexp WHERE (name LIKE '" + searchString + \
+        query = "SELECT id,name,user,created,model,branch,hpc,description FROM listexp WHERE (name LIKE '" + searchString + \
             "%' OR description LIKE '%" + searchString + \
                 "%' OR user LIKE '%" + searchString + "%')"
     if typeExp and len(typeExp) > 0:
@@ -416,8 +416,8 @@ def get_current_running_exp():
         Log.error(
             'Connection to database could not be established: {0}', e.message)
         return False
-    query = "SELECT * FROM listexp"
-    BasicConfig.read()
+    query = "SELECT id,name,user,created,model,branch,hpc,description FROM listexp"
+    APIBasicConfig.read()
     # print(query)
     cursor.execute(query)
     table = cursor.fetchall()
@@ -457,7 +457,7 @@ def get_current_running_exp():
             if (expid in experiment_times):
                 if len(user) == 0:
                     # Retrieve user from path
-                    path = BasicConfig.LOCAL_ROOT_DIR + '/' + expid
+                    path = APIBasicConfig.LOCAL_ROOT_DIR + '/' + expid
                     if (os.path.exists(path)):
                         main_folder = os.stat(path)
                         user = os.popen(
@@ -491,14 +491,16 @@ def get_experiment_by_id(expid):
     if not check_db():
         return result
     (conn, cursor) = open_conn()
-    query = "SELECT * FROM experiment WHERE name ='" + expid + "'"
+    query = "SELECT id, name, description, autosubmit_version FROM experiment WHERE name ='" + expid + "'"
     cursor.execute(query)
+    headers = list(map(lambda attr : attr[0], cursor.description))
     row = cursor.fetchone()
     if row is not None:
-        result['id'] = int(row[0])
-        result['name'] = str(row[1])
-        result['description'] = str(row[4])
-        result['version'] = str(row[3])
+        obj = {header:row[i] for i, header in enumerate(headers)} 
+        result['id'] = obj["id"]
+        result['name'] = obj["name"]
+        result['description'] = obj["description"]
+        result['version'] = obj["autosubmit_version"]
     return result
 
 

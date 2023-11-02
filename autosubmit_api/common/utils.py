@@ -11,6 +11,20 @@ from bscearth.utils.date import date2str
 from dateutil.relativedelta import *
 from typing import List
 
+class Section:
+  CONFIG = "CONFIG"
+  MAIL = "MAIL"
+  STORAGE = "STORAGE"
+  DEFAULT = "DEFAULT"
+  EXPERIMENT = "EXPERIMENT"
+  PROJECT = "PROJECT"
+  GIT = "GIT"
+  SVN = "SVN"
+  LOCAL = "LOCAL"
+  PROJECT_FILES = "PROJECT_FILES"
+  RERUN = "RERUN"
+  JOBS = "JOBS"
+
 class JobSection:
   SIM = "SIM"
   POST = "POST"

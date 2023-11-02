@@ -22,8 +22,8 @@ import time
 
 import os
 
-from ...config.basicConfig import BasicConfig
-from ...config.config_common import AutosubmitConfig
+from ...config.basicConfig import APIBasicConfig
+from ...config.config_common import AutosubmitConfigResolver
 from .saga_platform import SagaPlatform
 from .submitter import Submitter
 
@@ -71,7 +71,7 @@ class SagaSubmitter(Submitter):
         session = None
 
         platforms = dict()
-        local_platform = SagaPlatform(asconf.expid, 'local', BasicConfig)
+        local_platform = SagaPlatform(asconf.expid, 'local', APIBasicConfig)
         local_platform.service = None
         retry = retries
         while local_platform.service is None and retry >= 0:
@@ -86,13 +86,13 @@ class SagaSubmitter(Submitter):
         local_platform.max_processors = asconf.get_max_processors()
         local_platform.max_waiting_jobs = asconf.get_max_waiting_jobs()
         local_platform.total_jobs = asconf.get_total_jobs()
-        local_platform.scratch = os.path.join(BasicConfig.LOCAL_ROOT_DIR, asconf.expid, BasicConfig.LOCAL_TMP_DIR)
+        local_platform.scratch = os.path.join(APIBasicConfig.LOCAL_ROOT_DIR, asconf.expid, APIBasicConfig.LOCAL_TMP_DIR)
         local_platform.project = ''
         local_platform.budget = ''
         local_platform.reservation = ''
         local_platform.exclusivity = ''
         local_platform.user = ''
-        local_platform.root_dir = os.path.join(BasicConfig.LOCAL_ROOT_DIR, local_platform.expid)
+        local_platform.root_dir = os.path.join(APIBasicConfig.LOCAL_ROOT_DIR, local_platform.expid)
         local_platform.transfer = "file"
         local_platform.host = 'localhost'
         platforms['local'] = local_platform
@@ -105,7 +105,7 @@ class SagaSubmitter(Submitter):
 
             platform_type = parser.get_option(section, 'TYPE', '').lower()
 
-            remote_platform = SagaPlatform(asconf.expid, section.lower(), BasicConfig)
+            remote_platform = SagaPlatform(asconf.expid, section.lower(), APIBasicConfig)
             remote_platform.type = platform_type
 
             platform_version = parser.get_option(section, 'VERSION', '')

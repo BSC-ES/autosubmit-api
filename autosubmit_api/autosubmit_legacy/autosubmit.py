@@ -41,8 +41,8 @@ import subprocess
 import argparse
 
 sys.path.insert(0, os.path.abspath('.'))
-from ..config.basicConfig import BasicConfig
-from ..config.config_common import AutosubmitConfig
+from ..config.basicConfig import APIBasicConfig
+from ..config.config_common import AutosubmitConfigResolver
 from bscearth.utils.config_parser import ConfigParserFactory
 from .job.job_common import Status
 from ..git.autosubmit_git import AutosubmitGit
@@ -131,7 +131,7 @@ class Autosubmit:
         Parse arguments given to an executable and start execution of command given
         """
         try:
-            BasicConfig.read()
+            APIBasicConfig.read()
 
             parser = argparse.ArgumentParser(
                 description='Main executable for autosubmit. ')
@@ -561,17 +561,17 @@ class Autosubmit:
         :type expid_delete: str
         :param expid_delete: identifier of the experiment to delete
         """
-        if expid_delete == '' or expid_delete is None and not os.path.exists(os.path.join(BasicConfig.LOCAL_ROOT_DIR,
+        if expid_delete == '' or expid_delete is None and not os.path.exists(os.path.join(APIBasicConfig.LOCAL_ROOT_DIR,
                                                                                           expid_delete)):
             Log.info("Experiment directory does not exist.")
         else:
             Log.info("Removing experiment directory...")
             ret = False
-            if pwd.getpwuid(os.stat(os.path.join(BasicConfig.LOCAL_ROOT_DIR, expid_delete)).st_uid).pw_name == os.getlogin():
+            if pwd.getpwuid(os.stat(os.path.join(APIBasicConfig.LOCAL_ROOT_DIR, expid_delete)).st_uid).pw_name == os.getlogin():
                 try:
 
                     shutil.rmtree(os.path.join(
-                        BasicConfig.LOCAL_ROOT_DIR, expid_delete))
+                        APIBasicConfig.LOCAL_ROOT_DIR, expid_delete))
                 except OSError as e:
                     Log.warning('Can not delete experiment folder: {0}', e)
                     return ret
@@ -603,10 +603,10 @@ class Autosubmit:
         :return: experiment identifier. If method fails, returns ''.
         :rtype: str
         """
-        BasicConfig.read()
+        APIBasicConfig.read()
 
         log_path = os.path.join(
-            BasicConfig.LOCAL_ROOT_DIR, 'ASlogs', 'expid.log'.format(os.getuid()))
+            APIBasicConfig.LOCAL_ROOT_DIR, 'ASlogs', 'expid.log'.format(os.getuid()))
         try:
             Log.set_file(log_path)
         except IOError as e:
@@ -625,10 +625,10 @@ class Autosubmit:
             if exp_id == '':
                 return ''
             try:
-                os.mkdir(os.path.join(BasicConfig.LOCAL_ROOT_DIR, exp_id))
+                os.mkdir(os.path.join(APIBasicConfig.LOCAL_ROOT_DIR, exp_id))
 
                 os.mkdir(os.path.join(
-                    BasicConfig.LOCAL_ROOT_DIR, exp_id, 'conf'))
+                    APIBasicConfig.LOCAL_ROOT_DIR, exp_id, 'conf'))
                 Log.info("Copying config files...")
 
                 # autosubmit config and experiment copied from AS.
@@ -639,18 +639,18 @@ class Autosubmit:
                         new_filename = filename[:index] + \
                             "_" + exp_id + filename[index:]
 
-                        if filename == 'platforms.conf' and BasicConfig.DEFAULT_PLATFORMS_CONF != '':
+                        if filename == 'platforms.conf' and APIBasicConfig.DEFAULT_PLATFORMS_CONF != '':
                             content = open(os.path.join(
-                                BasicConfig.DEFAULT_PLATFORMS_CONF, filename)).read()
-                        elif filename == 'jobs.conf' and BasicConfig.DEFAULT_JOBS_CONF != '':
+                                APIBasicConfig.DEFAULT_PLATFORMS_CONF, filename)).read()
+                        elif filename == 'jobs.conf' and APIBasicConfig.DEFAULT_JOBS_CONF != '':
                             content = open(os.path.join(
-                                BasicConfig.DEFAULT_JOBS_CONF, filename)).read()
+                                APIBasicConfig.DEFAULT_JOBS_CONF, filename)).read()
                         else:
                             content = resource_string(
                                 'autosubmit.config', 'files/' + filename)
 
                         conf_new_filename = os.path.join(
-                            BasicConfig.LOCAL_ROOT_DIR, exp_id, "conf", new_filename)
+                            APIBasicConfig.LOCAL_ROOT_DIR, exp_id, "conf", new_filename)
                         Log.debug(conf_new_filename)
                         open(conf_new_filename, 'w').write(content)
                 Autosubmit._prepare_conf_files(
@@ -662,18 +662,18 @@ class Autosubmit:
                 return ''
         else:
             try:
-                if os.path.exists(os.path.join(BasicConfig.LOCAL_ROOT_DIR, copy_id)):
+                if os.path.exists(os.path.join(APIBasicConfig.LOCAL_ROOT_DIR, copy_id)):
                     exp_id = copy_experiment(
                         copy_id, description, Autosubmit.autosubmit_version, test, operational)
                     if exp_id == '':
                         return ''
                     dir_exp_id = os.path.join(
-                        BasicConfig.LOCAL_ROOT_DIR, exp_id)
+                        APIBasicConfig.LOCAL_ROOT_DIR, exp_id)
                     os.mkdir(dir_exp_id)
                     os.mkdir(dir_exp_id + '/conf')
                     Log.info("Copying previous experiment config directories")
                     conf_copy_id = os.path.join(
-                        BasicConfig.LOCAL_ROOT_DIR, copy_id, "conf")
+                        APIBasicConfig.LOCAL_ROOT_DIR, copy_id, "conf")
                     files = os.listdir(conf_copy_id)
                     for filename in files:
                         if os.path.isfile(os.path.join(conf_copy_id, filename)):
@@ -685,8 +685,8 @@ class Autosubmit:
                     Autosubmit._prepare_conf_files(
                         exp_id, hpc, Autosubmit.autosubmit_version, dummy)
                     #####
-                    autosubmit_config = AutosubmitConfig(
-                        copy_id, BasicConfig, ConfigParserFactory())
+                    autosubmit_config = AutosubmitConfigResolver(
+                        copy_id, APIBasicConfig, ConfigParserFactory())
                     if autosubmit_config.check_conf_files():
                         project_type = autosubmit_config.get_project_type()
                         if project_type == "git":
@@ -707,12 +707,12 @@ class Autosubmit:
                 return ''
 
         Log.debug("Creating temporal directory...")
-        exp_id_path = os.path.join(BasicConfig.LOCAL_ROOT_DIR, exp_id)
+        exp_id_path = os.path.join(APIBasicConfig.LOCAL_ROOT_DIR, exp_id)
         tmp_path = os.path.join(exp_id_path, "tmp")
         os.mkdir(tmp_path)
         os.chmod(tmp_path, 0o775)
-        os.mkdir(os.path.join(tmp_path, BasicConfig.LOCAL_ASLOG_DIR))
-        os.chmod(os.path.join(tmp_path, BasicConfig.LOCAL_ASLOG_DIR), 0o775)
+        os.mkdir(os.path.join(tmp_path, APIBasicConfig.LOCAL_ASLOG_DIR))
+        os.chmod(os.path.join(tmp_path, APIBasicConfig.LOCAL_ASLOG_DIR), 0o775)
         Log.debug("Creating temporal remote directory...")
         remote_tmp_path = os.path.join(tmp_path, "LOG_" + exp_id)
         os.mkdir(remote_tmp_path)
@@ -742,14 +742,14 @@ class Autosubmit:
         :rtype: bool
         """
         log_path = os.path.join(
-            BasicConfig.LOCAL_ROOT_DIR, "ASlogs", 'delete.log'.format(os.getuid()))
+            APIBasicConfig.LOCAL_ROOT_DIR, "ASlogs", 'delete.log'.format(os.getuid()))
         try:
             Log.set_file(log_path)
         except IOError as e:
             Log.error("Can not create log file in path {0}: {1}".format(
                 log_path, e.message))
 
-        if os.path.exists(os.path.join(BasicConfig.LOCAL_ROOT_DIR, expid)):
+        if os.path.exists(os.path.join(APIBasicConfig.LOCAL_ROOT_DIR, expid)):
             if force or Autosubmit._user_yes_no_query("Do you want to delete " + expid + " ?"):
                 return Autosubmit._delete_expid(expid)
             else:
@@ -787,9 +787,9 @@ class Autosubmit:
         if expid is None:
             Log.critical("Missing experiment id")
 
-        BasicConfig.read()
-        exp_path = os.path.join(BasicConfig.LOCAL_ROOT_DIR, expid)
-        tmp_path = os.path.join(exp_path, BasicConfig.LOCAL_TMP_DIR)
+        APIBasicConfig.read()
+        exp_path = os.path.join(APIBasicConfig.LOCAL_ROOT_DIR, expid)
+        tmp_path = os.path.join(exp_path, APIBasicConfig.LOCAL_TMP_DIR)
         if os.path.exists(os.path.join(tmp_path, 'autosubmit.lock')):
             locked = True
         else:
@@ -802,10 +802,10 @@ class Autosubmit:
             return 1
         Log.info("Starting inspect command")
         Log.set_file(os.path.join(
-            tmp_path, BasicConfig.LOCAL_ASLOG_DIR, 'generate.log'))
+            tmp_path, APIBasicConfig.LOCAL_ASLOG_DIR, 'generate.log'))
         os.system('clear')
         signal.signal(signal.SIGINT, signal_handler)
-        as_conf = AutosubmitConfig(expid, BasicConfig, ConfigParserFactory())
+        as_conf = AutosubmitConfigResolver(expid, APIBasicConfig, ConfigParserFactory())
         if not as_conf.check_conf_files():
             Log.critical('Can not generate scripts with invalid configuration')
             return False
@@ -816,9 +816,9 @@ class Autosubmit:
         safetysleeptime = as_conf.get_safetysleeptime()
         Log.debug("The Experiment name is: {0}", expid)
         Log.debug("Sleep: {0}", safetysleeptime)
-        packages_persistence = JobPackagePersistence(os.path.join(BasicConfig.LOCAL_ROOT_DIR, expid, "pkl"),
+        packages_persistence = JobPackagePersistence(os.path.join(APIBasicConfig.LOCAL_ROOT_DIR, expid, "pkl"),
                                                      "job_packages_" + expid)
-        os.chmod(os.path.join(BasicConfig.LOCAL_ROOT_DIR, expid,
+        os.chmod(os.path.join(APIBasicConfig.LOCAL_ROOT_DIR, expid,
                               "pkl", "job_packages_" + expid + ".db"), 0o664)
 
         packages_persistence.reset_table(True)
@@ -989,10 +989,10 @@ class Autosubmit:
         if expid is None:
             Log.critical("Missing experiment id")
 
-        BasicConfig.read()
-        exp_path = os.path.join(BasicConfig.LOCAL_ROOT_DIR, expid)
-        tmp_path = os.path.join(exp_path, BasicConfig.LOCAL_TMP_DIR)
-        aslogs_path = os.path.join(tmp_path, BasicConfig.LOCAL_ASLOG_DIR)
+        APIBasicConfig.read()
+        exp_path = os.path.join(APIBasicConfig.LOCAL_ROOT_DIR, expid)
+        tmp_path = os.path.join(exp_path, APIBasicConfig.LOCAL_TMP_DIR)
+        aslogs_path = os.path.join(tmp_path, APIBasicConfig.LOCAL_ASLOG_DIR)
         if not os.path.exists(aslogs_path):
             os.mkdir(aslogs_path)
             os.chmod(aslogs_path, 0o775)
@@ -1006,7 +1006,7 @@ class Autosubmit:
         import platform
         host = platform.node()
         print(host)
-        if BasicConfig.ALLOWED_HOSTS and host not in BasicConfig.ALLOWED_HOSTS:
+        if APIBasicConfig.ALLOWED_HOSTS and host not in APIBasicConfig.ALLOWED_HOSTS:
             Log.info("\n Autosubmit run command is not allowed on this host")
             return False
 
@@ -1021,8 +1021,8 @@ class Autosubmit:
 
                 signal.signal(signal.SIGINT, signal_handler)
 
-                as_conf = AutosubmitConfig(
-                    expid, BasicConfig, ConfigParserFactory())
+                as_conf = AutosubmitConfigResolver(
+                    expid, APIBasicConfig, ConfigParserFactory())
                 if not as_conf.check_conf_files():
                     Log.critical('Can not run with invalid configuration')
                     return False
@@ -1047,7 +1047,7 @@ class Autosubmit:
                 Log.info("Starting job submission...")
 
                 pkl_dir = os.path.join(
-                    BasicConfig.LOCAL_ROOT_DIR, expid, 'pkl')
+                    APIBasicConfig.LOCAL_ROOT_DIR, expid, 'pkl')
                 job_list = Autosubmit.load_job_list(
                     expid, as_conf, notransitive=notransitive)
 
@@ -1074,11 +1074,11 @@ class Autosubmit:
 
                 job_list.check_scripts(as_conf)
 
-                packages_persistence = JobPackagePersistence(os.path.join(BasicConfig.LOCAL_ROOT_DIR, expid, "pkl"),
+                packages_persistence = JobPackagePersistence(os.path.join(APIBasicConfig.LOCAL_ROOT_DIR, expid, "pkl"),
                                                              "job_packages_" + expid)
 
                 if as_conf.get_wrapper_type() != 'none':
-                    os.chmod(os.path.join(BasicConfig.LOCAL_ROOT_DIR,
+                    os.chmod(os.path.join(APIBasicConfig.LOCAL_ROOT_DIR,
                                           expid, "pkl", "job_packages_" + expid + ".db"), 0o664)
                     packages = packages_persistence.load()
                     for (exp_id, package_name, job_name) in packages:
@@ -1166,7 +1166,7 @@ class Autosubmit:
                                     if prev_status != job.update_status(as_conf.get_copy_remote_logs() == 'true'):
                                         if as_conf.get_notifications() == 'true':
                                             if Status.VALUE_TO_KEY[job.status] in job.notify_on:
-                                                Notifier.notify_status_change(MailNotifier(BasicConfig), expid, job.name,
+                                                Notifier.notify_status_change(MailNotifier(APIBasicConfig), expid, job.name,
                                                                               Status.VALUE_TO_KEY[prev_status],
                                                                               Status.VALUE_TO_KEY[job.status],
                                                                               as_conf.get_mails_to())
@@ -1189,7 +1189,7 @@ class Autosubmit:
                             if prev_status != job.update_status(as_conf.get_copy_remote_logs() == 'true'):
                                 if as_conf.get_notifications() == 'true':
                                     if Status.VALUE_TO_KEY[job.status] in job.notify_on:
-                                        Notifier.notify_status_change(MailNotifier(BasicConfig), expid, job.name,
+                                        Notifier.notify_status_change(MailNotifier(APIBasicConfig), expid, job.name,
                                                                       Status.VALUE_TO_KEY[prev_status],
                                                                       Status.VALUE_TO_KEY[job.status],
                                                                       as_conf.get_mails_to())
@@ -1349,9 +1349,9 @@ class Autosubmit:
         :param hide: hides plot window
         :type hide: bool
         """
-        BasicConfig.read()
+        APIBasicConfig.read()
 
-        exp_path = os.path.join(BasicConfig.LOCAL_ROOT_DIR, expid)
+        exp_path = os.path.join(APIBasicConfig.LOCAL_ROOT_DIR, expid)
 
         if not os.path.exists(exp_path):
             Log.critical(
@@ -1359,16 +1359,16 @@ class Autosubmit:
             Log.warning("Does an experiment with the given id exist?")
             return 1
 
-        Log.set_file(os.path.join(BasicConfig.LOCAL_ROOT_DIR, expid,
-                                  BasicConfig.LOCAL_TMP_DIR, BasicConfig.LOCAL_ASLOG_DIR, 'monitor.log'))
+        Log.set_file(os.path.join(APIBasicConfig.LOCAL_ROOT_DIR, expid,
+                                  APIBasicConfig.LOCAL_TMP_DIR, APIBasicConfig.LOCAL_ASLOG_DIR, 'monitor.log'))
         Log.info("Getting job list...")
 
-        as_conf = AutosubmitConfig(expid, BasicConfig, ConfigParserFactory())
+        as_conf = AutosubmitConfigResolver(expid, APIBasicConfig, ConfigParserFactory())
         if not as_conf.check_conf_files():
             Log.critical('Can not run with invalid configuration')
             return False
 
-        pkl_dir = os.path.join(BasicConfig.LOCAL_ROOT_DIR, expid, 'pkl')
+        pkl_dir = os.path.join(APIBasicConfig.LOCAL_ROOT_DIR, expid, 'pkl')
 
         job_list = Autosubmit.load_job_list(
             expid, as_conf, notransitive=notransitive, monitor=True)
@@ -1444,9 +1444,9 @@ class Autosubmit:
             job.parents = job.parents - referenced_jobs_to_remove
         # WRAPPERS
         if as_conf.get_wrapper_type() != 'none' and check_wrapper:
-            packages_persistence = JobPackagePersistence(os.path.join(BasicConfig.LOCAL_ROOT_DIR, expid, "pkl"),
+            packages_persistence = JobPackagePersistence(os.path.join(APIBasicConfig.LOCAL_ROOT_DIR, expid, "pkl"),
                                                          "job_packages_" + expid)
-            os.chmod(os.path.join(BasicConfig.LOCAL_ROOT_DIR, expid,
+            os.chmod(os.path.join(APIBasicConfig.LOCAL_ROOT_DIR, expid,
                                   "pkl", "job_packages_" + expid + ".db"), 0o664)
             packages_persistence.reset_table(True)
             referenced_jobs_to_remove = set()
@@ -1469,7 +1469,7 @@ class Autosubmit:
 
             packages = packages_persistence.load(True)
         else:
-            packages = JobPackagePersistence(os.path.join(BasicConfig.LOCAL_ROOT_DIR, expid, "pkl"),
+            packages = JobPackagePersistence(os.path.join(APIBasicConfig.LOCAL_ROOT_DIR, expid, "pkl"),
                                              "job_packages_" + expid).load()
 
         # print(packages)
@@ -1511,24 +1511,24 @@ class Autosubmit:
         :param hide: hides plot window
         :type hide: bool
         """
-        BasicConfig.read()
-        exp_path = os.path.join(BasicConfig.LOCAL_ROOT_DIR, expid)
+        APIBasicConfig.read()
+        exp_path = os.path.join(APIBasicConfig.LOCAL_ROOT_DIR, expid)
         if not os.path.exists(exp_path):
             Log.critical(
                 "The directory %s is needed and does not exist." % exp_path)
             Log.warning("Does an experiment with the given id exist?")
             return 1
 
-        Log.set_file(os.path.join(BasicConfig.LOCAL_ROOT_DIR, expid,
-                                  BasicConfig.LOCAL_TMP_DIR, BasicConfig.LOCAL_ASLOG_DIR, 'statistics.log'))
+        Log.set_file(os.path.join(APIBasicConfig.LOCAL_ROOT_DIR, expid,
+                                  APIBasicConfig.LOCAL_TMP_DIR, APIBasicConfig.LOCAL_ASLOG_DIR, 'statistics.log'))
         Log.info("Loading jobs...")
 
-        as_conf = AutosubmitConfig(expid, BasicConfig, ConfigParserFactory())
+        as_conf = AutosubmitConfigResolver(expid, APIBasicConfig, ConfigParserFactory())
         if not as_conf.check_conf_files():
             Log.critical('Can not run with invalid configuration')
             return False
 
-        pkl_dir = os.path.join(BasicConfig.LOCAL_ROOT_DIR, expid, 'pkl')
+        pkl_dir = os.path.join(APIBasicConfig.LOCAL_ROOT_DIR, expid, 'pkl')
         job_list = Autosubmit.load_job_list(
             expid, as_conf, notransitive=notransitive)
         Log.debug("Job list restored from {0} files", pkl_dir)
@@ -1583,8 +1583,8 @@ class Autosubmit:
         :param plot: set True to delete outdated plots
         :param stats: set True to delete outdated stats
         """
-        BasicConfig.read()
-        exp_path = os.path.join(BasicConfig.LOCAL_ROOT_DIR, expid)
+        APIBasicConfig.read()
+        exp_path = os.path.join(APIBasicConfig.LOCAL_ROOT_DIR, expid)
         if not os.path.exists(exp_path):
             Log.critical(
                 "The directory %s is needed and does not exist." % exp_path)
@@ -1592,11 +1592,11 @@ class Autosubmit:
             return 1
 
         if create_log_file:
-            Log.set_file(os.path.join(BasicConfig.LOCAL_ROOT_DIR, expid,
-                                      BasicConfig.LOCAL_TMP_DIR, BasicConfig.LOCAL_ASLOG_DIR, 'clean_exp.log'))
+            Log.set_file(os.path.join(APIBasicConfig.LOCAL_ROOT_DIR, expid,
+                                      APIBasicConfig.LOCAL_TMP_DIR, APIBasicConfig.LOCAL_ASLOG_DIR, 'clean_exp.log'))
         if project:
-            autosubmit_config = AutosubmitConfig(
-                expid, BasicConfig, ConfigParserFactory())
+            autosubmit_config = AutosubmitConfigResolver(
+                expid, APIBasicConfig, ConfigParserFactory())
             if not autosubmit_config.check_conf_files():
                 Log.critical(
                     'Can not clean project with invalid configuration')
@@ -1639,24 +1639,24 @@ class Autosubmit:
         :param hide: hides plot window
         :type hide: bool
         """
-        BasicConfig.read()
-        exp_path = os.path.join(BasicConfig.LOCAL_ROOT_DIR, expid)
+        APIBasicConfig.read()
+        exp_path = os.path.join(APIBasicConfig.LOCAL_ROOT_DIR, expid)
         if not os.path.exists(exp_path):
             Log.critical(
                 "The directory %s is needed and does not exist." % exp_path)
             Log.warning("Does an experiment with the given id exist?")
             return 1
 
-        Log.set_file(os.path.join(BasicConfig.LOCAL_ROOT_DIR, expid,
-                                  BasicConfig.LOCAL_TMP_DIR, BasicConfig.LOCAL_ASLOG_DIR, 'recovery.log'))
+        Log.set_file(os.path.join(APIBasicConfig.LOCAL_ROOT_DIR, expid,
+                                  APIBasicConfig.LOCAL_TMP_DIR, APIBasicConfig.LOCAL_ASLOG_DIR, 'recovery.log'))
 
-        as_conf = AutosubmitConfig(expid, BasicConfig, ConfigParserFactory())
+        as_conf = AutosubmitConfigResolver(expid, APIBasicConfig, ConfigParserFactory())
         if not as_conf.check_conf_files():
             Log.critical('Can not run with invalid configuration')
             return False
 
         Log.info('Recovering experiment {0}'.format(expid))
-        pkl_dir = os.path.join(BasicConfig.LOCAL_ROOT_DIR, expid, 'pkl')
+        pkl_dir = os.path.join(APIBasicConfig.LOCAL_ROOT_DIR, expid, 'pkl')
         job_list = Autosubmit.load_job_list(
             expid, as_conf, notransitive=notransitive, monitor=True)
         Log.debug("Job list restored from {0} files", pkl_dir)
@@ -1724,7 +1724,7 @@ class Autosubmit:
 
         Log.result("Recovery finalized")
 
-        packages = JobPackagePersistence(os.path.join(BasicConfig.LOCAL_ROOT_DIR, expid, "pkl"),
+        packages = JobPackagePersistence(os.path.join(APIBasicConfig.LOCAL_ROOT_DIR, expid, "pkl"),
                                          "job_packages_" + expid).load()
 
         groups_dict = dict()
@@ -1757,13 +1757,13 @@ class Autosubmit:
         :param offer:
         """
         log_file = os.path.join(
-            BasicConfig.LOCAL_ROOT_DIR, "ASlogs", 'migrate_{0}.log'.format(experiment_id))
+            APIBasicConfig.LOCAL_ROOT_DIR, "ASlogs", 'migrate_{0}.log'.format(experiment_id))
         Log.set_file(log_file)
 
         if offer:
             Log.info('Migrating experiment {0}'.format(experiment_id))
-            as_conf = AutosubmitConfig(
-                experiment_id, BasicConfig, ConfigParserFactory())
+            as_conf = AutosubmitConfigResolver(
+                experiment_id, APIBasicConfig, ConfigParserFactory())
             if not as_conf.check_conf_files():
                 Log.critical('Can not proceed with invalid configuration')
                 return False
@@ -1899,8 +1899,8 @@ class Autosubmit:
                 Log.critical("The experiment cannot be picked up")
                 return False
             Log.info("Local files/dirs have been successfully picked up")
-            as_conf = AutosubmitConfig(
-                experiment_id, BasicConfig, ConfigParserFactory())
+            as_conf = AutosubmitConfigResolver(
+                experiment_id, APIBasicConfig, ConfigParserFactory())
             if not as_conf.check_conf_files():
                 Log.critical('Can not proceed with invalid configuration')
                 return False
@@ -1956,20 +1956,20 @@ class Autosubmit:
         :param experiment_id: experiment identifier:
         :type experiment_id: str
         """
-        BasicConfig.read()
-        exp_path = os.path.join(BasicConfig.LOCAL_ROOT_DIR, experiment_id)
+        APIBasicConfig.read()
+        exp_path = os.path.join(APIBasicConfig.LOCAL_ROOT_DIR, experiment_id)
         if not os.path.exists(exp_path):
             Log.critical(
                 "The directory {0} is needed and does not exist.", exp_path)
             Log.warning("Does an experiment with the given id exist?")
             return False
 
-        log_file = os.path.join(BasicConfig.LOCAL_ROOT_DIR, experiment_id,
-                                BasicConfig.LOCAL_TMP_DIR, BasicConfig.LOCAL_ASLOG_DIR, 'check_exp.log')
+        log_file = os.path.join(APIBasicConfig.LOCAL_ROOT_DIR, experiment_id,
+                                APIBasicConfig.LOCAL_TMP_DIR, APIBasicConfig.LOCAL_ASLOG_DIR, 'check_exp.log')
         Log.set_file(log_file)
 
-        as_conf = AutosubmitConfig(
-            experiment_id, BasicConfig, ConfigParserFactory())
+        as_conf = AutosubmitConfigResolver(
+            experiment_id, APIBasicConfig, ConfigParserFactory())
         if not as_conf.check_conf_files():
             return False
 
@@ -1984,7 +1984,7 @@ class Autosubmit:
             return False
 
         pkl_dir = os.path.join(
-            BasicConfig.LOCAL_ROOT_DIR, experiment_id, 'pkl')
+            APIBasicConfig.LOCAL_ROOT_DIR, experiment_id, 'pkl')
         job_list = Autosubmit.load_job_list(
             experiment_id, as_conf, notransitive=notransitive)
         Log.debug("Job list restored from {0} files", pkl_dir)
@@ -2015,8 +2015,8 @@ class Autosubmit:
         model = ""
         branch = ""
         hpc = ""
-        BasicConfig.read()
-        exp_path = os.path.join(BasicConfig.LOCAL_ROOT_DIR, experiment_id)
+        APIBasicConfig.read()
+        exp_path = os.path.join(APIBasicConfig.LOCAL_ROOT_DIR, experiment_id)
         if not os.path.exists(exp_path):
             return user, created, model, branch, hpc
 
@@ -2033,8 +2033,8 @@ class Autosubmit:
             os.path.getmtime(experiment_file))
 
         try:
-            as_conf = AutosubmitConfig(
-                experiment_id, BasicConfig, ConfigParserFactory())
+            as_conf = AutosubmitConfigResolver(
+                experiment_id, APIBasicConfig, ConfigParserFactory())
             as_conf.reload()
 
             project_type = as_conf.get_project_type()
@@ -2377,10 +2377,10 @@ class Autosubmit:
         Creates a new database instance for autosubmit at the configured path
 
         """
-        BasicConfig.read()
+        APIBasicConfig.read()
         Log.set_file(os.path.join(
-            BasicConfig.LOCAL_ROOT_DIR, "ASlogs", 'install.log'))
-        if not os.path.exists(BasicConfig.DB_PATH):
+            APIBasicConfig.LOCAL_ROOT_DIR, "ASlogs", 'install.log'))
+        if not os.path.exists(APIBasicConfig.DB_PATH):
             Log.info("Creating autosubmit database...")
             qry = resource_string('autosubmit.database', 'data/autosubmit.sql')
             if not create_db(qry):
@@ -2404,10 +2404,10 @@ class Autosubmit:
         :param expid: experiment identifier
         :type expid: str
         """
-        BasicConfig.read()
-        Log.set_file(os.path.join(BasicConfig.LOCAL_ROOT_DIR, expid,
-                                  BasicConfig.LOCAL_TMP_DIR, BasicConfig.LOCAL_ASLOG_DIR, 'refresh.log'))
-        as_conf = AutosubmitConfig(expid, BasicConfig, ConfigParserFactory())
+        APIBasicConfig.read()
+        Log.set_file(os.path.join(APIBasicConfig.LOCAL_ROOT_DIR, expid,
+                                  APIBasicConfig.LOCAL_TMP_DIR, APIBasicConfig.LOCAL_ASLOG_DIR, 'refresh.log'))
+        as_conf = AutosubmitConfigResolver(expid, APIBasicConfig, ConfigParserFactory())
         as_conf.reload()
         if not as_conf.check_expdef_conf():
             Log.critical('Can not copy with invalid configuration')
@@ -2430,17 +2430,17 @@ class Autosubmit:
         :param expid: experiment identifier
         :type expid: str
         """
-        BasicConfig.read()
-        exp_path = os.path.join(BasicConfig.LOCAL_ROOT_DIR, expid)
+        APIBasicConfig.read()
+        exp_path = os.path.join(APIBasicConfig.LOCAL_ROOT_DIR, expid)
         if not os.path.exists(exp_path):
             Log.critical(
                 "The directory %s is needed and does not exist." % exp_path)
             Log.warning("Does an experiment with the given id exist?")
             return 1
 
-        Log.set_file(os.path.join(BasicConfig.LOCAL_ROOT_DIR,
+        Log.set_file(os.path.join(APIBasicConfig.LOCAL_ROOT_DIR,
                                   "ASlogs", 'archive_{0}.log'.format(expid)))
-        exp_folder = os.path.join(BasicConfig.LOCAL_ROOT_DIR, expid)
+        exp_folder = os.path.join(APIBasicConfig.LOCAL_ROOT_DIR, expid)
 
         if clean:
             # Cleaning to reduce file size.
@@ -2451,7 +2451,7 @@ class Autosubmit:
 
         # Getting year of last completed. If not, year of expid folder
         year = None
-        tmp_folder = os.path.join(exp_folder, BasicConfig.LOCAL_TMP_DIR)
+        tmp_folder = os.path.join(exp_folder, APIBasicConfig.LOCAL_TMP_DIR)
         if os.path.isdir(tmp_folder):
             for filename in os.listdir(tmp_folder):
                 if filename.endswith("COMPLETED"):
@@ -2467,7 +2467,7 @@ class Autosubmit:
         # Creating tar file
         Log.info("Creating tar file ... ")
         try:
-            year_path = os.path.join(BasicConfig.LOCAL_ROOT_DIR, str(year))
+            year_path = os.path.join(APIBasicConfig.LOCAL_ROOT_DIR, str(year))
             if not os.path.exists(year_path):
                 os.mkdir(year_path)
             with tarfile.open(os.path.join(year_path, '{0}.tar.gz'.format(expid)), "w:gz") as tar:
@@ -2499,10 +2499,10 @@ class Autosubmit:
         :param experiment_id: experiment identifier
         :type experiment_id: str
         """
-        BasicConfig.read()
-        Log.set_file(os.path.join(BasicConfig.LOCAL_ROOT_DIR,
+        APIBasicConfig.read()
+        Log.set_file(os.path.join(APIBasicConfig.LOCAL_ROOT_DIR,
                                   "ASlogs", 'unarchive_{0}.log'.format(experiment_id)))
-        exp_folder = os.path.join(BasicConfig.LOCAL_ROOT_DIR, experiment_id)
+        exp_folder = os.path.join(APIBasicConfig.LOCAL_ROOT_DIR, experiment_id)
 
         if os.path.exists(exp_folder):
             Log.error("Experiment {0} is not archived", experiment_id)
@@ -2512,7 +2512,7 @@ class Autosubmit:
         year = datetime.datetime.today().year
         archive_path = None
         while year > 2000:
-            archive_path = os.path.join(BasicConfig.LOCAL_ROOT_DIR, str(
+            archive_path = os.path.join(APIBasicConfig.LOCAL_ROOT_DIR, str(
                 year), '{0}.tar.gz'.format(experiment_id))
             if os.path.exists(archive_path):
                 break
@@ -2594,11 +2594,11 @@ class Autosubmit:
         :type output: str
 
         """
-        BasicConfig.read()
+        APIBasicConfig.read()
 
-        exp_path = os.path.join(BasicConfig.LOCAL_ROOT_DIR, expid)
-        tmp_path = os.path.join(exp_path, BasicConfig.LOCAL_TMP_DIR)
-        aslogs_path = os.path.join(tmp_path, BasicConfig.LOCAL_ASLOG_DIR)
+        exp_path = os.path.join(APIBasicConfig.LOCAL_ROOT_DIR, expid)
+        tmp_path = os.path.join(exp_path, APIBasicConfig.LOCAL_TMP_DIR)
+        aslogs_path = os.path.join(tmp_path, APIBasicConfig.LOCAL_ASLOG_DIR)
         if not os.path.exists(aslogs_path):
             os.mkdir(aslogs_path)
             os.chmod(aslogs_path, 0o775)
@@ -2614,10 +2614,10 @@ class Autosubmit:
                 Log.info(
                     "Preparing .lock file to avoid multiple instances with same expid.")
                 Log.set_file(os.path.join(
-                    tmp_path, BasicConfig.LOCAL_ASLOG_DIR, 'create_exp.log'))
+                    tmp_path, APIBasicConfig.LOCAL_ASLOG_DIR, 'create_exp.log'))
 
-                as_conf = AutosubmitConfig(
-                    expid, BasicConfig, ConfigParserFactory())
+                as_conf = AutosubmitConfigResolver(
+                    expid, APIBasicConfig, ConfigParserFactory())
                 if not as_conf.check_conf_files():
                     Log.critical('Can not create with invalid configuration')
                     return False
@@ -2626,7 +2626,7 @@ class Autosubmit:
 
                 if not Autosubmit._copy_code(as_conf, expid, project_type, False):
                     return False
-                update_job = not os.path.exists(os.path.join(BasicConfig.LOCAL_ROOT_DIR, expid, "pkl",
+                update_job = not os.path.exists(os.path.join(APIBasicConfig.LOCAL_ROOT_DIR, expid, "pkl",
                                                              "job_list_" + expid + ".pkl"))
                 Autosubmit._create_project_associated_conf(
                     as_conf, False, update_job)
@@ -2652,7 +2652,7 @@ class Autosubmit:
                 rerun = as_conf.get_rerun()
 
                 Log.info("\nCreating the jobs list...")
-                job_list = JobList(expid, BasicConfig, ConfigParserFactory(),
+                job_list = JobList(expid, APIBasicConfig, ConfigParserFactory(),
                                    Autosubmit._get_job_list_persistence(expid, as_conf))
 
                 date_format = ''
@@ -2676,7 +2676,7 @@ class Autosubmit:
                     job_list.remove_rerun_only_jobs(notransitive)
                 Log.info("\nSaving the jobs list...")
                 job_list.save()
-                JobPackagePersistence(os.path.join(BasicConfig.LOCAL_ROOT_DIR, expid, "pkl"),
+                JobPackagePersistence(os.path.join(APIBasicConfig.LOCAL_ROOT_DIR, expid, "pkl"),
                                       "job_packages_" + expid).reset_table()
 
                 groups_dict = dict()
@@ -2695,7 +2695,7 @@ class Autosubmit:
                     # WRAPPERS
                     if as_conf.get_wrapper_type() != 'none' and check_wrappers:
                         packages_persistence = JobPackagePersistence(
-                            os.path.join(BasicConfig.LOCAL_ROOT_DIR, expid, "pkl"), "job_packages_" + expid)
+                            os.path.join(APIBasicConfig.LOCAL_ROOT_DIR, expid, "pkl"), "job_packages_" + expid)
                         packages_persistence.reset_table(True)
                         referenced_jobs_to_remove = set()
                         job_list_wrappers = copy.deepcopy(job_list)
@@ -2755,7 +2755,7 @@ class Autosubmit:
             svn_project_url = as_conf.get_svn_project_url()
             svn_project_revision = as_conf.get_svn_project_revision()
             project_path = os.path.join(
-                BasicConfig.LOCAL_ROOT_DIR, expid, BasicConfig.LOCAL_PROJ_DIR)
+                APIBasicConfig.LOCAL_ROOT_DIR, expid, APIBasicConfig.LOCAL_PROJ_DIR)
             if os.path.exists(project_path):
                 Log.info("Using project folder: {0}", project_path)
                 if not force:
@@ -2781,7 +2781,7 @@ class Autosubmit:
         elif project_type == "local":
             local_project_path = as_conf.get_local_project_path()
             project_path = os.path.join(
-                BasicConfig.LOCAL_ROOT_DIR, expid, BasicConfig.LOCAL_PROJ_DIR)
+                APIBasicConfig.LOCAL_ROOT_DIR, expid, APIBasicConfig.LOCAL_PROJ_DIR)
             local_destination = os.path.join(project_path, project_destination)
 
             if os.path.exists(project_path):
@@ -2861,9 +2861,9 @@ class Autosubmit:
         :param hide: hides plot window
         :type hide: bool
         """
-        BasicConfig.read()
-        exp_path = os.path.join(BasicConfig.LOCAL_ROOT_DIR, expid)
-        tmp_path = os.path.join(exp_path, BasicConfig.LOCAL_TMP_DIR)
+        APIBasicConfig.read()
+        exp_path = os.path.join(APIBasicConfig.LOCAL_ROOT_DIR, expid)
+        tmp_path = os.path.join(exp_path, APIBasicConfig.LOCAL_TMP_DIR)
         if not os.path.exists(exp_path):
             Log.critical(
                 "The directory %s is needed and does not exist." % exp_path)
@@ -2877,7 +2877,7 @@ class Autosubmit:
                     "Preparing .lock file to avoid multiple instances with same expid.")
 
                 Log.set_file(os.path.join(
-                    tmp_path, BasicConfig.LOCAL_ASLOG_DIR, 'set_status.log'))
+                    tmp_path, APIBasicConfig.LOCAL_ASLOG_DIR, 'set_status.log'))
                 Log.debug('Exp ID: {0}', expid)
                 Log.debug('Save: {0}', save)
                 Log.debug('Final status: {0}', final)
@@ -2886,8 +2886,8 @@ class Autosubmit:
                 Log.debug('Status of jobs to change: {0}', filter_status)
                 Log.debug('Sections to change: {0}', filter_section)
                 wrongExpid = 0
-                as_conf = AutosubmitConfig(
-                    expid, BasicConfig, ConfigParserFactory())
+                as_conf = AutosubmitConfigResolver(
+                    expid, APIBasicConfig, ConfigParserFactory())
                 if not as_conf.check_conf_files():
                     Log.critical('Can not run with invalid configuration')
                     return False
@@ -2997,9 +2997,9 @@ class Autosubmit:
                             "Save disabled due invalid  expid, please check <expid> or/and jobs expid name")
 
                 if as_conf.get_wrapper_type() != 'none' and check_wrapper:
-                    packages_persistence = JobPackagePersistence(os.path.join(BasicConfig.LOCAL_ROOT_DIR, expid, "pkl"),
+                    packages_persistence = JobPackagePersistence(os.path.join(APIBasicConfig.LOCAL_ROOT_DIR, expid, "pkl"),
                                                                  "job_packages_" + expid)
-                    os.chmod(os.path.join(BasicConfig.LOCAL_ROOT_DIR,
+                    os.chmod(os.path.join(APIBasicConfig.LOCAL_ROOT_DIR,
                                           expid, "pkl", "job_packages_" + expid + ".db"), 0o664)
                     packages_persistence.reset_table(True)
                     referenced_jobs_to_remove = set()
@@ -3023,7 +3023,7 @@ class Autosubmit:
 
                     packages = packages_persistence.load(True)
                 else:
-                    packages = JobPackagePersistence(os.path.join(BasicConfig.LOCAL_ROOT_DIR, expid, "pkl"),
+                    packages = JobPackagePersistence(os.path.join(APIBasicConfig.LOCAL_ROOT_DIR, expid, "pkl"),
                                                      "job_packages_" + expid).load()
                 if not noplot:
                     groups_dict = dict()
@@ -3083,7 +3083,7 @@ class Autosubmit:
         :param dummy: if True, creates a dummy experiment adding some default values
         :type dummy: bool
         """
-        as_conf = AutosubmitConfig(exp_id, BasicConfig, ConfigParserFactory())
+        as_conf = AutosubmitConfigResolver(exp_id, APIBasicConfig, ConfigParserFactory())
         as_conf.set_version(autosubmit_version)
         as_conf.set_expid(exp_id)
         as_conf.set_platform(hpc)
@@ -3209,7 +3209,7 @@ class Autosubmit:
         if storage_type == 'pkl':
             return JobListPersistencePkl()
         elif storage_type == 'db':
-            return JobListPersistenceDb(os.path.join(BasicConfig.LOCAL_ROOT_DIR, expid, "pkl"),
+            return JobListPersistenceDb(os.path.join(APIBasicConfig.LOCAL_ROOT_DIR, expid, "pkl"),
                                         "job_list_" + expid)
 
         # communications library not known
@@ -3319,7 +3319,7 @@ class Autosubmit:
 
     @staticmethod
     def _change_conf(testid, hpc, start_date, member, chunks, branch, random_select=False):
-        as_conf = AutosubmitConfig(testid, BasicConfig, ConfigParserFactory())
+        as_conf = AutosubmitConfigResolver(testid, APIBasicConfig, ConfigParserFactory())
         exp_parser = as_conf.get_parser(
             ConfigParserFactory(), as_conf.experiment_file)
         if exp_parser.get_bool_option('rerun', "RERUN", True):
@@ -3379,9 +3379,9 @@ class Autosubmit:
         """
         # print("Load Job List Start")
         try:
-            BasicConfig.read()
+            APIBasicConfig.read()
             rerun = as_conf.get_rerun()
-            job_list = JobList(expid, BasicConfig, ConfigParserFactory(),
+            job_list = JobList(expid, APIBasicConfig, ConfigParserFactory(),
                                Autosubmit._get_job_list_persistence(expid, as_conf))
             date_list = as_conf.get_date_list()
             date_format = ''
@@ -3403,7 +3403,7 @@ class Autosubmit:
                 if not monitor:
                     job_list.rerun(chunk_list, notransitive)
                 else:
-                    rerun_list = JobList(expid, BasicConfig, ConfigParserFactory(),
+                    rerun_list = JobList(expid, APIBasicConfig, ConfigParserFactory(),
                                          Autosubmit._get_job_list_persistence(expid, as_conf))
                     rerun_list.generate(date_list, as_conf.get_member_list(), as_conf.get_num_chunks(),
                                         as_conf.get_chunk_ini(),

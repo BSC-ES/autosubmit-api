@@ -24,8 +24,8 @@ import os
 
 from bscearth.utils.log import Log
 
-from ...config.basicConfig import BasicConfig
-from ...config.config_common import AutosubmitConfig
+from ...config.basicConfig import APIBasicConfig
+from ...config.config_common import AutosubmitConfigResolver
 from .submitter import Submitter
 from .psplatform import PsPlatform
 from .lsfplatform import LsfPlatform
@@ -65,14 +65,14 @@ class ParamikoSubmitter(Submitter):
         parser = asconf.platforms_parser
 
         platforms = dict()
-        local_platform = LocalPlatform(asconf.expid, 'local', BasicConfig)
+        local_platform = LocalPlatform(asconf.expid, 'local', APIBasicConfig)
         local_platform.max_wallclock = asconf.get_max_wallclock()
         local_platform.max_processors = asconf.get_max_processors()
         local_platform.max_waiting_jobs = asconf.get_max_waiting_jobs()
         local_platform.total_jobs = asconf.get_total_jobs()
-        local_platform.scratch = os.path.join(BasicConfig.LOCAL_ROOT_DIR, asconf.expid, BasicConfig.LOCAL_TMP_DIR)
-        local_platform.temp_dir = os.path.join(BasicConfig.LOCAL_ROOT_DIR, 'ASlogs')
-        local_platform.root_dir = os.path.join(BasicConfig.LOCAL_ROOT_DIR, local_platform.expid)
+        local_platform.scratch = os.path.join(APIBasicConfig.LOCAL_ROOT_DIR, asconf.expid, APIBasicConfig.LOCAL_TMP_DIR)
+        local_platform.temp_dir = os.path.join(APIBasicConfig.LOCAL_ROOT_DIR, 'ASlogs')
+        local_platform.root_dir = os.path.join(APIBasicConfig.LOCAL_ROOT_DIR, local_platform.expid)
         local_platform.host = 'localhost'
         platforms['local'] = local_platform
         platforms['LOCAL'] = local_platform
@@ -86,17 +86,17 @@ class ParamikoSubmitter(Submitter):
             platform_version = parser.get_option(section, 'VERSION', '')
             try:
                 if platform_type == 'pbs':
-                    remote_platform = PBSPlatform(asconf.expid, section.lower(), BasicConfig, platform_version)
+                    remote_platform = PBSPlatform(asconf.expid, section.lower(), APIBasicConfig, platform_version)
                 elif platform_type == 'sge':
-                    remote_platform = SgePlatform(asconf.expid, section.lower(), BasicConfig)
+                    remote_platform = SgePlatform(asconf.expid, section.lower(), APIBasicConfig)
                 elif platform_type == 'ps':
-                    remote_platform = PsPlatform(asconf.expid, section.lower(), BasicConfig)
+                    remote_platform = PsPlatform(asconf.expid, section.lower(), APIBasicConfig)
                 elif platform_type == 'lsf':
-                    remote_platform = LsfPlatform(asconf.expid, section.lower(), BasicConfig)
+                    remote_platform = LsfPlatform(asconf.expid, section.lower(), APIBasicConfig)
                 elif platform_type == 'ecaccess':
-                    remote_platform = EcPlatform(asconf.expid, section.lower(), BasicConfig, platform_version)
+                    remote_platform = EcPlatform(asconf.expid, section.lower(), APIBasicConfig, platform_version)
                 elif platform_type == 'slurm':
-                    remote_platform = SlurmPlatform(asconf.expid, section.lower(), BasicConfig)
+                    remote_platform = SlurmPlatform(asconf.expid, section.lower(), APIBasicConfig)
                 else:
                     raise Exception("Queue type not specified on platform {0}".format(section))
 
