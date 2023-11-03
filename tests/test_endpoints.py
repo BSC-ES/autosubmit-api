@@ -16,6 +16,11 @@ class TestPerformance:
         result = PerformanceMetrics(expid, JobListHelperDirector(JobListHelperBuilder(expid)).build_job_list_helper()).to_json()
         assert result["Parallelization"] == 8
 
+    def test_parallelization_platforms(self, fixture_mock_basic_config: fixture_mock_basic_config):
+        expid = "a003"
+        result = PerformanceMetrics(expid, JobListHelperDirector(JobListHelperBuilder(expid)).build_job_list_helper()).to_json()
+        assert result["Parallelization"] == 16
+
 
 class TestTree:
 

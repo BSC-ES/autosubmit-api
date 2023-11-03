@@ -123,7 +123,12 @@ class IConfigStrategy(ABC):
         pass
 
     @abstractmethod
-    def get_job_platform(self, section):
+    def get_job_platform(self, section: str) -> str:
+        """
+        Gets wallclock for the given job type
+        :param section: job type
+        :return: wallclock time
+        """
         pass
 
     @abstractmethod
@@ -162,13 +167,11 @@ class IConfigStrategy(ABC):
         """
         pass
 
-    def get_processors(self, section):
+    def get_processors(self, section: str) -> str:
         """
         Gets processors needed for the given job type
         :param section: job type
-        :type section: str
         :return: wallclock time
-        :rtype: str
         """
         pass
 

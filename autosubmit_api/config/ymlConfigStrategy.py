@@ -131,24 +131,24 @@ class ymlConfigStrategy(IConfigStrategy):
     def get_queue(self, section):
         return self._conf_parser.jobs_data[section].get('QUEUE', "")
 
-    def get_job_platform(self, section):
-        pass
+    def get_job_platform(self, section: str) -> str:
+        return self._conf_parser.jobs_data.get(section, {}).get("PLATFORM", "")
 
     def get_platform_queue(self, platform):
         logger.info("get_platform_queue")
-        return self._conf_parser.platforms_data[platform]["QUEUE"]
+        return self._conf_parser.experiment_data.get("PLATFORMS", {}).get(platform, {}).get("QUEUE")
 
     def get_platform_serial_queue(self, platform):
         logger.info("get_platform_serial_queue")
-        return self._conf_parser.platforms_data[platform]["SERIAL_QUEUE"]
+        return self._conf_parser.experiment_data.get("PLATFORMS", {}).get(platform, {}).get("SERIAL_QUEUE")
 
     def get_platform_project(self, platform):
         logger.info("get_platform_project")
-        return self._conf_parser.platforms_data[platform]["PROJECT"]
+        return self._conf_parser.experiment_data.get("PLATFORMS", {}).get(platform, {}).get("PROJECT")
 
     def get_platform_wallclock(self, platform):
         logger.info("get_platform_wallclock")
-        return self._conf_parser.platforms_data[platform].get('MAX_WALLCLOCK', "")
+        return self._conf_parser.experiment_data.get("PLATFORMS", {}).get(platform, {}).get('MAX_WALLCLOCK', "")
 
     def get_wallclock(self, section):
         return self._conf_parser.jobs_data[section].get('WALLCLOCK', '')
@@ -157,8 +157,19 @@ class ymlConfigStrategy(IConfigStrategy):
     def get_synchronize(self, section):
         return self._conf_parser.get_synchronize(section)
 
-    def get_processors(self, section):
-        return self._conf_parser.jobs_data.get(section, {}).get("PROCESSORS", "1")
+    def get_processors(self, section: str) -> str:
+        # Check processors in job
+        processors = self._conf_parser.jobs_data.get(section, {}).get("PROCESSORS")
+        if processors:
+            return processors
+
+        # Check processors in job platform
+        processors = self._conf_parser.experiment_data.get("PLATFORMS", {}).get(self.get_job_platform(section), {}).get("PROCESSORS")
+        if processors:
+            return processors
+        else:
+            return "1"
+
 
     def get_threads(self, section):
         return self._conf_parser.get_threads(section)
