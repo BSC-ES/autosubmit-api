@@ -68,13 +68,13 @@ def process_completed_times(time_condition=60):
             if current_table.get(exp_str, None) is None:
                 # Pkl exists but is not registered in the table
                 # INSERT
-                print("Pkl of " + exp_str + " exists but not in the table: INSERT")
+                # print("Pkl of " + exp_str + " exists but not in the table: INSERT")
                 current_id = _process_pkl_insert_times(exp_str, full_path, timest, APIBasicConfig, DEBUG)
                 _process_details_insert_or_update(exp_str, experiments_table_exp_id, experiments_table_exp_id in details_table_ids_set)
             else:
                 exp_id, created, modified, total_jobs, completed_jobs = current_table[exp_str]
                 time_diff = int(timest - modified)
-                print("Pkl of " + exp_str + " exists")
+                # print("Pkl of " + exp_str + " exists")
                 current_id = _process_pkl_insert_times(exp_str, full_path, timest, APIBasicConfig, DEBUG)
                 if time_diff > time_condition:
                     # Update table
