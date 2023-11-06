@@ -17,20 +17,21 @@
 # You should have received a copy of the GNU General Public License
 # along with Autosubmit.  If not, see <http://www.gnu.org/licenses/>.
 
-from functools import wraps
 import os
 import sys
-import time
 from datetime import datetime, timedelta
+from typing import Optional
 import requests
-import logging
 from flask_cors import CORS, cross_origin
 from flask import Flask, request, session, redirect
+from autosubmit_api import __version__ as APIVersion
+from autosubmit_api.auth import with_auth_token
 
 from autosubmit_api.database.extended_db import ExtendedDB
 from autosubmit_api.database.db_common import get_current_running_exp, update_experiment_description_owner
 from autosubmit_api.experiment import common_requests as CommonRequests
 from autosubmit_api.experiment import utils as Utiles
+from autosubmit_api.logger import get_app_logger, with_log_run_times
 from autosubmit_api.performance.performance_metrics import PerformanceMetrics
 from autosubmit_api.database.db_common import search_experiment_by_id
 from autosubmit_api.config.basicConfig import APIBasicConfig
@@ -42,23 +43,6 @@ from flask_apscheduler import APScheduler
 from autosubmit_api.workers import populate_details_db, populate_queue_run_times, populate_running_experiments, populate_graph, verify_complete
 from autosubmit_api.config import JWT_SECRET, JWT_ALGORITHM, JWT_EXP_DELTA_SECONDS, RUN_BACKGROUND_TASKS_ON_START, CAS_LOGIN_URL, CAS_VERIFY_URL
 
-def with_log_run_times(_logger: logging.Logger, _tag: str):
-    def decorator(func):
-        @wraps(func)
-        def inner_wrapper(*args, **kwargs):
-            start_time = time.time()
-            path = ""
-            try:
-                path = request.path
-            except:
-                pass
-            _logger.info('{}|RECEIVED|{}'.format(_tag, path))
-            response = func(*args, **kwargs)  
-            _logger.info('{}|RTIME|{}|{:.3f}'.format(_tag, path,(time.time() - start_time)))
-            return response
-
-        return inner_wrapper
-    return decorator
 
 def create_app():
     """
@@ -73,10 +57,7 @@ def create_app():
     D = Manager().dict()    
 
     CORS(app)
-    gunicorn_logger = logging.getLogger('gunicorn.error')
-    app.logger.handlers = gunicorn_logger.handlers
-    app.logger.setLevel(gunicorn_logger.level)
-
+    app.logger = get_app_logger() # Bind logger
     app.logger.info("PYTHON VERSION: " + sys.version)
 
     requests.packages.urllib3.util.ssl_.DEFAULT_CIPHERS += 'HIGH:!DH:!aNULL'
@@ -134,6 +115,13 @@ def create_app():
         worker_verify_complete()
         worker_populate_graph()
 
+    @app.route('/')
+    def home():
+        return {
+            "name": "Autosubmit API",
+            "version": APIVersion
+        }
+
     # CAS Login
     @app.route('/login')
     def login():
@@ -175,7 +163,8 @@ def create_app():
     @app.route('/updatedesc', methods=['GET', 'POST'])
     @cross_origin(expose_headers="Authorization")
     @with_log_run_times(app.logger, "UDESC")
-    def update_description():
+    @with_auth_token()
+    def update_description(user_id: Optional[str] = None):
         """
         Updates the description of an experiment. Requires authenticated user.
         """
@@ -185,51 +174,29 @@ def create_app():
             body_data = request.json
             expid = body_data.get("expid", None)
             new_description = body_data.get("description", None)
-        current_token = request.headers.get("Authorization")
-        try:
-            jwt_token = jwt.decode(current_token, JWT_SECRET, JWT_ALGORITHM)
-        except jwt.ExpiredSignatureError:
-            jwt_token = {"user_id": None}
-        except Exception as exp:
-            jwt_token = {"user_id": None}
-        valid_user = jwt_token.get("user_id", None)
-        return update_experiment_description_owner(expid, new_description, valid_user)
+        return update_experiment_description_owner(expid, new_description, user_id), 200 if user_id else 401
 
 
     @app.route('/tokentest', methods=['GET', 'POST'])
     @cross_origin(expose_headers="Authorization")
     @with_log_run_times(app.logger, "TTEST")
-    def test_token():
+    @with_auth_token()
+    def test_token(user_id: Optional[str] = None):
         """
         Tests if a token is still valid
         """
-        current_token = request.headers.get("Authorization")
-        try:
-            jwt_token = jwt.decode(current_token, JWT_SECRET, JWT_ALGORITHM)
-        except jwt.ExpiredSignatureError:
-            jwt_token = {"user_id": None}
-        except Exception as exp:
-            print(exp)
-            jwt_token = {"user_id": None}
-
-        valid_user = jwt_token.get("user_id", None)
         return {
-            "isValid": True if valid_user else False,
-            "message": "Session expired" if not valid_user else None
-        }
+            "isValid": True if user_id else False,
+            "message": "Unauthorized" if not user_id else None
+        }, 200 if user_id else 401
 
 
     @app.route('/cconfig/<string:expid>', methods=['GET'])
     @cross_origin(expose_headers="Authorization")
     @with_log_run_times(app.logger, "CCONFIG")
-    def get_current_configuration(expid):
-        current_token = request.headers.get("Authorization")
-        try:
-            jwt_token = jwt.decode(current_token, JWT_SECRET, JWT_ALGORITHM)
-        except Exception as exp:
-            jwt_token = {"user_id": None}
-        valid_user = jwt_token.get("user_id", None)
-        result = CommonRequests.get_current_configuration_by_expid(expid, valid_user, app.logger)
+    @with_auth_token(response_on_fail=True)
+    def get_current_configuration(expid: str, user_id: Optional[str] = None):
+        result = CommonRequests.get_current_configuration_by_expid(expid, user_id)
         return result
 
 

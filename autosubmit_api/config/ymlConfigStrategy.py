@@ -116,10 +116,10 @@ class ymlConfigStrategy(IConfigStrategy):
         # print(self._conf_parser)
         #result["conf"] = get_data( self._conf_parser.experiment_data["CONF"]) if self._conf_parser else None
         #result["exp"] = get_data( self._conf_parser.experiment_data["CONF"]) if self._exp_parser else None
-        result["platforms"] = self._conf_parser.platforms_data if self._conf_parser.platforms_data else None
+        # result["platforms"] = self._conf_parser.platforms_data if self._conf_parser.platforms_data else None
         #result["jobs"] = get_data( self._conf_parser.experiment_data["JOBS"]) if self._conf_parser.experiment_data["JOBS"] else None
         #result["proj"] = get_data( self._conf_parser.experiment_data["CONF"] ) if self._proj_parser else None
-        return result
+        return self._conf_parser.experiment_data
 
 
     def get_full_config_as_json(self):

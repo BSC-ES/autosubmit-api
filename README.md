@@ -5,7 +5,7 @@
 1. [Overview](#overview)
 2. [Autosubmit Big Picture](#autosubmit-big-picture)
 3. [General Knowledge Requirements](#general-knowledge-requirements)
-4. [Deployment](#deployment)
+4. [Installation](#Installation)
 
 ## Overview
 
