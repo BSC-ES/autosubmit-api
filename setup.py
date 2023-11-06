@@ -10,13 +10,16 @@ current_path = path.abspath(path.dirname(__file__))
 def get_version():
     return autosubmit_api.__version__
 
+def get_authors():
+    return autosubmit_api.__author__
+
 
 setup(
     name='autosubmit_api',
     version=get_version(),
     description='An extension to the Autosubmit package that serves its information as an API',
     url='https://earth.bsc.es/gitlab/es/autosubmit_api',
-    author='Luiggi Tenorio, Cristian Gutiérrez, Julian Berlin, Wilmer Uruchi',
+    author=get_authors(),
     author_email='support-autosubmit@bsc.es',
     license='GNU GPL',
     packages=find_packages(),
