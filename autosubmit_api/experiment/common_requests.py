@@ -1268,6 +1268,22 @@ def get_current_configuration_by_expid(expid: str, user_id: Optional[str]):
                 logger.error(f"Error while trying to eliminate duplicated key from config: {exc}")
                 logger.error(traceback.format_exc())
 
+    def sideDifferences(base_dict: dict, comparing_dict: dict):
+        diffs = set()
+        for key, value in base_dict.items():
+            comp_value = comparing_dict.get(key)
+            if isinstance(value, dict) and isinstance(comp_value, dict):
+                aux_diffs = sideDifferences(value, comp_value)
+                for d in aux_diffs:
+                    diffs.add(f"{key}.{d}")
+            else:
+                if isinstance(value, str) and isinstance(comp_value, int) or isinstance(value, int) and isinstance(comp_value, str):
+                    if str(value) != str(comp_value):
+                        diffs.add(key)
+                elif value != comp_value:
+                    diffs.add(key)
+        return list(diffs)
+
     try:
         APIBasicConfig.read()
         autosubmitConfig = AutosubmitConfigResolver(
@@ -1327,6 +1343,7 @@ def get_current_configuration_by_expid(expid: str, user_id: Optional[str]):
         logger.error("Exception while generating the configuration: " + error_message)
         logger.error(traceback.format_exc())
 
+    diffs = sideDifferences(currentFileSystemConfig, currentRunConfig)
     return {
         "error": error, 
         "error_message": error_message, 
@@ -1334,7 +1351,8 @@ def get_current_configuration_by_expid(expid: str, user_id: Optional[str]):
         "warning_message": warning_message, 
         "configuration_current_run": currentRunConfig, 
         "configuration_filesystem": currentFileSystemConfig, 
-        "are_equal": currentRunConfig == currentFileSystemConfig
+        "are_equal": len(diffs) == 0,
+        "differences": diffs
     }
 
 
