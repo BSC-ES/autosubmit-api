@@ -25,7 +25,7 @@ import requests
 from flask_cors import CORS, cross_origin
 from flask import Flask, request, session, redirect
 from autosubmit_api import __version__ as APIVersion
-from autosubmit_api.auth import with_auth_token
+from autosubmit_api.auth import AuthorizationLevels, with_auth_token
 
 from autosubmit_api.database.extended_db import ExtendedDB
 from autosubmit_api.database.db_common import get_current_running_exp, update_experiment_description_owner
@@ -54,10 +54,10 @@ def create_app():
 
     app = Flask(__name__)
 
-    D = Manager().dict()    
+    D = Manager().dict()
 
     CORS(app)
-    app.logger = get_app_logger() # Bind logger
+    app.logger = get_app_logger()  # Bind logger
     app.logger.info("PYTHON VERSION: " + sys.version)
 
     requests.packages.urllib3.util.ssl_.DEFAULT_CIPHERS += 'HIGH:!DH:!aNULL'
@@ -80,7 +80,7 @@ def create_app():
     @with_log_run_times(app.logger, "WRKPOPDET")
     def worker_populate_details_db():
         populate_details_db.main()
-        
+
     @scheduler.task('interval', id='populate_queue_run_times', minutes=3)
     @with_log_run_times(app.logger, "WRKPOPQUE")
     def worker_populate_queue_run_times():
@@ -139,11 +139,14 @@ def create_app():
 
         target_service = "{}{}/login".format(referrer, environment)
         if not ticket:
-            route_to_request_ticket = "{}?service={}".format(CAS_LOGIN_URL, target_service)
+            route_to_request_ticket = "{}?service={}".format(
+                CAS_LOGIN_URL, target_service)
             app.logger.info("Redirected to: " + str(route_to_request_ticket))
             return redirect(route_to_request_ticket)
-        environment = environment if environment is not None else "autosubmitapp" # can be used to target the test environment
-        cas_verify_ticket_route = CAS_VERIFY_URL + '?service=' + target_service + '&ticket=' + ticket
+        # can be used to target the test environment
+        environment = environment if environment is not None else "autosubmitapp"
+        cas_verify_ticket_route = CAS_VERIFY_URL + \
+            '?service=' + target_service + '&ticket=' + ticket
         response = requests.get(cas_verify_ticket_route)
         user = None
         if response:
@@ -159,11 +162,10 @@ def create_app():
             jwt_token = jwt.encode(payload, JWT_SECRET, JWT_ALGORITHM)
             return {'authenticated': True, 'user': user, 'token': jwt_token, 'message': "Token generated."}
 
-
     @app.route('/updatedesc', methods=['GET', 'POST'])
     @cross_origin(expose_headers="Authorization")
     @with_log_run_times(app.logger, "UDESC")
-    @with_auth_token()
+    @with_auth_token(level=AuthorizationLevels.WRITEONLY)
     def update_description(user_id: Optional[str] = None):
         """
         Updates the description of an experiment. Requires authenticated user.
@@ -176,11 +178,10 @@ def create_app():
             new_description = body_data.get("description", None)
         return update_experiment_description_owner(expid, new_description, user_id), 200 if user_id else 401
 
-
     @app.route('/tokentest', methods=['GET', 'POST'])
     @cross_origin(expose_headers="Authorization")
     @with_log_run_times(app.logger, "TTEST")
-    @with_auth_token()
+    @with_auth_token(level=AuthorizationLevels.WRITEONLY, response_on_fail=False)
     def test_token(user_id: Optional[str] = None):
         """
         Tests if a token is still valid
@@ -190,102 +191,113 @@ def create_app():
             "message": "Unauthorized" if not user_id else None
         }, 200 if user_id else 401
 
-
     @app.route('/cconfig/<string:expid>', methods=['GET'])
     @cross_origin(expose_headers="Authorization")
     @with_log_run_times(app.logger, "CCONFIG")
-    @with_auth_token(response_on_fail=True)
+    @with_auth_token()
     def get_current_configuration(expid: str, user_id: Optional[str] = None):
-        result = CommonRequests.get_current_configuration_by_expid(expid, user_id)
+        result = CommonRequests.get_current_configuration_by_expid(
+            expid, user_id)
         return result
-
 
     @app.route('/expinfo/<string:expid>', methods=['GET'])
     @with_log_run_times(app.logger, "EXPINFO")
-    def exp_info(expid):
+    @with_auth_token()
+    def exp_info(expid: str, user_id: Optional[str] = None):
         result = CommonRequests.get_experiment_data(expid)
         return result
 
-
     @app.route('/expcount/<string:expid>', methods=['GET'])
     @with_log_run_times(app.logger, "EXPCOUNT")
-    def exp_counters(expid):
+    @with_auth_token()
+    def exp_counters(expid: str, user_id: Optional[str] = None):
         result = CommonRequests.get_experiment_counters(expid)
         return result
-
 
     @app.route('/searchowner/<string:owner>/<string:exptype>/<string:onlyactive>', methods=['GET'])
     @app.route('/searchowner/<string:owner>', methods=['GET'])
     @with_log_run_times(app.logger, "SOWNER")
-    def search_owner(owner, exptype=None, onlyactive=None):
+    @with_auth_token()
+    def search_owner(owner, exptype=None, onlyactive=None, user_id: Optional[str] = None):
         """
         Same output format as search_expid
         """
-        result = search_experiment_by_id(searchString=None, owner=owner, typeExp=exptype, onlyActive=onlyactive)
+        result = search_experiment_by_id(
+            searchString=None, owner=owner, typeExp=exptype, onlyActive=onlyactive)
         return result
-
 
     @app.route('/search/<string:expid>/<string:exptype>/<string:onlyactive>', methods=['GET'])
     @app.route('/search/<string:expid>', methods=['GET'])
     @with_log_run_times(app.logger, "SEARCH")
-    def search_expid(expid, exptype=None, onlyactive=None):
-        result = search_experiment_by_id(expid, owner=None, typeExp=exptype, onlyActive=onlyactive)
+    @with_auth_token()
+    def search_expid(expid, exptype=None, onlyactive=None, user_id: Optional[str] = None):
+        result = search_experiment_by_id(
+            expid, owner=None, typeExp=exptype, onlyActive=onlyactive)
         return result
-
 
     @app.route('/running/', methods=['GET'])
     @with_log_run_times(app.logger, "RUN")
-    def search_running():
+    @with_auth_token()
+    def search_running(user_id: Optional[str] = None):
         """
         Returns the list of all experiments that are currently running.
         """
         if 'username' in session:
             print(("USER {}".format(session['username'])))
         app.logger.info("Active proceses: " + str(D))
-        #app.logger.info("Received Currently Running query ")
+        # app.logger.info("Received Currently Running query ")
         result = get_current_running_exp()
         return result
 
-
     @app.route('/runs/<string:expid>', methods=['GET'])
     @with_log_run_times(app.logger, "ERUNS")
-    def get_runs(expid):
+    @with_auth_token()
+    def get_runs(expid, user_id: Optional[str] = None):
         """
         Get list of runs of the same experiment from the historical db
         """
         result = CommonRequests.get_experiment_runs(expid)
         return result
 
-
     @app.route('/ifrun/<string:expid>', methods=['GET'])
     @with_log_run_times(app.logger, "IFRUN")
-    def get_if_running(expid):
+    @with_auth_token()
+    def get_if_running(expid, user_id: Optional[str] = None):
         result = CommonRequests.quick_test_run(expid)
         return result
 
-
     @app.route('/logrun/<string:expid>', methods=['GET'])
     @with_log_run_times(app.logger, "LOGRUN")
-    def get_log_running(expid):
+    @with_auth_token()
+    def get_log_running(expid, user_id: Optional[str] = None):
         result = CommonRequests.get_current_status_log_plus(expid)
         return result
 
-
     @app.route('/summary/<string:expid>', methods=['GET'])
     @with_log_run_times(app.logger, "SUMMARY")
-    def get_expsummary(expid):
+    @with_auth_token()
+    def get_expsummary(expid, user_id: Optional[str] = None):
         user = request.args.get("loggedUser", default="null", type=str)
-        if user != "null": lock.acquire(); D[os.getpid()] = [user, "summary", True]; lock.release();
+        if user != "null":
+            lock.acquire()
+            D[os.getpid()] = [user, "summary", True]
+            lock.release()
         result = CommonRequests.get_experiment_summary(expid, app.logger)
         app.logger.info('Process: ' + str(os.getpid()) + " workers: " + str(D))
-        if user != "null": lock.acquire(); D[os.getpid()] = [user, "summary", False]; lock.release();
-        if user != "null": lock.acquire(); D.pop(os.getpid(), None); lock.release();
+        if user != "null":
+            lock.acquire()
+            D[os.getpid()] = [user, "summary", False]
+            lock.release()
+        if user != "null":
+            lock.acquire()
+            D.pop(os.getpid(), None)
+            lock.release()
         return result
-
 
     @app.route('/shutdown/<string:route>')
     @with_log_run_times(app.logger, "SHUTDOWN")
-    def shutdown(route):
+    @with_auth_token()
+    def shutdown(route, user_id: Optional[str] = None):
         """
         This function is invoked from the frontend (AS-GUI) to kill workers that are no longer needed.
         This call is common in heavy parts of the GUI such as the Tree and Graph generation or Summaries fetching.
@@ -297,13 +309,14 @@ def create_app():
             app.logger.info("Bad parameters for user and expid in route.")
 
         if user != "null":
-            app.logger.info('SHUTDOWN|DETAILS|route: ' + route + " user: " + user + " expid: " + expid)
+            app.logger.info('SHUTDOWN|DETAILS|route: ' + route +
+                            " user: " + user + " expid: " + expid)
             try:
                 # app.logger.info("user: " + user)
                 # app.logger.info("expid: " + expid)
                 app.logger.info("Workers before: " + str(D))
                 lock.acquire()
-                for k,v in list(D.items()):
+                for k, v in list(D.items()):
                     if v[0] == user and v[1] == route and v[-1] == True:
                         if v[2] == expid:
                             D[k] = [user, route, expid, False]
@@ -316,79 +329,103 @@ def create_app():
                 lock.release()
                 app.logger.info("Workers now: " + str(D))
             except Exception as exp:
-                app.logger.info("[CRITICAL] Could not shutdown process " + expid + " by user \"" + user + "\"")
+                app.logger.info(
+                    "[CRITICAL] Could not shutdown process " + expid + " by user \"" + user + "\"")
         return ""
-
 
     @app.route('/performance/<string:expid>', methods=['GET'])
     @with_log_run_times(app.logger, "PRF")
-    def get_exp_performance(expid):
+    @with_auth_token()
+    def get_exp_performance(expid, user_id: Optional[str] = None):
         result = {}
         try:
-            result = PerformanceMetrics(expid, JobListHelperDirector(JobListHelperBuilder(expid)).build_job_list_helper()).to_json()
+            result = PerformanceMetrics(expid, JobListHelperDirector(
+                JobListHelperBuilder(expid)).build_job_list_helper()).to_json()
         except Exception as exp:
             result = {"SYPD": None,
-                "ASYPD": None,
-                "RSYPD": None,
-                "CHSY": None,
-                "JPSY": None,
-                "Parallelization": None,
-                "considered": [],
-                "error": True,
-                "error_message": str(exp),
-                "warnings_job_data": [],
-            }
+                      "ASYPD": None,
+                      "RSYPD": None,
+                      "CHSY": None,
+                      "JPSY": None,
+                      "Parallelization": None,
+                      "considered": [],
+                      "error": True,
+                      "error_message": str(exp),
+                      "warnings_job_data": [],
+                      }
         return result
-
 
     @app.route('/graph/<string:expid>/<string:layout>/<string:grouped>', methods=['GET'])
     @with_log_run_times(app.logger, "GRAPH")
-    def get_list_format(expid, layout='standard', grouped='none'):
+    @with_auth_token()
+    def get_list_format(expid, layout='standard', grouped='none', user_id: Optional[str] = None):
         user = request.args.get("loggedUser", default="null", type=str)
         # app.logger.info("user: " + user)
         # app.logger.info("expid: " + expid)
-        if user != "null": lock.acquire(); D[os.getpid()] = [user, "graph", expid, True]; lock.release();
-        result = CommonRequests.get_experiment_graph(expid, app.logger, layout, grouped)
-        app.logger.info('Process: ' + str(os.getpid()) + " graph workers: " + str(D))
-        if user != "null": lock.acquire(); D[os.getpid()] = [user, "graph", expid, False]; lock.release();
-        if user != "null": lock.acquire(); D.pop(os.getpid(), None); lock.release();
+        if user != "null":
+            lock.acquire()
+            D[os.getpid()] = [user, "graph", expid, True]
+            lock.release()
+        result = CommonRequests.get_experiment_graph(
+            expid, app.logger, layout, grouped)
+        app.logger.info('Process: ' + str(os.getpid()) +
+                        " graph workers: " + str(D))
+        if user != "null":
+            lock.acquire()
+            D[os.getpid()] = [user, "graph", expid, False]
+            lock.release()
+        if user != "null":
+            lock.acquire()
+            D.pop(os.getpid(), None)
+            lock.release()
         return result
-
 
     @app.route('/tree/<string:expid>', methods=['GET'])
     @with_log_run_times(app.logger, "TREE")
-    def get_exp_tree(expid):
+    @with_auth_token()
+    def get_exp_tree(expid, user_id: Optional[str] = None):
         user = request.args.get("loggedUser", default="null", type=str)
         # app.logger.info("user: " + user)
         # app.logger.info("expid: " + expid)
-        if user != "null": lock.acquire(); D[os.getpid()] = [user, "tree", expid, True]; lock.release();
-        result = CommonRequests.get_experiment_tree_structured(expid, app.logger)
-        app.logger.info('Process: ' + str(os.getpid()) + " tree workers: " + str(D))
-        if user != "null": lock.acquire(); D[os.getpid()] = [user, "tree", expid, False]; lock.release();
-        if user != "null": lock.acquire(); D.pop(os.getpid(), None); lock.release();
+        if user != "null":
+            lock.acquire()
+            D[os.getpid()] = [user, "tree", expid, True]
+            lock.release()
+        result = CommonRequests.get_experiment_tree_structured(
+            expid, app.logger)
+        app.logger.info('Process: ' + str(os.getpid()) +
+                        " tree workers: " + str(D))
+        if user != "null":
+            lock.acquire()
+            D[os.getpid()] = [user, "tree", expid, False]
+            lock.release()
+        if user != "null":
+            lock.acquire()
+            D.pop(os.getpid(), None)
+            lock.release()
         return result
-
 
     @app.route('/quick/<string:expid>', methods=['GET'])
     @with_log_run_times(app.logger, "QUICK")
-    def get_quick_view_data(expid):
+    @with_auth_token(response_on_fail=True)
+    def get_quick_view_data(expid, user_id=None):
         result = CommonRequests.get_quick_view(expid)
         return result
 
-
     @app.route('/exprun/<string:expid>', methods=['GET'])
     @with_log_run_times(app.logger, "LOG")
-    def get_experiment_running(expid):
+    @with_auth_token()
+    def get_experiment_running(expid, user_id: Optional[str] = None):
         """
         Finds log and gets the last 150 lines
         """
         result = CommonRequests.get_experiment_log_last_lines(expid)
         return result
 
-
     @app.route('/joblog/<string:logfile>', methods=['GET'])
     @with_log_run_times(app.logger, "JOBLOG")
-    def get_job_log_from_path(logfile):
+    @with_auth_token()
+    def get_job_log_from_path(logfile, user_id: Optional[str] = None):
         """
         Get log from path
         """
@@ -397,41 +434,41 @@ def create_app():
         result = CommonRequests.get_job_log(expid, logfile)
         return result
 
-
     @app.route('/pklinfo/<string:expid>/<string:timeStamp>', methods=['GET'])
     @with_log_run_times(app.logger, "GPKL")
-    def get_experiment_pklinfo(expid, timeStamp):
+    @with_auth_token()
+    def get_experiment_pklinfo(expid, timeStamp, user_id: Optional[str] = None):
         result = CommonRequests.get_experiment_pkl(expid)
         return result
 
-
     @app.route('/pkltreeinfo/<string:expid>/<string:timeStamp>', methods=['GET'])
     @with_log_run_times(app.logger, "TPKL")
-    def get_experiment_tree_pklinfo(expid, timeStamp):
+    @with_auth_token()
+    def get_experiment_tree_pklinfo(expid, timeStamp, user_id: Optional[str] = None):
         result = CommonRequests.get_experiment_tree_pkl(expid)
         return result
 
-
     @app.route('/stats/<string:expid>/<string:filter_period>/<string:filter_type>')
     @with_log_run_times(app.logger, "STAT")
-    def get_experiment_statistics(expid, filter_period, filter_type):
-        result = CommonRequests.get_experiment_stats(expid, filter_period, filter_type)
+    @with_auth_token()
+    def get_experiment_statistics(expid, filter_period, filter_type, user_id: Optional[str] = None):
+        result = CommonRequests.get_experiment_stats(
+            expid, filter_period, filter_type)
         return result
-
 
     @app.route('/history/<string:expid>/<string:jobname>')
     @with_log_run_times(app.logger, "HISTORY")
-    def get_exp_job_history(expid, jobname):
+    @with_auth_token()
+    def get_exp_job_history(expid, jobname, user_id: Optional[str] = None):
         result = CommonRequests.get_job_history(expid, jobname)
         return result
 
-
     @app.route('/rundetail/<string:expid>/<string:runid>')
     @with_log_run_times(app.logger, "RUNDETAIL")
-    def get_experiment_run_job_detail(expid, runid):
+    @with_auth_token()
+    def get_experiment_run_job_detail(expid, runid, user_id: Optional[str] = None):
         result = CommonRequests.get_experiment_tree_rundetail(expid, runid)
         return result
-
 
     @app.route('/filestatus/')
     @with_log_run_times(app.logger, "FSTATUS")
@@ -439,7 +476,7 @@ def create_app():
         result = CommonRequests.get_last_test_archive_status()
         return result
 
-
     return app
+
 
 app = create_app()
