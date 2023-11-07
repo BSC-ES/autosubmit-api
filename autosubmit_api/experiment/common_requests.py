@@ -1151,7 +1151,7 @@ def get_quick_view(expid):
             now_ = time.time()
             job_to_package, package_to_jobs, package_to_package_id, package_to_symbol = JobList.retrieve_packages(
                 APIBasicConfig, expid)
-            print(("Retrieving packages {0} seconds.".format(
+            logger.debug(("Retrieving packages {0} seconds.".format(
                 str(time.time() - now_))))
 
             try:
@@ -1202,16 +1202,16 @@ def get_quick_view(expid):
                                       'out': "/" + out,
                                       'err': "/" + err,
                                       })
+                    tree_job = {'title': Job.getTitle(job_name, status_color, status_text) + wrapper_tag,
+                                'refKey': job_name,
+                                'data': 'Empty',
+                                'children': [],
+                                'status': status_text,
+                                }
                     if status_code in [common_utils.Status.COMPLETED, common_utils.Status.WAITING, common_utils.Status.READY]:
-                        quick_tree_view.append({'title': Job.getTitle(job_name, status_color, status_text) + wrapper_tag,
-                                                'refKey': job_name,
-                                                'data': 'Empty',
-                                                'children': []})
+                        quick_tree_view.append(tree_job)
                     else:
-                        quick_tree_view.appendleft({'title': Job.getTitle(job_name, status_color, status_text) + wrapper_tag,
-                                                    'refKey': job_name,
-                                                    'data': 'Empty',
-                                                    'children': []})
+                        quick_tree_view.appendleft(tree_job)
                 # return {}
                 # quick_tree_view = list(quick_tree_view)
             else:
@@ -1219,9 +1219,8 @@ def get_quick_view(expid):
     except Exception as exp:
         error_message = "Exception: {0}".format(str(exp))
         error = True
-        print(error_message)
-        print((traceback.format_exc()))
-        pass
+        logger.error(error_message)
+        logger.error(traceback.format_exc())
 
     return {"error": error, "error_message": error_message, "view_data": view_data, "tree_view": list(quick_tree_view), "total": total_count, "completed": completed_count, "failed": failed_count, "running": running_count, "queuing": queuing_count}
 
