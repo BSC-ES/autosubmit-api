@@ -1274,6 +1274,8 @@ def get_current_configuration_by_expid(expid: str, user_id: Optional[str]):
             comp_value = comparing_dict.get(key)
             if isinstance(value, dict) and isinstance(comp_value, dict):
                 aux_diffs = sideDifferences(value, comp_value)
+                if len(aux_diffs) > 0:
+                    diffs.add(key)
                 for d in aux_diffs:
                     diffs.add(f"{key}.{d}")
             else:
