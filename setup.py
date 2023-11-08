@@ -27,7 +27,7 @@ setup(
     python_requires='>=3.7',
     install_requires=[
         'Flask~=2.2.5',
-        'jwt~=1.3.1',
+        'pyjwt~=2.8.0',
         'requests~=2.28.1',
         'flask_cors~=3.0.10',
         'bscearth.utils~=0.5.2',
