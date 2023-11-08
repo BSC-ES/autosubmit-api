@@ -3,8 +3,8 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-# Authorization
-AUTHORIZATION_LEVEL = os.environ.get("AUTHORIZATION_LEVEL")
+# Auth
+PROTECTION_LEVEL = os.environ.get("PROTECTION_LEVEL")
 # WARNING: Always provide a SECRET_KEY for production
 JWT_SECRET = os.environ.get(
     "SECRET_KEY", "M87;Z$,o5?MSC(/@#-LbzgE3PH-5ki.ZvS}N.s09v>I#v8I'00THrA-:ykh3HX?")

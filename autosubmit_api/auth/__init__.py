@@ -2,11 +2,11 @@ from functools import wraps
 from flask import request
 import jwt
 from autosubmit_api.logger import logger
-from autosubmit_api.config import AUTHORIZATION_LEVEL, JWT_ALGORITHM, JWT_SECRET
+from autosubmit_api.config import PROTECTION_LEVEL, JWT_ALGORITHM, JWT_SECRET
 from enum import IntEnum
 
 
-class AuthorizationLevels(IntEnum):
+class ProtectionLevels(IntEnum):
     ALL = 100
     WRITEONLY = 20
     NONE = 0
@@ -16,16 +16,16 @@ class AppAuthError(ValueError):
     code = 401
 
 
-def _parse_authorization_level_env(_var):
+def _parse_protection_level_env(_var):
     if _var == "NONE":
-        return AuthorizationLevels.NONE
+        return ProtectionLevels.NONE
     elif _var == "WRITEONLY":
-        return AuthorizationLevels.WRITEONLY
+        return ProtectionLevels.WRITEONLY
 
-    return AuthorizationLevels.ALL
+    return ProtectionLevels.ALL
 
 
-def with_auth_token(level=AuthorizationLevels.ALL, response_on_fail=True, raise_on_fail=False):
+def with_auth_token(threshold=ProtectionLevels.ALL, response_on_fail=True, raise_on_fail=False):
     """
     Decorator that validates the Authorization token in a request.
 
@@ -46,10 +46,10 @@ def with_auth_token(level=AuthorizationLevels.ALL, response_on_fail=True, raise_
                 error_msg = "Unauthorized"
                 if isinstance(exc, jwt.ExpiredSignatureError):
                     error_msg = "Expired token" 
-                auth_level = _parse_authorization_level_env(AUTHORIZATION_LEVEL)
-                if level <= auth_level and raise_on_fail:
+                auth_level = _parse_protection_level_env(PROTECTION_LEVEL)
+                if threshold <= auth_level and raise_on_fail:
                     raise AppAuthError(error_msg)
-                if level <= auth_level and response_on_fail:
+                if threshold <= auth_level and response_on_fail:
                     return {"error": True, "message": error_msg }, 401
                 jwt_token = {"user_id": None}
 

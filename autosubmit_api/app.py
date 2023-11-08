@@ -25,7 +25,7 @@ import requests
 from flask_cors import CORS, cross_origin
 from flask import Flask, request, session, redirect
 from autosubmit_api import __version__ as APIVersion
-from autosubmit_api.auth import AuthorizationLevels, with_auth_token
+from autosubmit_api.auth import ProtectionLevels, with_auth_token
 
 from autosubmit_api.database.extended_db import ExtendedDB
 from autosubmit_api.database.db_common import get_current_running_exp, update_experiment_description_owner
@@ -174,7 +174,7 @@ def create_app():
     @app.route('/updatedesc', methods=['GET', 'POST'])
     @cross_origin(expose_headers="Authorization")
     @with_log_run_times(app.logger, "UDESC")
-    @with_auth_token(level=AuthorizationLevels.WRITEONLY)
+    @with_auth_token(threshold=ProtectionLevels.WRITEONLY)
     def update_description(user_id: Optional[str] = None):
         """
         Updates the description of an experiment. Requires authenticated user.
@@ -190,7 +190,7 @@ def create_app():
     @app.route('/tokentest', methods=['GET', 'POST'])
     @cross_origin(expose_headers="Authorization")
     @with_log_run_times(app.logger, "TTEST")
-    @with_auth_token(level=AuthorizationLevels.WRITEONLY, response_on_fail=False)
+    @with_auth_token(threshold=ProtectionLevels.WRITEONLY, response_on_fail=False)
     def test_token(user_id: Optional[str] = None):
         """
         Tests if a token is still valid

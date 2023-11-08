@@ -1,5 +1,5 @@
 import pytest
-from autosubmit_api.auth import AuthorizationLevels, with_auth_token
+from autosubmit_api.auth import ProtectionLevels, with_auth_token
 from autosubmit_api import auth
 from tests.custom_utils import custom_return_value
 
@@ -11,8 +11,8 @@ def dummy_response(*args, **kwargs):
 class TestCommonAuth:
 
     def test_levels_enum(self):
-        assert AuthorizationLevels.ALL > AuthorizationLevels.WRITEONLY
-        assert AuthorizationLevels.WRITEONLY > AuthorizationLevels.NONE
+        assert ProtectionLevels.ALL > ProtectionLevels.WRITEONLY
+        assert ProtectionLevels.WRITEONLY > ProtectionLevels.NONE
 
     def test_decorator(self, monkeypatch: pytest.MonkeyPatch):
         """
@@ -22,49 +22,49 @@ class TestCommonAuth:
         """
 
         # Test on AuthorizationLevels.ALL
-        monkeypatch.setattr(auth, "_parse_authorization_level_env",
-                            custom_return_value(AuthorizationLevels.ALL))
+        monkeypatch.setattr(auth, "_parse_protection_level_env",
+                            custom_return_value(ProtectionLevels.ALL))
 
         _, code = with_auth_token(
-            level=AuthorizationLevels.ALL)(dummy_response)()
+            threshold=ProtectionLevels.ALL)(dummy_response)()
         assert code == 401
 
         _, code = with_auth_token(
-            level=AuthorizationLevels.WRITEONLY)(dummy_response)()
+            threshold=ProtectionLevels.WRITEONLY)(dummy_response)()
         assert code == 401
 
         _, code = with_auth_token(
-            level=AuthorizationLevels.NONE)(dummy_response)()
+            threshold=ProtectionLevels.NONE)(dummy_response)()
         assert code == 401
 
         # Test on AuthorizationLevels.WRITEONLY
-        monkeypatch.setattr(auth, "_parse_authorization_level_env",
-                            custom_return_value(AuthorizationLevels.WRITEONLY))
+        monkeypatch.setattr(auth, "_parse_protection_level_env",
+                            custom_return_value(ProtectionLevels.WRITEONLY))
 
         _, code = with_auth_token(
-            level=AuthorizationLevels.ALL)(dummy_response)()
+            threshold=ProtectionLevels.ALL)(dummy_response)()
         assert code == 200
 
         _, code = with_auth_token(
-            level=AuthorizationLevels.WRITEONLY)(dummy_response)()
+            threshold=ProtectionLevels.WRITEONLY)(dummy_response)()
         assert code == 401
 
         _, code = with_auth_token(
-            level=AuthorizationLevels.NONE)(dummy_response)()
+            threshold=ProtectionLevels.NONE)(dummy_response)()
         assert code == 401
 
         # Test on AuthorizationLevels.NONE
-        monkeypatch.setattr(auth, "_parse_authorization_level_env",
-                            custom_return_value(AuthorizationLevels.NONE))
+        monkeypatch.setattr(auth, "_parse_protection_level_env",
+                            custom_return_value(ProtectionLevels.NONE))
 
         _, code = with_auth_token(
-            level=AuthorizationLevels.ALL)(dummy_response)()
+            threshold=ProtectionLevels.ALL)(dummy_response)()
         assert code == 200
 
         _, code = with_auth_token(
-            level=AuthorizationLevels.WRITEONLY)(dummy_response)()
+            threshold=ProtectionLevels.WRITEONLY)(dummy_response)()
         assert code == 200
 
         _, code = with_auth_token(
-            level=AuthorizationLevels.NONE)(dummy_response)()
+            threshold=ProtectionLevels.NONE)(dummy_response)()
         assert code == 401
