@@ -1107,20 +1107,19 @@ def get_experiment_counters(expid):
     experiment_counters = {name: 0 for name in common_utils.Status.STRING_TO_CODE}
     try:
         if os.path.exists(path_pkl):
-            fd = open(path_pkl, 'r')
+            fd = open(path_pkl, 'rb')
             for item in pickle.load(fd, encoding="latin1"):
                 status_code = int(item[2])
                 total += 1
                 experiment_counters[common_utils.Status.VALUE_TO_KEY.get(status_code, "UNKNOWN")] = experiment_counters.get(
                     common_utils.Status.VALUE_TO_KEY.get(status_code, "UNKNOWN"), 0) + 1
-
         else:
             raise Exception("PKL file not found.")
-    except Exception as exp:
+    except Exception as exc:
         error = True
-        error_message = str(exp)
-        # print(traceback.format_exc())
-        # print(exp)
+        error_message = str(exc)
+        logger.error(traceback.format_exc())
+        logger.error(exc)
     return {"error": error, "error_message": error_message, "expid": expid, "total": total, "counters": experiment_counters}
 
 
