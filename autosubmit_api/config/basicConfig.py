@@ -27,14 +27,14 @@ class APIBasicConfig(BasicConfig):
     Extended class to manage configuration for Autosubmit path, database and default values for new experiments in the Autosubmit API
     """
 
-    GRAPHDATA_DIR = os.path.join('/esarchive', 'autosubmit', 'as_metadata', 'graph')
-    FILE_STATUS_DIR = os.path.join('/esarchive', 'autosubmit', 'as_metadata', 'test')
+    GRAPHDATA_DIR = os.path.join(os.path.expanduser('~'), 'autosubmit', 'as_metadata', 'graph')
+    FILE_STATUS_DIR = os.path.join(os.path.expanduser('~'), 'autosubmit', 'as_metadata', 'test')
     FILE_STATUS_DB = 'status.db'
-    ALLOWED_CLIENTS = set(['https://earth.bsc.es/'])
+    ALLOWED_CLIENTS = set([])
 
     @staticmethod
     def __read_file_config(file_path):
-        super().__read_file_config(file_path)
+        # WARNING: Is unsafe to call this method directly. Doing APIBasicConfig.__read_file_config doesn't run BasicConfig.__read_file_config
 
         if not os.path.isfile(file_path):
             return
@@ -51,3 +51,27 @@ class APIBasicConfig(BasicConfig):
             APIBasicConfig.FILE_STATUS_DB = parser.get('statusdb', 'filename')
         if parser.has_option('clients', 'authorized'):
             APIBasicConfig.ALLOWED_CLIENTS = set(parser.get('clients', 'authorized').split())
+
+
+    @staticmethod
+    def read():
+        BasicConfig.read() # This is done to run BasicConfig.__read_file_config indirectly
+
+        filename = 'autosubmitrc'
+        if 'AUTOSUBMIT_CONFIGURATION' in os.environ and os.path.exists(os.environ['AUTOSUBMIT_CONFIGURATION']):
+            config_file_path = os.environ['AUTOSUBMIT_CONFIGURATION']
+            # Call read_file_config with the value of the environment variable
+            APIBasicConfig.__read_file_config(config_file_path)
+        else:
+            if os.path.exists(os.path.join('', '.' + filename)):
+                APIBasicConfig.__read_file_config(os.path.join('', '.' + filename))
+            elif os.path.exists(os.path.join(os.path.expanduser('~'), '.' + filename)):
+                APIBasicConfig.__read_file_config(os.path.join(
+                    os.path.expanduser('~'), '.' + filename))
+            else:
+                APIBasicConfig.__read_file_config(os.path.join('/etc', filename))
+
+            # Check if the environment variable is defined
+
+        APIBasicConfig._update_config()
+        return

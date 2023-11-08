@@ -54,22 +54,34 @@ def create_app():
 
     app = Flask(__name__)
 
+    # Multiprocessing setup
     D = Manager().dict()
+    lock = Lock()
 
+    # CORS setup
     CORS(app)
-    app.logger = get_app_logger()  # Bind logger
+
+    # Logger binding
+    app.logger = get_app_logger()
     app.logger.info("PYTHON VERSION: " + sys.version)
+
+    # Enforce Language Locale
+    CommonRequests.enforceLocal(app.logger)
 
     requests.packages.urllib3.util.ssl_.DEFAULT_CIPHERS += 'HIGH:!DH:!aNULL'
     try:
         requests.packages.urllib3.contrib.pyopenssl.DEFAULT_SSL_CIPHER_LIST += 'HIGH:!DH:!aNULL'
     except AttributeError:
-        # no pyopenssl support used / needed / available
-        pass
+        app.logger.warning('No pyopenssl support used / needed / available')
 
-    lock = Lock()
+    # Initial read config
+    APIBasicConfig.read()
+    app.logger.debug("API Basic config: " + str(APIBasicConfig().props()))
 
-    CommonRequests.enforceLocal(app.logger)
+    # Prepare DB
+    ext_db = ExtendedDB(APIBasicConfig.DB_DIR,
+                        APIBasicConfig.DB_FILE, APIBasicConfig.AS_TIMES_DB)
+    ext_db.prepare_db()
 
     # Background Scheduler
     scheduler = APScheduler()
@@ -101,12 +113,7 @@ def create_app():
     def worker_populate_graph():
         populate_graph.main()
 
-    # Prepare DB
-    config = APIBasicConfig()
-    config.read()
-    ext_db = ExtendedDB(config.DB_DIR, config.DB_FILE, config.AS_TIMES_DB)
-    ext_db.prepare_db()
-
+    # Run workers on create_app
     if RUN_BACKGROUND_TASKS_ON_START:
         app.logger.info('Starting populate workers on init...')
         worker_populate_details_db()
@@ -114,6 +121,8 @@ def create_app():
         worker_populate_running_experiments()
         worker_verify_complete()
         worker_populate_graph()
+
+    ################################ ROUTES ################################
 
     @app.route('/')
     def home():
