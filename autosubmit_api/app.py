@@ -41,7 +41,7 @@ import jwt
 import sys
 from flask_apscheduler import APScheduler
 from autosubmit_api.workers import populate_details_db, populate_queue_run_times, populate_running_experiments, populate_graph, verify_complete
-from autosubmit_api.config import JWT_SECRET, JWT_ALGORITHM, JWT_EXP_DELTA_SECONDS, RUN_BACKGROUND_TASKS_ON_START, CAS_LOGIN_URL, CAS_VERIFY_URL
+from autosubmit_api.config import JWT_SECRET, JWT_ALGORITHM, JWT_EXP_DELTA_SECONDS, PROTECTION_LEVEL, RUN_BACKGROUND_TASKS_ON_START, CAS_LOGIN_URL, CAS_VERIFY_URL
 
 
 def create_app():
@@ -77,6 +77,12 @@ def create_app():
     # Initial read config
     APIBasicConfig.read()
     app.logger.debug("API Basic config: " + str(APIBasicConfig().props()))
+    app.logger.debug("Env Config: "+ str({
+        "PROTECTION_LEVEL": PROTECTION_LEVEL,
+        "CAS_LOGIN_URL": CAS_LOGIN_URL,
+        "CAS_VERIFY_URL": CAS_VERIFY_URL,
+        "RUN_BACKGROUND_TASKS_ON_START": RUN_BACKGROUND_TASKS_ON_START
+    }))
 
     # Prepare DB
     ext_db = ExtendedDB(APIBasicConfig.DB_DIR,
@@ -153,7 +159,7 @@ def create_app():
             app.logger.info("Redirected to: " + str(route_to_request_ticket))
             return redirect(route_to_request_ticket)
         # can be used to target the test environment
-        environment = environment if environment is not None else "autosubmitapp"
+        # environment = environment if environment is not None else "autosubmitapp"
         cas_verify_ticket_route = CAS_VERIFY_URL + \
             '?service=' + target_service + '&ticket=' + ticket
         response = requests.get(cas_verify_ticket_route)
@@ -190,7 +196,7 @@ def create_app():
     @app.route('/tokentest', methods=['GET', 'POST'])
     @cross_origin(expose_headers="Authorization")
     @with_log_run_times(app.logger, "TTEST")
-    @with_auth_token(threshold=ProtectionLevels.WRITEONLY, response_on_fail=False)
+    @with_auth_token(threshold=ProtectionLevels.NONE, response_on_fail=False)
     def test_token(user_id: Optional[str] = None):
         """
         Tests if a token is still valid
@@ -252,8 +258,8 @@ def create_app():
         Returns the list of all experiments that are currently running.
         """
         if 'username' in session:
-            print(("USER {}".format(session['username'])))
-        app.logger.info("Active proceses: " + str(D))
+            app.logger.debug(("USER {}".format(session['username'])))
+        app.logger.debug("Active proceses: " + str(D))
         # app.logger.info("Received Currently Running query ")
         result = get_current_running_exp()
         return result

@@ -1,10 +1,9 @@
 #!/usr/bin/env python
 import traceback
-from ..common import utils as utils
-from ..components.experiment.pkl_organizer import PklOrganizer
-from ..components.experiment.configuration_facade import AutosubmitConfigurationFacade
-from ..components.jobs.joblist_helper import JobListHelper
-from ..components.jobs.job_factory import Job
+from autosubmit_api.logger import logger
+from autosubmit_api.common import utils as utils
+from autosubmit_api.components.jobs.joblist_helper import JobListHelper
+from autosubmit_api.components.jobs.job_factory import Job, SimJob
 from typing import List, Dict
 
 class PerformanceMetrics(object):
@@ -35,13 +34,13 @@ class PerformanceMetrics(object):
     except Exception as exp:
       self.error = True
       self.error_message = "Error while preparing data sources: {0}".format(str(exp))
-      print((traceback.format_exc()))
-      print((str(exp)))
+      logger.error((traceback.format_exc()))
+      logger.error((str(exp)))
     if self.error == False:
       self.configuration_facade.update_sim_jobs(self.pkl_organizer.sim_jobs)
       self._update_jobs_with_time_data()
       self._calculate_post_jobs_total_time_average()
-      self.sim_jobs_valid = utils.get_jobs_with_no_outliers(self.pkl_organizer.get_completed_section_jobs(utils.JobSection.SIM)) # type: List[Job]
+      self.sim_jobs_valid: List[SimJob] = utils.get_jobs_with_no_outliers(self.pkl_organizer.get_completed_section_jobs(utils.JobSection.SIM))
       self._identify_outlied_jobs()
       self._update_valid_sim_jobs_with_post_data()
       self._add_valid_sim_jobs_to_considered()
@@ -152,8 +151,7 @@ class PerformanceMetrics(object):
     return divisor
 
 
-  def _add_to_considered(self, simjob):
-    # type: (Job) -> None
+  def _add_to_considered(self, simjob: SimJob):
     self._considered.append({
       "name": simjob.name,
       "queue": simjob.queue_time,

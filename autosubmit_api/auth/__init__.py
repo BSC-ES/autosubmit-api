@@ -31,8 +31,9 @@ def with_auth_token(threshold=ProtectionLevels.ALL, response_on_fail=True, raise
 
     It adds the `user_id` variable inside the arguments of the wrapped function.
 
-    :param response_on_fail: if `True` will return a Flask response
-    :param raise_on_fail: if `True` will raise an exception
+    :param threshold: The minimum PROTECTION_LEVEL that needs to be set to trigger a *_on_fail
+    :param response_on_fail: if `True` will return a Flask response on fail
+    :param raise_on_fail: if `True` will raise an exception on fail
     :raises AppAuthError: if raise_on_fail=True and decoding fails
     """
     def decorator(func):
@@ -45,12 +46,13 @@ def with_auth_token(threshold=ProtectionLevels.ALL, response_on_fail=True, raise
             except Exception as exc:
                 error_msg = "Unauthorized"
                 if isinstance(exc, jwt.ExpiredSignatureError):
-                    error_msg = "Expired token" 
+                    error_msg = "Expired token"
                 auth_level = _parse_protection_level_env(PROTECTION_LEVEL)
-                if threshold <= auth_level and raise_on_fail:
-                    raise AppAuthError(error_msg)
-                if threshold <= auth_level and response_on_fail:
-                    return {"error": True, "message": error_msg }, 401
+                if threshold <= auth_level:  # If True, will trigger *_on_fail
+                    if raise_on_fail:
+                        raise AppAuthError(error_msg)
+                    if response_on_fail:
+                        return {"error": True, "message": error_msg}, 401
                 jwt_token = {"user_id": None}
 
             user_id = jwt_token.get("user_id", None)

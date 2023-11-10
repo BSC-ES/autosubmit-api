@@ -1,6 +1,4 @@
 #!/usr/bin/env python
-import os
-import pickle
 import subprocess
 import time
 import datetime
