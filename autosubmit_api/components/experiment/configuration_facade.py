@@ -1,11 +1,14 @@
 #!/usr/bin/env python
+import math
 import os
-from ...config.basicConfig import APIBasicConfig
-from ..jobs.job_factory import SimJob, Job
-from ...config.config_common import AutosubmitConfigResolver
-from bscearth.utils.config_parser import ConfigParserFactory
+from autosubmit_api.logger import logger
+from autosubmit_api.components.jobs.utils import convert_int_default
+from autosubmit_api.config.ymlConfigStrategy import ymlConfigStrategy
+from autosubmit_api.config.basicConfig import APIBasicConfig
+from autosubmit_api.components.jobs.job_factory import SimJob
+from autosubmit_api.config.config_common import AutosubmitConfigResolver
 from abc import ABCMeta, abstractmethod
-from ...common.utils import JobSection, parse_number_processors, timestamp_to_datetime_format, datechunk_to_year
+from autosubmit_api.common.utils import JobSection, parse_number_processors, timestamp_to_datetime_format, datechunk_to_year
 from typing import List
 
 class ProjectType:
@@ -123,6 +126,19 @@ class AutosubmitConfigurationFacade(ConfigurationFacade):
     self.chunk_size = self.autosubmit_conf.get_chunk_size()
     self.current_years_per_sim = datechunk_to_year(self.chunk_unit, self.chunk_size)
     self.sim_processors = self._get_processors_number(self.autosubmit_conf.get_processors(JobSection.SIM))
+    
+    # Process for yml
+    if isinstance(self.autosubmit_conf._configWrapper, ymlConfigStrategy):
+      self.sim_tasks = convert_int_default(self.autosubmit_conf._configWrapper.get_tasks(JobSection.SIM))
+      self.sim_nodes = convert_int_default(self.autosubmit_conf._configWrapper.get_nodes(JobSection.SIM))
+      self.sim_processors_per_node = convert_int_default(self.autosubmit_conf._configWrapper.get_processors_per_node(JobSection.SIM))
+    else:
+      self.sim_tasks = None
+      self.sim_nodes = None
+      self.sim_processors_per_node = None
+    
+    self.sim_processing_elements = self._calculate_processing_elements()
+
     self.experiment_stat_data = os.stat(self.experiment_path)
 
   def get_pkl_last_modified_timestamp(self):
@@ -242,7 +258,7 @@ class AutosubmitConfigurationFacade(ConfigurationFacade):
     # type: (List[SimJob]) -> None
     """ Update the jobs with the latest configuration values: Processors, years per sim """
     for job in sim_jobs:
-      job.set_ncpus(self.sim_processors)
+      job.set_ncpus(self.sim_processing_elements)
       job.set_years_per_sim(self.current_years_per_sim)
 
   def _get_processors_number(self, conf_job_processors):
@@ -264,3 +280,21 @@ class AutosubmitConfigurationFacade(ConfigurationFacade):
   def _add_warning(self, message):
     # type: (str) -> None
     self.warnings.append(message)
+
+  def _estimate_requested_nodes(self) -> int:
+    if self.sim_nodes:
+      return self.sim_nodes
+    elif self.sim_tasks:
+      return math.ceil(self.sim_processors / self.sim_tasks)
+    elif self.sim_processors_per_node and self.sim_processors > self.sim_processors_per_node:
+      return math.ceil(self.sim_processors / self.sim_processors_per_node)
+    else:
+      return 1
+
+  def _calculate_processing_elements(self) -> int:
+    if self.sim_processors_per_node:
+      estimated_nodes = self._estimate_requested_nodes()
+      return estimated_nodes * self.sim_processors_per_node
+    elif self.sim_tasks or self.sim_nodes:
+      logger.warning('Missing PROCESSORS_PER_NODE. Should be set if TASKS or NODES are defined. The SIM PROCESSORS will used instead.')
+    return self.sim_processors

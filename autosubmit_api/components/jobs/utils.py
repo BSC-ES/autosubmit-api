@@ -133,3 +133,9 @@ def get_folder_package_title(package_name, jobs_count, counters):
       get_folder_held_tag(counters[Status.HELD]),
       get_folder_checkmark(counters[Status.COMPLETED], jobs_count)
   )
+
+def convert_int_default(value, default_value=None):
+  try:
+    return int(value)
+  except:
+    return default_value

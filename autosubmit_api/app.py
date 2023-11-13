@@ -356,16 +356,17 @@ def create_app():
         try:
             result = PerformanceMetrics(expid, JobListHelperDirector(
                 JobListHelperBuilder(expid)).build_job_list_helper()).to_json()
-        except Exception as exp:
+        except Exception as exc:
             result = {"SYPD": None,
                       "ASYPD": None,
                       "RSYPD": None,
                       "CHSY": None,
                       "JPSY": None,
                       "Parallelization": None,
+                      "PE": None,
                       "considered": [],
                       "error": True,
-                      "error_message": str(exp),
+                      "error_message": str(exc),
                       "warnings_job_data": [],
                       }
         return result

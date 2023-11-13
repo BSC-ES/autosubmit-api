@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+import math
 import traceback
 from autosubmit_api.logger import logger
 from autosubmit_api.common import utils as utils
@@ -21,8 +22,9 @@ class PerformanceMetrics(object):
     self.CHSY = 0 # type: float
     self.JPSY = 0 # type: float
     self.RSYPD = 0 # type: float
+    self.processing_elements = 1
     self._considered = [] # type : List
-    self._sim_processors = 0 # type : int
+    self._sim_processors = 1 # type : int
     self.warnings = [] # type : List
     self.post_jobs_total_time_average = 0 # type : int
     try:
@@ -31,13 +33,14 @@ class PerformanceMetrics(object):
       self.pkl_organizer = self.joblist_helper.pkl_organizer # type : PklOrganizer
       self.pkl_organizer.prepare_jobs_for_performance_metrics()
       self._sim_processors = self.configuration_facade.sim_processors
+      self.processing_elements = self.configuration_facade.sim_processing_elements
     except Exception as exp:
       self.error = True
       self.error_message = "Error while preparing data sources: {0}".format(str(exp))
       logger.error((traceback.format_exc()))
       logger.error((str(exp)))
     if self.error == False:
-      self.configuration_facade.update_sim_jobs(self.pkl_organizer.sim_jobs)
+      self.configuration_facade.update_sim_jobs(self.pkl_organizer.sim_jobs) # This will assign self.configuration_facade.sim_processors to all the SIM jobs
       self._update_jobs_with_time_data()
       self._calculate_post_jobs_total_time_average()
       self.sim_jobs_valid: List[SimJob] = utils.get_jobs_with_no_outliers(self.pkl_organizer.get_completed_section_jobs(utils.JobSection.SIM))
@@ -58,11 +61,11 @@ class PerformanceMetrics(object):
       self.joblist_helper.update_with_yps_per_run(self.pkl_organizer.sim_jobs)
 
   def _calculate_global_metrics(self):
-      self._calculate_SYPD()
-      self._calculate_ASYPD()
-      self._calculate_RSYPD()
-      self._calculate_JPSY()
-      self._calculate_CHSY()
+      self.SYPD = self._calculate_SYPD()
+      self.ASYPD = self._calculate_ASYPD()
+      self.RSYPD = self._calculate_RSYPD()
+      self.JPSY = self._calculate_JPSY()
+      self.CHSY = self._calculate_CHSY()
 
   def _identify_outlied_jobs(self):
     """ Generates warnings """
@@ -101,34 +104,40 @@ class PerformanceMetrics(object):
   def _calculate_total_sim_queue_time(self):
     self.total_sim_queue_time = sum(job.queue_time for job in self.sim_jobs_valid)
 
+
   def _calculate_SYPD(self):
     if self.total_sim_run_time > 0:
       SYPD = ((self.configuration_facade.current_years_per_sim * len(self._considered) * utils.SECONDS_IN_A_DAY) /
                   (self.total_sim_run_time))
-      self.SYPD = round(SYPD, 4)
+      return round(SYPD, 4)
+    return 0
 
   def _calculate_ASYPD(self):
     if len(self.sim_jobs_valid) > 0:
       ASYPD = (self.configuration_facade.current_years_per_sim * len(self.sim_jobs_valid) * utils.SECONDS_IN_A_DAY) / (self.total_sim_run_time + self.total_sim_queue_time + self.post_jobs_total_time_average)
-      self.ASYPD = round(ASYPD, 4)
+      return round(ASYPD, 4)
+    return 0
 
   def _calculate_RSYPD(self):
     divisor = self._get_RSYPD_divisor()
     if len(self.sim_jobs_valid) > 0 and divisor > 0:
       RSYPD = (self.configuration_facade.current_years_per_sim * len(self.sim_jobs_valid) * utils.SECONDS_IN_A_DAY) / divisor
-      self.RSYPD = round(RSYPD, 4)
+      return round(RSYPD, 4)
+    return 0
 
   def _calculate_JPSY(self):
     """ Joules per Simulated Year """
     sims_with_energy_count = self._get_sims_with_energy_count()
     if len(self.sim_jobs_valid) > 0 and sims_with_energy_count > 0:
       JPSY = sum(job.JPSY for job in self.sim_jobs_valid)/sims_with_energy_count
-      self.JPSY = round(JPSY, 4)
+      return round(JPSY, 4)
+    return 0
 
   def _calculate_CHSY(self):
     if len(self.sim_jobs_valid) > 0:
       CHSY = sum(job.CHSY for job in self.sim_jobs_valid)/len(self.sim_jobs_valid)
       self.CHSY = round(CHSY, 4)
+    return 0
 
   def _get_RSYPD_support_list(self):
     # type: () -> List[Job]
@@ -173,6 +182,7 @@ class PerformanceMetrics(object):
             "CHSY": self.CHSY,
             "JPSY": self.JPSY,
             "Parallelization": self._sim_processors,
+            "PE": self.processing_elements,
             "considered": self._considered,
             "error": self.error,
             "error_message": self.error_message,
