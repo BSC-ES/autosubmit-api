@@ -1,9 +1,9 @@
 #!/usr/bin/env python
+import statistics
 import subprocess
 import time
 import datetime
 import math
-import numpy as np
 from collections import namedtuple
 from bscearth.utils.date import date2str
 from dateutil.relativedelta import *
@@ -79,8 +79,8 @@ def get_jobs_with_no_outliers(jobs):
   if len(data_run_times) == 0:
     return jobs  
   
-  mean = np.mean(data_run_times)
-  std = np.std(data_run_times)
+  mean = statistics.mean(data_run_times)
+  std = statistics.stdev(data_run_times)
   
   # print("mean {0} std {1}".format(mean, std))
   if std == 0:
@@ -89,7 +89,7 @@ def get_jobs_with_no_outliers(jobs):
   for job in jobs:
     z_score = (job.run_time - mean) / std
     # print("{0} {1} {2}".format(job.name, np.abs(z_score), job.run_time))
-    if np.abs(z_score) <= THRESHOLD_OUTLIER and job.run_time > 0:
+    if math.fabs(z_score) <= THRESHOLD_OUTLIER and job.run_time > 0:
       new_list.append(job)
     # else:
     #   print(" OUTLIED {0} {1} {2}".format(job.name, np.abs(z_score), job.run_time))  

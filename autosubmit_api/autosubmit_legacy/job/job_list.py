@@ -29,50 +29,43 @@ from bscearth.utils.config_parser import ConfigParserFactory
 import os
 import re
 import pickle
-import hashlib
 import traceback
 import datetime
 import math
-import random
 
 # Spectral imports
-import numpy as np
 import networkx as nx
 from scipy import sparse
 from fnmatch import fnmatch
 from collections import deque, OrderedDict
-from threading import Thread
 # End Spectral imports
 
 from time import localtime, strftime, time, mktime
 from shutil import move
-from random import shuffle
 from dateutil.relativedelta import *
 
-from .job import Job
-from ...config.config_common import AutosubmitConfigResolver
+from autosubmit_api.config.config_common import AutosubmitConfigResolver
 from bscearth.utils.log import Log
-from .job_dict import DicJobs
-from .job_utils import Dependency
-from .job_utils import SubJob
-from .job_utils import SubJobManager, job_times_to_text, datechunk_to_year
-from ...performance.utils import calculate_ASYPD_perjob, calculate_SYPD_perjob
-from ...components.jobs import utils as JUtils
-from ...monitor.monitor import Monitor
-from .job_common import Status, Type
-from bscearth.utils.date import date2str, parse_date, sum_str_hours
-from ...experiment import common_db_requests as DbRequests
-from .job_packages import JobPackageSimple, JobPackageArray, JobPackageThread
-from .job_package_persistence import JobPackagePersistence
+from autosubmit_api.autosubmit_legacy.job.job_dict import DicJobs
+from autosubmit_api.autosubmit_legacy.job.job_utils import Dependency
+from autosubmit_api.autosubmit_legacy.job.job_utils import SubJob
+from autosubmit_api.autosubmit_legacy.job.job_utils import SubJobManager, job_times_to_text, datechunk_to_year
+from autosubmit_api.performance.utils import calculate_ASYPD_perjob, calculate_SYPD_perjob
+from autosubmit_api.components.jobs import utils as JUtils
+from autosubmit_api.monitor.monitor import Monitor
+from autosubmit_api.autosubmit_legacy.job.job_common import Status
+from bscearth.utils.date import date2str, parse_date
+from autosubmit_api.experiment import common_db_requests as DbRequests
+from autosubmit_api.autosubmit_legacy.job.job_package_persistence import JobPackagePersistence
 # from autosubmit_legacy.job.tree import Tree
-from ...database import db_structure as DbStructure
-from ...database.db_jobdata import JobDataStructure, JobRow, ExperimentGraphDrawing
-from ...builders.experiment_history_builder import ExperimentHistoryDirector, ExperimentHistoryBuilder
-from ...history.data_classes.job_data import JobData
+from autosubmit_api.database import db_structure as DbStructure
+from autosubmit_api.database.db_jobdata import JobDataStructure, JobRow, ExperimentGraphDrawing
+from autosubmit_api.builders.experiment_history_builder import ExperimentHistoryDirector, ExperimentHistoryBuilder
+from autosubmit_api.history.data_classes.job_data import JobData
 
 from networkx import DiGraph
-from .job_utils import transitive_reduction
-from ...common.utils import timestamp_to_datetime_format
+from autosubmit_api.autosubmit_legacy.job.job_utils import transitive_reduction
+from autosubmit_api.common.utils import timestamp_to_datetime_format
 from typing import List, Dict, Tuple
 
 

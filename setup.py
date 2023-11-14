@@ -32,7 +32,6 @@ setup(
         'flask_cors~=3.0.10',
         'bscearth.utils~=0.5.2',
         'pysqlite-binary',
-        'numpy~=1.21.6',
         'pydotplus~=2.0.2',
         'portalocker~=2.6.0',
         'networkx~=2.6.3',

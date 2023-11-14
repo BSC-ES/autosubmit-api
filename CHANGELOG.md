@@ -10,6 +10,7 @@
 * Improved security by using protection levels.
 * Improved logging and code structure.
 * Added Processing Elements (PE) estimation in the `/performance/<expid>` endpoint which improves the CHSY metric accuracy.
+* Fixed error while populating the `experiment_times` table which affected the `/running/` endpoint.
 
 ### Pre-release v4.0.0b1 - Release date: 2023-11-02
 
