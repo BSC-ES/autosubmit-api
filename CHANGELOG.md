@@ -9,6 +9,7 @@
 * Added job status in the `/quick/<expid>` endpoint.
 * Improved security by using protection levels.
 * Improved logging and code structure.
+* Added Processing Elements (PE) estimation in the `/performance/<expid>` endpoint which improves the CHSY metric accuracy.
 
 ### Pre-release v4.0.0b1 - Release date: 2023-11-02
 

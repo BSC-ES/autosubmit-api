@@ -136,7 +136,7 @@ class PerformanceMetrics(object):
   def _calculate_CHSY(self):
     if len(self.sim_jobs_valid) > 0:
       CHSY = sum(job.CHSY for job in self.sim_jobs_valid)/len(self.sim_jobs_valid)
-      self.CHSY = round(CHSY, 4)
+      return round(CHSY, 4)
     return 0
 
   def _get_RSYPD_support_list(self):
