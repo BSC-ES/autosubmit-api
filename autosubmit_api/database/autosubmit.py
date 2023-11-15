@@ -23,7 +23,7 @@ import traceback
 from pyparsing import nestedExpr
 from collections import defaultdict
 from distutils.util import strtobool
-from pkg_resources import require, resource_listdir, resource_exists, resource_string
+from pkg_resources import resource_listdir, resource_exists, resource_string
 import portalocker
 import datetime
 import signal
@@ -44,7 +44,7 @@ sys.path.insert(0, os.path.abspath('.'))
 from autosubmit_api.config.basicConfig import APIBasicConfig
 from autosubmit_api.config.config_common import AutosubmitConfigResolver
 from bscearth.utils.config_parser import ConfigParserFactory
-from autosubmit_api.autosubmit_legacy.job.job_common import Status
+from autosubmit_api.common.utils import Status
 from autosubmit_api.git.autosubmit_git import AutosubmitGit
 from autosubmit_api.autosubmit_legacy.job.job_list import JobList
 from autosubmit_api.autosubmit_legacy.job.job_packages import JobPackageThread
@@ -66,7 +66,6 @@ from autosubmit_api.autosubmit_legacy.platforms.saga_submitter import SagaSubmit
 from autosubmit_api.autosubmit_legacy.platforms.paramiko_submitter import ParamikoSubmitter
 from autosubmit_api.autosubmit_legacy.job.job_exceptions import WrongTemplateException
 from autosubmit_api.autosubmit_legacy.job.job_packager import JobPackager
-from autosubmit_api.autosubmit_legacy.platforms.paramiko_platform import ParamikoTimeout
 """
 Main module for autosubmit. Only contains an interface class to all functionality implemented on autosubmit
 """

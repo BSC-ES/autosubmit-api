@@ -2,18 +2,13 @@
 
 import os
 from fnmatch import fnmatch
-from .joblist_helper import JobListHelper
-from ..experiment.pkl_organizer import PklOrganizer
-from ..experiment.configuration_facade import AutosubmitConfigurationFacade
-from .job_factory import StandardJob, Job
-from ...database.db_structure import get_structure
-from ...autosubmit_legacy.job.job_common import Status
-from bscearth.utils.date import date2str, parse_date
-from typing import Dict, List, Set, Tuple
+from autosubmit_api.components.jobs.joblist_helper import JobListHelper
+from autosubmit_api.components.jobs.job_factory import StandardJob, Job
+from autosubmit_api.database.db_structure import get_structure
+from autosubmit_api.common.utils import Status
+from bscearth.utils.date import date2str
+from typing import Dict, List, Set
 # Builder Imports
-from ...config.config_common import AutosubmitConfigResolver
-from ...config.basicConfig import APIBasicConfig
-import json
 import logging
 
 

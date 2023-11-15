@@ -1,12 +1,12 @@
 #!/usr/bin/env python
-from ...autosubmit_legacy.job.job_list import JobList
-from ...database.db_jobdata import JobDataStructure, JobRow
-from ..experiment.configuration_facade import AutosubmitConfigurationFacade
-from ..experiment.pkl_organizer import PklOrganizer
-from ...config.basicConfig import APIBasicConfig
-from ...autosubmit_legacy.job.job_utils import datechunk_to_year
+from autosubmit_api.autosubmit_legacy.job.job_list import JobList
+from autosubmit_api.common.utils import datechunk_to_year
+from autosubmit_api.database.db_jobdata import JobDataStructure, JobRow
+from autosubmit_api.components.experiment.configuration_facade import AutosubmitConfigurationFacade
+from autosubmit_api.components.experiment.pkl_organizer import PklOrganizer
+from autosubmit_api.config.basicConfig import APIBasicConfig
 from typing import List, Dict
-from .job_factory import Job
+from autosubmit_api.components.jobs.job_factory import Job
 
 class JobListHelper(object):
   """ Loads time (queuing runnning) and packages. Applies the fix for queue time of jobs in wrappers. """

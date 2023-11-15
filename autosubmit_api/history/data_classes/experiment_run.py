@@ -17,11 +17,10 @@
 # along with Autosubmit.  If not, see <http://www.gnu.org/licenses/>.
 
 import json
-from ...common import utils as common_utils
-from ...performance import utils as PUtils
-from ..utils import get_current_datetime_if_none
-from .job_data import JobData
-from ...components.jobs.job_factory import SimJob
+from autosubmit_api.common import utils as common_utils
+from autosubmit_api.history.utils import get_current_datetime_if_none
+from autosubmit_api.history.data_classes.job_data import JobData
+from autosubmit_api.components.jobs.job_factory import SimJob
 from typing import List, Dict, Tuple
 
 
@@ -93,7 +92,7 @@ class ExperimentRun(object):
             outlier_free_list = common_utils.get_jobs_with_no_outliers(performance_jobs)
         # print("{} -> {}".format(self.run_id, len(outlier_free_list)))
         if len(outlier_free_list) > 0:
-            years_per_sim = PUtils.datechunk_to_year(self.chunk_unit, self.chunk_size)
+            years_per_sim = common_utils.datechunk_to_year(self.chunk_unit, self.chunk_size)
             # print(self.run_id)
             # print(years_per_sim)
             seconds_per_day = 86400
@@ -118,7 +117,7 @@ class ExperimentRun(object):
                 job_sim_list = [job for job in job_sim_list if job.job_name in valid_names]
 
             if job_sim_list and len(job_sim_list) > 0 and job_post_list and len(job_post_list) > 0:
-                years_per_sim = PUtils.datechunk_to_year(self.chunk_unit, self.chunk_size)
+                years_per_sim = common_utils.datechunk_to_year(self.chunk_unit, self.chunk_size)
                 seconds_per_day = 86400
                 number_SIM = len(job_sim_list)
                 number_POST = len(job_post_list)
