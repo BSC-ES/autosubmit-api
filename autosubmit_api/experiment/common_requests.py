@@ -34,12 +34,11 @@ from autosubmit_api.config.confConfigStrategy import confConfigStrategy
 from autosubmit_api.database import db_common as db_common
 from autosubmit_api.experiment import common_db_requests as DbRequests
 from autosubmit_api.database import db_jobdata as JobData
-from autosubmit_api.autosubmit_legacy.job import job_utils as LegacyJobUtils
+from autosubmit_api.autosubmit_legacy.job.job_utils import SimpleJob
 from autosubmit_api.common import utils as common_utils
 from autosubmit_api.components.jobs import utils as JUtils
 
 from autosubmit_api.autosubmit_legacy.job.job_list import JobList
-from autosubmit_api.autosubmit_legacy.job.job import Job
 from autosubmit_api.logger import logger
 
 from autosubmit_api.performance.utils import calculate_SYPD_perjob
@@ -336,7 +335,7 @@ def get_experiment_summary(expid, log):
                 jobs_in_pkl[job_name] = (
                     status_code, status_color, status_text, out, err, priority, id_number)
                 fakeAllJobs.append(
-                    LegacyJobUtils.SimpleJob(job_name, tmp_path, status_code))
+                    SimpleJob(job_name, tmp_path, status_code))
             job_running_to_seconds, job_running_to_runtext, _ = JobList.get_job_times_collection(
                 APIBasicConfig, fakeAllJobs, expid, job_to_package, package_to_jobs, timeseconds=True)
 
@@ -1067,7 +1066,7 @@ def verify_last_completed(seconds=300):
         tmp_path = os.path.join(
             APIBasicConfig.LOCAL_ROOT_DIR, job_name[:4], APIBasicConfig.LOCAL_TMP_DIR)
         detail_id, submit, start, finish, status = detail
-        submit_time, start_time, finish_time, status_text_res = JobList._job_running_check(
+        submit_time, start_time, finish_time, status_text_res = JUtils.get_job_total_stats(
             common_utils.Status.COMPLETED, job_name, tmp_path)
         submit_ts = int(time.mktime(submit_time.timetuple())) if len(
             str(submit_time)) > 0 else 0
@@ -1201,7 +1200,7 @@ def get_quick_view(expid):
                                       'out': "/" + out,
                                       'err': "/" + err,
                                       })
-                    tree_job = {'title': Job.getTitle(job_name, status_color, status_text) + wrapper_tag,
+                    tree_job = {'title': JUtils.generate_job_html_title(job_name, status_color, status_text) + wrapper_tag,
                                 'refKey': job_name,
                                 'data': 'Empty',
                                 'children': [],

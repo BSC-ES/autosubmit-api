@@ -27,10 +27,10 @@ import portalocker
 from datetime import datetime, timedelta
 from json import loads
 from time import mktime
+from autosubmit_api.components.jobs.utils import generate_job_html_title, job_times_to_text
 # from networkx import DiGraph
 from autosubmit_api.config.basicConfig import APIBasicConfig
 from autosubmit_api.monitor.monitor import Monitor
-from autosubmit_api.autosubmit_legacy.job.job_utils import job_times_to_text, getTitle
 from autosubmit_api.performance.utils import calculate_ASYPD_perjob
 from autosubmit_api.components.jobs.job_factory import SimJob
 from autosubmit_api.common.utils import get_jobs_with_no_outliers, Status, datechunk_to_year
@@ -220,7 +220,7 @@ class JobData(object):
 
     @property
     def title(self):
-        return getTitle(self.job_name, Monitor.color_status(Status.STRING_TO_CODE[self.status]), self.status)
+        return generate_job_html_title(self.job_name, Monitor.color_status(Status.STRING_TO_CODE[self.status]), self.status)
 
     def calculateSYPD(self, years_per_sim):
         """

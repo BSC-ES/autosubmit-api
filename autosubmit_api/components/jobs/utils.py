@@ -1,7 +1,10 @@
 #!/usr/bin/env python
 
+import datetime
+import os
 from autosubmit_api.common.utils import Status
-from typing import List, Dict
+from typing import List, Dict, Tuple
+from bscearth.utils.date import parse_date
 
 wrapped_title_format = " <span class='badge' style='background-color:#94b8b8'>Wrapped {0} </span>"
 source_tag = " <span class='badge' style='background-color:#80d4ff'>SOURCE</span>"
@@ -137,3 +140,104 @@ def convert_int_default(value, default_value=None):
     return int(value)
   except:
     return default_value
+  
+def get_job_total_stats(status_code: int, name: str, tmp_path: str) -> Tuple[datetime.datetime, datetime.datetime, datetime.datetime, str]:
+    """
+    Receives job data and returns the data from its TOTAL_STATS file in an ordered way.
+    Function migrated from the legacy JobList class method _job_running_check()
+    :param status_code: Status of job
+    :param name: Name of job
+    :param tmp_path: Path to the tmp folder of the experiment
+    :return: submit time, start time, end time, status
+    :rtype: 4-tuple in datetime format
+    """
+    values = list()
+    status_from_job = str(Status.VALUE_TO_KEY[status_code])
+    now = datetime.datetime.now()
+    submit_time = now
+    start_time = now
+    finish_time = now
+    current_status = status_from_job
+    path = os.path.join(tmp_path, name + '_TOTAL_STATS')
+    if os.path.exists(path):
+        request = 'tail -1 ' + path
+        last_line = os.popen(request).readline()
+        # print(last_line)
+
+        values = last_line.split()
+        # print(last_line)
+        try:
+            if status_code in [Status.RUNNING]:
+                submit_time = parse_date(
+                    values[0]) if len(values) > 0 else now
+                start_time = parse_date(values[1]) if len(
+                    values) > 1 else submit_time
+                finish_time = now
+            elif status_code in [Status.QUEUING, Status.SUBMITTED, Status.HELD]:
+                submit_time = parse_date(
+                    values[0]) if len(values) > 0 else now
+                start_time = parse_date(
+                    values[1]) if len(values) > 1 and values[0] != values[1] else now
+            elif status_code in [Status.COMPLETED]:
+                submit_time = parse_date(
+                    values[0]) if len(values) > 0 else now
+                start_time = parse_date(
+                    values[1]) if len(values) > 1 else submit_time
+                if len(values) > 3:
+                    finish_time = parse_date(values[len(values) - 2])
+                else:
+                    finish_time = submit_time
+            else:
+                submit_time = parse_date(
+                    values[0]) if len(values) > 0 else now
+                start_time = parse_date(values[1]) if len(
+                    values) > 1 else submit_time
+                finish_time = parse_date(values[2]) if len(
+                    values) > 2 else start_time
+        except Exception as exp:
+            start_time = now
+            finish_time = now
+            # NA if reading fails
+            current_status = "NA"
+
+    current_status = values[3] if (len(values) > 3 and len(
+        values[3]) != 14) else status_from_job
+    # TOTAL_STATS last line has more than 3 items, status is different from pkl, and status is not "NA"
+    if len(values) > 3 and current_status != status_from_job and current_status != "NA":
+        current_status = "SUSPICIOUS"
+    return (submit_time, start_time, finish_time, current_status)
+
+
+def job_times_to_text(minutes_queue: int, minutes_running: int, status: str):
+    """
+    Return text correpsonding to queue and running time. 
+    Function migrated from the legacy job.utils
+    :param minutes_queue: seconds queuing (actually using seconds)
+    :type minutes_queue: int
+    :param minutes_running: seconds running (actually using seconds)
+    :type minutes_running: int
+    :param status: current status
+    :type status: string
+    :return: string
+    """
+    if status in ["COMPLETED", "FAILED", "RUNNING"]:
+        running_text = "( " + str(datetime.timedelta(seconds=minutes_queue)) + \
+            " ) + " + \
+            str(datetime.timedelta(seconds=minutes_running))
+    elif status in ["SUBMITTED", "QUEUING", "HELD", "HOLD"]:
+        running_text = "( " + \
+            str(datetime.timedelta(seconds=minutes_queue)) + " )"
+    elif status in ["NA"]:
+        running_text = " <small><i><b>NA</b></i></small>"
+    else:
+        running_text = ""
+
+    if status == "SUSPICIOUS":
+        running_text = running_text + \
+            " <small><i><b>SUSPICIOUS</b></i></small>"
+    return running_text
+
+
+def generate_job_html_title(job_name, status_color, status_text):
+    # type: (str, str, str) -> str
+    return job_name + " <span class='badge' style='background-color: " + status_color + "'>#" + status_text + "</span>"
