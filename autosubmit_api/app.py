@@ -26,7 +26,7 @@ from flask_cors import CORS, cross_origin
 from flask import Flask, request, session, redirect
 from autosubmit_api import __version__ as APIVersion
 from autosubmit_api.auth import ProtectionLevels, with_auth_token
-
+from autosubmit_api.bgtasks.scheduler import create_bind_scheduler
 from autosubmit_api.database.extended_db import ExtendedDB
 from autosubmit_api.database.db_common import get_current_running_exp, update_experiment_description_owner
 from autosubmit_api.experiment import common_requests as CommonRequests
@@ -39,8 +39,6 @@ from autosubmit_api.builders.joblist_helper_builder import JobListHelperBuilder,
 from multiprocessing import Manager, Lock
 import jwt
 import sys
-from flask_apscheduler import APScheduler
-from autosubmit_api.workers import populate_details_db, populate_queue_run_times, populate_running_experiments, populate_graph, verify_complete
 from autosubmit_api.config import JWT_SECRET, JWT_ALGORITHM, JWT_EXP_DELTA_SECONDS, PROTECTION_LEVEL, RUN_BACKGROUND_TASKS_ON_START, CAS_LOGIN_URL, CAS_VERIFY_URL
 
 
@@ -90,43 +88,7 @@ def create_app():
     ext_db.prepare_db()
 
     # Background Scheduler
-    scheduler = APScheduler()
-    scheduler.init_app(app)
-    scheduler.start()
-
-    @scheduler.task('interval', id='populate_details_db', hours=4)
-    @with_log_run_times(app.logger, "WRKPOPDET")
-    def worker_populate_details_db():
-        populate_details_db.main()
-
-    @scheduler.task('interval', id='populate_queue_run_times', minutes=3)
-    @with_log_run_times(app.logger, "WRKPOPQUE")
-    def worker_populate_queue_run_times():
-        populate_queue_run_times.main()
-
-    @scheduler.task('interval', id='populate_running_experiments', minutes=5)
-    @with_log_run_times(app.logger, "WRKPOPREX")
-    def worker_populate_running_experiments():
-        populate_running_experiments.main()
-
-    @scheduler.task('interval', id='verify_complete', minutes=10)
-    @with_log_run_times(app.logger, "WRKVRFCMPT")
-    def worker_verify_complete():
-        verify_complete.main()
-
-    @scheduler.task('interval', id='populate_graph', hours=24)
-    @with_log_run_times(app.logger, "WRKPOPGRPH")
-    def worker_populate_graph():
-        populate_graph.main()
-
-    # Run workers on create_app
-    if RUN_BACKGROUND_TASKS_ON_START:
-        app.logger.info('Starting populate workers on init...')
-        worker_populate_details_db()
-        worker_populate_queue_run_times()
-        worker_populate_running_experiments()
-        worker_verify_complete()
-        worker_populate_graph()
+    create_bind_scheduler(app)
 
     ################################ ROUTES ################################
 
@@ -493,6 +455,3 @@ def create_app():
         return result
 
     return app
-
-
-app = create_app()
