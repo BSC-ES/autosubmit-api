@@ -1,13 +1,17 @@
 from functools import wraps
 import logging
 import time
+import traceback
 
 from flask import request
 
 
-def with_log_run_times(_logger: logging.Logger, _tag: str = ""):
+def with_log_run_times(_logger: logging.Logger, _tag: str = "", catch_exc:bool=False):
     """
     Function decorator to log runtimes of the endpoints
+    :param _logger: logger to use
+    :param _tag: tag for the logs
+    :param catch_exc: if True, will catch any Exception and not raise it
     """
     def decorator(func):
         @wraps(func)
@@ -19,7 +23,15 @@ def with_log_run_times(_logger: logging.Logger, _tag: str = ""):
             except:
                 pass
             _logger.info('{}|RECEIVED|{}'.format(_tag, path))
-            response = func(*args, **kwargs)
+            response = None
+            try:
+                response = func(*args, **kwargs)
+            except Exception as exc:
+                _logger.error('{}|ERROR|{}|Exception msg: {}'.format(_tag, path, exc))
+                if catch_exc:
+                    _logger.error(traceback.format_exc())
+                else:
+                    raise exc
             _logger.info('{}|RTIME|{}|{:.3f}'.format(
                 _tag, path, (time.time() - start_time)))
             return response

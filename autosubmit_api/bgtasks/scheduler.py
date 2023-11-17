@@ -19,7 +19,7 @@ def create_bind_scheduler(app):
     scheduler.start()
 
     for task in REGISTERED_TASKS:
-        scheduler.add_job(task.id, with_log_run_times(logger, task.id)(task.run), **task.trigger_options)
+        scheduler.add_job(task.id, with_log_run_times(logger, task.id, catch_exc=True)(task.run), **task.trigger_options)
 
     logger.info("Background tasks: " + str([str(task) for task in scheduler.get_jobs()]))
 
