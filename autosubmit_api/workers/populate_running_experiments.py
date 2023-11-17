@@ -1,12 +1,11 @@
 # import autosubmitAPIwu.experiment.common_requests as ExperimentUtils
-from ..history.experiment_status_manager import ExperimentStatusManager
-
+from autosubmit_api.bgtasks.bgtask import PopulateRunningExperiments
 
 def main():
     """
     Updates STATUS of experiments.
     """
-    ExperimentStatusManager().update_running_experiments()
+    PopulateRunningExperiments.run()
 
 
 if __name__ == "__main__":

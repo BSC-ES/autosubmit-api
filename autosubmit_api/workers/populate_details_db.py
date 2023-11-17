@@ -1,10 +1,7 @@
-from .populate_details.populate import DetailsProcessor
-from ..config.basicConfig import APIBasicConfig
-
-APIBasicConfig.read()
+from autosubmit_api.bgtasks.bgtask import PopulateDetailsDB
 
 def main():
-  DetailsProcessor(APIBasicConfig).process()
+  PopulateDetailsDB.run()
 
 if __name__ == "__main__":
   main()

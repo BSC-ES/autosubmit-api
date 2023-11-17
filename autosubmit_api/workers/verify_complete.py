@@ -1,9 +1,9 @@
 #!/usr/bin/env python
-from ..experiment import common_requests as ExperimentUtils
+from autosubmit_api.bgtasks.bgtask import VerifyComplete
 
 
 def main():
-    ExperimentUtils.verify_last_completed(1800)
+    VerifyComplete.run()
 
 
 if __name__ == "__main__":

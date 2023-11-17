@@ -1,11 +1,11 @@
-from ..workers.business import process_graph_drawings as ProcessGraph
+from autosubmit_api.bgtasks.bgtask import PopulateGraph
 
 
 def main():
     """
     Process coordinates of nodes in a graph drawing and saves them.
     """
-    ProcessGraph.process_active_graphs()
+    PopulateGraph.run()
 
 
 if __name__ == "__main__":

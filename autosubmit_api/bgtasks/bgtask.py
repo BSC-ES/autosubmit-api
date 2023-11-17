@@ -1,5 +1,4 @@
 from abc import ABC, abstractmethod
-from time import sleep
 from autosubmit_api.experiment import common_requests
 from autosubmit_api.history.experiment_status_manager import ExperimentStatusManager
 from autosubmit_api.config.basicConfig import APIBasicConfig
@@ -33,6 +32,7 @@ class PopulateDetailsDB(BackgroundTask):
 
     @staticmethod
     def run():
+        APIBasicConfig.read()
         return DetailsProcessor(APIBasicConfig).process()
     
 

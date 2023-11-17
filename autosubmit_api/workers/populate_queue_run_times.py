@@ -1,9 +1,9 @@
-from autosubmit_api.workers.business import populate_times as PopulateTimes
+from autosubmit_api.bgtasks.bgtask import PopulateQueueRuntimes
 
 
 def main():
     """ Process and updates queuing and running times. """
-    PopulateTimes.process_completed_times()
+    PopulateQueueRuntimes.run()
 
 
 if __name__ == "__main__":
