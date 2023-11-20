@@ -1,11 +1,14 @@
 from os import path
 from setuptools import setup
 from setuptools import find_packages
-
+from pathlib import Path
 import autosubmit_api
 
 current_path = path.abspath(path.dirname(__file__))
 
+# read the contents of your README file
+this_directory = Path(__file__).parent
+long_description = (this_directory / "README.md").read_text()
 
 def get_version():
     return autosubmit_api.__version__
@@ -18,6 +21,8 @@ setup(
     name='autosubmit_api',
     version=get_version(),
     description='An extension to the Autosubmit package that serves its information as an API',
+    long_description=long_description,
+    long_description_content_type='text/markdown',
     url='https://earth.bsc.es/gitlab/es/autosubmit_api',
     author=get_authors(),
     author_email='support-autosubmit@bsc.es',
