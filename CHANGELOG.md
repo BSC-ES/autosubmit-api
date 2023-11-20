@@ -1,5 +1,9 @@
 # CHANGELOG
 
+### Pre-release v4.0.0b3 - Release date: TBD
+
+*
+
 ### Pre-release v4.0.0b2 - Release date: 2023-11-20
 
 * Fix bug where API allowed clients aren't read from the autosubmitrc.
