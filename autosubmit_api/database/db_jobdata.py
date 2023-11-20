@@ -18,32 +18,26 @@
 # along with Autosubmit.  If not, see <http://www.gnu.org/licenses/>.
 
 import os
-import sys
-import string
 import time
-import pickle
 import textwrap
 import traceback
 import pysqlite3 as sqlite3
-import copy
 import collections
 import portalocker
-import numpy as np
 from datetime import datetime, timedelta
-from json import dumps, loads
+from json import loads
 from time import mktime
+from autosubmit_api.components.jobs.utils import generate_job_html_title, job_times_to_text
 # from networkx import DiGraph
-from ..config.basicConfig import APIBasicConfig
-from ..monitor.monitor import Monitor
-from ..autosubmit_legacy.job.job_utils import job_times_to_text, getTitle
-from ..performance.utils import calculate_ASYPD_perjob, calculate_SYPD_perjob
-from ..components.jobs.job_factory import SimJob
-from ..common.utils import get_jobs_with_no_outliers, Status, bcolors, datechunk_to_year
+from autosubmit_api.config.basicConfig import APIBasicConfig
+from autosubmit_api.monitor.monitor import Monitor
+from autosubmit_api.performance.utils import calculate_ASYPD_perjob
+from autosubmit_api.components.jobs.job_factory import SimJob
+from autosubmit_api.common.utils import get_jobs_with_no_outliers, Status, datechunk_to_year
 # from autosubmitAPIwu.job.job_list
 # import autosubmitAPIwu.experiment.common_db_requests as DbRequests
-from bscearth.utils.date import date2str, parse_date, previous_day, chunk_end_date, chunk_start_date, Log, subs_dates
+from bscearth.utils.date import Log
 from typing import List
-import locale
 
 
 # Version 15 includes out err MaxRSS AveRSS and rowstatus
@@ -226,7 +220,7 @@ class JobData(object):
 
     @property
     def title(self):
-        return getTitle(self.job_name, Monitor.color_status(Status.STRING_TO_CODE[self.status]), self.status)
+        return generate_job_html_title(self.job_name, Monitor.color_status(Status.STRING_TO_CODE[self.status]), self.status)
 
     def calculateSYPD(self, years_per_sim):
         """

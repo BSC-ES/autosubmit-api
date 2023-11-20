@@ -28,18 +28,18 @@ import datetime
 import json
 import multiprocessing
 import subprocess
-import logging
 
 from collections import deque
+from autosubmit_api.config.confConfigStrategy import confConfigStrategy
 from autosubmit_api.database import db_common as db_common
 from autosubmit_api.experiment import common_db_requests as DbRequests
 from autosubmit_api.database import db_jobdata as JobData
-from autosubmit_api.autosubmit_legacy.job import job_utils as LegacyJobUtils
+from autosubmit_api.autosubmit_legacy.job.job_utils import SimpleJob
 from autosubmit_api.common import utils as common_utils
 from autosubmit_api.components.jobs import utils as JUtils
 
 from autosubmit_api.autosubmit_legacy.job.job_list import JobList
-from autosubmit_api.autosubmit_legacy.job.job import Job
+from autosubmit_api.logger import logger
 
 from autosubmit_api.performance.utils import calculate_SYPD_perjob
 from autosubmit_api.monitor.monitor import Monitor
@@ -57,7 +57,7 @@ from autosubmit_api.builders.experiment_history_builder import ExperimentHistory
 from autosubmit_api.builders.configuration_facade_builder import ConfigurationFacadeDirector, AutosubmitConfigurationFacadeBuilder
 from autosubmit_api.builders.joblist_loader_builder import JobListLoaderBuilder, JobListLoaderDirector
 from autosubmit_api.components.jobs.job_support import JobSupport
-from typing import Dict, Any
+from typing import Dict, Any, Optional
 import locale
 from autosubmitconfigparser.config.configcommon import AutosubmitConfig as Autosubmit4Config
 
@@ -66,8 +66,6 @@ APIBasicConfig.read()
 SAFE_TIME_LIMIT = 300
 SAFE_TIME_LIMIT_STATUS = 180
 
-# global object for logging
-logger = logging.getLogger('gunicorn.error')
 
 def get_experiment_stats(expid, filter_period, filter_type):
     # type: (str, int, str) -> Dict[str, Any]
@@ -337,7 +335,7 @@ def get_experiment_summary(expid, log):
                 jobs_in_pkl[job_name] = (
                     status_code, status_color, status_text, out, err, priority, id_number)
                 fakeAllJobs.append(
-                    LegacyJobUtils.SimpleJob(job_name, tmp_path, status_code))
+                    SimpleJob(job_name, tmp_path, status_code))
             job_running_to_seconds, job_running_to_runtext, _ = JobList.get_job_times_collection(
                 APIBasicConfig, fakeAllJobs, expid, job_to_package, package_to_jobs, timeseconds=True)
 
@@ -1068,7 +1066,7 @@ def verify_last_completed(seconds=300):
         tmp_path = os.path.join(
             APIBasicConfig.LOCAL_ROOT_DIR, job_name[:4], APIBasicConfig.LOCAL_TMP_DIR)
         detail_id, submit, start, finish, status = detail
-        submit_time, start_time, finish_time, status_text_res = JobList._job_running_check(
+        submit_time, start_time, finish_time, status_text_res = JUtils.get_job_total_stats(
             common_utils.Status.COMPLETED, job_name, tmp_path)
         submit_ts = int(time.mktime(submit_time.timetuple())) if len(
             str(submit_time)) > 0 else 0
@@ -1108,20 +1106,19 @@ def get_experiment_counters(expid):
     experiment_counters = {name: 0 for name in common_utils.Status.STRING_TO_CODE}
     try:
         if os.path.exists(path_pkl):
-            fd = open(path_pkl, 'r')
+            fd = open(path_pkl, 'rb')
             for item in pickle.load(fd, encoding="latin1"):
                 status_code = int(item[2])
                 total += 1
                 experiment_counters[common_utils.Status.VALUE_TO_KEY.get(status_code, "UNKNOWN")] = experiment_counters.get(
                     common_utils.Status.VALUE_TO_KEY.get(status_code, "UNKNOWN"), 0) + 1
-
         else:
             raise Exception("PKL file not found.")
-    except Exception as exp:
+    except Exception as exc:
         error = True
-        error_message = str(exp)
-        # print(traceback.format_exc())
-        # print(exp)
+        error_message = str(exc)
+        logger.error(traceback.format_exc())
+        logger.error(exc)
     return {"error": error, "error_message": error_message, "expid": expid, "total": total, "counters": experiment_counters}
 
 
@@ -1152,7 +1149,7 @@ def get_quick_view(expid):
             now_ = time.time()
             job_to_package, package_to_jobs, package_to_package_id, package_to_symbol = JobList.retrieve_packages(
                 APIBasicConfig, expid)
-            print(("Retrieving packages {0} seconds.".format(
+            logger.debug(("Retrieving packages {0} seconds.".format(
                 str(time.time() - now_))))
 
             try:
@@ -1203,16 +1200,16 @@ def get_quick_view(expid):
                                       'out': "/" + out,
                                       'err': "/" + err,
                                       })
+                    tree_job = {'title': JUtils.generate_job_html_title(job_name, status_color, status_text) + wrapper_tag,
+                                'refKey': job_name,
+                                'data': 'Empty',
+                                'children': [],
+                                'status': status_text,
+                                }
                     if status_code in [common_utils.Status.COMPLETED, common_utils.Status.WAITING, common_utils.Status.READY]:
-                        quick_tree_view.append({'title': Job.getTitle(job_name, status_color, status_text) + wrapper_tag,
-                                                'refKey': job_name,
-                                                'data': 'Empty',
-                                                'children': []})
+                        quick_tree_view.append(tree_job)
                     else:
-                        quick_tree_view.appendleft({'title': Job.getTitle(job_name, status_color, status_text) + wrapper_tag,
-                                                    'refKey': job_name,
-                                                    'data': 'Empty',
-                                                    'children': []})
+                        quick_tree_view.appendleft(tree_job)
                 # return {}
                 # quick_tree_view = list(quick_tree_view)
             else:
@@ -1220,9 +1217,8 @@ def get_quick_view(expid):
     except Exception as exp:
         error_message = "Exception: {0}".format(str(exp))
         error = True
-        print(error_message)
-        print((traceback.format_exc()))
-        pass
+        logger.error(error_message)
+        logger.error(traceback.format_exc())
 
     return {"error": error, "error_message": error_message, "view_data": view_data, "tree_view": list(quick_tree_view), "total": total_count, "completed": completed_count, "failed": failed_count, "running": running_count, "queuing": queuing_count}
 
@@ -1245,13 +1241,11 @@ def get_job_history(expid, job_name):
     return {"error": error, "error_message": error_message, "history": result, "path_to_logs": path_to_job_logs}
 
 
-def get_current_configuration_by_expid(expid, valid_user, log):
+def get_current_configuration_by_expid(expid: str, user_id: Optional[str]):
     """
     Gets the current configuration by expid. The procedure queries the historical database and the filesystem.
     :param expid: Experiment Identifier
-    :type expdi: str
     :return: configuration content formatted as a JSON object
-    :rtype: Dictionary
     """
     error = False
     warning = False
@@ -1259,20 +1253,42 @@ def get_current_configuration_by_expid(expid, valid_user, log):
     warning_message = ""
     currentRunConfig = {}
     currentFileSystemConfig = {}
+    ALLOWED_CONFIG_KEYS = ['conf', 'exp', 'jobs', 'platforms', 'proj']
 
-    def removeParameterDuplication(currentDict, keyToRemove, exceptionsKeys=[]):
+    def removeParameterDuplication(currentDict: dict, keyToRemove: str, exceptionsKeys=[]):
         if "exp" in currentDict.keys() and isinstance(currentDict["exp"], dict):
             try:
                 for k, nested_d in list(currentDict["exp"].items()):
                     if k not in exceptionsKeys and isinstance(nested_d, dict):
                         nested_d.pop(keyToRemove, None)
-            except Exception as exp:
-                log.info("Error while trying to eliminate duplicated key from config.")
-                pass
+            except Exception as exc:
+                logger.error(f"Error while trying to eliminate duplicated key from config: {exc}")
+                logger.error(traceback.format_exc())
+
+    def sideDifferences(base_dict: dict, comparing_dict: dict):
+        diffs = set()
+        for key, value in base_dict.items():
+            comp_value = comparing_dict.get(key)
+            if isinstance(value, dict) and isinstance(comp_value, dict):
+                aux_diffs = sideDifferences(value, comp_value)
+                if len(aux_diffs) > 0:
+                    diffs.add(key)
+                for d in aux_diffs:
+                    diffs.add(f"{key}.{d}")
+            else:
+                if isinstance(value, str) and isinstance(comp_value, int) or isinstance(value, int) and isinstance(comp_value, str):
+                    if str(value) != str(comp_value):
+                        diffs.add(key)
+                elif value != comp_value:
+                    diffs.add(key)
+        return list(diffs)
 
     try:
-        allowedConfigKeys = ['conf', 'exp', 'jobs', 'platforms', 'proj']
         APIBasicConfig.read()
+        autosubmitConfig = AutosubmitConfigResolver(
+            expid, APIBasicConfig, ConfigParserFactory())
+        is_as3 = isinstance(autosubmitConfig._configWrapper, confConfigStrategy)
+        
         historicalDatabase = JobData.JobDataStructure(expid, APIBasicConfig)
         experimentRun = historicalDatabase.get_max_id_experiment_run()
         currentMetadata = json.loads(
@@ -1283,42 +1299,60 @@ def get_current_configuration_by_expid(expid, valid_user, log):
         # TODO: Define which keys should be included in the answer
         if currentMetadata:
             currentRunConfig = {
-                key: currentMetadata[key] for key in currentMetadata if key in allowedConfigKeys}
-        currentRunConfig["contains_nones"] = True if not currentMetadata or None in list(currentMetadata.values(
-        )) else False
+                key: currentMetadata[key] 
+                for key in currentMetadata 
+                if not is_as3 or (key.lower() in ALLOWED_CONFIG_KEYS)
+            }
+        currentRunConfig["contains_nones"] = (
+            not currentMetadata or 
+            None in list(currentMetadata.values())
+        )
 
         APIBasicConfig.read()
-        autosubmitConfig = AutosubmitConfigResolver(
-            expid, APIBasicConfig, ConfigParserFactory())
         try:
             autosubmitConfig.reload()
             currentFileSystemConfigContent = autosubmitConfig.get_full_config_as_dict()
             if currentFileSystemConfigContent:
                 currentFileSystemConfig = {
-                    key: currentFileSystemConfigContent[key] for key in currentFileSystemConfigContent if key in allowedConfigKeys}
-            currentFileSystemConfig["contains_nones"] = True if not currentFileSystemConfigContent or None in list(currentFileSystemConfigContent.values(
-            )) else False
+                    key: currentFileSystemConfigContent[key] 
+                    for key in currentFileSystemConfigContent 
+                    if not is_as3 or (key.lower() in ALLOWED_CONFIG_KEYS)
+                }
+            currentFileSystemConfig["contains_nones"] = ( 
+                not currentFileSystemConfigContent or 
+                ( None in list(currentFileSystemConfigContent.values()) ) 
+            )
 
-        except Exception as exp:
+        except Exception as exc:
             warning = True
             warning_message = "The filesystem system configuration can't be retrieved because '{}'".format(
-                exp)
-            logger.info(traceback.format_exc())
+                exc)
+            logger.warning(warning_message)
+            logger.warning(traceback.format_exc())
             currentFileSystemConfig["contains_nones"] = True
-            log.info(warning_message)
-            pass
 
         removeParameterDuplication(currentRunConfig, "EXPID", ["experiment"])
         removeParameterDuplication(currentFileSystemConfig, "EXPID", ["experiment"])
 
-    except Exception as exp:
+    except Exception as exc:
         error = True
-        error_message = str(exp)
+        error_message = str(exc)
         currentRunConfig["contains_nones"] = True
         currentFileSystemConfig["contains_nones"] = True
-        log.info("Exception while generating the configuration: " + error_message)
-        pass
-    return {"error": error, "error_message": error_message, "warning": warning, "warning_message": warning_message, "configuration_current_run": currentRunConfig, "configuration_filesystem": currentFileSystemConfig, "are_equal": currentRunConfig == currentFileSystemConfig}
+        logger.error("Exception while generating the configuration: " + error_message)
+        logger.error(traceback.format_exc())
+
+    diffs = sideDifferences(currentFileSystemConfig, currentRunConfig)
+    return {
+        "error": error, 
+        "error_message": error_message, 
+        "warning": warning, 
+        "warning_message": warning_message, 
+        "configuration_current_run": currentRunConfig, 
+        "configuration_filesystem": currentFileSystemConfig, 
+        "are_equal": len(diffs) == 0,
+        "differences": diffs
+    }
 
 
 def get_experiment_runs(expid):

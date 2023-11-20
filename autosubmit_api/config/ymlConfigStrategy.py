@@ -17,28 +17,12 @@
 # You should have received a copy of the GNU General Public License
 # along with Autosubmit.  If not, see <http://www.gnu.org/licenses/>.
 
-try:
-    # noinspection PyCompatibility
-    from configparser import SafeConfigParser
-    from autosubmitconfigparser.config.configcommon import AutosubmitConfig as Autosubmit4Config
-except ImportError:
-    # noinspection PyCompatibility
-    from configparser import SafeConfigParser
+from typing import Any
+from autosubmitconfigparser.config.configcommon import AutosubmitConfig as Autosubmit4Config
+from autosubmit_api.logger import logger
+from autosubmit_api.config.basicConfig import APIBasicConfig
+from autosubmit_api.config.IConfigStrategy import IConfigStrategy
 
-import os
-import re
-import subprocess
-import json
-import logging
-
-from pyparsing import nestedExpr
-from bscearth.utils.config_parser import ConfigParserFactory, ConfigParser
-from bscearth.utils.date import parse_date
-from bscearth.utils.log import Log
-from ..config.basicConfig import APIBasicConfig
-from ..config.IConfigStrategy import IConfigStrategy
-
-logger = logging.getLogger('gunicorn.error')
 
 class ymlConfigStrategy(IConfigStrategy):
     """
@@ -48,12 +32,12 @@ class ymlConfigStrategy(IConfigStrategy):
     :type expid: str
     """
     def __init__(self, expid, basic_config = APIBasicConfig, parser_factory = None, extension=".yml"):
-        logger.info("Creating AS4 Parser !!!!!")
+        # logger.info("Creating AS4 Parser !!!!!")
         self._conf_parser = Autosubmit4Config(expid, basic_config)
         self._conf_parser.reload(True)
 
     def jobs_parser(self):
-        logger.info("Not yet implemented")
+        logger.error("Not yet implemented")
         pass
 
     #TODO: at the end of the implementation, check which methods can be moved to the top class for avoid code duplication
@@ -65,7 +49,7 @@ class ymlConfigStrategy(IConfigStrategy):
         return self._exp_parser_file
 
     def platforms_parser(self):
-        logger.info("OBSOLOTED - Not yet implemented")
+        logger.error("OBSOLOTED - Not yet implemented")
         pass
 
     @property
@@ -92,35 +76,32 @@ class ymlConfigStrategy(IConfigStrategy):
         """
         return self._jobs_parser_file
 
-    def get_full_config_as_dict(self):
+    def get_full_config_as_dict(self) -> dict:
         """
         Returns full configuration as json object
         """
-        _conf = _exp = _platforms = _jobs = _proj = None
-        result = {}
+        return self._conf_parser.experiment_data
+    
+    def _get_platform_config(self, platform: str) -> dict:
+        return self._conf_parser.experiment_data.get("PLATFORMS", {}).get(platform, {})
 
-        def get_data( parser):
-            """
-            dictionary comprehension to get data from parser
-            """
-            logger.info(parser)
-            #res = {sec: {option: parser[sec][option] for option in parser[sec].keys()} for sec in [
-            #    section for section in parser.keys()]}
-            #return res
-            return parser
+    def _get_from_job_or_platform(self, section: str, config_key: str, default_value = None) -> Any:
+        """
+        Helper function to get a value from a JOB section of its related PLATFORM
+        """
+        # Check in job
+        logger.debug("Checking " + config_key + " in JOBS")
+        value = self._conf_parser.jobs_data.get(section, {}).get(config_key)
+        if value:
+            return value
 
-            # res = {sec: {option: parser.get(sec, option) for option in parser.options(sec)} for sec in [
-            #    section for section in parser.sections()]}
-
-
-        # print(self._conf_parser)
-        #result["conf"] = get_data( self._conf_parser.experiment_data["CONF"]) if self._conf_parser else None
-        #result["exp"] = get_data( self._conf_parser.experiment_data["CONF"]) if self._exp_parser else None
-        result["platforms"] = self._conf_parser.platforms_data if self._conf_parser.platforms_data else None
-        #result["jobs"] = get_data( self._conf_parser.experiment_data["JOBS"]) if self._conf_parser.experiment_data["JOBS"] else None
-        #result["proj"] = get_data( self._conf_parser.experiment_data["CONF"] ) if self._proj_parser else None
-        return result
-
+        # Check in job platform
+        logger.debug("Checking " + config_key + " in PLATFORMS " + self.get_job_platform(section))
+        value = self._get_platform_config(self.get_job_platform(section)).get(config_key)
+        if value:
+            return value
+        else:
+            return default_value
 
     def get_full_config_as_json(self):
         return self._conf_parser.get_full_config_as_json()
@@ -128,52 +109,65 @@ class ymlConfigStrategy(IConfigStrategy):
     def get_project_dir(self):
         return self._conf_parser.get_project_dir()
 
-    def get_queue(self, section):
+    def get_queue(self, section: str) -> str:
         return self._conf_parser.jobs_data[section].get('QUEUE', "")
 
-    def get_job_platform(self, section):
-        pass
+    def get_job_platform(self, section: str) -> str:
+        # return the JOBS.<section>.PLATFORM or DEFAULT.HPCARCH
+        return self._conf_parser.jobs_data.get(section, {}).get("PLATFORM", self.get_platform())
 
-    def get_platform_queue(self, platform):
-        logger.info("get_platform_queue")
-        return self._conf_parser.platforms_data[platform]["QUEUE"]
+    def get_platform_queue(self, platform: str) -> str:
+        logger.debug("get_platform_queue")
+        return self._get_platform_config(platform).get("QUEUE")
 
-    def get_platform_serial_queue(self, platform):
-        logger.info("get_platform_serial_queue")
-        return self._conf_parser.platforms_data[platform]["SERIAL_QUEUE"]
+    def get_platform_serial_queue(self, platform: str) -> str:
+        logger.debug("get_platform_serial_queue")
+        return self._get_platform_config(platform).get("SERIAL_QUEUE")
 
-    def get_platform_project(self, platform):
-        logger.info("get_platform_project")
-        return self._conf_parser.platforms_data[platform]["PROJECT"]
+    def get_platform_project(self, platform: str) -> str:
+        logger.debug("get_platform_project")
+        return self._get_platform_config(platform).get("PROJECT")
 
-    def get_platform_wallclock(self, platform):
-        logger.info("get_platform_wallclock")
-        return self._conf_parser.platforms_data[platform].get('MAX_WALLCLOCK', "")
+    def get_platform_wallclock(self, platform: str) -> str:
+        logger.debug("get_platform_wallclock")
+        return self._get_platform_config(platform).get('MAX_WALLCLOCK', "")
 
-    def get_wallclock(self, section):
+    def get_wallclock(self, section: str) -> str:
         return self._conf_parser.jobs_data[section].get('WALLCLOCK', '')
 
+    def get_synchronize(self, section: str) -> str:
+        # return self._conf_parser.get_synchronize(section)
+        return self._get_from_job_or_platform(section, "SYNCHRONIZE", "")
 
-    def get_synchronize(self, section):
-        return self._conf_parser.get_synchronize(section)
+    def get_processors(self, section: str) -> str:
+        # return self._conf_parser.get_processors()
+        return self._get_from_job_or_platform(section, "PROCESSORS", "1")
 
-    def get_processors(self, section):
-        return self._conf_parser.jobs_data.get(section, {}).get("PROCESSORS", "1")
+    def get_threads(self, section: str) -> str:
+        # return self._conf_parser.get_threads(section)
+        return self._get_from_job_or_platform(section, "THREADS", "1")
 
-    def get_threads(self, section):
-        return self._conf_parser.get_threads(section)
+    def get_tasks(self, section: str) -> str:
+        # return self._conf_parser.get_tasks(section)
+        return self._get_from_job_or_platform(section, "TASKS", "")
+    
+    def get_nodes(self, section: str) -> str:
+        return self._get_from_job_or_platform(section, "NODES", "")
 
-    def get_tasks(self, section):
-        return self._conf_parser.get_tasks(section)
+    def get_processors_per_node(self, section: str) -> str:
+        return self._get_from_job_or_platform(section, "PROCESSORS_PER_NODE", "")
 
-    def get_scratch_free_space(self, section):
-        return self._conf_parser.get_scratch_free_space(section)
+    def get_scratch_free_space(self, section: str) -> str:
+        # return self._conf_parser.get_scratch_free_space(section)
+        return self._get_from_job_or_platform(section, "SCRATCH_FREE_SPACE", "")
 
-    def get_memory(self, section):
-        return self._conf_parser.get_memory(section)
+    def get_memory(self, section: str) -> str:
+        # return self._conf_parser.get_memory(section)
+        return self._get_from_job_or_platform(section, "MEMORY", "")
 
-    def get_memory_per_task(self, section):
-        return self._conf_parser.get_memory_per_task(section)
+    def get_memory_per_task(self, section: str) -> str:
+        # return self._conf_parser.get_memory_per_task(section)
+        return self._get_from_job_or_platform(section, "MEMORY_PER_TASK", "")
 
     def get_migrate_user_to(self, section):
         """
@@ -324,8 +318,12 @@ class ymlConfigStrategy(IConfigStrategy):
     def get_chunk_list(self):
         return self._conf_parser.get_chunk_list()
 
-    def get_platform(self):
-        return self._conf_parser.get_platform()
+    def get_platform(self) -> str:
+        try:
+            # return DEFAULT.HPCARCH
+            return self._conf_parser.get_platform()
+        except:
+            return ""
 
     def set_platform(self, hpc):
         self._conf_parser.set_platform(hpc)
@@ -400,14 +398,12 @@ class ymlConfigStrategy(IConfigStrategy):
         return self._conf_parser.get_storage_type()
 
     @staticmethod
-    def is_valid_mail_address(mail_address):
-        return self._conf_parser.is_valid_mail_address(mail_address)
+    def is_valid_mail_address(mail_address: str) -> bool:
+        return Autosubmit4Config.is_valid_mail_address(mail_address)
 
-    @classmethod
     def is_valid_communications_library(self):
         return self._conf_parser.is_valid_communications_library()
 
-    @classmethod
     def is_valid_storage_type(self):
         return self._conf_parser.is_valid_storage_type()
 

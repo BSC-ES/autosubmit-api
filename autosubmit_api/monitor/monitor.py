@@ -16,7 +16,6 @@
 
 # You should have received a copy of the GNU General Public License
 # along with Autosubmit.  If not, see <http://www.gnu.org/licenses/>.
-import datetime
 import os
 
 import time
@@ -30,9 +29,9 @@ import copy
 
 import subprocess
 
-from ..autosubmit_legacy.job.job_common import Status
-from ..config.basicConfig import APIBasicConfig
-from ..config.config_common import AutosubmitConfigResolver
+from autosubmit_api.common.utils import Status
+from autosubmit_api.config.basicConfig import APIBasicConfig
+from autosubmit_api.config.config_common import AutosubmitConfigResolver
 from bscearth.utils.log import Log
 from bscearth.utils.config_parser import ConfigParserFactory
 

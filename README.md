@@ -5,7 +5,7 @@
 1. [Overview](#overview)
 2. [Autosubmit Big Picture](#autosubmit-big-picture)
 3. [General Knowledge Requirements](#general-knowledge-requirements)
-4. [Deployment](#deployment)
+4. [Installation](#Installation)
 
 ## Overview
 
@@ -40,6 +40,19 @@ In this image you can see the flow of information in the **Autosubmit environmen
 * Gunicorn
 * Unit testing
 
+## Installation
 
+Autosubmit API can be easily installed via pip
 
+```sh
+pip install autosubmit-api # >=4.0 (recommended)
 
+# Check installation
+autosubmit_api start -h
+```
+
+Start the server:
+
+```sh
+autosubmit_api start
+```

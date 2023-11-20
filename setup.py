@@ -1,22 +1,30 @@
 from os import path
 from setuptools import setup
 from setuptools import find_packages
-
+from pathlib import Path
 import autosubmit_api
 
 current_path = path.abspath(path.dirname(__file__))
 
+# read the contents of your README file
+this_directory = Path(__file__).parent
+long_description = (this_directory / "README.md").read_text()
 
 def get_version():
     return autosubmit_api.__version__
+
+def get_authors():
+    return autosubmit_api.__author__
 
 
 setup(
     name='autosubmit_api',
     version=get_version(),
     description='An extension to the Autosubmit package that serves its information as an API',
+    long_description=long_description,
+    long_description_content_type='text/markdown',
     url='https://earth.bsc.es/gitlab/es/autosubmit_api',
-    author='Luiggi Tenorio, Cristian Gutiérrez, Julian Berlin, Wilmer Uruchi',
+    author=get_authors(),
     author_email='support-autosubmit@bsc.es',
     license='GNU GPL',
     packages=find_packages(),
@@ -24,12 +32,11 @@ setup(
     python_requires='>=3.7',
     install_requires=[
         'Flask~=2.2.5',
-        'jwt~=1.3.1',
+        'pyjwt~=2.8.0',
         'requests~=2.28.1',
         'flask_cors~=3.0.10',
         'bscearth.utils~=0.5.2',
         'pysqlite-binary',
-        'numpy~=1.21.6',
         'pydotplus~=2.0.2',
         'portalocker~=2.6.0',
         'networkx~=2.6.3',

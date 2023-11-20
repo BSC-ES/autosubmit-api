@@ -195,7 +195,7 @@ def _create_exp_times(row_content):
     """
     try:
         conn = create_connection(DB_FILE_AS_TIMES)
-        sql = ''' INSERT INTO experiment_times(exp_id, name, created, modified, total_jobs, completed_jobs) VALUES(?,?,?,?,?,?) '''
+        sql = ''' INSERT OR REPLACE INTO experiment_times(exp_id, name, created, modified, total_jobs, completed_jobs) VALUES(?,?,?,?,?,?) '''
         # print(row_content)
         cur = conn.cursor()
         cur.execute(sql, row_content)

@@ -1,11 +1,10 @@
 #!/usr/bin/env python
 import collections
-import time
-from ...common import utils as util
-from . import utils as JUtils
-from ...common.utils import Status
-from ...monitor.monitor import Monitor
-from ...history.data_classes.job_data import JobData
+from autosubmit_api.common import utils as util
+from autosubmit_api.components.jobs import utils as JUtils
+from autosubmit_api.common.utils import Status
+from autosubmit_api.monitor.monitor import Monitor
+from autosubmit_api.history.data_classes.job_data import JobData
 from typing import Tuple, List, Dict, Set
 # from autosubmitAPIwu.database.db_jobdata import JobData
 from abc import ABCMeta, abstractmethod

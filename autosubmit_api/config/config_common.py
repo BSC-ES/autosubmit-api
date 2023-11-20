@@ -48,10 +48,10 @@ class AutosubmitConfigResolver(object):
         # check which type of config files (AS3 or AS4)
         expdef_conf_file = os.path.join(self.basic_config.LOCAL_ROOT_DIR, expid, "conf", "expdef_" + expid + ".conf")
         if os.path.exists(expdef_conf_file):
-            logger.info("Setting AS3 Config strategy - conf")
+            # logger.info("Setting AS3 Config strategy - conf")
             self._configWrapper = confConfigStrategy(expid, basic_config, parser_factory, ".conf")
         else:
-            logger.info("Setting AS4 Config strategy - yml")
+            # logger.info("Setting AS4 Config strategy - yml")
             self._configWrapper = ymlConfigStrategy(expid, basic_config, parser_factory, ".yml")
 
 

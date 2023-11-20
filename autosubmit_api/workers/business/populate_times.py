@@ -6,9 +6,9 @@ import subprocess
 import traceback
 import socket
 import pickle
+from autosubmit_api.components.jobs.utils import get_job_total_stats
 from autosubmit_api.config.config_common import AutosubmitConfigResolver
 from autosubmit_api.experiment import common_db_requests as DbRequests
-from autosubmit_api.autosubmit_legacy.job.job_list import JobList
 from autosubmit_api.config.basicConfig import APIBasicConfig
 from autosubmit_api.common.utils import Status
 from bscearth.utils.config_parser import ConfigParserFactory
@@ -68,13 +68,13 @@ def process_completed_times(time_condition=60):
             if current_table.get(exp_str, None) is None:
                 # Pkl exists but is not registered in the table
                 # INSERT
-                print("Pkl of " + exp_str + " exists but not in the table: INSERT")
+                # print("Pkl of " + exp_str + " exists but not in the table: INSERT")
                 current_id = _process_pkl_insert_times(exp_str, full_path, timest, APIBasicConfig, DEBUG)
                 _process_details_insert_or_update(exp_str, experiments_table_exp_id, experiments_table_exp_id in details_table_ids_set)
             else:
                 exp_id, created, modified, total_jobs, completed_jobs = current_table[exp_str]
                 time_diff = int(timest - modified)
-                print("Pkl of " + exp_str + " exists")
+                # print("Pkl of " + exp_str + " exists")
                 current_id = _process_pkl_insert_times(exp_str, full_path, timest, APIBasicConfig, DEBUG)
                 if time_diff > time_condition:
                     # Update table
@@ -228,7 +228,7 @@ def _process_pkl_update_times(expid, path_pkl, timest_pkl, BasicConfig, exp_id, 
                     submit_time, start_time, finish_time, status_text_in_table, detail_id = experiment_times_detail[job_name]
                     if (status_text_in_table != status_text):
                         # If status has changed
-                        submit_time, start_time, finish_time, _ = JobList._job_running_check(status_code, job_name, tmp_path)
+                        submit_time, start_time, finish_time, _ = get_job_total_stats(status_code, job_name, tmp_path)
                         submit_ts = int(time.mktime(submit_time.timetuple())) if len(str(submit_time)) > 0 else 0
                         start_ts = int(time.mktime(start_time.timetuple())) if len(str(start_time)) > 0 else 0
                         finish_ts = int(time.mktime(finish_time.timetuple())) if len(str(finish_time)) > 0 else 0
@@ -244,7 +244,7 @@ def _process_pkl_update_times(expid, path_pkl, timest_pkl, BasicConfig, exp_id, 
                 else:
                     # Insert only if it is not WAITING nor READY
                     if (status_code not in [Status.WAITING, Status.READY]):
-                        submit_time, start_time, finish_time, status_text = JobList._job_running_check(status_code, job_name, tmp_path)
+                        submit_time, start_time, finish_time, status_text = get_job_total_stats(status_code, job_name, tmp_path)
                         must_update_header = True
                         to_create.append((exp_id,
                                           job_name,
@@ -336,7 +336,7 @@ def _process_pkl_insert_times(expid, path_pkl, timest_pkl, BasicConfig, debug=Fa
                 # Inserting detail. Do not insert WAITING or READY jobs.
                 status_code = job_times[job_name]
                 if (status_code not in [Status.WAITING, Status.READY]):
-                    submit_time, start_time, finish_time, status_text = JobList._job_running_check(status_code, job_name, tmp_path)
+                    submit_time, start_time, finish_time, status_text = get_job_total_stats(status_code, job_name, tmp_path)
                     to_insert_many.append((current_id,
                                            job_name,
                                            int(timest_pkl),
