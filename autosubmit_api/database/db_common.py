@@ -364,6 +364,7 @@ def search_experiment_by_id(searchString, typeExp=None, onlyActive=None, owner=N
             version = autosubmit_config_facade.get_autosubmit_version()
             wrapper = autosubmit_config_facade.get_wrapper_type()
             last_modified_pkl_datetime = autosubmit_config_facade.get_pkl_last_modified_time_as_datetime()
+            hpc = autosubmit_config_facade.get_main_platform()
         except Exception as exp:
             last_modified_pkl_datetime = None
             pass
@@ -391,12 +392,12 @@ def search_experiment_by_id(searchString, typeExp=None, onlyActive=None, owner=N
         if onlyActive == "active":
             if status == "RUNNING":
                 result.append({'id': row[0], 'name': row[1], 'user': row[2], 'description': row[7],
-                               'hpc': row[6], 'status': status, 'completed': completed, 'total': total,
+                               'hpc': hpc, 'status': status, 'completed': completed, 'total': total,
                                'version': version, 'wrapper': wrapper, "submitted": submitted, "queuing": queuing,
                                "running": running, "failed": failed, "suspended": suspended, "modified": last_modified_pkl_datetime})
         else:
             result.append({'id': row[0], 'name': row[1], 'user': row[2], 'description': row[7],
-                           'hpc': row[6], 'status': status, 'completed': completed, 'total': total,
+                           'hpc': hpc, 'status': status, 'completed': completed, 'total': total,
                            'version': version, 'wrapper': wrapper, "submitted": submitted, "queuing": queuing,
                            "running": running, "failed": failed, "suspended": suspended, "modified": last_modified_pkl_datetime})
     return {'experiment': result}
@@ -451,6 +452,7 @@ def get_current_running_exp():
                 version = autosubmit_config_facade.get_autosubmit_version()
                 wrapper = autosubmit_config_facade.get_wrapper_type()
                 last_modified_pkl_datetime = autosubmit_config_facade.get_pkl_last_modified_time_as_datetime()
+                hpc = autosubmit_config_facade.get_main_platform()
             except Exception as exp:
                 last_modified_pkl_datetime = None
                 pass
@@ -479,7 +481,7 @@ def get_current_running_exp():
                 print(("Exception on get_current_running_exp : {}".format(exp)))
                 pass
             result.append({'id': row[0], 'name': row[1], 'user': user, 'description': row[7],
-                           'hpc': row[6], 'status': status, 'completed': completed, 'total': total,
+                           'hpc': hpc, 'status': status, 'completed': completed, 'total': total,
                            'version': version, 'wrapper': wrapper, "submitted": submitted, "queuing": queuing,
                            "running": running, "failed": failed, "suspended": suspended, "modified": last_modified_pkl_datetime})
     return {'experiment': result}
