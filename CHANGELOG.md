@@ -2,7 +2,8 @@
 
 ### Pre-release v4.0.0b3 - Release date: TBD
 
-*
+* Fix HPC value in the running endpoint 
+* **Major change:** Updated all route names. Versioning path prefix is included. Also, new version added to better follow the RESTful convention
 
 ### Pre-release v4.0.0b2 - Release date: 2023-11-20
 
