@@ -1,4 +1,5 @@
 from functools import wraps
+from http import HTTPStatus
 from flask import request
 import jwt
 from autosubmit_api.logger import logger
@@ -25,7 +26,9 @@ def _parse_protection_level_env(_var):
     return ProtectionLevels.ALL
 
 
-def with_auth_token(threshold=ProtectionLevels.ALL, response_on_fail=True, raise_on_fail=False):
+def with_auth_token(
+    threshold=ProtectionLevels.ALL, response_on_fail=True, raise_on_fail=False
+):
     """
     Decorator that validates the Authorization token in a request.
 
@@ -36,13 +39,13 @@ def with_auth_token(threshold=ProtectionLevels.ALL, response_on_fail=True, raise
     :param raise_on_fail: if `True` will raise an exception on fail
     :raises AppAuthError: if raise_on_fail=True and decoding fails
     """
+
     def decorator(func):
         @wraps(func)
         def inner_wrapper(*args, **kwargs):
             try:
                 current_token = request.headers.get("Authorization")
-                jwt_token = jwt.decode(
-                    current_token, JWT_SECRET, JWT_ALGORITHM)
+                jwt_token = jwt.decode(current_token, JWT_SECRET, JWT_ALGORITHM)
             except Exception as exc:
                 error_msg = "Unauthorized"
                 if isinstance(exc, jwt.ExpiredSignatureError):
@@ -52,7 +55,10 @@ def with_auth_token(threshold=ProtectionLevels.ALL, response_on_fail=True, raise
                     if raise_on_fail:
                         raise AppAuthError(error_msg)
                     if response_on_fail:
-                        return {"error": True, "message": error_msg}, 401
+                        return {
+                            "error": True,
+                            "error_message": error_msg,
+                        }, HTTPStatus.UNAUTHORIZED
                 jwt_token = {"user_id": None}
 
             user_id = jwt_token.get("user_id", None)
@@ -62,4 +68,5 @@ def with_auth_token(threshold=ProtectionLevels.ALL, response_on_fail=True, raise
             return func(*args, **kwargs)
 
         return inner_wrapper
+
     return decorator
