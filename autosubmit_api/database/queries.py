@@ -1,16 +1,12 @@
 from sqlalchemy import select, or_
 from autosubmit_api.database import tables
-from autosubmit_api.database.common import create_main_db_conn
-from autosubmit_api.logger import logger
 
 
-def query_listexp_extended(
+def generate_query_listexp_extended(
     query: str = None,
     only_active: bool = False,
     owner: str = None,
     exp_type: str = None,
-    limit: int = None,
-    offset: int = None,
 ):
     """
     Query listexp without accessing the view with status and total/completed jobs.
@@ -71,16 +67,4 @@ def query_listexp_extended(
 
     # logger.debug(str(filter_stmts))
     statement = statement.where(*filter_stmts)
-
-    # Add limit and offset
-    statement = statement.offset(offset)
-    if limit > 0:
-        statement = statement.limit(limit)
-
-    # Execute query
-    conn = create_main_db_conn()
-    logger.debug(statement.compile(conn))
-    query_result = conn.execute(statement).all()
-    conn.close()
-
-    return query_result
+    return statement

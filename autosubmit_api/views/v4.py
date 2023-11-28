@@ -1,3 +1,5 @@
+from http import HTTPStatus
+import math
 import os
 import traceback
 from typing import Optional
@@ -11,8 +13,12 @@ from autosubmit_api.builders.experiment_history_builder import (
     ExperimentHistoryDirector,
 )
 from autosubmit_api.config.basicConfig import APIBasicConfig
+from autosubmit_api.database.common import (
+    create_main_db_conn,
+    execute_with_limit_offset,
+)
 from autosubmit_api.database.models import Experiment
-from autosubmit_api.database.queries import query_listexp_extended
+from autosubmit_api.database.queries import generate_query_listexp_extended
 from autosubmit_api.logger import logger, with_log_run_times
 
 
@@ -32,18 +38,37 @@ def search_experiments_view(user_id: Optional[str] = None):
     owner = request.args.get("owner")
     exp_type = request.args.get("exp_type")
 
-    limit = int(request.args.get("limit", PAGINATION_LIMIT_DEFAULT))
-    offset = int(request.args.get("offset", 0))
+    try:
+        page = max(request.args.get("page", default=1, type=int), 1)
+        page_size = request.args.get(
+            "page_size", default=PAGINATION_LIMIT_DEFAULT, type=int
+        )
+        if page_size > 0:
+            offset = (page - 1) * page_size
+        else:
+            page_size = None
+            offset = None
+    except:
+        return {
+            "error": True,
+            "error_message": "Bad Request: invalid params",
+        }, HTTPStatus.BAD_REQUEST
 
     # Query
-    query_result = query_listexp_extended(
+    conn = create_main_db_conn()
+    statement = generate_query_listexp_extended(
         query=query,
         only_active=only_active,
         owner=owner,
         exp_type=exp_type,
-        limit=limit,
+    )
+    query_result, total_rows = execute_with_limit_offset(
+        statement=statement,
+        conn=conn,
+        limit=page_size,
         offset=offset,
     )
+    conn.close()
 
     # Process experiments
     experiments = []
@@ -141,9 +166,13 @@ def search_experiments_view(user_id: Optional[str] = None):
 
     # Response
     response = {
-        "limit": limit,
-        "offset": offset,
         "experiments": experiments,
-        "count": len(experiments),
+        "pagination": {
+            "page": page,
+            "page_size": page_size,
+            "total_pages": math.ceil(total_rows / page_size) if page_size else 1,
+            "page_items": len(experiments),
+            "total_items": total_rows,
+        },
     }
     return response
