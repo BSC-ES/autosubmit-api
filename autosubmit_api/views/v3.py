@@ -151,7 +151,7 @@ def search_owner(owner, exptype=None, onlyactive=None, user_id: Optional[str] = 
     Same output format as search_expid
     """
     result = search_experiment_by_id(
-        searchString=None, owner=owner, typeExp=exptype, onlyActive=onlyactive
+        query=None, owner=owner, exp_type=exptype, only_active=onlyactive
     )
     return result
 
@@ -160,7 +160,7 @@ def search_owner(owner, exptype=None, onlyactive=None, user_id: Optional[str] = 
 @with_auth_token()
 def search_expid(expid, exptype=None, onlyactive=None, user_id: Optional[str] = None):
     result = search_experiment_by_id(
-        expid, owner=None, typeExp=exptype, onlyActive=onlyactive
+        query=expid, owner=None, exp_type=exptype, only_active=onlyactive
     )
     return result
 
@@ -196,9 +196,9 @@ def get_if_running(expid, user_id: Optional[str] = None):
     return result
 
 
-@with_log_run_times(logger, "LOGRUN")
+@with_log_run_times(logger, "RUNDET")
 @with_auth_token()
-def get_log_running(expid, user_id: Optional[str] = None):
+def get_running_detail(expid, user_id: Optional[str] = None):
     result = CommonRequests.get_current_status_log_plus(expid)
     return result
 
@@ -297,7 +297,7 @@ def get_exp_performance(expid, user_id: Optional[str] = None):
 
 @with_log_run_times(logger, "GRAPH")
 @with_auth_token()
-def get_list_format(
+def get_graph_format(
     expid, layout="standard", grouped="none", user_id: Optional[str] = None
 ):
     user = request.args.get("loggedUser", default="null", type=str)
@@ -352,7 +352,7 @@ def get_quick_view_data(expid, user_id=None):
 
 @with_log_run_times(logger, "LOG")
 @with_auth_token()
-def get_experiment_running(expid, user_id: Optional[str] = None):
+def get_experiment_run_log(expid, user_id: Optional[str] = None):
     """
     Finds log and gets the last 150 lines
     """

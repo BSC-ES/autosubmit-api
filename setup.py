@@ -10,58 +10,60 @@ current_path = path.abspath(path.dirname(__file__))
 this_directory = Path(__file__).parent
 long_description = (this_directory / "README.md").read_text()
 
+
 def get_version():
     return autosubmit_api.__version__
+
 
 def get_authors():
     return autosubmit_api.__author__
 
 
 setup(
-    name='autosubmit_api',
+    name="autosubmit_api",
     version=get_version(),
-    description='An extension to the Autosubmit package that serves its information as an API',
+    description="An extension to the Autosubmit package that serves its information as an API",
     long_description=long_description,
-    long_description_content_type='text/markdown',
-    url='https://earth.bsc.es/gitlab/es/autosubmit_api',
+    long_description_content_type="text/markdown",
+    url="https://earth.bsc.es/gitlab/es/autosubmit_api",
     author=get_authors(),
-    author_email='support-autosubmit@bsc.es',
-    license='GNU GPL',
+    author_email="support-autosubmit@bsc.es",
+    license="GNU GPL",
     packages=find_packages(),
-    keywords=['autosubmit', 'API'],
-    python_requires='>=3.7',
+    keywords=["autosubmit", "API"],
+    python_requires=">=3.7",
     install_requires=[
-        'Flask~=2.2.5',
-        'pyjwt~=2.8.0',
-        'requests~=2.28.1',
-        'flask_cors~=3.0.10',
-        'bscearth.utils~=0.5.2',
-        'pysqlite-binary',
-        'pydotplus~=2.0.2',
-        'portalocker~=2.6.0',
-        'networkx~=2.6.3',
-        'scipy~=1.7.3',
-        'paramiko~=2.12.0',
-        'python-dotenv',
-        'autosubmitconfigparser~=1.0.48',
-        'autosubmit>=3.13',
-        'Flask-APScheduler',
-        'gunicorn'
+        "Flask~=2.2.5",
+        "pyjwt~=2.8.0",
+        "requests~=2.28.1",
+        "flask_cors~=3.0.10",
+        "bscearth.utils~=0.5.2",
+        "pysqlite-binary",
+        "pydotplus~=2.0.2",
+        "portalocker~=2.6.0",
+        "networkx~=2.6.3",
+        "scipy~=1.7.3",
+        "paramiko~=2.12.0",
+        "python-dotenv",
+        "autosubmitconfigparser~=1.0.48",
+        "autosubmit>=3.13",
+        "Flask-APScheduler",
+        "gunicorn",
+        "pydantic~=2.5.2",
+        "SQLAlchemy~=2.0.23",
     ],
     include_package_data=True,
-    package_data={'autosubmit-api': ['README',
-                                     'VERSION',
-                                     'LICENSE']},
+    package_data={"autosubmit-api": ["README", "VERSION", "LICENSE"]},
     classifiers=[
-        'Development Status :: 4 - Beta',
-        'Intended Audience :: Developers',
-        'License :: OSI Approved :: GNU General Public License v3 (GPLv3)',
-        'Operating System :: POSIX :: Linux',
-        'Programming Language :: Python :: 3.7',
+        "Development Status :: 4 - Beta",
+        "Intended Audience :: Developers",
+        "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
+        "Operating System :: POSIX :: Linux",
+        "Programming Language :: Python :: 3.7",
     ],
     entry_points={
-        'console_scripts': [
-            'autosubmit_api = autosubmit_api.cli:main',
+        "console_scripts": [
+            "autosubmit_api = autosubmit_api.cli:main",
         ]
-    }
+    },
 )

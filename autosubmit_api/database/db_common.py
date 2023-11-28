@@ -21,18 +21,16 @@
 Module containing functions to manage autosubmit's database.
 """
 import os
-from pysqlite3 import dbapi2
+from sqlite3 import Connection, Cursor
 import pysqlite3 as sqlite3
 
 from bscearth.utils.log import Log
-from ..config.basicConfig import APIBasicConfig
-from ..config.config_common import AutosubmitConfigResolver
-from ..builders.experiment_history_builder import ExperimentHistoryDirector, ExperimentHistoryBuilder
-from ..builders.configuration_facade_builder import ConfigurationFacadeDirector, AutosubmitConfigurationFacadeBuilder
-from bscearth.utils.config_parser import ConfigParserFactory
-from ..experiment import common_db_requests as DbRequests
-from datetime import datetime
-from typing import Dict, Any
+from autosubmit_api.config.basicConfig import APIBasicConfig
+from autosubmit_api.builders.experiment_history_builder import ExperimentHistoryDirector, ExperimentHistoryBuilder
+from autosubmit_api.builders.configuration_facade_builder import ConfigurationFacadeDirector, AutosubmitConfigurationFacadeBuilder
+from autosubmit_api.database.utils import get_headers_sqlite, map_row_result_to_dict_sqlite
+from autosubmit_api.experiment import common_db_requests as DbRequests
+from typing import Dict, Any, Tuple
 
 CURRENT_DATABASE_VERSION = 1
 
@@ -78,7 +76,7 @@ def check_db():
     return True
 
 
-def open_conn(check_version=True):
+def open_conn(check_version=True) -> Tuple[Connection, Cursor]:
     """
     Opens a connection to database
 
@@ -294,7 +292,7 @@ def last_name_used(test=False, operational=False):
         return row[0]
 
 
-def search_experiment_by_id(searchString, typeExp=None, onlyActive=None, owner=None):
+def search_experiment_by_id(query, exp_type=None, only_active=None, owner=None):
     """
     Search experiments using provided data. Main query searches in the view listexp of ec_earth.db.
 
@@ -321,13 +319,13 @@ def search_experiment_by_id(searchString, typeExp=None, onlyActive=None, owner=N
         query = "SELECT id,name,user,created,model,branch,hpc,description FROM listexp WHERE user='{0}'".format(owner)
         # print(query)
     else:
-        query = "SELECT id,name,user,created,model,branch,hpc,description FROM listexp WHERE (name LIKE '" + searchString + \
-            "%' OR description LIKE '%" + searchString + \
-                "%' OR user LIKE '%" + searchString + "%')"
-    if typeExp and len(typeExp) > 0:
-        if typeExp == "test":
+        query = "SELECT id,name,user,created,model,branch,hpc,description FROM listexp WHERE (name LIKE '" + query + \
+            "%' OR description LIKE '%" + query + \
+                "%' OR user LIKE '%" + query + "%')"
+    if exp_type and len(exp_type) > 0:
+        if exp_type == "test":
             query += " AND name LIKE 't%'"
-        elif typeExp == "experiment":
+        elif exp_type == "experiment":
             query += " AND name NOT LIKE 't%'"
         else:
             # Indistinct
@@ -389,7 +387,7 @@ def search_experiment_by_id(searchString, typeExp=None, onlyActive=None, owner=N
             print(("Exception on search_experiment_by_id : {}".format(exp)))
             pass
 
-        if onlyActive == "active":
+        if only_active == "active":
             if status == "RUNNING":
                 result.append({'id': row[0], 'name': row[1], 'user': row[2], 'description': row[7],
                                'hpc': hpc, 'status': status, 'completed': completed, 'total': total,
@@ -495,10 +493,10 @@ def get_experiment_by_id(expid):
     (conn, cursor) = open_conn()
     query = "SELECT id, name, description, autosubmit_version FROM experiment WHERE name ='" + expid + "'"
     cursor.execute(query)
-    headers = list(map(lambda attr : attr[0], cursor.description))
+    headers = get_headers_sqlite(cursor)
     row = cursor.fetchone()
     if row is not None:
-        obj = {header:row[i] for i, header in enumerate(headers)} 
+        obj = map_row_result_to_dict_sqlite(row, headers)
         result['id'] = obj["id"]
         result['name'] = obj["name"]
         result['description'] = obj["description"]

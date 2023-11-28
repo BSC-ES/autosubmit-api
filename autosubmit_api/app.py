@@ -1,3 +1,4 @@
+from http import HTTPStatus
 import os
 import sys
 import requests
@@ -5,6 +6,7 @@ from flask_cors import CORS
 from flask import Flask
 from autosubmit_api.bgtasks.scheduler import create_bind_scheduler
 from autosubmit_api.blueprints.v3 import create_v3_blueprint
+from autosubmit_api.blueprints.v4 import create_v4_blueprint
 from autosubmit_api.database.extended_db import ExtendedDB
 from autosubmit_api.experiment import common_requests as CommonRequests
 from autosubmit_api.logger import get_app_logger
@@ -16,7 +18,7 @@ from autosubmit_api.config import (
     CAS_LOGIN_URL,
     CAS_VERIFY_URL,
 )
-from autosubmit_api.views import home
+from autosubmit_api.views import home, not_implemented_handler
 
 
 def create_app():
@@ -77,5 +79,10 @@ def create_app():
 
     v3_blueprint = create_v3_blueprint()
     app.register_blueprint(v3_blueprint, url_prefix="/v3")
+
+    v4_blueprint = create_v4_blueprint()
+    app.register_blueprint(v4_blueprint, url_prefix="/v4")
+
+    app.register_error_handler(HTTPStatus.NOT_IMPLEMENTED, not_implemented_handler)
 
     return app

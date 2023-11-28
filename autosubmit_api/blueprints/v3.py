@@ -27,7 +27,9 @@ def create_v3_blueprint():
     blueprint.route("/running/", methods=["GET"])(v3_views.search_running)
     blueprint.route("/runs/<string:expid>", methods=["GET"])(v3_views.get_runs)
     blueprint.route("/ifrun/<string:expid>", methods=["GET"])(v3_views.get_if_running)
-    blueprint.route("/logrun/<string:expid>", methods=["GET"])(v3_views.get_log_running)
+    blueprint.route("/logrun/<string:expid>", methods=["GET"])(
+        v3_views.get_running_detail
+    )
     blueprint.route("/summary/<string:expid>", methods=["GET"])(v3_views.get_expsummary)
     blueprint.route("/shutdown/<string:route>")(v3_views.shutdown)
     blueprint.route("/performance/<string:expid>", methods=["GET"])(
@@ -35,13 +37,13 @@ def create_v3_blueprint():
     )
     blueprint.route(
         "/graph/<string:expid>/<string:layout>/<string:grouped>", methods=["GET"]
-    )(v3_views.get_list_format)
+    )(v3_views.get_graph_format)
     blueprint.route("/tree/<string:expid>", methods=["GET"])(v3_views.get_exp_tree)
     blueprint.route("/quick/<string:expid>", methods=["GET"])(
         v3_views.get_quick_view_data
     )
     blueprint.route("/exprun/<string:expid>", methods=["GET"])(
-        v3_views.get_experiment_running
+        v3_views.get_experiment_run_log
     )
     blueprint.route("/joblog/<string:logfile>", methods=["GET"])(
         v3_views.get_job_log_from_path
