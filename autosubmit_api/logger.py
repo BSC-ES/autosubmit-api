@@ -19,7 +19,7 @@ def with_log_run_times(_logger: logging.Logger, _tag: str = "", catch_exc:bool=F
             start_time = time.time()
             path = ""
             try:
-                path = request.path
+                path = request.full_path
             except:
                 pass
             _logger.info('{}|RECEIVED|{}'.format(_tag, path))

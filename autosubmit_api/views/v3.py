@@ -374,14 +374,14 @@ def get_job_log_from_path(logfile, user_id: Optional[str] = None):
 
 @with_log_run_times(logger, "GPKL")
 @with_auth_token()
-def get_experiment_pklinfo(expid, timeStamp, user_id: Optional[str] = None):
+def get_experiment_pklinfo(expid, timeStamp=None, user_id: Optional[str] = None):
     result = CommonRequests.get_experiment_pkl(expid)
     return result
 
 
 @with_log_run_times(logger, "TPKL")
 @with_auth_token()
-def get_experiment_tree_pklinfo(expid, timeStamp, user_id: Optional[str] = None):
+def get_experiment_tree_pklinfo(expid, timeStamp=None, user_id: Optional[str] = None):
     result = CommonRequests.get_experiment_tree_pkl(expid)
     return result
 

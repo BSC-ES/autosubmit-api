@@ -4,6 +4,7 @@ import os
 import traceback
 from typing import Optional
 from flask import request
+from autosubmit_api.auth import with_auth_token
 from autosubmit_api.builders.configuration_facade_builder import (
     AutosubmitConfigurationFacadeBuilder,
     ConfigurationFacadeDirector,
@@ -17,15 +18,34 @@ from autosubmit_api.database.common import (
     create_main_db_conn,
     execute_with_limit_offset,
 )
+from autosubmit_api.database.db_common import update_experiment_description_owner
 from autosubmit_api.database.models import Experiment
 from autosubmit_api.database.queries import generate_query_listexp_extended
 from autosubmit_api.logger import logger, with_log_run_times
+from autosubmit_api.views import v3
 
 
 PAGINATION_LIMIT_DEFAULT = 12
 
 
+@with_log_run_times(logger, "EXPDESC")
+@with_auth_token()
+def experiment_description_view(expid, user_id: Optional[str] = None):
+    """
+    Replace the description of the experiment.
+    """
+    new_description = None
+    if request.is_json:
+        body_data = request.json
+        new_description = body_data.get("description", None)
+    return (
+        update_experiment_description_owner(expid, new_description, user_id),
+        HTTPStatus.OK if user_id else HTTPStatus.UNAUTHORIZED,
+    )
+
+
 @with_log_run_times(logger, "SEARCH4")
+@with_auth_token()
 def search_experiments_view(user_id: Optional[str] = None):
     """
     Search experiments view targeted to handle args
@@ -176,3 +196,19 @@ def search_experiments_view(user_id: Optional[str] = None):
         },
     }
     return response
+
+
+@with_log_run_times(logger, "GRAPH4")
+@with_auth_token()
+def exp_graph_view(expid: str, user_id: Optional[str] = None):
+    layout = request.args.get("layout", default="standard")
+    grouped = request.args.get("grouped", default="none")
+    return v3.get_graph_format(expid, layout, grouped)
+
+
+@with_log_run_times(logger, "STAT4")
+@with_auth_token()
+def exp_stats_view(expid: str, user_id: Optional[str] = None):
+    filter_period = request.args.get("filter_period", type=int)
+    filter_type = request.args.get("filter_type", default="Any")
+    return v3.get_experiment_statistics(expid, filter_period, filter_type)
