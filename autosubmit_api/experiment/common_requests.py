@@ -149,8 +149,8 @@ def get_experiment_data(expid):
             'db_historic_version': "NA"}
     try:
         autosubmit_config_facade = ConfigurationFacadeDirector(AutosubmitConfigurationFacadeBuilder(expid)).build_autosubmit_configuration_facade()
-        experiment_status = DbRequests.get_experiment_status()
-        result["running"] = (experiment_status.get(expid) == "RUNNING")
+        _, experiment_status = DbRequests.get_specific_experiment_status(expid)
+        result["running"] = (experiment_status == "RUNNING")
         result["path"] = autosubmit_config_facade.experiment_path
         result["owner_id"] = autosubmit_config_facade.get_owner_id()
         result["owner"] = autosubmit_config_facade.get_owner_name()
