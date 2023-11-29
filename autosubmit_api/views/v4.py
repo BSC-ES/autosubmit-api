@@ -1,6 +1,5 @@
 from http import HTTPStatus
 import math
-import os
 import traceback
 from typing import Optional
 from flask import request
@@ -13,7 +12,6 @@ from autosubmit_api.builders.experiment_history_builder import (
     ExperimentHistoryBuilder,
     ExperimentHistoryDirector,
 )
-from autosubmit_api.config.basicConfig import APIBasicConfig
 from autosubmit_api.database.common import (
     create_main_db_conn,
     execute_with_limit_offset,

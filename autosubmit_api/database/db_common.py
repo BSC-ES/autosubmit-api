@@ -345,6 +345,12 @@ def search_experiment_by_id(query, exp_type=None, only_active=None, owner=None):
         experiment_times = DbRequests.get_experiment_times()
     for row in table:
         expid = str(row[1])
+
+        status = experiment_status.get(expid, "NOT RUNNING")
+        if only_active == "active":
+            if status != "RUNNING":
+                continue
+
         status = "NOT RUNNING"
         completed = "NA"
         total = "NA"
@@ -366,7 +372,7 @@ def search_experiment_by_id(query, exp_type=None, only_active=None, owner=None):
         except Exception as exp:
             last_modified_pkl_datetime = None
             pass
-        status = experiment_status.get(expid, "NOT RUNNING")
+
         total, completed, last_modified_timestamp = experiment_times.get(
             expid, ("NA", "NA", None))
 
@@ -387,17 +393,10 @@ def search_experiment_by_id(query, exp_type=None, only_active=None, owner=None):
             print(("Exception on search_experiment_by_id : {}".format(exp)))
             pass
 
-        if only_active == "active":
-            if status == "RUNNING":
-                result.append({'id': row[0], 'name': row[1], 'user': row[2], 'description': row[7],
-                               'hpc': hpc, 'status': status, 'completed': completed, 'total': total,
-                               'version': version, 'wrapper': wrapper, "submitted": submitted, "queuing": queuing,
-                               "running": running, "failed": failed, "suspended": suspended, "modified": last_modified_pkl_datetime})
-        else:
-            result.append({'id': row[0], 'name': row[1], 'user': row[2], 'description': row[7],
-                           'hpc': hpc, 'status': status, 'completed': completed, 'total': total,
-                           'version': version, 'wrapper': wrapper, "submitted": submitted, "queuing": queuing,
-                           "running": running, "failed": failed, "suspended": suspended, "modified": last_modified_pkl_datetime})
+        result.append({'id': row[0], 'name': row[1], 'user': row[2], 'description': row[7],
+                        'hpc': hpc, 'status': status, 'completed': completed, 'total': total,
+                        'version': version, 'wrapper': wrapper, "submitted": submitted, "queuing": queuing,
+                        "running": running, "failed": failed, "suspended": suspended, "modified": last_modified_pkl_datetime})
     return {'experiment': result}
 
 
