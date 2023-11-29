@@ -75,44 +75,31 @@ def search_experiments_view(user_id: Optional[str] = None):
         }, HTTPStatus.BAD_REQUEST
 
     # Query
-    conn = create_main_db_conn()
     statement = generate_query_listexp_extended(
         query=query,
         only_active=only_active,
         owner=owner,
         exp_type=exp_type,
     )
-    query_result, total_rows = execute_with_limit_offset(
-        statement=statement,
-        conn=conn,
-        limit=page_size,
-        offset=offset,
-    )
-    conn.close()
+    with create_main_db_conn() as conn:
+        query_result, total_rows = execute_with_limit_offset(
+            statement=statement,
+            conn=conn,
+            limit=page_size,
+            offset=offset,
+        )
 
     # Process experiments
     experiments = []
     for raw_exp in query_result:
         exp = Experiment.model_validate(raw_exp._mapping)
 
-        # Get user
-        user = exp.user
-        if not user:
-            # Retrieve user from path
-            path = APIBasicConfig.LOCAL_ROOT_DIR + "/" + exp.name
-            if os.path.exists(path):
-                main_folder = os.stat(path)
-                user = (
-                    os.popen("id -nu {0}".format(str(main_folder.st_uid)))
-                    .read()
-                    .strip()
-                )
-
         # Get additional data from config files
         version = "Unknown"
         wrapper = None
         last_modified_pkl_datetime = None
         hpc = exp.hpc
+        user = exp.user
         try:
             autosubmit_config_facade = ConfigurationFacadeDirector(
                 AutosubmitConfigurationFacadeBuilder(exp.name)
@@ -123,6 +110,7 @@ def search_experiments_view(user_id: Optional[str] = None):
                 autosubmit_config_facade.get_pkl_last_modified_time_as_datetime()
             )
             hpc = autosubmit_config_facade.get_main_platform()
+            user = autosubmit_config_facade.get_owner_name()
         except Exception as exc:
             logger.warning(f"Config files params were unable to get on search: {exc}")
             logger.warning(traceback.format_exc())
