@@ -1,4 +1,3 @@
-from http import HTTPStatus
 import os
 import sys
 import requests
@@ -18,7 +17,9 @@ from autosubmit_api.config import (
     CAS_LOGIN_URL,
     CAS_VERIFY_URL,
 )
-from autosubmit_api.views import home, not_implemented_handler
+from autosubmit_api.views import handle_HTTP_exception, home
+from werkzeug.exceptions import HTTPException
+
 
 
 def create_app():
@@ -83,6 +84,6 @@ def create_app():
     v4_blueprint = create_v4_blueprint()
     app.register_blueprint(v4_blueprint, url_prefix="/v4")
 
-    app.register_error_handler(HTTPStatus.NOT_IMPLEMENTED, not_implemented_handler)
+    app.register_error_handler(HTTPException, handle_HTTP_exception)
 
     return app

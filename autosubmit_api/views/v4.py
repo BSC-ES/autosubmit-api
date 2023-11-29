@@ -3,7 +3,7 @@ import math
 import traceback
 from typing import Optional
 from flask import request
-from autosubmit_api.auth import with_auth_token
+from autosubmit_api.auth import ProtectionLevels, with_auth_token
 from autosubmit_api.builders.configuration_facade_builder import (
     AutosubmitConfigurationFacadeBuilder,
     ConfigurationFacadeDirector,
@@ -27,7 +27,7 @@ PAGINATION_LIMIT_DEFAULT = 12
 
 
 @with_log_run_times(logger, "EXPDESC")
-@with_auth_token()
+@with_auth_token(threshold=ProtectionLevels.WRITEONLY)
 def experiment_description_view(expid, user_id: Optional[str] = None):
     """
     Replace the description of the experiment.
