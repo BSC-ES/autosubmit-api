@@ -2,14 +2,14 @@
 
 ### Pre-release v4.0.0b3 - Release date: TBD
 
-* Fix HPC value in the running endpoint 
+* Fix HPC value in the running endpoint
 * **Major change:** Updated all route names. Versioning path prefix is included:
     * Previous routes have been moved with the prefix `/v3`
     * New routes have been added with prefix `/v4` to better follow the RESTful convention 
 * `pydantic` have been added to improve data validation
 * `SQLAlchemy` have been added to improve SQL interaction
 * *New* RESTful endpoint `GET /v4/experiments` added for experiment info search that handles pagination.
-
+* Fix `running` in `/v3/expinfo/<expid>` endpoint to return the right value
 
 ### Pre-release v4.0.0b2 - Release date: 2023-11-20
 
