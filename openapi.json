@@ -1,0 +1,358 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "version": "4.0.0",
+    "title": "Autosubmit API",
+    "license": {
+      "url": "https://www.gnu.org/licenses/gpl-3.0.html",
+      "name": "GNU General Public License"
+    }
+  },
+  "paths": {
+    "/v3/running": {
+      "get": {
+        "tags": [
+          "v3"
+        ],
+        "summary": "Running experiments",
+        "operationId": "get-v3-running",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "experiment": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "completed": {
+                            "type": "integer"
+                          },
+                          "description": {
+                            "type": "string"
+                          },
+                          "failed": {
+                            "type": "integer"
+                          },
+                          "hpc": {
+                            "type": "string"
+                          },
+                          "id": {
+                            "type": "integer"
+                          },
+                          "modified": {
+                            "type": "string"
+                          },
+                          "name": {
+                            "type": "string"
+                          },
+                          "queuing": {
+                            "type": "integer"
+                          },
+                          "running": {
+                            "type": "integer"
+                          },
+                          "status": {
+                            "type": "string"
+                          },
+                          "submitted": {
+                            "type": "integer"
+                          },
+                          "suspended": {
+                            "type": "integer"
+                          },
+                          "total": {
+                            "type": "integer"
+                          },
+                          "user": {
+                            "type": "string"
+                          },
+                          "version": {
+                            "type": "string"
+                          },
+                          "wrapper": {
+                            "type": "string",
+                            "nullable": true
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "examples": {
+                  "Example 1": {
+                    "value": {
+                      "experiment": [
+                        {
+                          "completed": 25,
+                          "description": "Testing AS 4.0",
+                          "failed": 8,
+                          "hpc": "MARENOSTRUM4",
+                          "id": 8192,
+                          "modified": "2022-10-03 10:05:27",
+                          "name": "a4yd",
+                          "queuing": 0,
+                          "running": 0,
+                          "status": "RUNNING",
+                          "submitted": 0,
+                          "suspended": 0,
+                          "total": 385,
+                          "user": "root",
+                          "version": "4.0.0b0",
+                          "wrapper": null
+                        },
+                        {
+                          "completed": 88,
+                          "description": "TEST_AS_4.0",
+                          "failed": 0,
+                          "hpc": "MARENOSTRUM4",
+                          "id": 8202,
+                          "modified": "2022-11-30 11:50:29",
+                          "name": "t0an",
+                          "queuing": 0,
+                          "running": 0,
+                          "status": "RUNNING",
+                          "submitted": 0,
+                          "suspended": 0,
+                          "total": 91,
+                          "user": "root",
+                          "version": "4.0.0b0",
+                          "wrapper": null
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v4/experiments": {
+      "get": {
+        "tags": [
+          "v4"
+        ],
+        "summary": "Search experiments",
+        "description": "",
+        "operationId": "get-v4-experiments",
+        "parameters": [
+          {
+            "name": "query",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "only_active",
+            "in": "query",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "owner",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "exp_type",
+            "in": "query",
+            "schema": {
+              "enum": [
+                "test",
+                "operational",
+                "experiment"
+              ]
+            }
+          },
+          {
+            "name": "order_by",
+            "in": "query",
+            "schema": {
+              "enum": [
+                "expid",
+                "created",
+                "description"
+              ]
+            }
+          },
+          {
+            "name": "order_desc",
+            "in": "query",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "page_size",
+            "in": "query",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "experiments": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "completed": {
+                            "type": "integer"
+                          },
+                          "description": {
+                            "type": "string"
+                          },
+                          "failed": {
+                            "type": "integer"
+                          },
+                          "hpc": {
+                            "type": "string",
+                            "nullable": true
+                          },
+                          "id": {
+                            "type": "integer"
+                          },
+                          "modified": {
+                            "type": "string",
+                            "nullable": true
+                          },
+                          "name": {
+                            "type": "string"
+                          },
+                          "queuing": {
+                            "type": "integer"
+                          },
+                          "running": {
+                            "type": "integer"
+                          },
+                          "status": {
+                            "type": "string"
+                          },
+                          "submitted": {
+                            "type": "integer"
+                          },
+                          "suspended": {
+                            "type": "integer"
+                          },
+                          "total": {
+                            "type": "integer"
+                          },
+                          "user": {
+                            "type": "string",
+                            "nullable": true
+                          },
+                          "version": {
+                            "type": "string"
+                          },
+                          "wrapper": {
+                            "type": "string",
+                            "nullable": true
+                          }
+                        }
+                      }
+                    },
+                    "pagination": {
+                      "type": "object",
+                      "properties": {
+                        "page": {
+                          "type": "integer"
+                        },
+                        "page_items": {
+                          "type": "integer"
+                        },
+                        "page_size": {
+                          "type": "integer"
+                        },
+                        "total_items": {
+                          "type": "integer"
+                        },
+                        "total_pages": {
+                          "type": "integer"
+                        }
+                      }
+                    }
+                  }
+                },
+                "examples": {
+                  "Example 1": {
+                    "value": {
+                      "experiments": [
+                        {
+                          "completed": 0,
+                          "description": "DE Model App",
+                          "failed": 0,
+                          "hpc": null,
+                          "id": 9,
+                          "modified": null,
+                          "name": "a005",
+                          "queuing": 0,
+                          "running": 0,
+                          "status": "NOT RUNNING",
+                          "submitted": 0,
+                          "suspended": 0,
+                          "total": 0,
+                          "user": null,
+                          "version": "Unknown",
+                          "wrapper": null
+                        },
+                        {
+                          "completed": 115,
+                          "description": "DE downstream",
+                          "failed": 0,
+                          "hpc": "LOCAL",
+                          "id": 11,
+                          "modified": "2023-10-26 11:44:07",
+                          "name": "a006",
+                          "queuing": 0,
+                          "running": 0,
+                          "status": "NOT RUNNING",
+                          "submitted": 0,
+                          "suspended": 0,
+                          "total": 115,
+                          "user": "ltenorio",
+                          "version": "4.0.95",
+                          "wrapper": null
+                        }
+                      ],
+                      "pagination": {
+                        "page": 1,
+                        "page_items": 2,
+                        "page_size": 2,
+                        "total_items": 9,
+                        "total_pages": 5
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
