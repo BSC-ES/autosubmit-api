@@ -1,4 +1,6 @@
-from sqlalchemy import select, or_
+from typing import Optional
+from pyparsing import Any
+from sqlalchemy import Column, select, or_
 from autosubmit_api.database import tables
 
 
@@ -7,6 +9,8 @@ def generate_query_listexp_extended(
     only_active: bool = False,
     owner: str = None,
     exp_type: str = None,
+    order_by: str = None,
+    order_desc: bool = False,
 ):
     """
     Query listexp without accessing the view with status and total/completed jobs.
@@ -67,4 +71,20 @@ def generate_query_listexp_extended(
 
     # logger.debug(str(filter_stmts))
     statement = statement.where(*filter_stmts)
+
+    # Order by
+    ORDER_OPTIONS = {
+        "expid": tables.experiment_table.c.name,
+        "created": tables.details_table.c.created,
+        "description": tables.experiment_table.c.description,
+    }
+    order_col: Optional[Column[Any]] = None
+    if order_by:
+        order_col = ORDER_OPTIONS.get(order_by, None)
+
+    if isinstance(order_col, Column):
+        if order_desc:
+            order_col = order_col.desc()
+        statement = statement.order_by(order_col)
+
     return statement

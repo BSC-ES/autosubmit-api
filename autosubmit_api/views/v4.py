@@ -56,6 +56,9 @@ def search_experiments_view(user_id: Optional[str] = None):
     owner = request.args.get("owner")
     exp_type = request.args.get("exp_type")
 
+    order_by = request.args.get("order_by")
+    order_desc = request.args.get("order_desc") == "true"
+
     try:
         page = max(request.args.get("page", default=1, type=int), 1)
         page_size = request.args.get(
@@ -78,6 +81,8 @@ def search_experiments_view(user_id: Optional[str] = None):
         only_active=only_active,
         owner=owner,
         exp_type=exp_type,
+        order_by=order_by,
+        order_desc=order_desc,
     )
     with create_main_db_conn() as conn:
         query_result, total_rows = execute_with_limit_offset(
