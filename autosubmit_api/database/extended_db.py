@@ -20,7 +20,7 @@ class ExtendedDB:
 
     def prepare_main_db(self):
         APIBasicConfig.read()
-        DetailsProcessor(APIBasicConfig)._create_table_if_not_exists()
+        DetailsProcessor(APIBasicConfig).create_details_table_if_not_exists()
         self.main_db_manager.create_view(
             'listexp',
             'select id,name,user,created,model,branch,hpc,description from experiment left join details on experiment.id = details.exp_id'
