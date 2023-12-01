@@ -4,8 +4,8 @@
 
 1. [Overview](#overview)
 2. [Autosubmit Big Picture](#autosubmit-big-picture)
-3. [General Knowledge Requirements](#general-knowledge-requirements)
-4. [Installation](#Installation)
+3. [Installation](#installation)
+4. [Configuration options](#configuration-options)
 
 ## Overview
 
@@ -32,13 +32,6 @@ In this image you can see the flow of information in the **Autosubmit environmen
 * **Authentication Server**: **BSC Central Authentication Service**.
 * **Users**: Users that access the GUI through their web browsers from any device. The current implementation requires that an user generates a token using the Authentication server once every 5 days.
 
-## General Knowledge Requirements
-
-* Python 2.7
-* Object Oriented Programming
-* Flask
-* Gunicorn
-* Unit testing
 
 ## Installation
 
@@ -47,7 +40,7 @@ Autosubmit API can be easily installed via pip
 ```sh
 pip install autosubmit-api # >=4.0 (recommended)
 
-# Check installation
+# Check installation and serving options
 autosubmit_api start -h
 ```
 
@@ -56,3 +49,15 @@ Start the server:
 ```sh
 autosubmit_api start
 ```
+
+## Configuration options
+
+The Autosubmit API have some configuration options that can be modified by setting their specific environment variable before starting the server:
+
+* **`PROTECTION_LEVEL`**: Default `ALL`. Possible values `ALL`, `WRITEONLY`, `NONE`.
+    * If set to `ALL`, all the endpoints will be protected by needing a valid token inside the `Authorization` header of the request.
+    * If set to `WRITEONLY`, only a subset of the endpoints will be protected.
+    * If set to `NONE`, none of the endpoints will be protected.
+* **`SECRET_KEY`**: The secret key to encode the JWT tokens from the Authorization Module. **Important to be set up on production.**
+* **`CAS_LOGIN_URL`**: CAS Protocol URL to request a ticket.
+* **`CAS_VERIFY_URL`**: CAS Protocol URL to verify a given ticket.
