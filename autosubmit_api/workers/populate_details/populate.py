@@ -10,7 +10,6 @@ from autosubmit_api.builders.configuration_facade_builder import (
     AutosubmitConfigurationFacadeBuilder,
 )
 from autosubmit_api.config.basicConfig import APIBasicConfig
-from configparser import ParsingError
 from collections import namedtuple
 from typing import List, Any, Tuple
 
@@ -79,15 +78,9 @@ class DetailsProcessor:
                         }
                     )
                     exp_ids.add(experiment.id)
-            except IOError:
-                # Ignore file not found errors
-                pass
-            except ParsingError:
-                # Ignore parsing errors
-                pass
-            except Exception as exp:
-                logger.error(
-                    ("Error on experiment {}: {}".format(experiment.name, str(exp)))
+            except Exception as exc:
+                logger.warning(
+                    ("Error on experiment {}: {}".format(experiment.name, str(exc)))
                 )
         return result
 

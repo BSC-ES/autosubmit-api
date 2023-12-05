@@ -16,3 +16,4 @@ class Experiment(BaseModel):
     modified: Optional[str] = None
     total_jobs: Optional[int] = None
     completed_jobs: Optional[int] = None
+    wrapper: Optional[str] = None

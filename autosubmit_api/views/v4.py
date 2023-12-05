@@ -4,10 +4,7 @@ import traceback
 from typing import Optional
 from flask import request
 from autosubmit_api.auth import ProtectionLevels, with_auth_token
-from autosubmit_api.builders.configuration_facade_builder import (
-    AutosubmitConfigurationFacadeBuilder,
-    ConfigurationFacadeDirector,
-)
+from autosubmit_api.builders.experiment_builder import ExperimentBuilder
 from autosubmit_api.builders.experiment_history_builder import (
     ExperimentHistoryBuilder,
     ExperimentHistoryDirector,
@@ -17,7 +14,6 @@ from autosubmit_api.database.common import (
     execute_with_limit_offset,
 )
 from autosubmit_api.database.db_common import update_experiment_description_owner
-from autosubmit_api.database.models import Experiment
 from autosubmit_api.database.queries import generate_query_listexp_extended
 from autosubmit_api.logger import logger, with_log_run_times
 from autosubmit_api.views import v3
@@ -95,28 +91,17 @@ def search_experiments_view(user_id: Optional[str] = None):
     # Process experiments
     experiments = []
     for raw_exp in query_result:
-        exp = Experiment.model_validate(raw_exp._mapping)
+        exp_builder = ExperimentBuilder()
+        exp_builder.produce_base_from_dict(raw_exp._mapping)
 
         # Get additional data from config files
-        version = "Unknown"
-        wrapper = None
-        last_modified_pkl_datetime = None
-        hpc = exp.hpc
-        user = exp.user
         try:
-            autosubmit_config_facade = ConfigurationFacadeDirector(
-                AutosubmitConfigurationFacadeBuilder(exp.name)
-            ).build_autosubmit_configuration_facade()
-            version = autosubmit_config_facade.get_autosubmit_version()
-            wrapper = autosubmit_config_facade.get_wrapper_type()
-            last_modified_pkl_datetime = (
-                autosubmit_config_facade.get_pkl_last_modified_time_as_datetime()
-            )
-            hpc = autosubmit_config_facade.get_main_platform()
-            user = autosubmit_config_facade.get_owner_name()
+            exp_builder.produce_config_data()
         except Exception as exc:
             logger.warning(f"Config files params were unable to get on search: {exc}")
             logger.warning(traceback.format_exc())
+
+        exp = exp_builder.product
 
         # Get current run data from history
         last_modified_timestamp = exp.created
@@ -158,20 +143,20 @@ def search_experiments_view(user_id: Optional[str] = None):
             {
                 "id": exp.id,
                 "name": exp.name,
-                "user": user,
+                "user": exp.user,
                 "description": exp.description,
-                "hpc": hpc,
+                "hpc": exp.hpc,
+                "version": exp.autosubmit_version,
+                "wrapper": exp.wrapper,
+                "modified": exp.modified,
                 "status": exp.status if exp.status else "NOT RUNNING",
                 "completed": completed,
                 "total": total,
-                "version": version,
-                "wrapper": wrapper,
                 "submitted": submitted,
                 "queuing": queuing,
                 "running": running,
                 "failed": failed,
                 "suspended": suspended,
-                "modified": last_modified_pkl_datetime,
             }
         )
 
