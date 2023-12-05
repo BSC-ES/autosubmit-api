@@ -1,0 +1,9 @@
+[database]
+path = /app/autosubmit/database
+filename = autosubmit.db
+
+[local]
+path = /app/autosubmit/experiments
+
+[globallogs]
+path = /app/autosubmit/logs
