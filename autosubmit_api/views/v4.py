@@ -3,6 +3,7 @@ import math
 import traceback
 from typing import Optional
 from flask import request
+from flask.views import MethodView
 from autosubmit_api.auth import ProtectionLevels, with_auth_token
 from autosubmit_api.builders.experiment_builder import ExperimentBuilder
 from autosubmit_api.builders.experiment_history_builder import (
@@ -22,6 +23,146 @@ from autosubmit_api.views import v3
 PAGINATION_LIMIT_DEFAULT = 12
 
 
+class ExperimentView(MethodView):
+    # IMPORTANT: Remember that in MethodView last decorator is executed first
+    decorators = [with_auth_token(), with_log_run_times(logger, "SEARCH4")]
+
+    def get(self, user_id: Optional[str] = None):
+        """
+        Search experiments view targeted to handle args
+        """
+        # Parse args
+        logger.debug("Search args: " + str(request.args))
+
+        query = request.args.get("query")
+        only_active = request.args.get("only_active") == "true"
+        owner = request.args.get("owner")
+        exp_type = request.args.get("exp_type")
+
+        order_by = request.args.get("order_by")
+        order_desc = request.args.get("order_desc") == "true"
+
+        try:
+            page = max(request.args.get("page", default=1, type=int), 1)
+            page_size = request.args.get(
+                "page_size", default=PAGINATION_LIMIT_DEFAULT, type=int
+            )
+            if page_size > 0:
+                offset = (page - 1) * page_size
+            else:
+                page_size = None
+                offset = None
+        except:
+            return {
+                "error": True,
+                "error_message": "Bad Request: invalid params",
+            }, HTTPStatus.BAD_REQUEST
+
+        # Query
+        statement = generate_query_listexp_extended(
+            query=query,
+            only_active=only_active,
+            owner=owner,
+            exp_type=exp_type,
+            order_by=order_by,
+            order_desc=order_desc,
+        )
+        with create_main_db_conn() as conn:
+            query_result, total_rows = execute_with_limit_offset(
+                statement=statement,
+                conn=conn,
+                limit=page_size,
+                offset=offset,
+            )
+
+        # Process experiments
+        experiments = []
+        for raw_exp in query_result:
+            exp_builder = ExperimentBuilder()
+            exp_builder.produce_base_from_dict(raw_exp._mapping)
+
+            # Get additional data from config files
+            try:
+                exp_builder.produce_config_data()
+            except Exception as exc:
+                logger.warning(
+                    f"Config files params were unable to get on search: {exc}"
+                )
+                logger.warning(traceback.format_exc())
+
+            exp = exp_builder.product
+
+            # Get current run data from history
+            last_modified_timestamp = exp.created
+            completed = exp.completed_jobs if exp.completed_jobs else 0
+            total = exp.total_jobs if exp.total_jobs else 0
+            submitted = 0
+            queuing = 0
+            running = 0
+            failed = 0
+            suspended = 0
+            try:
+                current_run = (
+                    ExperimentHistoryDirector(ExperimentHistoryBuilder(exp.name))
+                    .build_reader_experiment_history()
+                    .manager.get_experiment_run_dc_with_max_id()
+                )
+                if (
+                    current_run
+                    and current_run.total > 0
+                    and (
+                        current_run.total == total
+                        or current_run.modified_timestamp > last_modified_timestamp
+                    )
+                ):
+                    completed = current_run.completed
+                    total = current_run.total
+                    submitted = current_run.submitted
+                    queuing = current_run.queuing
+                    running = current_run.running
+                    failed = current_run.failed
+                    suspended = current_run.suspended
+                    last_modified_timestamp = current_run.modified_timestamp
+            except Exception as exc:
+                logger.warning((f"Exception getting the current run on search: {exc}"))
+                logger.warning(traceback.format_exc())
+
+            # Format data
+            experiments.append(
+                {
+                    "id": exp.id,
+                    "name": exp.name,
+                    "user": exp.user,
+                    "description": exp.description,
+                    "hpc": exp.hpc,
+                    "version": exp.autosubmit_version,
+                    "wrapper": exp.wrapper,
+                    "modified": exp.modified,
+                    "status": exp.status if exp.status else "NOT RUNNING",
+                    "completed": completed,
+                    "total": total,
+                    "submitted": submitted,
+                    "queuing": queuing,
+                    "running": running,
+                    "failed": failed,
+                    "suspended": suspended,
+                }
+            )
+
+        # Response
+        response = {
+            "experiments": experiments,
+            "pagination": {
+                "page": page,
+                "page_size": page_size,
+                "total_pages": math.ceil(total_rows / page_size) if page_size else 1,
+                "page_items": len(experiments),
+                "total_items": total_rows,
+            },
+        }
+        return response
+
+
 @with_log_run_times(logger, "EXPDESC")
 @with_auth_token(threshold=ProtectionLevels.WRITEONLY)
 def experiment_description_view(expid, user_id: Optional[str] = None):
@@ -36,142 +177,6 @@ def experiment_description_view(expid, user_id: Optional[str] = None):
         update_experiment_description_owner(expid, new_description, user_id),
         HTTPStatus.OK if user_id else HTTPStatus.UNAUTHORIZED,
     )
-
-
-@with_log_run_times(logger, "SEARCH4")
-@with_auth_token()
-def search_experiments_view(user_id: Optional[str] = None):
-    """
-    Search experiments view targeted to handle args
-    """
-    # Parse args
-    logger.debug("Search args: " + str(request.args))
-
-    query = request.args.get("query")
-    only_active = request.args.get("only_active") == "true"
-    owner = request.args.get("owner")
-    exp_type = request.args.get("exp_type")
-
-    order_by = request.args.get("order_by")
-    order_desc = request.args.get("order_desc") == "true"
-
-    try:
-        page = max(request.args.get("page", default=1, type=int), 1)
-        page_size = request.args.get(
-            "page_size", default=PAGINATION_LIMIT_DEFAULT, type=int
-        )
-        if page_size > 0:
-            offset = (page - 1) * page_size
-        else:
-            page_size = None
-            offset = None
-    except:
-        return {
-            "error": True,
-            "error_message": "Bad Request: invalid params",
-        }, HTTPStatus.BAD_REQUEST
-
-    # Query
-    statement = generate_query_listexp_extended(
-        query=query,
-        only_active=only_active,
-        owner=owner,
-        exp_type=exp_type,
-        order_by=order_by,
-        order_desc=order_desc,
-    )
-    with create_main_db_conn() as conn:
-        query_result, total_rows = execute_with_limit_offset(
-            statement=statement,
-            conn=conn,
-            limit=page_size,
-            offset=offset,
-        )
-
-    # Process experiments
-    experiments = []
-    for raw_exp in query_result:
-        exp_builder = ExperimentBuilder()
-        exp_builder.produce_base_from_dict(raw_exp._mapping)
-
-        # Get additional data from config files
-        try:
-            exp_builder.produce_config_data()
-        except Exception as exc:
-            logger.warning(f"Config files params were unable to get on search: {exc}")
-            logger.warning(traceback.format_exc())
-
-        exp = exp_builder.product
-
-        # Get current run data from history
-        last_modified_timestamp = exp.created
-        completed = exp.completed_jobs if exp.completed_jobs else 0
-        total = exp.total_jobs if exp.total_jobs else 0
-        submitted = 0
-        queuing = 0
-        running = 0
-        failed = 0
-        suspended = 0
-        try:
-            current_run = (
-                ExperimentHistoryDirector(ExperimentHistoryBuilder(exp.name))
-                .build_reader_experiment_history()
-                .manager.get_experiment_run_dc_with_max_id()
-            )
-            if (
-                current_run
-                and current_run.total > 0
-                and (
-                    current_run.total == total
-                    or current_run.modified_timestamp > last_modified_timestamp
-                )
-            ):
-                completed = current_run.completed
-                total = current_run.total
-                submitted = current_run.submitted
-                queuing = current_run.queuing
-                running = current_run.running
-                failed = current_run.failed
-                suspended = current_run.suspended
-                last_modified_timestamp = current_run.modified_timestamp
-        except Exception as exc:
-            logger.warning((f"Exception getting the current run on search: {exc}"))
-            logger.warning(traceback.format_exc())
-
-        # Format data
-        experiments.append(
-            {
-                "id": exp.id,
-                "name": exp.name,
-                "user": exp.user,
-                "description": exp.description,
-                "hpc": exp.hpc,
-                "version": exp.autosubmit_version,
-                "wrapper": exp.wrapper,
-                "modified": exp.modified,
-                "status": exp.status if exp.status else "NOT RUNNING",
-                "completed": completed,
-                "total": total,
-                "submitted": submitted,
-                "queuing": queuing,
-                "running": running,
-                "failed": failed,
-                "suspended": suspended,
-            }
-        )
-
-    # Response
-    response = {
-        "experiments": experiments,
-        "pagination": {
-            "page": page,
-            "page_size": page_size,
-            "total_pages": math.ceil(total_rows / page_size) if page_size else 1,
-            "page_items": len(experiments),
-            "total_items": total_rows,
-        },
-    }
-    return response
 
 
 @with_log_run_times(logger, "GRAPH4")

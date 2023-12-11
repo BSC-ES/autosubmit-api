@@ -22,7 +22,7 @@ def create_v4_blueprint():
     #     v3_views.exp_counters
     # )
 
-    blueprint.route("/experiments")(v4_views.search_experiments_view)
+    blueprint.add_url_rule("/experiments", view_func=v4_views.ExperimentView.as_view("experiments"))
 
     # blueprint.route("/experiments/<string:expid>/runs")(v3_views.get_runs)
     # blueprint.route("/experiments/<string:expid>/check-running")(
