@@ -1,32 +1,35 @@
-import json
-import logging
+from flask.testing import FlaskClient
 
-import pytest
-from autosubmit_api.builders.joblist_helper_builder import JobListHelperBuilder, JobListHelperDirector
-from autosubmit_api.experiment import common_requests, common_db_requests
+from autosubmit_api.experiment import common_requests
 from autosubmit_api.performance.performance_metrics import PerformanceMetrics
 
-from tests.common_fixtures import fixture_mock_basic_config
+from tests.common_fixtures import fixture_mock_basic_config, fixture_client, fixture_app
 from tests.custom_utils import custom_return_value
 
+
 class TestPerformance:
-
-    def test_parallelization(self, fixture_mock_basic_config: fixture_mock_basic_config):
+    def test_parallelization(
+        self, fixture_mock_basic_config, fixture_client: FlaskClient
+    ):
         expid = "a007"
-        result = PerformanceMetrics(expid, JobListHelperDirector(JobListHelperBuilder(expid)).build_job_list_helper()).to_json()
-        assert result["Parallelization"] == 8
+        response = fixture_client.get(f"/v3/performance/{expid}")
+        resp_obj: dict = response.get_json()
+        assert resp_obj["Parallelization"] == 8
 
-    def test_parallelization_platforms(self, fixture_mock_basic_config: fixture_mock_basic_config):
+    def test_parallelization_platforms(
+        self, fixture_mock_basic_config, fixture_client: FlaskClient
+    ):
         expid = "a003"
-        result = PerformanceMetrics(expid, JobListHelperDirector(JobListHelperBuilder(expid)).build_job_list_helper()).to_json()
-        assert result["Parallelization"] == 16
+        response = fixture_client.get(f"/v3/performance/{expid}")
+        resp_obj: dict = response.get_json()
+        assert resp_obj["Parallelization"] == 16
 
 
 class TestTree:
-
-    def test_minimal_conf(self, fixture_mock_basic_config: fixture_mock_basic_config):
+    def test_minimal_conf(self, fixture_mock_basic_config, fixture_client: FlaskClient):
         expid = "a003"
-        result = common_requests.get_experiment_tree_structured(expid, logging)
+        response = fixture_client.get(f"/v3/tree/{expid}")
+        resp_obj: dict = response.get_json()
 
-        assert result.get("total") == 8
-        assert result.get("error") == False
+        assert resp_obj["total"] == 8
+        assert resp_obj["error"] == False
