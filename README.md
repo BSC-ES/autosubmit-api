@@ -56,3 +56,19 @@ Start the server:
 ```sh
 autosubmit_api start
 ```
+
+## How to run tests
+
+### Run tests:
+
+```bash
+pytest tests/*
+```
+
+### Run tests with coverage HTML report:
+
+```bash
+pytest --cov=autosubmit_api --cov-config=.coveragerc --cov-report=html tests/*
+```
+
+You will find the report in `htmlcov/index.html`

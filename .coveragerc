@@ -1,0 +1,4 @@
+[run]
+omit=
+    autosubmit_api/autosubmit_legacy/*
+    *test*.py
