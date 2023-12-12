@@ -59,6 +59,12 @@ autosubmit_api start
 
 ## How to run tests
 
+### Install pytest
+
+```bash
+pip install -U pytest pytest-cov
+```
+
 ### Run tests:
 
 ```bash
