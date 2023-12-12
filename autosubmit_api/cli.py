@@ -24,6 +24,7 @@ class StandaloneApplication(WSGIApplication):
 
 def start_app_gunicorn(
     init_bg_tasks: bool = False,
+    disable_bg_tasks: bool = False,
     bind: List[str] = [],
     workers: int = 1,
     log_level: str = "info",
@@ -34,6 +35,9 @@ def start_app_gunicorn(
     # API options
     if init_bg_tasks:
         os.environ.setdefault("RUN_BACKGROUND_TASKS_ON_START", str(init_bg_tasks))
+
+    if disable_bg_tasks:
+        os.environ.setdefault("DISABLE_BACKGROUND_TASKS", str(disable_bg_tasks))
 
     # Gunicorn options
     options = {  # Options to always have
@@ -83,6 +87,10 @@ def main():
     # Autosubmit API opts
     start_parser.add_argument(
         "--init-bg-tasks", action="store_true", help="run background tasks on start. "
+    )
+
+    start_parser.add_argument(
+        "--disable-bg-tasks", action="store_true", help="disable background tasks."
     )
 
     # Gunicorn args
