@@ -11,14 +11,20 @@ class TestPerformance:
         expid = "a007"
         response = fixture_client.get(f"/v3/performance/{expid}")
         resp_obj: dict = response.get_json()
+        assert resp_obj["error"] == False
         assert resp_obj["Parallelization"] == 8
 
-    def test_parallelization_platforms(
-        self, fixture_mock_basic_config, fixture_client: FlaskClient
-    ):
+        expid = "a3tb"
+        response = fixture_client.get(f"/v3/performance/{expid}")
+        resp_obj: dict = response.get_json()
+        assert resp_obj["error"] == False
+        assert resp_obj["Parallelization"] == 768
+
+    def test_parallelization_platforms(self, fixture_client: FlaskClient):
         expid = "a003"
         response = fixture_client.get(f"/v3/performance/{expid}")
         resp_obj: dict = response.get_json()
+        assert resp_obj["error"] == False
         assert resp_obj["Parallelization"] == 16
 
 
@@ -28,8 +34,8 @@ class TestTree:
         response = fixture_client.get(f"/v3/tree/{expid}")
         resp_obj: dict = response.get_json()
 
-        assert resp_obj["total"] == 8
         assert resp_obj["error"] == False
+        assert resp_obj["total"] == 8
 
 
 class TestExperimentListV4:
@@ -49,6 +55,9 @@ class TestExperimentListV4:
         response = fixture_client.get(f"/v4/experiments?page_size=-1")
         resp_obj: dict = response.get_json()
         assert resp_obj["pagination"]["page_size"] == None
-        assert resp_obj["pagination"]["page_items"] == resp_obj["pagination"]["total_items"]
+        assert (
+            resp_obj["pagination"]["page_items"]
+            == resp_obj["pagination"]["total_items"]
+        )
         assert resp_obj["pagination"]["page"] == 1
         assert resp_obj["pagination"]["page"] == resp_obj["pagination"]["total_pages"]

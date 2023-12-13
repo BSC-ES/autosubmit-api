@@ -1,0 +1,9 @@
+[INFO] JOBID=20650264
+
+*II* !!!! CMIP FIX YEAR SETTINGS:
+*II* ifs_cmip_fixyear:  0
+*II* lpjg_fixNDepAfter: -1
+*II* lpjg_fixLUAfter:   -1
+*II* !!!!
+WARNING: save_ic requires to define condition and offset here or in the runscript
+*EE* Error: no more than one IC is allowed in the same month when running with ifs

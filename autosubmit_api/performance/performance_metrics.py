@@ -113,7 +113,7 @@ class PerformanceMetrics(object):
     return 0
 
   def _calculate_ASYPD(self):
-    if len(self.sim_jobs_valid) > 0:
+    if len(self.sim_jobs_valid) > 0 and (self.total_sim_run_time + self.total_sim_queue_time + self.post_jobs_total_time_average)>0:
       ASYPD = (self.configuration_facade.current_years_per_sim * len(self.sim_jobs_valid) * utils.SECONDS_IN_A_DAY) / (self.total_sim_run_time + self.total_sim_queue_time + self.post_jobs_total_time_average)
       return round(ASYPD, 4)
     return 0
