@@ -347,11 +347,9 @@ def search_experiment_by_id(query, exp_type=None, only_active=None, owner=None):
         expid = str(row[1])
 
         status = experiment_status.get(expid, "NOT RUNNING")
-        if only_active == "active":
-            if status != "RUNNING":
-                continue
+        if only_active == "active" and status != "RUNNING":
+            continue
 
-        status = "NOT RUNNING"
         completed = "NA"
         total = "NA"
         submitted = 0
