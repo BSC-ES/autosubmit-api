@@ -79,6 +79,7 @@ def create_app():
     app.route("/")(home)
 
     v3_blueprint = create_v3_blueprint()
+    app.register_blueprint(v3_blueprint, name="root") # Add v3 to root but will be DEPRECATED
     app.register_blueprint(v3_blueprint, url_prefix="/v3")
 
     v4_blueprint = create_v4_blueprint()
