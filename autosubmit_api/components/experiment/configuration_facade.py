@@ -296,5 +296,7 @@ class AutosubmitConfigurationFacade(ConfigurationFacade):
       estimated_nodes = self._estimate_requested_nodes()
       return estimated_nodes * self.sim_processors_per_node
     elif self.sim_tasks or self.sim_nodes:
-      logger.warning('Missing PROCESSORS_PER_NODE. Should be set if TASKS or NODES are defined. The SIM PROCESSORS will used instead.')
+      warn_msg = 'Missing PROCESSORS_PER_NODE. Should be set if TASKS or NODES are defined. The SIM PROCESSORS will used instead.'
+      self._add_warning(warn_msg)
+      logger.warning(warn_msg)
     return self.sim_processors
