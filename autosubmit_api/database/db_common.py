@@ -363,6 +363,7 @@ def search_experiment_by_id(query, exp_type=None, only_active=None, owner=None):
         wrapper = None
         last_modified_timestamp = None
         last_modified_pkl_datetime = None
+        hpc = row[6]
         try:
             autosubmit_config_facade = ConfigurationFacadeDirector(AutosubmitConfigurationFacadeBuilder(expid)).build_autosubmit_configuration_facade()
             version = autosubmit_config_facade.get_autosubmit_version()
