@@ -11,6 +11,9 @@
 * *New* RESTful endpoint `GET /v4/experiments` added for experiment info search that handles pagination
 * Fix `running` in `/v3/expinfo/<expid>` endpoint to return the right value
 * Add the `--disable-bg-tasks` on the CLI 
+* Support new Autosubmit >= 4.1 pickle file
+    * Affected endpoints: `/v3/quick/<expid>`, `/v3/expcount/<expid>`, `/v3/summary/<expid>`
+    * Affected Background task: `PopulateQueueRuntimes`
 
 ### Pre-release v4.0.0b2 - Release date: 2023-11-20
 

@@ -31,7 +31,7 @@ setup(
     license="GNU GPL",
     packages=find_packages(),
     keywords=["autosubmit", "API"],
-    python_requires=">=3.7",
+    python_requires=">=3.8",
     install_requires=[
         "Flask~=2.2.5",
         "pyjwt~=2.8.0",

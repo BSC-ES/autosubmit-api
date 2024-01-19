@@ -1,7 +1,4 @@
-import random
 from flask.testing import FlaskClient
-
-from autosubmit_api.views.v4 import PAGINATION_LIMIT_DEFAULT
 
 from tests.common_fixtures import fixture_mock_basic_config, fixture_client, fixture_app
 
@@ -29,7 +26,7 @@ class TestPerformance:
 
 
 class TestTree:
-    def test_minimal_conf(self, fixture_client: FlaskClient):
+    def test_tree(self, fixture_client: FlaskClient):
         expid = "a003"
         response = fixture_client.get(f"/v3/tree/{expid}")
         resp_obj: dict = response.get_json()
@@ -38,26 +35,45 @@ class TestTree:
         assert resp_obj["total"] == 8
 
 
-class TestExperimentListV4:
-    def test_page_size(self, fixture_client: FlaskClient):
-        # Default page size
-        response = fixture_client.get(f"/v4/experiments")
+class TestQuick:
+    def test_quick(self, fixture_client: FlaskClient):
+        expid = "a007"
+        response = fixture_client.get(f"/v3/quick/{expid}")
         resp_obj: dict = response.get_json()
-        assert resp_obj["pagination"]["page_size"] == PAGINATION_LIMIT_DEFAULT
 
-        # Any page size
-        page_size = random.randint(2, 100)
-        response = fixture_client.get(f"/v4/experiments?page_size={str(page_size)}")
-        resp_obj: dict = response.get_json()
-        assert resp_obj["pagination"]["page_size"] == page_size
+        assert resp_obj["error"] == False
+        assert resp_obj["total"] == len(resp_obj["tree_view"])
+        assert resp_obj["total"] == len(resp_obj["view_data"])
 
-        # Unbounded page size
-        response = fixture_client.get(f"/v4/experiments?page_size=-1")
+
+class TestGraph:
+    def test_graph(self, fixture_client: FlaskClient):
+        expid = "a003"
+        response = fixture_client.get(f"/v3/graph/{expid}/standard/none")
         resp_obj: dict = response.get_json()
-        assert resp_obj["pagination"]["page_size"] == None
-        assert (
-            resp_obj["pagination"]["page_items"]
-            == resp_obj["pagination"]["total_items"]
+
+        assert resp_obj["error"] == False
+        assert resp_obj["total_jobs"] == len(resp_obj["nodes"])
+
+
+class TestExpCount:
+    def test_exp_count(self, fixture_client: FlaskClient):
+        expid = "a007"
+        response = fixture_client.get(f"/v3/expcount/{expid}")
+        resp_obj: dict = response.get_json()
+
+        assert resp_obj["error"] == False
+        assert resp_obj["total"] == sum(
+            [resp_obj["counters"][key] for key in resp_obj["counters"]]
         )
-        assert resp_obj["pagination"]["page"] == 1
-        assert resp_obj["pagination"]["page"] == resp_obj["pagination"]["total_pages"]
+        assert resp_obj["expid"] == expid
+
+
+class TestSummary:
+    def test_summary(self, fixture_client: FlaskClient):
+        expid = "a007"
+        response = fixture_client.get(f"/v3/summary/{expid}")
+        resp_obj: dict = response.get_json()
+
+        assert resp_obj["error"] == False
+        assert resp_obj["n_sim"] > 0

@@ -30,6 +30,7 @@ import multiprocessing
 import subprocess
 
 from collections import deque
+from autosubmit_api.components.experiment.pkl_organizer import PklOrganizer
 from autosubmit_api.config.confConfigStrategy import confConfigStrategy
 from autosubmit_api.database import db_common as db_common
 from autosubmit_api.experiment import common_db_requests as DbRequests
@@ -305,11 +306,8 @@ def get_experiment_summary(expid, log):
     try:
         # Basic paths
         APIBasicConfig.read()
-        path = APIBasicConfig.LOCAL_ROOT_DIR + '/' + expid + '/pkl'
         tmp_path = os.path.join(
             APIBasicConfig.LOCAL_ROOT_DIR, expid, APIBasicConfig.LOCAL_TMP_DIR)
-        pkl_filename = "job_list_" + str(expid) + ".pkl"
-        path_pkl = path + "/" + pkl_filename
         # Try to get packages
         job_to_package = dict()
         package_to_jobs = dict()
@@ -323,23 +321,26 @@ def get_experiment_summary(expid, log):
         jobs_in_pkl = dict()
         fakeAllJobs = list()
 
-        if os.path.exists(path_pkl):
-            fd = open(path_pkl, 'rb')
-            for item in pickle.load(fd, encoding="latin1"):
-                status_code = int(item[2])
-                job_name = item[0]
-                priority = item[3]
-                id_number = item[1]
-                out = str(item[8]) if len(item) >= 9 else ""
-                err = str(item[9]) if len(item) >= 10 else ""
-                status_color = Monitor.color_status(status_code)
-                status_text = str(common_utils.Status.VALUE_TO_KEY[status_code])
-                jobs_in_pkl[job_name] = (
-                    status_code, status_color, status_text, out, err, priority, id_number)
-                fakeAllJobs.append(
-                    SimpleJob(job_name, tmp_path, status_code))
-            job_running_to_seconds, job_running_to_runtext, _ = JobList.get_job_times_collection(
-                APIBasicConfig, fakeAllJobs, expid, job_to_package, package_to_jobs, timeseconds=True)
+        # Read PKL
+        autosubmit_config_facade = ConfigurationFacadeDirector(
+            AutosubmitConfigurationFacadeBuilder(expid)).build_autosubmit_configuration_facade()
+        pkl_organizer = PklOrganizer(autosubmit_config_facade)
+        for job_item in pkl_organizer.current_content:
+            status_code = job_item.status
+            job_name = job_item.name
+            priority = job_item.priority
+            id_number = job_item.id
+            out = job_item.out_path_local
+            err = job_item.err_path_local
+            status_color = Monitor.color_status(status_code)
+            status_text = str(common_utils.Status.VALUE_TO_KEY[status_code])
+            jobs_in_pkl[job_name] = (
+                status_code, status_color, status_text, out, err, priority, id_number)
+            fakeAllJobs.append(
+                SimpleJob(job_name, tmp_path, status_code))
+            
+        job_running_to_seconds, job_running_to_runtext, _ = JobList.get_job_times_collection(
+            APIBasicConfig, fakeAllJobs, expid, job_to_package, package_to_jobs, timeseconds=True)
 
         # Main Loop
         if len(list(job_running_to_seconds.keys())) > 0:
@@ -1102,20 +1103,18 @@ def get_experiment_counters(expid):
     total = 0
     experiment_counters = dict()
     APIBasicConfig.read()
-    path_pkl = os.path.join(APIBasicConfig.LOCAL_ROOT_DIR,
-                            expid, "pkl", "job_list_{}.pkl".format(expid))
     # Default counter per status
     experiment_counters = {name: 0 for name in common_utils.Status.STRING_TO_CODE}
     try:
-        if os.path.exists(path_pkl):
-            fd = open(path_pkl, 'rb')
-            for item in pickle.load(fd, encoding="latin1"):
-                status_code = int(item[2])
-                total += 1
-                experiment_counters[common_utils.Status.VALUE_TO_KEY.get(status_code, "UNKNOWN")] = experiment_counters.get(
-                    common_utils.Status.VALUE_TO_KEY.get(status_code, "UNKNOWN"), 0) + 1
-        else:
-            raise Exception("PKL file not found.")
+        autosubmit_config_facade = ConfigurationFacadeDirector(
+            AutosubmitConfigurationFacadeBuilder(expid)).build_autosubmit_configuration_facade()
+        pkl_organizer = PklOrganizer(autosubmit_config_facade)
+        for job_item in pkl_organizer.current_content:
+            status_code = int(job_item.status)
+            total += 1
+            experiment_counters[common_utils.Status.VALUE_TO_KEY.get(status_code, "UNKNOWN")] = experiment_counters.get(
+                common_utils.Status.VALUE_TO_KEY.get(status_code, "UNKNOWN"), 0) + 1
+            
     except Exception as exc:
         error = True
         error_message = str(exc)
@@ -1142,80 +1141,78 @@ def get_quick_view(expid):
     total_count = completed_count = failed_count = running_count = queuing_count = 0
     try:
         APIBasicConfig.read()
-        path_pkl = APIBasicConfig.LOCAL_ROOT_DIR + '/' + expid + '/pkl'
-        pkl_file = os.path.join(path_pkl, "job_list_{0}.pkl".format(expid))
         path_to_logs = os.path.join(APIBasicConfig.LOCAL_ROOT_DIR, expid, "tmp", "LOG_" + expid)
-        tmp_path = os.path.join(APIBasicConfig.LOCAL_ROOT_DIR, expid, APIBasicConfig.LOCAL_TMP_DIR)
-        if os.path.exists(pkl_file):
-            # Retrieving packages
-            now_ = time.time()
-            job_to_package, package_to_jobs, package_to_package_id, package_to_symbol = JobList.retrieve_packages(
-                APIBasicConfig, expid)
-            logger.debug(("Retrieving packages {0} seconds.".format(
-                str(time.time() - now_))))
 
-            try:
-                fd = open(pkl_file, 'rb')
-                for item in pickle.load(fd, encoding="latin1"):
-                    status_code = int(item[2])
-                    # counters
-                    if status_code == common_utils.Status.COMPLETED:
-                        completed_count += 1
-                    elif status_code == common_utils.Status.FAILED:
-                        failed_count += 1
-                    elif status_code == common_utils.Status.RUNNING:
-                        running_count += 1
-                    elif status_code == common_utils.Status.QUEUING:
-                        queuing_count += 1
-                    # end
-                    job_name = item[0]
-                    priority = item[3]
-                    id_number = item[1]
-                    out = str(item[8]) if len(item) >= 9 else ""
-                    err = str(item[9]) if len(item) >= 10 else ""
-                    status_color = Monitor.color_status(status_code)
-                    status_text = str(common_utils.Status.VALUE_TO_KEY[status_code])
-                    jobs_in_pkl[job_name] = (
-                        status_code, status_color, status_text, out, err, priority, id_number)
-            except Exception as exp:
-                raise Exception(
-                    "Autosubmit API couldn't open pkl file. If you are sure that your experiment is running correctly, try again.")
+        # Retrieving packages
+        now_ = time.time()
+        job_to_package, package_to_jobs, package_to_package_id, package_to_symbol = JobList.retrieve_packages(
+            APIBasicConfig, expid)
+        logger.debug(("Retrieving packages {0} seconds.".format(
+            str(time.time() - now_))))
+        
+        # Reading PKL
+        try:
+            autosubmit_config_facade = ConfigurationFacadeDirector(
+                AutosubmitConfigurationFacadeBuilder(expid)).build_autosubmit_configuration_facade()
+            pkl_organizer = PklOrganizer(autosubmit_config_facade)
+            for job_item in pkl_organizer.current_content:
+                status_code = int(job_item.status)
+                # counters
+                if status_code == common_utils.Status.COMPLETED:
+                    completed_count += 1
+                elif status_code == common_utils.Status.FAILED:
+                    failed_count += 1
+                elif status_code == common_utils.Status.RUNNING:
+                    running_count += 1
+                elif status_code == common_utils.Status.QUEUING:
+                    queuing_count += 1
+                # end
+                job_name = job_item.name
+                priority = job_item.priority
+                id_number = job_item.id
+                out = job_item.out_path_local
+                err = job_item.err_path_local
+                status_color = Monitor.color_status(status_code)
+                status_text = str(common_utils.Status.VALUE_TO_KEY[status_code])
+                jobs_in_pkl[job_name] = (
+                    status_code, status_color, status_text, out, err, priority, id_number)
+        except Exception as exp:
+            raise Exception(
+                "Autosubmit API couldn't open pkl file. If you are sure that your experiment is running correctly, try again.")
 
-            total_count = len(list(jobs_in_pkl.keys()))
+        total_count = len(list(jobs_in_pkl.keys()))
 
-            if len(list(jobs_in_pkl.keys())) > 0:
-                # fd = open(path_pkl, 'r')
-                for job_name in list(jobs_in_pkl.keys()):
-                    status_code, status_color, status_text, out, err, priority, id_number = jobs_in_pkl[
-                        job_name]
-                    wrapper_tag = ""
-                    wrapper_id = 0
-                    wrapper_name = ""
-                    if job_name in list(job_to_package.keys()):
-                        wrapper_name = job_to_package[job_name]
-                        wrapper_id = package_to_package_id[job_to_package[job_name]]
-                        wrapper_tag = " <span class='badge' style='background-color:#94b8b8'>Wrapped " + \
-                            wrapper_id + "</span>"
+        if len(list(jobs_in_pkl.keys())) > 0:
+            for job_name in list(jobs_in_pkl.keys()):
+                status_code, status_color, status_text, out, err, priority, id_number = jobs_in_pkl[
+                    job_name]
+                wrapper_tag = ""
+                wrapper_id = 0
+                wrapper_name = ""
+                if job_name in list(job_to_package.keys()):
+                    wrapper_name = job_to_package[job_name]
+                    wrapper_id = package_to_package_id[job_to_package[job_name]]
+                    wrapper_tag = " <span class='badge' style='background-color:#94b8b8'>Wrapped " + \
+                        wrapper_id + "</span>"
 
-                    view_data.append({'name': job_name,
-                                      'path_log': path_to_logs,
-                                      'out': "/" + out,
-                                      'err': "/" + err,
-                                      })
-                    tree_job = {'title': JUtils.generate_job_html_title(job_name, status_color, status_text) + wrapper_tag,
-                                'refKey': job_name,
-                                'data': 'Empty',
-                                'children': [],
-                                'status': status_text,
-                                }
-                    if status_code in [common_utils.Status.COMPLETED, common_utils.Status.WAITING, common_utils.Status.READY]:
-                        quick_tree_view.append(tree_job)
-                    else:
-                        quick_tree_view.appendleft(tree_job)
-                # return {}
-                # quick_tree_view = list(quick_tree_view)
-            else:
-                raise Exception('File {0} does not exist'.format(path_pkl))
+                view_data.append({'name': job_name,
+                                    'path_log': path_to_logs,
+                                    'out': "/" + out,
+                                    'err': "/" + err,
+                                    })
+                tree_job = {'title': JUtils.generate_job_html_title(job_name, status_color, status_text) + wrapper_tag,
+                            'refKey': job_name,
+                            'data': 'Empty',
+                            'children': [],
+                            'status': status_text,
+                            }
+                if status_code in [common_utils.Status.COMPLETED, common_utils.Status.WAITING, common_utils.Status.READY]:
+                    quick_tree_view.append(tree_job)
+                else:
+                    quick_tree_view.appendleft(tree_job)
+            # return {}
+            # quick_tree_view = list(quick_tree_view)
+                    
     except Exception as exp:
         error_message = "Exception: {0}".format(str(exp))
         error = True

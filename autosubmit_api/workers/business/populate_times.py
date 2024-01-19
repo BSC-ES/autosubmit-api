@@ -6,6 +6,8 @@ import subprocess
 import traceback
 import socket
 import pickle
+from autosubmit_api.builders.configuration_facade_builder import AutosubmitConfigurationFacadeBuilder, ConfigurationFacadeDirector
+from autosubmit_api.components.experiment.pkl_organizer import PklOrganizer
 from autosubmit_api.components.jobs.utils import get_job_total_stats
 from autosubmit_api.config.config_common import AutosubmitConfigResolver
 from autosubmit_api.experiment import common_db_requests as DbRequests
@@ -85,7 +87,7 @@ def process_completed_times(time_condition=60):
             # Timer safeguard
             if (t1 - t0) > SAFE_TIME_LIMIT:
                 raise Exception(
-                    "Time limit reached {0:06.2f} seconds on process_completed_times while processing {1}. Time spent on reading data {2:06.2f} seconds.".format((t1 - t0), exp_str, t_data))
+                    "Time limit reached {0:06.2f} seconds on process_completed_times while processing {1}. Time spent on reading data {2:06.2f} seconds.".format((t1 - t0), exp_str, (t1 - t0)))
     except Exception as ex:
         print((traceback.format_exc()))
         print(str(ex))
@@ -182,7 +184,7 @@ def _process_pkl_update_times(expid, path_pkl, timest_pkl, BasicConfig, exp_id, 
     Updates register in job_times and experiment_times for the given experiment.
     :param expid: Experiment name
     :type expid: String
-    :param path_pkl: path to the pkl file
+    :param path_pkl: path to the pkl file (DEPRECATED)
     :type path_pkl: String
     :param timest_pkl: Timestamp of the last modified date of the pkl file
     :type timest_pkl: Integer
@@ -209,62 +211,64 @@ def _process_pkl_update_times(expid, path_pkl, timest_pkl, BasicConfig, exp_id, 
         experiment_times_detail = DbRequests.get_times_detail(exp_id)
         # t_seconds = time.time() - t_start
         must_update_header = False
-        if os.path.exists(path_pkl):
-            fd = []
-            with open(path_pkl, 'rb') as f:
-                fd = pickle.load(f, encoding="latin1")
-            to_update = []
-            to_create = []
-            for item in fd:
-                total_jobs += 1
-                status_code = int(item[2])
-                job_name = str(item[0])
-                found_in_pkl.append(job_name)
-                status_text = str(Status.VALUE_TO_KEY[status_code])
-                if (status_code == Status.COMPLETED):
-                    completed_jobs += 1
-                if (experiment_times_detail) and job_name in list(experiment_times_detail.keys()):
-                    # If job in pkl exists in database, retrieve data from database
-                    submit_time, start_time, finish_time, status_text_in_table, detail_id = experiment_times_detail[job_name]
-                    if (status_text_in_table != status_text):
-                        # If status has changed
-                        submit_time, start_time, finish_time, _ = get_job_total_stats(status_code, job_name, tmp_path)
-                        submit_ts = int(time.mktime(submit_time.timetuple())) if len(str(submit_time)) > 0 else 0
-                        start_ts = int(time.mktime(start_time.timetuple())) if len(str(start_time)) > 0 else 0
-                        finish_ts = int(time.mktime(finish_time.timetuple())) if len(str(finish_time)) > 0 else 0
-                        # UPDATE
-                        must_update_header = True
-                        to_update.append((int(timest_pkl),
-                                          submit_ts,
-                                          start_ts,
-                                          finish_ts,
-                                          status_text,
-                                          detail_id))
 
-                else:
-                    # Insert only if it is not WAITING nor READY
-                    if (status_code not in [Status.WAITING, Status.READY]):
-                        submit_time, start_time, finish_time, status_text = get_job_total_stats(status_code, job_name, tmp_path)
-                        must_update_header = True
-                        to_create.append((exp_id,
-                                          job_name,
-                                          int(timest_pkl),
-                                          int(timest_pkl),
-                                          int(time.mktime(submit_time.timetuple())) if len(str(submit_time)) > 0 else 0,
-                                          int(time.mktime(start_time.timetuple())) if len(str(start_time)) > 0 else 0,
-                                          int(time.mktime(finish_time.timetuple())) if len(str(finish_time)) > 0 else 0,
-                                          status_text))
+        to_update = []
+        to_create = []
+
+        # Read PKL
+        autosubmit_config_facade = ConfigurationFacadeDirector(
+            AutosubmitConfigurationFacadeBuilder(expid)).build_autosubmit_configuration_facade()
+        pkl_organizer = PklOrganizer(autosubmit_config_facade)
+        for job_item in pkl_organizer.current_content:
+            total_jobs += 1
+            status_code = job_item.status
+            job_name = job_item.name
+            found_in_pkl.append(job_name)
+            status_text = str(Status.VALUE_TO_KEY[status_code])
+            if (status_code == Status.COMPLETED):
+                completed_jobs += 1
+            if (experiment_times_detail) and job_name in list(experiment_times_detail.keys()):
+                # If job in pkl exists in database, retrieve data from database
+                submit_time, start_time, finish_time, status_text_in_table, detail_id = experiment_times_detail[job_name]
+                if (status_text_in_table != status_text):
+                    # If status has changed
+                    submit_time, start_time, finish_time, _ = get_job_total_stats(status_code, job_name, tmp_path)
+                    submit_ts = int(time.mktime(submit_time.timetuple())) if len(str(submit_time)) > 0 else 0
+                    start_ts = int(time.mktime(start_time.timetuple())) if len(str(start_time)) > 0 else 0
+                    finish_ts = int(time.mktime(finish_time.timetuple())) if len(str(finish_time)) > 0 else 0
+                    # UPDATE
+                    must_update_header = True
+                    to_update.append((int(timest_pkl),
+                                        submit_ts,
+                                        start_ts,
+                                        finish_ts,
+                                        status_text,
+                                        detail_id))
+
+            else:
+                # Insert only if it is not WAITING nor READY
+                if (status_code not in [Status.WAITING, Status.READY]):
+                    submit_time, start_time, finish_time, status_text = get_job_total_stats(status_code, job_name, tmp_path)
+                    must_update_header = True
+                    to_create.append((exp_id,
+                                        job_name,
+                                        int(timest_pkl),
+                                        int(timest_pkl),
+                                        int(time.mktime(submit_time.timetuple())) if len(str(submit_time)) > 0 else 0,
+                                        int(time.mktime(start_time.timetuple())) if len(str(start_time)) > 0 else 0,
+                                        int(time.mktime(finish_time.timetuple())) if len(str(finish_time)) > 0 else 0,
+                                        status_text))
 
 
-            # Update Many
-            if len(to_update) > 0:
-                DbRequests.update_many_job_times(to_update)
-            # Create Many
-            if len(to_create) > 0:
-                DbRequests.create_many_job_times(to_create)
+        # Update Many
+        if len(to_update) > 0:
+            DbRequests.update_many_job_times(to_update)
+        # Create Many
+        if len(to_create) > 0:
+            DbRequests.create_many_job_times(to_create)
 
-            if must_update_header == True:
-                exp_id = DbRequests.update_experiment_times(exp_id, int(timest_pkl), completed_jobs, total_jobs, debug)
+        if must_update_header == True:
+            exp_id = DbRequests.update_experiment_times(exp_id, int(timest_pkl), completed_jobs, total_jobs, debug)
 
         # Reviewing for deletes:
         if len(found_in_pkl) > 0 and (experiment_times_detail):
@@ -312,13 +316,14 @@ def _process_pkl_insert_times(expid, path_pkl, timest_pkl, BasicConfig, debug=Fa
     status_code = Status.UNKNOWN
     status_text = str(Status.VALUE_TO_KEY[status_code])
     try:
-        fd = []
-        with open(path_pkl, 'rb') as f:
-            fd = pickle.load(f, encoding="latin1")
-        for item in fd:
+        # Read PKL
+        autosubmit_config_facade = ConfigurationFacadeDirector(
+            AutosubmitConfigurationFacadeBuilder(expid)).build_autosubmit_configuration_facade()
+        pkl_organizer = PklOrganizer(autosubmit_config_facade)
+        for job_item in pkl_organizer.current_content:
             total_jobs += 1
-            status_code = int(item[2])
-            job_name = item[0]
+            status_code = job_item.status
+            job_name = job_item.name
             status_text = str(Status.VALUE_TO_KEY[status_code])
             if (status_code == Status.COMPLETED):
                 completed_jobs += 1

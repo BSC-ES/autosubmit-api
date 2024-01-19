@@ -1,11 +1,13 @@
 #!/usr/bin/env python
 import os
 import pickle
-from ..jobs import job_factory as factory
-from ...common.utils import JobSection, PklJob, PklJob14, is_wrapper_type_in_pkl_version, Status
-from ...autosubmit_legacy.job.job_utils import SimpleJob
-from .configuration_facade import AutosubmitConfigurationFacade
-from ..jobs.job_factory import Job
+
+from networkx import DiGraph
+from autosubmit_api.components.jobs import job_factory as factory
+from autosubmit_api.common.utils import JobSection, PklJob, PklJob14, Status
+from autosubmit_api.autosubmit_legacy.job.job_utils import SimpleJob
+from autosubmit_api.components.experiment.configuration_facade import AutosubmitConfigurationFacade
+from autosubmit_api.components.jobs.job_factory import Job
 from typing import List, Dict, Set
 
 
@@ -56,16 +58,35 @@ class PklOrganizer(object):
   def _process_pkl(self):
     # type: () -> None
     if os.path.exists(self.pkl_path):
-      with (open(self.pkl_path, "rb")) as openfile:
-        for item in pickle.load(openfile, encoding="latin1"):
-          try:
-            if len(item) == 13:
-              self.current_content.append(PklJob14(*item))
-            else:
-              self.current_content.append(PklJob(*item))
-          except Exception as ex:
-            print(("Exception while reading the pkl content: {}".format(str(ex))))
-            return
+      try:
+        with (open(self.pkl_path, "rb")) as openfile:
+          obj = pickle.load(openfile, encoding="latin1")
+          if isinstance(obj, DiGraph):
+            for item in obj.nodes(data=True):
+              jobpkl = PklJob14(
+                item[1]["job"].name, 
+                item[1]["job"].id,
+                item[1]["job"].status,
+                item[1]["job"].priority,
+                item[1]["job"].section,
+                item[1]["job"].date,
+                item[1]["job"].member,
+                item[1]["job"].chunk,
+                item[1]["job"].local_logs[0], 
+                item[1]["job"].local_logs[1],
+                item[1]["job"].remote_logs[0],
+                item[1]["job"].remote_logs[1],
+                item[1]["job"].wrapper_type
+              )
+              self.current_content.append(jobpkl)
+          else:
+            for item in obj:
+              if len(item) == 13:
+                self.current_content.append(PklJob14(*item))
+              else:
+                self.current_content.append(PklJob(*item))
+      except Exception as exc:
+        raise Exception("Exception while reading the pkl content: {}".format(str(exc)))
     else:
       raise Exception("Pkl file {0} not found.".format(self.pkl_path))
 
