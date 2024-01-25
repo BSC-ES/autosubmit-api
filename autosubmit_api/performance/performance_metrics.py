@@ -171,7 +171,8 @@ class PerformanceMetrics(object):
       "JPSY": simjob.JPSY,
       "energy": simjob.energy,
       "yps": simjob.years_per_sim,
-      "ncpus": simjob.ncpus
+      "ncpus": simjob.ncpus,
+      "chunk": simjob.chunk
     })
 
   def to_json(self):
