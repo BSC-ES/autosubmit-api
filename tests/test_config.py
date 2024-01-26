@@ -1,5 +1,6 @@
 import os
 import pytest
+from autosubmit_api.common.utils import JobSection
 from autosubmit_api.config.confConfigStrategy import confConfigStrategy
 from autosubmit_api.config.basicConfig import APIBasicConfig
 
@@ -24,8 +25,15 @@ class TestConfigResolver:
         resolver = AutosubmitConfigResolver("----", APIBasicConfig, None)
         assert isinstance(resolver._configWrapper, ymlConfigStrategy)
 
-    def test_files_init_conf(
-        self, fixture_mock_basic_config: fixture_mock_basic_config
-    ):
-        resolver = AutosubmitConfigResolver("a3tb", APIBasicConfig, None)
+    def test_files_init_conf(self, fixture_mock_basic_config):
+        resolver = AutosubmitConfigResolver("a3tb", fixture_mock_basic_config, None)
         assert isinstance(resolver._configWrapper, confConfigStrategy)
+
+
+class TestYMLConfigStrategy:
+    def test_exclusive(self, fixture_mock_basic_config):
+        wrapper = ymlConfigStrategy("a007", fixture_mock_basic_config)
+        assert True == wrapper.get_exclusive(JobSection.SIM)
+
+        wrapper = ymlConfigStrategy("a003", fixture_mock_basic_config)
+        assert False == wrapper.get_exclusive(JobSection.SIM)

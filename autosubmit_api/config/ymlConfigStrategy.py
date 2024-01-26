@@ -156,6 +156,12 @@ class ymlConfigStrategy(IConfigStrategy):
 
     def get_processors_per_node(self, section: str) -> str:
         return self._get_from_job_or_platform(section, "PROCESSORS_PER_NODE", "")
+    
+    def get_exclusive(self, section: str) -> bool:
+        value = self._get_from_job_or_platform(section, "EXCLUSIVE", False)
+        if not isinstance(value, bool):
+            return False
+        return value
 
     def get_scratch_free_space(self, section: str) -> str:
         # return self._conf_parser.get_scratch_free_space(section)

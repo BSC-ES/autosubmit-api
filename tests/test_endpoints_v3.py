@@ -5,6 +5,9 @@ from tests.common_fixtures import fixture_mock_basic_config, fixture_client, fix
 
 class TestPerformance:
     def test_parallelization(self, fixture_client: FlaskClient):
+        """
+        Test parallelization without PROCESSORS_PER_NODE
+        """
         expid = "a007"
         response = fixture_client.get(f"/v3/performance/{expid}")
         resp_obj: dict = response.get_json()
@@ -18,6 +21,9 @@ class TestPerformance:
         assert resp_obj["Parallelization"] == 768
 
     def test_parallelization_platforms(self, fixture_client: FlaskClient):
+        """
+        Test parallelization that comes from default platform
+        """
         expid = "a003"
         response = fixture_client.get(f"/v3/performance/{expid}")
         resp_obj: dict = response.get_json()

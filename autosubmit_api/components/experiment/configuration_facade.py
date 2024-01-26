@@ -132,10 +132,12 @@ class AutosubmitConfigurationFacade(ConfigurationFacade):
       self.sim_tasks = convert_int_default(self.autosubmit_conf._configWrapper.get_tasks(JobSection.SIM))
       self.sim_nodes = convert_int_default(self.autosubmit_conf._configWrapper.get_nodes(JobSection.SIM))
       self.sim_processors_per_node = convert_int_default(self.autosubmit_conf._configWrapper.get_processors_per_node(JobSection.SIM))
+      self.sim_exclusive = self.autosubmit_conf._configWrapper.get_exclusive(JobSection.SIM)
     else:
       self.sim_tasks = None
       self.sim_nodes = None
       self.sim_processors_per_node = None
+      self.sim_exclusive = False
     
     self.sim_processing_elements = self._calculate_processing_elements()
 
@@ -294,6 +296,8 @@ class AutosubmitConfigurationFacade(ConfigurationFacade):
   def _calculate_processing_elements(self) -> int:
     if self.sim_processors_per_node:
       estimated_nodes = self._estimate_requested_nodes()
+      if not self.sim_nodes and not self.sim_exclusive and estimated_nodes <= 1 and self.sim_processors <= self.sim_processors_per_node:
+        return self.sim_processors
       return estimated_nodes * self.sim_processors_per_node
     elif self.sim_tasks or self.sim_nodes:
       warn_msg = 'Missing PROCESSORS_PER_NODE. Should be set if TASKS or NODES are defined. The SIM PROCESSORS will used instead.'
