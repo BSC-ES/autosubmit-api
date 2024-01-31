@@ -15,9 +15,13 @@ JWT_EXP_DELTA_SECONDS = 84000 * 5  # 5 days
 # CAS Stuff
 CAS_SERVER_URL = os.environ.get("CAS_SERVER_URL")
 # e.g: 'https://cas.bsc.es/cas/login'
-CAS_LOGIN_URL = os.environ.get("CAS_LOGIN_URL", CAS_SERVER_URL + "login")
+CAS_LOGIN_URL = os.environ.get(
+    "CAS_LOGIN_URL", (CAS_SERVER_URL + "login") if CAS_SERVER_URL else ""
+)
 # e.g: 'https://cas.bsc.es/cas/serviceValidate'
-CAS_VERIFY_URL = os.environ.get("CAS_VERIFY_URL", CAS_SERVER_URL + "serviceValidate")
+CAS_VERIFY_URL = os.environ.get(
+    "CAS_VERIFY_URL", (CAS_SERVER_URL + "serviceValidate") if CAS_SERVER_URL else ""
+)
 
 # Startup options
 RUN_BACKGROUND_TASKS_ON_START = os.environ.get("RUN_BACKGROUND_TASKS_ON_START") in [
