@@ -1,3 +1,4 @@
+from http import HTTPStatus
 import os
 from datetime import datetime, timedelta
 from typing import Optional
@@ -52,7 +53,7 @@ def login():
             "user": None,
             "token": None,
             "message": "Your client is not authorized for this operation. The API admin needs to add your URL to the list of allowed clients.",
-        }, 401
+        }, HTTPStatus.UNAUTHORIZED
 
     target_service = "{}{}/login".format(referrer, environment)
     if not ticket:
@@ -75,11 +76,13 @@ def login():
             "user": None,
             "token": None,
             "message": "Can't verify user.",
-        }, 401
+        }, HTTPStatus.UNAUTHORIZED
     else:  # Login successful
         payload = {
             "user_id": user,
-            "exp": datetime.utcnow() + timedelta(seconds=JWT_EXP_DELTA_SECONDS),
+            "sub": user,
+            "iat": int(datetime.now().timestamp()),
+            "exp": (datetime.utcnow() + timedelta(seconds=JWT_EXP_DELTA_SECONDS)),
         }
         jwt_token = jwt.encode(payload, JWT_SECRET, JWT_ALGORITHM)
         return {
@@ -100,7 +103,7 @@ def test_token(user_id: Optional[str] = None):
     return {
         "isValid": True if user_id else False,
         "message": "Unauthorized" if not user_id else None,
-    }, 200 if user_id else 401
+    }, HTTPStatus.OK if user_id else HTTPStatus.UNAUTHORIZED
 
 
 @cross_origin(expose_headers="Authorization")
@@ -118,7 +121,7 @@ def update_description(user_id: Optional[str] = None):
         new_description = body_data.get("description", None)
     return (
         update_experiment_description_owner(expid, new_description, user_id),
-        200 if user_id else 401,
+        HTTPStatus.OK if user_id else HTTPStatus.UNAUTHORIZED,
     )
 
 

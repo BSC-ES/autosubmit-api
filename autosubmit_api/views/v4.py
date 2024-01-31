@@ -1,15 +1,18 @@
+from datetime import datetime, timedelta
 from http import HTTPStatus
 import math
 import traceback
 from typing import Optional
-from flask import request
+from flask import redirect, request
 from flask.views import MethodView
+import jwt
 from autosubmit_api.auth import ProtectionLevels, with_auth_token
 from autosubmit_api.builders.experiment_builder import ExperimentBuilder
 from autosubmit_api.builders.experiment_history_builder import (
     ExperimentHistoryBuilder,
     ExperimentHistoryDirector,
 )
+from autosubmit_api.config.basicConfig import APIBasicConfig
 from autosubmit_api.database.common import (
     create_main_db_conn,
     execute_with_limit_offset,
@@ -18,9 +21,87 @@ from autosubmit_api.database.db_common import update_experiment_description_owne
 from autosubmit_api.database.queries import generate_query_listexp_extended
 from autosubmit_api.logger import logger, with_log_run_times
 from autosubmit_api.views import v3
+from cas import CASClient
+from autosubmit_api.config import (
+    JWT_SECRET,
+    JWT_ALGORITHM,
+    JWT_EXP_DELTA_SECONDS,
+    CAS_SERVER_URL,
+)
 
 
 PAGINATION_LIMIT_DEFAULT = 12
+
+
+class CASV2Login(MethodView):
+    decorators = [with_log_run_times(logger, "CASV2LOGIN")]
+
+    def get(self):
+        ticket = request.args.get("ticket")
+        service = request.args.get("service", request.base_url)
+
+        is_allowed_service = False
+        APIBasicConfig.read()
+        for allowed_client in APIBasicConfig.ALLOWED_CLIENTS:
+            if (allowed_client == "*") or (allowed_client in service) or (service == request.base_url):
+                is_allowed_service = True
+            
+
+        if not is_allowed_service:
+            return {
+                "authenticated": False,
+                "user": None,
+                "token": None,
+                "message": "Your service is not authorized for this operation. The API admin needs to add your URL to the list of allowed clients.",
+            }, HTTPStatus.UNAUTHORIZED
+
+        cas_client = CASClient(
+            version=2, service_url=service, server_url=CAS_SERVER_URL
+        )
+
+        if not ticket:
+            # No ticket, the request come from end user, send to CAS login
+            cas_login_url = cas_client.get_login_url()
+            return redirect(cas_login_url)
+
+        # There is a ticket, the request come from CAS as callback.
+        # need call `verify_ticket()` to validate ticket and get user profile.
+        user, attributes, pgtiou = cas_client.verify_ticket(ticket)
+
+        if not user:
+            return {
+                "authenticated": False,
+                "user": None,
+                "token": None,
+                "message": "Can't verify user",
+            }, HTTPStatus.UNAUTHORIZED
+        else:  # Login successful
+            payload = {
+                "user_id": user,
+                "sub": user,
+                "iat": int(datetime.now().timestamp()),
+                "exp": (datetime.utcnow() + timedelta(seconds=JWT_EXP_DELTA_SECONDS)),
+            }
+            jwt_token = jwt.encode(payload, JWT_SECRET, JWT_ALGORITHM)
+            return {
+                "authenticated": True,
+                "user": user,
+                "token": jwt_token,
+                "message": "Token generated",
+            }, HTTPStatus.OK
+
+
+class AuthJWTVerify(MethodView):
+    decorators = [
+        with_auth_token(threshold=ProtectionLevels.NONE, response_on_fail=False),
+        with_log_run_times(logger, "JWTVRF")
+    ]
+
+    def get(self, user_id: Optional[str] = None):
+        return {
+            "authenticated": True if user_id else False,
+            "user": user_id,
+        }, HTTPStatus.OK if user_id else HTTPStatus.UNAUTHORIZED
 
 
 class ExperimentView(MethodView):

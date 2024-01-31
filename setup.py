@@ -51,6 +51,8 @@ setup(
         "gunicorn",
         "pydantic~=2.5.2",
         "SQLAlchemy~=2.0.23",
+        "python-cas>=1.6.0",
+        "Authlib>=1.3.0"
     ],
     include_package_data=True,
     package_data={"autosubmit-api": ["README", "VERSION", "LICENSE"]},
