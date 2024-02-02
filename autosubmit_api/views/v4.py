@@ -7,12 +7,12 @@ from flask import redirect, request
 from flask.views import MethodView
 import jwt
 from autosubmit_api.auth import ProtectionLevels, with_auth_token
+from autosubmit_api.auth.utils import validate_client
 from autosubmit_api.builders.experiment_builder import ExperimentBuilder
 from autosubmit_api.builders.experiment_history_builder import (
     ExperimentHistoryBuilder,
     ExperimentHistoryDirector,
 )
-from autosubmit_api.config.basicConfig import APIBasicConfig
 from autosubmit_api.database.common import (
     create_main_db_conn,
     execute_with_limit_offset,
@@ -40,12 +40,7 @@ class CASV2Login(MethodView):
         ticket = request.args.get("ticket")
         service = request.args.get("service", request.base_url)
 
-        is_allowed_service = False
-        APIBasicConfig.read()
-        for allowed_client in APIBasicConfig.ALLOWED_CLIENTS:
-            if (allowed_client == "*") or (allowed_client in service) or (service == request.base_url):
-                is_allowed_service = True
-            
+        is_allowed_service = (service == request.base_url) or validate_client(service)
 
         if not is_allowed_service:
             return {
@@ -94,7 +89,7 @@ class CASV2Login(MethodView):
 class AuthJWTVerify(MethodView):
     decorators = [
         with_auth_token(threshold=ProtectionLevels.NONE, response_on_fail=False),
-        with_log_run_times(logger, "JWTVRF")
+        with_log_run_times(logger, "JWTVRF"),
     ]
 
     def get(self, user_id: Optional[str] = None):

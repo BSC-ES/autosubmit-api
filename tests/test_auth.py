@@ -1,6 +1,10 @@
+from uuid import uuid4
 import pytest
 from autosubmit_api.auth import ProtectionLevels, with_auth_token
 from autosubmit_api import auth
+from autosubmit_api.auth.utils import validate_client
+from autosubmit_api.config.basicConfig import APIBasicConfig
+from tests.common_fixtures import fixture_mock_basic_config
 from tests.custom_utils import custom_return_value, dummy_response
 
 
@@ -69,3 +73,19 @@ class TestCommonAuth:
 
         _, code = with_auth_token(threshold=ProtectionLevels.NONE)(dummy_response)()
         assert code == 401
+
+    def test_validate_client(
+        self, monkeypatch: pytest.MonkeyPatch, fixture_mock_basic_config
+    ):
+        # No ALLOWED_CLIENTS
+        monkeypatch.setattr(APIBasicConfig, "ALLOWED_CLIENTS", [])
+        assert False == validate_client(str(uuid4()))
+
+        # Wildcard ALLOWED_CLIENTS
+        monkeypatch.setattr(APIBasicConfig, "ALLOWED_CLIENTS", ["*"])
+        assert True == validate_client(str(uuid4()))
+
+        # Registered client. The received with longer path
+        random_client = str(uuid4())
+        monkeypatch.setattr(APIBasicConfig, "ALLOWED_CLIENTS", [random_client])
+        assert True == validate_client(random_client + str(uuid4()))

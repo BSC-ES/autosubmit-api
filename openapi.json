@@ -167,6 +167,7 @@
             "name": "exp_type",
             "in": "query",
             "schema": {
+              "type": "string",
               "enum": [
                 "test",
                 "operational",
@@ -178,6 +179,7 @@
             "name": "order_by",
             "in": "query",
             "schema": {
+              "type": "string",
               "enum": [
                 "expid",
                 "created",
@@ -345,6 +347,145 @@
                         "total_items": 9,
                         "total_pages": 5
                       }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v4/auth/verify-token": {
+      "get": {
+        "tags": [
+          "v4"
+        ],
+        "summary": "Verify JWT Token",
+        "operationId": "get-v4-auth-verify-token",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "description": "JWT Token",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "authenticated": {
+                      "type": "boolean"
+                    },
+                    "user": {
+                      "type": "string",
+                      "nullable": true
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "authenticated": {
+                      "type": "boolean"
+                    },
+                    "user": {
+                      "type": "string",
+                      "nullable": true
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v4/auth/cas/v2/login": {
+      "get": {
+        "tags": [
+          "v4"
+        ],
+        "summary": "CAS v2 Login",
+        "operationId": "get-v4-auth-cas-v2-login",
+        "parameters": [
+          {
+            "name": "ticket",
+            "in": "query",
+            "description": "CAS ticket",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "service",
+            "in": "query",
+            "description": "CAS service",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "authenticated": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "token": {
+                      "type": "string"
+                    },
+                    "user": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "302": {
+            "description": "Redirect to CAS login form"
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "authenticated": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "token": {
+                      "type": "string"
+                    },
+                    "user": {
+                      "type": "string"
                     }
                   }
                 }
