@@ -7,7 +7,6 @@ from autosubmit_api.config.basicConfig import APIBasicConfig
 from autosubmit_api.config.config_common import AutosubmitConfigResolver
 from autosubmit_api.config.ymlConfigStrategy import ymlConfigStrategy
 
-from tests.common_fixtures import fixture_mock_basic_config
 from tests.custom_utils import custom_return_value
 
 

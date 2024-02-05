@@ -1,3 +1,6 @@
+# Conftest file for sharing fixtures 
+# Reference: https://docs.pytest.org/en/latest/reference/fixtures.html#conftest-py-sharing-fixtures-across-multiple-files
+
 import os
 from flask import Flask
 import pytest

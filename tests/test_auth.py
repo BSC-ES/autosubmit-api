@@ -4,7 +4,6 @@ from autosubmit_api.auth import ProtectionLevels, with_auth_token
 from autosubmit_api import auth
 from autosubmit_api.auth.utils import validate_client
 from autosubmit_api.config.basicConfig import APIBasicConfig
-from tests.common_fixtures import fixture_mock_basic_config
 from tests.custom_utils import custom_return_value, dummy_response
 
 

@@ -22,12 +22,7 @@ from autosubmit_api.database.queries import generate_query_listexp_extended
 from autosubmit_api.logger import logger, with_log_run_times
 from autosubmit_api.views import v3
 from cas import CASClient
-from autosubmit_api.config import (
-    JWT_SECRET,
-    JWT_ALGORITHM,
-    JWT_EXP_DELTA_SECONDS,
-    CAS_SERVER_URL,
-)
+from autosubmit_api import config
 
 
 PAGINATION_LIMIT_DEFAULT = 12
@@ -51,7 +46,7 @@ class CASV2Login(MethodView):
             }, HTTPStatus.UNAUTHORIZED
 
         cas_client = CASClient(
-            version=2, service_url=service, server_url=CAS_SERVER_URL
+            version=2, service_url=service, server_url=config.CAS_SERVER_URL
         )
 
         if not ticket:
@@ -75,9 +70,9 @@ class CASV2Login(MethodView):
                 "user_id": user,
                 "sub": user,
                 "iat": int(datetime.now().timestamp()),
-                "exp": (datetime.utcnow() + timedelta(seconds=JWT_EXP_DELTA_SECONDS)),
+                "exp": (datetime.utcnow() + timedelta(seconds=config.JWT_EXP_DELTA_SECONDS)),
             }
-            jwt_token = jwt.encode(payload, JWT_SECRET, JWT_ALGORITHM)
+            jwt_token = jwt.encode(payload, config.JWT_SECRET, config.JWT_ALGORITHM)
             return {
                 "authenticated": True,
                 "user": user,

@@ -1,6 +1,83 @@
+from datetime import datetime, timedelta
+from http import HTTPStatus
+from uuid import uuid4
 from flask.testing import FlaskClient
+import jwt
+from autosubmit_api import config
+import pytest
+from autosubmit_api.config.basicConfig import APIBasicConfig
 
-from tests.common_fixtures import fixture_mock_basic_config, fixture_client, fixture_app
+
+class TestLogin:
+    endpoint = f"/v3/login"
+
+    def test_not_allowed_client(
+        self,
+        fixture_client: FlaskClient,
+        fixture_mock_basic_config: APIBasicConfig,
+        monkeypatch: pytest.MonkeyPatch,
+    ):
+        monkeypatch.setattr(APIBasicConfig, "ALLOWED_CLIENTS", [])
+
+        response = fixture_client.get(self.endpoint)
+        resp_obj: dict = response.get_json()
+        
+        assert response.status_code == HTTPStatus.UNAUTHORIZED
+        assert resp_obj.get("authenticated") == False
+
+    def test_redirect(
+        self,
+        fixture_client: FlaskClient,
+        fixture_mock_basic_config: APIBasicConfig,
+        monkeypatch: pytest.MonkeyPatch,
+    ): 
+        random_referer = str(f"https://${str(uuid4())}/")
+        monkeypatch.setattr(APIBasicConfig, "ALLOWED_CLIENTS", [random_referer])
+
+        response = fixture_client.get(self.endpoint, headers={
+            "Referer": random_referer
+        })
+        
+        assert response.status_code == HTTPStatus.FOUND
+        assert config.CAS_LOGIN_URL in response.location
+        assert random_referer in response.location
+
+
+class TestVerifyToken:
+    def test_unauthorized_no_token(self, fixture_client: FlaskClient):
+        response = fixture_client.get(f"/v3/tokentest")
+        resp_obj: dict = response.get_json()
+
+        assert response.status_code == HTTPStatus.UNAUTHORIZED
+        assert resp_obj.get("isValid") == False
+
+    def test_unauthorized_random_token(self, fixture_client: FlaskClient):
+        random_token = str(uuid4())
+        response = fixture_client.get(
+            f"/v3/tokentest", headers={"Authorization": random_token}
+        )
+        resp_obj: dict = response.get_json()
+
+        assert response.status_code == HTTPStatus.UNAUTHORIZED
+        assert resp_obj.get("isValid") == False
+
+    def test_authorized(self, fixture_client: FlaskClient):
+        random_user = str(uuid4())
+        payload = {
+            "user_id": random_user,
+            "exp": (
+                datetime.utcnow() + timedelta(seconds=config.JWT_EXP_DELTA_SECONDS)
+            ),
+        }
+        jwt_token = jwt.encode(payload, config.JWT_SECRET, config.JWT_ALGORITHM)
+
+        response = fixture_client.get(
+            f"/v3/tokentest", headers={"Authorization": jwt_token}
+        )
+        resp_obj: dict = response.get_json()
+
+        assert response.status_code == HTTPStatus.OK
+        assert resp_obj.get("isValid") == True
 
 
 class TestPerformance:
