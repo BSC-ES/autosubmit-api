@@ -182,11 +182,47 @@ class TestQuick:
 class TestGraph:
     endpoint = "/v3/graph/{expid}/{graph_type}/{grouped}"
 
-    def test_graph(self, fixture_client: FlaskClient):
+    def test_graph_standard_none(self, fixture_client: FlaskClient):
         expid = "a003"
         random_user = str(uuid4())
         response = fixture_client.get(
             self.endpoint.format(expid=expid, graph_type="standard", grouped="none"),
+            query_string={"loggedUser": random_user},
+        )
+        resp_obj: dict = response.get_json()
+
+        assert resp_obj["error"] == False
+        assert resp_obj["total_jobs"] == len(resp_obj["nodes"])
+
+    def test_graph_standard_datemember(self, fixture_client: FlaskClient):
+        expid = "a003"
+        random_user = str(uuid4())
+        response = fixture_client.get(
+            self.endpoint.format(expid=expid, graph_type="standard", grouped="date-member"),
+            query_string={"loggedUser": random_user},
+        )
+        resp_obj: dict = response.get_json()
+
+        assert resp_obj["error"] == False
+        assert resp_obj["total_jobs"] == len(resp_obj["nodes"])
+
+    def test_graph_standard_status(self, fixture_client: FlaskClient):
+        expid = "a003"
+        random_user = str(uuid4())
+        response = fixture_client.get(
+            self.endpoint.format(expid=expid, graph_type="standard", grouped="status"),
+            query_string={"loggedUser": random_user},
+        )
+        resp_obj: dict = response.get_json()
+
+        assert resp_obj["error"] == False
+        assert resp_obj["total_jobs"] == len(resp_obj["nodes"])
+
+    def test_graph_laplacian_none(self, fixture_client: FlaskClient):
+        expid = "a003"
+        random_user = str(uuid4())
+        response = fixture_client.get(
+            self.endpoint.format(expid=expid, graph_type="laplacian", grouped="none"),
             query_string={"loggedUser": random_user},
         )
         resp_obj: dict = response.get_json()
