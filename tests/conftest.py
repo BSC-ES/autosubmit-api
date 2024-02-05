@@ -13,6 +13,10 @@ FAKE_EXP_DIR = "./tests/experiments/"
 
 
 #### FIXTURES ####
+@pytest.fixture(autouse=True)
+def fixture_disable_protection(monkeypatch: pytest.MonkeyPatch):
+    monkeypatch.setenv("PROTECTION_LEVEL", "NONE")
+
 @pytest.fixture
 def fixture_mock_basic_config(monkeypatch: pytest.MonkeyPatch):
     # Patch APIBasicConfig parent BasicConfig

@@ -9,7 +9,7 @@ from autosubmit_api.config.basicConfig import APIBasicConfig
 
 
 class TestLogin:
-    endpoint = f"/v3/login"
+    endpoint = "/v3/login"
 
     def test_not_allowed_client(
         self,
@@ -21,7 +21,7 @@ class TestLogin:
 
         response = fixture_client.get(self.endpoint)
         resp_obj: dict = response.get_json()
-        
+
         assert response.status_code == HTTPStatus.UNAUTHORIZED
         assert resp_obj.get("authenticated") == False
 
@@ -30,22 +30,24 @@ class TestLogin:
         fixture_client: FlaskClient,
         fixture_mock_basic_config: APIBasicConfig,
         monkeypatch: pytest.MonkeyPatch,
-    ): 
+    ):
         random_referer = str(f"https://${str(uuid4())}/")
         monkeypatch.setattr(APIBasicConfig, "ALLOWED_CLIENTS", [random_referer])
 
-        response = fixture_client.get(self.endpoint, headers={
-            "Referer": random_referer
-        })
-        
+        response = fixture_client.get(
+            self.endpoint, headers={"Referer": random_referer}
+        )
+
         assert response.status_code == HTTPStatus.FOUND
         assert config.CAS_LOGIN_URL in response.location
         assert random_referer in response.location
 
 
 class TestVerifyToken:
+    endpoint = "/v3/tokentest"
+
     def test_unauthorized_no_token(self, fixture_client: FlaskClient):
-        response = fixture_client.get(f"/v3/tokentest")
+        response = fixture_client.get(self.endpoint)
         resp_obj: dict = response.get_json()
 
         assert response.status_code == HTTPStatus.UNAUTHORIZED
@@ -54,7 +56,7 @@ class TestVerifyToken:
     def test_unauthorized_random_token(self, fixture_client: FlaskClient):
         random_token = str(uuid4())
         response = fixture_client.get(
-            f"/v3/tokentest", headers={"Authorization": random_token}
+            self.endpoint, headers={"Authorization": random_token}
         )
         resp_obj: dict = response.get_json()
 
@@ -72,7 +74,7 @@ class TestVerifyToken:
         jwt_token = jwt.encode(payload, config.JWT_SECRET, config.JWT_ALGORITHM)
 
         response = fixture_client.get(
-            f"/v3/tokentest", headers={"Authorization": jwt_token}
+            self.endpoint, headers={"Authorization": jwt_token}
         )
         resp_obj: dict = response.get_json()
 
@@ -80,19 +82,33 @@ class TestVerifyToken:
         assert resp_obj.get("isValid") == True
 
 
+class TestExpInfo:
+    endpoint = "/v3/expinfo/{expid}"
+
+    def test_info(self, fixture_client: FlaskClient):
+        expid = "a003"
+        response = fixture_client.get(self.endpoint.format(expid=expid))
+        resp_obj: dict = response.get_json()
+        assert resp_obj["error"] == False
+        assert resp_obj["expid"] == expid
+        assert resp_obj["total_jobs"] == 8
+
+
 class TestPerformance:
+    endpoint = "/v3/performance/{expid}"
+
     def test_parallelization(self, fixture_client: FlaskClient):
         """
         Test parallelization without PROCESSORS_PER_NODE
         """
         expid = "a007"
-        response = fixture_client.get(f"/v3/performance/{expid}")
+        response = fixture_client.get(self.endpoint.format(expid=expid))
         resp_obj: dict = response.get_json()
         assert resp_obj["error"] == False
         assert resp_obj["Parallelization"] == 8
 
         expid = "a3tb"
-        response = fixture_client.get(f"/v3/performance/{expid}")
+        response = fixture_client.get(self.endpoint.format(expid=expid))
         resp_obj: dict = response.get_json()
         assert resp_obj["error"] == False
         assert resp_obj["Parallelization"] == 768
@@ -102,16 +118,48 @@ class TestPerformance:
         Test parallelization that comes from default platform
         """
         expid = "a003"
-        response = fixture_client.get(f"/v3/performance/{expid}")
+        response = fixture_client.get(self.endpoint.format(expid=expid))
         resp_obj: dict = response.get_json()
         assert resp_obj["error"] == False
         assert resp_obj["Parallelization"] == 16
 
 
 class TestTree:
+    endpoint = "/v3/tree/{expid}"
+
     def test_tree(self, fixture_client: FlaskClient):
         expid = "a003"
-        response = fixture_client.get(f"/v3/tree/{expid}")
+        random_user = str(uuid4())
+        response = fixture_client.get(
+            self.endpoint.format(expid=expid),
+            query_string={"loggedUser": random_user},
+        )
+        resp_obj: dict = response.get_json()
+
+        assert resp_obj["error"] == False
+        assert resp_obj["total"] == 8
+
+
+class TestRunsList:
+    endpoint = "/v3/runs/{expid}"
+
+    def test_runs_list(self, fixture_client: FlaskClient):
+        expid = "a003"
+
+        response = fixture_client.get(self.endpoint.format(expid=expid))
+        resp_obj: dict = response.get_json()
+
+        assert resp_obj["error"] == False
+        assert isinstance(resp_obj["runs"], list)
+
+
+class TestRunDetail:
+    endpoint = "/v3/rundetail/{expid}/{runId}"
+
+    def test_runs_detail(self, fixture_client: FlaskClient):
+        expid = "a003"
+
+        response = fixture_client.get(self.endpoint.format(expid=expid, runId=2))
         resp_obj: dict = response.get_json()
 
         assert resp_obj["error"] == False
@@ -119,9 +167,11 @@ class TestTree:
 
 
 class TestQuick:
+    endpoint = "/v3/quick/{expid}"
+
     def test_quick(self, fixture_client: FlaskClient):
         expid = "a007"
-        response = fixture_client.get(f"/v3/quick/{expid}")
+        response = fixture_client.get(self.endpoint.format(expid=expid))
         resp_obj: dict = response.get_json()
 
         assert resp_obj["error"] == False
@@ -130,9 +180,15 @@ class TestQuick:
 
 
 class TestGraph:
+    endpoint = "/v3/graph/{expid}/{graph_type}/{grouped}"
+
     def test_graph(self, fixture_client: FlaskClient):
         expid = "a003"
-        response = fixture_client.get(f"/v3/graph/{expid}/standard/none")
+        random_user = str(uuid4())
+        response = fixture_client.get(
+            self.endpoint.format(expid=expid, graph_type="standard", grouped="none"),
+            query_string={"loggedUser": random_user},
+        )
         resp_obj: dict = response.get_json()
 
         assert resp_obj["error"] == False
@@ -140,9 +196,11 @@ class TestGraph:
 
 
 class TestExpCount:
+    endpoint = "/v3/expcount/{expid}"
+
     def test_exp_count(self, fixture_client: FlaskClient):
         expid = "a007"
-        response = fixture_client.get(f"/v3/expcount/{expid}")
+        response = fixture_client.get(self.endpoint.format(expid=expid))
         resp_obj: dict = response.get_json()
 
         assert resp_obj["error"] == False
@@ -153,9 +211,15 @@ class TestExpCount:
 
 
 class TestSummary:
+    endpoint = "/v3/summary/{expid}"
+
     def test_summary(self, fixture_client: FlaskClient):
         expid = "a007"
-        response = fixture_client.get(f"/v3/summary/{expid}")
+        random_user = str(uuid4())
+        response = fixture_client.get(
+            self.endpoint.format(expid=expid),
+            query_string={"loggedUser": random_user},
+        )
         resp_obj: dict = response.get_json()
 
         assert resp_obj["error"] == False

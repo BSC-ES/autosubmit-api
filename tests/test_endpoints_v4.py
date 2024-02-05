@@ -11,7 +11,7 @@ from tests.custom_utils import custom_return_value
 
 
 class TestCASV2Login:
-    endpoint = f"/v4/auth/cas/v2/login"
+    endpoint = "/v4/auth/cas/v2/login"
 
     def test_redirect(
         self, fixture_client: FlaskClient, monkeypatch: pytest.MonkeyPatch
@@ -28,14 +28,15 @@ class TestCASV2Login:
     def test_invalid_client(
         self, fixture_client: FlaskClient, monkeypatch: pytest.MonkeyPatch
     ):
-        monkeypatch.setattr("autosubmit_api.views.v4.validate_client", custom_return_value(False))
-        response = fixture_client.get(self.endpoint, query_string={
-            "service": "asd"
-        })
+        monkeypatch.setattr(
+            "autosubmit_api.views.v4.validate_client", custom_return_value(False)
+        )
+        response = fixture_client.get(self.endpoint, query_string={"service": "asd"})
         assert response.status_code == HTTPStatus.UNAUTHORIZED
 
+
 class TestJWTVerify:
-    endpoint = f"/v4/auth/verify-token"
+    endpoint = "/v4/auth/verify-token"
 
     def test_unauthorized_no_token(self, fixture_client: FlaskClient):
         response = fixture_client.get(self.endpoint)
@@ -79,7 +80,7 @@ class TestJWTVerify:
 
 
 class TestExperimentList:
-    endpoint = f"/v4/experiments"
+    endpoint = "/v4/experiments"
 
     def test_page_size(self, fixture_client: FlaskClient):
         # Default page size
