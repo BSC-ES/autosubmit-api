@@ -1,0 +1,6 @@
+2023-10-16 15:21:51,815 Autosubmit is running with 4.0.95
+2023-10-16 15:21:51,822 The project folder /home/ltenorio/autosubmit/a003/proj has been created.
+2023-10-16 15:21:51,822 Cloning main https://earth.bsc.es/gitlab/ces/auto-advanced_config_example into /home/ltenorio/autosubmit/a003/proj
+2023-10-16 15:21:51,822 Clone command:  git clone --single-branch -b main https://earth.bsc.es/gitlab/ces/auto-advanced_config_example git_project;
+2023-10-16 15:21:52,600 Githook + Checkout and Submodules:  cd /home/ltenorio/autosubmit/a003/proj/git_project; git checkout;  git submodule init;  git submodule update --init --recursive ;  
+2023-10-16 15:21:52,635 Project folder updated

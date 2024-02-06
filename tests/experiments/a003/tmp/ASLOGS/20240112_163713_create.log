@@ -1,0 +1,64 @@
+2024-01-12 16:37:15,358 Autosubmit is running with 4.0.100
+2024-01-12 16:37:15,361 Preparing .lock file to avoid multiple instances with same expid.
+2024-01-12 16:37:15,378 Using project folder: /home/ltenorio/autosubmit/a003/proj
+2024-01-12 16:37:15,378 The project folder exists. SKIPPING...
+2024-01-12 16:37:15,378 
+Checking configuration files...
+2024-01-12 16:37:15,399 Expdef config file is correct
+2024-01-12 16:37:15,399 Platforms sections: OK
+2024-01-12 16:37:15,399 Jobs sections OK
+2024-01-12 16:37:15,399 Autosubmit general sections OK
+2024-01-12 16:37:15,399 Configuration files OK
+
+2024-01-12 16:37:15,399 Loading parameters...
+2024-01-12 16:37:15,403 
+Creating the jobs list...
+2024-01-12 16:37:15,405 Creating jobs...
+2024-01-12 16:37:15,405 Loading JobList
+2024-01-12 16:37:15,405 Creating LOCAL_SETUP jobs
+2024-01-12 16:37:15,405 Creating REMOTE_SETUP jobs
+2024-01-12 16:37:15,405 Creating INI jobs
+2024-01-12 16:37:15,405 Creating SIM jobs
+2024-01-12 16:37:15,405 Creating POST jobs
+2024-01-12 16:37:15,405 Creating CLEAN jobs
+2024-01-12 16:37:15,405 Creating TRANSFER jobs
+2024-01-12 16:37:15,405 Adding dependencies...
+2024-01-12 16:37:15,405 Adding dependencies for LOCAL_SETUP jobs
+2024-01-12 16:37:15,405 Adding dependencies for REMOTE_SETUP jobs
+2024-01-12 16:37:15,405 Adding dependencies for INI jobs
+2024-01-12 16:37:15,405 Adding dependencies for SIM jobs
+2024-01-12 16:37:15,406 Adding dependencies for POST jobs
+2024-01-12 16:37:15,406 Adding dependencies for CLEAN jobs
+2024-01-12 16:37:15,406 Adding dependencies for TRANSFER jobs
+2024-01-12 16:37:15,406 Removing redundant dependencies...
+2024-01-12 16:37:15,406 File jobs_a003.yml was not found.
+2024-01-12 16:37:15,406 Using existing valid structure.
+2024-01-12 16:37:15,406 Looking for edgeless jobs...
+2024-01-12 16:37:15,406 Creating jobs...
+2024-01-12 16:37:15,406 Creating LOCAL_SETUP jobs
+2024-01-12 16:37:15,406 Creating REMOTE_SETUP jobs
+2024-01-12 16:37:15,406 Creating INI jobs
+2024-01-12 16:37:15,406 Creating SIM jobs
+2024-01-12 16:37:15,406 Creating POST jobs
+2024-01-12 16:37:15,406 Creating CLEAN jobs
+2024-01-12 16:37:15,407 Creating TRANSFER jobs
+2024-01-12 16:37:15,407 Adding dependencies...
+2024-01-12 16:37:15,407 Adding dependencies for LOCAL_SETUP jobs
+2024-01-12 16:37:15,407 Adding dependencies for REMOTE_SETUP jobs
+2024-01-12 16:37:15,407 Adding dependencies for INI jobs
+2024-01-12 16:37:15,407 Adding dependencies for SIM jobs
+2024-01-12 16:37:15,407 Adding dependencies for POST jobs
+2024-01-12 16:37:15,407 Adding dependencies for CLEAN jobs
+2024-01-12 16:37:15,407 Adding dependencies for TRANSFER jobs
+2024-01-12 16:37:15,407 Removing redundant dependencies...
+2024-01-12 16:37:15,407 Updating structure persistence...
+2024-01-12 16:37:15,417 Looking for edgeless jobs...
+2024-01-12 16:37:15,418 
+Saving the jobs list...
+2024-01-12 16:37:15,418 Saving JobList: /home/ltenorio/autosubmit/a003/pkl/job_list_a003.pkl
+2024-01-12 16:37:15,418 Job list saved
+2024-01-12 16:37:15,453 Backing up jobs_data...
+2024-01-12 16:37:15,457 Jobs_data database backup completed.
+2024-01-12 16:37:15,458 
+Job list created successfully
+[WARNING] 2024-01-12 16:37:15,458 Remember to MODIFY the MODEL config files!

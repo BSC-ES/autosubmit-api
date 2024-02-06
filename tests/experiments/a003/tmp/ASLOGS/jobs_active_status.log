@@ -1,0 +1,7 @@
+
+Job Name                           Job Id         Job Status     Job Platform        Job Queue      
+a003_20220401_fc0_1_SIM            1590577        COMPLETED      local                              
+a003_20220401_fc0_2_SIM            1590980        COMPLETED      local                              
+a003_POST                          1591056        COMPLETED      local                              
+a003_CLEAN                         1591094        COMPLETED      local                              
+a003_20220401_fc0_TRANSFER         1591131        COMPLETED      local                              

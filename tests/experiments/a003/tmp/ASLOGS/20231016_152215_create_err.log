@@ -1,0 +1,4 @@
+[CRITICAL] 2023-10-16 15:22:16,309 Current experiment uses (4.0.0) which is not the running Autosubmit version  
+Please, update the experiment version if you wish to continue using AutoSubmit 4.0.95
+You can achieve this using the command autosubmit updateversion a003 
+Or with the -v parameter: autosubmit create a003 -v  [eCode=7014]

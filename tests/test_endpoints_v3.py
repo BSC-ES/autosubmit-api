@@ -198,7 +198,9 @@ class TestGraph:
         expid = "a003"
         random_user = str(uuid4())
         response = fixture_client.get(
-            self.endpoint.format(expid=expid, graph_type="standard", grouped="date-member"),
+            self.endpoint.format(
+                expid=expid, graph_type="standard", grouped="date-member"
+            ),
             query_string={"loggedUser": random_user},
         )
         resp_obj: dict = response.get_json()
@@ -260,3 +262,79 @@ class TestSummary:
 
         assert resp_obj["error"] == False
         assert resp_obj["n_sim"] > 0
+
+
+class TestStatistics:
+    endpoint = "/v3/stats/{expid}/{period}/{section}"
+
+    def test_period_none(self, fixture_client: FlaskClient):
+        expid = "a003"
+        response = fixture_client.get(
+            self.endpoint.format(expid=expid, period=0, section="Any")
+        )
+        resp_obj: dict = response.get_json()
+
+        assert resp_obj["error"] == False
+        assert resp_obj["Statistics"]["Period"]["From"] == "None"
+
+
+class TestCurrentConfig:
+    endpoint = "/v3/cconfig/{expid}"
+
+    def test_current_config(self, fixture_client: FlaskClient):
+        expid = "a007"
+        response = fixture_client.get(self.endpoint.format(expid=expid))
+        resp_obj: dict = response.get_json()
+
+        assert resp_obj["error"] == False
+        assert (
+            resp_obj["configuration_filesystem"]["CONFIG"]["AUTOSUBMIT_VERSION"]
+            == "4.0.95"
+        )
+        assert (
+            resp_obj["configuration_current_run"]["CONFIG"]["AUTOSUBMIT_VERSION"]
+            == "4.0.101"
+        )
+
+
+class TestPklInfo:
+    endpoint = "/v3/pklinfo/{expid}/{timestamp}"
+
+    def test_pkl_info(self, fixture_client: FlaskClient):
+        expid = "a003"
+        response = fixture_client.get(self.endpoint.format(expid=expid, timestamp=0))
+        resp_obj: dict = response.get_json()
+
+        assert resp_obj["error"] == False
+        assert len(resp_obj["pkl_content"]) == 8
+
+        for job_obj in resp_obj["pkl_content"]:
+            assert job_obj["name"][:4] == expid
+
+
+class TestPklTreeInfo:
+    endpoint = "/v3/pkltreeinfo/{expid}/{timestamp}"
+
+    def test_pkl_tree_info(self, fixture_client: FlaskClient):
+        expid = "a003"
+        response = fixture_client.get(self.endpoint.format(expid=expid, timestamp=0))
+        resp_obj: dict = response.get_json()
+
+        assert resp_obj["error"] == False
+        assert len(resp_obj["pkl_content"]) == 8
+
+        for job_obj in resp_obj["pkl_content"]:
+            assert job_obj["name"][:4] == expid
+
+
+class TestExpRunLog:
+    endpoint = "/v3/exprun/{expid}"
+
+    def test_exp_run_log(self, fixture_client: FlaskClient):
+        expid = "a003"
+        response = fixture_client.get(self.endpoint.format(expid=expid))
+        resp_obj: dict = response.get_json()
+
+        assert resp_obj["error"] == False
+        assert resp_obj["found"] == True
+

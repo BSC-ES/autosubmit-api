@@ -1,0 +1,79 @@
+2023-10-16 15:22:24,583 The a003 experiment 4.0.0 version is being updated to 4.0.95 for match autosubmit version
+2023-10-16 15:22:24,589 Autosubmit is running with 4.0.95
+2023-10-16 15:22:24,594 Preparing .lock file to avoid multiple instances with same expid.
+2023-10-16 15:22:24,602 Using project folder: /home/ltenorio/autosubmit/a003/proj
+2023-10-16 15:22:24,602 The project folder exists. SKIPPING...
+2023-10-16 15:22:24,602 
+Checking configuration files...
+2023-10-16 15:22:24,617 Expdef config file is correct
+2023-10-16 15:22:24,617 Platforms sections: OK
+2023-10-16 15:22:24,618 Jobs sections OK
+2023-10-16 15:22:24,618 Autosubmit general sections OK
+2023-10-16 15:22:24,618 Configuration files OK
+
+2023-10-16 15:22:24,618 Loading parameters...
+2023-10-16 15:22:24,623 
+Creating the jobs list...
+2023-10-16 15:22:24,625 Creating jobs...
+2023-10-16 15:22:24,625 Loading JobList
+[WARNING] 2023-10-16 15:22:24,625 File /home/ltenorio/autosubmit/a003/pkl/job_list_a003.pkl does not exist[eCode=3000]
+2023-10-16 15:22:24,625 Creating LOCAL_SETUP jobs
+2023-10-16 15:22:24,625 Creating REMOTE_SETUP jobs
+2023-10-16 15:22:24,625 Creating INI jobs
+2023-10-16 15:22:24,625 Creating SIM jobs
+2023-10-16 15:22:24,625 Creating POST jobs
+2023-10-16 15:22:24,625 Creating CLEAN jobs
+2023-10-16 15:22:24,625 Creating TRANSFER jobs
+2023-10-16 15:22:24,625 Adding dependencies...
+2023-10-16 15:22:24,625 Adding dependencies for LOCAL_SETUP jobs
+2023-10-16 15:22:24,625 Adding dependencies for REMOTE_SETUP jobs
+2023-10-16 15:22:24,625 Adding dependencies for INI jobs
+2023-10-16 15:22:24,625 Adding dependencies for SIM jobs
+2023-10-16 15:22:24,625 Adding dependencies for POST jobs
+2023-10-16 15:22:24,626 Adding dependencies for CLEAN jobs
+2023-10-16 15:22:24,626 Adding dependencies for TRANSFER jobs
+2023-10-16 15:22:24,626 Removing redundant dependencies...
+2023-10-16 15:22:24,626 Updating structure persistence...
+2023-10-16 15:22:24,638 Looking for edgeless jobs...
+2023-10-16 15:22:24,638 Creating jobs...
+2023-10-16 15:22:24,638 Creating LOCAL_SETUP jobs
+2023-10-16 15:22:24,638 Creating REMOTE_SETUP jobs
+2023-10-16 15:22:24,638 Creating INI jobs
+2023-10-16 15:22:24,638 Creating SIM jobs
+2023-10-16 15:22:24,638 Creating POST jobs
+2023-10-16 15:22:24,638 Creating CLEAN jobs
+2023-10-16 15:22:24,638 Creating TRANSFER jobs
+2023-10-16 15:22:24,638 Adding dependencies...
+2023-10-16 15:22:24,638 Adding dependencies for LOCAL_SETUP jobs
+2023-10-16 15:22:24,638 Adding dependencies for REMOTE_SETUP jobs
+2023-10-16 15:22:24,638 Adding dependencies for INI jobs
+2023-10-16 15:22:24,638 Adding dependencies for SIM jobs
+2023-10-16 15:22:24,638 Adding dependencies for POST jobs
+2023-10-16 15:22:24,639 Adding dependencies for CLEAN jobs
+2023-10-16 15:22:24,639 Adding dependencies for TRANSFER jobs
+2023-10-16 15:22:24,639 Removing redundant dependencies...
+2023-10-16 15:22:24,639 Updating structure persistence...
+2023-10-16 15:22:24,649 Looking for edgeless jobs...
+2023-10-16 15:22:24,649 
+Saving the jobs list...
+2023-10-16 15:22:24,650 Saving JobList: /home/ltenorio/autosubmit/a003/pkl/job_list_a003.pkl
+2023-10-16 15:22:24,650 Job list saved
+2023-10-16 15:22:24,747 Backing up jobs_data...
+2023-10-16 15:22:24,756 Jobs_data database backup completed.
+2023-10-16 15:22:24,756 
+Saving unified data..
+2023-10-16 15:22:24,763 
+2023-10-16 15:22:24,763 
+Plotting the jobs list...
+2023-10-16 15:22:24,763 Plotting...
+2023-10-16 15:22:24,763 Creating workflow graph...
+2023-10-16 15:22:24,763 Creating legend...
+2023-10-16 15:22:24,765 Creating job graph...
+2023-10-16 15:22:24,766 Graph definition finalized
+2023-10-16 15:22:24,766 Saving workflow plot at '/home/ltenorio/autosubmit/a003/plot/a003_20231016_1522.pdf'
+2023-10-16 15:22:24,781 Plot created at /home/ltenorio/autosubmit/a003/plot/a003_20231016_1522.pdf
+2023-10-16 15:22:24,781 Writing status txt...
+2023-10-16 15:22:24,781 Status txt created at <_io.TextIOWrapper name='/home/ltenorio/autosubmit/a003/status/a003_20231016_1522.txt' mode='w+' encoding='UTF-8'>
+2023-10-16 15:22:27,154 
+Job list created successfully
+[WARNING] 2023-10-16 15:22:27,154 Remember to MODIFY the MODEL config files!

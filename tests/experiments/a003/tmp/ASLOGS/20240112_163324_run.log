@@ -1,0 +1,503 @@
+2024-01-12 16:33:26,191 Autosubmit is running with 4.0.100
+2024-01-12 16:33:26,192 Preparing run
+2024-01-12 16:33:26,192 
+Checking configuration files...
+2024-01-12 16:33:26,213 Expdef config file is correct
+2024-01-12 16:33:26,213 Platforms sections: OK
+2024-01-12 16:33:26,213 Jobs sections OK
+2024-01-12 16:33:26,213 Autosubmit general sections OK
+2024-01-12 16:33:26,213 Configuration files OK
+
+2024-01-12 16:33:26,216 The Experiment name is: a003
+2024-01-12 16:33:26,216 Sleep: 10
+2024-01-12 16:33:26,216 Default retrials: 0
+2024-01-12 16:33:26,216 Starting from job list restored from /home/ltenorio/autosubmit/a003/pkl files
+2024-01-12 16:33:26,222 Creating jobs...
+2024-01-12 16:33:26,222 Loading JobList
+2024-01-12 16:33:26,223 Creating LOCAL_SETUP jobs
+2024-01-12 16:33:26,223 Creating REMOTE_SETUP jobs
+2024-01-12 16:33:26,223 Creating INI jobs
+2024-01-12 16:33:26,223 Creating SIM jobs
+2024-01-12 16:33:26,223 Creating POST jobs
+2024-01-12 16:33:26,223 Creating CLEAN jobs
+2024-01-12 16:33:26,223 Creating TRANSFER jobs
+2024-01-12 16:33:26,223 Adding dependencies...
+2024-01-12 16:33:26,223 Adding dependencies for LOCAL_SETUP jobs
+2024-01-12 16:33:26,223 Adding dependencies for REMOTE_SETUP jobs
+2024-01-12 16:33:26,223 Adding dependencies for INI jobs
+2024-01-12 16:33:26,223 Adding dependencies for SIM jobs
+2024-01-12 16:33:26,223 Adding dependencies for POST jobs
+2024-01-12 16:33:26,223 Adding dependencies for CLEAN jobs
+2024-01-12 16:33:26,223 Adding dependencies for TRANSFER jobs
+2024-01-12 16:33:26,223 Removing redundant dependencies...
+2024-01-12 16:33:26,224 File jobs_a003.yml was not found.
+2024-01-12 16:33:26,224 Using existing valid structure.
+2024-01-12 16:33:26,224 Looking for edgeless jobs...
+2024-01-12 16:33:26,224 Length of the jobs list: 8
+2024-01-12 16:33:26,224 Loading parameters...
+2024-01-12 16:33:26,224 Parameters load.
+2024-01-12 16:33:26,224 Checking experiment templates...
+2024-01-12 16:33:26,224 Checking scripts...
+2024-01-12 16:33:26,249 2 of 8 checked
+2024-01-12 16:33:26,296 4 of 8 checked
+2024-01-12 16:33:26,340 6 of 8 checked
+2024-01-12 16:33:26,383 8 of 8 checked
+[WARNING] 2024-01-12 16:33:26,405 Scripts check failed
+ Running after failed scripts is at your own risk![eCode=3000]
+2024-01-12 16:33:26,405 Loading job packages
+2024-01-12 16:33:26,405 Checking job_list current status
+2024-01-12 16:33:26,405 Updating FAILED jobs
+2024-01-12 16:33:26,405 Updating WAITING jobs
+2024-01-12 16:33:26,405 Update finished
+2024-01-12 16:33:26,406 Saving JobList: /home/ltenorio/autosubmit/a003/pkl/job_list_a003.pkl
+2024-01-12 16:33:26,406 Job list saved
+2024-01-12 16:33:26,406 Autosubmit is running with v4.0.100
+2024-01-12 16:33:26,406 Running job data structure
+2024-01-12 16:33:26,412 Backing up jobs_data...
+2024-01-12 16:33:26,417 Jobs_data database backup completed.
+2024-01-12 16:33:26,425 Checking the connection to all platforms in use
+2024-01-12 16:33:26,425 [local] Correct user privileges for host localhost
+2024-01-12 16:33:26,425 [local] Connection successful to host localhost
+2024-01-12 16:33:26,425 Running main running loop
+2024-01-12 16:33:26,425 Reloading parameters...
+2024-01-12 16:33:26,425 Loading parameters...
+2024-01-12 16:33:26,425 Parameters load.
+2024-01-12 16:33:26,425 
+
+8 of 8 jobs remaining (16:33)
+2024-01-12 16:33:26,425 Sleep: 10
+2024-01-12 16:33:26,425 Number of retrials: 0
+2024-01-12 16:33:26,425 Checking jobs for platform=local
+2024-01-12 16:33:26,425 No jobs to check for platform local
+2024-01-12 16:33:26,425 Updating FAILED jobs
+2024-01-12 16:33:26,425 Updating WAITING jobs
+2024-01-12 16:33:26,425 Update finished
+2024-01-12 16:33:26,426 Saving JobList: /home/ltenorio/autosubmit/a003/pkl/job_list_a003.pkl
+2024-01-12 16:33:26,426 Job list saved
+2024-01-12 16:33:26,426 Number of jobs available: 20
+2024-01-12 16:33:26,426 Number of jobs ready: 1
+2024-01-12 16:33:26,426 Jobs ready for local: 1
+2024-01-12 16:33:26,426 Saving JobList: /home/ltenorio/autosubmit/a003/pkl/job_list_a003.pkl
+2024-01-12 16:33:26,426 Job list saved
+2024-01-12 16:33:26,426 
+Jobs ready for local: 1
+2024-01-12 16:33:26,448 Creating Scripts
+2024-01-12 16:33:26,457 Sending Files
+2024-01-12 16:33:26,461 Command 'mkdir -p /home/ltenorio/autosubmit/a003/tmp/LOG_a003': 
+2024-01-12 16:33:26,461 /home/ltenorio/autosubmit/a003/tmp/LOG_a003 has been created on localhost .
+2024-01-12 16:33:26,468 Submitting
+2024-01-12 16:33:26,471 a003_LOCAL_SETUP_STAT have been removed
+2024-01-12 16:33:26,474 a003_LOCAL_SETUP_COMPLETED been removed
+2024-01-12 16:33:26,478 Command ' nohup bash /home/ltenorio/autosubmit/a003/tmp/LOG_a003/a003_LOCAL_SETUP.cmd > /home/ltenorio/autosubmit/a003/tmp/LOG_a003/a003_LOCAL_SETUP.cmd.out.0 2> /home/ltenorio/autosubmit/a003/tmp/LOG_a003/a003_LOCAL_SETUP.cmd.err.0 & echo $!': 1588935
+
+2024-01-12 16:33:26,478 Job ID: 1588935
+
+2024-01-12 16:33:26,478 a003_LOCAL_SETUP submitted
+2024-01-12 16:33:26,490 Saving JobList: /home/ltenorio/autosubmit/a003/pkl/job_list_a003.pkl
+2024-01-12 16:33:26,490 Job list saved
+2024-01-12 16:33:26,491 Saving JobList: /home/ltenorio/autosubmit/a003/pkl/job_list_a003.pkl
+2024-01-12 16:33:26,491 Job list saved
+2024-01-12 16:33:26,491 Updating FAILED jobs
+2024-01-12 16:33:26,491 Updating WAITING jobs
+2024-01-12 16:33:26,491 Update finished
+2024-01-12 16:33:26,491 Saving JobList: /home/ltenorio/autosubmit/a003/pkl/job_list_a003.pkl
+2024-01-12 16:33:26,491 Job list saved
+2024-01-12 16:33:36,498 Reloading parameters...
+2024-01-12 16:33:36,498 Loading parameters...
+2024-01-12 16:33:36,499 Parameters load.
+2024-01-12 16:33:36,499 
+
+8 of 8 jobs remaining (16:33)
+2024-01-12 16:33:36,500 Sleep: 10
+2024-01-12 16:33:36,500 Number of retrials: 0
+2024-01-12 16:33:36,500 Checking jobs for platform=local
+2024-01-12 16:33:36,500 Checking 1 jobs for platform local
+2024-01-12 16:33:38,514 Command 'nohup kill -0 1588935 > /dev/null 2>&1; echo $?': 1
+
+2024-01-12 16:33:38,514 Successful check job command: nohup kill -0 1588935 > /dev/null 2>&1; echo $?
+2024-01-12 16:33:38,515 a003_LOCAL_SETUP job seems to have completed: checking...
+2024-01-12 16:33:38,519 Job a003_LOCAL_SETUP is COMPLETED
+2024-01-12 16:33:38,523 a003_LOCAL_SETUP_STAT file have been transferred
+2024-01-12 16:33:38,549 a003_LOCAL_SETUP_STAT file have been transferred
+2024-01-12 16:33:38,584 Updating FAILED jobs
+2024-01-12 16:33:38,584 Updating WAITING jobs
+2024-01-12 16:33:38,584 Setting job: a003_REMOTE_SETUP status to: READY (all parents completed)...
+2024-01-12 16:33:38,584 Update finished
+2024-01-12 16:33:38,585 Saving JobList: /home/ltenorio/autosubmit/a003/pkl/job_list_a003.pkl
+2024-01-12 16:33:38,585 Job list saved
+2024-01-12 16:33:38,585 Number of jobs available: 20
+2024-01-12 16:33:38,585 Number of jobs ready: 1
+2024-01-12 16:33:38,585 Jobs ready for local: 1
+2024-01-12 16:33:38,585 Saving JobList: /home/ltenorio/autosubmit/a003/pkl/job_list_a003.pkl
+2024-01-12 16:33:38,585 Job list saved
+2024-01-12 16:33:38,586 
+Jobs ready for local: 1
+2024-01-12 16:33:38,609 Creating Scripts
+2024-01-12 16:33:38,610 Sending Files
+2024-01-12 16:33:38,615 Command 'mkdir -p /home/ltenorio/autosubmit/a003/tmp/LOG_a003': 
+2024-01-12 16:33:38,616 /home/ltenorio/autosubmit/a003/tmp/LOG_a003 has been created on localhost .
+2024-01-12 16:33:38,621 Submitting
+2024-01-12 16:33:38,624 a003_REMOTE_SETUP_STAT have been removed
+2024-01-12 16:33:38,630 a003_REMOTE_SETUP_COMPLETED been removed
+2024-01-12 16:33:38,633 Command 'timeout 18000 nohup bash /home/ltenorio/autosubmit/a003/tmp/LOG_a003/a003_REMOTE_SETUP.cmd > /home/ltenorio/autosubmit/a003/tmp/LOG_a003/a003_REMOTE_SETUP.cmd.out.0 2> /home/ltenorio/autosubmit/a003/tmp/LOG_a003/a003_REMOTE_SETUP.cmd.err.0 & echo $!': 1589052
+
+2024-01-12 16:33:38,633 Job ID: 1589052
+
+2024-01-12 16:33:38,633 a003_REMOTE_SETUP submitted
+2024-01-12 16:33:38,644 Saving JobList: /home/ltenorio/autosubmit/a003/pkl/job_list_a003.pkl
+2024-01-12 16:33:38,644 Job list saved
+2024-01-12 16:33:38,645 Saving JobList: /home/ltenorio/autosubmit/a003/pkl/job_list_a003.pkl
+2024-01-12 16:33:38,645 Job list saved
+2024-01-12 16:33:38,645 Updating FAILED jobs
+2024-01-12 16:33:38,645 Updating WAITING jobs
+2024-01-12 16:33:38,645 Update finished
+2024-01-12 16:33:38,645 Saving JobList: /home/ltenorio/autosubmit/a003/pkl/job_list_a003.pkl
+2024-01-12 16:33:38,645 Job list saved
+2024-01-12 16:33:38,651 Backing up jobs_data...
+2024-01-12 16:33:38,656 Jobs_data database backup completed.
+2024-01-12 16:33:48,666 Reloading parameters...
+2024-01-12 16:33:48,666 Loading parameters...
+2024-01-12 16:33:48,667 Parameters load.
+2024-01-12 16:33:48,668 
+
+7 of 8 jobs remaining (16:33)
+2024-01-12 16:33:48,668 Sleep: 10
+2024-01-12 16:33:48,668 Number of retrials: 0
+2024-01-12 16:33:48,669 Checking jobs for platform=local
+2024-01-12 16:33:48,669 Checking 1 jobs for platform local
+2024-01-12 16:33:50,677 Command 'nohup kill -0 1589052 > /dev/null 2>&1; echo $?': 1
+
+2024-01-12 16:33:50,677 Successful check job command: nohup kill -0 1589052 > /dev/null 2>&1; echo $?
+2024-01-12 16:33:50,678 a003_REMOTE_SETUP job seems to have completed: checking...
+2024-01-12 16:33:50,682 Job a003_REMOTE_SETUP is COMPLETED
+2024-01-12 16:33:50,686 a003_REMOTE_SETUP_STAT file have been transferred
+2024-01-12 16:33:50,708 a003_REMOTE_SETUP_STAT file have been transferred
+2024-01-12 16:33:50,759 Updating FAILED jobs
+2024-01-12 16:33:50,759 Updating WAITING jobs
+2024-01-12 16:33:50,760 Setting job: a003_20220401_fc0_INI status to: READY (all parents completed)...
+2024-01-12 16:33:50,760 Update finished
+2024-01-12 16:33:50,761 Saving JobList: /home/ltenorio/autosubmit/a003/pkl/job_list_a003.pkl
+2024-01-12 16:33:50,761 Job list saved
+2024-01-12 16:33:50,761 Number of jobs available: 20
+2024-01-12 16:33:50,761 Number of jobs ready: 1
+2024-01-12 16:33:50,761 Jobs ready for local: 1
+2024-01-12 16:33:50,762 Saving JobList: /home/ltenorio/autosubmit/a003/pkl/job_list_a003.pkl
+2024-01-12 16:33:50,762 Job list saved
+2024-01-12 16:33:50,762 
+Jobs ready for local: 1
+2024-01-12 16:33:50,789 Creating Scripts
+2024-01-12 16:33:50,791 Sending Files
+2024-01-12 16:33:50,797 Command 'mkdir -p /home/ltenorio/autosubmit/a003/tmp/LOG_a003': 
+2024-01-12 16:33:50,797 /home/ltenorio/autosubmit/a003/tmp/LOG_a003 has been created on localhost .
+2024-01-12 16:33:50,803 Submitting
+2024-01-12 16:33:50,810 a003_20220401_fc0_INI_STAT have been removed
+2024-01-12 16:33:50,815 a003_20220401_fc0_INI_COMPLETED been removed
+2024-01-12 16:33:50,819 Command 'timeout 18000 nohup bash /home/ltenorio/autosubmit/a003/tmp/LOG_a003/a003_20220401_fc0_INI.cmd > /home/ltenorio/autosubmit/a003/tmp/LOG_a003/a003_20220401_fc0_INI.cmd.out.0 2> /home/ltenorio/autosubmit/a003/tmp/LOG_a003/a003_20220401_fc0_INI.cmd.err.0 & echo $!': 1589163
+
+2024-01-12 16:33:50,819 Job ID: 1589163
+
+2024-01-12 16:33:50,819 a003_20220401_fc0_INI submitted
+2024-01-12 16:33:50,833 Saving JobList: /home/ltenorio/autosubmit/a003/pkl/job_list_a003.pkl
+2024-01-12 16:33:50,833 Job list saved
+2024-01-12 16:33:50,834 Saving JobList: /home/ltenorio/autosubmit/a003/pkl/job_list_a003.pkl
+2024-01-12 16:33:50,834 Job list saved
+2024-01-12 16:33:50,834 Updating FAILED jobs
+2024-01-12 16:33:50,834 Updating WAITING jobs
+2024-01-12 16:33:50,834 Update finished
+2024-01-12 16:33:50,834 Saving JobList: /home/ltenorio/autosubmit/a003/pkl/job_list_a003.pkl
+2024-01-12 16:33:50,834 Job list saved
+2024-01-12 16:33:50,840 Backing up jobs_data...
+2024-01-12 16:33:50,847 Jobs_data database backup completed.
+2024-01-12 16:34:00,851 Reloading parameters...
+2024-01-12 16:34:00,851 Loading parameters...
+2024-01-12 16:34:00,853 Parameters load.
+2024-01-12 16:34:00,853 
+
+6 of 8 jobs remaining (16:34)
+2024-01-12 16:34:00,854 Sleep: 10
+2024-01-12 16:34:00,854 Number of retrials: 0
+2024-01-12 16:34:00,854 Checking jobs for platform=local
+2024-01-12 16:34:00,854 Checking 1 jobs for platform local
+2024-01-12 16:34:02,862 Command 'nohup kill -0 1589163 > /dev/null 2>&1; echo $?': 1
+
+2024-01-12 16:34:02,862 Successful check job command: nohup kill -0 1589163 > /dev/null 2>&1; echo $?
+2024-01-12 16:34:02,862 a003_20220401_fc0_INI job seems to have completed: checking...
+2024-01-12 16:34:02,866 Job a003_20220401_fc0_INI is COMPLETED
+2024-01-12 16:34:02,874 a003_20220401_fc0_INI_STAT file have been transferred
+2024-01-12 16:34:02,901 a003_20220401_fc0_INI_STAT file have been transferred
+2024-01-12 16:34:02,943 Updating FAILED jobs
+2024-01-12 16:34:02,943 Updating WAITING jobs
+2024-01-12 16:34:02,943 Setting job: a003_20220401_fc0_1_SIM status to: READY (all parents completed)...
+2024-01-12 16:34:02,943 Update finished
+2024-01-12 16:34:02,944 Saving JobList: /home/ltenorio/autosubmit/a003/pkl/job_list_a003.pkl
+2024-01-12 16:34:02,944 Job list saved
+2024-01-12 16:34:02,944 Number of jobs available: 20
+2024-01-12 16:34:02,944 Number of jobs ready: 1
+2024-01-12 16:34:02,944 Jobs ready for local: 1
+2024-01-12 16:34:02,945 Saving JobList: /home/ltenorio/autosubmit/a003/pkl/job_list_a003.pkl
+2024-01-12 16:34:02,945 Job list saved
+2024-01-12 16:34:02,945 
+Jobs ready for local: 1
+2024-01-12 16:34:02,967 Creating Scripts
+2024-01-12 16:34:02,968 Sending Files
+2024-01-12 16:34:02,971 Command 'mkdir -p /home/ltenorio/autosubmit/a003/tmp/LOG_a003': 
+2024-01-12 16:34:02,971 /home/ltenorio/autosubmit/a003/tmp/LOG_a003 has been created on localhost .
+2024-01-12 16:34:02,977 Submitting
+2024-01-12 16:34:02,980 a003_20220401_fc0_1_SIM_STAT have been removed
+2024-01-12 16:34:02,983 a003_20220401_fc0_1_SIM_COMPLETED been removed
+2024-01-12 16:34:02,986 Command 'timeout 18000 nohup bash /home/ltenorio/autosubmit/a003/tmp/LOG_a003/a003_20220401_fc0_1_SIM.cmd > /home/ltenorio/autosubmit/a003/tmp/LOG_a003/a003_20220401_fc0_1_SIM.cmd.out.0 2> /home/ltenorio/autosubmit/a003/tmp/LOG_a003/a003_20220401_fc0_1_SIM.cmd.err.0 & echo $!': 1589316
+
+2024-01-12 16:34:02,986 Job ID: 1589316
+
+2024-01-12 16:34:02,986 a003_20220401_fc0_1_SIM submitted
+2024-01-12 16:34:02,996 Saving JobList: /home/ltenorio/autosubmit/a003/pkl/job_list_a003.pkl
+2024-01-12 16:34:02,996 Job list saved
+2024-01-12 16:34:02,997 Saving JobList: /home/ltenorio/autosubmit/a003/pkl/job_list_a003.pkl
+2024-01-12 16:34:02,997 Job list saved
+2024-01-12 16:34:02,997 Updating FAILED jobs
+2024-01-12 16:34:02,997 Updating WAITING jobs
+2024-01-12 16:34:02,997 Update finished
+2024-01-12 16:34:02,997 Saving JobList: /home/ltenorio/autosubmit/a003/pkl/job_list_a003.pkl
+2024-01-12 16:34:02,998 Job list saved
+2024-01-12 16:34:03,003 Backing up jobs_data...
+2024-01-12 16:34:03,008 Jobs_data database backup completed.
+2024-01-12 16:34:13,018 Reloading parameters...
+2024-01-12 16:34:13,019 Loading parameters...
+2024-01-12 16:34:13,020 Parameters load.
+2024-01-12 16:34:13,020 
+
+5 of 8 jobs remaining (16:34)
+2024-01-12 16:34:13,020 Sleep: 10
+2024-01-12 16:34:13,020 Number of retrials: 0
+2024-01-12 16:34:13,021 Checking jobs for platform=local
+2024-01-12 16:34:13,021 Checking 1 jobs for platform local
+2024-01-12 16:34:15,035 Command 'nohup kill -0 1589316 > /dev/null 2>&1; echo $?': 1
+
+2024-01-12 16:34:15,035 Successful check job command: nohup kill -0 1589316 > /dev/null 2>&1; echo $?
+2024-01-12 16:34:15,036 a003_20220401_fc0_1_SIM job seems to have completed: checking...
+2024-01-12 16:34:15,044 Job a003_20220401_fc0_1_SIM is COMPLETED
+2024-01-12 16:34:15,050 a003_20220401_fc0_1_SIM_STAT file have been transferred
+2024-01-12 16:34:15,088 a003_20220401_fc0_1_SIM_STAT file have been transferred
+2024-01-12 16:34:15,125 Updating FAILED jobs
+2024-01-12 16:34:15,125 Updating WAITING jobs
+2024-01-12 16:34:15,125 Setting job: a003_20220401_fc0_2_SIM status to: READY (all parents completed)...
+2024-01-12 16:34:15,125 Update finished
+2024-01-12 16:34:15,126 Saving JobList: /home/ltenorio/autosubmit/a003/pkl/job_list_a003.pkl
+2024-01-12 16:34:15,126 Job list saved
+2024-01-12 16:34:15,126 Number of jobs available: 20
+2024-01-12 16:34:15,126 Number of jobs ready: 1
+2024-01-12 16:34:15,126 Jobs ready for local: 1
+2024-01-12 16:34:15,127 Saving JobList: /home/ltenorio/autosubmit/a003/pkl/job_list_a003.pkl
+2024-01-12 16:34:15,127 Job list saved
+2024-01-12 16:34:15,127 
+Jobs ready for local: 1
+2024-01-12 16:34:15,158 Creating Scripts
+2024-01-12 16:34:15,159 Sending Files
+2024-01-12 16:34:15,163 Command 'mkdir -p /home/ltenorio/autosubmit/a003/tmp/LOG_a003': 
+2024-01-12 16:34:15,163 /home/ltenorio/autosubmit/a003/tmp/LOG_a003 has been created on localhost .
+2024-01-12 16:34:15,169 Submitting
+2024-01-12 16:34:15,173 a003_20220401_fc0_2_SIM_STAT have been removed
+2024-01-12 16:34:15,176 a003_20220401_fc0_2_SIM_COMPLETED been removed
+2024-01-12 16:34:15,178 Command 'timeout 18000 nohup bash /home/ltenorio/autosubmit/a003/tmp/LOG_a003/a003_20220401_fc0_2_SIM.cmd > /home/ltenorio/autosubmit/a003/tmp/LOG_a003/a003_20220401_fc0_2_SIM.cmd.out.0 2> /home/ltenorio/autosubmit/a003/tmp/LOG_a003/a003_20220401_fc0_2_SIM.cmd.err.0 & echo $!': 1589391
+
+2024-01-12 16:34:15,178 Job ID: 1589391
+
+2024-01-12 16:34:15,178 a003_20220401_fc0_2_SIM submitted
+2024-01-12 16:34:15,190 Saving JobList: /home/ltenorio/autosubmit/a003/pkl/job_list_a003.pkl
+2024-01-12 16:34:15,190 Job list saved
+2024-01-12 16:34:15,190 Saving JobList: /home/ltenorio/autosubmit/a003/pkl/job_list_a003.pkl
+2024-01-12 16:34:15,190 Job list saved
+2024-01-12 16:34:15,191 Updating FAILED jobs
+2024-01-12 16:34:15,191 Updating WAITING jobs
+2024-01-12 16:34:15,191 Update finished
+2024-01-12 16:34:15,191 Saving JobList: /home/ltenorio/autosubmit/a003/pkl/job_list_a003.pkl
+2024-01-12 16:34:15,191 Job list saved
+2024-01-12 16:34:15,196 Backing up jobs_data...
+2024-01-12 16:34:15,201 Jobs_data database backup completed.
+2024-01-12 16:34:25,210 Reloading parameters...
+2024-01-12 16:34:25,211 Loading parameters...
+2024-01-12 16:34:25,212 Parameters load.
+2024-01-12 16:34:25,212 
+
+4 of 8 jobs remaining (16:34)
+2024-01-12 16:34:25,212 Sleep: 10
+2024-01-12 16:34:25,212 Number of retrials: 0
+2024-01-12 16:34:25,213 Checking jobs for platform=local
+2024-01-12 16:34:25,213 Checking 1 jobs for platform local
+2024-01-12 16:34:27,225 Command 'nohup kill -0 1589391 > /dev/null 2>&1; echo $?': 1
+
+2024-01-12 16:34:27,226 Successful check job command: nohup kill -0 1589391 > /dev/null 2>&1; echo $?
+2024-01-12 16:34:27,226 a003_20220401_fc0_2_SIM job seems to have completed: checking...
+2024-01-12 16:34:27,232 Job a003_20220401_fc0_2_SIM is COMPLETED
+2024-01-12 16:34:27,236 a003_20220401_fc0_2_SIM_STAT file have been transferred
+2024-01-12 16:34:27,264 a003_20220401_fc0_2_SIM_STAT file have been transferred
+2024-01-12 16:34:27,299 Updating FAILED jobs
+2024-01-12 16:34:27,299 Updating WAITING jobs
+2024-01-12 16:34:27,299 Setting job: a003_POST status to: READY (all parents completed)...
+2024-01-12 16:34:27,300 Update finished
+2024-01-12 16:34:27,300 Saving JobList: /home/ltenorio/autosubmit/a003/pkl/job_list_a003.pkl
+2024-01-12 16:34:27,300 Job list saved
+2024-01-12 16:34:27,300 Number of jobs available: 20
+2024-01-12 16:34:27,300 Number of jobs ready: 1
+2024-01-12 16:34:27,301 Jobs ready for local: 1
+2024-01-12 16:34:27,301 Saving JobList: /home/ltenorio/autosubmit/a003/pkl/job_list_a003.pkl
+2024-01-12 16:34:27,301 Job list saved
+2024-01-12 16:34:27,301 
+Jobs ready for local: 1
+2024-01-12 16:34:27,325 Creating Scripts
+2024-01-12 16:34:27,325 Sending Files
+2024-01-12 16:34:27,329 Command 'mkdir -p /home/ltenorio/autosubmit/a003/tmp/LOG_a003': 
+2024-01-12 16:34:27,329 /home/ltenorio/autosubmit/a003/tmp/LOG_a003 has been created on localhost .
+2024-01-12 16:34:27,335 Submitting
+2024-01-12 16:34:27,338 a003_POST_STAT have been removed
+2024-01-12 16:34:27,341 a003_POST_COMPLETED been removed
+2024-01-12 16:34:27,343 Command 'timeout 18000 nohup bash /home/ltenorio/autosubmit/a003/tmp/LOG_a003/a003_POST.cmd > /home/ltenorio/autosubmit/a003/tmp/LOG_a003/a003_POST.cmd.out.0 2> /home/ltenorio/autosubmit/a003/tmp/LOG_a003/a003_POST.cmd.err.0 & echo $!': 1589427
+
+2024-01-12 16:34:27,344 Job ID: 1589427
+
+2024-01-12 16:34:27,344 a003_POST submitted
+2024-01-12 16:34:27,355 Saving JobList: /home/ltenorio/autosubmit/a003/pkl/job_list_a003.pkl
+2024-01-12 16:34:27,355 Job list saved
+2024-01-12 16:34:27,355 Saving JobList: /home/ltenorio/autosubmit/a003/pkl/job_list_a003.pkl
+2024-01-12 16:34:27,355 Job list saved
+2024-01-12 16:34:27,355 Updating FAILED jobs
+2024-01-12 16:34:27,355 Updating WAITING jobs
+2024-01-12 16:34:27,355 Update finished
+2024-01-12 16:34:27,355 Saving JobList: /home/ltenorio/autosubmit/a003/pkl/job_list_a003.pkl
+2024-01-12 16:34:27,355 Job list saved
+2024-01-12 16:34:27,361 Backing up jobs_data...
+2024-01-12 16:34:27,367 Jobs_data database backup completed.
+2024-01-12 16:34:37,372 Reloading parameters...
+2024-01-12 16:34:37,372 Loading parameters...
+2024-01-12 16:34:37,373 Parameters load.
+2024-01-12 16:34:37,374 
+
+3 of 8 jobs remaining (16:34)
+2024-01-12 16:34:37,374 Sleep: 10
+2024-01-12 16:34:37,374 Number of retrials: 0
+2024-01-12 16:34:37,374 Checking jobs for platform=local
+2024-01-12 16:34:37,375 Checking 1 jobs for platform local
+2024-01-12 16:34:39,389 Command 'nohup kill -0 1589427 > /dev/null 2>&1; echo $?': 1
+
+2024-01-12 16:34:39,389 Successful check job command: nohup kill -0 1589427 > /dev/null 2>&1; echo $?
+2024-01-12 16:34:39,389 a003_POST job seems to have completed: checking...
+2024-01-12 16:34:39,396 Job a003_POST is COMPLETED
+2024-01-12 16:34:39,403 a003_POST_STAT file have been transferred
+2024-01-12 16:34:39,462 a003_POST_STAT file have been transferred
+2024-01-12 16:34:39,561 Updating FAILED jobs
+2024-01-12 16:34:39,561 Updating WAITING jobs
+2024-01-12 16:34:39,562 Setting job: a003_CLEAN status to: READY (all parents completed)...
+2024-01-12 16:34:39,562 Update finished
+2024-01-12 16:34:39,563 Saving JobList: /home/ltenorio/autosubmit/a003/pkl/job_list_a003.pkl
+2024-01-12 16:34:39,563 Job list saved
+2024-01-12 16:34:39,564 Number of jobs available: 20
+2024-01-12 16:34:39,564 Number of jobs ready: 1
+2024-01-12 16:34:39,564 Jobs ready for local: 1
+2024-01-12 16:34:39,565 Saving JobList: /home/ltenorio/autosubmit/a003/pkl/job_list_a003.pkl
+2024-01-12 16:34:39,565 Job list saved
+2024-01-12 16:34:39,565 
+Jobs ready for local: 1
+2024-01-12 16:34:39,590 Creating Scripts
+2024-01-12 16:34:39,590 Sending Files
+2024-01-12 16:34:39,594 Command 'mkdir -p /home/ltenorio/autosubmit/a003/tmp/LOG_a003': 
+2024-01-12 16:34:39,594 /home/ltenorio/autosubmit/a003/tmp/LOG_a003 has been created on localhost .
+2024-01-12 16:34:39,600 Submitting
+2024-01-12 16:34:39,606 a003_CLEAN_STAT have been removed
+2024-01-12 16:34:39,612 a003_CLEAN_COMPLETED been removed
+2024-01-12 16:34:39,615 Command 'timeout 18000 nohup bash /home/ltenorio/autosubmit/a003/tmp/LOG_a003/a003_CLEAN.cmd > /home/ltenorio/autosubmit/a003/tmp/LOG_a003/a003_CLEAN.cmd.out.0 2> /home/ltenorio/autosubmit/a003/tmp/LOG_a003/a003_CLEAN.cmd.err.0 & echo $!': 1589463
+
+2024-01-12 16:34:39,615 Job ID: 1589463
+
+2024-01-12 16:34:39,615 a003_CLEAN submitted
+2024-01-12 16:34:39,675 Saving JobList: /home/ltenorio/autosubmit/a003/pkl/job_list_a003.pkl
+2024-01-12 16:34:39,675 Job list saved
+2024-01-12 16:34:39,676 Saving JobList: /home/ltenorio/autosubmit/a003/pkl/job_list_a003.pkl
+2024-01-12 16:34:39,676 Job list saved
+2024-01-12 16:34:39,677 Updating FAILED jobs
+2024-01-12 16:34:39,677 Updating WAITING jobs
+2024-01-12 16:34:39,677 Update finished
+2024-01-12 16:34:39,678 Saving JobList: /home/ltenorio/autosubmit/a003/pkl/job_list_a003.pkl
+2024-01-12 16:34:39,678 Job list saved
+2024-01-12 16:34:39,720 Backing up jobs_data...
+2024-01-12 16:34:39,733 Jobs_data database backup completed.
+2024-01-12 16:34:49,744 Reloading parameters...
+2024-01-12 16:34:49,745 Loading parameters...
+2024-01-12 16:34:49,745 Parameters load.
+2024-01-12 16:34:49,746 
+
+2 of 8 jobs remaining (16:34)
+2024-01-12 16:34:49,746 Sleep: 10
+2024-01-12 16:34:49,746 Number of retrials: 0
+2024-01-12 16:34:49,746 Checking jobs for platform=local
+2024-01-12 16:34:49,746 Checking 1 jobs for platform local
+2024-01-12 16:34:51,760 Command 'nohup kill -0 1589463 > /dev/null 2>&1; echo $?': 1
+
+2024-01-12 16:34:51,760 Successful check job command: nohup kill -0 1589463 > /dev/null 2>&1; echo $?
+2024-01-12 16:34:51,761 a003_CLEAN job seems to have completed: checking...
+2024-01-12 16:34:51,767 Job a003_CLEAN is COMPLETED
+2024-01-12 16:34:51,772 a003_CLEAN_STAT file have been transferred
+2024-01-12 16:34:51,802 a003_CLEAN_STAT file have been transferred
+2024-01-12 16:34:51,836 Updating FAILED jobs
+2024-01-12 16:34:51,836 Updating WAITING jobs
+2024-01-12 16:34:51,836 Setting job: a003_20220401_fc0_TRANSFER status to: READY (all parents completed)...
+2024-01-12 16:34:51,836 Update finished
+2024-01-12 16:34:51,836 Saving JobList: /home/ltenorio/autosubmit/a003/pkl/job_list_a003.pkl
+2024-01-12 16:34:51,836 Job list saved
+2024-01-12 16:34:51,836 Number of jobs available: 20
+2024-01-12 16:34:51,836 Number of jobs ready: 1
+2024-01-12 16:34:51,837 Jobs ready for local: 1
+2024-01-12 16:34:51,837 Saving JobList: /home/ltenorio/autosubmit/a003/pkl/job_list_a003.pkl
+2024-01-12 16:34:51,837 Job list saved
+2024-01-12 16:34:51,837 
+Jobs ready for local: 1
+2024-01-12 16:34:51,860 Creating Scripts
+2024-01-12 16:34:51,860 Sending Files
+2024-01-12 16:34:51,865 Command 'mkdir -p /home/ltenorio/autosubmit/a003/tmp/LOG_a003': 
+2024-01-12 16:34:51,865 /home/ltenorio/autosubmit/a003/tmp/LOG_a003 has been created on localhost .
+2024-01-12 16:34:51,872 Submitting
+2024-01-12 16:34:51,875 a003_20220401_fc0_TRANSFER_STAT have been removed
+2024-01-12 16:34:51,878 a003_20220401_fc0_TRANSFER_COMPLETED been removed
+2024-01-12 16:34:51,881 Command ' nohup bash /home/ltenorio/autosubmit/a003/tmp/LOG_a003/a003_20220401_fc0_TRANSFER.cmd > /home/ltenorio/autosubmit/a003/tmp/LOG_a003/a003_20220401_fc0_TRANSFER.cmd.out.0 2> /home/ltenorio/autosubmit/a003/tmp/LOG_a003/a003_20220401_fc0_TRANSFER.cmd.err.0 & echo $!': 1589511
+
+2024-01-12 16:34:51,881 Job ID: 1589511
+
+2024-01-12 16:34:51,881 a003_20220401_fc0_TRANSFER submitted
+2024-01-12 16:34:51,892 Saving JobList: /home/ltenorio/autosubmit/a003/pkl/job_list_a003.pkl
+2024-01-12 16:34:51,892 Job list saved
+2024-01-12 16:34:51,893 Saving JobList: /home/ltenorio/autosubmit/a003/pkl/job_list_a003.pkl
+2024-01-12 16:34:51,893 Job list saved
+2024-01-12 16:34:51,893 Updating FAILED jobs
+2024-01-12 16:34:51,893 Updating WAITING jobs
+2024-01-12 16:34:51,893 Update finished
+2024-01-12 16:34:51,893 Saving JobList: /home/ltenorio/autosubmit/a003/pkl/job_list_a003.pkl
+2024-01-12 16:34:51,894 Job list saved
+2024-01-12 16:34:51,900 Backing up jobs_data...
+2024-01-12 16:34:51,906 Jobs_data database backup completed.
+2024-01-12 16:35:01,914 Reloading parameters...
+2024-01-12 16:35:01,915 Loading parameters...
+2024-01-12 16:35:01,916 Parameters load.
+2024-01-12 16:35:01,916 
+
+1 of 8 jobs remaining (16:35)
+2024-01-12 16:35:01,917 Sleep: 10
+2024-01-12 16:35:01,917 Number of retrials: 0
+2024-01-12 16:35:01,917 Checking jobs for platform=local
+2024-01-12 16:35:01,917 Checking 1 jobs for platform local
+2024-01-12 16:35:03,927 Command 'nohup kill -0 1589511 > /dev/null 2>&1; echo $?': 1
+
+2024-01-12 16:35:03,927 Successful check job command: nohup kill -0 1589511 > /dev/null 2>&1; echo $?
+2024-01-12 16:35:03,928 a003_20220401_fc0_TRANSFER job seems to have completed: checking...
+2024-01-12 16:35:03,934 Job a003_20220401_fc0_TRANSFER is COMPLETED
+2024-01-12 16:35:03,938 a003_20220401_fc0_TRANSFER_STAT file have been transferred
+2024-01-12 16:35:03,973 a003_20220401_fc0_TRANSFER_STAT file have been transferred
+2024-01-12 16:35:04,016 Updating FAILED jobs
+2024-01-12 16:35:04,016 Updating WAITING jobs
+2024-01-12 16:35:04,016 Update finished
+2024-01-12 16:35:04,017 Saving JobList: /home/ltenorio/autosubmit/a003/pkl/job_list_a003.pkl
+2024-01-12 16:35:04,017 Job list saved
+2024-01-12 16:35:04,023 Backing up jobs_data...
+2024-01-12 16:35:04,028 Jobs_data database backup completed.
+2024-01-12 16:35:14,038 No more jobs to run.
+2024-01-12 16:35:14,045 Backing up jobs_data...
+2024-01-12 16:35:14,054 Jobs_data database backup completed.
+2024-01-12 16:35:14,054 Run successful

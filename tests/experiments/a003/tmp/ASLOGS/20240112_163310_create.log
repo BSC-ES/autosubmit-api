@@ -1,0 +1,5 @@
+[CRITICAL] 2024-01-12 16:33:11,802 Current experiment uses (4.0.95) which is not the running Autosubmit version  
+Please, update the experiment version if you wish to continue using AutoSubmit 4.0.100
+You can achieve this using the command autosubmit updateversion a003 
+Or with the -v parameter: autosubmit create a003 -v  [eCode=7014]
+2024-01-12 16:33:11,803 More info at https://autosubmit.readthedocs.io/en/master/troubleshooting/error-codes.html
