@@ -22,7 +22,6 @@ Module containing functions to manage autosubmit's experiments.
 """
 import os
 import time
-import pickle
 import traceback
 import datetime
 import json
@@ -464,29 +463,6 @@ def quick_test_run(expid):
     }
 
 
-def test_run(expid):
-    """
-    Tests if experiment is running.\n
-    :param expid: Experiment name
-    :type expid: str
-    :return: running status
-    :rtype: JSON object
-    """
-    running = False
-    error = False
-    error_message = ""
-
-    try:
-        error, error_message, running, _, _ = _is_exp_running(expid, time_condition=120)
-    except Exception as ex:
-        error = True
-        error_message = str(ex)
-
-    return {'running': running,
-            'error': error,
-            'error_message': error_message}
-
-
 def get_experiment_log_last_lines(expid):
     """
     Gets last 150 lines of the log content
@@ -791,67 +767,6 @@ def get_experiment_tree_structured(expid, log):
         print(("New Tree Representation failed: {0}".format(e)))
         log.info("New Tree Representation failed: {0}".format(e))
         return {'tree': [], 'jobs': [], 'total': 0, 'reference': [], 'error': True, 'error_message': str(e), 'pkl_timestamp': 0}
-
-
-def get_job_conf_list(expid):
-    """
-    Gets list of jobs with attributes from parser
-    """
-    try:
-        APIBasicConfig.read()
-        as_conf = AutosubmitConfigResolver(expid, APIBasicConfig, ConfigParserFactory())
-        if not as_conf.check_conf_files():
-            print('Can not create with invalid configuration')
-            return None
-        sections = as_conf.get_jobs_sections()
-        result = dict()
-        for section in set(sections):
-            main_platform = as_conf.get_platform()
-            job_platform = as_conf.get_job_platform(section)
-
-            processors = as_conf.get_processors(section)
-            threads = as_conf.get_threads(section)
-            tasks = as_conf.get_tasks(section)
-            memory = as_conf.get_memory(section)
-            memory_per_task = as_conf.get_memory_per_task(section)
-            queue = as_conf.get_queue(section)
-            queue = queue if len(queue) > 0 else (as_conf.get_platform_queue(job_platform) if len(
-                job_platform) > 0 else (as_conf.get_platform_queue(main_platform) if len(main_platform) > 0 else ""))
-            final_platform = job_platform if len(
-                job_platform) > 0 else main_platform
-            wallclock = as_conf.get_wallclock(section)
-            project = as_conf.get_platform_project(final_platform) # Section is not platform, must get platform from somwhere else.
-            platform_wallclock = as_conf.get_platform_wallclock(final_platform)
-            wallclock = wallclock if len(wallclock) > 0 else (
-                platform_wallclock if len(platform_wallclock) > 0 else "")
-            result[section] = (wallclock, processors, threads,
-                               tasks, memory, memory_per_task, queue, final_platform, main_platform, project)
-        return result
-    except Exception as ex:
-        print((str(ex) + "\n" + str(expid) +
-              " : failed to retrieve info from jobs conf.\n"))
-        return None
-
-
-def get_auto_conf_data(expid):
-    """
-    Gets autosubmit conf parser information per expid
-    """
-    try:
-        wrapper_type = "None"
-        max_wrapped = 0
-        APIBasicConfig.read()
-        as_conf = AutosubmitConfigResolver(expid, APIBasicConfig, ConfigParserFactory())
-        if not as_conf.check_conf_files():
-            #print('Can not create with invalid configuration')
-            return (wrapper_type, max_wrapped)
-        wrapper_type = as_conf.get_wrapper_type()
-        max_wrapped = as_conf.get_max_wrapped_jobs()
-        return (wrapper_type, max_wrapped)
-    except Exception as ex:
-        logger.info(traceback.format_exc())
-        print(("Couldn't retrieve conf data (wrapper info) from {0}. Exception {1}.".format(expid, str(ex))))
-        return ("None", 0)
 
 
 def verify_last_completed(seconds=300):
