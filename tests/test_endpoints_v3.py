@@ -93,6 +93,15 @@ class TestExpInfo:
         assert resp_obj["expid"] == expid
         assert resp_obj["total_jobs"] == 8
 
+    def test_retro3_info(self, fixture_client: FlaskClient):
+        expid = "a3tb"
+        response = fixture_client.get(self.endpoint.format(expid=expid))
+        resp_obj: dict = response.get_json()
+        assert resp_obj["error"] == False
+        assert resp_obj["expid"] == expid
+        assert resp_obj["total_jobs"] == 55
+        assert resp_obj["completed_jobs"] == 24
+
 
 class TestPerformance:
     endpoint = "/v3/performance/{expid}"
@@ -138,6 +147,27 @@ class TestTree:
 
         assert resp_obj["error"] == False
         assert resp_obj["total"] == 8
+        assert resp_obj["total"] == len(resp_obj["jobs"])
+        for job in resp_obj["jobs"]:
+            assert job["id"][:4] == expid
+
+    def test_retro3(self, fixture_client: FlaskClient):
+        expid = "a3tb"
+        random_user = str(uuid4())
+        response = fixture_client.get(
+            self.endpoint.format(expid=expid),
+            query_string={"loggedUser": random_user},
+        )
+        resp_obj: dict = response.get_json()
+
+        assert resp_obj["error"] == False
+        assert resp_obj["total"] == 55
+        assert resp_obj["total"] == len(resp_obj["jobs"])
+        assert (
+            len([job for job in resp_obj["jobs"] if job["status"] == "COMPLETED"]) == 24
+        )
+        for job in resp_obj["jobs"]:
+            assert job["id"][:4] == expid
 
 
 class TestRunsList:
@@ -237,7 +267,7 @@ class TestExpCount:
     endpoint = "/v3/expcount/{expid}"
 
     def test_exp_count(self, fixture_client: FlaskClient):
-        expid = "a007"
+        expid = "a003"
         response = fixture_client.get(self.endpoint.format(expid=expid))
         resp_obj: dict = response.get_json()
 
@@ -246,6 +276,24 @@ class TestExpCount:
             [resp_obj["counters"][key] for key in resp_obj["counters"]]
         )
         assert resp_obj["expid"] == expid
+        assert resp_obj["counters"]["READY"] == 1
+        assert resp_obj["counters"]["WAITING"] == 7
+
+    def test_retro3(self, fixture_client: FlaskClient):
+        expid = "a3tb"
+        response = fixture_client.get(self.endpoint.format(expid=expid))
+        resp_obj: dict = response.get_json()
+
+        assert resp_obj["error"] == False
+        assert resp_obj["total"] == sum(
+            [resp_obj["counters"][key] for key in resp_obj["counters"]]
+        )
+        assert resp_obj["expid"] == expid
+        assert resp_obj["counters"]["COMPLETED"] == 24
+        assert resp_obj["counters"]["RUNNING"] == 1
+        assert resp_obj["counters"]["QUEUING"] == 4
+        assert resp_obj["counters"]["SUSPENDED"] == 2
+        assert resp_obj["counters"]["WAITING"] == 24
 
 
 class TestSummary:
@@ -296,6 +344,17 @@ class TestCurrentConfig:
             == "4.0.101"
         )
 
+    def test_retrocomp_v3_conf_files(self, fixture_client: FlaskClient):
+        expid = "a3tb"
+        response = fixture_client.get(self.endpoint.format(expid=expid))
+        resp_obj: dict = response.get_json()
+
+        assert resp_obj["error"] == False
+        assert (
+            resp_obj["configuration_filesystem"]["conf"]["config"]["AUTOSUBMIT_VERSION"]
+            == "3.13.0"
+        )
+
 
 class TestPklInfo:
     endpoint = "/v3/pklinfo/{expid}/{timestamp}"
@@ -337,4 +396,3 @@ class TestExpRunLog:
 
         assert resp_obj["error"] == False
         assert resp_obj["found"] == True
-

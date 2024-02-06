@@ -1,0 +1,66 @@
+Platforms:
+  MaReNoStRuM4:
+    TYPE: slurm
+    HOST: mn1.bsc.es
+    PROJECT: bsc32
+    USER: bsc32xxx
+    QUEUE: debug
+    SCRATCH_DIR: /gpfs/scratch
+    ADD_PROJECT_TO_HOST: False
+    MAX_WALLCLOCK: '48:00'
+    TEMP_DIR: ''
+  marenostrum_archive:
+    TYPE: ps
+    HOST: dt02.bsc.es
+    PROJECT: bsc32
+    USER: bsc32xxx
+    SCRATCH_DIR: /gpfs/scratch
+    ADD_PROJECT_TO_HOST: False
+    TEST_SUITE: False
+
+  transfer_node:
+    TYPE: ps
+    HOST: dt01.bsc.es
+    PROJECT: bsc32
+    USER: bsc32xxx
+    ADD_PROJECT_TO_HOST: false
+    SCRATCH_DIR: /gpfs/scratch
+
+  transfer_node_bscearth000:
+    TYPE: ps
+    HOST: bscearth000
+    USER: dbeltran
+    PROJECT: Earth
+    ADD_PROJECT_TO_HOST: false
+    QUEUE: serial
+    SCRATCH_DIR: /esarchive/scratch
+
+  bscearth000:
+    TYPE: ps
+    HOST: bscearth000
+    USER: dbeltran
+    PROJECT: Earth
+    ADD_PROJECT_TO_HOST: false
+    QUEUE: serial
+    SCRATCH_DIR: /esarchive/scratch
+  nord3:
+    TYPE: SLURM
+    HOST: nord1.bsc.es
+    PROJECT: bsc32
+    USER: bsc32xxx
+    QUEUE: debug
+    SCRATCH_DIR: /gpfs/scratch
+    MAX_WALLCLOCK: '48:00'
+
+  ecmwf-xc40:
+    TYPE: ecaccess
+    VERSION: pbs
+    HOST: cca
+    USER: c3d
+    PROJECT: spesiccf
+    ADD_PROJECT_TO_HOST: false
+    SCRATCH_DIR: /scratch/ms
+    QUEUE: np
+    SERIAL_QUEUE: ns
+    MAX_WALLCLOCK: '48:00'
+
