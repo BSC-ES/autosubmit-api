@@ -35,33 +35,6 @@ from typing import Dict, Any, Tuple
 CURRENT_DATABASE_VERSION = 1
 
 
-def create_db(qry):
-    """
-    Creates a new database for autosubmit
-
-    :param qry: query to create the new database
-    :type qry: str    """
-
-    try:
-        (conn, cursor) = open_conn(False)
-    except DbException as e:
-        Log.error(
-            'Connection to database could not be established: {0}', e.message)
-        return False
-
-    try:
-        cursor.executescript(qry)
-    except sqlite3.Error:
-        close_conn(conn, cursor)
-        Log.error('The database can not be created.' +
-                  'DB file:' + APIBasicConfig.DB_PATH)
-        return False
-
-    conn.commit()
-    close_conn(conn, cursor)
-    return True
-
-
 def check_db():
     """
     Checks if database file exist
@@ -138,39 +111,6 @@ def close_conn(conn, cursor):
     return
 
 
-def save_experiment(name, description, version):
-    """
-    Stores experiment in database
-
-    :param version:
-    :type version: str
-    :param name: experiment's name
-    :type name: str
-    :param description: experiment's description
-    :type description: str
-    """
-    if not check_db():
-        return False
-    try:
-        (conn, cursor) = open_conn()
-    except DbException as e:
-        Log.error(
-            'Connection to database could not be established: {0}', e.message)
-        return False
-    try:
-        cursor.execute('INSERT INTO experiment (name, description, autosubmit_version) VALUES (:name, :description, '
-                       ':version)',
-                       {'name': name, 'description': description, 'version': version})
-    except sqlite3.IntegrityError as e:
-        close_conn(conn, cursor)
-        Log.error('Could not register experiment: {0}'.format(e))
-        return False
-
-    conn.commit()
-    close_conn(conn, cursor)
-    return True
-
-
 def check_experiment_exists(name, error_on_inexistence=True):
     """
     Checks if exist an experiment with the given name.
@@ -239,57 +179,6 @@ def get_autosubmit_version(expid, log=None):
             log.error('The experiment "{0}" does not exist yet!!!', expid)
         return None
     return row[0]
-
-
-def last_name_used(test=False, operational=False):
-    """
-    Gets last experiment identifier used
-
-    :param test: flag for test experiments
-    :type test: bool
-    :param operational: flag for operational experiments
-    :type test: bool
-    :return: last experiment identifier used, 'empty' if there is none
-    :rtype: str
-    """
-    if not check_db():
-        return ''
-    try:
-        (conn, cursor) = open_conn()
-    except DbException as e:
-        Log.error(
-            'Connection to database could not be established: {0}', e.message)
-        return ''
-    conn.text_factory = str
-    if test:
-        cursor.execute('SELECT name '
-                       'FROM experiment '
-                       'WHERE rowid=(SELECT max(rowid) FROM experiment WHERE name LIKE "t%" AND '
-                       'autosubmit_version IS NOT NULL AND '
-                       'NOT (autosubmit_version LIKE "%3.0.0b%"))')
-    elif operational:
-        cursor.execute('SELECT name '
-                       'FROM experiment '
-                       'WHERE rowid=(SELECT max(rowid) FROM experiment WHERE name LIKE "o%" AND '
-                       'autosubmit_version IS NOT NULL AND '
-                       'NOT (autosubmit_version LIKE "%3.0.0b%"))')
-    else:
-        cursor.execute('SELECT name '
-                       'FROM experiment '
-                       'WHERE rowid=(SELECT max(rowid) FROM experiment WHERE name NOT LIKE "t%" AND '
-                       'name NOT LIKE "o%" AND autosubmit_version IS NOT NULL AND '
-                       'NOT (autosubmit_version LIKE "%3.0.0b%"))')
-    row = cursor.fetchone()
-    close_conn(conn, cursor)
-    if row is None:
-        return 'empty'
-
-    # If starts by number (during 3.0 beta some jobs starting with numbers where created), returns empty.
-    try:
-        int(row[0][0])
-        return 'empty'
-    except ValueError:
-        return row[0]
 
 
 def search_experiment_by_id(query, exp_type=None, only_active=None, owner=None):
@@ -500,34 +389,6 @@ def get_experiment_by_id(expid):
         result['description'] = obj["description"]
         result['version'] = obj["autosubmit_version"]
     return result
-
-
-def delete_experiment(experiment_id):
-    """
-    Removes experiment from database
-
-    :param experiment_id: experiment identifier
-    :type experiment_id: str
-    :return: True if delete is succesful
-    :rtype: bool
-    """
-    if not check_db():
-        return False
-    if not check_experiment_exists(experiment_id, False):
-        return True
-    try:
-        (conn, cursor) = open_conn()
-    except DbException as e:
-        Log.error(
-            'Connection to database could not be established: {0}', e.message)
-        return False
-    cursor.execute('DELETE FROM experiment '
-                   'WHERE name=:name', {'name': experiment_id})
-    row = cursor.fetchone()
-    if row is None:
-        Log.debug('The experiment {0} has been deleted!!!', experiment_id)
-    close_conn(conn, cursor)
-    return True
 
 
 def _update_database(version, cursor):

@@ -34,7 +34,7 @@ from autosubmit_api.autosubmit_legacy.job.job_utils import SubJobManager, job_ti
 from autosubmit_api.performance.utils import calculate_ASYPD_perjob, calculate_SYPD_perjob
 from autosubmit_api.components.jobs import utils as JUtils
 from autosubmit_api.monitor.monitor import Monitor
-from autosubmit_api.autosubmit_legacy.job.job_common import Status
+from autosubmit_api.common.utils import Status
 from bscearth.utils.date import date2str, parse_date
 from autosubmit_api.experiment import common_db_requests as DbRequests
 from autosubmit_api.autosubmit_legacy.job.job_package_persistence import JobPackagePersistence

@@ -1,17 +1,13 @@
 import os
-import sys
-import string
 import time
-import pickle
 import textwrap
 import traceback
 import sqlite3
-import copy
 from datetime import datetime
 from collections import OrderedDict
 from typing import List, Tuple, Dict
 
-from ..config.basicConfig import APIBasicConfig
+from autosubmit_api.config.basicConfig import APIBasicConfig
 APIBasicConfig.read()
 
 DB_FILE_AS_TIMES = os.path.join(APIBasicConfig.DB_DIR, APIBasicConfig.AS_TIMES_DB) # "/esarchive/autosubmit/as_times.db"
@@ -207,50 +203,6 @@ def _create_exp_times(row_content):
         print(row_content)
 
 
-def create_job_times(conn, exp_id, job_name, timest, submit_time, start_time, finish_time, status, debug=False):
-    """
-    Create job_times detail register.
-    :param conn: connection to as_times.db
-    :type conn: sqlite3 connection
-    :param exp_id: Id of experiment (not name)
-    :type exp_id: Integer
-    :param job_name: Name of job
-    :type job_name: String
-    :param timest: Timestamp of the last modified date of the pkl file
-    :type timest: Integer
-    :param submit_time: Timestamp of the submit time of the job
-    :type submit_time: Integer
-    :param start_time: Timestamp of the start time of the job
-    :type start_time: Integer
-    :param finish_time: Timestamp of the finish time of the job
-    :type finish_time: Integer
-    :param status: Status of the job
-    :type status: String
-    :param debug: Flag for testing purposes
-    :type debug: Boolean
-    :return: Id of detail
-    :rtype: Integer
-    """
-
-    try:
-        if (debug == True):
-            print(("INSERTING INTO JOB_TIMES " + str(exp_id) + " ~ " + str(job_name) + " ~ " + str(timest) +
-                  "\t" + str(submit_time) + "\t" + str(start_time) + "\t" + str(finish_time) + "\t" + str(status)))
-            return
-        sql = ''' INSERT INTO job_times(exp_id, job_name, created, modified, submit_time, start_time, finish_time, status) VALUES(?,?,?,?,?,?,?,?) '''
-        cur = conn.cursor()
-        cur.execute(sql, (exp_id, job_name, timest, timest,
-                          submit_time, start_time, finish_time, status))
-        # Commit outside the loop
-        conn.commit()
-        return cur.lastrowid
-    except sqlite3.Error as e:
-        print((traceback.format_exc()))
-        print(("Error on Insert : " + str(type(e).__name__)))
-        print((exp_id, job_name, timest, timest,
-               submit_time, start_time, finish_time, status))
-
-
 def create_many_job_times(list_job):
     try:
         conn = create_connection(DB_FILE_AS_TIMES)
@@ -287,37 +239,6 @@ def _insert_into_ecearth_details(exp_id, user, created, model, branch, hpc):
     return False
 
 
-def insert_experiment_status(conn, expid, seconds_diff):
-    """
-    Inserts into table of status if it does not exist and updates status. Requires conn to ecearth.db.\n
-    :param conn: ecearth.db connection
-    :type conn: sqlite3 connection object
-    :param expid: Experiment name
-    :type expid: str
-    :param seconds_diff: time limit in seconds
-    :type seconds_diff: int
-    :return: Experiment id
-    :rtype: int
-    """
-    # print("Looking {}".format(expid))
-    current_id = _get_id_db(conn, expid)
-    conn = create_connection(DB_FILE_AS_TIMES)
-    if (current_id):
-        try:
-            # print("Inserting {} {}".format(current_id, expid))
-            row_content = (current_id, expid, "RUNNING", int(
-                seconds_diff), datetime.today().strftime('%Y-%m-%d-%H:%M:%S'))
-            result = _create_exp_status(row_content)
-        except sqlite3.Error as exp:
-            print(("error on insert_experiment_status {0} {1}".format(
-                current_id, expid)))
-            print((traceback.format_exc()))
-            return current_id
-        # print(row_content)
-
-    return current_id
-
-
 def create_connection(db_file):
     # type: (str) -> sqlite3.Connection
     """
@@ -346,26 +267,6 @@ def create_table(conn, create_table_sql):
 
 
 # SELECTS
-
-def get_completed_times_detail():
-    """
-    Gets all details in job times as a Dictionary of dictionaries
-    """
-    # experiments = get_exps(conn)
-    try:
-        # conn = create_connection(DB_FILE_AS_TIMES)
-        all_detail = _get_all_job_times()
-        exps = dict()
-        for item in all_detail:
-            detail_id, exp_id, job_name, created, modified, submit_time, start_time, finish_time, status = item
-            if exp_id not in list(exps.keys()):
-                exps[exp_id] = dict()
-            exps[exp_id][job_name] = (
-                submit_time, start_time, finish_time, status, detail_id)
-        return exps
-    except Exception as ex:
-        print((traceback.format_exc()))
-
 
 def get_times_detail(exp_id):
     """
@@ -496,40 +397,6 @@ def get_experiment_times_group():
         # if extended == True:
         #     experiment_times[name] = (total_jobs, completed_jobs, created, modified)
     return experiment_times
-
-
-def get_exps(conn):
-    """
-    Get exp ids
-    :param conn: ecearth.db connection
-    :param expid:
-    :return:
-    """
-    # SQLite always return a unicode object, but we can change this
-    # behaviour with the next sentence
-    conn.text_factory = str
-    cur = conn.cursor()
-    cur.execute(
-        "SELECT name FROM experiment WHERE autosubmit_version IS NOT NULL")
-    rows = cur.fetchall()
-    return rows
-
-
-def _get_exps_complete(conn):
-    """
-    Get exp all row information
-    :param conn: ecearth.db connection
-    :param expid:
-    :return:
-    """
-    # SQLite always return a unicode object, but we can change this
-    # behaviour with the next sentence
-    conn.text_factory = str
-    cur = conn.cursor()
-    cur.execute(
-        "SELECT * FROM experiment WHERE autosubmit_version IS NOT NULL")
-    rows = cur.fetchall()
-    return rows
 
 
 def get_exps_base():
@@ -689,53 +556,6 @@ def _get_latest_completed_jobs(seconds=300):
         return None
 
 
-def _get_all_job_times():
-    """
-    Get content from job_times detail for all experiments.\n
-    :return: (detail_id, exp_id, job_name, created, modified, submit, start, finish_time, status)
-    :rtype: 9-tuple (int, int, str, int, int, int, int, int, str)
-    """
-    try:
-        conn = create_connection(os.path.join(APIBasicConfig.DB_DIR, APIBasicConfig.AS_TIMES_DB))
-        cur = conn.cursor()
-        cur.execute(
-            "SELECT detail_id, exp_id, job_name, created, modified, submit_time, start_time, finish_time, status FROM job_times")
-        rows = cur.fetchall()
-        conn.close()
-        return rows
-    except Exception as exp:
-        print("Error while trying to _get_all_job_times")
-        print((traceback.format_exc()))
-        return None
-
-
-def _delete_from_job_times_detail(detail_id):
-    """
-    Deletes a job that is no longer included in the experiment.
-
-    :param detail_id: id of row
-    :type detail_id: int
-    """
-    try:
-        conn = create_connection(os.path.join(APIBasicConfig.DB_DIR, APIBasicConfig.AS_TIMES_DB))
-        cur = conn.cursor()
-        #print("Cursor defined")
-        cur.execute(
-            "DELETE FROM job_times WHERE detail_id=?", (detail_id,))
-        # print(cur.rowcount)
-        cur.close()
-        conn.commit()
-        conn.close()
-
-        # No reliable way to get any feedback from cursor at this point, so let's just return 1
-        return True
-    except Exception as exp:
-        print(("Error while trying to delete " +
-              str(detail_id) + " from job_times."))
-        print((traceback.format_exc()))
-        return None
-
-
 def _delete_many_from_job_times_detail(detail_list):
     try:
         conn = create_connection(os.path.join(APIBasicConfig.DB_DIR, APIBasicConfig.AS_TIMES_DB))
@@ -870,45 +690,6 @@ def _get_specific_exp_status(expid):
     except Exception as exp:
         print((traceback.format_exc()))
         return (0, expid, "NOT RUNNING", 0)
-
-
-def _get_exp_status_running():
-    """
-    Get RUNNING experiments from from experiment_status.\n
-    :return: row content: exp_id, name, status, seconds_diff
-    :rtype: 4-tuple (int, str, str, int)
-    """
-    try:
-        conn = create_connection(os.path.join(APIBasicConfig.DB_DIR, APIBasicConfig.AS_TIMES_DB))
-        conn.text_factory = str
-        cur = conn.cursor()
-        cur.execute(
-            "SELECT exp_id, name, status, seconds_diff FROM experiment_status WHERE status='RUNNING'")
-        rows = cur.fetchall()
-        return rows
-    except sqlite3.Error as e:
-        print("Error on _get_exp_status_running")
-
-
-def _create_exp_status(row_content):
-    """
-    Create experiment status
-    :param conn:
-    :param details:
-    :return:
-    """
-    try:
-        conn = create_connection(os.path.join(APIBasicConfig.DB_DIR, APIBasicConfig.AS_TIMES_DB))
-        sql = ''' INSERT INTO experiment_status(exp_id, name, status, seconds_diff, modified) VALUES(?,?,?,?,?) '''
-        # print(row_content)
-        cur = conn.cursor()
-        cur.execute(sql, row_content)
-        # print(cur)
-        conn.commit()
-        return cur.lastrowid
-    except sqlite3.Error as e:
-        print(row_content)
-        print(("Error on Insert : " + str(type(e).__name__)))
 
 
 def _get_id_db(conn, expid):
