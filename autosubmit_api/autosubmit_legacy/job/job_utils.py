@@ -20,14 +20,7 @@
 import networkx
 import datetime
 import time
-import os
 
-from networkx.algorithms.dag import is_directed_acyclic_graph
-from networkx import DiGraph
-from networkx import dfs_edges
-from networkx import NetworkXError
-from .job_package_persistence import JobPackagePersistence
-from ...config.basicConfig import APIBasicConfig
 
 
 def transitive_reduction(graph):
@@ -45,57 +38,6 @@ def transitive_reduction(graph):
     #         u_edges -= {y for x, y in dfs_edges(graph, v)}
     #     reduced_graph.add_edges_from((u, v) for v in u_edges)
     # return reduced_graph
-
-def get_job_package_code(expid, job_name):
-    # type: (str, str) -> int
-    """
-    Finds the package code and retrieves it. None if no package.
-
-    :param BasicConfig: Basic configuration
-    :type BasicConfig: Configuration Object
-    :param expid: Experiment Id
-    :type expid: String
-    :param current_job_name: Name of job
-    :type current_jobs: string
-    :return: package code, None if not found
-    :rtype: int or None
-    """
-    try:
-        basic_conf = APIBasicConfig()
-        basic_conf.read()
-        packages_wrapper = JobPackagePersistence(os.path.join(basic_conf.LOCAL_ROOT_DIR, expid, "pkl"),"job_packages_" + expid).load(wrapper=True)
-        packages_wrapper_plus = JobPackagePersistence(os.path.join(basic_conf.LOCAL_ROOT_DIR, expid, "pkl"),"job_packages_" + expid).load(wrapper=False)
-        if (packages_wrapper or packages_wrapper_plus):
-            packages = packages_wrapper if len(packages_wrapper) > len(packages_wrapper_plus) else packages_wrapper_plus
-            for exp, package_name, _job_name in packages:
-                if job_name == _job_name:
-                    code = int(package_name.split("_")[2])
-                    return code
-    except:
-        pass
-    return 0
-class Dependency(object):
-    """
-    Class to manage the metadata related with a dependency
-
-    """
-
-    def __init__(self, section, distance=None, running=None, sign=None, delay=-1, splits=None, select_chunks=list()):
-        self.section = section
-        self.distance = distance
-        self.running = running
-        self.sign = sign
-        self.delay = delay
-        self.splits = splits
-        self.select_chunks_dest = list()
-        self.select_chunks_orig = list()
-        for chunk_relation in select_chunks:
-            self.select_chunks_dest.append(chunk_relation[0])
-            if len(chunk_relation) > 1:
-                self.select_chunks_orig.append(chunk_relation[1])
-            else:
-                self.select_chunks_orig.append([])
-
 
 class SimpleJob(object):
     """
@@ -266,12 +208,6 @@ class SubJobManager(object):
         """
         return self.subjobList
 
-    def get_collection_of_fixes_applied(self):
-        """
-
-        """
-        return self.subjobfixes
-
 
 def parse_output_number(self, string_number):
     """
@@ -366,37 +302,3 @@ def tostamp(string_date):
                                                           "%Y-%m-%d %H:%M:%S").timetuple()))
     else:
         return 0
-
-
-# def calculate_SYPD_perjob(chunk_unit, chunk_size, job_chunk, run_time):
-#     # type: (str, int, int, int) -> float
-#     """
-#     :param chunk_unit:
-#     :param chunk_size:
-#     :param job_chunk:
-#     :param run_time:
-#     """
-#     if job_chunk and job_chunk > 0:
-#         years_per_sim = datechunk_to_year(chunk_unit, chunk_size)
-#         return round(years_per_sim * 86400 / run_time, 2) if run_time and run_time > 0 else 0
-#     return None
-
-
-# def calculate_ASYPD_perjob(chunk_unit, chunk_size, job_chunk, queue_run_time, average_post):
-#     # type: (str, int, int, int, float) -> float
-#     """
-#     :param chunk_unit:
-#     :param chunk_size:
-#     :param job_chunk:
-#     :param queue_run_time:
-#     :param average_post:
-#     """
-#     if job_chunk and job_chunk > 0:
-#         years_per_sim = datechunk_to_year(chunk_unit, chunk_size)
-#         return round(years_per_sim * 86400.0 / (queue_run_time + average_post), 2) if queue_run_time and average_post and queue_run_time > 0 and average_post > 0 else 0
-#     return None
-
-
-def getTitle(job_name, status_color, status_text):
-    # type: (str, str, str) -> str
-    return job_name + " <span class='badge' style='background-color: " + status_color + "'>#" + status_text + "</span>"

@@ -30,11 +30,11 @@ import subprocess
 
 from collections import deque
 from autosubmit_api.components.experiment.pkl_organizer import PklOrganizer
+from autosubmit_api.components.jobs.job_factory import SimpleJob
 from autosubmit_api.config.confConfigStrategy import confConfigStrategy
 from autosubmit_api.database import db_common as db_common
 from autosubmit_api.experiment import common_db_requests as DbRequests
 from autosubmit_api.database import db_jobdata as JobData
-from autosubmit_api.autosubmit_legacy.job.job_utils import SimpleJob
 from autosubmit_api.common import utils as common_utils
 from autosubmit_api.components.jobs import utils as JUtils
 

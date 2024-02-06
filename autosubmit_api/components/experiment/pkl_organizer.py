@@ -5,9 +5,8 @@ import pickle
 from networkx import DiGraph
 from autosubmit_api.components.jobs import job_factory as factory
 from autosubmit_api.common.utils import JobSection, PklJob, PklJob14, Status
-from autosubmit_api.autosubmit_legacy.job.job_utils import SimpleJob
 from autosubmit_api.components.experiment.configuration_facade import AutosubmitConfigurationFacade
-from autosubmit_api.components.jobs.job_factory import Job
+from autosubmit_api.components.jobs.job_factory import Job, SimpleJob
 from typing import List, Dict, Set
 
 

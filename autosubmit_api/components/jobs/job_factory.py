@@ -11,6 +11,16 @@ from abc import ABCMeta, abstractmethod
 JobRow = collections.namedtuple(
     'JobRow', ['name', 'queue_time', 'run_time', 'status', 'energy', 'submit', 'start', 'finish', 'ncpus', 'run_id'])
 
+class SimpleJob(object):
+    """
+    A simple replacement for jobs
+    """
+
+    def __init__(self, name, tmppath, statuscode):
+        self.name = name
+        self._tmp_path = tmppath
+        self.status = statuscode
+
 class Job(metaclass=ABCMeta):
   """ Abstract Job """
 
