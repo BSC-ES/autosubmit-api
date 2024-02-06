@@ -488,24 +488,3 @@ class JobPackageHybrid(JobPackageThread):
             jobs_scripts.append(inner_jobs)
         return jobs_scripts
 
-
-class JobPackageVerticalHorizontal(JobPackageHybrid):
-
-    def _common_script_content(self):
-        return self._wrapper_factory.get_wrapper(self._wrapper_factory.hybrid_wrapper_vertical_horizontal,
-                                                 name=self._name, queue=self._queue, project=self._project,
-                                                 wallclock=self._wallclock, num_processors=self._num_processors,
-                                                 jobs_scripts=self._jobs_scripts, dependency=self._job_dependency,
-                                                 jobs_resources=self._jobs_resources, expid=self._expid,
-                                                 rootdir=self.platform.root_dir, directives=self._custom_directives)
-
-
-class JobPackageHorizontalVertical(JobPackageHybrid):
-
-    def _common_script_content(self):
-        return self._wrapper_factory.get_wrapper(self._wrapper_factory.hybrid_wrapper_horizontal_vertical,
-                                                 name=self._name, queue=self._queue, project=self._project,
-                                                 wallclock=self._wallclock, num_processors=self._num_processors,
-                                                 jobs_scripts=self._jobs_scripts, dependency=self._job_dependency,
-                                                 jobs_resources=self._jobs_resources, expid=self._expid,
-                                                 rootdir=self.platform.root_dir, directives=self._custom_directives)
