@@ -16,6 +16,8 @@
     * Affected Background task: `PopulateQueueRuntimes`
 * Added chunks to the `/v3/performance/<expid>` endpoint
 * Added `/v4/auth/cas/v2/login` endpoint to handle CAS version 2 protocol by giving a whitelisted `service` instead of using the `Referer` header in the request. Also, supports wildcard `*` in the `ALLOWED_CLIENTS` list, and by default gives the API base URL as the `service` for direct authentication.
+* Added more tests
+* Several dead code was removed
 
 ### Pre-release v4.0.0b2 - Release date: 2023-11-20
 
