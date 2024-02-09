@@ -6,6 +6,7 @@
 2. [Autosubmit Big Picture](#autosubmit-big-picture)
 3. [Installation](#installation)
 4. [Configuration options](#configuration-options)
+5. [How to run tests](#how-to-run-tests)
 
 ## Overview
 
@@ -59,8 +60,9 @@ The Autosubmit API have some configuration options that can be modified by setti
     * If set to `WRITEONLY`, only a subset of the endpoints will be protected.
     * If set to `NONE`, none of the endpoints will be protected.
 * **`SECRET_KEY`**: The secret key to encode the JWT tokens from the Authorization Module. **Important to be set up on production.**
-* **`CAS_LOGIN_URL`**: CAS Protocol URL to request a ticket.
-* **`CAS_VERIFY_URL`**: CAS Protocol URL to verify a given ticket.
+* **`CAS_SERVER_URL`**: CAS Protocol server base URL to request a ticket and verify it. Used for `/v4` endpoints.
+* **`CAS_LOGIN_URL`**: CAS Protocol URL to request a ticket. Used for `/v3` endpoints.
+* **`CAS_VERIFY_URL`**: CAS Protocol URL to verify a given ticket. Used for `/v3` endpoints.
 
 
 ## How to run tests
