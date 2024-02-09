@@ -1,6 +1,6 @@
 # CHANGELOG
 
-### Pre-release v4.0.0b3 - Release date: TBD
+### Pre-release v4.0.0b3 - Release date: 2023-02-09
 
 * Fix HPC value in the running endpoint
 * **Major change:** Updated all route names. Versioning path prefix is included:
