@@ -1,13 +1,13 @@
 from typing import List
 from flask_apscheduler import APScheduler
 from autosubmit_api.bgtasks.bgtask import (
-    BackgroundTask,
+    BackgroundTaskTemplate,
     PopulateDetailsDB,
     PopulateQueueRuntimes,
-    PopulateRunningExperiments,
     VerifyComplete,
     PopulateGraph,
 )
+from autosubmit_api.bgtasks.tasks.status_updater import StatusUpdater
 from autosubmit_api.config import (
     DISABLE_BACKGROUND_TASKS,
     RUN_BACKGROUND_TASKS_ON_START,
@@ -15,10 +15,10 @@ from autosubmit_api.config import (
 
 from autosubmit_api.logger import logger, with_log_run_times
 
-REGISTERED_TASKS: List[BackgroundTask] = [
+REGISTERED_TASKS: List[BackgroundTaskTemplate] = [
     PopulateDetailsDB,
     PopulateQueueRuntimes,
-    PopulateRunningExperiments,
+    StatusUpdater,
     VerifyComplete,
     PopulateGraph,
 ]

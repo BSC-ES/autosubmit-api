@@ -1,27 +1,63 @@
 import os
 from typing import Any
-from sqlalchemy import Connection, Select, create_engine, select, text, func
+from sqlalchemy import Connection, Engine, Select, create_engine, select, text, func
+from autosubmit_api.builders import BaseBuilder
 from autosubmit_api.logger import logger
 from autosubmit_api.config.basicConfig import APIBasicConfig
 
 
-def create_main_db_conn():
-    APIBasicConfig.read()
-    autosubmit_db_path = os.path.abspath(APIBasicConfig.DB_PATH)
-    as_times_db_path = os.path.join(APIBasicConfig.DB_DIR, APIBasicConfig.AS_TIMES_DB)
-    engine = create_engine("sqlite://")
-    conn = engine.connect()
-    conn.execute(text(f"attach database '{autosubmit_db_path}' as autosubmit;"))
-    conn.execute(text(f"attach database '{as_times_db_path}' as as_times;"))
-    return conn
+class AttachedDatabaseConnBuilder(BaseBuilder):
+    """
+    SQLite utility to build attached databases.
+    """
+
+    def __init__(self) -> None:
+        super().__init__(False)
+        APIBasicConfig.read()
+        self.engine = create_engine("sqlite://")
+        self._product = self.engine.connect()
+
+    def attach_db(self, path: str, name: str):
+        self._product.execute(text(f"attach database '{path}' as {name};"))
+
+    def attach_autosubmit_db(self):
+        autosubmit_db_path = os.path.abspath(APIBasicConfig.DB_PATH)
+        self.attach_db(autosubmit_db_path, "autosubmit")
+
+    def attach_as_times_db(self):
+        as_times_db_path = os.path.join(
+            APIBasicConfig.DB_DIR, APIBasicConfig.AS_TIMES_DB
+        )
+        self.attach_db(as_times_db_path, "as_times")
+
+    @property
+    def product(self) -> Connection:
+        return super().product
 
 
-def create_autosubmit_db_engine():
+def create_main_db_conn() -> Connection:
+    """
+    Connection with the autosubmit and as_times DDBB.
+    """
+    builder = AttachedDatabaseConnBuilder()
+    builder.attach_autosubmit_db()
+    builder.attach_as_times_db()
+
+    return builder.product
+
+
+def create_autosubmit_db_engine() -> Engine:
+    """
+    Create an engine for the autosubmit DDBB. Usually named autosubmit.db
+    """
     APIBasicConfig.read()
     return create_engine(f"sqlite:///{ os.path.abspath(APIBasicConfig.DB_PATH)}")
 
 
-def create_as_times_db_engine():
+def create_as_times_db_engine() -> Engine:
+    """
+    Create an engine for the AS_TIMES DDBB. Usually named as_times.db
+    """
     APIBasicConfig.read()
     db_path = os.path.join(APIBasicConfig.DB_DIR, APIBasicConfig.AS_TIMES_DB)
     return create_engine(f"sqlite:///{ os.path.abspath(db_path)}")
