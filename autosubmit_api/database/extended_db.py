@@ -29,8 +29,5 @@ class ExtendedDB:
     def prepare_as_times_db(self):
         prepare_completed_times_db()
         prepare_status_db()
-        self.as_times_db_manager.create_view('currently_running',
-            'select s.name, s.status, t.total_jobs from experiment_status as s inner join experiment_times as t on s.name = t.name where s.status="RUNNING" ORDER BY t.total_jobs'
-            )
 
 

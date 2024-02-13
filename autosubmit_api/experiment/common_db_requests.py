@@ -324,22 +324,6 @@ def get_experiment_status():
     return experiment_status
 
 
-def get_currently_running_experiments():
-    """
-    Gets the list of currently running experiments ordered by total_jobs
-    Connects to AS_TIMES
-    :return: map of expid -> total_jobs
-    :rtype: OrderedDict() str -> int
-    """
-    experiment_running = OrderedDict()
-    current_running = _get_exp_only_active()
-    if current_running:
-        for item in current_running:
-            name, status, total_jobs = item
-            experiment_running[name] = total_jobs
-    return experiment_running
-
-
 def get_specific_experiment_status(expid):
     """
     Gets the current status from database.\n
@@ -651,23 +635,6 @@ def _get_exp_status():
     except Exception as exp:
         print((traceback.format_exc()))
         return dict()
-
-
-def _get_exp_only_active():
-    """
-    Get all registers of experiments ACTIVE
-    """
-    try:
-        conn = create_connection(os.path.join(APIBasicConfig.DB_DIR, APIBasicConfig.AS_TIMES_DB))
-        conn.text_factory = str
-        cur = conn.cursor()
-        cur.execute("select name, status, total_jobs from currently_running")
-        rows = cur.fetchall()
-        return rows
-    except Exception as exp:
-        print((traceback.format_exc()))
-        print(exp)
-        return None
 
 
 def _get_specific_exp_status(expid):
