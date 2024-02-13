@@ -28,17 +28,6 @@ details_table = Table(
 
 # AS_TIMES TABLES
 
-experiment_times_table = Table(
-    "experiment_times",
-    metadata_obj,
-    Column("exp_id", Integer, primary_key=True),
-    Column("name", Text, nullable=False),
-    Column("created", Integer, nullable=False),
-    Column("modified", Integer, nullable=False),
-    Column("total_jobs", Integer, nullable=False),
-    Column("completed_jobs", Integer, nullable=False),
-)
-
 experiment_status_table = Table(
     "experiment_status",
     metadata_obj,

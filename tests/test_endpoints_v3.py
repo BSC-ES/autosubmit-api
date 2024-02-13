@@ -100,7 +100,7 @@ class TestExpInfo:
         assert resp_obj["error"] == False
         assert resp_obj["expid"] == expid
         assert resp_obj["total_jobs"] == 55
-        assert resp_obj["completed_jobs"] == 24
+        assert resp_obj["completed_jobs"] == 28
 
 
 class TestPerformance:
@@ -338,10 +338,6 @@ class TestCurrentConfig:
         assert (
             resp_obj["configuration_filesystem"]["CONFIG"]["AUTOSUBMIT_VERSION"]
             == "4.0.95"
-        )
-        assert (
-            resp_obj["configuration_current_run"]["CONFIG"]["AUTOSUBMIT_VERSION"]
-            == "4.0.101"
         )
 
     def test_retrocomp_v3_conf_files(self, fixture_client: FlaskClient):

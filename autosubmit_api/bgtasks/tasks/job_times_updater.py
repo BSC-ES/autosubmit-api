@@ -57,4 +57,4 @@ class JobTimesUpdater(BackgroundTaskTemplate):
 
     @classmethod
     def procedure(cls):
-        verify_last_completed(1800)
+        pass

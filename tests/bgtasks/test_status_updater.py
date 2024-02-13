@@ -1,5 +1,5 @@
 from autosubmit_api.bgtasks.tasks.status_updater import StatusUpdater
-from autosubmit_api.database import tables
+from autosubmit_api.database import prepare_db, tables
 from autosubmit_api.database.common import (
     create_autosubmit_db_engine,
     create_as_times_db_engine,
@@ -9,6 +9,7 @@ from autosubmit_api.history.database_managers.database_models import RunningStat
 class TestStatusUpdater:
 
     def test_same_tables(self, fixture_mock_basic_config):
+        prepare_db()
         
         StatusUpdater.run()
         

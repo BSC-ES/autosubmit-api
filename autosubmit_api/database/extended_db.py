@@ -1,6 +1,6 @@
 from autosubmit_api.config.basicConfig import APIBasicConfig
 from autosubmit_api.database.db_manager import DbManager
-from autosubmit_api.experiment.common_db_requests import prepare_completed_times_db, prepare_status_db
+from autosubmit_api.database import prepare_db
 from autosubmit_api.workers.populate_details.populate import DetailsProcessor
 
 class ExtendedDB:
@@ -15,7 +15,7 @@ class ExtendedDB:
         Create tables and views that are required
         """
         self.prepare_main_db()
-        self.prepare_as_times_db()
+        prepare_db()
 
 
     def prepare_main_db(self):
@@ -25,9 +25,5 @@ class ExtendedDB:
             'listexp',
             'select id,name,user,created,model,branch,hpc,description from experiment left join details on experiment.id = details.exp_id'
             )
-        
-    def prepare_as_times_db(self):
-        prepare_completed_times_db()
-        prepare_status_db()
 
 

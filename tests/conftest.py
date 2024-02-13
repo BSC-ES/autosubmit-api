@@ -1,4 +1,4 @@
-# Conftest file for sharing fixtures 
+# Conftest file for sharing fixtures
 # Reference: https://docs.pytest.org/en/latest/reference/fixtures.html#conftest-py-sharing-fixtures-across-multiple-files
 
 import os
@@ -17,6 +17,7 @@ FAKE_EXP_DIR = "./tests/experiments/"
 def fixture_disable_protection(monkeypatch: pytest.MonkeyPatch):
     monkeypatch.setenv("PROTECTION_LEVEL", "NONE")
 
+
 @pytest.fixture
 def fixture_mock_basic_config(monkeypatch: pytest.MonkeyPatch):
     # Patch APIBasicConfig parent BasicConfig
@@ -25,6 +26,9 @@ def fixture_mock_basic_config(monkeypatch: pytest.MonkeyPatch):
     monkeypatch.setattr(BasicConfig, "LOCAL_ROOT_DIR", FAKE_EXP_DIR)
     monkeypatch.setattr(BasicConfig, "DB_DIR", FAKE_EXP_DIR)
     monkeypatch.setattr(BasicConfig, "DB_FILE", "autosubmit.db")
+    monkeypatch.setattr(
+        BasicConfig, "JOBDATA_DIR", os.path.join(FAKE_EXP_DIR, "metadata", "data")
+    )
     monkeypatch.setattr(
         BasicConfig, "DB_PATH", os.path.join(FAKE_EXP_DIR, "autosubmit.db")
     )

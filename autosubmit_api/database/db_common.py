@@ -231,7 +231,7 @@ def search_experiment_by_id(query, exp_type=None, only_active=None, owner=None):
     experiment_times = dict()
     if len(table) > 0:
         experiment_status = DbRequests.get_experiment_status()
-        experiment_times = DbRequests.get_experiment_times()
+        # REMOVED: experiment_times = DbRequests.get_experiment_times()
     for row in table:
         expid = str(row[1])
 
@@ -268,7 +268,7 @@ def search_experiment_by_id(query, exp_type=None, only_active=None, owner=None):
 
         try:
             current_run = ExperimentHistoryDirector(ExperimentHistoryBuilder(expid)).build_reader_experiment_history().manager.get_experiment_run_dc_with_max_id()
-            if current_run and current_run.total > 0 and (current_run.total == total or current_run.modified_timestamp > last_modified_timestamp):
+            if current_run and current_run.total > 0:
                 completed = current_run.completed
                 total = current_run.total
                 submitted = current_run.submitted
@@ -313,7 +313,7 @@ def get_current_running_exp():
     experiment_status = dict()
     experiment_times = dict()
     experiment_status = DbRequests.get_experiment_status()
-    experiment_times = DbRequests.get_experiment_times()
+    # REMOVED: experiment_times = DbRequests.get_experiment_times()
     for row in table:
         expid = str(row[1])
         status = "NOT RUNNING"
@@ -353,7 +353,7 @@ def get_current_running_exp():
             # Try to retrieve experiment_run data
             try:
                 current_run = ExperimentHistoryDirector(ExperimentHistoryBuilder(expid)).build_reader_experiment_history().manager.get_experiment_run_dc_with_max_id()
-                if current_run and current_run.total > 0 and (current_run.total == total or current_run.modified_timestamp > last_modified_timestamp):
+                if current_run and current_run.total > 0:
                     completed = current_run.completed
                     total = current_run.total
                     submitted = current_run.submitted

@@ -38,7 +38,7 @@ def process_completed_times(time_condition=60):
         stdOut, _ = currentDirectories.communicate() if currentDirectories else (None, None)
         # Building connection to ecearth
 
-        current_table = DbRequests.prepare_completed_times_db()
+        current_table = dict() # REMOVED: DbRequests.prepare_completed_times_db()
         # Build list of all folder in /esarchive/autosubmit which should be considered as experiments (although some might not be)
         # Pre process
         _preprocess_completed_times()

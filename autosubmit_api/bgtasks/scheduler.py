@@ -17,9 +17,9 @@ from autosubmit_api.logger import logger, with_log_run_times
 
 REGISTERED_TASKS: List[BackgroundTaskTemplate] = [
     PopulateDetailsDB,
-    PopulateQueueRuntimes,
+    # PopulateQueueRuntimes,
     StatusUpdater,
-    JobTimesUpdater,
+    # JobTimesUpdater,
     PopulateGraph,
 ]
 

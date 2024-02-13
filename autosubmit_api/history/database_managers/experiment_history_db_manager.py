@@ -176,10 +176,7 @@ class ExperimentHistoryDbManager(DatabaseManager):
 
   def get_experiment_run_dc_with_max_id(self):
     """ Get Current (latest) ExperimentRun data class. """
-    if self.db_version >= Models.DatabaseVersion.EXPERIMENT_HEADER_SCHEMA_CHANGES.value:
-      return ExperimentRun.from_model(self._get_experiment_run_with_max_id())
-    else:
-      return ExperimentRun(run_id=0)
+    return ExperimentRun.from_model(self._get_experiment_run_with_max_id())
 
   def register_experiment_run_dc(self, experiment_run_dc):
     self._insert_experiment_run(experiment_run_dc)

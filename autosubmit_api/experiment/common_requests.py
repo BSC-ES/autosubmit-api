@@ -172,7 +172,8 @@ def get_experiment_data(expid):
             result["completed_jobs"] = experiment_run.completed
             result["db_historic_version"] = experiment_history.manager.db_version
         else:
-            _, result["total_jobs"], result["completed_jobs"] =  DbRequests.get_experiment_times_by_expid(expid)
+            result["total_jobs"] = 0
+            result["completed_jobs"] = 0
             result["db_historic_version"] = "NA"
 
     except Exception as exp:

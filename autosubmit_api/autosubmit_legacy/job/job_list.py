@@ -590,7 +590,7 @@ class JobList:
         conn = DbRequests.create_connection(db_file)
         # job_data = None
         # Job information from worker database
-        job_times = DbRequests.get_times_detail_by_expid(conn, expid)
+        job_times = dict() # REMOVED: DbRequests.get_times_detail_by_expid(conn, expid)
         conn.close()
         # Job information from job historic data
         # print("Get current job data structure...")
