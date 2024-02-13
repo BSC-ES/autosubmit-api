@@ -11,6 +11,8 @@ from abc import ABCMeta, abstractmethod
 from autosubmit_api.common.utils import JobSection, parse_number_processors, timestamp_to_datetime_format, datechunk_to_year
 from typing import List
 
+from autosubmit_api.persistance.experiment import ExperimentPaths
+
 class ProjectType:
   GIT = "git"
   SVN = "svn"
@@ -40,11 +42,12 @@ class ConfigurationFacade(metaclass=ABCMeta):
 
   def _process_basic_config(self):
     # type: () -> None
-    self.pkl_filename = "job_list_{0}.pkl".format(self.expid)
-    self.experiment_path = os.path.join(self.basic_configuration.LOCAL_ROOT_DIR, self.expid)
-    self.pkl_path = os.path.join(self.basic_configuration.LOCAL_ROOT_DIR, self.expid, "pkl", self.pkl_filename)
-    self.tmp_path = os.path.join(self.basic_configuration.LOCAL_ROOT_DIR, self.expid, self.basic_configuration.LOCAL_TMP_DIR)
-    self.log_path = os.path.join(self.basic_configuration.LOCAL_ROOT_DIR, self.expid, "tmp", "LOG_{0}".format(self.expid))
+    exp_paths = ExperimentPaths(self.expid)
+    self.pkl_filename = os.path.basename(exp_paths.job_list_pkl)
+    self.experiment_path = exp_paths.exp_dir
+    self.pkl_path = exp_paths.job_list_pkl
+    self.tmp_path = exp_paths.tmp_dir
+    self.log_path = exp_paths.tmp_log_dir
     self.structures_path = self.basic_configuration.STRUCTURES_DIR
     if not os.path.exists(self.experiment_path): raise IOError("Experiment folder {0} not found".format(self.experiment_path))
     if not os.path.exists(self.pkl_path): raise IOError("Required file {0} not found.".format(self.pkl_path))

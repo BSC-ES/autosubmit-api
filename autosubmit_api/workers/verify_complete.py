@@ -1,9 +1,9 @@
 #!/usr/bin/env python
-from autosubmit_api.bgtasks.bgtask import VerifyComplete
+from autosubmit_api.bgtasks.tasks.job_times_updater import JobTimesUpdater
 
 
 def main():
-    VerifyComplete.run()
+    JobTimesUpdater.run()
 
 
 if __name__ == "__main__":

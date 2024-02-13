@@ -4,9 +4,9 @@ from autosubmit_api.bgtasks.bgtask import (
     BackgroundTaskTemplate,
     PopulateDetailsDB,
     PopulateQueueRuntimes,
-    VerifyComplete,
     PopulateGraph,
 )
+from autosubmit_api.bgtasks.tasks.job_times_updater import JobTimesUpdater
 from autosubmit_api.bgtasks.tasks.status_updater import StatusUpdater
 from autosubmit_api.config import (
     DISABLE_BACKGROUND_TASKS,
@@ -19,7 +19,7 @@ REGISTERED_TASKS: List[BackgroundTaskTemplate] = [
     PopulateDetailsDB,
     PopulateQueueRuntimes,
     StatusUpdater,
-    VerifyComplete,
+    JobTimesUpdater,
     PopulateGraph,
 ]
 

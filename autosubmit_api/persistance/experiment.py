@@ -31,3 +31,15 @@ class ExperimentPaths:
     def job_packages_db(self):
         filename = f"job_packages_{self.expid}.db"
         return os.path.join(self.pkl_dir, filename)
+
+    @property
+    def tmp_dir(self):
+        return os.path.join(self.exp_dir, APIBasicConfig.LOCAL_TMP_DIR)
+    
+    @property
+    def tmp_dir(self):
+        return os.path.join(self.exp_dir, APIBasicConfig.LOCAL_TMP_DIR)
+
+    @property
+    def tmp_log_dir(self):
+        return os.path.join(self.tmp_dir, f"LOG_{self.expid}")

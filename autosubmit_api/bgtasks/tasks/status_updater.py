@@ -92,7 +92,7 @@ class StatusUpdater(BackgroundTaskTemplate):
                         else RunningStatus.NOT_RUNNING
                     ),
                     seconds_diff=0,
-                    modified=datetime.now().isoformat(timespec="seconds"),
+                    modified=datetime.now().isoformat(sep="-", timespec="seconds"),
                 )
                 conn.execute(del_stmnt)
                 conn.execute(ins_stmnt)

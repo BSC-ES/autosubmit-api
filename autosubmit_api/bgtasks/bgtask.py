@@ -1,7 +1,6 @@
 from abc import ABC, abstractmethod
 import traceback
 from autosubmit_api.logger import logger
-from autosubmit_api.experiment import common_requests
 from autosubmit_api.config.basicConfig import APIBasicConfig
 from autosubmit_api.workers.business import populate_times, process_graph_drawings
 from autosubmit_api.workers.populate_details.populate import DetailsProcessor
@@ -59,15 +58,6 @@ class PopulateQueueRuntimes(BackgroundTaskTemplate):
     def procedure(cls):
         """Process and updates queuing and running times."""
         populate_times.process_completed_times()
-
-
-class VerifyComplete(BackgroundTaskTemplate):
-    id = "TASK_VRFCMPT"
-    trigger_options = {"trigger": "interval", "minutes": 10}
-
-    @classmethod
-    def procedure(cls):
-        common_requests.verify_last_completed(1800)
 
 
 class PopulateGraph(BackgroundTaskTemplate):
