@@ -89,6 +89,7 @@ class TestExpInfo:
         expid = "a003"
         response = fixture_client.get(self.endpoint.format(expid=expid))
         resp_obj: dict = response.get_json()
+        assert resp_obj["error_message"] == ""
         assert resp_obj["error"] == False
         assert resp_obj["expid"] == expid
         assert resp_obj["total_jobs"] == 8
@@ -97,6 +98,7 @@ class TestExpInfo:
         expid = "a3tb"
         response = fixture_client.get(self.endpoint.format(expid=expid))
         resp_obj: dict = response.get_json()
+        assert resp_obj["error_message"] == ""
         assert resp_obj["error"] == False
         assert resp_obj["expid"] == expid
         assert resp_obj["total_jobs"] == 55
@@ -113,12 +115,14 @@ class TestPerformance:
         expid = "a007"
         response = fixture_client.get(self.endpoint.format(expid=expid))
         resp_obj: dict = response.get_json()
+        assert resp_obj["error_message"] == ""
         assert resp_obj["error"] == False
         assert resp_obj["Parallelization"] == 8
 
         expid = "a3tb"
         response = fixture_client.get(self.endpoint.format(expid=expid))
         resp_obj: dict = response.get_json()
+        assert resp_obj["error_message"] == ""
         assert resp_obj["error"] == False
         assert resp_obj["Parallelization"] == 768
 
@@ -129,6 +133,7 @@ class TestPerformance:
         expid = "a003"
         response = fixture_client.get(self.endpoint.format(expid=expid))
         resp_obj: dict = response.get_json()
+        assert resp_obj["error_message"] == ""
         assert resp_obj["error"] == False
         assert resp_obj["Parallelization"] == 16
 
@@ -145,6 +150,7 @@ class TestTree:
         )
         resp_obj: dict = response.get_json()
 
+        assert resp_obj["error_message"] == ""
         assert resp_obj["error"] == False
         assert resp_obj["total"] == 8
         assert resp_obj["total"] == len(resp_obj["jobs"])
@@ -160,6 +166,7 @@ class TestTree:
         )
         resp_obj: dict = response.get_json()
 
+        assert resp_obj["error_message"] == ""
         assert resp_obj["error"] == False
         assert resp_obj["total"] == 55
         assert resp_obj["total"] == len(resp_obj["jobs"])
@@ -179,6 +186,7 @@ class TestRunsList:
         response = fixture_client.get(self.endpoint.format(expid=expid))
         resp_obj: dict = response.get_json()
 
+        assert resp_obj["error_message"] == ""
         assert resp_obj["error"] == False
         assert isinstance(resp_obj["runs"], list)
 
@@ -192,6 +200,7 @@ class TestRunDetail:
         response = fixture_client.get(self.endpoint.format(expid=expid, runId=2))
         resp_obj: dict = response.get_json()
 
+        assert resp_obj["error_message"] == ""
         assert resp_obj["error"] == False
         assert resp_obj["total"] == 8
 
@@ -204,6 +213,7 @@ class TestQuick:
         response = fixture_client.get(self.endpoint.format(expid=expid))
         resp_obj: dict = response.get_json()
 
+        assert resp_obj["error_message"] == ""
         assert resp_obj["error"] == False
         assert resp_obj["total"] == len(resp_obj["tree_view"])
         assert resp_obj["total"] == len(resp_obj["view_data"])
@@ -221,6 +231,7 @@ class TestGraph:
         )
         resp_obj: dict = response.get_json()
 
+        assert resp_obj["error_message"] == ""
         assert resp_obj["error"] == False
         assert resp_obj["total_jobs"] == len(resp_obj["nodes"])
 
@@ -235,6 +246,7 @@ class TestGraph:
         )
         resp_obj: dict = response.get_json()
 
+        assert resp_obj["error_message"] == ""
         assert resp_obj["error"] == False
         assert resp_obj["total_jobs"] == len(resp_obj["nodes"])
 
@@ -247,6 +259,7 @@ class TestGraph:
         )
         resp_obj: dict = response.get_json()
 
+        assert resp_obj["error_message"] == ""
         assert resp_obj["error"] == False
         assert resp_obj["total_jobs"] == len(resp_obj["nodes"])
 
@@ -259,6 +272,7 @@ class TestGraph:
         )
         resp_obj: dict = response.get_json()
 
+        assert resp_obj["error_message"] == ""
         assert resp_obj["error"] == False
         assert resp_obj["total_jobs"] == len(resp_obj["nodes"])
 
@@ -271,6 +285,7 @@ class TestExpCount:
         response = fixture_client.get(self.endpoint.format(expid=expid))
         resp_obj: dict = response.get_json()
 
+        assert resp_obj["error_message"] == ""
         assert resp_obj["error"] == False
         assert resp_obj["total"] == sum(
             [resp_obj["counters"][key] for key in resp_obj["counters"]]
@@ -284,6 +299,7 @@ class TestExpCount:
         response = fixture_client.get(self.endpoint.format(expid=expid))
         resp_obj: dict = response.get_json()
 
+        assert resp_obj["error_message"] == ""
         assert resp_obj["error"] == False
         assert resp_obj["total"] == sum(
             [resp_obj["counters"][key] for key in resp_obj["counters"]]
@@ -308,6 +324,7 @@ class TestSummary:
         )
         resp_obj: dict = response.get_json()
 
+        assert resp_obj["error_message"] == ""
         assert resp_obj["error"] == False
         assert resp_obj["n_sim"] > 0
 
@@ -322,6 +339,7 @@ class TestStatistics:
         )
         resp_obj: dict = response.get_json()
 
+        assert resp_obj["error_message"] == ""
         assert resp_obj["error"] == False
         assert resp_obj["Statistics"]["Period"]["From"] == "None"
 
@@ -334,6 +352,7 @@ class TestCurrentConfig:
         response = fixture_client.get(self.endpoint.format(expid=expid))
         resp_obj: dict = response.get_json()
 
+        assert resp_obj["error_message"] == ""
         assert resp_obj["error"] == False
         assert (
             resp_obj["configuration_filesystem"]["CONFIG"]["AUTOSUBMIT_VERSION"]
@@ -345,6 +364,7 @@ class TestCurrentConfig:
         response = fixture_client.get(self.endpoint.format(expid=expid))
         resp_obj: dict = response.get_json()
 
+        assert resp_obj["error_message"] == ""
         assert resp_obj["error"] == False
         assert (
             resp_obj["configuration_filesystem"]["conf"]["config"]["AUTOSUBMIT_VERSION"]
@@ -360,6 +380,7 @@ class TestPklInfo:
         response = fixture_client.get(self.endpoint.format(expid=expid, timestamp=0))
         resp_obj: dict = response.get_json()
 
+        assert resp_obj["error_message"] == ""
         assert resp_obj["error"] == False
         assert len(resp_obj["pkl_content"]) == 8
 
@@ -375,6 +396,7 @@ class TestPklTreeInfo:
         response = fixture_client.get(self.endpoint.format(expid=expid, timestamp=0))
         resp_obj: dict = response.get_json()
 
+        assert resp_obj["error_message"] == ""
         assert resp_obj["error"] == False
         assert len(resp_obj["pkl_content"]) == 8
 
@@ -390,5 +412,6 @@ class TestExpRunLog:
         response = fixture_client.get(self.endpoint.format(expid=expid))
         resp_obj: dict = response.get_json()
 
+        assert resp_obj["error_message"] == ""
         assert resp_obj["error"] == False
         assert resp_obj["found"] == True

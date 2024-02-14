@@ -727,7 +727,7 @@ def get_experiment_tree_rundetail(expid, run_id):
         print((traceback.format_exc()))
         return {'tree': [], 'jobs': [], 'total': 0, 'reference': [], 'error': True, 'error_message': str(e), 'pkl_timestamp': 0}
     base_list['error'] = False
-    base_list['error_message'] = 'None'
+    base_list['error_message'] = ''
     base_list['pkl_timestamp'] = pkl_timestamp
     return base_list
 
