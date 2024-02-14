@@ -647,7 +647,7 @@ class confConfigStrategy(IConfigStrategy):
             if self._proj_parser_file == '':
                 self._proj_parser = None
             else:
-                self._proj_parser = AutosubmitConfig.get_parser(
+                self._proj_parser = confConfigStrategy.get_parser(
                     self.parser_factory, self._proj_parser_file)
             return True
         except Exception as e:

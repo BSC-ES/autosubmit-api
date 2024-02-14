@@ -20,19 +20,20 @@ def fixture_disable_protection(monkeypatch: pytest.MonkeyPatch):
 
 @pytest.fixture
 def fixture_mock_basic_config(monkeypatch: pytest.MonkeyPatch):
+    monkeypatch.setenv("AUTOSUBMIT_CONFIGURATION", os.path.join(FAKE_EXP_DIR, ".autosubmitrc"))
     # Patch APIBasicConfig parent BasicConfig
-    monkeypatch.setattr(BasicConfig, "read", custom_return_value(None))
-    monkeypatch.setattr(APIBasicConfig, "read", custom_return_value(None))
-    monkeypatch.setattr(BasicConfig, "LOCAL_ROOT_DIR", FAKE_EXP_DIR)
-    monkeypatch.setattr(BasicConfig, "DB_DIR", FAKE_EXP_DIR)
-    monkeypatch.setattr(BasicConfig, "DB_FILE", "autosubmit.db")
-    monkeypatch.setattr(
-        BasicConfig, "JOBDATA_DIR", os.path.join(FAKE_EXP_DIR, "metadata", "data")
-    )
-    monkeypatch.setattr(
-        BasicConfig, "DB_PATH", os.path.join(FAKE_EXP_DIR, "autosubmit.db")
-    )
-    monkeypatch.setattr(BasicConfig, "AS_TIMES_DB", "as_times.db")
+    # monkeypatch.setattr(BasicConfig, "read", custom_return_value(None))
+    # monkeypatch.setattr(APIBasicConfig, "read", custom_return_value(None))
+    # monkeypatch.setattr(BasicConfig, "LOCAL_ROOT_DIR", FAKE_EXP_DIR)
+    # monkeypatch.setattr(BasicConfig, "DB_DIR", FAKE_EXP_DIR)
+    # monkeypatch.setattr(BasicConfig, "DB_FILE", "autosubmit.db")
+    # monkeypatch.setattr(
+    #     BasicConfig, "JOBDATA_DIR", os.path.join(FAKE_EXP_DIR, "metadata", "data")
+    # )
+    # monkeypatch.setattr(
+    #     BasicConfig, "DB_PATH", os.path.join(FAKE_EXP_DIR, "autosubmit.db")
+    # )
+    # monkeypatch.setattr(BasicConfig, "AS_TIMES_DB", "as_times.db")
     yield APIBasicConfig
 
 

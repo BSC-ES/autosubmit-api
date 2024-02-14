@@ -82,7 +82,7 @@ pytest tests/*
 ### Run tests with coverage HTML report:
 
 ```bash
-pytest --cov=autosubmit_api --cov-config=.coveragerc --cov-report=html tests/*
+pytest --cov=autosubmit_api --cov-config=.coveragerc --cov-report=html tests/
 ```
 
 You will find the report in `htmlcov/index.html`
