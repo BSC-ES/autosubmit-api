@@ -7,6 +7,7 @@ import pytest
 from autosubmitconfigparser.config.basicconfig import BasicConfig
 from autosubmit_api.app import create_app
 from autosubmit_api.config.basicConfig import APIBasicConfig
+from autosubmit_api import config
 from tests.custom_utils import custom_return_value
 
 FAKE_EXP_DIR = "./tests/experiments/"
@@ -15,6 +16,7 @@ FAKE_EXP_DIR = "./tests/experiments/"
 #### FIXTURES ####
 @pytest.fixture(autouse=True)
 def fixture_disable_protection(monkeypatch: pytest.MonkeyPatch):
+    monkeypatch.setattr(config, "PROTECTION_LEVEL", "NONE")
     monkeypatch.setenv("PROTECTION_LEVEL", "NONE")
 
 
