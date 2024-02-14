@@ -230,7 +230,6 @@ class TestGraph:
             query_string={"loggedUser": random_user},
         )
         resp_obj: dict = response.get_json()
-
         assert resp_obj["error_message"] == ""
         assert resp_obj["error"] == False
         assert resp_obj["total_jobs"] == len(resp_obj["nodes"])
@@ -245,7 +244,6 @@ class TestGraph:
             query_string={"loggedUser": random_user},
         )
         resp_obj: dict = response.get_json()
-
         assert resp_obj["error_message"] == ""
         assert resp_obj["error"] == False
         assert resp_obj["total_jobs"] == len(resp_obj["nodes"])
@@ -258,7 +256,6 @@ class TestGraph:
             query_string={"loggedUser": random_user},
         )
         resp_obj: dict = response.get_json()
-
         assert resp_obj["error_message"] == ""
         assert resp_obj["error"] == False
         assert resp_obj["total_jobs"] == len(resp_obj["nodes"])
@@ -271,7 +268,44 @@ class TestGraph:
             query_string={"loggedUser": random_user},
         )
         resp_obj: dict = response.get_json()
+        assert resp_obj["error_message"] == ""
+        assert resp_obj["error"] == False
+        assert resp_obj["total_jobs"] == len(resp_obj["nodes"])
 
+    def test_graph_standard_none_retro3(self, fixture_client: FlaskClient):
+        expid = "a3tb"
+        random_user = str(uuid4())
+        response = fixture_client.get(
+            self.endpoint.format(expid=expid, graph_type="standard", grouped="none"),
+            query_string={"loggedUser": random_user},
+        )
+        resp_obj: dict = response.get_json()
+        assert resp_obj["error_message"] == ""
+        assert resp_obj["error"] == False
+        assert resp_obj["total_jobs"] == len(resp_obj["nodes"])
+
+    def test_graph_standard_datemember_retro3(self, fixture_client: FlaskClient):
+        expid = "a3tb"
+        random_user = str(uuid4())
+        response = fixture_client.get(
+            self.endpoint.format(
+                expid=expid, graph_type="standard", grouped="date-member"
+            ),
+            query_string={"loggedUser": random_user},
+        )
+        resp_obj: dict = response.get_json()
+        assert resp_obj["error_message"] == ""
+        assert resp_obj["error"] == False
+        assert resp_obj["total_jobs"] == len(resp_obj["nodes"])
+
+    def test_graph_standard_status_retro3(self, fixture_client: FlaskClient):
+        expid = "a3tb"
+        random_user = str(uuid4())
+        response = fixture_client.get(
+            self.endpoint.format(expid=expid, graph_type="standard", grouped="status"),
+            query_string={"loggedUser": random_user},
+        )
+        resp_obj: dict = response.get_json()
         assert resp_obj["error_message"] == ""
         assert resp_obj["error"] == False
         assert resp_obj["total_jobs"] == len(resp_obj["nodes"])

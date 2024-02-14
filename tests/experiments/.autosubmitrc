@@ -16,3 +16,6 @@ path = ./tests/experiments/metadata/structures
 
 [historiclog]
 path = ./tests/experiments/metadata/logs
+
+[graph]
+path = ./tests/experiments/metadata/graph

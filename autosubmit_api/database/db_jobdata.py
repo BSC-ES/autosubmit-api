@@ -533,8 +533,7 @@ class ExperimentGraphDrawing(MainDataBase):
         APIBasicConfig.read()
         self.expid = expid
         self.folder_path = APIBasicConfig.LOCAL_ROOT_DIR
-        self.database_path = os.path.join(
-            self.folder_path, "as_metadata", "graph" , "graph_data_" + str(expid) + ".db")
+        self.database_path = os.path.join(APIBasicConfig.GRAPHDATA_DIR, "graph_data_" + str(expid) + ".db")
         self.create_table_query = textwrap.dedent(
             '''CREATE TABLE
         IF NOT EXISTS experiment_graph_draw (

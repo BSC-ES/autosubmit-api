@@ -2,7 +2,7 @@ FROM python:3.8-slim-bullseye
 
 WORKDIR /
 
-RUN apt-get update && apt-get install -y git
+RUN apt-get update && apt-get install -y git graphviz
 
 RUN git clone https://earth.bsc.es/gitlab/es/autosubmit_api.git
 

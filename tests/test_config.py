@@ -35,6 +35,10 @@ class TestBasicConfig:
             FAKE_EXP_DIR, "metadata", "logs"
         )
 
+        assert APIBasicConfig.GRAPHDATA_DIR == os.path.join(
+            FAKE_EXP_DIR, "metadata", "graph"
+        )
+
 class TestConfigResolver:
     def test_simple_init(self, monkeypatch: pytest.MonkeyPatch):
         # Conf test decision
