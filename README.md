@@ -70,13 +70,13 @@ The Autosubmit API have some configuration options that can be modified by setti
 ### Install pytest
 
 ```bash
-pip install -U pytest pytest-cov
+pip install -e .[test]
 ```
 
 ### Run tests:
 
 ```bash
-pytest tests/*
+pytest
 ```
 
 ### Run tests with coverage HTML report:
