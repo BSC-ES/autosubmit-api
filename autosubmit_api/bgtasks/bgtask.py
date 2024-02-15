@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 import traceback
 from autosubmit_api.logger import logger
 from autosubmit_api.config.basicConfig import APIBasicConfig
-from autosubmit_api.workers.business import populate_times, process_graph_drawings
+from autosubmit_api.workers.business import process_graph_drawings
 from autosubmit_api.workers.populate_details.populate import DetailsProcessor
 
 
@@ -11,6 +11,7 @@ class BackgroundTaskTemplate(ABC):
     Interface to define Background Tasks.
     Do not override the run method.
     """
+
     logger = logger
 
     @classmethod
@@ -48,16 +49,6 @@ class PopulateDetailsDB(BackgroundTaskTemplate):
     def procedure(cls):
         APIBasicConfig.read()
         return DetailsProcessor(APIBasicConfig).process()
-
-
-class PopulateQueueRuntimes(BackgroundTaskTemplate):
-    id = "TASK_POPQUE"
-    trigger_options = {"trigger": "interval", "minutes": 3}
-
-    @classmethod
-    def procedure(cls):
-        """Process and updates queuing and running times."""
-        populate_times.process_completed_times()
 
 
 class PopulateGraph(BackgroundTaskTemplate):

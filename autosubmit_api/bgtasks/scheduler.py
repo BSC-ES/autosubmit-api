@@ -3,10 +3,8 @@ from flask_apscheduler import APScheduler
 from autosubmit_api.bgtasks.bgtask import (
     BackgroundTaskTemplate,
     PopulateDetailsDB,
-    PopulateQueueRuntimes,
     PopulateGraph,
 )
-from autosubmit_api.bgtasks.tasks.job_times_updater import JobTimesUpdater
 from autosubmit_api.bgtasks.tasks.status_updater import StatusUpdater
 from autosubmit_api.config import (
     DISABLE_BACKGROUND_TASKS,
@@ -17,9 +15,7 @@ from autosubmit_api.logger import logger, with_log_run_times
 
 REGISTERED_TASKS: List[BackgroundTaskTemplate] = [
     PopulateDetailsDB,
-    # PopulateQueueRuntimes,
     StatusUpdater,
-    # JobTimesUpdater,
     PopulateGraph,
 ]
 

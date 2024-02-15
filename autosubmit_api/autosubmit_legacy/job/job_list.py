@@ -590,7 +590,7 @@ class JobList:
         conn = DbRequests.create_connection(db_file)
         # job_data = None
         # Job information from worker database
-        job_times = dict() # REMOVED: DbRequests.get_times_detail_by_expid(conn, expid)
+        # job_times = dict() # REMOVED: DbRequests.get_times_detail_by_expid(conn, expid)
         conn.close()
         # Job information from job historic data
         # print("Get current job data structure...")
@@ -612,7 +612,7 @@ class JobList:
         # print("Start main loop")
         for job in allJobs:
             job_info = JobList.retrieve_times(
-                job.status, job.name, job._tmp_path, make_exception=False, job_times=job_times, seconds=timeseconds, job_data_collection=job_data)
+                job.status, job.name, job._tmp_path, make_exception=False, job_times=None, seconds=timeseconds, job_data_collection=job_data)
             # if job_info:
             job_name_to_job_info[job.name] = job_info
             time_total = (job_info.queue_time +
