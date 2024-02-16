@@ -43,6 +43,7 @@ from autosubmit_api.logger import logger
 
 from autosubmit_api.performance.utils import calculate_SYPD_perjob
 from autosubmit_api.monitor.monitor import Monitor
+from autosubmit_api.persistance.experiment import ExperimentPaths
 
 from autosubmit_api.statistics.statistics import Statistics
 
@@ -212,10 +213,9 @@ def _is_exp_running(expid, time_condition=300):
     definite_log_path = None
     try:
         APIBasicConfig.read()
-        pathlog_aslog = APIBasicConfig.LOCAL_ROOT_DIR + '/' + expid + '/' + \
-            APIBasicConfig.LOCAL_TMP_DIR + '/' + APIBasicConfig.LOCAL_ASLOG_DIR
-        pathlog_tmp = APIBasicConfig.LOCAL_ROOT_DIR + '/' + \
-            expid + '/' + APIBasicConfig.LOCAL_TMP_DIR
+        exp_paths = ExperimentPaths(expid)
+        pathlog_aslog = exp_paths.tmp_as_logs_dir
+        pathlog_tmp = exp_paths.tmp_dir
         # Basic Configuration
         look_old_folder = False
         current_version = None
@@ -480,7 +480,8 @@ def get_experiment_log_last_lines(expid):
 
     try:
         APIBasicConfig.read()
-        path = APIBasicConfig.LOCAL_ROOT_DIR + '/' + expid + '/' + APIBasicConfig.LOCAL_TMP_DIR + '/' + APIBasicConfig.LOCAL_ASLOG_DIR
+        exp_paths = ExperimentPaths(expid)
+        path = exp_paths.tmp_as_logs_dir
         reading = os.popen('ls -t ' + path + ' | grep "run.log"').read() if (os.path.exists(path)) else ""
 
         # Finding log files
@@ -529,7 +530,8 @@ def get_job_log(expid, logfile, nlines=150):
     logcontent = []
     reading = ""
     APIBasicConfig.read()
-    logfilepath = os.path.join(APIBasicConfig.LOCAL_ROOT_DIR, expid, APIBasicConfig.LOCAL_TMP_DIR, "LOG_{0}".format(expid), logfile)
+    exp_paths = ExperimentPaths(expid)
+    logfilepath = os.path.join(exp_paths.tmp_log_dir, logfile)
     try:
         if os.path.exists(logfilepath):
             current_stat = os.stat(logfilepath)
@@ -817,7 +819,8 @@ def get_quick_view(expid):
     total_count = completed_count = failed_count = running_count = queuing_count = 0
     try:
         APIBasicConfig.read()
-        path_to_logs = os.path.join(APIBasicConfig.LOCAL_ROOT_DIR, expid, "tmp", "LOG_" + expid)
+        exp_paths = ExperimentPaths(expid)
+        path_to_logs = exp_paths.tmp_log_dir
 
         # Retrieving packages
         now_ = time.time()
@@ -906,7 +909,8 @@ def get_job_history(expid, job_name):
     result = None
     try:
         APIBasicConfig.read()
-        path_to_job_logs = os.path.join(APIBasicConfig.LOCAL_ROOT_DIR, expid, "tmp", "LOG_" + expid)
+        exp_paths = ExperimentPaths(expid)
+        path_to_job_logs = exp_paths.tmp_log_dir
         result = ExperimentHistoryDirector(ExperimentHistoryBuilder(expid)).build_reader_experiment_history().get_historic_job_data(job_name)
     except Exception as exp:
         print((traceback.format_exc()))

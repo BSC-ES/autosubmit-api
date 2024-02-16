@@ -34,12 +34,33 @@ class ExperimentPaths:
 
     @property
     def tmp_dir(self):
-        return os.path.join(self.exp_dir, APIBasicConfig.LOCAL_TMP_DIR)
-    
-    @property
-    def tmp_dir(self):
+        """
+        tmp dir
+        """
         return os.path.join(self.exp_dir, APIBasicConfig.LOCAL_TMP_DIR)
 
     @property
     def tmp_log_dir(self):
+        """
+        tmp/LOG_{expid} dir
+        """
         return os.path.join(self.tmp_dir, f"LOG_{self.expid}")
+    
+    @property
+    def tmp_as_logs_dir(self):
+        """
+        tmp/ASLOGS dir
+        """
+        return os.path.join(self.tmp_dir, APIBasicConfig.LOCAL_ASLOG_DIR)
+
+    @property
+    def job_data_db(self):
+        return os.path.join(APIBasicConfig.JOBDATA_DIR, f"job_data_{self.expid}.db")
+    
+    @property
+    def structure_db(self):
+        return os.path.join(APIBasicConfig.STRUCTURES_DIR, f"structure_{self.expid}.db")
+
+    @property
+    def graph_data_db(self):
+        return os.path.join(APIBasicConfig.GRAPHDATA_DIR, f"graph_data_{self.expid}.db")

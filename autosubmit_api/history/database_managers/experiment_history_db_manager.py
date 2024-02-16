@@ -19,6 +19,8 @@ import pysqlite3 as sqlite3
 import os
 import traceback
 import textwrap
+
+from autosubmit_api.persistance.experiment import ExperimentPaths
 from .. import utils as HUtils
 from .. database_managers import database_models as Models
 from .. data_classes.job_data import JobData
@@ -39,7 +41,8 @@ class ExperimentHistoryDbManager(DatabaseManager):
     super(ExperimentHistoryDbManager, self).__init__(expid, basic_config)
     self._set_schema_changes()
     self._set_table_queries()
-    self.historicaldb_file_path = os.path.join(self.JOBDATA_DIR, "job_data_{0}.db".format(self.expid)) # type : str
+    exp_paths = ExperimentPaths(expid)
+    self.historicaldb_file_path = exp_paths.job_data_db
     if self.my_database_exists():
       self.set_db_version_models()
 

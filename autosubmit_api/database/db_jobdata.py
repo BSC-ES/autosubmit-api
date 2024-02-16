@@ -38,6 +38,8 @@ from autosubmit_api.common.utils import get_jobs_with_no_outliers, Status, datec
 # import autosubmitAPIwu.experiment.common_db_requests as DbRequests
 from bscearth.utils.date import Log
 
+from autosubmit_api.persistance.experiment import ExperimentPaths
+
 
 # Version 15 includes out err MaxRSS AveRSS and rowstatus
 CURRENT_DB_VERSION = 15  # Used to be 10 or 0
@@ -532,8 +534,9 @@ class ExperimentGraphDrawing(MainDataBase):
         MainDataBase.__init__(self, expid)
         APIBasicConfig.read()
         self.expid = expid
+        exp_paths = ExperimentPaths(expid)
         self.folder_path = APIBasicConfig.LOCAL_ROOT_DIR
-        self.database_path = os.path.join(APIBasicConfig.GRAPHDATA_DIR, "graph_data_" + str(expid) + ".db")
+        self.database_path = exp_paths.graph_data_db
         self.create_table_query = textwrap.dedent(
             '''CREATE TABLE
         IF NOT EXISTS experiment_graph_draw (
@@ -733,7 +736,7 @@ class ExperimentGraphDrawing(MainDataBase):
 
 class JobDataStructure(MainDataBase):
 
-    def __init__(self, expid, basic_config):
+    def __init__(self, expid: str, basic_config: APIBasicConfig):
         """Initializes the object based on the unique identifier of the experiment.
 
         Args:
@@ -743,8 +746,8 @@ class JobDataStructure(MainDataBase):
         # BasicConfig.read()
         # self.expid = expid
         self.folder_path = basic_config.JOBDATA_DIR
-        self.database_path = os.path.join(
-            self.folder_path, "job_data_" + str(expid) + ".db")
+        exp_paths = ExperimentPaths(expid)
+        self.database_path = exp_paths.job_data_db
         # self.conn = None
         self.db_version = None
         # self.jobdata_list = JobDataList(self.expid)
