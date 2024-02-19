@@ -22,7 +22,7 @@ Module containing functions to manage autosubmit's database.
 """
 import os
 from sqlite3 import Connection, Cursor
-import pysqlite3 as sqlite3
+import sqlite3
 
 from bscearth.utils.log import Log
 from autosubmit_api.config.basicConfig import APIBasicConfig
@@ -96,7 +96,7 @@ def open_conn(check_version=True) -> Tuple[Connection, Cursor]:
     return conn, cursor
 
 
-def close_conn(conn, cursor):
+def close_conn(conn: Connection, cursor):
     """
     Commits changes and close connection to database
 

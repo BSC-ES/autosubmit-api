@@ -15,18 +15,16 @@
 
 # You should have received a copy of the GNU General Public License
 # along with Autosubmit.  If not, see <http://www.gnu.org/licenses/>.
-import pysqlite3 as sqlite3
 import os
-import traceback
 import textwrap
 
 from autosubmit_api.persistance.experiment import ExperimentPaths
-from .. import utils as HUtils
-from .. database_managers import database_models as Models
-from .. data_classes.job_data import JobData
-from ..data_classes.experiment_run import ExperimentRun
-from ...config.basicConfig import APIBasicConfig
-from .database_manager import DatabaseManager, DEFAULT_JOBDATA_DIR
+from autosubmit_api.history import utils as HUtils
+from autosubmit_api.history.database_managers import database_models as Models
+from autosubmit_api.history.data_classes.job_data import JobData
+from autosubmit_api.history.data_classes.experiment_run import ExperimentRun
+from autosubmit_api.config.basicConfig import APIBasicConfig
+from autosubmit_api.history.database_managers.database_manager import DatabaseManager
 from typing import List
 from collections import namedtuple
 

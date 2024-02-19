@@ -21,7 +21,7 @@ import os
 import time
 import textwrap
 import traceback
-import pysqlite3 as sqlite3
+import sqlite3
 import collections
 import portalocker
 from datetime import datetime, timedelta

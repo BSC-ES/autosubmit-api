@@ -1,7 +1,7 @@
 import os
 import textwrap
 import traceback
-import pysqlite3 as sqlite3
+import sqlite3
 
 from autosubmit_api.persistance.experiment import ExperimentPaths
 
@@ -72,7 +72,7 @@ def create_connection(db_file):
         return None
 
 
-def create_table(conn, create_table_sql):
+def create_table(conn: sqlite3.Connection, create_table_sql):
     """ create a table from the create_table_sql statement
     :param conn: Connection object
     :param create_table_sql: a CREATE TABLE statement

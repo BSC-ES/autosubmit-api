@@ -2,6 +2,10 @@
 
 ### Pre-release v4.0.0b4 - Release date: TBD
 
+* The background task that updates the experiment status have refactored. Now, it keep the records of all the experiments
+* **Major change:** `experiment_times` and `job_times` tables are removed. Background tasks related to them are also removed
+* Fixed bug when performance metrics are not calculated when there is only one SIM job
+
 ### Pre-release v4.0.0b3 - Release date: 2023-02-09
 
 * Fix HPC value in the running endpoint
