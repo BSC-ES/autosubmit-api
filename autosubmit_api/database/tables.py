@@ -37,3 +37,15 @@ experiment_status_table = Table(
     Column("seconds_diff", Integer, nullable=False),
     Column("modified", Text, nullable=False),
 )
+
+
+# Graph Data TABLES
+
+graph_data_table = Table(
+    "experiment_graph_draw",
+    metadata_obj,
+    Column("id", Integer, primary_key=True),
+    Column("job_name", Text, nullable=False),
+    Column("x", Integer, nullable=False),
+    Column("y", Integer, nullable=False),
+)

@@ -622,9 +622,10 @@ class ExperimentGraphDrawing(MainDataBase):
                     result = graph.create('dot', format="plain")
                 for u in result.split(b"\n"):
                     splitList = u.split(b" ")
-                    if len(splitList) > 1 and splitList[0] == "node":
-                        self.coordinates.append((splitList[1], int(
-                            float(splitList[2]) * 90), int(float(splitList[3]) * -90)))
+                    if len(splitList) > 1 and splitList[0].decode() == "node":
+
+                        self.coordinates.append((splitList[1].decode(), int(
+                            float(splitList[2].decode()) * 90), int(float(splitList[3].decode()) * -90)))
                         # self.coordinates[splitList[1]] = (
                         #     int(float(splitList[2]) * 90), int(float(splitList[3]) * -90))
                 self.insert_coordinates()
