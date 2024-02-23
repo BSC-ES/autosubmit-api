@@ -27,8 +27,8 @@ class APIBasicConfig(BasicConfig):
     Extended class to manage configuration for Autosubmit path, database and default values for new experiments in the Autosubmit API
     """
 
-    GRAPHDATA_DIR = os.path.join(os.path.expanduser('~'), 'autosubmit', 'as_metadata', 'graph')
-    FILE_STATUS_DIR = os.path.join(os.path.expanduser('~'), 'autosubmit', 'as_metadata', 'test')
+    GRAPHDATA_DIR = os.path.join(os.path.expanduser('~'), 'autosubmit', 'metadata', 'graph')
+    FILE_STATUS_DIR = os.path.join(os.path.expanduser('~'), 'autosubmit', 'metadata', 'test')
     FILE_STATUS_DB = 'status.db'
     ALLOWED_CLIENTS = set([])
 
@@ -45,6 +45,8 @@ class APIBasicConfig(BasicConfig):
 
         if parser.has_option('graph', 'path'):
             APIBasicConfig.GRAPHDATA_DIR = parser.get('graph', 'path')
+        else:
+            APIBasicConfig.GRAPHDATA_DIR = os.path.join(APIBasicConfig.LOCAL_ROOT_DIR, 'metadata', 'graph')
         if parser.has_option('statusdb', 'path'):
             APIBasicConfig.FILE_STATUS_DIR = parser.get('statusdb', 'path')
         if parser.has_option('statusdb', 'filename'):

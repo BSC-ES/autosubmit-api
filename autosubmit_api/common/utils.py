@@ -71,12 +71,12 @@ def parse_number_processors(processors_str):
     except:
       return 1
 
-def get_jobs_with_no_outliers(jobs):
+def get_jobs_with_no_outliers(jobs: List):
   """ Detects outliers and removes them from the returned list """  
   new_list = []
   data_run_times = [job.run_time for job in jobs]
   # print(data_run_times)
-  if len(data_run_times) == 0:
+  if len(data_run_times) <= 1:
     return jobs  
   
   mean = statistics.mean(data_run_times)

@@ -6,7 +6,7 @@ from flask import Flask
 from autosubmit_api.bgtasks.scheduler import create_bind_scheduler
 from autosubmit_api.blueprints.v3 import create_v3_blueprint
 from autosubmit_api.blueprints.v4 import create_v4_blueprint
-from autosubmit_api.database.extended_db import ExtendedDB
+from autosubmit_api.database import prepare_db
 from autosubmit_api.experiment import common_requests as CommonRequests
 from autosubmit_api.logger import get_app_logger
 from autosubmit_api.config.basicConfig import APIBasicConfig
@@ -66,11 +66,8 @@ def create_app():
     )
 
     # Prepare DB
-    ext_db = ExtendedDB(
-        APIBasicConfig.DB_DIR, APIBasicConfig.DB_FILE, APIBasicConfig.AS_TIMES_DB
-    )
-    ext_db.prepare_db()
-
+    prepare_db()
+    
     # Background Scheduler
     create_bind_scheduler(app)
 

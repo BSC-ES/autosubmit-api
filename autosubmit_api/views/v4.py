@@ -165,8 +165,8 @@ class ExperimentView(MethodView):
 
             # Get current run data from history
             last_modified_timestamp = exp.created
-            completed = exp.completed_jobs if exp.completed_jobs else 0
-            total = exp.total_jobs if exp.total_jobs else 0
+            completed = 0
+            total = 0
             submitted = 0
             queuing = 0
             running = 0
@@ -181,10 +181,6 @@ class ExperimentView(MethodView):
                 if (
                     current_run
                     and current_run.total > 0
-                    and (
-                        current_run.total == total
-                        or current_run.modified_timestamp > last_modified_timestamp
-                    )
                 ):
                     completed = current_run.completed
                     total = current_run.total

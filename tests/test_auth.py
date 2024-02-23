@@ -1,13 +1,19 @@
+import os
 from uuid import uuid4
 import pytest
 from autosubmit_api.auth import ProtectionLevels, with_auth_token
 from autosubmit_api import auth
 from autosubmit_api.auth.utils import validate_client
 from autosubmit_api.config.basicConfig import APIBasicConfig
+from autosubmit_api import config
 from tests.custom_utils import custom_return_value, dummy_response
 
 
 class TestCommonAuth:
+    def test_mock_env_protection_level(self):
+        assert os.environ.get("PROTECTION_LEVEL") == "NONE"
+        assert config.PROTECTION_LEVEL == "NONE"
+
     def test_levels_enum(self):
         assert ProtectionLevels.ALL > ProtectionLevels.WRITEONLY
         assert ProtectionLevels.WRITEONLY > ProtectionLevels.NONE

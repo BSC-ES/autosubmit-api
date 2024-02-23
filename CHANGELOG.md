@@ -1,6 +1,16 @@
 # CHANGELOG
 
-### Pre-release v4.0.0b3 - Release date: 2023-02-09
+### Pre-release v4.0.0b4 - Release date: 2024-02-23
+
+* The background task that updates the experiment status has been refactored. Now, it keeps the records of all the experiments
+* **Major change:** Removed `experiment_times` and `job_times` tables and background tasks related to them
+* Fixed bug when performance metrics are not calculated when there is only one SIM job
+* Multiple tests have been added
+* Testing module configuration fixtures have been fixed
+* A lot of dead code has been removed
+* Fix the decoding issue on graph coordinates generation on the background task
+
+### Pre-release v4.0.0b3 - Release date: 2024-02-09
 
 * Fix HPC value in the running endpoint
 * **Major change:** Updated all route names. Versioning path prefix is included:

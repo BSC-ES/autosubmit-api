@@ -31,6 +31,7 @@ from dateutil.relativedelta import *
 from bscearth.utils.log import Log
 from autosubmit_api.autosubmit_legacy.job.job_utils import SubJob
 from autosubmit_api.autosubmit_legacy.job.job_utils import SubJobManager, job_times_to_text
+from autosubmit_api.config.basicConfig import APIBasicConfig
 from autosubmit_api.performance.utils import calculate_ASYPD_perjob, calculate_SYPD_perjob
 from autosubmit_api.components.jobs import utils as JUtils
 from autosubmit_api.monitor.monitor import Monitor
@@ -45,6 +46,8 @@ from autosubmit_api.builders.experiment_history_builder import ExperimentHistory
 from autosubmit_api.history.data_classes.job_data import JobData
 
 from typing import List, Dict, Tuple
+
+from autosubmit_api.persistance.experiment import ExperimentPaths
 
 
 class JobList:
@@ -153,8 +156,8 @@ class JobList:
         date_member_repetition = {}
         job_name_to_job_title = {}
         job_name_to_job = {job.job_name: job for job in job_list}
-        path_to_logs = os.path.join(
-            BasicConfig.LOCAL_ROOT_DIR, expid, "tmp", "LOG_" + expid)
+        exp_paths = ExperimentPaths(expid)
+        path_to_logs = exp_paths.tmp_log_dir
 
         packages = {job.rowtype for job in job_list if job.rowtype > 2}
         package_to_jobs = {package: [
@@ -577,7 +580,7 @@ class JobList:
             return ""
 
     @staticmethod
-    def get_job_times_collection(basic_config, allJobs, expid, job_to_package=None, package_to_jobs=None, timeseconds=True):
+    def get_job_times_collection(basic_config: APIBasicConfig, allJobs, expid, job_to_package=None, package_to_jobs=None, timeseconds=True):
         """
         Gets queuing and running time for the collection of jobs
 
@@ -590,7 +593,7 @@ class JobList:
         conn = DbRequests.create_connection(db_file)
         # job_data = None
         # Job information from worker database
-        job_times = DbRequests.get_times_detail_by_expid(conn, expid)
+        # job_times = dict() # REMOVED: DbRequests.get_times_detail_by_expid(conn, expid)
         conn.close()
         # Job information from job historic data
         # print("Get current job data structure...")
@@ -612,7 +615,7 @@ class JobList:
         # print("Start main loop")
         for job in allJobs:
             job_info = JobList.retrieve_times(
-                job.status, job.name, job._tmp_path, make_exception=False, job_times=job_times, seconds=timeseconds, job_data_collection=job_data)
+                job.status, job.name, job._tmp_path, make_exception=False, job_times=None, seconds=timeseconds, job_data_collection=job_data)
             # if job_info:
             job_name_to_job_info[job.name] = job_info
             time_total = (job_info.queue_time +
@@ -860,23 +863,21 @@ class JobList:
         """
         monitor = Monitor()
         packages = None
+        exp_paths = ExperimentPaths(expid)
         try:
-            packages = JobPackagePersistence(os.path.join(basic_config.LOCAL_ROOT_DIR, expid, "pkl"),
-                                             "job_packages_" + expid).load(wrapper=False)
+            packages = JobPackagePersistence(exp_paths.job_packages_db).load(wrapper=False)
 
             # if the main table exist but is empty, we try the other one
             if not (any(packages.keys()) or any(packages.values())):
                 Log.info("Wrapper table empty, trying packages.")
-                packages = JobPackagePersistence(os.path.join(basic_config.LOCAL_ROOT_DIR, expid, "pkl"),
-                                                 "job_packages_" + expid).load(wrapper=True)
+                packages = JobPackagePersistence(exp_paths.job_packages_db).load(wrapper=True)
 
 
         except Exception as ex:
             print("Wrapper table not found, trying packages.")
             packages = None
             try:
-                packages = JobPackagePersistence(os.path.join(basic_config.LOCAL_ROOT_DIR, expid, "pkl"),
-                                                 "job_packages_" + expid).load(wrapper=True)
+                packages = JobPackagePersistence(exp_paths.job_packages_db).load(wrapper=True)
             except Exception as exp2:
                 packages = None
                 pass

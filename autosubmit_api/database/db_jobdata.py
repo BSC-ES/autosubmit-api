@@ -21,7 +21,7 @@ import os
 import time
 import textwrap
 import traceback
-import pysqlite3 as sqlite3
+import sqlite3
 import collections
 import portalocker
 from datetime import datetime, timedelta
@@ -37,6 +37,8 @@ from autosubmit_api.common.utils import get_jobs_with_no_outliers, Status, datec
 # from autosubmitAPIwu.job.job_list
 # import autosubmitAPIwu.experiment.common_db_requests as DbRequests
 from bscearth.utils.date import Log
+
+from autosubmit_api.persistance.experiment import ExperimentPaths
 
 
 # Version 15 includes out err MaxRSS AveRSS and rowstatus
@@ -532,9 +534,9 @@ class ExperimentGraphDrawing(MainDataBase):
         MainDataBase.__init__(self, expid)
         APIBasicConfig.read()
         self.expid = expid
+        exp_paths = ExperimentPaths(expid)
         self.folder_path = APIBasicConfig.LOCAL_ROOT_DIR
-        self.database_path = os.path.join(
-            self.folder_path, "as_metadata", "graph" , "graph_data_" + str(expid) + ".db")
+        self.database_path = exp_paths.graph_data_db
         self.create_table_query = textwrap.dedent(
             '''CREATE TABLE
         IF NOT EXISTS experiment_graph_draw (
@@ -620,9 +622,10 @@ class ExperimentGraphDrawing(MainDataBase):
                     result = graph.create('dot', format="plain")
                 for u in result.split(b"\n"):
                     splitList = u.split(b" ")
-                    if len(splitList) > 1 and splitList[0] == "node":
-                        self.coordinates.append((splitList[1], int(
-                            float(splitList[2]) * 90), int(float(splitList[3]) * -90)))
+                    if len(splitList) > 1 and splitList[0].decode() == "node":
+
+                        self.coordinates.append((splitList[1].decode(), int(
+                            float(splitList[2].decode()) * 90), int(float(splitList[3].decode()) * -90)))
                         # self.coordinates[splitList[1]] = (
                         #     int(float(splitList[2]) * 90), int(float(splitList[3]) * -90))
                 self.insert_coordinates()
@@ -734,7 +737,7 @@ class ExperimentGraphDrawing(MainDataBase):
 
 class JobDataStructure(MainDataBase):
 
-    def __init__(self, expid, basic_config):
+    def __init__(self, expid: str, basic_config: APIBasicConfig):
         """Initializes the object based on the unique identifier of the experiment.
 
         Args:
@@ -744,8 +747,8 @@ class JobDataStructure(MainDataBase):
         # BasicConfig.read()
         # self.expid = expid
         self.folder_path = basic_config.JOBDATA_DIR
-        self.database_path = os.path.join(
-            self.folder_path, "job_data_" + str(expid) + ".db")
+        exp_paths = ExperimentPaths(expid)
+        self.database_path = exp_paths.job_data_db
         # self.conn = None
         self.db_version = None
         # self.jobdata_list = JobDataList(self.expid)

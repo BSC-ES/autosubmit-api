@@ -70,19 +70,19 @@ The Autosubmit API have some configuration options that can be modified by setti
 ### Install pytest
 
 ```bash
-pip install -U pytest pytest-cov
+pip install -e .[test]
 ```
 
 ### Run tests:
 
 ```bash
-pytest tests/*
+pytest
 ```
 
 ### Run tests with coverage HTML report:
 
 ```bash
-pytest --cov=autosubmit_api --cov-config=.coveragerc --cov-report=html tests/*
+pytest --cov=autosubmit_api --cov-config=.coveragerc --cov-report=html tests/
 ```
 
 You will find the report in `htmlcov/index.html`

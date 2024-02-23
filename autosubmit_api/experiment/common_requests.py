@@ -43,6 +43,7 @@ from autosubmit_api.logger import logger
 
 from autosubmit_api.performance.utils import calculate_SYPD_perjob
 from autosubmit_api.monitor.monitor import Monitor
+from autosubmit_api.persistance.experiment import ExperimentPaths
 
 from autosubmit_api.statistics.statistics import Statistics
 
@@ -172,7 +173,8 @@ def get_experiment_data(expid):
             result["completed_jobs"] = experiment_run.completed
             result["db_historic_version"] = experiment_history.manager.db_version
         else:
-            _, result["total_jobs"], result["completed_jobs"] =  DbRequests.get_experiment_times_by_expid(expid)
+            result["total_jobs"] = 0
+            result["completed_jobs"] = 0
             result["db_historic_version"] = "NA"
 
     except Exception as exp:
@@ -211,10 +213,9 @@ def _is_exp_running(expid, time_condition=300):
     definite_log_path = None
     try:
         APIBasicConfig.read()
-        pathlog_aslog = APIBasicConfig.LOCAL_ROOT_DIR + '/' + expid + '/' + \
-            APIBasicConfig.LOCAL_TMP_DIR + '/' + APIBasicConfig.LOCAL_ASLOG_DIR
-        pathlog_tmp = APIBasicConfig.LOCAL_ROOT_DIR + '/' + \
-            expid + '/' + APIBasicConfig.LOCAL_TMP_DIR
+        exp_paths = ExperimentPaths(expid)
+        pathlog_aslog = exp_paths.tmp_as_logs_dir
+        pathlog_tmp = exp_paths.tmp_dir
         # Basic Configuration
         look_old_folder = False
         current_version = None
@@ -479,7 +480,8 @@ def get_experiment_log_last_lines(expid):
 
     try:
         APIBasicConfig.read()
-        path = APIBasicConfig.LOCAL_ROOT_DIR + '/' + expid + '/' + APIBasicConfig.LOCAL_TMP_DIR + '/' + APIBasicConfig.LOCAL_ASLOG_DIR
+        exp_paths = ExperimentPaths(expid)
+        path = exp_paths.tmp_as_logs_dir
         reading = os.popen('ls -t ' + path + ' | grep "run.log"').read() if (os.path.exists(path)) else ""
 
         # Finding log files
@@ -528,7 +530,8 @@ def get_job_log(expid, logfile, nlines=150):
     logcontent = []
     reading = ""
     APIBasicConfig.read()
-    logfilepath = os.path.join(APIBasicConfig.LOCAL_ROOT_DIR, expid, APIBasicConfig.LOCAL_TMP_DIR, "LOG_{0}".format(expid), logfile)
+    exp_paths = ExperimentPaths(expid)
+    logfilepath = os.path.join(exp_paths.tmp_log_dir, logfile)
     try:
         if os.path.exists(logfilepath):
             current_stat = os.stat(logfilepath)
@@ -726,7 +729,7 @@ def get_experiment_tree_rundetail(expid, run_id):
         print((traceback.format_exc()))
         return {'tree': [], 'jobs': [], 'total': 0, 'reference': [], 'error': True, 'error_message': str(e), 'pkl_timestamp': 0}
     base_list['error'] = False
-    base_list['error_message'] = 'None'
+    base_list['error_message'] = ''
     base_list['pkl_timestamp'] = pkl_timestamp
     return base_list
 
@@ -767,53 +770,6 @@ def get_experiment_tree_structured(expid, log):
         print(("New Tree Representation failed: {0}".format(e)))
         log.info("New Tree Representation failed: {0}".format(e))
         return {'tree': [], 'jobs': [], 'total': 0, 'reference': [], 'error': True, 'error_message': str(e), 'pkl_timestamp': 0}
-
-
-def verify_last_completed(seconds=300):
-    """
-    Verifying last 300 seconds by default
-    """
-    # Basic info
-    t0 = time.time()
-    APIBasicConfig.read()
-    # Current timestamp
-    current_st = time.time()
-    # Connection
-    path = APIBasicConfig.LOCAL_ROOT_DIR
-    db_file = os.path.join(path, DbRequests.DB_FILE_AS_TIMES)
-    conn = DbRequests.create_connection(db_file)
-    # Current latest detail
-    td0 = time.time()
-    latest_detail = DbRequests.get_latest_completed_jobs(seconds)
-    t_data = time.time() - td0
-    # Main Loop
-    for job_name, detail in list(latest_detail.items()):
-        tmp_path = os.path.join(
-            APIBasicConfig.LOCAL_ROOT_DIR, job_name[:4], APIBasicConfig.LOCAL_TMP_DIR)
-        detail_id, submit, start, finish, status = detail
-        submit_time, start_time, finish_time, status_text_res = JUtils.get_job_total_stats(
-            common_utils.Status.COMPLETED, job_name, tmp_path)
-        submit_ts = int(time.mktime(submit_time.timetuple())) if len(
-            str(submit_time)) > 0 else 0
-        start_ts = int(time.mktime(start_time.timetuple())) if len(
-            str(start_time)) > 0 else 0
-        finish_ts = int(time.mktime(finish_time.timetuple())) if len(
-            str(finish_time)) > 0 else 0
-        if (finish_ts != finish):
-            #print("\tMust Update")
-            DbRequests.update_job_times(detail_id,
-                                        int(current_st),
-                                        submit_ts,
-                                        start_ts,
-                                        finish_ts,
-                                        status,
-                                        debug=False,
-                                        no_modify_time=True)
-        t1 = time.time()
-        # Timer safeguard
-        if (t1 - t0) > SAFE_TIME_LIMIT:
-            raise Exception(
-                "Time limit reached {0:06.2f} seconds on verify_last_completed while reading {1}. Time spent on reading data {2:06.2f} seconds.".format((t1 - t0), job_name, t_data))
 
 
 def get_experiment_counters(expid):
@@ -863,7 +819,8 @@ def get_quick_view(expid):
     total_count = completed_count = failed_count = running_count = queuing_count = 0
     try:
         APIBasicConfig.read()
-        path_to_logs = os.path.join(APIBasicConfig.LOCAL_ROOT_DIR, expid, "tmp", "LOG_" + expid)
+        exp_paths = ExperimentPaths(expid)
+        path_to_logs = exp_paths.tmp_log_dir
 
         # Retrieving packages
         now_ = time.time()
@@ -952,7 +909,8 @@ def get_job_history(expid, job_name):
     result = None
     try:
         APIBasicConfig.read()
-        path_to_job_logs = os.path.join(APIBasicConfig.LOCAL_ROOT_DIR, expid, "tmp", "LOG_" + expid)
+        exp_paths = ExperimentPaths(expid)
+        path_to_job_logs = exp_paths.tmp_log_dir
         result = ExperimentHistoryDirector(ExperimentHistoryBuilder(expid)).build_reader_experiment_history().get_historic_job_data(job_name)
     except Exception as exp:
         print((traceback.format_exc()))

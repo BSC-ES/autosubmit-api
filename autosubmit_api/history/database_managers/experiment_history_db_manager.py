@@ -15,16 +15,16 @@
 
 # You should have received a copy of the GNU General Public License
 # along with Autosubmit.  If not, see <http://www.gnu.org/licenses/>.
-import pysqlite3 as sqlite3
 import os
-import traceback
 import textwrap
-from .. import utils as HUtils
-from .. database_managers import database_models as Models
-from .. data_classes.job_data import JobData
-from ..data_classes.experiment_run import ExperimentRun
-from ...config.basicConfig import APIBasicConfig
-from .database_manager import DatabaseManager, DEFAULT_JOBDATA_DIR
+
+from autosubmit_api.persistance.experiment import ExperimentPaths
+from autosubmit_api.history import utils as HUtils
+from autosubmit_api.history.database_managers import database_models as Models
+from autosubmit_api.history.data_classes.job_data import JobData
+from autosubmit_api.history.data_classes.experiment_run import ExperimentRun
+from autosubmit_api.config.basicConfig import APIBasicConfig
+from autosubmit_api.history.database_managers.database_manager import DatabaseManager
 from typing import List
 from collections import namedtuple
 
@@ -39,7 +39,8 @@ class ExperimentHistoryDbManager(DatabaseManager):
     super(ExperimentHistoryDbManager, self).__init__(expid, basic_config)
     self._set_schema_changes()
     self._set_table_queries()
-    self.historicaldb_file_path = os.path.join(self.JOBDATA_DIR, "job_data_{0}.db".format(self.expid)) # type : str
+    exp_paths = ExperimentPaths(expid)
+    self.historicaldb_file_path = exp_paths.job_data_db
     if self.my_database_exists():
       self.set_db_version_models()
 
@@ -176,10 +177,7 @@ class ExperimentHistoryDbManager(DatabaseManager):
 
   def get_experiment_run_dc_with_max_id(self):
     """ Get Current (latest) ExperimentRun data class. """
-    if self.db_version >= Models.DatabaseVersion.EXPERIMENT_HEADER_SCHEMA_CHANGES.value:
-      return ExperimentRun.from_model(self._get_experiment_run_with_max_id())
-    else:
-      return ExperimentRun(run_id=0)
+    return ExperimentRun.from_model(self._get_experiment_run_with_max_id())
 
   def register_experiment_run_dc(self, experiment_run_dc):
     self._insert_experiment_run(experiment_run_dc)

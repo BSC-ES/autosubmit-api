@@ -20,20 +20,12 @@ def generate_query_listexp_extended(
         select(
             tables.experiment_table,
             tables.details_table,
-            tables.experiment_times_table.c.exp_id,
-            tables.experiment_times_table.c.total_jobs,
-            tables.experiment_times_table.c.completed_jobs,
             tables.experiment_status_table.c.exp_id,
             tables.experiment_status_table.c.status,
         )
         .join(
             tables.details_table,
             tables.experiment_table.c.id == tables.details_table.c.exp_id,
-            isouter=True,
-        )
-        .join(
-            tables.experiment_times_table,
-            tables.experiment_table.c.id == tables.experiment_times_table.c.exp_id,
             isouter=True,
         )
         .join(

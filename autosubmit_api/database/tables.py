@@ -28,17 +28,6 @@ details_table = Table(
 
 # AS_TIMES TABLES
 
-experiment_times_table = Table(
-    "experiment_times",
-    metadata_obj,
-    Column("exp_id", Integer, primary_key=True),
-    Column("name", Text, nullable=False),
-    Column("created", Integer, nullable=False),
-    Column("modified", Integer, nullable=False),
-    Column("total_jobs", Integer, nullable=False),
-    Column("completed_jobs", Integer, nullable=False),
-)
-
 experiment_status_table = Table(
     "experiment_status",
     metadata_obj,
@@ -47,4 +36,16 @@ experiment_status_table = Table(
     Column("status", Text, nullable=False),
     Column("seconds_diff", Integer, nullable=False),
     Column("modified", Text, nullable=False),
+)
+
+
+# Graph Data TABLES
+
+graph_data_table = Table(
+    "experiment_graph_draw",
+    metadata_obj,
+    Column("id", Integer, primary_key=True),
+    Column("job_name", Text, nullable=False),
+    Column("x", Integer, nullable=False),
+    Column("y", Integer, nullable=False),
 )

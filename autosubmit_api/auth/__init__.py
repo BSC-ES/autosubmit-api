@@ -3,7 +3,7 @@ from http import HTTPStatus
 from flask import request
 import jwt
 from autosubmit_api.logger import logger
-from autosubmit_api.config import PROTECTION_LEVEL, JWT_ALGORITHM, JWT_SECRET
+from autosubmit_api import config
 from enum import IntEnum
 
 
@@ -45,12 +45,12 @@ def with_auth_token(
         def inner_wrapper(*args, **kwargs):
             try:
                 current_token = request.headers.get("Authorization")
-                jwt_token = jwt.decode(current_token, JWT_SECRET, JWT_ALGORITHM)
+                jwt_token = jwt.decode(current_token, config.JWT_SECRET, config.JWT_ALGORITHM)
             except Exception as exc:
                 error_msg = "Unauthorized"
                 if isinstance(exc, jwt.ExpiredSignatureError):
                     error_msg = "Expired token"
-                auth_level = _parse_protection_level_env(PROTECTION_LEVEL)
+                auth_level = _parse_protection_level_env(config.PROTECTION_LEVEL)
                 if threshold <= auth_level:  # If True, will trigger *_on_fail
                     if raise_on_fail:
                         raise AppAuthError(error_msg)

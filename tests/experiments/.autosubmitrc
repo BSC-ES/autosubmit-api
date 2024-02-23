@@ -1,0 +1,21 @@
+[database]
+path = ./tests/experiments/
+filename = autosubmit.db
+
+[local]
+path = ./tests/experiments/
+
+[globallogs]
+path = ./tests/experiments/logs
+
+[historicdb]
+path = ./tests/experiments/metadata/data
+
+[structures]
+path = ./tests/experiments/metadata/structures
+
+[historiclog]
+path = ./tests/experiments/metadata/logs
+
+[graph]
+path = ./tests/experiments/metadata/graph

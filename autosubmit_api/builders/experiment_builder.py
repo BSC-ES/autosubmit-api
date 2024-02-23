@@ -4,16 +4,16 @@ from autosubmit_api.builders.configuration_facade_builder import (
     ConfigurationFacadeDirector,
 )
 from autosubmit_api.database import tables
-from autosubmit_api.database.common import create_main_db_conn
-from autosubmit_api.database.models import Experiment
+from autosubmit_api.database.common import create_autosubmit_db_engine, create_main_db_conn
+from autosubmit_api.database.models import ExperimentModel
 
 
 class ExperimentBuilder(BaseBuilder):
     def produce_base_from_dict(self, obj: dict):
-        self._product = Experiment.model_validate(obj)
+        self._product = ExperimentModel.model_validate(obj)
 
     def produce_base(self, expid):
-        with create_main_db_conn() as conn:
+        with create_autosubmit_db_engine().connect() as conn:
             result = conn.execute(
                 tables.experiment_table.select().where(
                     tables.experiment_table.c.name == expid
@@ -21,7 +21,7 @@ class ExperimentBuilder(BaseBuilder):
             ).one()
 
         # Set new product
-        self._product = Experiment(
+        self._product = ExperimentModel(
             id=result.id,
             name=result.name,
             description=result.description,
@@ -30,12 +30,12 @@ class ExperimentBuilder(BaseBuilder):
 
     def produce_details(self):
         exp_id = self._product.id
-        with create_main_db_conn() as conn:
+        with create_autosubmit_db_engine().connect()() as conn:
             result = conn.execute(
                 tables.details_table.select().where(
                     tables.details_table.c.exp_id == exp_id
                 )
-            ).one_or_none
+            ).one_or_none()
 
         # Set details props
         if result:
@@ -63,5 +63,5 @@ class ExperimentBuilder(BaseBuilder):
         )
 
     @property
-    def product(self) -> Experiment:
+    def product(self) -> ExperimentModel:
         return super().product

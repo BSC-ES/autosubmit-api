@@ -1,7 +1,9 @@
 import os
 import textwrap
 import traceback
-import pysqlite3 as sqlite3
+import sqlite3
+
+from autosubmit_api.persistance.experiment import ExperimentPaths
 
 def get_structure(expid, structures_path):
     """
@@ -12,10 +14,10 @@ def get_structure(expid, structures_path):
     :rtype: Dictionary Key: String, Value: List(of String)
     """
     try:
+        exp_paths = ExperimentPaths(expid)
+        db_structure_path = exp_paths.structure_db
         #pkl_path = os.path.join(exp_path, expid, "pkl")
-        if os.path.exists(structures_path):
-            db_structure_path = os.path.join(
-                structures_path, "structure_" + expid + ".db")
+        if os.path.exists(db_structure_path):
             # Create file
             os.umask(0)
             if not os.path.exists(db_structure_path):
@@ -51,8 +53,8 @@ def get_structure(expid, structures_path):
                 return dict()
         else:
             # pkl folder not found
-            raise Exception("structures folder not found " +
-                            str(structures_path))
+            raise Exception("structures db not found " +
+                            str(db_structure_path))
     except Exception as exp:
         print((traceback.format_exc()))
 
@@ -70,7 +72,7 @@ def create_connection(db_file):
         return None
 
 
-def create_table(conn, create_table_sql):
+def create_table(conn: sqlite3.Connection, create_table_sql):
     """ create a table from the create_table_sql statement
     :param conn: Connection object
     :param create_table_sql: a CREATE TABLE statement
@@ -100,59 +102,3 @@ def _get_exp_structure(path):
     except Exception as exp:
         print((traceback.format_exc()))
         return dict()
-
-
-def save_structure(graph, exp_id, structures_path):
-    """
-    Saves structure if path is valid
-    """
-    #pkl_path = os.path.join(exp_path, exp_id, "pkl")
-    if os.path.exists(structures_path):
-        db_structure_path = os.path.join(
-            structures_path, "structure_" + exp_id + ".db")
-        # with open(db_structure_path, "w"):
-        conn = create_connection(db_structure_path)
-        deleted = _delete_table_content(conn)
-        if deleted == True:
-            nodes_edges = {u for u, v in graph.edges()}
-            nodes_edges.update({v for u, v in graph.edges()})
-            independent_nodes = {
-                u for u in graph.nodes() if u not in nodes_edges}
-            data = {(u, v) for u, v in graph.edges()}
-            data.update({(u, u) for u in independent_nodes})
-            # save
-            _create_edge(conn, data)
-            #print("Created edge " + str(u) + str(v))
-            conn.commit()
-    else:
-        # pkl folder not found
-        raise Exception("pkl folder not found " + str(structures_path))
-
-
-def _create_edge(conn, data):
-    """
-    Create edge
-    """
-    try:
-        sql = ''' INSERT INTO experiment_structure(e_from, e_to) VALUES(?,?) '''
-        cur = conn.cursor()
-        cur.executemany(sql, data)
-        # return cur.lastrowid
-    except sqlite3.Error as e:
-        print(("Error on Insert : " + str(type(e).__name__)))
-
-
-def _delete_table_content(conn):
-    """
-    Deletes table content
-    """
-    try:
-        sql = ''' DELETE FROM experiment_structure '''
-        cur = conn.cursor()
-        cur.execute(sql)
-        conn.commit()
-        return True
-    except Exception as exp:
-        # print(traceback.format_exc())
-        print(("Error on Delete _delete_table_content: {}".format(str(exp))))
-        return False
