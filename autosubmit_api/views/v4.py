@@ -6,6 +6,7 @@ from typing import Optional
 from flask import redirect, request
 from flask.views import MethodView
 import jwt
+import requests
 from autosubmit_api.auth import ProtectionLevels, with_auth_token
 from autosubmit_api.auth.utils import validate_client
 from autosubmit_api.builders.experiment_builder import ExperimentBuilder
@@ -70,7 +71,61 @@ class CASV2Login(MethodView):
                 "user_id": user,
                 "sub": user,
                 "iat": int(datetime.now().timestamp()),
-                "exp": (datetime.utcnow() + timedelta(seconds=config.JWT_EXP_DELTA_SECONDS)),
+                "exp": (
+                    datetime.utcnow() + timedelta(seconds=config.JWT_EXP_DELTA_SECONDS)
+                ),
+            }
+            jwt_token = jwt.encode(payload, config.JWT_SECRET, config.JWT_ALGORITHM)
+            return {
+                "authenticated": True,
+                "user": user,
+                "token": jwt_token,
+                "message": "Token generated",
+            }, HTTPStatus.OK
+
+
+class GithubOauth2Login(MethodView):
+    decorators = [with_log_run_times(logger, "GHOAUTH2LOGIN")]
+
+    def get(self):
+        code = request.args.get("code")
+
+        if not code:
+            return "Unauthorized", HTTPStatus.UNAUTHORIZED
+
+        resp_obj: dict = requests.post(
+            "https://github.com/login/oauth/access_token",
+            data={
+                "client_id": config.GITHUB_OAUTH_CLIENT_ID,
+                "client_secret": config.GITHUB_OAUTH_CLIENT_SECRET,
+                "code": code,
+            },
+            headers={"Accept": "application/json"},
+        ).json()
+
+        access_token = resp_obj.get("access_token")
+
+        user_info: dict = requests.get(
+            "https://api.github.com/user",
+            headers={"Authorization": f"Bearer {access_token}"},
+        ).json()
+        user = user_info.get("login")
+
+        if not user:
+            return {
+                "authenticated": False,
+                "user": None,
+                "token": None,
+                "message": "Can't verify user",
+            }, HTTPStatus.UNAUTHORIZED
+        else:  # Login successful
+            payload = {
+                "user_id": user,
+                "sub": user,
+                "iat": int(datetime.now().timestamp()),
+                "exp": (
+                    datetime.utcnow() + timedelta(seconds=config.JWT_EXP_DELTA_SECONDS)
+                ),
             }
             jwt_token = jwt.encode(payload, config.JWT_SECRET, config.JWT_ALGORITHM)
             return {
@@ -91,7 +146,7 @@ class AuthJWTVerify(MethodView):
         return {
             "authenticated": True if user_id else False,
             "user": user_id,
-        }, HTTPStatus.OK if user_id else HTTPStatus.UNAUTHORIZED
+        }, (HTTPStatus.OK if user_id else HTTPStatus.UNAUTHORIZED)
 
 
 class ExperimentView(MethodView):
@@ -178,10 +233,7 @@ class ExperimentView(MethodView):
                     .build_reader_experiment_history()
                     .manager.get_experiment_run_dc_with_max_id()
                 )
-                if (
-                    current_run
-                    and current_run.total > 0
-                ):
+                if current_run and current_run.total > 0:
                     completed = current_run.completed
                     total = current_run.total
                     submitted = current_run.submitted

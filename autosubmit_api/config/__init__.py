@@ -23,6 +23,11 @@ CAS_VERIFY_URL = os.environ.get(
     "CAS_VERIFY_URL", (CAS_SERVER_URL + "serviceValidate") if CAS_SERVER_URL else ""
 )
 
+# GitHub Oauth App
+
+GITHUB_OAUTH_CLIENT_ID = os.environ.get("GITHUB_OAUTH_CLIENT_ID")
+GITHUB_OAUTH_CLIENT_SECRET = os.environ.get("GITHUB_OAUTH_CLIENT_SECRET")
+
 # Startup options
 RUN_BACKGROUND_TASKS_ON_START = os.environ.get("RUN_BACKGROUND_TASKS_ON_START") in [
     "True",

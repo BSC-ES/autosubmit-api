@@ -8,8 +8,16 @@ def create_v4_blueprint():
 
     # TODO Uncomment endpoints as they are ready to be published
 
-    blueprint.add_url_rule("/auth/cas/v2/login", view_func=v4_views.CASV2Login.as_view("CASV2Login"))
-    blueprint.add_url_rule("/auth/verify-token", view_func=v4_views.AuthJWTVerify.as_view("AuthJWTVerify"))
+    blueprint.add_url_rule(
+        "/auth/cas/v2/login", view_func=v4_views.CASV2Login.as_view("CASV2Login")
+    )
+    blueprint.add_url_rule(
+        "/auth/oauth2/github/login",
+        view_func=v4_views.GithubOauth2Login.as_view("GithubOauth2Login"),
+    )
+    blueprint.add_url_rule(
+        "/auth/verify-token", view_func=v4_views.AuthJWTVerify.as_view("AuthJWTVerify")
+    )
 
     # blueprint.route("/experiments/<string:expid>/description", methods=["PUT"])(
     #     v4_views.experiment_description_view
@@ -22,7 +30,9 @@ def create_v4_blueprint():
     #     v3_views.exp_counters
     # )
 
-    blueprint.add_url_rule("/experiments", view_func=v4_views.ExperimentView.as_view("ExperimentView"))
+    blueprint.add_url_rule(
+        "/experiments", view_func=v4_views.ExperimentView.as_view("ExperimentView")
+    )
 
     # blueprint.route("/experiments/<string:expid>/runs")(v3_views.get_runs)
     # blueprint.route("/experiments/<string:expid>/check-running")(
