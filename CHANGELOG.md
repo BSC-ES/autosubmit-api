@@ -2,6 +2,8 @@
 
 ### Pre-release v4.0.0b5 - Release date: TBD
 
+* Fixed the graph background task to correctly select the active experiments
+
 ### Pre-release v4.0.0b4 - Release date: 2024-02-23
 
 * The background task that updates the experiment status has been refactored. Now, it keeps the records of all the experiments
