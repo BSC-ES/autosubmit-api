@@ -3,6 +3,8 @@
 ### Pre-release v4.0.0b5 - Release date: TBD
 
 * Fixed the graph background task to correctly select the active experiments
+* Added support to Github Oauth Apps
+* Fixed details background task multiple insert
 
 ### Pre-release v4.0.0b4 - Release date: 2024-02-23
 

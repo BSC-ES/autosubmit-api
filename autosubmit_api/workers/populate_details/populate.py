@@ -11,7 +11,7 @@ from autosubmit_api.builders.configuration_facade_builder import (
 )
 from autosubmit_api.config.basicConfig import APIBasicConfig
 from collections import namedtuple
-from typing import List, Any, Tuple
+from typing import List
 
 
 ExperimentDetails = namedtuple(
@@ -21,8 +21,7 @@ Experiment = namedtuple("Experiment", ["id", "name"])
 
 
 class DetailsProcessor:
-    def __init__(self, basic_config):
-        # type: (APIBasicConfig) -> None
+    def __init__(self, basic_config: APIBasicConfig):
         self.basic_config = basic_config
         self.main_db_engine = create_autosubmit_db_engine()
 
@@ -32,8 +31,7 @@ class DetailsProcessor:
         self._clean_table()
         return self._insert_many_into_details_table(new_details)
 
-    def _get_experiments(self):
-        # type: () -> List[Experiment]
+    def _get_experiments(self) -> List[Experiment]:
         experiments = []
         with self.main_db_engine.connect() as conn:
             query_result = conn.execute(tables.experiment_table.select()).all()
@@ -45,8 +43,7 @@ class DetailsProcessor:
 
         return experiments
 
-    def _get_details_data_from_experiment(self, expid):
-        # type: (str) -> ExperimentDetails
+    def _get_details_data_from_experiment(self, expid: str) -> ExperimentDetails:
         autosubmit_config = ConfigurationFacadeDirector(
             AutosubmitConfigurationFacadeBuilder(expid)
         ).build_autosubmit_configuration_facade(self.basic_config)
@@ -58,8 +55,7 @@ class DetailsProcessor:
             autosubmit_config.get_main_platform(),
         )
 
-    def _get_all_details(self):
-        # type: () -> List[Tuple[Any]]
+    def _get_all_details(self) -> List[dict]:
         experiments = self._get_experiments()
         result = []
         exp_ids = set()
@@ -84,15 +80,15 @@ class DetailsProcessor:
                 )
         return result
 
-    def _insert_many_into_details_table(self, values):
-        # type: (List[Tuple[Any, Any, Any, Any, Any, Any]]) -> int
+    def _insert_many_into_details_table(self, values: List[dict]) -> int:
         with self.main_db_engine.connect() as conn:
-            result = conn.execute(tables.details_table.insert().values(values))
+            result = conn.execute(
+                tables.details_table.insert(), values
+            )  # Executemany style https://docs.sqlalchemy.org/en/20/tutorial/data_insert.html#insert-usually-generates-the-values-clause-automatically
             conn.commit()
         return result.rowcount
 
     def create_details_table_if_not_exists(self):
-        # type: () -> None
         create_table_query = textwrap.dedent(
             """
             CREATE TABLE
