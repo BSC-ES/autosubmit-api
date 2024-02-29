@@ -109,19 +109,25 @@ class GithubOauth2Login(MethodView):
             "https://api.github.com/user",
             headers={"Authorization": f"Bearer {access_token}"},
         ).json()
-        user = user_info.get("login")
+        username = user_info.get("login")
 
-        if not user:
-            return {
-                "authenticated": False,
-                "user": None,
-                "token": None,
-                "message": "Can't verify user",
-            }, HTTPStatus.UNAUTHORIZED
-        else:  # Login successful
+        # Whitelist organization
+        if config.GITHUB_OAUTH_WHITELIST_ORGANIZATION:
+            org_resp = requests.get(
+                f"https://api.github.com/orgs/{config.GITHUB_OAUTH_WHITELIST_ORGANIZATION}/members/{username}",
+                headers={"Authorization": f"Bearer {access_token}"},
+            )
+            is_member = (
+                org_resp.status_code == 204
+            )  # https://docs.github.com/en/rest/orgs/members?apiVersion=2022-11-28#check-organization-membership-for-a-user
+        else:
+            is_member = True
+
+        # Login successful
+        if username and is_member:
             payload = {
-                "user_id": user,
-                "sub": user,
+                "user_id": username,
+                "sub": username,
                 "iat": int(datetime.now().timestamp()),
                 "exp": (
                     datetime.utcnow() + timedelta(seconds=config.JWT_EXP_DELTA_SECONDS)
@@ -130,10 +136,17 @@ class GithubOauth2Login(MethodView):
             jwt_token = jwt.encode(payload, config.JWT_SECRET, config.JWT_ALGORITHM)
             return {
                 "authenticated": True,
-                "user": user,
+                "user": username,
                 "token": jwt_token,
                 "message": "Token generated",
             }, HTTPStatus.OK
+        else:  # UNAUTHORIZED
+            return {
+                "authenticated": False,
+                "user": None,
+                "token": None,
+                "message": "Can't verify user",
+            }, HTTPStatus.UNAUTHORIZED
 
 
 class AuthJWTVerify(MethodView):
