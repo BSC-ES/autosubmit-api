@@ -91,7 +91,12 @@ class GithubOauth2Login(MethodView):
         code = request.args.get("code")
 
         if not code:
-            return "Unauthorized", HTTPStatus.UNAUTHORIZED
+            return {
+                "authenticated": False,
+                "user": None,
+                "token": None,
+                "message": "Can't verify user",
+            }, HTTPStatus.UNAUTHORIZED
 
         resp_obj: dict = requests.post(
             "https://github.com/login/oauth/access_token",
@@ -102,7 +107,6 @@ class GithubOauth2Login(MethodView):
             },
             headers={"Accept": "application/json"},
         ).json()
-
         access_token = resp_obj.get("access_token")
 
         user_info: dict = requests.get(
@@ -111,8 +115,30 @@ class GithubOauth2Login(MethodView):
         ).json()
         username = user_info.get("login")
 
-        # Whitelist organization
-        if config.GITHUB_OAUTH_WHITELIST_ORGANIZATION:
+        if not username:
+            return {
+                "authenticated": False,
+                "user": None,
+                "token": None,
+                "message": "Couldn't find user on GitHub",
+            }, HTTPStatus.UNAUTHORIZED
+
+        # Whitelist organization team
+        if (
+            config.GITHUB_OAUTH_WHITELIST_ORGANIZATION
+            and config.GITHUB_OAUTH_WHITELIST_TEAM
+        ):
+            org_resp = requests.get(
+                f"https://api.github.com/orgs/{config.GITHUB_OAUTH_WHITELIST_ORGANIZATION}/teams/{config.GITHUB_OAUTH_WHITELIST_TEAM}/memberships/{username}",
+                headers={"Authorization": f"Bearer {access_token}"},
+            )
+            membership: dict = org_resp.json()
+            is_member = (
+                org_resp.status_code == 200 and membership.get("state") == "active"
+            )  # https://docs.github.com/en/rest/teams/members?apiVersion=2022-11-28#get-team-membership-for-a-user
+        elif (
+            config.GITHUB_OAUTH_WHITELIST_ORGANIZATION
+        ):  # Whitelist all organization (no team)
             org_resp = requests.get(
                 f"https://api.github.com/orgs/{config.GITHUB_OAUTH_WHITELIST_ORGANIZATION}/members/{username}",
                 headers={"Authorization": f"Bearer {access_token}"},
@@ -124,7 +150,7 @@ class GithubOauth2Login(MethodView):
             is_member = True
 
         # Login successful
-        if username and is_member:
+        if is_member:
             payload = {
                 "user_id": username,
                 "sub": username,
@@ -145,7 +171,7 @@ class GithubOauth2Login(MethodView):
                 "authenticated": False,
                 "user": None,
                 "token": None,
-                "message": "Can't verify user",
+                "message": "User is not member of organization or team",
             }, HTTPStatus.UNAUTHORIZED
 
 
