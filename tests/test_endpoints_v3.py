@@ -449,3 +449,89 @@ class TestExpRunLog:
         assert resp_obj["error_message"] == ""
         assert resp_obj["error"] == False
         assert resp_obj["found"] == True
+
+
+class TestIfRunFromLog:
+    endpoint = "/v3/logrun/{expid}"
+
+    def test_run_status_from_log(self, fixture_client: FlaskClient):
+        expid = "a003"
+        response = fixture_client.get(self.endpoint.format(expid=expid))
+        resp_obj: dict = response.get_json()
+
+        assert resp_obj["error_message"] == ""
+        assert resp_obj["error"] == False
+        assert isinstance(resp_obj["is_running"], bool)
+        assert isinstance(resp_obj["log_path"], str)
+        assert isinstance(resp_obj["timediff"], int)
+
+
+class TestQuickIfRun:
+    endpoint = "/v3/ifrun/{expid}"
+
+    def test_quick_run_status(self, fixture_client: FlaskClient):
+        expid = "a003"
+        response = fixture_client.get(self.endpoint.format(expid=expid))
+        resp_obj: dict = response.get_json()
+
+        assert resp_obj["error_message"] == ""
+        assert resp_obj["error"] == False
+        assert isinstance(resp_obj["running"], bool)
+
+
+class TestJobLogLines:
+    endpoint = "/v3/joblog/{logfile}"
+
+    def test_get_logfile_content(self, fixture_client: FlaskClient):
+        logfile = "a3tb_19930101_fc01_1_SIM.20211201184808.err"
+        response = fixture_client.get(self.endpoint.format(logfile=logfile))
+        resp_obj: dict = response.get_json()
+
+        assert resp_obj["error_message"] == ""
+        assert resp_obj["error"] == False
+        assert resp_obj["found"] == True
+        assert isinstance(resp_obj["lastModified"], str)
+        assert isinstance(resp_obj["logfile"], str)
+        assert isinstance(resp_obj["timeStamp"], int)
+        assert isinstance(resp_obj["logcontent"], list)
+        assert len(resp_obj["logcontent"]) > 0 and len(resp_obj["logcontent"]) <= 150
+
+
+class TestJobHistory:
+    endpoint = "/v3/history/{expid}/{jobname}"
+
+    def test_job_history(self, fixture_client: FlaskClient):
+        expid = "a3tb"
+        jobname = "a3tb_19930101_fc01_1_SIM"
+        response = fixture_client.get(
+            self.endpoint.format(expid=expid, jobname=jobname)
+        )
+        resp_obj: dict = response.get_json()
+
+        assert resp_obj["error_message"] == ""
+        assert resp_obj["error"] == False
+        assert isinstance(resp_obj["path_to_logs"], str)
+        assert isinstance(resp_obj["history"], list)
+        assert len(resp_obj["history"]) > 0
+
+
+class TestSearchExpid:
+    endpoint = "/v3/search/{expid}"
+
+    def test_search_by_expid(self, fixture_client: FlaskClient):
+        expid = "a3tb"
+        response = fixture_client.get(self.endpoint.format(expid=expid))
+        resp_obj: dict = response.get_json()
+
+        assert isinstance(resp_obj["experiment"], list)
+        assert len(resp_obj["experiment"]) > 0
+
+class TestRunningExps:
+    endpoint = "/v3/running/"
+
+    def test_search_by_expid(self, fixture_client: FlaskClient):
+        expid = "a3tb"
+        response = fixture_client.get(self.endpoint)
+        resp_obj: dict = response.get_json()
+
+        assert isinstance(resp_obj["experiment"], list)
