@@ -81,6 +81,48 @@
                         }
                       }
                     }
+                  },
+                  "x-examples": {
+                    "Example 1": {
+                      "experiment": [
+                        {
+                          "completed": 25,
+                          "description": "Testing AS 4.0",
+                          "failed": 8,
+                          "hpc": "MARENOSTRUM4",
+                          "id": 8192,
+                          "modified": "2022-10-03 10:05:27",
+                          "name": "a4yd",
+                          "queuing": 0,
+                          "running": 0,
+                          "status": "RUNNING",
+                          "submitted": 0,
+                          "suspended": 0,
+                          "total": 385,
+                          "user": "root",
+                          "version": "4.0.0b0",
+                          "wrapper": null
+                        },
+                        {
+                          "completed": 88,
+                          "description": "TEST_AS_4.0",
+                          "failed": 0,
+                          "hpc": "MARENOSTRUM4",
+                          "id": 8202,
+                          "modified": "2022-11-30 11:50:29",
+                          "name": "t0an",
+                          "queuing": 0,
+                          "running": 0,
+                          "status": "RUNNING",
+                          "submitted": 0,
+                          "suspended": 0,
+                          "total": 91,
+                          "user": "root",
+                          "version": "4.0.0b0",
+                          "wrapper": null
+                        }
+                      ]
+                    }
                   }
                 },
                 "examples": {
@@ -297,6 +339,55 @@
                         }
                       }
                     }
+                  },
+                  "x-examples": {
+                    "Example 1": {
+                      "experiments": [
+                        {
+                          "completed": 0,
+                          "description": "DE Model App",
+                          "failed": 0,
+                          "hpc": null,
+                          "id": 9,
+                          "modified": null,
+                          "name": "a005",
+                          "queuing": 0,
+                          "running": 0,
+                          "status": "NOT RUNNING",
+                          "submitted": 0,
+                          "suspended": 0,
+                          "total": 0,
+                          "user": null,
+                          "version": "Unknown",
+                          "wrapper": null
+                        },
+                        {
+                          "completed": 115,
+                          "description": "DE downstream",
+                          "failed": 0,
+                          "hpc": "LOCAL",
+                          "id": 11,
+                          "modified": "2023-10-26 11:44:07",
+                          "name": "a006",
+                          "queuing": 0,
+                          "running": 0,
+                          "status": "NOT RUNNING",
+                          "submitted": 0,
+                          "suspended": 0,
+                          "total": 115,
+                          "user": "ltenorio",
+                          "version": "4.0.95",
+                          "wrapper": null
+                        }
+                      ],
+                      "pagination": {
+                        "page": 1,
+                        "page_items": 2,
+                        "page_size": 2,
+                        "total_items": 9,
+                        "total_pages": 5
+                      }
+                    }
                   }
                 },
                 "examples": {
@@ -346,6 +437,71 @@
                         "page_size": 2,
                         "total_items": 9,
                         "total_pages": 5
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v4/experiments/{expid}": {
+      "get": {
+        "summary": "Get experiment info",
+        "operationId": "get-v4-experiments-expid",
+        "parameters": [
+          {
+            "name": "expid",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v4/experiments/{expid}/jobs": {
+      "get": {
+        "summary": "List experiment jobs",
+        "operationId": "get-v4-experiments-expid-jobs",
+        "parameters": [
+          {
+            "name": "view",
+            "in": "query",
+            "description": "Data view selector",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "base",
+                "quick"
+              ]
+            }
+          },
+          {
+            "name": "expid",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "jobs": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Job"
                       }
                     }
                   }
@@ -491,6 +647,150 @@
                 }
               }
             }
+          }
+        }
+      }
+    },
+    "/v4/auth/oauth2/github/login": {
+      "get": {
+        "summary": "GitHub Oauth2 App Login",
+        "operationId": "get-v4-auth-oauth2-github-login",
+        "parameters": [
+          {
+            "name": "code",
+            "in": "query",
+            "description": "GitHub code used to exchange for an access_token",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "authenticated": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "token": {
+                      "type": "string"
+                    },
+                    "user": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "authenticated": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "token": {
+                      "type": "string"
+                    },
+                    "user": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Job": {
+        "type": "object",
+        "title": "Job",
+        "description": "Base experiment job",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Job identifier"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "WAITING",
+              "READY",
+              "SUBMITTED",
+              "QUEUING",
+              "RUNNING",
+              "COMPLETED",
+              "HELD",
+              "PREPARED",
+              "SKIPPED",
+              "DELAYED",
+              "FAILED",
+              "UNKNOWN",
+              "SUSPENDED"
+            ],
+            "description": "Status of the job",
+            "default": "UNKNOWN"
+          },
+          "priority": {
+            "type": "integer"
+          },
+          "section": {
+            "type": "string"
+          },
+          "date": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "member": {
+            "type": "string"
+          },
+          "chunk": {
+            "type": "integer"
+          },
+          "out_path_local": {
+            "type": "string"
+          },
+          "err_path_local": {
+            "type": "string"
+          },
+          "out_path_remote": {
+            "type": "string"
+          },
+          "err_path_remote": {
+            "type": "string"
+          }
+        },
+        "x-examples": {
+          "Example 1": {
+            "name": "a008_20200120_fc0_2_SIM",
+            "status": "COMPLETED",
+            "priority": 4,
+            "section": "SIM",
+            "date": "2020-01-20T00:00:00",
+            "member": "fc0",
+            "chunk": 2,
+            "out_path_local": "a008_20200120_fc0_2_SIM.20231027153508.out",
+            "err_path_local": "a008_20200120_fc0_2_SIM.20231027153508.err",
+            "out_path_remote": "a008_20200120_fc0_2_SIM.20231027153508.out",
+            "err_path_remote": "a008_20200120_fc0_2_SIM.20231027153508.err"
           }
         }
       }
