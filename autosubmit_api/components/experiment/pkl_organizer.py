@@ -7,7 +7,9 @@ from autosubmit_api.components.jobs import job_factory as factory
 from autosubmit_api.common.utils import JobSection, PklJob, PklJob14, Status
 from autosubmit_api.components.experiment.configuration_facade import AutosubmitConfigurationFacade
 from autosubmit_api.components.jobs.job_factory import Job, SimpleJob
-from typing import List, Dict, Set
+from typing import List, Dict, Set, Union
+
+from autosubmit_api.persistance.pkl_reader import PklReader
 
 
 class PklOrganizer(object):
@@ -17,9 +19,8 @@ class PklOrganizer(object):
   Warnings are stored in self.warnings.
   """
 
-  def __init__(self, configuration_facade):
-    # type: (AutosubmitConfigurationFacade) -> None
-    self.current_content = [] # type: List[PklJob]
+  def __init__(self, configuration_facade: AutosubmitConfigurationFacade):
+    self.current_content: List[Union[PklJob,PklJob14]] = []
     self.configuration_facade = configuration_facade # type: AutosubmitConfigurationFacade
     self.sim_jobs = [] # type: List[Job]
     self.post_jobs = [] # type: List[Job]
@@ -55,35 +56,9 @@ class PklOrganizer(object):
     return [SimpleJob(job.name, tmp_path, job.status) for job in self.current_content]
 
   def _process_pkl(self):
-    # type: () -> None
     if os.path.exists(self.pkl_path):
       try:
-        with (open(self.pkl_path, "rb")) as openfile:
-          obj = pickle.load(openfile, encoding="latin1")
-          if isinstance(obj, DiGraph):
-            for item in obj.nodes(data=True):
-              jobpkl = PklJob14(
-                item[1]["job"].name, 
-                item[1]["job"].id,
-                item[1]["job"].status,
-                item[1]["job"].priority,
-                item[1]["job"].section,
-                item[1]["job"].date,
-                item[1]["job"].member,
-                item[1]["job"].chunk,
-                item[1]["job"].local_logs[0], 
-                item[1]["job"].local_logs[1],
-                item[1]["job"].remote_logs[0],
-                item[1]["job"].remote_logs[1],
-                item[1]["job"].wrapper_type
-              )
-              self.current_content.append(jobpkl)
-          else:
-            for item in obj:
-              if len(item) == 13:
-                self.current_content.append(PklJob14(*item))
-              else:
-                self.current_content.append(PklJob(*item))
+        self.current_content = PklReader(self.configuration_facade.expid).parse_job_list()
       except Exception as exc:
         raise Exception("Exception while reading the pkl content: {}".format(str(exc)))
     else:

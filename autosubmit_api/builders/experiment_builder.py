@@ -1,10 +1,14 @@
+import datetime
 from autosubmit_api.builders import BaseBuilder
 from autosubmit_api.builders.configuration_facade_builder import (
     AutosubmitConfigurationFacadeBuilder,
     ConfigurationFacadeDirector,
 )
 from autosubmit_api.database import tables
-from autosubmit_api.database.common import create_autosubmit_db_engine, create_main_db_conn
+from autosubmit_api.database.common import (
+    create_autosubmit_db_engine,
+    create_main_db_conn,
+)
 from autosubmit_api.database.models import ExperimentModel
 
 
@@ -30,7 +34,7 @@ class ExperimentBuilder(BaseBuilder):
 
     def produce_details(self):
         exp_id = self._product.id
-        with create_autosubmit_db_engine().connect()() as conn:
+        with create_autosubmit_db_engine().connect() as conn:
             result = conn.execute(
                 tables.details_table.select().where(
                     tables.details_table.c.exp_id == exp_id
@@ -58,9 +62,12 @@ class ExperimentBuilder(BaseBuilder):
         self._product.user = autosubmit_config_facade.get_owner_name()
         self._product.hpc = autosubmit_config_facade.get_main_platform()
         self._product.wrapper = autosubmit_config_facade.get_wrapper_type()
-        self._product.modified = (
-            autosubmit_config_facade.get_pkl_last_modified_time_as_datetime()
-        )
+        try:
+            self._product.modified = datetime.datetime.fromtimestamp(
+                autosubmit_config_facade.get_pkl_last_modified_timestamp()
+            ).isoformat()
+        except Exception:
+            self._product.modified = None
 
     @property
     def product(self) -> ExperimentModel:

@@ -1,4 +1,6 @@
+from collections import deque
 from datetime import datetime, timedelta
+from enum import Enum
 from http import HTTPStatus
 import math
 import traceback
@@ -14,16 +16,16 @@ from autosubmit_api.builders.experiment_history_builder import (
     ExperimentHistoryBuilder,
     ExperimentHistoryDirector,
 )
+from autosubmit_api.common.utils import Status
 from autosubmit_api.database.common import (
     create_main_db_conn,
     execute_with_limit_offset,
 )
-from autosubmit_api.database.db_common import update_experiment_description_owner
 from autosubmit_api.database.queries import generate_query_listexp_extended
 from autosubmit_api.logger import logger, with_log_run_times
-from autosubmit_api.views import v3
 from cas import CASClient
 from autosubmit_api import config
+from autosubmit_api.persistance.pkl_reader import PklReader
 
 
 PAGINATION_LIMIT_DEFAULT = 12
@@ -218,10 +220,7 @@ class ExperimentView(MethodView):
                 page_size = None
                 offset = None
         except:
-            return {
-                "error": True,
-                "error_message": "Bad Request: invalid params",
-            }, HTTPStatus.BAD_REQUEST
+            return {"error": {"message": "Invalid params"}}, HTTPStatus.BAD_REQUEST
 
         # Query
         statement = generate_query_listexp_extended(
@@ -321,33 +320,61 @@ class ExperimentView(MethodView):
         return response
 
 
-@with_log_run_times(logger, "EXPDESC")
-@with_auth_token(threshold=ProtectionLevels.WRITEONLY)
-def experiment_description_view(expid, user_id: Optional[str] = None):
-    """
-    Replace the description of the experiment.
-    """
-    new_description = None
-    if request.is_json:
-        body_data = request.json
-        new_description = body_data.get("description", None)
-    return (
-        update_experiment_description_owner(expid, new_description, user_id),
-        HTTPStatus.OK if user_id else HTTPStatus.UNAUTHORIZED,
-    )
+class ExperimentJobsViewOptEnum(str, Enum):
+    QUICK = "quick"
+    BASE = "base"
 
 
-@with_log_run_times(logger, "GRAPH4")
-@with_auth_token()
-def exp_graph_view(expid: str, user_id: Optional[str] = None):
-    layout = request.args.get("layout", default="standard")
-    grouped = request.args.get("grouped", default="none")
-    return v3.get_graph_format(expid, layout, grouped)
+class ExperimentJobsView(MethodView):
+    decorators = [with_auth_token(), with_log_run_times(logger, "EXPJOBS")]
 
+    def get(self, expid: str, user_id: Optional[str] = None):
+        """
+        Quickly get the experiment jobs from pickle file.
+        """
+        view = request.args.get(
+            "view", type=str, default=ExperimentJobsViewOptEnum.BASE
+        )
 
-@with_log_run_times(logger, "STAT4")
-@with_auth_token()
-def exp_stats_view(expid: str, user_id: Optional[str] = None):
-    filter_period = request.args.get("filter_period", type=int)
-    filter_type = request.args.get("filter_type", default="Any")
-    return v3.get_experiment_statistics(expid, filter_period, filter_type)
+        # Read the pkl
+        try:
+            current_content = PklReader(expid).parse_job_list()
+        except Exception as exc:
+            error_message = "Error while reading the job list"
+            logger.error(error_message + f": {exc}")
+            logger.error(traceback.print_exc())
+            return {
+                "error": {"message": error_message}
+            }, HTTPStatus.INTERNAL_SERVER_ERROR
+
+        pkl_jobs = deque()
+        for job_item in current_content:
+            resp_job = {
+                "name": job_item.name,
+                "status": Status.VALUE_TO_KEY.get(job_item.status, Status.UNKNOWN),
+            }
+
+            if view == ExperimentJobsViewOptEnum.BASE:
+                resp_job = {
+                    **resp_job,
+                    "priority": job_item.priority,
+                    "section": job_item.section,
+                    "date": (
+                        job_item.date.date().isoformat()
+                        if isinstance(job_item.date, datetime)
+                        else None
+                    ),
+                    "member": job_item.member,
+                    "chunk": job_item.chunk,
+                    "out_path_local": job_item.out_path_local,
+                    "err_path_local": job_item.err_path_local,
+                    "out_path_remote": job_item.out_path_remote,
+                    "err_path_remote": job_item.err_path_remote,
+                }
+
+            if job_item.status in [Status.COMPLETED, Status.WAITING, Status.READY]:
+                pkl_jobs.append(resp_job)
+            else:
+                pkl_jobs.appendleft(resp_job)
+
+        return {"jobs": list(pkl_jobs)}, HTTPStatus.OK
