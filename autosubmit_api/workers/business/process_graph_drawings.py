@@ -22,7 +22,9 @@ def process_active_graphs():
     try:
         with create_as_times_db_engine().connect() as conn:
             query_result = conn.execute(
-                tables.experiment_status_table.select().where()
+                tables.experiment_status_table.select().where(
+                    tables.experiment_status_table.c.status == "RUNNING"
+                )
             ).all()
 
         active_experiments: List[str] = [exp.name for exp in query_result]

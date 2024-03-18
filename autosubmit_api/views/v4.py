@@ -1,4 +1,6 @@
+from collections import deque
 from datetime import datetime, timedelta
+from enum import Enum
 from http import HTTPStatus
 import math
 import traceback
@@ -6,6 +8,7 @@ from typing import Optional
 from flask import redirect, request
 from flask.views import MethodView
 import jwt
+import requests
 from autosubmit_api.auth import ProtectionLevels, with_auth_token
 from autosubmit_api.auth.utils import validate_client
 from autosubmit_api.builders.experiment_builder import ExperimentBuilder
@@ -13,16 +16,19 @@ from autosubmit_api.builders.experiment_history_builder import (
     ExperimentHistoryBuilder,
     ExperimentHistoryDirector,
 )
+from autosubmit_api.common.utils import Status
+from autosubmit_api.database import tables
 from autosubmit_api.database.common import (
+    create_autosubmit_db_engine,
     create_main_db_conn,
     execute_with_limit_offset,
 )
-from autosubmit_api.database.db_common import update_experiment_description_owner
+from autosubmit_api.database.models import ExperimentModel
 from autosubmit_api.database.queries import generate_query_listexp_extended
 from autosubmit_api.logger import logger, with_log_run_times
-from autosubmit_api.views import v3
 from cas import CASClient
 from autosubmit_api import config
+from autosubmit_api.persistance.pkl_reader import PklReader
 
 
 PAGINATION_LIMIT_DEFAULT = 12
@@ -70,7 +76,9 @@ class CASV2Login(MethodView):
                 "user_id": user,
                 "sub": user,
                 "iat": int(datetime.now().timestamp()),
-                "exp": (datetime.utcnow() + timedelta(seconds=config.JWT_EXP_DELTA_SECONDS)),
+                "exp": (
+                    datetime.now() + timedelta(seconds=config.JWT_EXP_DELTA_SECONDS)
+                ),
             }
             jwt_token = jwt.encode(payload, config.JWT_SECRET, config.JWT_ALGORITHM)
             return {
@@ -81,6 +89,103 @@ class CASV2Login(MethodView):
             }, HTTPStatus.OK
 
 
+class GithubOauth2Login(MethodView):
+    decorators = [with_log_run_times(logger, "GHOAUTH2LOGIN")]
+
+    def get(self):
+        """
+        Authenticate and authorize user using a cofigured GitHub Oauth app.
+        The authorization in done by verifying users membership to either a Github Team
+        or Organization.
+        """
+
+        code = request.args.get("code")
+
+        if not code:
+            return {
+                "authenticated": False,
+                "user": None,
+                "token": None,
+                "message": "Can't verify user",
+            }, HTTPStatus.UNAUTHORIZED
+
+        resp_obj: dict = requests.post(
+            "https://github.com/login/oauth/access_token",
+            data={
+                "client_id": config.GITHUB_OAUTH_CLIENT_ID,
+                "client_secret": config.GITHUB_OAUTH_CLIENT_SECRET,
+                "code": code,
+            },
+            headers={"Accept": "application/json"},
+        ).json()
+        access_token = resp_obj.get("access_token")
+
+        user_info: dict = requests.get(
+            "https://api.github.com/user",
+            headers={"Authorization": f"Bearer {access_token}"},
+        ).json()
+        username = user_info.get("login")
+
+        if not username:
+            return {
+                "authenticated": False,
+                "user": None,
+                "token": None,
+                "message": "Couldn't find user on GitHub",
+            }, HTTPStatus.UNAUTHORIZED
+
+        # Whitelist organization team
+        if (
+            config.GITHUB_OAUTH_WHITELIST_ORGANIZATION
+            and config.GITHUB_OAUTH_WHITELIST_TEAM
+        ):
+            org_resp = requests.get(
+                f"https://api.github.com/orgs/{config.GITHUB_OAUTH_WHITELIST_ORGANIZATION}/teams/{config.GITHUB_OAUTH_WHITELIST_TEAM}/memberships/{username}",
+                headers={"Authorization": f"Bearer {access_token}"},
+            )
+            membership: dict = org_resp.json()
+            is_member = (
+                org_resp.status_code == 200 and membership.get("state") == "active"
+            )  # https://docs.github.com/en/rest/teams/members?apiVersion=2022-11-28#get-team-membership-for-a-user
+        elif (
+            config.GITHUB_OAUTH_WHITELIST_ORGANIZATION
+        ):  # Whitelist all organization (no team)
+            org_resp = requests.get(
+                f"https://api.github.com/orgs/{config.GITHUB_OAUTH_WHITELIST_ORGANIZATION}/members/{username}",
+                headers={"Authorization": f"Bearer {access_token}"},
+            )
+            is_member = (
+                org_resp.status_code == 204
+            )  # https://docs.github.com/en/rest/orgs/members?apiVersion=2022-11-28#check-organization-membership-for-a-user
+        else:  # No authorization check
+            is_member = True
+
+        # Login successful
+        if is_member:
+            payload = {
+                "user_id": username,
+                "sub": username,
+                "iat": int(datetime.now().timestamp()),
+                "exp": (
+                    datetime.now() + timedelta(seconds=config.JWT_EXP_DELTA_SECONDS)
+                ),
+            }
+            jwt_token = jwt.encode(payload, config.JWT_SECRET, config.JWT_ALGORITHM)
+            return {
+                "authenticated": True,
+                "user": username,
+                "token": jwt_token,
+                "message": "Token generated",
+            }, HTTPStatus.OK
+        else:  # UNAUTHORIZED
+            return {
+                "authenticated": False,
+                "user": None,
+                "token": None,
+                "message": "User is not member of organization or team",
+            }, HTTPStatus.UNAUTHORIZED
+
+
 class AuthJWTVerify(MethodView):
     decorators = [
         with_auth_token(threshold=ProtectionLevels.NONE, response_on_fail=False),
@@ -88,10 +193,13 @@ class AuthJWTVerify(MethodView):
     ]
 
     def get(self, user_id: Optional[str] = None):
+        """
+        Verify JWT endpoint.
+        """
         return {
             "authenticated": True if user_id else False,
             "user": user_id,
-        }, HTTPStatus.OK if user_id else HTTPStatus.UNAUTHORIZED
+        }, (HTTPStatus.OK if user_id else HTTPStatus.UNAUTHORIZED)
 
 
 class ExperimentView(MethodView):
@@ -124,10 +232,7 @@ class ExperimentView(MethodView):
                 page_size = None
                 offset = None
         except:
-            return {
-                "error": True,
-                "error_message": "Bad Request: invalid params",
-            }, HTTPStatus.BAD_REQUEST
+            return {"error": {"message": "Invalid params"}}, HTTPStatus.BAD_REQUEST
 
         # Query
         statement = generate_query_listexp_extended(
@@ -178,10 +283,7 @@ class ExperimentView(MethodView):
                     .build_reader_experiment_history()
                     .manager.get_experiment_run_dc_with_max_id()
                 )
-                if (
-                    current_run
-                    and current_run.total > 0
-                ):
+                if current_run and current_run.total > 0:
                     completed = current_run.completed
                     total = current_run.total
                     submitted = current_run.submitted
@@ -203,7 +305,8 @@ class ExperimentView(MethodView):
                     "description": exp.description,
                     "hpc": exp.hpc,
                     "version": exp.autosubmit_version,
-                    "wrapper": exp.wrapper,
+                    # "wrapper": exp.wrapper,
+                    "created": exp.created,
                     "modified": exp.modified,
                     "status": exp.status if exp.status else "NOT RUNNING",
                     "completed": completed,
@@ -230,33 +333,75 @@ class ExperimentView(MethodView):
         return response
 
 
-@with_log_run_times(logger, "EXPDESC")
-@with_auth_token(threshold=ProtectionLevels.WRITEONLY)
-def experiment_description_view(expid, user_id: Optional[str] = None):
-    """
-    Replace the description of the experiment.
-    """
-    new_description = None
-    if request.is_json:
-        body_data = request.json
-        new_description = body_data.get("description", None)
-    return (
-        update_experiment_description_owner(expid, new_description, user_id),
-        HTTPStatus.OK if user_id else HTTPStatus.UNAUTHORIZED,
-    )
+class ExperimentDetailView(MethodView):
+    decorators = [with_auth_token(), with_log_run_times(logger, "EXPDETAIL")]
+
+    def get(self, expid: str, user_id: Optional[str] = None):
+        """
+        Get details of an experiment
+        """
+        exp_builder = ExperimentBuilder()
+        exp_builder.produce_base(expid)
+        return exp_builder.product.model_dump(include=tables.experiment_table.c.keys())
 
 
-@with_log_run_times(logger, "GRAPH4")
-@with_auth_token()
-def exp_graph_view(expid: str, user_id: Optional[str] = None):
-    layout = request.args.get("layout", default="standard")
-    grouped = request.args.get("grouped", default="none")
-    return v3.get_graph_format(expid, layout, grouped)
+class ExperimentJobsViewOptEnum(str, Enum):
+    QUICK = "quick"
+    BASE = "base"
 
 
-@with_log_run_times(logger, "STAT4")
-@with_auth_token()
-def exp_stats_view(expid: str, user_id: Optional[str] = None):
-    filter_period = request.args.get("filter_period", type=int)
-    filter_type = request.args.get("filter_type", default="Any")
-    return v3.get_experiment_statistics(expid, filter_period, filter_type)
+class ExperimentJobsView(MethodView):
+    decorators = [with_auth_token(), with_log_run_times(logger, "EXPJOBS")]
+
+    def get(self, expid: str, user_id: Optional[str] = None):
+        """
+        Get the experiment jobs from pickle file.
+        BASE view returns base content of the pkl file.
+        QUICK view returns a reduced payload with just the name and status of the jobs.
+        """
+        view = request.args.get(
+            "view", type=str, default=ExperimentJobsViewOptEnum.BASE
+        )
+
+        # Read the pkl
+        try:
+            current_content = PklReader(expid).parse_job_list()
+        except Exception as exc:
+            error_message = "Error while reading the job list"
+            logger.error(error_message + f": {exc}")
+            logger.error(traceback.print_exc())
+            return {
+                "error": {"message": error_message}
+            }, HTTPStatus.INTERNAL_SERVER_ERROR
+
+        pkl_jobs = deque()
+        for job_item in current_content:
+            resp_job = {
+                "name": job_item.name,
+                "status": Status.VALUE_TO_KEY.get(job_item.status, Status.UNKNOWN),
+            }
+
+            if view == ExperimentJobsViewOptEnum.BASE:
+                resp_job = {
+                    **resp_job,
+                    "priority": job_item.priority,
+                    "section": job_item.section,
+                    "date": (
+                        job_item.date.date().isoformat()
+                        if isinstance(job_item.date, datetime)
+                        else None
+                    ),
+                    "member": job_item.member,
+                    "chunk": job_item.chunk,
+                    "out_path_local": job_item.out_path_local,
+                    "err_path_local": job_item.err_path_local,
+                    "out_path_remote": job_item.out_path_remote,
+                    "err_path_remote": job_item.err_path_remote,
+                }
+
+            if job_item.status in [Status.COMPLETED, Status.WAITING, Status.READY]:
+                pkl_jobs.append(resp_job)
+            else:
+                pkl_jobs.appendleft(resp_job)
+
+        return {"jobs": list(pkl_jobs)}, HTTPStatus.OK

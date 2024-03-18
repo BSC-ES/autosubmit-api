@@ -1,5 +1,12 @@
 # CHANGELOG
 
+### Pre-release v4.0.0b5 - Release date: 2024-03-18
+
+* Fixed the graph background task to correctly select the active experiments
+* Added support to Github Oauth Apps
+* Fixed details background task multiple insert
+* Included `/v4/experiments/{expid}` and `/v4/experiments/{expid}/jobs` endpoints
+
 ### Pre-release v4.0.0b4 - Release date: 2024-02-23
 
 * The background task that updates the experiment status has been refactored. Now, it keeps the records of all the experiments

@@ -1,12 +1,17 @@
-from typing import Optional
+import datetime
+from typing import Any, Optional
 from pydantic import BaseModel
+from autosubmit_api.common import utils as common_utils
 
 
-class ExperimentModel(BaseModel):
+class BaseExperimentModel(BaseModel):
     id: int
     name: str
     description: str
     autosubmit_version: Optional[str] = None
+
+
+class ExperimentModel(BaseExperimentModel):
     user: Optional[str] = None
     created: Optional[str] = None
     model: Optional[str] = None
@@ -17,3 +22,24 @@ class ExperimentModel(BaseModel):
     total_jobs: Optional[int] = None
     completed_jobs: Optional[int] = None
     wrapper: Optional[str] = None
+
+
+class BaseJobModel(BaseModel):
+    name: str
+    status: Optional[int] = common_utils.Status.UNKNOWN
+
+
+class PklJobModel(BaseJobModel):
+    name: str
+    id: Any
+    status: Optional[int] = common_utils.Status.UNKNOWN
+    priority: int
+    section: str
+    date: Optional[datetime.datetime]
+    member: Optional[str]
+    chunk: Optional[int]
+    out_path_local: str
+    err_path_local: str
+    out_path_remote: str
+    err_path_remote: str
+    wrapper_type: Optional[str]
