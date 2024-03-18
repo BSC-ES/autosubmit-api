@@ -449,6 +449,9 @@
     },
     "/v4/experiments/{expid}": {
       "get": {
+        "tags": [
+          "v4"
+        ],
         "summary": "Get experiment info",
         "operationId": "get-v4-experiments-expid",
         "parameters": [
@@ -466,6 +469,9 @@
     },
     "/v4/experiments/{expid}/jobs": {
       "get": {
+        "tags": [
+          "v4"
+        ],
         "summary": "List experiment jobs",
         "operationId": "get-v4-experiments-expid-jobs",
         "parameters": [
@@ -653,6 +659,9 @@
     },
     "/v4/auth/oauth2/github/login": {
       "get": {
+        "tags": [
+          "v4"
+        ],
         "summary": "GitHub Oauth2 App Login",
         "operationId": "get-v4-auth-oauth2-github-login",
         "parameters": [

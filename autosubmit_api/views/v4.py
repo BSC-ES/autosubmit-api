@@ -17,10 +17,13 @@ from autosubmit_api.builders.experiment_history_builder import (
     ExperimentHistoryDirector,
 )
 from autosubmit_api.common.utils import Status
+from autosubmit_api.database import tables
 from autosubmit_api.database.common import (
+    create_autosubmit_db_engine,
     create_main_db_conn,
     execute_with_limit_offset,
 )
+from autosubmit_api.database.models import ExperimentModel
 from autosubmit_api.database.queries import generate_query_listexp_extended
 from autosubmit_api.logger import logger, with_log_run_times
 from cas import CASClient
@@ -74,7 +77,7 @@ class CASV2Login(MethodView):
                 "sub": user,
                 "iat": int(datetime.now().timestamp()),
                 "exp": (
-                    datetime.utcnow() + timedelta(seconds=config.JWT_EXP_DELTA_SECONDS)
+                    datetime.now() + timedelta(seconds=config.JWT_EXP_DELTA_SECONDS)
                 ),
             }
             jwt_token = jwt.encode(payload, config.JWT_SECRET, config.JWT_ALGORITHM)
@@ -90,6 +93,12 @@ class GithubOauth2Login(MethodView):
     decorators = [with_log_run_times(logger, "GHOAUTH2LOGIN")]
 
     def get(self):
+        """
+        Authenticate and authorize user using a cofigured GitHub Oauth app.
+        The authorization in done by verifying users membership to either a Github Team
+        or Organization.
+        """
+
         code = request.args.get("code")
 
         if not code:
@@ -148,7 +157,7 @@ class GithubOauth2Login(MethodView):
             is_member = (
                 org_resp.status_code == 204
             )  # https://docs.github.com/en/rest/orgs/members?apiVersion=2022-11-28#check-organization-membership-for-a-user
-        else:
+        else:  # No authorization check
             is_member = True
 
         # Login successful
@@ -158,7 +167,7 @@ class GithubOauth2Login(MethodView):
                 "sub": username,
                 "iat": int(datetime.now().timestamp()),
                 "exp": (
-                    datetime.utcnow() + timedelta(seconds=config.JWT_EXP_DELTA_SECONDS)
+                    datetime.now() + timedelta(seconds=config.JWT_EXP_DELTA_SECONDS)
                 ),
             }
             jwt_token = jwt.encode(payload, config.JWT_SECRET, config.JWT_ALGORITHM)
@@ -184,6 +193,9 @@ class AuthJWTVerify(MethodView):
     ]
 
     def get(self, user_id: Optional[str] = None):
+        """
+        Verify JWT endpoint.
+        """
         return {
             "authenticated": True if user_id else False,
             "user": user_id,
@@ -293,7 +305,8 @@ class ExperimentView(MethodView):
                     "description": exp.description,
                     "hpc": exp.hpc,
                     "version": exp.autosubmit_version,
-                    "wrapper": exp.wrapper,
+                    # "wrapper": exp.wrapper,
+                    "created": exp.created,
                     "modified": exp.modified,
                     "status": exp.status if exp.status else "NOT RUNNING",
                     "completed": completed,
@@ -320,6 +333,18 @@ class ExperimentView(MethodView):
         return response
 
 
+class ExperimentDetailView(MethodView):
+    decorators = [with_auth_token(), with_log_run_times(logger, "EXPDETAIL")]
+
+    def get(self, expid: str, user_id: Optional[str] = None):
+        """
+        Get details of an experiment
+        """
+        exp_builder = ExperimentBuilder()
+        exp_builder.produce_base(expid)
+        return exp_builder.product.model_dump(include=tables.experiment_table.c.keys())
+
+
 class ExperimentJobsViewOptEnum(str, Enum):
     QUICK = "quick"
     BASE = "base"
@@ -330,7 +355,9 @@ class ExperimentJobsView(MethodView):
 
     def get(self, expid: str, user_id: Optional[str] = None):
         """
-        Quickly get the experiment jobs from pickle file.
+        Get the experiment jobs from pickle file.
+        BASE view returns base content of the pkl file.
+        QUICK view returns a reduced payload with just the name and status of the jobs.
         """
         view = request.args.get(
             "view", type=str, default=ExperimentJobsViewOptEnum.BASE

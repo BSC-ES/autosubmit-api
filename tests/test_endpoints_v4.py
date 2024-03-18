@@ -6,7 +6,7 @@ from flask.testing import FlaskClient
 import jwt
 import pytest
 from autosubmit_api import config
-from autosubmit_api.views.v4 import PAGINATION_LIMIT_DEFAULT
+from autosubmit_api.views.v4 import PAGINATION_LIMIT_DEFAULT, ExperimentJobsViewOptEnum
 from tests.custom_utils import custom_return_value
 
 
@@ -106,3 +106,59 @@ class TestExperimentList:
         )
         assert resp_obj["pagination"]["page"] == 1
         assert resp_obj["pagination"]["page"] == resp_obj["pagination"]["total_pages"]
+
+
+class TestExperimentDetail:
+    endpoint = "/v4/experiments/{expid}"
+
+    def test_detail(self, fixture_client: FlaskClient):
+        expid = "a003"
+        response = fixture_client.get(self.endpoint.format(expid=expid))
+        resp_obj: dict = response.get_json()
+
+        assert resp_obj["id"] == 1
+        assert resp_obj["name"] == expid
+        assert (
+            isinstance(resp_obj["description"], str)
+            and len(resp_obj["description"]) > 0
+        )
+        assert (
+            isinstance(resp_obj["autosubmit_version"], str)
+            and len(resp_obj["autosubmit_version"]) > 0
+        )
+
+
+class TestExperimentJobs:
+    endpoint = "/v4/experiments/{expid}/jobs"
+
+    def test_quick(self, fixture_client: FlaskClient):
+        expid = "a003"
+
+        response = fixture_client.get(
+            self.endpoint.format(expid=expid),
+            query_string={"view": ExperimentJobsViewOptEnum.QUICK.value},
+        )
+        resp_obj: dict = response.get_json()
+
+        assert len(resp_obj["jobs"]) == 8
+
+        for job in resp_obj["jobs"]:
+            assert isinstance(job, dict) and len(job.keys()) == 2
+            assert isinstance(job["name"], str) and job["name"].startswith(expid)
+            assert isinstance(job["status"], str)
+
+    def test_base(self, fixture_client: FlaskClient):
+        expid = "a003"
+
+        response = fixture_client.get(
+            self.endpoint.format(expid=expid),
+            query_string={"view": ExperimentJobsViewOptEnum.BASE.value},
+        )
+        resp_obj: dict = response.get_json()
+
+        assert len(resp_obj["jobs"]) == 8
+
+        for job in resp_obj["jobs"]:
+            assert isinstance(job, dict) and len(job.keys()) > 2
+            assert isinstance(job["name"], str) and job["name"].startswith(expid)
+            assert isinstance(job["status"], str)

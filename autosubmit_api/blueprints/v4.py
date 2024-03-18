@@ -35,6 +35,11 @@ def create_v4_blueprint():
     )
 
     blueprint.add_url_rule(
+        "/experiments/<string:expid>",
+        view_func=v4_views.ExperimentDetailView.as_view("ExperimentDetailView"),
+    )
+
+    blueprint.add_url_rule(
         "/experiments/<string:expid>/jobs",
         view_func=v4_views.ExperimentJobsView.as_view("ExperimentJobsView"),
     )

@@ -13,10 +13,17 @@ from autosubmit_api.database.models import ExperimentModel
 
 
 class ExperimentBuilder(BaseBuilder):
+
     def produce_base_from_dict(self, obj: dict):
-        self._product = ExperimentModel.model_validate(obj)
+        """
+        Produce the Experiment from a dictionary, validating it first.
+        """
+        self._product: ExperimentModel = ExperimentModel.model_validate(obj)
 
     def produce_base(self, expid):
+        """
+        Produce basic information from the main experiment table
+        """
         with create_autosubmit_db_engine().connect() as conn:
             result = conn.execute(
                 tables.experiment_table.select().where(
@@ -33,6 +40,9 @@ class ExperimentBuilder(BaseBuilder):
         )
 
     def produce_details(self):
+        """
+        Produce data from the details table
+        """
         exp_id = self._product.id
         with create_autosubmit_db_engine().connect() as conn:
             result = conn.execute(
@@ -50,6 +60,9 @@ class ExperimentBuilder(BaseBuilder):
             self._product.hpc = result.hpc
 
     def produce_config_data(self):
+        """
+        Produce data from the files
+        """
         expid = self._product.name
         autosubmit_config_facade = ConfigurationFacadeDirector(
             AutosubmitConfigurationFacadeBuilder(expid)
@@ -71,4 +84,7 @@ class ExperimentBuilder(BaseBuilder):
 
     @property
     def product(self) -> ExperimentModel:
+        """
+        Returns the Experiment final product.
+        """
         return super().product
