@@ -511,6 +511,27 @@
                       }
                     }
                   }
+                },
+                "examples": {
+                  "Example 1": {
+                    "value": {
+                      "jobs": [
+                        {
+                          "name": "a008_20200120_fc0_2_SIM",
+                          "status": "COMPLETED",
+                          "priority": 4,
+                          "section": "SIM",
+                          "date": "2020-01-20T00:00:00",
+                          "member": "fc0",
+                          "chunk": 2,
+                          "out_path_local": "a008_20200120_fc0_2_SIM.20231027153508.out",
+                          "err_path_local": "a008_20200120_fc0_2_SIM.20231027153508.err",
+                          "out_path_remote": "a008_20200120_fc0_2_SIM.20231027153508.out",
+                          "err_path_remote": "a008_20200120_fc0_2_SIM.20231027153508.err"
+                        }
+                      ]
+                    }
+                  }
                 }
               }
             }
@@ -551,6 +572,14 @@
                       "nullable": true
                     }
                   }
+                },
+                "examples": {
+                  "Example 1": {
+                    "value": {
+                      "authenticated": true,
+                      "user": "username"
+                    }
+                  }
                 }
               }
             }
@@ -568,6 +597,14 @@
                     "user": {
                       "type": "string",
                       "nullable": true
+                    }
+                  }
+                },
+                "examples": {
+                  "Example 1": {
+                    "value": {
+                      "authenticated": false,
+                      "user": null
                     }
                   }
                 }
@@ -623,6 +660,16 @@
                       "type": "string"
                     }
                   }
+                },
+                "examples": {
+                  "Example 1": {
+                    "value": {
+                      "authenticated": true,
+                      "message": "Token generated",
+                      "token": "...",
+                      "user": "username"
+                    }
+                  }
                 }
               }
             }
@@ -644,10 +691,22 @@
                       "type": "string"
                     },
                     "token": {
-                      "type": "string"
+                      "type": "string",
+                      "nullable": true
                     },
                     "user": {
-                      "type": "string"
+                      "type": "string",
+                      "nullable": true
+                    }
+                  }
+                },
+                "examples": {
+                  "Example 1": {
+                    "value": {
+                      "authenticated": false,
+                      "message": "Unauthorized",
+                      "token": null,
+                      "user": null
                     }
                   }
                 }
@@ -695,6 +754,16 @@
                       "type": "string"
                     }
                   }
+                },
+                "examples": {
+                  "Example 1": {
+                    "value": {
+                      "authenticated": true,
+                      "message": "Token generated",
+                      "token": "...",
+                      "user": "username"
+                    }
+                  }
                 }
               }
             }
@@ -717,6 +786,16 @@
                     },
                     "user": {
                       "type": "string"
+                    }
+                  }
+                },
+                "examples": {
+                  "Example 1": {
+                    "value": {
+                      "authenticated": false,
+                      "message": "Unauthorized",
+                      "token": null,
+                      "user": null
                     }
                   }
                 }
