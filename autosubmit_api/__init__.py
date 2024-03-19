@@ -17,6 +17,6 @@
 # You should have received a copy of the GNU General Public License
 # along with Autosubmit.  If not, see <http://www.gnu.org/licenses/>.
 
-__version__ = "4.0.0b5"
+__version__ = "4.0.0b6"
 __author__ = "Luiggi Tenorio, Bruno P. Kinoshita, Cristian Gutiérrez, Julian Berlin, Wilmer Uruchi"
 __credits__ = "Barcelona Supercomputing Center"

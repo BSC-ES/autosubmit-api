@@ -1,5 +1,7 @@
 # CHANGELOG
 
+### Pre-release v4.0.0b6 - Release date: TBD
+
 ### Pre-release v4.0.0b5 - Release date: 2024-03-18
 
 * Fixed the graph background task to correctly select the active experiments
