@@ -16,15 +16,13 @@ DB_FILES_STATUS = os.path.join(APIBasicConfig.LOCAL_ROOT_DIR, "as_metadata", "te
 def insert_archive_status(status, alatency, abandwidth, clatency, cbandwidth, rtime):
 
     try:
-        conn = create_connection(DB_FILES_STATUS)
-        sql = ''' INSERT INTO archive_status(status, avg_latency, avg_bandwidth, current_latency, current_bandwidth, response_time, modified ) VALUES(?,?,?,?,?,?,?)'''
-        # print(row_content)
-        cur = conn.cursor()
-        cur.execute(sql, (int(status), alatency, abandwidth, clatency,
-                          cbandwidth, rtime, datetime.today().strftime('%Y-%m-%d-%H:%M:%S')))
-        # print(cur)
-        conn.commit()
-        return cur.lastrowid
+        with create_connection(DB_FILES_STATUS) as conn:
+            sql = ''' INSERT INTO archive_status(status, avg_latency, avg_bandwidth, current_latency, current_bandwidth, response_time, modified ) VALUES(?,?,?,?,?,?,?)'''
+            cur = conn.cursor()
+            cur.execute(sql, (int(status), alatency, abandwidth, clatency,
+                              cbandwidth, rtime, datetime.today().strftime('%Y-%m-%d-%H:%M:%S')))
+            conn.commit()
+            return cur.lastrowid
     except Exception as exp:
         print((traceback.format_exc()))
         print(("Error on Insert : " + str(exp)))
@@ -37,14 +35,13 @@ def get_last_read_archive_status():
     :rtype: 7-tuple
     """
     try:
-        conn = create_connection(DB_FILES_STATUS)
-        sql = "SELECT status, avg_latency, avg_bandwidth, current_latency, current_bandwidth, response_time, modified FROM archive_status order by rowid DESC LIMIT 1"
-        cur = conn.cursor()
-        cur.execute(sql)
-        rows = cur.fetchall()
-        status, alatency, abandwidth, clatency, cbandwidth, rtime, date = rows[0]
-        return (status, alatency, abandwidth, clatency, cbandwidth, rtime, date)
-        # print(rows)
+        with create_connection(DB_FILES_STATUS) as conn:
+            sql = "SELECT status, avg_latency, avg_bandwidth, current_latency, current_bandwidth, response_time, modified FROM archive_status order by rowid DESC LIMIT 1"
+            cur = conn.cursor()
+            cur.execute(sql)
+            rows = cur.fetchall()
+            status, alatency, abandwidth, clatency, cbandwidth, rtime, date = rows[0]
+            return (status, alatency, abandwidth, clatency, cbandwidth, rtime, date)
     except Exception as exp:
         print((traceback.format_exc()))
         print(("Error on Get Last : " + str(exp)))
@@ -102,14 +99,14 @@ def _get_exp_status():
     :rtype: 4-tuple (int, str, str, int)
     """
     try:
-        conn = create_connection(os.path.join(APIBasicConfig.DB_DIR, APIBasicConfig.AS_TIMES_DB))
-        conn.text_factory = str
-        cur = conn.cursor()
-        cur.execute(
-            "SELECT exp_id, name, status, seconds_diff FROM experiment_status")
-        rows = cur.fetchall()
-        return rows
-    except Exception as exp:
+        with create_connection(os.path.join(APIBasicConfig.DB_DIR, APIBasicConfig.AS_TIMES_DB)) as conn:
+            conn.text_factory = str
+            cur = conn.cursor()
+            cur.execute(
+                "SELECT exp_id, name, status, seconds_diff FROM experiment_status")
+            rows = cur.fetchall()
+            return rows
+    except Exception:
         print((traceback.format_exc()))
         return dict()
 
@@ -121,19 +118,14 @@ def _get_specific_exp_status(expid):
     :rtype: 4-tuple (int, str, str, int)
     """
     try:
-        # print("Honk")
-        conn = create_connection(os.path.join(APIBasicConfig.DB_DIR, APIBasicConfig.AS_TIMES_DB))
-        cur = conn.cursor()
-        cur.execute(
-            "SELECT exp_id, name, status, seconds_diff FROM experiment_status WHERE name=?", (expid,))
-        row = cur.fetchone()
-        if row == None:
-            return (0, expid, "NOT RUNNING", 0)
-        # print(row)
-        return row
+        with create_connection(os.path.join(APIBasicConfig.DB_DIR, APIBasicConfig.AS_TIMES_DB)) as conn:
+            cur = conn.cursor()
+            cur.execute(
+                "SELECT exp_id, name, status, seconds_diff FROM experiment_status WHERE name=?", (expid,))
+            row = cur.fetchone()
+            if row == None:
+                return (0, expid, "NOT RUNNING", 0)
+            return row
     except Exception as exp:
         print((traceback.format_exc()))
         return (0, expid, "NOT RUNNING", 0)
-
-
-# UPDATES
