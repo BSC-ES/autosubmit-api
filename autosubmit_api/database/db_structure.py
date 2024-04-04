@@ -24,7 +24,6 @@ def get_structure(expid, structures_path):
                 os.open(db_structure_path, os.O_WRONLY | os.O_CREAT, 0o777)
                 # open(db_structure_path, "w")
             # print(db_structure_path)
-            conn = create_connection(db_structure_path)
             create_table_query = textwrap.dedent(
                 '''CREATE TABLE
             IF NOT EXISTS experiment_structure (
@@ -32,7 +31,8 @@ def get_structure(expid, structures_path):
             e_to text NOT NULL,
             UNIQUE(e_from,e_to)
             );''')
-            create_table(conn, create_table_query)
+            with create_connection(db_structure_path) as conn:
+                create_table(conn, create_table_query)
             current_table = _get_exp_structure(db_structure_path)
             # print("Current table: ")
             # print(current_table)
@@ -92,12 +92,12 @@ def _get_exp_structure(path):
     :rtype: 4-tuple (int, str, str, int)
     """
     try:
-        conn = create_connection(path)
-        conn.text_factory = str
-        cur = conn.cursor()
-        cur.execute(
-            "SELECT e_from, e_to FROM experiment_structure")
-        rows = cur.fetchall()
+        with create_connection(path) as conn:
+            conn.text_factory = str
+            cur = conn.cursor()
+            cur.execute(
+                "SELECT e_from, e_to FROM experiment_structure")
+            rows = cur.fetchall()
         return rows
     except Exception as exp:
         print((traceback.format_exc()))

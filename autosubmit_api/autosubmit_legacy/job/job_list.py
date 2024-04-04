@@ -37,7 +37,6 @@ from autosubmit_api.components.jobs import utils as JUtils
 from autosubmit_api.monitor.monitor import Monitor
 from autosubmit_api.common.utils import Status
 from bscearth.utils.date import date2str, parse_date
-from autosubmit_api.experiment import common_db_requests as DbRequests
 from autosubmit_api.autosubmit_legacy.job.job_package_persistence import JobPackagePersistence
 # from autosubmit_legacy.job.tree import Tree
 from autosubmit_api.database import db_structure as DbStructure
@@ -590,11 +589,6 @@ class JobList:
         path_local_root = basic_config.LOCAL_ROOT_DIR
         path_structure = basic_config.STRUCTURES_DIR
         db_file = os.path.join(path_local_root, basic_config.DB_FILE)
-        conn = DbRequests.create_connection(db_file)
-        # job_data = None
-        # Job information from worker database
-        # job_times = dict() # REMOVED: DbRequests.get_times_detail_by_expid(conn, expid)
-        conn.close()
         # Job information from job historic data
         # print("Get current job data structure...")
         experiment_history = ExperimentHistoryDirector(ExperimentHistoryBuilder(expid)).build_reader_experiment_history()
