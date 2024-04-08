@@ -382,6 +382,7 @@ def get_experiment_by_id(expid):
     cursor.execute(query)
     headers = get_headers_sqlite(cursor)
     row = cursor.fetchone()
+    close_conn(conn, cursor)
     if row is not None:
         obj = map_row_result_to_dict_sqlite(row, headers)
         result['id'] = obj["id"]
