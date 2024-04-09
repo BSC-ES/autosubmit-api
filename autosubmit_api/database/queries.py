@@ -9,6 +9,7 @@ def generate_query_listexp_extended(
     only_active: bool = False,
     owner: str = None,
     exp_type: str = None,
+    autosubmit_version: str = None,
     order_by: str = None,
     order_desc: bool = False,
 ):
@@ -61,7 +62,11 @@ def generate_query_listexp_extended(
         filter_stmts.append(tables.experiment_table.c.name.not_like(f"t%"))
         filter_stmts.append(tables.experiment_table.c.name.not_like(f"o%"))
 
-    # logger.debug(str(filter_stmts))
+    if autosubmit_version:
+        filter_stmts.append(
+            tables.experiment_table.c.autosubmit_version == autosubmit_version
+        )
+
     statement = statement.where(*filter_stmts)
 
     # Order by

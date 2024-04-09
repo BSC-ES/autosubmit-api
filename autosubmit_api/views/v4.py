@@ -217,6 +217,7 @@ class ExperimentView(MethodView):
         only_active = request.args.get("only_active") == "true"
         owner = request.args.get("owner")
         exp_type = request.args.get("exp_type")
+        autosubmit_version = request.args.get("autosubmit_version")
 
         order_by = request.args.get("order_by")
         order_desc = request.args.get("order_desc") == "true"
@@ -240,6 +241,7 @@ class ExperimentView(MethodView):
             only_active=only_active,
             owner=owner,
             exp_type=exp_type,
+            autosubmit_version=autosubmit_version,
             order_by=order_by,
             order_desc=order_desc,
         )

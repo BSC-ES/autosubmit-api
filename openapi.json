@@ -218,6 +218,13 @@
             }
           },
           {
+            "name": "autosubmit_version",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
             "name": "order_by",
             "in": "query",
             "schema": {
