@@ -250,6 +250,7 @@ class GraphRepresentation(object):
         "platform_name": job.platform,
         "chunk": job.chunk,
         "package": job.package,
+        "wrapper": job.package,
         "member": job.member,
         "date": ini_date,
         "date_plus": end_date,

@@ -5,6 +5,7 @@ from sqlalchemy.orm import DeclarativeBase, mapped_column, Mapped
 metadata_obj = MetaData()
 
 
+## SQLAlchemy ORM tables
 class BaseTable(DeclarativeBase):
     metadata = metadata_obj
 
@@ -48,6 +49,16 @@ class GraphDataTable(BaseTable):
     y: Mapped[int] = mapped_column(Integer, nullable=False)
 
 
+class JobPackageTable(BaseTable):
+    __tablename__ = "job_package"
+
+    exp_id: Mapped[str] = mapped_column(Text)
+    package_name: Mapped[str] = mapped_column(Text, primary_key=True)
+    job_name: Mapped[str] = mapped_column(Text, primary_key=True)
+
+
+## SQLAlchemy Core tables
+
 # MAIN_DB TABLES
 experiment_table: Table = ExperimentTable.__table__
 details_table: Table = DetailsTable.__table__
@@ -57,3 +68,6 @@ experiment_status_table: Table = ExperimentStatusTable.__table__
 
 # Graph Data TABLES
 graph_data_table: Table = GraphDataTable.__table__
+
+# Job package TABLES
+job_package_table: Table = JobPackageTable.__table__

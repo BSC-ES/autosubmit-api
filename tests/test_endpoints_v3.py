@@ -176,6 +176,23 @@ class TestTree:
         for job in resp_obj["jobs"]:
             assert job["id"][:4] == expid
 
+    def test_wrappers(self, fixture_client: FlaskClient):
+        expid = "a6zj"
+        response = fixture_client.get(self.endpoint.format(expid=expid))
+        resp_obj: dict = response.get_json()
+
+        assert len(resp_obj["jobs"]) == 10
+
+        for job in resp_obj["jobs"]:
+            if job["section"] == "SIM":
+                assert isinstance(job["wrapper"], str) and len(job["wrapper"]) > 0
+            else:
+                assert job["wrapper"] == None
+
+        assert (
+            resp_obj["tree"][2]["title"] == "Wrappers" and resp_obj["tree"][2]["folder"]
+        )
+
 
 class TestRunsList:
     endpoint = "/v3/runs/{expid}"
@@ -309,6 +326,26 @@ class TestGraph:
         assert resp_obj["error_message"] == ""
         assert resp_obj["error"] == False
         assert resp_obj["total_jobs"] == len(resp_obj["nodes"])
+
+    def test_wrappers(self, fixture_client: FlaskClient):
+        expid = "a6zj"
+        random_user = str(uuid4())
+        response = fixture_client.get(
+            self.endpoint.format(expid=expid, graph_type="standard", grouped="none"),
+            query_string={"loggedUser": random_user},
+        )
+        resp_obj: dict = response.get_json()
+
+        assert len(resp_obj["nodes"]) == 10
+
+        for node in resp_obj["nodes"]:
+            if node["section"] == "SIM":
+                assert isinstance(node["wrapper"], str) and len(node["wrapper"]) > 0
+            else:
+                assert node["wrapper"] == None
+
+        assert "packages" in list(resp_obj.keys())
+        assert len(resp_obj["packages"].keys()) > 0
 
 
 class TestExpCount:
@@ -525,6 +562,7 @@ class TestSearchExpid:
 
         assert isinstance(resp_obj["experiment"], list)
         assert len(resp_obj["experiment"]) > 0
+
 
 class TestRunningExps:
     endpoint = "/v3/running/"
