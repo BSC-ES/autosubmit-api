@@ -11,6 +11,10 @@ class BaseTable(DeclarativeBase):
 
 
 class ExperimentTable(BaseTable):
+    """
+    Is the main table, populated by Autosubmit. Should be read-only by the API.
+    """
+
     __tablename__ = "experiment"
 
     id: Mapped[int] = mapped_column(Integer, nullable=False, primary_key=True)
@@ -20,6 +24,10 @@ class ExperimentTable(BaseTable):
 
 
 class DetailsTable(BaseTable):
+    """
+    Stores extra information. It is populated by the API.
+    """
+
     __tablename__ = "details"
 
     exp_id: Mapped[int] = mapped_column(Integer, primary_key=True)
@@ -31,6 +39,10 @@ class DetailsTable(BaseTable):
 
 
 class ExperimentStatusTable(BaseTable):
+    """
+    Stores the status of the experiments
+    """
+
     __tablename__ = "experiment_status"
 
     exp_id: Mapped[int] = mapped_column(Integer, primary_key=True)
@@ -41,6 +53,11 @@ class ExperimentStatusTable(BaseTable):
 
 
 class GraphDataTable(BaseTable):
+    """
+    Stores the coordinates and it is used exclusively to speed up the process
+    of generating the graph layout
+    """
+
     __tablename__ = "experiment_graph_draw"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
@@ -50,7 +67,26 @@ class GraphDataTable(BaseTable):
 
 
 class JobPackageTable(BaseTable):
+    """
+    Stores a mapping between the wrapper name and the actual job in slurm
+    """
+
     __tablename__ = "job_package"
+
+    exp_id: Mapped[str] = mapped_column(Text)
+    package_name: Mapped[str] = mapped_column(Text, primary_key=True)
+    job_name: Mapped[str] = mapped_column(Text, primary_key=True)
+
+
+class WrapperJobPackageTable(BaseTable):
+    """
+    It is a replication. It is only created/used when using inspectand create or monitor
+    with flag -cw in Autosubmit.\n
+    This replication is used to not interfere with the current autosubmit run of that experiment
+    since wrapper_job_package will contain a preview, not the real wrapper packages
+    """
+
+    __tablename__ = "wrapper_job_package"
 
     exp_id: Mapped[str] = mapped_column(Text)
     package_name: Mapped[str] = mapped_column(Text, primary_key=True)
@@ -71,3 +107,4 @@ graph_data_table: Table = GraphDataTable.__table__
 
 # Job package TABLES
 job_package_table: Table = JobPackageTable.__table__
+wrapper_job_package_table: Table = WrapperJobPackageTable.__table__

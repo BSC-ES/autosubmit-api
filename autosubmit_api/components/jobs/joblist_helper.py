@@ -7,6 +7,7 @@ from autosubmit_api.components.experiment.pkl_organizer import PklOrganizer
 from autosubmit_api.config.basicConfig import APIBasicConfig
 from typing import List, Dict
 from autosubmit_api.components.jobs.job_factory import Job
+from autosubmit_api.persistance.job_package_reader import JobPackageReader
 
 class JobListHelper(object):
   """ Loads time (queuing runnning) and packages. Applies the fix for queue time of jobs in wrappers. """
@@ -28,8 +29,16 @@ class JobListHelper(object):
     self._initialize_main_values()
 
   def _initialize_main_values(self):
-    # type: () -> None
-    self.job_to_package, self.package_to_jobs, self.package_to_package_id, self.package_to_symbol = JobList.retrieve_packages(self.basic_config, self.expid)
+    job_package_reader = JobPackageReader(self.expid)
+    try:
+      job_package_reader.read()
+      self.job_to_package = job_package_reader.job_to_package
+      self.package_to_jobs = job_package_reader.package_to_jobs
+      self.package_to_package_id = job_package_reader.package_to_package_id
+      self.package_to_symbol = job_package_reader.package_to_symbol
+    except:
+      self.warning_messages.append("Failed to read job_packages")
+      
     self.job_name_to_job_row, self.job_running_time_to_text, self.warning_messages  = JobList.get_job_times_collection(
                 self.basic_config, self.simple_jobs, self.expid, self.job_to_package, self.package_to_jobs, timeseconds=True)
 

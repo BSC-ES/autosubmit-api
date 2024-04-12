@@ -45,6 +45,7 @@ from autosubmit_api.performance.utils import calculate_SYPD_perjob
 from autosubmit_api.monitor.monitor import Monitor
 from autosubmit_api.persistance.experiment import ExperimentPaths
 
+from autosubmit_api.persistance.job_package_reader import JobPackageReader
 from autosubmit_api.statistics.statistics import Statistics
 
 from autosubmit_api.config.basicConfig import APIBasicConfig
@@ -309,12 +310,11 @@ def get_experiment_summary(expid, log):
         tmp_path = os.path.join(
             APIBasicConfig.LOCAL_ROOT_DIR, expid, APIBasicConfig.LOCAL_TMP_DIR)
         # Try to get packages
-        job_to_package = dict()
-        package_to_jobs = dict()
-        package_to_package_id = dict()
-        package_to_symbol = dict()
-        job_to_package, package_to_jobs, package_to_package_id, package_to_symbol = JobList.retrieve_packages(
-            APIBasicConfig, expid)
+        job_package_reader = JobPackageReader(expid)
+        try:
+            job_package_reader.read()
+        except:
+            logger.warning("Failed to read job_packages")
         # Basic data
         job_running_to_seconds = dict()
         job_running_to_runtext = dict()
@@ -338,9 +338,17 @@ def get_experiment_summary(expid, log):
                 status_code, status_color, status_text, out, err, priority, id_number)
             fakeAllJobs.append(
                 SimpleJob(job_name, tmp_path, status_code))
-            
-        job_running_to_seconds, job_running_to_runtext, _ = JobList.get_job_times_collection(
-            APIBasicConfig, fakeAllJobs, expid, job_to_package, package_to_jobs, timeseconds=True)
+
+        job_running_to_seconds, job_running_to_runtext, _ = (
+            JobList.get_job_times_collection(
+                APIBasicConfig,
+                fakeAllJobs,
+                expid,
+                job_package_reader.job_to_package,
+                job_package_reader.package_to_jobs,
+                timeseconds=True,
+            )
+        )
 
         # Main Loop
         if len(list(job_running_to_seconds.keys())) > 0:
@@ -824,8 +832,17 @@ def get_quick_view(expid):
 
         # Retrieving packages
         now_ = time.time()
-        job_to_package, package_to_jobs, package_to_package_id, package_to_symbol = JobList.retrieve_packages(
-            APIBasicConfig, expid)
+        job_to_package = {}
+        package_to_package_id = {}
+
+        job_package_reader = JobPackageReader(expid)
+        try:
+            job_package_reader.read()
+            job_to_package = job_package_reader.job_to_package
+            package_to_package_id = job_package_reader.package_to_package_id
+        except:
+            logger.warning("Failed to read job_packages")
+        
         logger.debug(("Retrieving packages {0} seconds.".format(
             str(time.time() - now_))))
         
