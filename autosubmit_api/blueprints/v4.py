@@ -44,6 +44,11 @@ def create_v4_blueprint():
         view_func=v4_views.ExperimentJobsView.as_view("ExperimentJobsView"),
     )
 
+    blueprint.add_url_rule(
+        "/experiments/<string:expid>/wrappers",
+        view_func=v4_views.ExperimentWrappersView.as_view("ExperimentWrappersView"),
+    )
+
     # blueprint.route("/experiments/<string:expid>/runs")(v3_views.get_runs)
     # blueprint.route("/experiments/<string:expid>/check-running")(
     #     v3_views.get_if_running

@@ -3,7 +3,9 @@
 ### Pre-release v4.0.0b6 - Release date: TBD
 
 * Added filter by autosubmit version in `/v4/experiments`
+* Fixed bug that affected wrappers information retrieval
 * Fixed some connection file handlers
+* Added `/v4/experiments/{expid}/wrappers` endpoint
 
 ### Pre-release v4.0.0b5 - Release date: 2024-03-18
 
