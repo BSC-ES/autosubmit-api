@@ -218,6 +218,13 @@
             }
           },
           {
+            "name": "autosubmit_version",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
             "name": "order_by",
             "in": "query",
             "schema": {
@@ -528,6 +535,84 @@
                           "err_path_local": "a008_20200120_fc0_2_SIM.20231027153508.err",
                           "out_path_remote": "a008_20200120_fc0_2_SIM.20231027153508.out",
                           "err_path_remote": "a008_20200120_fc0_2_SIM.20231027153508.err"
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v4/experiments/{expid}/wrappers": {
+      "get": {
+        "tags": [
+          "v4"
+        ],
+        "summary": "List experiment wrappers",
+        "operationId": "get-v4-experiments-expid-wrappers",
+        "parameters": [
+          {
+            "name": "expid",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "wrappers": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "job_names": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          },
+                          "wrapper_name": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "x-examples": {
+                    "Example 1": {
+                      "wrappers": [
+                        {
+                          "job_names": [
+                            "a6zi_18500101_fc0_1_SIM",
+                            "a6zi_18500101_fc0_2_SIM"
+                          ],
+                          "wrapper_name": "a6zi_ASThread_17108563159474_528_10"
+                        },
+                        {
+                          "job_names": [
+                            "a6zi_18500101_fc0_3_SIM",
+                            "a6zi_18500101_fc0_4_SIM",
+                            "a6zi_18500101_fc0_5_SIM",
+                            "a6zi_18500101_fc0_6_SIM",
+                            "a6zi_18500101_fc0_7_SIM",
+                            "a6zi_18500101_fc0_8_SIM",
+                            "a6zi_18500101_fc0_9_SIM",
+                            "a6zi_18500101_fc0_10_SIM",
+                            "a6zi_18500101_fc0_11_SIM",
+                            "a6zi_18500101_fc0_12_SIM"
+                          ],
+                          "wrapper_name": "a6zi_ASThread_17108816522924_528_10"
                         }
                       ]
                     }

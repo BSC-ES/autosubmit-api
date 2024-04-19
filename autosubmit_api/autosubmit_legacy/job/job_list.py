@@ -28,7 +28,6 @@ import math
 from time import time, mktime
 from dateutil.relativedelta import *
 
-from bscearth.utils.log import Log
 from autosubmit_api.autosubmit_legacy.job.job_utils import SubJob
 from autosubmit_api.autosubmit_legacy.job.job_utils import SubJobManager, job_times_to_text
 from autosubmit_api.config.basicConfig import APIBasicConfig
@@ -37,8 +36,6 @@ from autosubmit_api.components.jobs import utils as JUtils
 from autosubmit_api.monitor.monitor import Monitor
 from autosubmit_api.common.utils import Status
 from bscearth.utils.date import date2str, parse_date
-from autosubmit_api.experiment import common_db_requests as DbRequests
-from autosubmit_api.autosubmit_legacy.job.job_package_persistence import JobPackagePersistence
 # from autosubmit_legacy.job.tree import Tree
 from autosubmit_api.database import db_structure as DbStructure
 from autosubmit_api.database.db_jobdata import JobDataStructure, JobRow
@@ -590,11 +587,6 @@ class JobList:
         path_local_root = basic_config.LOCAL_ROOT_DIR
         path_structure = basic_config.STRUCTURES_DIR
         db_file = os.path.join(path_local_root, basic_config.DB_FILE)
-        conn = DbRequests.create_connection(db_file)
-        # job_data = None
-        # Job information from worker database
-        # job_times = dict() # REMOVED: DbRequests.get_times_detail_by_expid(conn, expid)
-        conn.close()
         # Job information from job historic data
         # print("Get current job data structure...")
         experiment_history = ExperimentHistoryDirector(ExperimentHistoryBuilder(expid)).build_reader_experiment_history()
@@ -846,72 +838,3 @@ class JobList:
                     int(finish_time),
                     None,
                     None)
-
-    @staticmethod
-    def retrieve_packages(basic_config, expid, current_jobs=None):
-        """
-        Retrieves dictionaries that map the collection of packages in the experiment
-
-        :param basic_config: Basic configuration
-        :type basic_config: Configuration Object
-        :param expid: Experiment Id
-        :type expid: String
-        :param current_jobs: list of names of current jobs
-        :type current_jobs: list
-        :return: job to package, package to jobs, package to package_id, package to symbol
-        :rtype: Dictionary(Job Object, Package_name), Dictionary(Package_name, List of Job Objects), Dictionary(String, String), Dictionary(String, String)
-        """
-        monitor = Monitor()
-        packages = None
-        exp_paths = ExperimentPaths(expid)
-        try:
-            packages = JobPackagePersistence(exp_paths.job_packages_db).load(wrapper=False)
-
-            # if the main table exist but is empty, we try the other one
-            if not (any(packages.keys()) or any(packages.values())):
-                Log.info("Wrapper table empty, trying packages.")
-                packages = JobPackagePersistence(exp_paths.job_packages_db).load(wrapper=True)
-
-
-        except Exception as ex:
-            print("Wrapper table not found, trying packages.")
-            packages = None
-            try:
-                packages = JobPackagePersistence(exp_paths.job_packages_db).load(wrapper=True)
-            except Exception as exp2:
-                packages = None
-                pass
-            pass
-
-        job_to_package = dict()
-        package_to_jobs = dict()
-        package_to_package_id = dict()
-        package_to_symbol = dict()
-        if (packages):
-            try:
-                for exp, package_name, job_name in packages:
-                    if len(str(package_name).strip()) > 0:
-                        if (current_jobs):
-                            if job_name in current_jobs:
-                                job_to_package[job_name] = package_name
-                        else:
-                            job_to_package[job_name] = package_name
-                    # list_packages.add(package_name)
-                for name in job_to_package:
-                    package_name = job_to_package[name]
-                    package_to_jobs.setdefault(package_name, []).append(name)
-                    # if package_name not in package_to_jobs.keys():
-                    #     package_to_jobs[package_name] = list()
-                    # package_to_jobs[package_name].append(name)
-                for key in package_to_jobs:
-                    package_to_package_id[key] = key.split("_")[2]
-                list_packages = list(job_to_package.values())
-                for i in range(len(list_packages)):
-                    if i % 2 == 0:
-                        package_to_symbol[list_packages[i]] = 'square'
-                    else:
-                        package_to_symbol[list_packages[i]] = 'hexagon'
-            except Exception as ex:
-                print((traceback.format_exc()))
-
-        return (job_to_package, package_to_jobs, package_to_package_id, package_to_symbol)

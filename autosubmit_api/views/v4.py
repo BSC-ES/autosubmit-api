@@ -4,7 +4,7 @@ from enum import Enum
 from http import HTTPStatus
 import math
 import traceback
-from typing import Optional
+from typing import Dict, List, Optional
 from flask import redirect, request
 from flask.views import MethodView
 import jwt
@@ -19,15 +19,14 @@ from autosubmit_api.builders.experiment_history_builder import (
 from autosubmit_api.common.utils import Status
 from autosubmit_api.database import tables
 from autosubmit_api.database.common import (
-    create_autosubmit_db_engine,
     create_main_db_conn,
     execute_with_limit_offset,
 )
-from autosubmit_api.database.models import ExperimentModel
 from autosubmit_api.database.queries import generate_query_listexp_extended
 from autosubmit_api.logger import logger, with_log_run_times
 from cas import CASClient
 from autosubmit_api import config
+from autosubmit_api.persistance.job_package_reader import JobPackageReader
 from autosubmit_api.persistance.pkl_reader import PklReader
 
 
@@ -217,6 +216,7 @@ class ExperimentView(MethodView):
         only_active = request.args.get("only_active") == "true"
         owner = request.args.get("owner")
         exp_type = request.args.get("exp_type")
+        autosubmit_version = request.args.get("autosubmit_version")
 
         order_by = request.args.get("order_by")
         order_desc = request.args.get("order_desc") == "true"
@@ -240,6 +240,7 @@ class ExperimentView(MethodView):
             only_active=only_active,
             owner=owner,
             exp_type=exp_type,
+            autosubmit_version=autosubmit_version,
             order_by=order_by,
             order_desc=order_desc,
         )
@@ -405,3 +406,21 @@ class ExperimentJobsView(MethodView):
                 pkl_jobs.appendleft(resp_job)
 
         return {"jobs": list(pkl_jobs)}, HTTPStatus.OK
+
+
+class ExperimentWrappersView(MethodView):
+    decorators = [with_auth_token(), with_log_run_times(logger, "WRAPPERS")]
+
+    def get(self, expid: str, user_id: Optional[str] = None):
+
+        job_package_reader = JobPackageReader(expid)
+        job_package_reader.read()
+
+        wrappers_dict: Dict[str, List[str]] = job_package_reader.package_to_jobs
+
+        wrappers = []
+        for key, val in wrappers_dict.items():
+            wrappers.append({"wrapper_name": key, "job_names": val})
+
+        logger.debug(wrappers)
+        return {"wrappers": wrappers}

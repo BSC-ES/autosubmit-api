@@ -162,3 +162,24 @@ class TestExperimentJobs:
             assert isinstance(job, dict) and len(job.keys()) > 2
             assert isinstance(job["name"], str) and job["name"].startswith(expid)
             assert isinstance(job["status"], str)
+
+
+class TestExperimentWrappers:
+    endpoint = "/v4/experiments/{expid}/wrappers"
+
+    def test_wrappers(self, fixture_client: FlaskClient):
+        expid = "a6zj"
+
+        response = fixture_client.get(self.endpoint.format(expid=expid))
+        resp_obj: dict = response.get_json()
+
+        assert isinstance(resp_obj, dict)
+        assert isinstance(resp_obj["wrappers"], list)
+        assert len(resp_obj["wrappers"]) == 1
+
+        for wrapper in resp_obj["wrappers"]:
+            assert isinstance(wrapper, dict)
+            assert isinstance(wrapper["job_names"], list)
+            assert isinstance(wrapper["wrapper_name"], str) and wrapper[
+                "wrapper_name"
+            ].startswith(expid)
