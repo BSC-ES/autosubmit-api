@@ -1,6 +1,6 @@
 # CHANGELOG
 
-### Pre-release v4.0.0b6 - Release date: TBD
+### Pre-release v4.0.0b6 - Release date: 2024-04-19
 
 * Added filter by autosubmit version in `/v4/experiments`
 * Fixed bug that affected wrappers information retrieval
