@@ -31,6 +31,8 @@ class APIBasicConfig(BasicConfig):
     FILE_STATUS_DIR = os.path.join(os.path.expanduser('~'), 'autosubmit', 'metadata', 'test')
     FILE_STATUS_DB = 'status.db'
     ALLOWED_CLIENTS = set([])
+    DATABASE_BACKEND = "sqlite" # TODO Move to the config parser repo
+    DATABASE_CONN_URL = "" # TODO Move to the config parser repo
 
     @staticmethod
     def __read_file_config(file_path):
@@ -53,6 +55,10 @@ class APIBasicConfig(BasicConfig):
             APIBasicConfig.FILE_STATUS_DB = parser.get('statusdb', 'filename')
         if parser.has_option('clients', 'authorized'):
             APIBasicConfig.ALLOWED_CLIENTS = set(parser.get('clients', 'authorized').split())
+        if parser.has_option('database', 'backend'):
+            APIBasicConfig.DATABASE_BACKEND = parser.get('database', 'backend')
+        if parser.has_option('database', 'connection_url'):
+            APIBasicConfig.DATABASE_CONN_URL = parser.get('database', 'connection_url')
 
 
     @staticmethod
