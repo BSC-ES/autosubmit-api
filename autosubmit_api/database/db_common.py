@@ -205,10 +205,10 @@ def search_experiment_by_id(query, exp_type=None, only_active=None, owner=None):
             'Connection to database could not be established: {0}', e.message)
         return False
     if owner:
-        query = "SELECT id,name,user,created,model,branch,hpc,description FROM listexp WHERE user='{0}'".format(owner)
+        query = "SELECT id,name,user,created,model,branch,hpc,description FROM experiment e left join details d on e.id = d.exp_id WHERE user='{0}'".format(owner)
         # print(query)
     else:
-        query = "SELECT id,name,user,created,model,branch,hpc,description FROM listexp WHERE (name LIKE '" + query + \
+        query = "SELECT id,name,user,created,model,branch,hpc,description FROM experiment e left join details d on e.id = d.exp_id WHERE (name LIKE '" + query + \
             "%' OR description LIKE '%" + query + \
                 "%' OR user LIKE '%" + query + "%')"
     if exp_type and len(exp_type) > 0:
@@ -302,7 +302,7 @@ def get_current_running_exp():
         Log.error(
             'Connection to database could not be established: {0}', e.message)
         return False
-    query = "SELECT id,name,user,created,model,branch,hpc,description FROM listexp"
+    query = "SELECT id,name,user,created,model,branch,hpc,description FROM experiment e left join details d on e.id = d.exp_id"
     APIBasicConfig.read()
     # print(query)
     cursor.execute(query)
