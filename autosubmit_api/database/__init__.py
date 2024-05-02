@@ -1,19 +1,28 @@
-from sqlalchemy import text
+from sqlalchemy import Connection, Table
 from autosubmit_api.database.common import (
     create_as_times_db_engine,
     create_autosubmit_db_engine,
 )
-from autosubmit_api.database.tables import experiment_status_table, details_table
+from autosubmit_api.database import tables
+
+
+def _create_autosubmit_db_tables(conn: Connection):
+    experiment_table: Table = tables.ExperimentTable.__table__
+    experiment_table.create(conn, checkfirst=True)
+    details_table: Table = tables.DetailsTable.__table__
+    details_table.create(conn, checkfirst=True)
+
+
+def _create_as_times_db_tables(conn: Connection):
+    experiment_status_table: Table = tables.ExperimentStatusTable.__table__
+    experiment_status_table.create(conn, checkfirst=True)
 
 
 def prepare_db():
     with create_as_times_db_engine().connect() as conn:
-        experiment_status_table.create(conn, checkfirst=True)
+        _create_as_times_db_tables(conn)
+        conn.commit()
 
     with create_autosubmit_db_engine().connect() as conn:
-        details_table.create(conn, checkfirst=True)
-
-        view_name = "listexp"
-        view_from = "select id,name,user,created,model,branch,hpc,description from experiment left join details on experiment.id = details.exp_id"
-        new_view_stmnt = f"CREATE VIEW IF NOT EXISTS {view_name} as {view_from}"
-        conn.execute(text(new_view_stmnt))
+        _create_autosubmit_db_tables(conn)
+        conn.commit()

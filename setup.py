@@ -37,7 +37,9 @@ install_requires = [
     "gunicorn",
     "pydantic~=2.5.2",
     "SQLAlchemy~=2.0.23",
-    "python-cas>=1.6.0"
+    "python-cas>=1.6.0",
+    "Authlib>=1.3.0",
+    "psycopg2>=2.9.9"
 ]
 
 # Test dependencies

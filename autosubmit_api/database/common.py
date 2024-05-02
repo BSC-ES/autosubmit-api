@@ -9,10 +9,32 @@ from sqlalchemy import (
     select,
     text,
     func,
+    Table,
 )
+from sqlalchemy.orm import DeclarativeBase
 from autosubmit_api.builders import BaseBuilder
 from autosubmit_api.logger import logger
 from autosubmit_api.config.basicConfig import APIBasicConfig
+
+APIBasicConfig.read()
+postgres_engine = create_engine(APIBasicConfig.DATABASE_CONN_URL)
+
+def get_postgres_engine():
+    db = postgres_engine
+    if not isinstance(db, Engine):
+        APIBasicConfig.read()
+        db = create_engine(APIBasicConfig.DATABASE_CONN_URL)
+    return db
+
+
+def copy_rename_table(source_table: DeclarativeBase, new_name: str):
+    dest_table = Table(new_name)
+
+    core_source_table: Table = source_table.__table__
+    for col in core_source_table.columns:
+        dest_table.append_column(col)
+
+    return dest_table
 
 
 class AttachedDatabaseConnBuilder(BaseBuilder):
@@ -48,6 +70,9 @@ def create_main_db_conn() -> Connection:
     """
     Connection with the autosubmit and as_times DDBB.
     """
+    APIBasicConfig.read()
+    if APIBasicConfig.DATABASE_BACKEND == "postgres":
+        return get_postgres_engine().connect()
     builder = AttachedDatabaseConnBuilder()
     builder.attach_autosubmit_db()
     builder.attach_as_times_db()
@@ -60,16 +85,19 @@ def create_autosubmit_db_engine() -> Engine:
     Create an engine for the autosubmit DDBB. Usually named autosubmit.db
     """
     APIBasicConfig.read()
-    return create_engine(
-        f"sqlite:///{ os.path.abspath(APIBasicConfig.DB_PATH)}", poolclass=NullPool
-    )
+    if APIBasicConfig.DATABASE_BACKEND == "postgres":
+        return get_postgres_engine()
+    return create_engine(f"sqlite:///{ os.path.abspath(APIBasicConfig.DB_PATH)}", poolclass=NullPool)
 
 
 def create_as_times_db_engine() -> Engine:
     """
     Create an engine for the AS_TIMES DDBB. Usually named as_times.db
     """
+
     APIBasicConfig.read()
+    if APIBasicConfig.DATABASE_BACKEND == "postgres":
+        return get_postgres_engine()
     db_path = os.path.join(APIBasicConfig.DB_DIR, APIBasicConfig.AS_TIMES_DB)
     return create_engine(f"sqlite:///{ os.path.abspath(db_path)}", poolclass=NullPool)
 
