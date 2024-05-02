@@ -13,11 +13,18 @@ from sqlalchemy import (
 from autosubmit_api.builders import BaseBuilder
 from autosubmit_api.logger import logger
 from autosubmit_api.config.basicConfig import APIBasicConfig
+from autosubmit_api.database import session
+
+
+def get_postgres_engine():
+    return session.Session().bind
 
 
 class AttachedDatabaseConnBuilder(BaseBuilder):
     """
     SQLite utility to build attached databases.
+
+    MUST BE USED ONLY FOR DATABASE MODULE and TESTS.
     """
 
     def __init__(self) -> None:
@@ -47,7 +54,12 @@ class AttachedDatabaseConnBuilder(BaseBuilder):
 def create_main_db_conn() -> Connection:
     """
     Connection with the autosubmit and as_times DDBB.
+
+    MUST BE USED ONLY FOR DATABASE MODULE and TESTS.
     """
+    APIBasicConfig.read()
+    if APIBasicConfig.DATABASE_BACKEND == "postgres":
+        return get_postgres_engine().connect()
     builder = AttachedDatabaseConnBuilder()
     builder.attach_autosubmit_db()
     builder.attach_as_times_db()
@@ -58,8 +70,12 @@ def create_main_db_conn() -> Connection:
 def create_autosubmit_db_engine() -> Engine:
     """
     Create an engine for the autosubmit DDBB. Usually named autosubmit.db
+
+    MUST BE USED ONLY FOR DATABASE MODULE and TESTS.
     """
     APIBasicConfig.read()
+    if APIBasicConfig.DATABASE_BACKEND == "postgres":
+        return get_postgres_engine()
     return create_engine(
         f"sqlite:///{ os.path.abspath(APIBasicConfig.DB_PATH)}", poolclass=NullPool
     )
@@ -68,8 +84,13 @@ def create_autosubmit_db_engine() -> Engine:
 def create_as_times_db_engine() -> Engine:
     """
     Create an engine for the AS_TIMES DDBB. Usually named as_times.db
+
+    MUST BE USED ONLY FOR DATABASE MODULE and TESTS.
     """
+
     APIBasicConfig.read()
+    if APIBasicConfig.DATABASE_BACKEND == "postgres":
+        return get_postgres_engine()
     db_path = os.path.join(APIBasicConfig.DB_DIR, APIBasicConfig.AS_TIMES_DB)
     return create_engine(f"sqlite:///{ os.path.abspath(db_path)}", poolclass=NullPool)
 

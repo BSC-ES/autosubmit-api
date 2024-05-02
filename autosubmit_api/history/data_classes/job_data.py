@@ -78,9 +78,8 @@ class JobData(object):
       self.platform_output = platform_output # DB 17
 
     @classmethod
-    def from_model(cls, row):
+    def from_model(cls, row_dict: dict):
       """ Build JobData from JobDataRow. """
-      row_dict = row._asdict()
       job_data = cls(row_dict['id'],
                       row_dict['counter'],
                       row_dict['job_name'],

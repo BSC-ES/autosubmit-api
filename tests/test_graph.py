@@ -1,6 +1,4 @@
-import os
 
-from sqlalchemy import create_engine
 from autosubmit_api.builders.configuration_facade_builder import (
     AutosubmitConfigurationFacadeBuilder,
     ConfigurationFacadeDirector,
@@ -9,14 +7,12 @@ from autosubmit_api.builders.joblist_loader_builder import (
     JobListLoaderBuilder,
     JobListLoaderDirector,
 )
-from autosubmit_api.database import tables
-from autosubmit_api.database.db_jobdata import ExperimentGraphDrawing
+from autosubmit_api.components.experiment.graph_drawer import ExperimentGraphDrawing
+from autosubmit_api.database.repositories.graph_draw import ExpGraphDrawDBRepository
 from autosubmit_api.monitor.monitor import Monitor
-from autosubmit_api.persistance.experiment import ExperimentPaths
 
 
 class TestPopulateDB:
-
     def test_monitor_dot(self, fixture_mock_basic_config):
         expid = "a003"
         job_list_loader = JobListLoaderDirector(
@@ -48,28 +44,27 @@ class TestPopulateDB:
             AutosubmitConfigurationFacadeBuilder(expid)
         ).build_autosubmit_configuration_facade()
 
-        exp_paths = ExperimentPaths(expid)
-        with create_engine(
-            f"sqlite:///{ os.path.abspath(exp_paths.graph_data_db)}"
-        ).connect() as conn:
-            conn.execute(tables.graph_data_table.delete())
-            conn.commit()
+        # Create repository handler
+        graph_draw_db = ExpGraphDrawDBRepository(expid)
 
-            experimentGraphDrawing.calculate_drawing(
-                allJobs=job_list_loader.jobs,
-                independent=False,
-                num_chunks=autosubmit_configuration_facade.chunk_size,
-                job_dictionary=job_list_loader.job_dictionary,
-            )
+        # Delete content of table
+        graph_draw_db.delete_all()
 
-            assert (
-                experimentGraphDrawing.coordinates
-                and len(experimentGraphDrawing.coordinates) == 8
-            )
+        experimentGraphDrawing.calculate_drawing(
+            allJobs=job_list_loader.jobs,
+            independent=False,
+            num_chunks=autosubmit_configuration_facade.chunk_size,
+            job_dictionary=job_list_loader.job_dictionary,
+        )
 
-            rows = conn.execute(tables.graph_data_table.select()).all()
+        assert (
+            experimentGraphDrawing.coordinates
+            and len(experimentGraphDrawing.coordinates) == 8
+        )
 
-            assert len(rows) == 8
-            for job in rows:
-                job_name: str = job.job_name
-                assert job_name.startswith(expid)
+        rows = graph_draw_db.get_all()
+
+        assert len(rows) == 8
+        for job in rows:
+            job_name: str = job.get("job_name")
+            assert job_name.startswith(expid)

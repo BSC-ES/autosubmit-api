@@ -33,12 +33,10 @@ class ExperimentHistoryBuilder(Builder):
 
   def generate_experiment_history_db_manager(self):
     self._validate_basic_config()
-    self.experiment_history_db_manager = ExperimentHistoryDbManager(self.expid, self.basic_config)
+    self.experiment_history_db_manager = ExperimentHistoryDbManager(self.expid)
 
   def initialize_experiment_history_db_manager(self):
-    if not self.experiment_history_db_manager:
-      raise Exception("Experiment Database Manager is missing")
-    self.experiment_history_db_manager.initialize()
+    return NotImplementedError
 
   def generate_logger(self):
     self._validate_basic_config()
@@ -49,7 +47,7 @@ class ExperimentHistoryBuilder(Builder):
     if not self.experiment_history_db_manager:
       raise Exception("Experiment Database Manager is missing")
     else:
-      if not self.experiment_history_db_manager.my_database_exists():
+      if APIBasicConfig == "sqlite" and not self.experiment_history_db_manager.my_database_exists():
         raise Exception("Job/Runs database does not exist")
     if not self.logger:
       raise Exception("Logging is missing.")
@@ -58,17 +56,6 @@ class ExperimentHistoryBuilder(Builder):
 class ExperimentHistoryDirector(object):
   def __init__(self, builder: Builder):
     self.builder = builder
-
-  def build_current_experiment_history(self, basic_config: Optional[APIBasicConfig] = None) -> ExperimentHistory:
-    """ Builds ExperimentHistory updated to current version. """
-    if basic_config:
-      self.builder.set_basic_config(basic_config)
-    else:
-      self.builder.generate_basic_config()
-    self.builder.generate_experiment_history_db_manager()
-    self.builder.initialize_experiment_history_db_manager()
-    self.builder.generate_logger()
-    return self.builder.make_experiment_history()
 
   def build_reader_experiment_history(self, basic_config: Optional[APIBasicConfig] = None) -> ExperimentHistory:
     """ Buids ExperimentHistory that doesn't update to current version automatically. """

@@ -31,14 +31,14 @@ from dateutil.relativedelta import relativedelta
 from autosubmit_api.autosubmit_legacy.job.job_utils import SubJob
 from autosubmit_api.autosubmit_legacy.job.job_utils import SubJobManager, job_times_to_text
 from autosubmit_api.config.basicConfig import APIBasicConfig
+from autosubmit_api.database.repositories import ExperimentStructureDbRepository
 from autosubmit_api.performance.utils import calculate_ASYPD_perjob, calculate_SYPD_perjob
 from autosubmit_api.components.jobs import utils as JUtils
 from autosubmit_api.monitor.monitor import Monitor
 from autosubmit_api.common.utils import Status
 from bscearth.utils.date import date2str, parse_date
 # from autosubmit_legacy.job.tree import Tree
-from autosubmit_api.database import db_structure as DbStructure
-from autosubmit_api.database.db_jobdata import JobDataStructure, JobRow
+from autosubmit_api.components.jobdata import JobDataStructure, JobRow
 from autosubmit_api.builders.experiment_history_builder import ExperimentHistoryDirector, ExperimentHistoryBuilder
 from autosubmit_api.history.data_classes.job_data import JobData
 
@@ -114,7 +114,7 @@ class JobList:
         else:
             raise Exception("Autosubmit couldn't fin the experiment header information necessary to complete this request.")
         job_list = job_data_structure.get_current_job_data(
-            run_id, all_states=True)
+            run_id)
         if not job_list:
             return [], [], {}
         else:
@@ -592,7 +592,7 @@ class JobList:
         job_data = None
         try:
             experiment_history = ExperimentHistoryDirector(ExperimentHistoryBuilder(expid)).build_reader_experiment_history()
-            job_data = experiment_history.manager.get_all_last_job_data_dcs() if experiment_history.is_header_ready() else None
+            job_data = experiment_history.manager.get_all_last_job_data_dcs()
         except Exception:
             print(traceback.print_exc())
         # Result variables
@@ -606,7 +606,7 @@ class JobList:
         # Get structure  if there are packages because package require special time calculation
         # print("Get Structure")
         if (job_to_package):
-            current_table_structure = DbStructure.get_structure(expid, path_structure)
+            current_table_structure = ExperimentStructureDbRepository(expid).get_structure()
         # Main loop
         # print("Start main loop")
         for job in allJobs:

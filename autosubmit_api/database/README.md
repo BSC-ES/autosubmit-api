@@ -1,7 +1,12 @@
-**db_common** contains some function to access Autosubmit database. It is mostly legacy code that needs to be restructured.
+This package aims to encapsulate everything related to structured DDBB (SQLite/Postgres) operations.
 
-**db_jobdata** contains most of the classes of the old implementation of the `historical database`. It needs to be deleted, but some functions still use it. Replace the references to this old implementation for the new implementation `history` module and proceed to delete this file. Also, take out the `Graph Drawing` class.
+* **common.py**: This module have all the common functions to allow DDBB interaction.
 
-**db_manager** is mostly legacy code that is still referenced.
+* **tables.py**: Holds all the table schemas. This module extends `autosubmit.tables`.
 
-**db_structure** handles the consumption of the structure database of the experiment.
+* **models.py**: Holds data validators. Might be refactored in the future.
+
+* **table_manager.py**: Provides a generalized interface to interact with one table at the time.
+
+* **adapters**: This subpackage holds all the entities and their corresponding operations. It should provide an interface for other parts of the API that prevents them to worry about DDBB logic.
+

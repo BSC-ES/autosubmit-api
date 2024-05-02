@@ -6,15 +6,14 @@ import requests
 from flask_cors import cross_origin
 from flask import request, session, redirect
 from autosubmit_api.auth import ProtectionLevels, with_auth_token
-from autosubmit_api.database.db_common import (
+from autosubmit_api.experiment.common_requests import (
     get_current_running_exp,
-    update_experiment_description_owner,
 )
 from autosubmit_api.experiment import common_requests as CommonRequests
 from autosubmit_api.experiment import utils as Utiles
 from autosubmit_api.logger import logger, with_log_run_times
 from autosubmit_api.performance.performance_metrics import PerformanceMetrics
-from autosubmit_api.database.db_common import search_experiment_by_id
+from autosubmit_api.experiment.common_requests import search_experiment_by_id
 from autosubmit_api.config.basicConfig import APIBasicConfig
 from autosubmit_api.builders.joblist_helper_builder import (
     JobListHelperBuilder,
@@ -113,16 +112,17 @@ def update_description(user_id: Optional[str] = None):
     """
     Updates the description of an experiment. Requires authenticated user.
     """
-    expid = None
-    new_description = None
-    if request.is_json:
-        body_data = request.json
-        expid = body_data.get("expid", None)
-        new_description = body_data.get("description", None)
-    return (
-        update_experiment_description_owner(expid, new_description, user_id),
-        HTTPStatus.OK if user_id else HTTPStatus.UNAUTHORIZED,
-    )
+    raise NotImplementedError
+    # expid = None
+    # new_description = None
+    # if request.is_json:
+    #     body_data = request.json
+    #     expid = body_data.get("expid", None)
+    #     new_description = body_data.get("description", None)
+    # return (
+    #     update_experiment_description_owner(expid, new_description, user_id),
+    #     HTTPStatus.OK if user_id else HTTPStatus.UNAUTHORIZED,
+    # )
 
 
 @cross_origin(expose_headers="Authorization")

@@ -4,8 +4,6 @@ import sqlite3
 from datetime import datetime
 from autosubmit_api.logger import logger
 from autosubmit_api.config.basicConfig import APIBasicConfig
-from autosubmit_api.database import tables
-from autosubmit_api.database.common import create_as_times_db_engine
 
 APIBasicConfig.read()
 DB_FILES_STATUS = os.path.join(
@@ -30,7 +28,6 @@ def create_connection(db_file: str) -> sqlite3.Connection:
 
 
 def insert_archive_status(status, alatency, abandwidth, clatency, cbandwidth, rtime):
-
     try:
         with create_connection(DB_FILES_STATUS) as conn:
             sql = """ INSERT INTO archive_status(status, avg_latency, avg_bandwidth, current_latency, current_bandwidth, response_time, modified ) VALUES(?,?,?,?,?,?,?)"""
@@ -72,47 +69,3 @@ def get_last_read_archive_status():
         print((traceback.format_exc()))
         print(("Error on Get Last : " + str(exp)))
         return (False, None, None, None, None, None, None)
-
-
-# SELECTS
-
-
-def get_experiment_status():
-    """
-    Gets table experiment_status as dictionary
-    conn is expected to reference as_times.db
-    """
-    experiment_status = dict()
-    try:
-        with create_as_times_db_engine().connect() as conn:
-            cursor = conn.execute(tables.experiment_status_table.select())
-            for row in cursor:
-                experiment_status[row.name] = row.status
-    except Exception as exc:
-        logger.error(f"Exception while reading experiment_status: {exc}")
-        logger.error(traceback.format_exc())
-    return experiment_status
-
-
-def get_specific_experiment_status(expid):
-    """
-    Gets the current status from database.\n
-    :param expid: Experiment name
-    :type expid: str
-    :return: name of experiment and status
-    :rtype: 2-tuple (name, status)
-    """
-    try:
-        with create_as_times_db_engine().connect() as conn:
-            row = conn.execute(
-                tables.experiment_status_table.select().where(
-                    tables.experiment_status_table.c.name == expid
-                )
-            ).one_or_none()
-            if row:
-                return (row.name, row.status)
-    except Exception as exc:
-        logger.error(f"Exception while reading experiment_status for {expid}: {exc}")
-        logger.error(traceback.format_exc())
-
-    return (expid, "NOT RUNNING")

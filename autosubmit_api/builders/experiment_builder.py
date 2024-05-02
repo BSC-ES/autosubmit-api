@@ -1,13 +1,11 @@
 import datetime
+from autosubmit_api.logger import logger
 from autosubmit_api.builders import BaseBuilder
 from autosubmit_api.builders.configuration_facade_builder import (
     AutosubmitConfigurationFacadeBuilder,
     ConfigurationFacadeDirector,
 )
-from autosubmit_api.database import tables
-from autosubmit_api.database.common import (
-    create_autosubmit_db_engine,
-)
+from autosubmit_api.database.repositories import ExperimentDbRepository, ExperimentDetailsDbRepository
 from autosubmit_api.database.models import ExperimentModel
 
 
@@ -23,19 +21,14 @@ class ExperimentBuilder(BaseBuilder):
         """
         Produce basic information from the main experiment table
         """
-        with create_autosubmit_db_engine().connect() as conn:
-            result = conn.execute(
-                tables.experiment_table.select().where(
-                    tables.experiment_table.c.name == expid
-                )
-            ).one()
+        result = ExperimentDbRepository().get_by_expid(expid)
 
         # Set new product
         self._product = ExperimentModel(
-            id=result.id,
-            name=result.name,
-            description=result.description,
-            autosubmit_version=result.autosubmit_version,
+            id=result["id"],
+            name=result["name"],
+            description=result["description"],
+            autosubmit_version=result["autosubmit_version"],
         )
 
     def produce_details(self):
@@ -43,12 +36,11 @@ class ExperimentBuilder(BaseBuilder):
         Produce data from the details table
         """
         exp_id = self._product.id
-        with create_autosubmit_db_engine().connect() as conn:
-            result = conn.execute(
-                tables.details_table.select().where(
-                    tables.details_table.c.exp_id == exp_id
-                )
-            ).one_or_none()
+        result = None
+        try:
+            result = ExperimentDetailsDbRepository().get_by_exp_id(exp_id)
+        except Exception:
+            logger.error(f"Error getting details for exp_id {exp_id}")
 
         # Set details props
         if result:
@@ -80,6 +72,7 @@ class ExperimentBuilder(BaseBuilder):
             ).isoformat()
         except Exception:
             self._product.modified = None
+            logger.error(f"Error getting modified date for expid {expid}")
 
     @property
     def product(self) -> ExperimentModel:

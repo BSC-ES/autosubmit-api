@@ -22,12 +22,8 @@ from autosubmit_api.config.basicConfig import APIBasicConfig
 from autosubmit_api.config.confConfigStrategy import confConfigStrategy
 from autosubmit_api.config.config_common import AutosubmitConfigResolver
 from autosubmit_api.database import tables
-from autosubmit_api.database.common import (
-    create_main_db_conn,
-    execute_with_limit_offset,
-)
-from autosubmit_api.database.db_jobdata import JobDataStructure
-from autosubmit_api.database.queries import generate_query_listexp_extended
+from autosubmit_api.components.jobdata import JobDataStructure
+from autosubmit_api.database.repositories import ExperimentJoinDbRepository
 from autosubmit_api.logger import logger, with_log_run_times
 from cas import CASClient
 from autosubmit_api import config
@@ -241,7 +237,7 @@ class ExperimentView(MethodView):
             return {"error": {"message": "Invalid params"}}, HTTPStatus.BAD_REQUEST
 
         # Query
-        statement = generate_query_listexp_extended(
+        query_result, total_rows = ExperimentJoinDbRepository().search(
             query=query,
             only_active=only_active,
             owner=owner,
@@ -249,20 +245,15 @@ class ExperimentView(MethodView):
             autosubmit_version=autosubmit_version,
             order_by=order_by,
             order_desc=order_desc,
+            limit=page_size,
+            offset=offset,
         )
-        with create_main_db_conn() as conn:
-            query_result, total_rows = execute_with_limit_offset(
-                statement=statement,
-                conn=conn,
-                limit=page_size,
-                offset=offset,
-            )
 
         # Process experiments
         experiments = []
         for raw_exp in query_result:
             exp_builder = ExperimentBuilder()
-            exp_builder.produce_base_from_dict(raw_exp._mapping)
+            exp_builder.produce_base_from_dict(raw_exp)
 
             # Get additional data from config files
             try:
@@ -349,7 +340,7 @@ class ExperimentDetailView(MethodView):
         """
         exp_builder = ExperimentBuilder()
         exp_builder.produce_base(expid)
-        return exp_builder.product.model_dump(include=tables.experiment_table.c.keys())
+        return exp_builder.product.model_dump(include=tables.ExperimentTable.c.keys())
 
 
 class ExperimentJobsViewOptEnum(str, Enum):

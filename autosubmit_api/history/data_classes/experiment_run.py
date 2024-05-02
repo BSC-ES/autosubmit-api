@@ -133,10 +133,9 @@ class ExperimentRun(object):
             raise dbexception
 
     @classmethod
-    def from_model(cls, row):
+    def from_model(cls, row_dict: dict):
         """ Build ExperimentRun from ExperimentRunRow """
         try:
-            row_dict = row._asdict()
             experiment_run = cls(0)
             experiment_run.run_id = row_dict.get('run_id', 0)
             experiment_run.created = get_current_datetime_if_none(row_dict.get('created', None))

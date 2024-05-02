@@ -1,4 +1,29 @@
 import os
+from typing import Tuple
+import pytest
+from sqlalchemy import Engine, select
+from autosubmit_api.config.basicConfig import APIBasicConfig
+from autosubmit_api.database import tables
+from tests.utils import get_schema_names
+
+
+def test_mock_basic_config(fixture_mock_basic_config: APIBasicConfig):
+    assert "AUTOSUBMIT_CONFIGURATION" in os.environ and os.path.exists(
+        os.environ["AUTOSUBMIT_CONFIGURATION"]
+    )
+
+    # Reading the configuration file
+    APIBasicConfig.read()
+
+    assert APIBasicConfig.DATABASE_BACKEND in ["sqlite", "postgres"]
+    assert "tmp" in APIBasicConfig.LOCAL_ROOT_DIR
+    assert APIBasicConfig.LOCAL_ROOT_DIR in os.environ["AUTOSUBMIT_CONFIGURATION"]
+
+    if APIBasicConfig.DATABASE_BACKEND == "sqlite":
+        assert APIBasicConfig.DB_FILE == "autosubmit.db"
+
+    elif APIBasicConfig.DATABASE_BACKEND == "postgres":
+        assert APIBasicConfig.DATABASE_CONN_URL
 
 
 class TestSQLiteFixtures:
@@ -28,3 +53,61 @@ class TestSQLiteFixtures:
             assert f"path = {fixture_gen_rc_sqlite}" in content
             assert "filename = autosubmit.db" in content
             assert "backend = sqlite" in content
+
+
+@pytest.mark.pg
+class TestPostgresFixtures:
+    def test_fixture_temp_dir_copy_exclude_db(
+        self, fixture_temp_dir_copy_exclude_db: str
+    ):
+        """
+        Test if all the files are copied from FAKEDIR to the temporary directory except .db files
+        """
+        FILES_SHOULD_EXIST = [
+            "a003/conf/minimal.yml",
+        ]
+        FILES_SHOULD_EXCLUDED = ["metadata/data/job_data_a007.db"]
+        for file in FILES_SHOULD_EXIST:
+            assert os.path.exists(os.path.join(fixture_temp_dir_copy_exclude_db, file))
+
+        for file in FILES_SHOULD_EXCLUDED:
+            assert not os.path.exists(
+                os.path.join(fixture_temp_dir_copy_exclude_db, file)
+            )
+
+    def test_fixture_gen_rc_postgres(self, fixture_gen_rc_pg: str):
+        """
+        Test if the .autosubmitrc file is generated and the environment variable is set
+        """
+        rc_file = os.path.join(fixture_gen_rc_pg, ".autosubmitrc")
+
+        # File should exist
+        assert os.path.exists(rc_file)
+
+        with open(rc_file, "r") as f:
+            content = f.read()
+            assert "[database]" in content
+            assert "backend = postgres" in content
+            assert "postgresql://" in content
+            assert fixture_gen_rc_pg in content
+
+    def test_fixture_pg_db(self, fixture_pg_db: Tuple[str, Engine]):
+        engine = fixture_pg_db[1]
+
+        # Check if the public schema exists
+        with engine.connect() as conn:
+            schema_names = get_schema_names(conn)
+            assert "public" in schema_names
+
+    def test_fixture_pg_db_copy_all(self, fixture_pg_db_copy_all: Tuple[str, Engine]):
+        engine = fixture_pg_db_copy_all[1]
+
+        # Check if the experiment and details tables are copied
+        with engine.connect() as conn:
+            exp_rows = conn.execute(select(tables.ExperimentTable)).all()
+            details_rows = conn.execute(select(tables.DetailsTable)).all()
+
+        assert len(exp_rows) > 0
+        assert len(details_rows) > 0
+
+        # TODO: Check if the other tables are copied

@@ -12,15 +12,15 @@ class TestStatusUpdater:
         prepare_db()
 
         with create_as_times_db_engine().connect() as conn:
-            exps_status = conn.execute(tables.experiment_status_table.delete())
+            exps_status = conn.execute(tables.ExperimentStatusTable.delete())
 
         StatusUpdater.run()
 
         with create_autosubmit_db_engine().connect() as conn:
-            experiments = conn.execute(tables.experiment_table.select()).all()
+            experiments = conn.execute(tables.ExperimentTable.select()).all()
 
         with create_as_times_db_engine().connect() as conn:
-            exps_status = conn.execute(tables.experiment_status_table.select()).all()
+            exps_status = conn.execute(tables.ExperimentStatusTable.select()).all()
 
         assert len(experiments) == len(exps_status)
         assert set([x.id for x in experiments]) == set([x.exp_id for x in exps_status])

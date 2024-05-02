@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 from autosubmit_api.autosubmit_legacy.job.job_list import JobList
 from autosubmit_api.common.utils import datechunk_to_year
-from autosubmit_api.database.db_jobdata import JobDataStructure, JobRow
+from autosubmit_api.components.jobdata import JobDataStructure, JobRow
 from autosubmit_api.components.experiment.configuration_facade import AutosubmitConfigurationFacade
 from autosubmit_api.components.experiment.pkl_organizer import PklOrganizer
 from autosubmit_api.config.basicConfig import APIBasicConfig
