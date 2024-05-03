@@ -10,7 +10,7 @@ from autosubmit_api.builders.joblist_loader_builder import (
     JobListLoaderDirector,
 )
 from autosubmit_api.database import tables
-from autosubmit_api.database.db_jobdata import ExperimentGraphDrawing
+from autosubmit_api.components.experiment.graph_drawer import ExperimentGraphDrawing
 from autosubmit_api.monitor.monitor import Monitor
 from autosubmit_api.persistance.experiment import ExperimentPaths
 

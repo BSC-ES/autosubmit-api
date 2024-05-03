@@ -9,7 +9,7 @@ from networkx.linalg.laplacianmatrix import laplacian_matrix
 from ...jobs.job_factory import Job
 from ...jobs.joblist_loader import JobListLoader
 from ....monitor.monitor import Monitor
-from ....database.db_jobdata import ExperimentGraphDrawing
+from ...experiment.graph_drawer import ExperimentGraphDrawing
 
 from .edge import Edge, RealEdge
 from typing import List, Dict, Tuple, Set, Any

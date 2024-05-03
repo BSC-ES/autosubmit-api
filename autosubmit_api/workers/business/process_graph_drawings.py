@@ -3,7 +3,7 @@ import traceback
 from autosubmit_api.database import tables
 from autosubmit_api.database.common import create_as_times_db_engine
 from autosubmit_api.common import utils as common_utils
-from autosubmit_api.database.db_jobdata import ExperimentGraphDrawing
+from autosubmit_api.components.experiment.graph_drawer import ExperimentGraphDrawing
 from autosubmit_api.builders.configuration_facade_builder import (
     ConfigurationFacadeDirector,
     AutosubmitConfigurationFacadeBuilder,

@@ -1,6 +1,7 @@
 [database]
 path = ./tests/experiments/
 filename = autosubmit.db
+backend = sqlite
 
 [local]
 path = ./tests/experiments/
