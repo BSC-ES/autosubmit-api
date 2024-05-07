@@ -18,7 +18,10 @@ from autosubmit_api.logger import logger
 from autosubmit_api.config.basicConfig import APIBasicConfig
 
 APIBasicConfig.read()
-_postgres_engine = create_engine(APIBasicConfig.DATABASE_CONN_URL)
+try:
+    _postgres_engine = create_engine(APIBasicConfig.DATABASE_CONN_URL)
+except Exception:
+    pass
 
 def get_postgres_engine():
     db = _postgres_engine
