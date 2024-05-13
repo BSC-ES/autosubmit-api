@@ -1,6 +1,15 @@
 import os
 from typing import Any
-from sqlalchemy import Connection, Engine, Select, create_engine, select, text, func
+from sqlalchemy import (
+    Connection,
+    Engine,
+    NullPool,
+    Select,
+    create_engine,
+    select,
+    text,
+    func,
+)
 from autosubmit_api.builders import BaseBuilder
 from autosubmit_api.logger import logger
 from autosubmit_api.config.basicConfig import APIBasicConfig
@@ -14,7 +23,7 @@ class AttachedDatabaseConnBuilder(BaseBuilder):
     def __init__(self) -> None:
         super().__init__(False)
         APIBasicConfig.read()
-        self.engine = create_engine("sqlite://")
+        self.engine = create_engine("sqlite://", poolclass=NullPool)
         self._product = self.engine.connect()
 
     def attach_db(self, path: str, name: str):
@@ -51,7 +60,9 @@ def create_autosubmit_db_engine() -> Engine:
     Create an engine for the autosubmit DDBB. Usually named autosubmit.db
     """
     APIBasicConfig.read()
-    return create_engine(f"sqlite:///{ os.path.abspath(APIBasicConfig.DB_PATH)}")
+    return create_engine(
+        f"sqlite:///{ os.path.abspath(APIBasicConfig.DB_PATH)}", poolclass=NullPool
+    )
 
 
 def create_as_times_db_engine() -> Engine:
@@ -60,7 +71,7 @@ def create_as_times_db_engine() -> Engine:
     """
     APIBasicConfig.read()
     db_path = os.path.join(APIBasicConfig.DB_DIR, APIBasicConfig.AS_TIMES_DB)
-    return create_engine(f"sqlite:///{ os.path.abspath(db_path)}")
+    return create_engine(f"sqlite:///{ os.path.abspath(db_path)}", poolclass=NullPool)
 
 
 def execute_with_limit_offset(
