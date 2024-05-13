@@ -4,3 +4,4 @@ sphinx==5.*
 sphinx-autobuild==2021.3.*
 sphinx_rtd_theme
 sphinx-reredirects==0.1.*
+sphinxcontrib-redoc==1.6.0
