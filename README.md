@@ -2,11 +2,10 @@
 
 # Table of Contents
 
-1. [Overview](#overview) 
+1. [Overview](#overview)
 2. [Installation](#installation)
 3. [Configuration options](#configuration-options)
 4. [How to run tests](#how-to-run-tests)
-5. [Autosubmit Big Picture at BSC](#autosubmit-big-picture-at-bsc)
 
 ## Overview
 
@@ -37,19 +36,18 @@ autosubmit_api start
 
 The Autosubmit API have some configuration options that can be modified by setting their specific environment variable before starting the server:
 
-* **`PROTECTION_LEVEL`**: Default `ALL`. Possible values `ALL`, `WRITEONLY`, `NONE`.
-    * If set to `ALL`, all the endpoints will be protected by needing a valid token inside the `Authorization` header of the request.
-    * If set to `WRITEONLY`, only a subset of the endpoints will be protected.
-    * If set to `NONE`, none of the endpoints will be protected.
-* **`SECRET_KEY`**: The secret key to encode the JWT tokens from the Authorization Module. **Important to be set up on production.**
-* **`CAS_SERVER_URL`**: CAS Protocol server base URL to request a ticket and verify it. Used for `/v4` endpoints. `CAS_LOGIN_URL` and `CAS_VERIFY_URL` can be empty if this variable is set (the API will append the protocol URL subpaths).
-* **`CAS_LOGIN_URL`**: CAS Protocol URL to request a ticket. Used for `/v3` endpoints.
-* **`CAS_VERIFY_URL`**: CAS Protocol URL to verify a given ticket. Used for `/v3` endpoints.
-* **`GITHUB_OAUTH_CLIENT_ID`**: Client ID of the Github Oauth app.
-* **`GITHUB_OAUTH_CLIENT_SECRET`**: Secret key of the Github Oauth app.
-* **`GITHUB_OAUTH_WHITELIST_ORGANIZATION`**: Used to use authorization based on the membership of a Github organization.
-* **`GITHUB_OAUTH_WHITELIST_TEAM`**: Used to use authorization based on the membership of a Github team in an organization. `GITHUB_OAUTH_WHITELIST_ORGANIZATION` is required
-
+- **`PROTECTION_LEVEL`**: Default `ALL`. Possible values `ALL`, `WRITEONLY`, `NONE`.
+  - If set to `ALL`, all the endpoints will be protected by needing a valid token inside the `Authorization` header of the request.
+  - If set to `WRITEONLY`, only a subset of the endpoints will be protected.
+  - If set to `NONE`, none of the endpoints will be protected.
+- **`SECRET_KEY`**: The secret key to encode the JWT tokens from the Authorization Module. **Important to be set up on production.**
+- **`CAS_SERVER_URL`**: CAS Protocol server base URL to request a ticket and verify it. Used for `/v4` endpoints. `CAS_LOGIN_URL` and `CAS_VERIFY_URL` can be empty if this variable is set (the API will append the protocol URL subpaths).
+- **`CAS_LOGIN_URL`**: CAS Protocol URL to request a ticket. Used for `/v3` endpoints.
+- **`CAS_VERIFY_URL`**: CAS Protocol URL to verify a given ticket. Used for `/v3` endpoints.
+- **`GITHUB_OAUTH_CLIENT_ID`**: Client ID of the Github Oauth app.
+- **`GITHUB_OAUTH_CLIENT_SECRET`**: Secret key of the Github Oauth app.
+- **`GITHUB_OAUTH_WHITELIST_ORGANIZATION`**: Used to use authorization based on the membership of a Github organization.
+- **`GITHUB_OAUTH_WHITELIST_TEAM`**: Used to use authorization based on the membership of a Github team in an organization. `GITHUB_OAUTH_WHITELIST_ORGANIZATION` is required
 
 ## How to run tests
 
@@ -72,21 +70,3 @@ pytest --cov=autosubmit_api --cov-config=.coveragerc --cov-report=html tests/
 ```
 
 You will find the report in `htmlcov/index.html`
-
-## Autosubmit Big Picture at BSC
-
-![Autosubmit Big Picture](/docs/Total_Autosubmit_Diagram.png)
-
-In this image you can see the flow of information in the **Autosubmit environment**.
-
-* **Autosubmit**: Machines running Autosubmit.
-* **Remote Platforms**: Platforms (HPCs in most cases) to which Autosubmit connects to run jobs. 
-* **Experiment Database**: Starting from Autosubmit `3.13.0`, each experiment generates a set of databases that save important (reusable) information about it. We have the `historical database`, `graph database`, `structures database`.
-* **File System**: The file system where the experiment files are stored.
-* **Data Process Workers**: **Autosubmit API** implements a set of workers that periodically collect information from the experiments or complement that information. In the current **BSC** implementation, these workers are running no `bscesweb04` under `webadmin` user.
-* **Main Database**: **Autosubmit API** uses a centralized database to keep track of important experiment information. The **workers** fill this information. **Autosubmit** also writes into this database.
-* **Autosubmit API**: See [Autosubmit API](https://earth.bsc.es/gitlab/es/autosubmit_api). Currently, under **BSC** implementation, this API is running on `bscesweb04` under `webadmin` user. This API exposes a set of requests that **Autosubmit GUI** consumes and serves to the users through the front end.
-* **Autosubmit GUI**: This project.
-* **Authentication Server**: **BSC Central Authentication Service**.
-* **Users**: Users that access the GUI through their web browsers from any device. The current implementation requires that an user generates a token using the Authentication server once every 5 days.
-
