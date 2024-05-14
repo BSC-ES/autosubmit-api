@@ -9,11 +9,239 @@
     }
   },
   "paths": {
+    "/v3/login": {
+      "post": {
+        "tags": ["v3"],
+        "summary": "Login",
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/v3/tokentest": {
+      "get": {
+        "tags": ["v3"],
+        "summary": "Token test",
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      },
+      "post": {
+        "tags": ["v3"],
+        "summary": "Token test",
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/v3/updatedesc": {
+      "get": {
+        "tags": ["v3"],
+        "summary": "Update description",
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      },
+      "post": {
+        "tags": ["v3"],
+        "summary": "Update description",
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/v3/cconfig/{expid}": {
+      "get": {
+        "tags": ["v3"],
+        "summary": "Get current configuration",
+        "parameters": [
+          {
+            "name": "expid",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/v3/expinfo/{expid}": {
+      "get": {
+        "tags": ["v3"],
+        "summary": "Get experiment info",
+        "parameters": [
+          {
+            "name": "expid",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/v3/expcount/{expid}": {
+      "get": {
+        "tags": ["v3"],
+        "summary": "Get experiment counters",
+        "parameters": [
+          {
+            "name": "expid",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/v3/searchowner/{owner}/{exptype}/{onlyactive}": {
+      "get": {
+        "tags": ["v3"],
+        "summary": "Search owner",
+        "parameters": [
+          {
+            "name": "owner",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "exptype",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "onlyactive",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/v3/searchowner/{owner}": {
+      "get": {
+        "tags": ["v3"],
+        "summary": "Search owner",
+        "parameters": [
+          {
+            "name": "owner",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/v3/search/{expid}/{exptype}/{onlyactive}": {
+      "get": {
+        "tags": ["v3"],
+        "summary": "Search experiment",
+        "parameters": [
+          {
+            "name": "expid",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "exptype",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "onlyactive",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/v3/search/{expid}": {
+      "get": {
+        "tags": ["v3"],
+        "summary": "Search experiment",
+        "parameters": [
+          {
+            "name": "expid",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
     "/v3/running": {
       "get": {
-        "tags": [
-          "v3"
-        ],
+        "tags": ["v3"],
         "summary": "Running experiments",
         "operationId": "get-v3-running",
         "responses": {
@@ -81,48 +309,6 @@
                         }
                       }
                     }
-                  },
-                  "x-examples": {
-                    "Example 1": {
-                      "experiment": [
-                        {
-                          "completed": 25,
-                          "description": "Testing AS 4.0",
-                          "failed": 8,
-                          "hpc": "MARENOSTRUM4",
-                          "id": 8192,
-                          "modified": "2022-10-03 10:05:27",
-                          "name": "a4yd",
-                          "queuing": 0,
-                          "running": 0,
-                          "status": "RUNNING",
-                          "submitted": 0,
-                          "suspended": 0,
-                          "total": 385,
-                          "user": "root",
-                          "version": "4.0.0b0",
-                          "wrapper": null
-                        },
-                        {
-                          "completed": 88,
-                          "description": "TEST_AS_4.0",
-                          "failed": 0,
-                          "hpc": "MARENOSTRUM4",
-                          "id": 8202,
-                          "modified": "2022-11-30 11:50:29",
-                          "name": "t0an",
-                          "queuing": 0,
-                          "running": 0,
-                          "status": "RUNNING",
-                          "submitted": 0,
-                          "suspended": 0,
-                          "total": 91,
-                          "user": "root",
-                          "version": "4.0.0b0",
-                          "wrapper": null
-                        }
-                      ]
-                    }
                   }
                 },
                 "examples": {
@@ -175,11 +361,420 @@
         }
       }
     },
+    "/v3/runs/{expid}": {
+      "get": {
+        "tags": ["v3"],
+        "summary": "Get runs",
+        "parameters": [
+          {
+            "name": "expid",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/v3/ifrun/{expid}": {
+      "get": {
+        "tags": ["v3"],
+        "summary": "Get if running",
+        "parameters": [
+          {
+            "name": "expid",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/v3/logrun/{expid}": {
+      "get": {
+        "tags": ["v3"],
+        "summary": "Get status and log path experiment",
+        "parameters": [
+          {
+            "name": "expid",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/v3/summary/{expid}": {
+      "get": {
+        "tags": ["v3"],
+        "summary": "Get experiment summary",
+        "parameters": [
+          {
+            "name": "expid",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/v3/shutdown/{route}": {
+      "get": {
+        "tags": ["v3"],
+        "summary": "Shutdown route",
+        "parameters": [
+          {
+            "name": "route",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/v3/performance/{expid}": {
+      "get": {
+        "tags": ["v3"],
+        "summary": "Get experiment performance metrics",
+        "parameters": [
+          {
+            "name": "expid",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/v3/graph/{expid}/{layout}/{grouped}": {
+      "get": {
+        "tags": ["v3"],
+        "summary": "Get graph format",
+        "parameters": [
+          {
+            "name": "expid",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "layout",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "grouped",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/v3/tree/{expid}": {
+      "get": {
+        "tags": ["v3"],
+        "summary": "Get experiment tree",
+        "parameters": [
+          {
+            "name": "expid",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/v3/quick/{expid}": {
+      "get": {
+        "tags": ["v3"],
+        "summary": "Get quick view data",
+        "parameters": [
+          {
+            "name": "expid",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/v3/exprun/{expid}": {
+      "get": {
+        "tags": ["v3"],
+        "summary": "Get experiment run log",
+        "parameters": [
+          {
+            "name": "expid",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/v3/joblog/{logfile}": {
+      "get": {
+        "tags": ["v3"],
+        "summary": "Get job log from path",
+        "parameters": [
+          {
+            "name": "logfile",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/v3/pklinfo/{expid}/{timeStamp}": {
+      "get": {
+        "tags": ["v3"],
+        "summary": "Get experiment pklinfo",
+        "parameters": [
+          {
+            "name": "expid",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "timeStamp",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/v3/pkltreeinfo/{expid}/{timeStamp}": {
+      "get": {
+        "tags": ["v3"],
+        "summary": "Get experiment tree pklinfo",
+        "parameters": [
+          {
+            "name": "expid",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "timeStamp",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/v3/stats/{expid}/{filter_period}/{filter_type}": {
+      "get": {
+        "tags": ["v3"],
+        "summary": "Get experiment statistics",
+        "parameters": [
+          {
+            "name": "expid",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "filter_period",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "filter_type",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/v3/history/{expid}/{jobname}": {
+      "get": {
+        "tags": ["v3"],
+        "summary": "Get experiment job history",
+        "parameters": [
+          {
+            "name": "expid",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "jobname",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/v3/rundetail/{expid}/{runid}": {
+      "get": {
+        "tags": ["v3"],
+        "summary": "Get experiment run job detail",
+        "parameters": [
+          {
+            "name": "expid",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "runid",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/v3/filestatus/": {
+      "get": {
+        "tags": ["v3"],
+        "summary": "[LEGACY] Get file status",
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
     "/v4/experiments": {
       "get": {
-        "tags": [
-          "v4"
-        ],
+        "tags": ["v4"],
         "summary": "Search experiments",
         "description": "",
         "operationId": "get-v4-experiments",
@@ -210,11 +805,7 @@
             "in": "query",
             "schema": {
               "type": "string",
-              "enum": [
-                "test",
-                "operational",
-                "experiment"
-              ]
+              "enum": ["test", "operational", "experiment"]
             }
           },
           {
@@ -229,11 +820,7 @@
             "in": "query",
             "schema": {
               "type": "string",
-              "enum": [
-                "expid",
-                "created",
-                "description"
-              ]
+              "enum": ["expid", "created", "description"]
             }
           },
           {
@@ -346,55 +933,6 @@
                         }
                       }
                     }
-                  },
-                  "x-examples": {
-                    "Example 1": {
-                      "experiments": [
-                        {
-                          "completed": 0,
-                          "description": "DE Model App",
-                          "failed": 0,
-                          "hpc": null,
-                          "id": 9,
-                          "modified": null,
-                          "name": "a005",
-                          "queuing": 0,
-                          "running": 0,
-                          "status": "NOT RUNNING",
-                          "submitted": 0,
-                          "suspended": 0,
-                          "total": 0,
-                          "user": null,
-                          "version": "Unknown",
-                          "wrapper": null
-                        },
-                        {
-                          "completed": 115,
-                          "description": "DE downstream",
-                          "failed": 0,
-                          "hpc": "LOCAL",
-                          "id": 11,
-                          "modified": "2023-10-26 11:44:07",
-                          "name": "a006",
-                          "queuing": 0,
-                          "running": 0,
-                          "status": "NOT RUNNING",
-                          "submitted": 0,
-                          "suspended": 0,
-                          "total": 115,
-                          "user": "ltenorio",
-                          "version": "4.0.95",
-                          "wrapper": null
-                        }
-                      ],
-                      "pagination": {
-                        "page": 1,
-                        "page_items": 2,
-                        "page_size": 2,
-                        "total_items": 9,
-                        "total_pages": 5
-                      }
-                    }
                   }
                 },
                 "examples": {
@@ -456,9 +994,7 @@
     },
     "/v4/experiments/{expid}": {
       "get": {
-        "tags": [
-          "v4"
-        ],
+        "tags": ["v4"],
         "summary": "Get experiment info",
         "operationId": "get-v4-experiments-expid",
         "parameters": [
@@ -471,14 +1007,16 @@
             }
           }
         ],
-        "responses": {}
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
       }
     },
     "/v4/experiments/{expid}/jobs": {
       "get": {
-        "tags": [
-          "v4"
-        ],
+        "tags": ["v4"],
         "summary": "List experiment jobs",
         "operationId": "get-v4-experiments-expid-jobs",
         "parameters": [
@@ -488,10 +1026,7 @@
             "description": "Data view selector",
             "schema": {
               "type": "string",
-              "enum": [
-                "base",
-                "quick"
-              ]
+              "enum": ["base", "quick"]
             }
           },
           {
@@ -548,9 +1083,7 @@
     },
     "/v4/experiments/{expid}/wrappers": {
       "get": {
-        "tags": [
-          "v4"
-        ],
+        "tags": ["v4"],
         "summary": "List experiment wrappers",
         "operationId": "get-v4-experiments-expid-wrappers",
         "parameters": [
@@ -588,34 +1121,6 @@
                         }
                       }
                     }
-                  },
-                  "x-examples": {
-                    "Example 1": {
-                      "wrappers": [
-                        {
-                          "job_names": [
-                            "a6zi_18500101_fc0_1_SIM",
-                            "a6zi_18500101_fc0_2_SIM"
-                          ],
-                          "wrapper_name": "a6zi_ASThread_17108563159474_528_10"
-                        },
-                        {
-                          "job_names": [
-                            "a6zi_18500101_fc0_3_SIM",
-                            "a6zi_18500101_fc0_4_SIM",
-                            "a6zi_18500101_fc0_5_SIM",
-                            "a6zi_18500101_fc0_6_SIM",
-                            "a6zi_18500101_fc0_7_SIM",
-                            "a6zi_18500101_fc0_8_SIM",
-                            "a6zi_18500101_fc0_9_SIM",
-                            "a6zi_18500101_fc0_10_SIM",
-                            "a6zi_18500101_fc0_11_SIM",
-                            "a6zi_18500101_fc0_12_SIM"
-                          ],
-                          "wrapper_name": "a6zi_ASThread_17108816522924_528_10"
-                        }
-                      ]
-                    }
                   }
                 }
               }
@@ -626,9 +1131,7 @@
     },
     "/v4/auth/verify-token": {
       "get": {
-        "tags": [
-          "v4"
-        ],
+        "tags": ["v4"],
         "summary": "Verify JWT Token",
         "operationId": "get-v4-auth-verify-token",
         "parameters": [
@@ -701,9 +1204,7 @@
     },
     "/v4/auth/cas/v2/login": {
       "get": {
-        "tags": [
-          "v4"
-        ],
+        "tags": ["v4"],
         "summary": "CAS v2 Login",
         "operationId": "get-v4-auth-cas-v2-login",
         "parameters": [
@@ -803,9 +1304,7 @@
     },
     "/v4/auth/oauth2/github/login": {
       "get": {
-        "tags": [
-          "v4"
-        ],
+        "tags": ["v4"],
         "summary": "GitHub Oauth2 App Login",
         "operationId": "get-v4-auth-oauth2-github-login",
         "parameters": [
@@ -867,10 +1366,12 @@
                       "type": "string"
                     },
                     "token": {
-                      "type": "string"
+                      "type": "string",
+                      "nullable": true
                     },
                     "user": {
-                      "type": "string"
+                      "type": "string",
+                      "nullable": true
                     }
                   }
                 },
@@ -949,21 +1450,6 @@
           },
           "err_path_remote": {
             "type": "string"
-          }
-        },
-        "x-examples": {
-          "Example 1": {
-            "name": "a008_20200120_fc0_2_SIM",
-            "status": "COMPLETED",
-            "priority": 4,
-            "section": "SIM",
-            "date": "2020-01-20T00:00:00",
-            "member": "fc0",
-            "chunk": 2,
-            "out_path_local": "a008_20200120_fc0_2_SIM.20231027153508.out",
-            "err_path_local": "a008_20200120_fc0_2_SIM.20231027153508.err",
-            "out_path_remote": "a008_20200120_fc0_2_SIM.20231027153508.out",
-            "err_path_remote": "a008_20200120_fc0_2_SIM.20231027153508.err"
           }
         }
       }

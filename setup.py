@@ -30,7 +30,6 @@ install_requires = [
     "portalocker~=2.6.0",
     "networkx~=2.6.3",
     "scipy~=1.7.3",
-    "paramiko~=2.12.0",
     "python-dotenv",
     "autosubmitconfigparser~=1.0.48",
     "autosubmit>=3.13",
@@ -38,8 +37,7 @@ install_requires = [
     "gunicorn",
     "pydantic~=2.5.2",
     "SQLAlchemy~=2.0.23",
-    "python-cas>=1.6.0",
-    "Authlib>=1.3.0"
+    "python-cas>=1.6.0"
 ]
 
 # Test dependencies
