@@ -59,7 +59,7 @@ from autosubmit_api.builders.experiment_history_builder import ExperimentHistory
 from autosubmit_api.builders.configuration_facade_builder import ConfigurationFacadeDirector, AutosubmitConfigurationFacadeBuilder
 from autosubmit_api.builders.joblist_loader_builder import JobListLoaderBuilder, JobListLoaderDirector
 from autosubmit_api.components.jobs.job_support import JobSupport
-from typing import Dict, Any, Optional
+from typing import Dict, Any, Optional, Tuple
 import locale
 from autosubmitconfigparser.config.configcommon import AutosubmitConfig as Autosubmit4Config
 
@@ -69,8 +69,7 @@ SAFE_TIME_LIMIT = 300
 SAFE_TIME_LIMIT_STATUS = 180
 
 
-def get_experiment_stats(expid, filter_period, filter_type):
-    # type: (str, int, str) -> Dict[str, Any]
+def get_experiment_stats(expid: str, filter_period: int, filter_type: str) -> Dict[str, Any]:
     """
     Lite version of the stats generator from Autosubmit autosubmit.py
     """
@@ -151,8 +150,14 @@ def get_experiment_data(expid):
             'db_historic_version': "NA"}
     try:
         autosubmit_config_facade = ConfigurationFacadeDirector(AutosubmitConfigurationFacadeBuilder(expid)).build_autosubmit_configuration_facade()
-        _, experiment_status = DbRequests.get_specific_experiment_status(expid)
-        result["running"] = (experiment_status == "RUNNING")
+        try:
+            _, experiment_status = DbRequests.get_specific_experiment_status(expid)
+            result["running"] = (experiment_status == "RUNNING")
+        except Exception as exc:
+            logger.warning((traceback.format_exc()))
+            logger.warning((f"Warning: Error in get_experiment_data: {exc}. Trying to get the status exhaustively."))
+            _, _, is_running, _, _ = _is_exp_running(expid)
+            result["running"] = is_running
         result["path"] = autosubmit_config_facade.experiment_path
         result["owner_id"] = autosubmit_config_facade.get_owner_id()
         result["owner"] = autosubmit_config_facade.get_owner_name()
@@ -181,7 +186,7 @@ def get_experiment_data(expid):
     except Exception as exp:
         result["error"] = True
         result["error_message"] = str(exp)
-        print((traceback.format_exc()))
+        logger.error((traceback.format_exc()))
     return result
 
 
@@ -199,13 +204,12 @@ def get_current_status_log_plus(expid):
             "log_path": log_path}
 
 
-def _is_exp_running(expid, time_condition=300):
+def _is_exp_running(expid: str, time_condition=300) -> Tuple[bool, str, bool, int, str]:
     """
     Tests if experiment is running
     :param expid: Experiment name
     :param time_condition: Time constraint, 120 by default. Represents max seconds before an experiment is considered as NOT RUNNING
     :return: (error (true if error is found, false otherwise), error_message, is_running (true if running, false otherwise), timediff, path_to_log)
-    :rtype: tuple (bool, string, bool, int)
     """
     is_running = False
     error = False
@@ -225,14 +229,13 @@ def _is_exp_running(expid, time_condition=300):
                 expid, APIBasicConfig, ConfigParserFactory())
             as_conf.reload()
             current_version = as_conf.get_version()
-        except Exception as exp:
-            # print(exp)
-            pass
+        except Exception as exc:
+            logger.warning("Error in getting current_version: " + str(exc))
         look_old_folder = True if current_version is not None and (str(current_version).startswith(
             "3.11") or str(current_version).startswith("3.9") or str(current_version).startswith("3.12")) else False
 
-        pathlog_first = pathlog_aslog if look_old_folder == False else pathlog_tmp
-        pathlog_second = pathlog_aslog if look_old_folder == True else pathlog_tmp
+        pathlog_first = pathlog_aslog if look_old_folder is False else pathlog_tmp
+        pathlog_second = pathlog_aslog if look_old_folder is True else pathlog_tmp
         # print("Experiment {0} version {1} \nLook {2} \nLook {3}".format(
         #     expid, current_version, pathlog_first, pathlog_second))
         # print(pathlog)
@@ -313,8 +316,8 @@ def get_experiment_summary(expid, log):
         job_package_reader = JobPackageReader(expid)
         try:
             job_package_reader.read()
-        except:
-            logger.warning("Failed to read job_packages")
+        except Exception as exc:
+            logger.warning(f"Failed to read job_packages: {exc}")
         # Basic data
         job_running_to_seconds = dict()
         job_running_to_runtext = dict()
@@ -359,7 +362,6 @@ def get_experiment_summary(expid, log):
                 queue_seconds = job_info.queue_time if job_info else 0
                 running_seconds = job_info.run_time if job_info else 0
                 status = job_info.status if job_info else "UNKNOWN"
-                energy = job_info.energy if job_info else 0
                 # Identifying SIM
                 name_components = job_name.split('_')
                 if "SIM" in name_components:
@@ -536,7 +538,6 @@ def get_job_log(expid, logfile, nlines=150):
     error = False
     error_message = ""
     logcontent = []
-    reading = ""
     APIBasicConfig.read()
     exp_paths = ExperimentPaths(expid)
     logfilepath = os.path.join(exp_paths.tmp_log_dir, logfile)
@@ -752,7 +753,6 @@ def get_experiment_tree_structured(expid, log):
     """
 
     try:
-        notransitive = False
         APIBasicConfig.read()
 
         # TODO: Encapsulate this following 2 lines or move to the parent function in app.py
@@ -812,18 +812,12 @@ def get_experiment_counters(expid):
 # TODO: Update to current representation standards and classes
 def get_quick_view(expid):
     """ Lighter View """
-    pkl_file_name = ""
     error = False
     error_message = ""
     #quick_view = list()
     view_data = []
     quick_tree_view = deque()
-    source = JobList.get_sourcetag()
-    target = JobList.get_targettag()
-    sync = JobList.get_synctag()
-    check_mark = JobList.get_checkmark()
     jobs_in_pkl = {}
-    fakeAllJobs = []
     total_count = completed_count = failed_count = running_count = queuing_count = 0
     try:
         APIBasicConfig.read()
@@ -840,8 +834,8 @@ def get_quick_view(expid):
             job_package_reader.read()
             job_to_package = job_package_reader.job_to_package
             package_to_package_id = job_package_reader.package_to_package_id
-        except:
-            logger.warning("Failed to read job_packages")
+        except Exception as exc:
+            logger.warning(f"Failed to read job_packages: {exc}")
         
         logger.debug(("Retrieving packages {0} seconds.".format(
             str(time.time() - now_))))
@@ -872,9 +866,9 @@ def get_quick_view(expid):
                 status_text = str(common_utils.Status.VALUE_TO_KEY[status_code])
                 jobs_in_pkl[job_name] = (
                     status_code, status_color, status_text, out, err, priority, id_number)
-        except Exception as exp:
+        except Exception as exc:
             raise Exception(
-                "Autosubmit API couldn't open pkl file. If you are sure that your experiment is running correctly, try again.")
+                f"Autosubmit API couldn't open pkl file. If you are sure that your experiment is running correctly, try again: {exc}")
 
         total_count = len(list(jobs_in_pkl.keys()))
 
@@ -884,9 +878,9 @@ def get_quick_view(expid):
                     job_name]
                 wrapper_tag = ""
                 wrapper_id = 0
-                wrapper_name = ""
+                # wrapper_name = ""
                 if job_name in list(job_to_package.keys()):
-                    wrapper_name = job_to_package[job_name]
+                    # wrapper_name = job_to_package[job_name]
                     wrapper_id = package_to_package_id[job_to_package[job_name]]
                     wrapper_tag = " <span class='badge' style='background-color:#94b8b8'>Wrapped " + \
                         wrapper_id + "</span>"
@@ -909,8 +903,8 @@ def get_quick_view(expid):
             # return {}
             # quick_tree_view = list(quick_tree_view)
                     
-    except Exception as exp:
-        error_message = "Exception: {0}".format(str(exp))
+    except Exception as exc:
+        error_message = "Exception: {0}".format(str(exc))
         error = True
         logger.error(error_message)
         logger.error(traceback.format_exc())
@@ -989,7 +983,7 @@ def get_current_configuration_by_expid(expid: str, user_id: Optional[str]):
         experimentRun = historicalDatabase.get_max_id_experiment_run()
         currentMetadata = json.loads(
             experimentRun.metadata) if experimentRun and experimentRun.metadata else None
-        currentRunId = experimentRun.run_id if experimentRun else None
+        # currentRunId = experimentRun.run_id if experimentRun else None
         # Main keys = conf, exp, jobs, platforms, proj
         # Can we ignore proj by now? Including it.
         # TODO: Define which keys should be included in the answer
@@ -1199,7 +1193,7 @@ def test_esarchive_status():
         clatency = result[4]
         DbRequests.insert_archive_status(
             status, alatency, abandwith, clatency, cbandwidth, rtime)
-    except Exception as exp:
+    except Exception:
         print((traceback.format_exc()))
         # error_message = str(exp)
 
@@ -1225,9 +1219,9 @@ def get_last_test_archive_status():
                 rtime) > 1 else None
         else:
             str_status = "OFFLINE"
-    except Exception as exp:
+    except Exception as exc:
         error = True
-        error_message = ""
+        error_message = exc
 
     return {"status": str_status,
             "error": error,
@@ -1247,14 +1241,14 @@ def enforceLocal(log):
     try:
         try:
             locale.setlocale(locale.LC_ALL, 'en_GB.UTF-8')
-        except Exception as e:
+        except Exception:
             try:
                 locale.setlocale(locale.LC_ALL, 'C.utf8')
-            except Exception as e:
+            except Exception:
                 try:
                     locale.setlocale(locale.LC_ALL, 'en_GB')
-                except Exception as e:
+                except Exception:
                     locale.setlocale(locale.LC_ALL, 'es_ES')
-    except Exception as e:
+    except Exception:
         log.info("Locale C.utf8 is not found, using '{0}' as fallback".format("C"))
         locale.setlocale(locale.LC_ALL, 'C')

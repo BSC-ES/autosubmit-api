@@ -110,9 +110,10 @@ def get_specific_experiment_status(expid):
                     tables.experiment_status_table.c.name == expid
                 )
             ).one_or_none()
+            if row:
+                return (row.name, row.status)
     except Exception as exc:
         logger.error(f"Exception while reading experiment_status for {expid}: {exc}")
         logger.error(traceback.format_exc())
-    if row:
-        return (row.name, row.status)
+
     return (expid, "NOT RUNNING")
