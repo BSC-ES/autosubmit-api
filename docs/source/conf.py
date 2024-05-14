@@ -24,6 +24,10 @@ redoc = [
         'spec': '_static/openapi.json',
         # 'spec': 'https://petstore3.swagger.io/api/v3/openapi.json',
         # 'spec': 'https://petstore.swagger.io/v2/swagger.json'
+        'opts': {
+            'suppress-warnings': True,
+            'hide-hostname': True
+        }
     }
 ]
 

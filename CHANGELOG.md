@@ -1,8 +1,10 @@
 # CHANGELOG
 
-### Pre-release v4.0.0b7 - Release date: TBD
+### Pre-release v4.0.0b7 - Release date: 2024-05-14
 
 * Reduced writing time in status updater background task
+* Improved documentation
+* Removed `listexp` view
 * Minor fixes
 
 ### Pre-release v4.0.0b6 - Release date: 2024-04-19
