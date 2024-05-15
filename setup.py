@@ -32,7 +32,7 @@ install_requires = [
     "scipy~=1.7.3",
     "python-dotenv",
     "autosubmitconfigparser~=1.0.48",
-    "autosubmit>=3.13",
+    "autosubmit>=4.2.0",
     "Flask-APScheduler",
     "gunicorn",
     "pydantic~=2.5.2",

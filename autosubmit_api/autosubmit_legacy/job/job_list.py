@@ -37,7 +37,7 @@ from autosubmit_api.monitor.monitor import Monitor
 from autosubmit_api.common.utils import Status
 from bscearth.utils.date import date2str, parse_date
 # from autosubmit_legacy.job.tree import Tree
-from autosubmit_api.database import db_structure as DbStructure
+from autosubmit.database import db_structure as DbStructure
 from autosubmit_api.database.db_jobdata import JobDataStructure, JobRow
 from autosubmit_api.builders.experiment_history_builder import ExperimentHistoryDirector, ExperimentHistoryBuilder
 from autosubmit_api.history.data_classes.job_data import JobData

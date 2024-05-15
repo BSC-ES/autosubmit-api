@@ -4,7 +4,7 @@ import os
 from fnmatch import fnmatch
 from autosubmit_api.components.jobs.joblist_helper import JobListHelper
 from autosubmit_api.components.jobs.job_factory import StandardJob, Job
-from autosubmit_api.database.db_structure import get_structure
+from autosubmit.database import db_structure
 from autosubmit_api.common.utils import Status
 from bscearth.utils.date import date2str
 from typing import Dict, List, Set
@@ -144,7 +144,7 @@ class JobListLoader(object):
       self._job_dictionary[job.name] = job
 
   def load_existing_structure_adjacency(self):
-    self._structure_adjacency = get_structure(self.expid, self.configuration_facade.structures_path)
+    self._structure_adjacency = db_structure.get_structure(self.expid, self.configuration_facade.structures_path)
 
   def distribute_adjacency_into_jobs(self):
     parents_adjacency = {}
