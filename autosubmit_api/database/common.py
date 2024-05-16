@@ -1,44 +1,23 @@
 import os
-from typing import Any, Union
+from typing import Any
 from sqlalchemy import (
     Connection,
     Engine,
-    MetaData,
     NullPool,
     Select,
     create_engine,
     select,
     text,
     func,
-    Table,
 )
-from sqlalchemy.orm import DeclarativeBase
 from autosubmit_api.builders import BaseBuilder
 from autosubmit_api.logger import logger
 from autosubmit_api.config.basicConfig import APIBasicConfig
+from autosubmit.database import session
 
-APIBasicConfig.read()
-try:
-    _postgres_engine = create_engine(APIBasicConfig.DATABASE_CONN_URL)
-except Exception:
-    pass
 
 def get_postgres_engine():
-    db = _postgres_engine
-    if not isinstance(db, Engine):
-        APIBasicConfig.read()
-        db = create_engine(APIBasicConfig.DATABASE_CONN_URL)
-    return db
-
-
-def copy_rename_table(source_table: DeclarativeBase, new_name: str):
-    dest_table = Table(new_name)
-
-    core_source_table: Table = source_table.__table__
-    for col in core_source_table.columns:
-        dest_table.append_column(col)
-
-    return dest_table
+    return session.Session().bind
 
 
 class AttachedDatabaseConnBuilder(BaseBuilder):
@@ -91,7 +70,9 @@ def create_autosubmit_db_engine() -> Engine:
     APIBasicConfig.read()
     if APIBasicConfig.DATABASE_BACKEND == "postgres":
         return get_postgres_engine()
-    return create_engine(f"sqlite:///{ os.path.abspath(APIBasicConfig.DB_PATH)}", poolclass=NullPool)
+    return create_engine(
+        f"sqlite:///{ os.path.abspath(APIBasicConfig.DB_PATH)}", poolclass=NullPool
+    )
 
 
 def create_as_times_db_engine() -> Engine:
@@ -128,26 +109,3 @@ def execute_with_limit_offset(
     total = conn.scalar(count_stmnt)
 
     return query_result, total
-
-
-def table_change_schema(schema: str, source: Union[DeclarativeBase, Table]) -> Table:
-    """
-    Copy the source table and change the schema of that SQLAlchemy table into a new table instance
-    """
-    if issubclass(source, DeclarativeBase):
-        _source_table: Table = source.__table__
-    elif isinstance(source, Table):
-        _source_table = source
-    else:
-        raise RuntimeError("Invalid source type on table schema change")
-
-    metadata = MetaData(schema=schema)
-    dest_table = Table(_source_table.name, metadata)
-
-    for col in _source_table.columns:
-        dest_table.append_column(col.copy())
-
-    logger.debug(_source_table.columns)
-    logger.debug(dest_table.columns)
-
-    return dest_table

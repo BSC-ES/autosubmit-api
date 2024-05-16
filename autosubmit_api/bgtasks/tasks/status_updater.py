@@ -2,13 +2,11 @@ import os
 import time
 from typing import List
 
-from sqlalchemy import select
 from autosubmit_api.bgtasks.bgtask import BackgroundTaskTemplate
-from autosubmit_api.database import tables
-from autosubmit_api.database.adapters.experiment_status import ExperimentStatusDbAdapter
-from autosubmit_api.database.common import (
-    create_autosubmit_db_engine,
-    create_main_db_conn,
+from autosubmit_api.database.adapters import (
+    ExperimentStatusDbAdapter,
+    ExperimentDbAdapter,
+    ExperimentJoinDbAdapter,
 )
 from autosubmit_api.database.models import ExperimentModel
 from autosubmit_api.experiment.common_requests import _is_exp_running
@@ -25,28 +23,20 @@ class StatusUpdater(BackgroundTaskTemplate):
         """
         Clears the experiments that are not in the experiments table
         """
-        with create_main_db_conn() as conn:
-            try:
-                del_stmnt = tables.experiment_status_table.delete().where(
-                    tables.experiment_status_table.c.exp_id.not_in(
-                        select(tables.experiment_table.c.id)
-                    )
-                )
-                conn.execute(del_stmnt)
-                conn.commit()
-            except Exception as exc:
-                conn.rollback()
-                cls.logger.error(
-                    f"[{cls.id}] Error while clearing missing experiments status: {exc}"
-                )
+
+        try:
+            ExperimentJoinDbAdapter().drop_status_from_deleted_experiments()
+        except Exception as exc:
+            cls.logger.error(
+                f"[{cls.id}] Error while clearing missing experiments status: {exc}"
+            )
 
     @classmethod
     def _get_experiments(cls) -> List[ExperimentModel]:
         """
         Get the experiments list
         """
-        with create_autosubmit_db_engine().connect() as conn:
-            query_result = conn.execute(tables.experiment_table.select()).all()
+        query_result = ExperimentDbAdapter().get_all()
         return [ExperimentModel.model_validate(row._mapping) for row in query_result]
 
     @classmethod
