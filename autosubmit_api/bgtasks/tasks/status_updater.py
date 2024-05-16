@@ -1,6 +1,6 @@
 import os
 import time
-from typing import Dict, List
+from typing import List
 
 from sqlalchemy import select
 from autosubmit_api.bgtasks.bgtask import BackgroundTaskTemplate
@@ -48,15 +48,6 @@ class StatusUpdater(BackgroundTaskTemplate):
         with create_autosubmit_db_engine().connect() as conn:
             query_result = conn.execute(tables.experiment_table.select()).all()
         return [ExperimentModel.model_validate(row._mapping) for row in query_result]
-
-    @classmethod
-    def _get_current_status(cls) -> Dict[str, str]:
-        """
-        Get the current status of the experiments
-        """
-        with create_as_times_db_engine().connect() as conn:
-            query_result = conn.execute(tables.experiment_status_table.select()).all()
-        return {row.name: row.status for row in query_result}
 
     @classmethod
     def _check_exp_running(cls, expid: str) -> bool:
@@ -108,7 +99,7 @@ class StatusUpdater(BackgroundTaskTemplate):
         exp_list = cls._get_experiments()
 
         # Read current status of all experiments
-        current_status = cls._get_current_status()
+        current_status = ExperimentStatusDbAdapter().get_all_dict()
 
         # Check every experiment status & update
         for experiment in exp_list:
@@ -116,10 +107,7 @@ class StatusUpdater(BackgroundTaskTemplate):
             new_status = (
                 RunningStatus.RUNNING if is_running else RunningStatus.NOT_RUNNING
             )
-            if (
-                current_status.get(experiment.name, RunningStatus.NOT_RUNNING)
-                != new_status
-            ):
+            if current_status.get(experiment.name) != new_status:
                 cls.logger.info(
                     f"[{cls.id}] Updating status of {experiment.name} to {new_status}"
                 )
