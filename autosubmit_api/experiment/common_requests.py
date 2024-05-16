@@ -33,6 +33,7 @@ from autosubmit_api.components.experiment.pkl_organizer import PklOrganizer
 from autosubmit_api.components.jobs.job_factory import SimpleJob
 from autosubmit_api.config.confConfigStrategy import confConfigStrategy
 from autosubmit_api.database import db_common as db_common
+from autosubmit_api.database.adapters.experiment_status import ExperimentStatusDbAdapter
 from autosubmit_api.experiment import common_db_requests as DbRequests
 from autosubmit_api.database import db_jobdata as JobData
 from autosubmit_api.common import utils as common_utils
@@ -151,7 +152,7 @@ def get_experiment_data(expid):
     try:
         autosubmit_config_facade = ConfigurationFacadeDirector(AutosubmitConfigurationFacadeBuilder(expid)).build_autosubmit_configuration_facade()
         try:
-            _, experiment_status = DbRequests.get_specific_experiment_status(expid)
+            experiment_status = ExperimentStatusDbAdapter().get_status(expid)
             result["running"] = (experiment_status == "RUNNING")
         except Exception as exc:
             logger.warning((traceback.format_exc()))
@@ -459,7 +460,7 @@ def quick_test_run(expid):
     error_message = ""
 
     try:
-        name, status = DbRequests.get_specific_experiment_status(expid)
+        status = ExperimentStatusDbAdapter().get_status(expid)
         if status != "RUNNING":
             running = False
     except Exception as exp:

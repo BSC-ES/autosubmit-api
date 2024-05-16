@@ -28,6 +28,7 @@ from bscearth.utils.log import Log
 from autosubmit_api.config.basicConfig import APIBasicConfig
 from autosubmit_api.builders.experiment_history_builder import ExperimentHistoryDirector, ExperimentHistoryBuilder
 from autosubmit_api.builders.configuration_facade_builder import ConfigurationFacadeDirector, AutosubmitConfigurationFacadeBuilder
+from autosubmit_api.database.adapters.experiment_status import ExperimentStatusDbAdapter
 from autosubmit_api.database.utils import get_headers_sqlite, map_row_result_to_dict_sqlite
 from autosubmit_api.experiment import common_db_requests as DbRequests
 from typing import Dict, Any, Tuple
@@ -110,40 +111,6 @@ def close_conn(conn: Connection, cursor):
     conn.close()
     return
 
-
-def check_experiment_exists(name, error_on_inexistence=True):
-    """
-    Checks if exist an experiment with the given name.
-
-    :param error_on_inexistence: if True, adds an error log if experiment does not exists
-    :type error_on_inexistence: bool
-    :param name: Experiment name
-    :type name: str
-    :return: If experiment exists returns true, if not returns false
-    :rtype: bool
-    """
-    if not check_db():
-        return False
-    try:
-        (conn, cursor) = open_conn()
-    except DbException as e:
-        Log.error(
-            'Connection to database could not be established: {0}', e.message)
-        return False
-    conn.isolation_level = None
-
-    # SQLite always return a unicode object, but we can change this
-    # behaviour with the next sentence
-    conn.text_factory = str
-    cursor.execute(
-        'select name from experiment where name=:name', {'name': name})
-    row = cursor.fetchone()
-    close_conn(conn, cursor)
-    if row is None:
-        if error_on_inexistence:
-            Log.error('The experiment name "{0}" does not exist yet!!!', name)
-        return False
-    return True
 
 
 def get_autosubmit_version(expid, log=None):
@@ -230,8 +197,12 @@ def search_experiment_by_id(query, exp_type=None, only_active=None, owner=None):
     experiment_status = dict()
     experiment_times = dict()
     if len(table) > 0:
-        experiment_status = DbRequests.get_experiment_status()
-        # REMOVED: experiment_times = DbRequests.get_experiment_times()
+        # Get experiment status table
+        try:
+            experiment_status = ExperimentStatusDbAdapter().get_all_dict()
+        except Exception:
+            experiment_status = {}
+            
     for row in table:
         expid = str(row[1])
 
@@ -312,8 +283,12 @@ def get_current_running_exp():
     result = list()
     experiment_status = dict()
     experiment_times = dict()
-    experiment_status = DbRequests.get_experiment_status()
-    # REMOVED: experiment_times = DbRequests.get_experiment_times()
+    # Get experiment status table
+    try:
+        experiment_status = ExperimentStatusDbAdapter().get_all_dict()
+    except Exception:
+        experiment_status = {}
+
     for row in table:
         expid = str(row[1])
         status = "NOT RUNNING"
