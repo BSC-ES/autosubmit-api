@@ -3,6 +3,8 @@ from sqlalchemy.orm import mapped_column, Mapped
 from autosubmit.database.tables import (
     BaseTable,
     ExperimentTable,
+    experiment_run_table,
+    JobDataTable,
     ExperimentStatusTable,
     JobPackageTable,
     WrapperJobPackageTable,
@@ -53,3 +55,7 @@ graph_data_table: Table = GraphDataTable.__table__
 # Job package TABLES
 job_package_table: Table = JobPackageTable.__table__
 wrapper_job_package_table: Table = WrapperJobPackageTable.__table__
+
+# Job Data TABLES
+job_data_table: Table = JobDataTable.__table__
+experiment_run_table: Table = experiment_run_table

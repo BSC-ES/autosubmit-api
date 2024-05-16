@@ -424,41 +424,6 @@ class JobData(object):
             self._energy = energy if energy else 0
 
 
-class JobStepExtraData():
-    def __init__(self, key, dict_data):
-        self.key = key
-        if isinstance(dict_data, dict):
-            # dict_data["ncpus"] if dict_data and "ncpus" in dict_data.keys(
-            self.ncpus = dict_data.get("ncpus", 0) if dict_data else 0
-            # ) else 0
-            self.nnodes = dict_data.get(
-                "nnodes", 0) if dict_data else 0  # and "nnodes" in dict_data.keys(
-            # ) else 0
-            self.submit = int(mktime(datetime.strptime(dict_data["submit"], "%Y-%m-%dT%H:%M:%S").timetuple())) if dict_data and "submit" in list(dict_data.keys(
-            )) else 0
-            self.start = int(mktime(datetime.strptime(dict_data["start"], "%Y-%m-%dT%H:%M:%S").timetuple())) if dict_data and "start" in list(dict_data.keys(
-            )) else 0
-            self.finish = int(mktime(datetime.strptime(dict_data["finish"], "%Y-%m-%dT%H:%M:%S").timetuple())) if dict_data and "finish" in list(dict_data.keys(
-            )) and dict_data["finish"] != "Unknown" else 0
-            self.energy = parse_output_number(dict_data["energy"]) if dict_data and "energy" in list(dict_data.keys(
-            )) else 0
-            # if dict_data and "MaxRSS" in dict_data.keys(
-            self.maxRSS = dict_data.get("MaxRSS", 0)
-            # ) else 0
-            # if dict_data and "AveRSS" in dict_data.keys(
-            self.aveRSS = dict_data.get("AveRSS", 0)
-            # ) else 0
-        else:
-            self.ncpus = 0
-            self.nnodes = 0
-            self.submit = 0
-            self.start = 0
-            self.finish = 0
-            self.energy = 0
-            self.maxRSS = 0
-            self.aveRSS = 0
-
-
 class MainDataBase():
     def __init__(self, expid):
         self.expid = expid
