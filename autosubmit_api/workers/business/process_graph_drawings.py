@@ -1,7 +1,6 @@
 import time
 import traceback
-from autosubmit_api.database import tables
-from autosubmit_api.database.common import create_as_times_db_engine
+from autosubmit_api.database.adapters import ExperimentStatusDbAdapter
 from autosubmit_api.common import utils as common_utils
 from autosubmit_api.components.experiment.graph_drawer import ExperimentGraphDrawing
 from autosubmit_api.builders.configuration_facade_builder import (
@@ -12,7 +11,7 @@ from autosubmit_api.builders.joblist_loader_builder import (
     JobListLoaderBuilder,
     JobListLoaderDirector,
 )
-from typing import List, Any
+from typing import List, Any, Optional
 
 
 def process_active_graphs():
@@ -20,14 +19,7 @@ def process_active_graphs():
     Process the list of active experiments to generate the positioning of their graphs
     """
     try:
-        with create_as_times_db_engine().connect() as conn:
-            query_result = conn.execute(
-                tables.experiment_status_table.select().where(
-                    tables.experiment_status_table.c.status == "RUNNING"
-                )
-            ).all()
-
-        active_experiments: List[str] = [exp.name for exp in query_result]
+        active_experiments = ExperimentStatusDbAdapter().get_only_running_expids()
 
         for expid in active_experiments:
             try:
@@ -38,7 +30,7 @@ def process_active_graphs():
                     autosubmit_configuration_facade.get_autosubmit_version()
                 ):
                     _process_graph(expid, autosubmit_configuration_facade.chunk_size)
-            except Exception as exp:
+            except Exception:
                 print((traceback.format_exc()))
                 print(("Error while processing: {}".format(expid)))
 
@@ -47,8 +39,7 @@ def process_active_graphs():
         print(("Error while processing graph drawing: {}".format(exp)))
 
 
-def _process_graph(expid, chunk_size):
-    # type: (str, int) -> List[Any] | None
+def _process_graph(expid: str, chunk_size: int) -> Optional[List[Any]]:
     result = None
     experimentGraphDrawing = ExperimentGraphDrawing(expid)
     locked = experimentGraphDrawing.locked

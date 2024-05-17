@@ -23,6 +23,8 @@ def get_postgres_engine():
 class AttachedDatabaseConnBuilder(BaseBuilder):
     """
     SQLite utility to build attached databases.
+
+    MUST BE USED ONLY FOR ADAPTERS and TESTS.
     """
 
     def __init__(self) -> None:
@@ -52,6 +54,8 @@ class AttachedDatabaseConnBuilder(BaseBuilder):
 def create_main_db_conn() -> Connection:
     """
     Connection with the autosubmit and as_times DDBB.
+
+    MUST BE USED ONLY FOR ADAPTERS and TESTS.
     """
     APIBasicConfig.read()
     if APIBasicConfig.DATABASE_BACKEND == "postgres":
@@ -66,6 +70,8 @@ def create_main_db_conn() -> Connection:
 def create_autosubmit_db_engine() -> Engine:
     """
     Create an engine for the autosubmit DDBB. Usually named autosubmit.db
+
+    MUST BE USED ONLY FOR ADAPTERS and TESTS.
     """
     APIBasicConfig.read()
     if APIBasicConfig.DATABASE_BACKEND == "postgres":
@@ -78,6 +84,8 @@ def create_autosubmit_db_engine() -> Engine:
 def create_as_times_db_engine() -> Engine:
     """
     Create an engine for the AS_TIMES DDBB. Usually named as_times.db
+
+    MUST BE USED ONLY FOR ADAPTERS and TESTS.
     """
 
     APIBasicConfig.read()

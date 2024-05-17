@@ -1,6 +1,6 @@
 from datetime import datetime
 import os
-from typing import Dict
+from typing import Dict, List
 from autosubmit.database.db_manager import create_db_table_manager
 from sqlalchemy import delete, insert, select
 from autosubmit_api.config.basicConfig import APIBasicConfig
@@ -15,6 +15,13 @@ class ExperimentStatusDbAdapter:
             db_filepath=os.path.join(APIBasicConfig.DB_DIR, APIBasicConfig.AS_TIMES_DB),
         )
 
+    def create_table(self):
+        """
+        Create the experiment_status table.
+        """
+        with self.table_manager.get_connection() as conn:
+            self.table_manager.create_table(conn)
+
     def get_all_dict(self) -> Dict[str, str]:
         """
         Gets table experiment_status as dictionary {expid: status}
@@ -25,6 +32,18 @@ class ExperimentStatusDbAdapter:
             for row in cursor:
                 result[row.name] = row.status
         return result
+
+    def get_only_running_expids(self) -> List[str]:
+        """
+        Gets list of running experiments
+        """
+        with self.table_manager.get_connection() as conn:
+            rows = conn.execute(
+                select(self.table_manager.table).where(
+                    self.table_manager.table.c.status == "RUNNING"
+                )
+            ).all()
+        return [row.name for row in rows]
 
     def get_status(self, expid: str) -> str:
         """

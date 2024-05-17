@@ -513,7 +513,7 @@ class JobDataStructure(MainDataBase):
             self.db_version = self._select_pragma_version()
             # self.query_job_historic = None
             # Historic only working on DB 12 now
-            self.query_job_historic = "SELECT id, counter, job_name, created, modified, submit, start, finish, status, rowtype, ncpus, wallclock, qos, energy, date, section, member, chunk, last, platform, job_id, extra_data, nnodes, run_id FROM job_data WHERE job_name=? ORDER BY counter DESC"
+            # self.query_job_historic = "SELECT id, counter, job_name, created, modified, submit, start, finish, status, rowtype, ncpus, wallclock, qos, energy, date, section, member, chunk, last, platform, job_id, extra_data, nnodes, run_id FROM job_data WHERE job_name=? ORDER BY counter DESC"
 
             if self.db_version < DB_VERSION_SCHEMA_CHANGES:
                 try:

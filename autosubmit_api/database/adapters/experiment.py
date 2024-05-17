@@ -12,6 +12,13 @@ class ExperimentDbAdapter:
             db_filepath=APIBasicConfig.DB_PATH,
         )
 
+    def create_table(self):
+        """
+        Create the experiment table.
+        """
+        with self.table_manager.get_connection() as conn:
+            self.table_manager.create_table(conn)
+
     def get_all(self):
         """
         Return all experiments.

@@ -14,7 +14,13 @@ from autosubmit_api.database.adapters.experiment_status import (
     ExperimentStatusDbAdapter,
 )
 from autosubmit_api.database.adapters.graph_draw import ExpGraphDrawDBAdapter
-from autosubmit_api.database.adapters.join.experiment_join import ExperimentJoinDbAdapter
+from autosubmit_api.database.adapters.join.experiment_join import (
+    ExperimentJoinDbAdapter,
+)
+from autosubmit_api.database.adapters.job_packages import (
+    JobPackagesDbAdapter,
+    WrapperJobPackagesDbAdapter,
+)
 
 
 __all__ = [
@@ -22,5 +28,7 @@ __all__ = [
     "ExperimentDetailsDbAdapter",
     "ExperimentStatusDbAdapter",
     "ExpGraphDrawDBAdapter",
-    "ExperimentJoinDbAdapter"
+    "ExperimentJoinDbAdapter",
+    "JobPackagesDbAdapter",
+    "WrapperJobPackagesDbAdapter",
 ]
