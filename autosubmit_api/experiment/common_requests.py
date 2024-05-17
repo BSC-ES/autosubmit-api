@@ -29,11 +29,13 @@ import multiprocessing
 import subprocess
 
 from collections import deque
+
 from autosubmit_api.components.experiment.pkl_organizer import PklOrganizer
 from autosubmit_api.components.jobs.job_factory import SimpleJob
 from autosubmit_api.config.confConfigStrategy import confConfigStrategy
-from autosubmit_api.database import db_common as db_common
+from autosubmit_api.database.adapters.experiment import ExperimentDbAdapter
 from autosubmit_api.database.adapters.experiment_status import ExperimentStatusDbAdapter
+from autosubmit_api.database.adapters import ExperimentJoinDbAdapter
 from autosubmit_api.experiment import common_db_requests as DbRequests
 from autosubmit_api.database import db_jobdata as JobData
 from autosubmit_api.common import utils as common_utils
@@ -164,7 +166,10 @@ def get_experiment_data(expid):
         result["owner"] = autosubmit_config_facade.get_owner_name()
         result["time_last_access"] = autosubmit_config_facade.get_experiment_last_access_time_as_datetime()
         result["time_last_mod"] = autosubmit_config_facade.get_experiment_last_modified_time_as_datetime()
-        result["description"] = db_common.get_experiment_by_id(expid)["description"]
+        try:
+            result["description"] = ExperimentDbAdapter().get_by_expid(expid).get("description", "NA")
+        except Exception:
+            result["description"] = "NA"
         result["version"] = autosubmit_config_facade.get_autosubmit_version()
         result["model"] = autosubmit_config_facade.get_model()
         result["branch"] = autosubmit_config_facade.get_branch()
@@ -756,8 +761,8 @@ def get_experiment_tree_structured(expid, log):
     try:
         APIBasicConfig.read()
 
-        # TODO: Encapsulate this following 2 lines or move to the parent function in app.py
-        curr_exp_as_version = db_common.get_autosubmit_version(expid, log)
+        # TODO: Encapsulate this following 2 lines or move to the parent function in app.
+        curr_exp_as_version: str = ExperimentDbAdapter().get_by_expid(expid).get("autosubmit_version")
         main, secondary = common_utils.parse_version_number(curr_exp_as_version)
         if main and main >= 4:
             as_conf = Autosubmit4Config(expid)
@@ -1253,3 +1258,183 @@ def enforceLocal(log):
     except Exception:
         log.info("Locale C.utf8 is not found, using '{0}' as fallback".format("C"))
         locale.setlocale(locale.LC_ALL, 'C')
+
+
+def search_experiment_by_id(
+    query: str, exp_type: str = None, only_active: bool = None, owner: str = None
+):
+    """
+    Search experiments using provided data. Main query searches in the view listexp of ec_earth.db.
+
+    :param searchString: string used to match columns in the table
+    :type searchString: str
+    :param typeExp: Assumes values "test" (only experiments starting with 't') or "experiment" (not experiment starting with 't') or "all" (indistinct).
+    :type typeExp: str
+    :param onlyActive: Assumes "active" (only active experiments) or "" (indistinct)
+    :type onlyActive: str
+    :param owner: return only experiment that match the provided owner of the experiment
+    :type owner: str
+    :return: list of experiments that match the search
+    :rtype: JSON
+    """
+    result = list()
+    query_result, _ = ExperimentJoinDbAdapter().search(
+        query=query, exp_type=exp_type, only_active=only_active, owner=owner
+    )
+
+    for raw_row in query_result:
+        row = raw_row._mapping
+        expid = str(row["name"])
+        completed = "NA"
+        total = "NA"
+        submitted = 0
+        queuing = 0
+        running = 0
+        failed = 0
+        suspended = 0
+        version = "Unknown"
+        wrapper = None
+        # last_modified_timestamp = None
+        last_modified_pkl_datetime = None
+        hpc = row["hpc"]
+        try:
+            autosubmit_config_facade = ConfigurationFacadeDirector(
+                AutosubmitConfigurationFacadeBuilder(expid)
+            ).build_autosubmit_configuration_facade()
+            version = autosubmit_config_facade.get_autosubmit_version()
+            wrapper = autosubmit_config_facade.get_wrapper_type()
+            last_modified_pkl_datetime = (
+                autosubmit_config_facade.get_pkl_last_modified_time_as_datetime()
+            )
+            hpc = autosubmit_config_facade.get_main_platform()
+        except Exception:
+            last_modified_pkl_datetime = None
+            pass
+
+        total, completed = ("NA", "NA")
+
+        # Getting run data from historical database
+        try:
+            current_run = (
+                ExperimentHistoryDirector(ExperimentHistoryBuilder(expid))
+                .build_reader_experiment_history()
+                .manager.get_experiment_run_dc_with_max_id()
+            )
+            if current_run and current_run.total > 0:
+                completed = current_run.completed
+                total = current_run.total
+                submitted = current_run.submitted
+                queuing = current_run.queuing
+                running = current_run.running
+                failed = current_run.failed
+                suspended = current_run.suspended
+                # last_modified_timestamp = current_run.modified_timestamp
+        except Exception as exp:
+            print(("Exception on search_experiment_by_id : {}".format(exp)))
+            pass
+
+        result.append(
+            {
+                "id": row["id"],
+                "name": row["name"],
+                "user": row["user"],
+                "description": row["description"],
+                "hpc": hpc,
+                "status": row["status"],
+                "completed": completed,
+                "total": total,
+                "version": version,
+                "wrapper": wrapper,
+                "submitted": submitted,
+                "queuing": queuing,
+                "running": running,
+                "failed": failed,
+                "suspended": suspended,
+                "modified": last_modified_pkl_datetime,
+            }
+        )
+    return {"experiment": result}
+
+
+def get_current_running_exp():
+    """
+    Simple query that gets the list of experiments currently running
+
+    :rtype: list of users
+    """
+    result = list()
+    query_result, _ = ExperimentJoinDbAdapter().search(only_active=True)
+
+    for raw_row in query_result:
+        row = raw_row._mapping
+        expid = str(row["name"])
+        status = "NOT RUNNING"
+        completed = "NA"
+        total = "NA"
+        submitted = 0
+        queuing = 0
+        running = 0
+        failed = 0
+        suspended = 0
+        user = str(row["user"])
+        version = "Unknown"
+        wrapper = None
+        # last_modified_timestamp = None
+        last_modified_pkl_datetime = None
+        status = str(row["status"])
+        if status == "RUNNING":
+            try:
+                autosubmit_config_facade = ConfigurationFacadeDirector(
+                    AutosubmitConfigurationFacadeBuilder(expid)
+                ).build_autosubmit_configuration_facade()
+                version = autosubmit_config_facade.get_autosubmit_version()
+                wrapper = autosubmit_config_facade.get_wrapper_type()
+                last_modified_pkl_datetime = (
+                    autosubmit_config_facade.get_pkl_last_modified_time_as_datetime()
+                )
+                hpc = autosubmit_config_facade.get_main_platform()
+            except Exception:
+                # last_modified_pkl_datetime = None
+                pass
+
+            # Try to retrieve experiment_run data
+            try:
+                current_run = (
+                    ExperimentHistoryDirector(ExperimentHistoryBuilder(expid))
+                    .build_reader_experiment_history()
+                    .manager.get_experiment_run_dc_with_max_id()
+                )
+                if current_run and current_run.total > 0:
+                    completed = current_run.completed
+                    total = current_run.total
+                    submitted = current_run.submitted
+                    queuing = current_run.queuing
+                    running = current_run.running
+                    failed = current_run.failed
+                    suspended = current_run.suspended
+                    # last_modified_timestamp = current_run.modified_timestamp
+            except Exception as exp:
+                print(("Exception on get_current_running_exp : {}".format(exp)))
+                
+            # Append to result
+            result.append(
+                {
+                    "id": row["id"],
+                    "name": row["name"],
+                    "user": user,
+                    "description": row["description"],
+                    "hpc": hpc,
+                    "status": status,
+                    "completed": completed,
+                    "total": total,
+                    "version": version,
+                    "wrapper": wrapper,
+                    "submitted": submitted,
+                    "queuing": queuing,
+                    "running": running,
+                    "failed": failed,
+                    "suspended": suspended,
+                    "modified": last_modified_pkl_datetime,
+                }
+            )
+    return {"experiment": result}

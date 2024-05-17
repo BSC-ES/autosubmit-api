@@ -7,7 +7,6 @@ from autosubmit_api.builders.configuration_facade_builder import (
 from autosubmit_api.database import tables
 from autosubmit_api.database.common import (
     create_autosubmit_db_engine,
-    create_main_db_conn,
 )
 from autosubmit_api.database.models import ExperimentModel
 

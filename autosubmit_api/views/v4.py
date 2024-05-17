@@ -18,11 +18,7 @@ from autosubmit_api.builders.experiment_history_builder import (
 )
 from autosubmit_api.common.utils import Status
 from autosubmit_api.database import tables
-from autosubmit_api.database.common import (
-    create_main_db_conn,
-    execute_with_limit_offset,
-)
-from autosubmit_api.database.queries import generate_query_listexp_extended
+from autosubmit_api.database.adapters import ExperimentJoinDbAdapter
 from autosubmit_api.logger import logger, with_log_run_times
 from cas import CASClient
 from autosubmit_api import config
@@ -231,11 +227,11 @@ class ExperimentView(MethodView):
             else:
                 page_size = None
                 offset = None
-        except:
+        except Exception:
             return {"error": {"message": "Invalid params"}}, HTTPStatus.BAD_REQUEST
 
         # Query
-        statement = generate_query_listexp_extended(
+        query_result, total_rows = ExperimentJoinDbAdapter().search(
             query=query,
             only_active=only_active,
             owner=owner,
@@ -243,14 +239,9 @@ class ExperimentView(MethodView):
             autosubmit_version=autosubmit_version,
             order_by=order_by,
             order_desc=order_desc,
+            limit=page_size,
+            offset=offset,
         )
-        with create_main_db_conn() as conn:
-            query_result, total_rows = execute_with_limit_offset(
-                statement=statement,
-                conn=conn,
-                limit=page_size,
-                offset=offset,
-            )
 
         # Process experiments
         experiments = []
@@ -270,7 +261,7 @@ class ExperimentView(MethodView):
             exp = exp_builder.product
 
             # Get current run data from history
-            last_modified_timestamp = exp.created
+            # last_modified_timestamp = exp.created
             completed = 0
             total = 0
             submitted = 0
@@ -292,7 +283,7 @@ class ExperimentView(MethodView):
                     running = current_run.running
                     failed = current_run.failed
                     suspended = current_run.suspended
-                    last_modified_timestamp = current_run.modified_timestamp
+                    # last_modified_timestamp = current_run.modified_timestamp
             except Exception as exc:
                 logger.warning((f"Exception getting the current run on search: {exc}"))
                 logger.warning(traceback.format_exc())
@@ -412,7 +403,6 @@ class ExperimentWrappersView(MethodView):
     decorators = [with_auth_token(), with_log_run_times(logger, "WRAPPERS")]
 
     def get(self, expid: str, user_id: Optional[str] = None):
-
         job_package_reader = JobPackageReader(expid)
         job_package_reader.read()
 
