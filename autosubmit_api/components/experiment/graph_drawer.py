@@ -19,6 +19,7 @@ class ExperimentGraphDrawing:
         self.expid = expid
         self.folder_path = APIBasicConfig.LOCAL_ROOT_DIR
         self.graph_data_db = ExpGraphDrawDBAdapter(expid)
+        self.graph_data_db.create_table()
         self.lock_name = "calculation_in_progress.lock"
         self.current_position_dictionary = None
         self.current_jobs_set = set()
@@ -40,7 +41,7 @@ class ExperimentGraphDrawing:
         except portalocker.AlreadyLocked:
             logger.error("It is locked")
             self.locked = True
-        except Exception as exp:
+        except Exception:
             self.locked = True
 
     def get_validated_data(self, allJobs):
@@ -72,7 +73,7 @@ class ExperimentGraphDrawing:
         """
         lock_name = (
             "calculation_{}_in_progress.lock".format(self.expid)
-            if independent == True
+            if independent is True
             else self.lock_name
         )
         lock_path_file = os.path.join(self.folder_path, lock_name)
@@ -104,7 +105,6 @@ class ExperimentGraphDrawing:
                 for u in result.split(b"\n"):
                     splitList = u.split(b" ")
                     if len(splitList) > 1 and splitList[0].decode() == "node":
-
                         self.coordinates.append(
                             (
                                 splitList[1].decode(),

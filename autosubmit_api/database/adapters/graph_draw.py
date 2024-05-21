@@ -13,6 +13,13 @@ class ExpGraphDrawDBAdapter:
             schema=expid,
         )
 
+    def create_table(self):
+        """
+        Create the graph data table.
+        """
+        with self.table_manager.get_connection() as conn:
+            self.table_manager.create_table(conn)
+
     def get_all(self) -> List[Dict[str, Any]]:
         with self.table_manager.get_connection() as conn:
             result = self.table_manager.select_all(conn)
