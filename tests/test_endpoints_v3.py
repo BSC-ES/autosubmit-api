@@ -14,7 +14,6 @@ class TestLogin:
     def test_not_allowed_client(
         self,
         fixture_client: FlaskClient,
-        fixture_mock_basic_config: APIBasicConfig,
         monkeypatch: pytest.MonkeyPatch,
     ):
         monkeypatch.setattr(APIBasicConfig, "ALLOWED_CLIENTS", [])
@@ -28,7 +27,6 @@ class TestLogin:
     def test_redirect(
         self,
         fixture_client: FlaskClient,
-        fixture_mock_basic_config: APIBasicConfig,
         monkeypatch: pytest.MonkeyPatch,
     ):
         random_referer = str(f"https://${str(uuid4())}/")
