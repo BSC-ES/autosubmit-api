@@ -15,14 +15,14 @@ class ExperimentRunDbAdapter:
             schema=expid,
         )
 
-    def get_last_run(self) -> Optional[Dict[str,str]]:
+    def get_last_run(self) -> Optional[Dict[str, str]]:
         """
         Gets last run of the experiment
         """
         with self.table_manager.get_connection() as conn:
             row = conn.execute(
                 select(self.table_manager.table)
-                .order_by(tables.ExperimentRunTable.run_id.desc())
+                .order_by(tables.experiment_run_table.c.run_id.desc())
                 .limit(1)
             ).one_or_none()
 

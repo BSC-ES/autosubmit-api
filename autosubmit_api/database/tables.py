@@ -5,10 +5,14 @@ from autosubmit.database.tables import (
     ExperimentTable,
     experiment_run_table,
     JobDataTable,
+    ExperimentStructureTable,
+    table_change_schema,
     ExperimentStatusTable,
     JobPackageTable,
     WrapperJobPackageTable,
 )
+
+table_change_schema = table_change_schema
 
 ## SQLAlchemy ORM tables
 class DetailsTable(BaseTable):
@@ -59,3 +63,6 @@ wrapper_job_package_table: Table = WrapperJobPackageTable.__table__
 # Job Data TABLES
 job_data_table: Table = JobDataTable.__table__
 experiment_run_table: Table = experiment_run_table
+
+# Structure TABLES
+experiment_structure_table: Table = ExperimentStructureTable.__table__

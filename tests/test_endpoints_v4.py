@@ -7,7 +7,7 @@ import jwt
 import pytest
 from autosubmit_api import config
 from autosubmit_api.views.v4 import PAGINATION_LIMIT_DEFAULT, ExperimentJobsViewOptEnum
-from tests.custom_utils import custom_return_value
+from tests.utils import custom_return_value
 
 
 class TestCASV2Login:
