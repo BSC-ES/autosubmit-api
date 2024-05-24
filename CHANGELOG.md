@@ -2,6 +2,7 @@
 
 ### Pre-release v4.0.0b8 - Release date: TBD
 
+* Fixed major bug: Prevent accidental `job_data_{expid}.db` file creation
 
 ### Pre-release v4.0.0b7 - Release date: 2024-05-14
 

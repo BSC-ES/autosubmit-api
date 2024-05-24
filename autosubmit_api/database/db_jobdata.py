@@ -490,6 +490,7 @@ class MainDataBase():
             if self.conn:
                 c = self.conn.cursor()
                 c.execute(self.create_table_query)
+                self.conn.commit()
             else:
                 raise IOError("Not a valid connection")
         except IOError as exp:

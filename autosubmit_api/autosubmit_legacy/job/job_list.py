@@ -589,8 +589,12 @@ class JobList:
         db_file = os.path.join(path_local_root, basic_config.DB_FILE)
         # Job information from job historic data
         # print("Get current job data structure...")
-        experiment_history = ExperimentHistoryDirector(ExperimentHistoryBuilder(expid)).build_reader_experiment_history()
-        job_data = experiment_history.manager.get_all_last_job_data_dcs() if experiment_history.is_header_ready() else None
+        job_data = None
+        try:
+            experiment_history = ExperimentHistoryDirector(ExperimentHistoryBuilder(expid)).build_reader_experiment_history()
+            job_data = experiment_history.manager.get_all_last_job_data_dcs() if experiment_history.is_header_ready() else None
+        except Exception:
+            print(traceback.print_exc())
         # Result variables
         job_running_time_seconds = dict()
         job_running_to_runtext = dict()

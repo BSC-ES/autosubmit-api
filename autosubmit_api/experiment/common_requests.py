@@ -172,16 +172,20 @@ def get_experiment_data(expid):
         result["pkl_timestamp"] = autosubmit_config_facade.get_pkl_last_modified_timestamp()
         result["chunk_size"] = autosubmit_config_facade.chunk_size
         result["chunk_unit"] = autosubmit_config_facade.chunk_unit
-        experiment_history = ExperimentHistoryDirector(ExperimentHistoryBuilder(expid)).build_reader_experiment_history()
-        experiment_run = experiment_history.manager.get_experiment_run_dc_with_max_id()
-        if experiment_run and experiment_run.total > 0:
-            result["total_jobs"] = experiment_run.total
-            result["completed_jobs"] = experiment_run.completed
-            result["db_historic_version"] = experiment_history.manager.db_version
-        else:
-            result["total_jobs"] = 0
-            result["completed_jobs"] = 0
-            result["db_historic_version"] = "NA"
+
+        result["total_jobs"] = 0
+        result["completed_jobs"] = 0
+        result["db_historic_version"] = "NA"
+        try:
+            experiment_history = ExperimentHistoryDirector(ExperimentHistoryBuilder(expid)).build_reader_experiment_history()
+            experiment_run = experiment_history.manager.get_experiment_run_dc_with_max_id()
+            if experiment_run and experiment_run.total > 0:
+                result["total_jobs"] = experiment_run.total
+                result["completed_jobs"] = experiment_run.completed
+                result["db_historic_version"] = experiment_history.manager.db_version
+        except Exception as exc:
+            logger.warning((traceback.format_exc()))
+            logger.warning((f"Warning: Error in get_experiment_data while reading historical data: {exc}"))
 
     except Exception as exp:
         result["error"] = True

@@ -57,6 +57,9 @@ class ExperimentHistoryBuilder(Builder):
     self._validate_basic_config()
     if not self.experiment_history_db_manager:
       raise Exception("Experiment Database Manager is missing")
+    else:
+      if not self.experiment_history_db_manager.my_database_exists():
+        raise Exception("Job/Runs database does not exist")
     if not self.logger:
       raise Exception("Logging is missing.")
     return ExperimentHistory(self.expid, self.basic_config, self.experiment_history_db_manager, self.logger)
