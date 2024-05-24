@@ -1,5 +1,8 @@
 # CHANGELOG
 
+### Pre-release v4.0.0b8 - Release date: TBD
+
+
 ### Pre-release v4.0.0b7 - Release date: 2024-05-14
 
 * Reduced writing time in status updater background task
