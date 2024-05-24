@@ -34,7 +34,12 @@ def fixture_disable_protection(monkeypatch: pytest.MonkeyPatch):
     monkeypatch.setenv("PROTECTION_LEVEL", "NONE")
 
 
-@pytest.fixture(params=["fixture_sqlite", "fixture_pg"])
+@pytest.fixture(
+    params=[
+        pytest.param("fixture_sqlite", marks=pytest.mark.sqlite),
+        pytest.param("fixture_pg", marks=pytest.mark.pg),
+    ]
+)
 def fixture_mock_basic_config(request: pytest.FixtureRequest):
     """
     Sets a mock basic config for the tests.
