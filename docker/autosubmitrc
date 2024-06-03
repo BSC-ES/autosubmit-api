@@ -1,5 +1,6 @@
 [database]
 path = /app/autosubmit/database
+backend = sqlite
 filename = autosubmit.db
 
 [local]
