@@ -1,8 +1,5 @@
 FROM python:3.8-slim-bullseye
 
-# Default API version
-ARG API_VERSION=4.0.0b8
-
 # Set the environment
 ARG AUTOSUBMIT_ROOT_DIR=/app/autosubmit/
 
@@ -10,7 +7,19 @@ WORKDIR "${AUTOSUBMIT_ROOT_DIR}"
 
 RUN apt-get update && apt-get install -y git graphviz
 
-RUN pip3 install autosubmit-api==${API_VERSION}
+# Install Autosubmit API 
+# If GIT_REF is set, it will install from the specified branch/tag/commit. 
+# Otherwise, if AUTOSUBMIT_VERSION is set, it will install the specified version from pypi.
+# Otherwise, it will install the latest version from pypi.
+ARG GIT_REF
+ARG AUTOSUBMIT_VERSION
+RUN if [ -n "${GIT_REF}" ] ; then \
+      pip3 install git+https://earth.bsc.es/gitlab/es/autosubmit-api.git@${GIT_REF}; \
+    elif [ -n "${AUTOSUBMIT_VERSION}" ] ; then \
+      pip3 install autosubmit-api==${AUTOSUBMIT_VERSION}; \
+    else \
+      pip3 install autosubmit-api; \
+    fi
 
 COPY autosubmitrc /app/configs/autosubmitrc
 
