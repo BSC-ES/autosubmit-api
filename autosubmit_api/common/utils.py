@@ -73,29 +73,42 @@ def parse_number_processors(processors_str):
 
 
 def separate_job_outliers(jobs: List) -> Tuple[List, List]:
-    """
-    Detect job outliers and separate them from the job list
-    """
-    new_list = []
-    outliers = []
-    data_run_times = [job.run_time for job in jobs]
+  """
+  Detect job outliers and separate them from the job list
+  
+  Method: https://www.ibm.com/docs/en/cognos-analytics/11.1.0?topic=terms-modified-z-score
+  """
+  MAD_K = 1.4826 # = 1/(CDF-1(3/4)) https://en.wikipedia.org/wiki/Median_absolute_deviation#Derivation
+  MEANAD_K = 1.2533 # Ratio STD / MeanAD - Geary (1935) = 1/sqrt(2/pi)
 
-    if len(data_run_times) <= 1:
-        return (jobs, outliers)
+  new_list = []
+  outliers = []
+  data_run_times = [job.run_time for job in jobs]
 
-    mean = statistics.mean(data_run_times)
-    std = statistics.stdev(data_run_times)
+  if len(data_run_times) <= 1:
+    return (jobs, outliers)  
+  
+  mean = statistics.mean(data_run_times)
+  mean_ad = statistics.mean([abs(x - mean) for x in data_run_times])
 
-    if std == 0:
-        return (jobs, outliers)
+  median = statistics.median(data_run_times)
+  mad = statistics.median([abs(x - median) for x in data_run_times])
 
-    for job in jobs:
-        z_score = (job.run_time - mean) / std
-        if math.fabs(z_score) <= THRESHOLD_OUTLIER and job.run_time > 0:
-            new_list.append(job)
-        else:
-            outliers.append(job)
-    return (new_list, outliers)
+  if mad == 0 and mean_ad == 0:
+    return (jobs, outliers)
+
+  for job in jobs:
+    if mad == 0:
+       modified_z_score = (job.run_time - median) / (MEANAD_K*mean_ad)
+    else:
+      modified_z_score = (job.run_time - median) / (MAD_K*mad)
+
+    if math.fabs(modified_z_score) <= THRESHOLD_OUTLIER and job.run_time > 0:
+      new_list.append(job)
+    else:
+      outliers.append(job)
+
+  return (new_list, outliers)
 
 
 def get_jobs_with_no_outliers(jobs: List) -> List:
