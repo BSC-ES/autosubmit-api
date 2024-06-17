@@ -31,7 +31,7 @@ install_requires = [
     "networkx~=2.6.3",
     "scipy~=1.7.3",
     "python-dotenv",
-    "autosubmitconfigparser~=1.0.48",
+    "autosubmitconfigparser>=1.0.65",
     "autosubmit>=3.13",
     "Flask-APScheduler",
     "gunicorn",
