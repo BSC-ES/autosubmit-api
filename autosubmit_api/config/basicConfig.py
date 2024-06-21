@@ -16,7 +16,7 @@
 
 # You should have received a copy of the GNU General Public License
 # along with Autosubmit.  If not, see <http://www.gnu.org/licenses/>.
-from configparser import SafeConfigParser
+from configparser import ConfigParser
 from autosubmitconfigparser.config.basicconfig import BasicConfig
 import os
 # from log.log import Log, AutosubmitError, AutosubmitCritical
@@ -39,7 +39,7 @@ class APIBasicConfig(BasicConfig):
         if not os.path.isfile(file_path):
             return
         #Log.debug('Reading config from ' + file_path)
-        parser = SafeConfigParser()
+        parser = ConfigParser()
         parser.optionxform = str
         parser.read(file_path)
 

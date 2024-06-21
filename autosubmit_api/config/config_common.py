@@ -69,12 +69,11 @@ class AutosubmitConfigResolver(object):
 
 
     @property
-    def platforms_parser(self):
+    def platforms_parser(self)-> ConfigParser:
         """
         Returns experiment's platforms parser object
 
         :return: platforms config parser object
-        :rtype: SafeConfigParser
         """
         return self._configWrapper.platforms_parser
 
@@ -818,7 +817,7 @@ class AutosubmitConfigResolver(object):
         return self._configWrapper.is_valid_git_repository()
 
 
-    def get_parser(self, parser_factory, file_path):
+    def get_parser(self, parser_factory, file_path) -> ConfigParser:
         # type: (ConfigParserFactory, str) -> ConfigParser
         """
         Gets parser for given file
@@ -827,7 +826,6 @@ class AutosubmitConfigResolver(object):
         :param file_path: path to file to be parsed
         :type file_path: str
         :return: parser
-        :rtype: SafeConfigParser
         """
         # TODO: this was static method, check usages
 

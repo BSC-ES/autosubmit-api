@@ -17,14 +17,9 @@
 
 # You should have received a copy of the GNU General Public License
 # along with Autosubmit.  If not, see <http://www.gnu.org/licenses/>.
-try:
-    # noinspection PyCompatibility
-    from configparser import SafeConfigParser
-    from autosubmitconfigparser.config.configcommon import AutosubmitConfig as Autosubmit4Config
-except ImportError:
-    # noinspection PyCompatibility
-    from configparser import SafeConfigParser
 
+from configparser import ConfigParser as PyConfigParser
+from autosubmitconfigparser.config.configcommon import AutosubmitConfig as Autosubmit4Config
 
 import os
 import re
@@ -104,12 +99,11 @@ class confConfigStrategy(IConfigStrategy):
         return self._exp_parser_file
 
     @property
-    def platforms_parser(self):
+    def platforms_parser(self) -> PyConfigParser:
         """
         Returns experiment's platforms parser object
 
         :return: platforms config parser object
-        :rtype: SafeConfigParser
         """
         return self._platforms_parser
 
@@ -838,11 +832,10 @@ class confConfigStrategy(IConfigStrategy):
                     '/')[-1].split('.')[-2]
         return value
 
-    def set_git_project_commit(self, as_conf):
+    def set_git_project_commit(self, as_conf: Autosubmit4Config):
         """
         Function to register in the configuration the commit SHA of the git project version.
         :param as_conf: Configuration class for exteriment
-        :type as_conf: AutosubmitConfig
         """
         full_project_path = as_conf.get_project_dir()
         try:
@@ -1321,8 +1314,7 @@ class confConfigStrategy(IConfigStrategy):
         return origin_exists and (branch is not None or commit is not None)
 
     @staticmethod
-    def get_parser(parser_factory, file_path):
-        # type: (ConfigParserFactory, str) -> ConfigParser
+    def get_parser(parser_factory: ConfigParserFactory, file_path: str) -> PyConfigParser:
         """
         Gets parser for given file
 
@@ -1330,7 +1322,6 @@ class confConfigStrategy(IConfigStrategy):
         :param file_path: path to file to be parsed
         :type file_path: str
         :return: parser
-        :rtype: SafeConfigParser
         """
         parser = parser_factory.create_parser()
         parser.optionxform = str
