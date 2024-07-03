@@ -22,7 +22,7 @@ def get_authors():
 install_requires = [
     "Flask~=2.2.5",
     "pyjwt~=2.8.0",
-    "requests>=2.28.1",
+    "requests~=2.28.1",
     "flask_cors~=3.0.10",
     "bscearth.utils~=0.5.2",
     "pydotplus~=2.0.2",
