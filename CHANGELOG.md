@@ -1,5 +1,10 @@
 # CHANGELOG
 
+### Pre-release v4.0.0b9 - Release date: 2024-07-03
+
+* Added support to Python 3.12 and dropped support to Python <= 3.8
+* Minor bug fixes
+
 ### Pre-release v4.0.0b8 - Release date: 2024-05-28
 
 * Fixed major bug: Prevent accidental `job_data_{expid}.db` file creation
