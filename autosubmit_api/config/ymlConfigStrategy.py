@@ -114,7 +114,7 @@ class ymlConfigStrategy(IConfigStrategy):
 
     def get_job_platform(self, section: str) -> str:
         # return the JOBS.<section>.PLATFORM or DEFAULT.HPCARCH
-        return self._conf_parser.jobs_data.get(section, {}).get("PLATFORM", self.get_platform())
+        return self._conf_parser.jobs_data.get(section, {}).get("PLATFORM", self.get_platform()).upper()
 
     def get_platform_queue(self, platform: str) -> str:
         logger.debug("get_platform_queue")

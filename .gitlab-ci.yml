@@ -1,0 +1,54 @@
+before_script:
+  - export GIT_SSL_NO_VERIFY=1
+  - export PATH="$HOME/miniconda2/bin:$PATH"
+
+stages:
+  - prepare
+  - docs
+  - test
+  - report
+  - clean
+
+
+prepare:
+  stage: prepare
+  script:
+    - git submodule sync --recursive
+    - git submodule update --init --recursive
+    - conda update -n base -c defaults conda
+    - conda update conda
+    - conda create -n autosubmit_api python=3.9
+    - conda install -n autosubmit_api graphviz pytest pytest-cov pytest-mock
+    - conda activate autosubmit_api
+    - pip install .
+
+test_python3:
+  stage: test
+  script:
+    - conda activate autosubmit_api
+    - pytest
+  coverage: '/(?i)total.*? (100(?:\.0+)?\%|[1-9]?\d(?:\.\d+)?\%)$/'
+  # These artifacts are saved with every build in GitLab and can be reviewed later. If
+  # we have a folder with HTML files, as in this example, users can navigate with their
+  # browser.
+  artifacts:
+    reports:
+      coverage_report:
+        coverage_format: cobertura
+        path: coverage.xml
+
+# FIXME: Our GitLab worker has 3.7, but pydata-sphinx-theme requires 3.8+
+# docs:
+#   stage: docs
+#   script:
+#     - conda activate autosubmit3
+#     - pip install -e .
+#     - cd docs
+#     - pip install -r requirements.txt
+#     - make html
+
+
+clean:
+  stage: clean
+  script:
+    - conda clean --all --yes

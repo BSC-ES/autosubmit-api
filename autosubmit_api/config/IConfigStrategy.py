@@ -17,15 +17,8 @@
 # You should have received a copy of the GNU General Public License
 # along with Autosubmit.  If not, see <http://www.gnu.org/licenses/>.
 
-try:
-    # noinspection PyCompatibility
-    from configparser import SafeConfigParser
-    from autosubmitconfigparser.config.configcommon import AutosubmitConfig as Autosubmit4Config
-except ImportError:
-    # noinspection PyCompatibility
-    from configparser import SafeConfigParser
-
-
+from configparser import ConfigParser as PyConfigParser
+from autosubmitconfigparser.config.configcommon import AutosubmitConfig as Autosubmit4Config
 import os
 import re
 import subprocess
@@ -61,12 +54,11 @@ class IConfigStrategy(ABC):
         return self._exp_parser_file
 
     @abstractmethod
-    def platforms_parser(self):
+    def platforms_parser(self) -> PyConfigParser:
         """
         Returns experiment's platforms parser object
 
         :return: platforms config parser object
-        :rtype: SafeConfigParser
         """
         pass
 
@@ -459,11 +451,10 @@ class IConfigStrategy(ABC):
         """
 
 
-    def set_git_project_commit(self, as_conf):
+    def set_git_project_commit(self, as_conf: Autosubmit4Config):
         """
         Function to register in the configuration the commit SHA of the git project version.
         :param as_conf: Configuration class for exteriment
-        :type as_conf: AutosubmitConfig
         """
 
     def get_svn_project_url(self):
