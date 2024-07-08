@@ -29,14 +29,14 @@ install_requires = [
     "portalocker~=2.6.0",
     "networkx<=2.6.3",
     "scipy~=1.11.4",
-    "python-dotenv",
+    "python-dotenv~=1.0.1",
     "autosubmitconfigparser>=1.0.65",
     "autosubmit>=3.13",
-    "Flask-APScheduler",
-    "gunicorn",
+    "Flask-APScheduler~=1.13.1",
+    "gunicorn~=22.0.0",
     "pydantic~=2.5.2",
     "SQLAlchemy~=2.0.23",
-    "python-cas>=1.6.0"
+    "python-cas~=1.6.0"
 ]
 
 # Test dependencies
