@@ -7,7 +7,7 @@ import math
 from collections import namedtuple
 from bscearth.utils.date import date2str
 from dateutil.relativedelta import *
-from typing import List
+from typing import List, Tuple
 
 class Section:
   CONFIG = "CONFIG"
@@ -71,29 +71,39 @@ def parse_number_processors(processors_str):
     except:
       return 1
 
-def get_jobs_with_no_outliers(jobs: List):
-  """ Detects outliers and removes them from the returned list """  
-  new_list = []
-  data_run_times = [job.run_time for job in jobs]
-  # print(data_run_times)
-  if len(data_run_times) <= 1:
-    return jobs  
-  
-  mean = statistics.mean(data_run_times)
-  std = statistics.stdev(data_run_times)
-  
-  # print("mean {0} std {1}".format(mean, std))
-  if std == 0:
-    return jobs
 
-  for job in jobs:
-    z_score = (job.run_time - mean) / std
-    # print("{0} {1} {2}".format(job.name, np.abs(z_score), job.run_time))
-    if math.fabs(z_score) <= THRESHOLD_OUTLIER and job.run_time > 0:
-      new_list.append(job)
-    # else:
-    #   print(" OUTLIED {0} {1} {2}".format(job.name, np.abs(z_score), job.run_time))  
-  return new_list
+def separate_job_outliers(jobs: List) -> Tuple[List, List]:
+    """
+    Detect job outliers and separate them from the job list
+    """
+    new_list = []
+    outliers = []
+    data_run_times = [job.run_time for job in jobs]
+
+    if len(data_run_times) <= 1:
+        return (jobs, outliers)
+
+    mean = statistics.mean(data_run_times)
+    std = statistics.stdev(data_run_times)
+
+    if std == 0:
+        return (jobs, outliers)
+
+    for job in jobs:
+        z_score = (job.run_time - mean) / std
+        if math.fabs(z_score) <= THRESHOLD_OUTLIER and job.run_time > 0:
+            new_list.append(job)
+        else:
+            outliers.append(job)
+    return (new_list, outliers)
+
+
+def get_jobs_with_no_outliers(jobs: List) -> List:
+  """
+  Returns a list of jobs without outliers
+  """  
+  return separate_job_outliers(jobs)[0]
+
 
 def date_plus(date, chunk_unit, chunk, chunk_size=1):
   if not date:

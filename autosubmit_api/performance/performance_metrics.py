@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-import math
 import traceback
 from autosubmit_api.logger import logger
 from autosubmit_api.common import utils as utils
@@ -10,8 +9,7 @@ from typing import List, Dict
 class PerformanceMetrics(object):
   """ Manages Performance Metrics """
 
-  def __init__(self, expid, joblist_helper):
-    # type: (str, JobListHelper) -> None
+  def __init__(self, expid: str, joblist_helper: JobListHelper):
     self.expid = expid
     self.error = False
     self.error_message = ""
@@ -23,10 +21,13 @@ class PerformanceMetrics(object):
     self.JPSY = 0 # type: float
     self.RSYPD = 0 # type: float
     self.processing_elements = 1
-    self._considered = [] # type : List
+    self._considered: List[Dict] = []
+    self._not_considered: List[Dict] = []
     self._sim_processors = 1 # type : int
     self.warnings = [] # type : List
     self.post_jobs_total_time_average = 0 # type : int
+    self.sim_jobs_valid: List[SimJob] = []
+    self.sim_jobs_invalid: List[SimJob] = []
     try:
       self.joblist_helper = joblist_helper # type: JobListHelper
       self.configuration_facade = self.joblist_helper.configuration_facade # type : AutosubmitConfigurationFacade
@@ -39,14 +40,14 @@ class PerformanceMetrics(object):
       self.error_message = "Error while preparing data sources: {0}".format(str(exp))
       logger.error((traceback.format_exc()))
       logger.error((str(exp)))
-    if self.error == False:
+    if self.error is False:
       self.configuration_facade.update_sim_jobs(self.pkl_organizer.sim_jobs) # This will assign self.configuration_facade.sim_processors to all the SIM jobs
       self._update_jobs_with_time_data()
       self._calculate_post_jobs_total_time_average()
-      self.sim_jobs_valid: List[SimJob] = utils.get_jobs_with_no_outliers(self.pkl_organizer.get_completed_section_jobs(utils.JobSection.SIM))
+      self.sim_jobs_valid, self.sim_jobs_invalid = utils.separate_job_outliers(self.pkl_organizer.get_completed_section_jobs(utils.JobSection.SIM))
       self._identify_outlied_jobs()
       self._update_valid_sim_jobs_with_post_data()
-      self._add_valid_sim_jobs_to_considered()
+      self._populate_considered_jobs()
       self._calculate_total_sim_queue_time()
       self._calculate_total_sim_run_time()
       self._calculate_global_metrics()
@@ -94,9 +95,15 @@ class PerformanceMetrics(object):
         simjob.set_post_jobs_total_average(self.post_jobs_total_time_average)
       # self._add_to_considered(simjob)
 
-  def _add_valid_sim_jobs_to_considered(self):
+  def _populate_considered_jobs(self):
+    """
+    Format valid and invalid jobs to be added to the final JSON
+    """
     for simjob in self.sim_jobs_valid:
-      self._add_to_considered(simjob)
+      self._considered.append(self._sim_job_to_dict(simjob))
+
+    for simjob in self.sim_jobs_invalid:
+      self._not_considered.append(self._sim_job_to_dict(simjob))
 
   def _calculate_total_sim_run_time(self):
     self.total_sim_run_time =  sum(job.run_time for job in self.sim_jobs_valid)
@@ -139,8 +146,7 @@ class PerformanceMetrics(object):
       return round(CHSY, 4)
     return 0
 
-  def _get_RSYPD_support_list(self):
-    # type: () -> List[Job]
+  def _get_RSYPD_support_list(self) -> List[Job]:
     """ The support list for the divisor can have a different source """
     completed_transfer_jobs = self.pkl_organizer.get_completed_section_jobs(utils.JobSection.TRANSFER)
     completed_clean_jobs = self.pkl_organizer.get_completed_section_jobs(utils.JobSection.CLEAN)
@@ -159,9 +165,8 @@ class PerformanceMetrics(object):
       divisor = max(support_list[-1].finish_ts - self.sim_jobs_valid[0].start_ts, 0.0)
     return divisor
 
-
-  def _add_to_considered(self, simjob: SimJob):
-    self._considered.append({
+  def _sim_job_to_dict(self, simjob: SimJob):
+    return {
       "name": simjob.name,
       "queue": simjob.queue_time,
       "running": simjob.run_time,
@@ -173,7 +178,7 @@ class PerformanceMetrics(object):
       "yps": simjob.years_per_sim,
       "ncpus": simjob.ncpus,
       "chunk": simjob.chunk
-    })
+    }
 
   def to_json(self):
     # type: () -> Dict
@@ -184,6 +189,7 @@ class PerformanceMetrics(object):
             "JPSY": self.JPSY,
             "Parallelization": self.processing_elements,
             "considered": self._considered,
+            "not_considered": self._not_considered,
             "error": self.error,
             "error_message": self.error_message,
             "warnings_job_data": self.warnings,
