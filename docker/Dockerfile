@@ -1,11 +1,13 @@
-FROM python:3.8-slim-bullseye
+FROM python:3.9-slim-bullseye
 
 # Set the environment
 ARG AUTOSUBMIT_ROOT_DIR=/app/autosubmit/
 
 WORKDIR "${AUTOSUBMIT_ROOT_DIR}"
 
-RUN apt-get update && apt-get install -y git graphviz
+RUN apt-get update && apt-get install -y git graphviz gcc lsof && \
+  apt-get clean && \
+  rm -rf /var/lib/apt/lists/*
 
 # Install Autosubmit API 
 # If GIT_REF is set, it will install from the specified branch/tag/commit. 
