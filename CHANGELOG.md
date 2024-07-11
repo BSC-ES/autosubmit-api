@@ -1,5 +1,9 @@
 # CHANGELOG
 
+### Release v4.0.0 - Release date: 2024-07-11
+
+* Included all the changes from v4.0.0b1 to v4.0.0b9
+
 ### Pre-release v4.0.0b9 - Release date: 2024-07-03
 
 * Added support to Python 3.12 and dropped support to Python <= 3.8
