@@ -1,0 +1,10 @@
+[database]
+path = /app/autosubmit/database
+backend = sqlite
+filename = autosubmit.db
+
+[local]
+path = /app/autosubmit/experiments
+
+[globallogs]
+path = /app/autosubmit/logs
