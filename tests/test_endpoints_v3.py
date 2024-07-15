@@ -116,15 +116,21 @@ class TestPerformance:
         response = fixture_client.get(self.endpoint.format(expid=expid))
         resp_obj: dict = response.get_json()
         assert resp_obj["error_message"] == ""
-        assert resp_obj["error"] == False
+        assert resp_obj["error"] is False
         assert resp_obj["Parallelization"] == 8
+        assert isinstance(resp_obj["considered"], list) and isinstance(
+            resp_obj["not_considered"], list
+        )
 
         expid = "a3tb"
         response = fixture_client.get(self.endpoint.format(expid=expid))
         resp_obj: dict = response.get_json()
         assert resp_obj["error_message"] == ""
-        assert resp_obj["error"] == False
+        assert resp_obj["error"] is False
         assert resp_obj["Parallelization"] == 768
+        assert isinstance(resp_obj["considered"], list) and isinstance(
+            resp_obj["not_considered"], list
+        )
 
     def test_parallelization_platforms(self, fixture_client: FlaskClient):
         """
@@ -134,8 +140,11 @@ class TestPerformance:
         response = fixture_client.get(self.endpoint.format(expid=expid))
         resp_obj: dict = response.get_json()
         assert resp_obj["error_message"] == ""
-        assert resp_obj["error"] == False
+        assert resp_obj["error"] is False
         assert resp_obj["Parallelization"] == 16
+        assert isinstance(resp_obj["considered"], list) and isinstance(
+            resp_obj["not_considered"], list
+        )
 
 
 class TestTree:
