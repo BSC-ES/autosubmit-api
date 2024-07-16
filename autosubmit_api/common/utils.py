@@ -7,7 +7,7 @@ import math
 from collections import namedtuple
 from bscearth.utils.date import date2str
 from dateutil.relativedelta import *
-from typing import List
+from typing import List, Tuple
 
 class Section:
   CONFIG = "CONFIG"
@@ -71,29 +71,59 @@ def parse_number_processors(processors_str):
     except:
       return 1
 
-def get_jobs_with_no_outliers(jobs: List):
-  """ Detects outliers and removes them from the returned list """  
-  new_list = []
-  data_run_times = [job.run_time for job in jobs]
-  # print(data_run_times)
+
+def separate_job_outliers(jobs: List) -> Tuple[List, List]:
+  """
+  Detect job outliers and separate them from the job list. 
+  Zero (and negative) run times are considered outliers.
+  
+  Method: https://www.ibm.com/docs/en/cognos-analytics/11.1.0?topic=terms-modified-z-score
+  """
+  MAD_K = 1.4826 # = 1/(CDF-1(3/4)) https://en.wikipedia.org/wiki/Median_absolute_deviation#Derivation
+  MEANAD_K = 1.2533 # Ratio STD / MeanAD - Geary (1935) = 1/sqrt(2/pi)
+
+  data_run_times = [job.run_time for job in jobs if job.run_time > 0]
+
   if len(data_run_times) <= 1:
-    return jobs  
+    return (
+       [job for job in jobs if job.run_time > 0], 
+       [job for job in jobs if job.run_time <= 0]
+    )
   
   mean = statistics.mean(data_run_times)
-  std = statistics.stdev(data_run_times)
-  
-  # print("mean {0} std {1}".format(mean, std))
-  if std == 0:
-    return jobs
+  mean_ad = statistics.mean([abs(x - mean) for x in data_run_times])
 
+  median = statistics.median(data_run_times)
+  mad = statistics.median([abs(x - median) for x in data_run_times])
+
+  if mad == 0 and mean_ad == 0:
+    return (
+       [job for job in jobs if job.run_time > 0], 
+       [job for job in jobs if job.run_time <= 0]
+    )
+
+  new_list = []
+  outliers = []
   for job in jobs:
-    z_score = (job.run_time - mean) / std
-    # print("{0} {1} {2}".format(job.name, np.abs(z_score), job.run_time))
-    if math.fabs(z_score) <= THRESHOLD_OUTLIER and job.run_time > 0:
+    if mad == 0:
+       modified_z_score = (job.run_time - median) / (MEANAD_K*mean_ad)
+    else:
+      modified_z_score = (job.run_time - median) / (MAD_K*mad)
+
+    if math.fabs(modified_z_score) <= THRESHOLD_OUTLIER and job.run_time > 0:
       new_list.append(job)
-    # else:
-    #   print(" OUTLIED {0} {1} {2}".format(job.name, np.abs(z_score), job.run_time))  
-  return new_list
+    else:
+      outliers.append(job)
+
+  return (new_list, outliers)
+
+
+def get_jobs_with_no_outliers(jobs: List) -> List:
+  """
+  Returns a list of jobs without outliers
+  """  
+  return separate_job_outliers(jobs)[0]
+
 
 def date_plus(date, chunk_unit, chunk, chunk_size=1):
   if not date:
