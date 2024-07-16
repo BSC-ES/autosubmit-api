@@ -1,5 +1,10 @@
 # CHANGELOG
 
+### Pre-release v4.0.1b1 - Release date: 2024-07-16
+
+* Added not considered jobs (outliers) to the `/v3/performance/<expid>` endpoint
+* Changed outlier detection method used to calculate the performance metrics from the standard z-score to the modified z-score using the median absolute deviation (MAD).
+
 ### Release v4.0.0 - Release date: 2024-07-11
 
 * Included all the changes from v4.0.0b1 to v4.0.0b9
