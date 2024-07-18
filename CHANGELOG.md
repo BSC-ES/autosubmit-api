@@ -1,6 +1,12 @@
 # CHANGELOG
 
-### Pre-release v4.0.1b1 - Release date: 2024-07-16
+### Pre-release v4.0.1b2 - Release date: 2024-07-18
+
+* Fix threshold value on outlier detection algorithm.
+
+### Pre-release v4.0.1b1 - Release date: 2024-07-16 (Yanked)
+
+> Yanked reason: Incorrect threshold value on outlier detection algorithm
 
 * Added not considered jobs (outliers) to the `/v3/performance/<expid>` endpoint
 * Changed outlier detection method used to calculate the performance metrics from the standard z-score to the modified z-score using the median absolute deviation (MAD).
