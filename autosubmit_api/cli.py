@@ -30,7 +30,14 @@ def start_app_gunicorn(
     log_level: str = "info",
     log_file: str = "-",
     daemon: bool = False,
-    **kwargs
+    threads: int = 1,
+    worker_connections: int = 1000,
+    max_requests: int = 0,
+    max_requests_jitter: int = 0,
+    timeout: int = 600,
+    graceful_timeout: int = 30,
+    keepalive: int = 2,
+    **kwargs,
 ):
     # API options
     if init_bg_tasks:
@@ -55,6 +62,20 @@ def start_app_gunicorn(
         options["errorlog"] = log_file
     if daemon:
         options["daemon"] = daemon
+    if threads and threads > 0:
+        options["threads"] = threads
+    if worker_connections and worker_connections > 0:
+        options["worker_connections"] = worker_connections
+    if max_requests and max_requests > 0:
+        options["max_requests"] = max_requests
+    if max_requests_jitter and max_requests_jitter > 0:
+        options["max_requests_jitter"] = max_requests_jitter
+    if timeout and timeout > 0:
+        options["timeout"] = timeout
+    if graceful_timeout and graceful_timeout > 0:
+        options["graceful_timeout"] = graceful_timeout
+    if keepalive and keepalive > 0:
+        options["keepalive"] = keepalive
 
     g_app = StandaloneApplication("autosubmit_api.app:create_app()", options)
     print("Starting with gunicorn options: " + str(g_app.options))
@@ -111,6 +132,39 @@ def main():
     )
     start_parser.add_argument(
         "-D", "--daemon", action="store_true", help="Daemonize the Gunicorn process"
+    )
+    start_parser.add_argument(
+        "--threads",
+        type=int,
+        help="The number of worker threads for handling requests.",
+    )
+    start_parser.add_argument(
+        "--worker-connections",
+        type=int,
+        help="The maximum number of simultaneous clients.",
+    )
+    start_parser.add_argument(
+        "--max-requests",
+        type=int,
+        help="The maximum number of requests a worker will process before restarting.",
+    )
+    start_parser.add_argument(
+        "--max-requests-jitter",
+        type=int,
+        help="The maximum jitter to add to the max_requests setting.",
+    )
+    start_parser.add_argument(
+        "--timeout",
+        type=int,
+        help="Workers silent for more than this many seconds are killed and restarted.",
+    )
+    start_parser.add_argument(
+        "--graceful-timeout", type=int, help="Timeout for graceful workers restart."
+    )
+    start_parser.add_argument(
+        "--keepalive",
+        type=int,
+        help="The number of seconds to wait for requests on a Keep-Alive connection.",
     )
 
     args = parser.parse_args()
