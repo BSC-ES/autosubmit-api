@@ -55,15 +55,15 @@ class ExperimentRun(object):
         self.modified = get_current_datetime_if_none(modified)  # Added on DB 16
         self.start = start
         self.finish = finish
-        self.chunk_unit = chunk_unit  # type: str
-        self.chunk_size = chunk_size  # type: int
-        self.submitted = submitted  # type: int
-        self.queuing = queuing  # type: int
-        self.running = running  # type: int
-        self.completed = completed  # type: int
-        self.failed = failed  # type: int
-        self.total = total  # type: int
-        self.suspended = suspended  # type: int
+        self.chunk_unit: str = chunk_unit
+        self.chunk_size: int = chunk_size
+        self.submitted: int = submitted
+        self.queuing: int = queuing
+        self.running: int = running
+        self.completed: int = completed
+        self.failed: int = failed
+        self.total: int = total
+        self.suspended: int = suspended
         self.metadata = metadata
 
     @property
@@ -84,8 +84,7 @@ class ExperimentRun(object):
                     return wrapper_type
         return None
 
-    def getSYPD(self, job_list):
-        # type: (List[JobData]) -> float
+    def getSYPD(self, job_list: List[JobData]) -> float:
         outlier_free_list = []
         if job_list:
             performance_jobs = [SimJob.from_job_data_dc(job_data_dc) for job_data_dc in job_list]
@@ -104,11 +103,8 @@ class ExperimentRun(object):
                 return round((years_per_sim * number_SIM * seconds_per_day) / total_run_time, 2)
         return None
 
-    def getASYPD(self, job_sim_list, job_post_list, run_id_wrapper_code_to_job_dcs):
-        # type: (List[JobData], List[JobData], Dict[Tuple[int, int], List[JobData]]) -> float
-
+    def getASYPD(self, job_sim_list: List[JobData], job_post_list: List[JobData], run_id_wrapper_code_to_job_dcs: Dict[Tuple[int, int], List[JobData]]) -> float:
         try:
-
             SIM_no_outlier_list = []
             if job_sim_list and len(job_sim_list) > 0:
                 performance_jobs = [SimJob.from_job_data_dc(job_data_dc) for job_data_dc in job_sim_list]

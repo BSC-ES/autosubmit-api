@@ -508,8 +508,7 @@ class IConfigStrategy(ABC):
         """
 
 
-    def get_chunk_size_unit(self):
-        # type: () -> str
+    def get_chunk_size_unit(self) -> str:
         """
         Unit for the chunk length
 
@@ -519,8 +518,7 @@ class IConfigStrategy(ABC):
 
         pass
 
-    def get_chunk_size(self, default=1):
-        # type: (int) -> int
+    def get_chunk_size(self, default: int = 1) -> int:
         """
         Chunk Size as defined in the expdef file.
 
@@ -805,6 +803,5 @@ class IConfigStrategy(ABC):
        pass
 
     @staticmethod
-    def get_parser(parser_factory, file_path):
-        # type: (ConfigParserFactory, str) -> ConfigParser
+    def get_parser(parser_factory: ConfigParserFactory, file_path: str) -> ConfigParser:
         pass

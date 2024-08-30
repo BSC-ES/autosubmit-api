@@ -372,8 +372,7 @@ def get_current_running_exp():
     return {'experiment': result}
 
 
-def get_experiment_by_id(expid):
-    # type: (str) -> Dict[str, Any]
+def get_experiment_by_id(expid: str) -> Dict[str, Any]:
     result = {'id': 0, 'name': expid, 'description': "NA", 'version': "NA"}
     if not check_db():
         return result

@@ -12,7 +12,7 @@ from autosubmit_api.builders.joblist_loader_builder import (
     JobListLoaderBuilder,
     JobListLoaderDirector,
 )
-from typing import List, Any
+from typing import List, Any, Optional
 
 
 def process_active_graphs():
@@ -47,8 +47,7 @@ def process_active_graphs():
         print(("Error while processing graph drawing: {}".format(exp)))
 
 
-def _process_graph(expid, chunk_size):
-    # type: (str, int) -> List[Any] | None
+def _process_graph(expid: str, chunk_size: int) -> Optional[List[Any]]:
     result = None
     experimentGraphDrawing = ExperimentGraphDrawing(expid)
     locked = experimentGraphDrawing.locked

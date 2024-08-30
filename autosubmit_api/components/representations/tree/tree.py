@@ -1,9 +1,9 @@
 #!/usr/bin/env python
-from ...jobs import utils as JUtils
-from ....performance import utils as PUtils
-from ...jobs.joblist_loader import JobListLoader
-from ...jobs.job_factory import Job
-from ....common.utils import Status, get_average_total_time, get_current_timestamp
+from autosubmit_api.components.jobs import utils as JUtils
+from autosubmit_api.performance import utils as PUtils
+from autosubmit_api.components.jobs.joblist_loader import JobListLoader
+from autosubmit_api.components.jobs.job_factory import Job
+from autosubmit_api.common.utils import Status, get_average_total_time, get_current_timestamp
 from collections import deque, OrderedDict
 from typing import List, Dict, Tuple, Set, Any
 from operator import is_not
@@ -12,24 +12,21 @@ from functools import partial
 DEFAULT_MEMBER = "DEFAULT"
 
 class TreeRepresentation(object):
-  def __init__(self, expid, job_list_loader):
-    # type: (str, JobListLoader) -> None
-    self.expid = expid # type: str
-    # self.jobs = [] # type: List[Job]
-    self.joblist_loader = job_list_loader
-    self._date_member_distribution = {} # type: Dict[Tuple[str, str], List[Job]]
-    self._no_date_no_member_jobs = [] # type: List[Job]
-    self._normal_status = {Status.COMPLETED, Status.WAITING, Status.READY, Status.SUSPENDED} # type: Set
-    self.result_tree = list() # type: List
-    self.result_header = dict() # type: Dict
-    self.average_post_time = 0.0 # type: float
-    self.nodes = [] # type: List[Dict]
-    self._distributed_dates = OrderedDict() # type: OrderedDict[str, None]
-    self._distributed_members = OrderedDict() # type: OrderedDict[str, None]
+  def __init__(self, expid: str, job_list_loader: JobListLoader):
+    self.expid: str = expid
+    self.joblist_loader: JobListLoader = job_list_loader
+    self._date_member_distribution: Dict[Tuple[str, str], List[Job]] = {}
+    self._no_date_no_member_jobs: List[Job] = []
+    self._normal_status: Set[Status] = {Status.COMPLETED, Status.WAITING, Status.READY, Status.SUSPENDED}
+    self.result_tree: List = []
+    self.result_header: Dict = {}
+    self.average_post_time: float = 0.0
+    self.nodes: List[Dict] = []
+    self._distributed_dates: OrderedDict[str, None] = OrderedDict()
+    self._distributed_members: OrderedDict[str, None] = OrderedDict()
 
 
   def perform_calculations(self):
-    # type: () -> None
     self._distribute_into_date_member_groups()
     self._generate_date_member_tree_folders()
     self._generate_no_date_no_member_tree_folder()
@@ -38,8 +35,7 @@ class TreeRepresentation(object):
     self._calculate_average_post_time()
     self._generate_node_data()
 
-  def get_tree_structure(self):
-    # type: () -> Dict[str, Any]
+  def get_tree_structure(self) -> Dict[str, Any]:
     return {
       "tree": self.result_tree,
       "jobs": self.nodes,
@@ -51,7 +47,6 @@ class TreeRepresentation(object):
     }
 
   def _distribute_into_date_member_groups(self):
-    # type: () -> None
     for job in self.joblist_loader.jobs:
       if job.date is not None and job.member is not None:
         self._date_member_distribution.setdefault((job.date, job.member), []).append(job)
@@ -78,7 +73,6 @@ class TreeRepresentation(object):
         self._no_date_no_member_jobs.append(job)
 
   def _generate_date_member_tree_folders(self):
-    # type: () -> None
     for date in self._distributed_dates:
       folders_in_date = list()
       formatted_date = self.joblist_loader.dates_formatted_dict.get(date, None)

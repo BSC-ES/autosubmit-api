@@ -16,13 +16,12 @@
 # You should have received a copy of the GNU General Public License
 # along with Autosubmit.  If not, see <http://www.gnu.org/licenses/>.
 import os
-from ..experiment import utils as HUtils
+from autosubmit_api.experiment import utils as HUtils
 # from database_managers.database_manager import DEFAULT_LOCAL_ROOT_DIR, DEFAULT_HISTORICAL_LOGS_DIR
-from ..config.basicConfig import APIBasicConfig
+from autosubmit_api.config.basicConfig import APIBasicConfig
 
 class Logging():
-  def __init__(self, expid, basic_config):
-    # type: (str, APIBasicConfig) -> None
+  def __init__(self, expid: str, basic_config: APIBasicConfig):
     self.expid = expid
     self.historiclog_dir_path = basic_config.HISTORICAL_LOG_DIR
     self._make_log_directory_if_not_exists()

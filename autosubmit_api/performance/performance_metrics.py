@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 import traceback
+from autosubmit_api.components.experiment.configuration_facade import AutosubmitConfigurationFacade
+from autosubmit_api.components.experiment.pkl_organizer import PklOrganizer
 from autosubmit_api.logger import logger
 from autosubmit_api.common import utils as utils
 from autosubmit_api.components.jobs.joblist_helper import JobListHelper
@@ -13,25 +15,25 @@ class PerformanceMetrics(object):
     self.expid = expid
     self.error = False
     self.error_message = ""
-    self.total_sim_run_time = 0 # type : int
-    self.total_sim_queue_time = 0 # type : int
-    self.SYPD = 0 # type: float
-    self.ASYPD = 0 # type: float
-    self.CHSY = 0 # type: float
-    self.JPSY = 0 # type: float
-    self.RSYPD = 0 # type: float
-    self.processing_elements = 1
+    self.total_sim_run_time: int = 0
+    self.total_sim_queue_time: int = 0
+    self.SYPD: float = 0
+    self.ASYPD: float = 0
+    self.CHSY: float = 0
+    self.JPSY: float = 0
+    self.RSYPD: float = 0
+    self.processing_elements: int = 1
     self._considered: List[Dict] = []
     self._not_considered: List[Dict] = []
-    self._sim_processors = 1 # type : int
-    self.warnings = [] # type : List
-    self.post_jobs_total_time_average = 0 # type : int
+    self._sim_processors: int = 1
+    self.warnings: List[str] = []
+    self.post_jobs_total_time_average: int = 0
     self.sim_jobs_valid: List[SimJob] = []
     self.sim_jobs_invalid: List[SimJob] = []
     try:
-      self.joblist_helper = joblist_helper # type: JobListHelper
-      self.configuration_facade = self.joblist_helper.configuration_facade # type : AutosubmitConfigurationFacade
-      self.pkl_organizer = self.joblist_helper.pkl_organizer # type : PklOrganizer
+      self.joblist_helper: JobListHelper = joblist_helper
+      self.configuration_facade: AutosubmitConfigurationFacade = self.joblist_helper.configuration_facade
+      self.pkl_organizer: PklOrganizer = self.joblist_helper.pkl_organizer
       self.pkl_organizer.prepare_jobs_for_performance_metrics()
       self._sim_processors = self.configuration_facade.sim_processors
       self.processing_elements = self.configuration_facade.sim_processing_elements
@@ -157,8 +159,7 @@ class PerformanceMetrics(object):
     else:
       return []
 
-  def _get_RSYPD_divisor(self):
-    # type: () -> float
+  def _get_RSYPD_divisor(self) -> float:
     support_list = self._get_RSYPD_support_list()
     divisor = 0
     if len(support_list) > 0 and len(self.sim_jobs_valid):
@@ -180,8 +181,7 @@ class PerformanceMetrics(object):
       "chunk": simjob.chunk
     }
 
-  def to_json(self):
-    # type: () -> Dict
+  def to_json(self) -> Dict:
     return {"SYPD": self.SYPD,
             "ASYPD": self.ASYPD,
             "RSYPD": self.RSYPD,

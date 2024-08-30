@@ -21,37 +21,34 @@ class PklOrganizer(object):
 
   def __init__(self, configuration_facade: AutosubmitConfigurationFacade):
     self.current_content: List[Union[PklJob,PklJob14]] = []
-    self.configuration_facade = configuration_facade # type: AutosubmitConfigurationFacade
-    self.sim_jobs = [] # type: List[Job]
-    self.post_jobs = [] # type: List[Job]
-    self.transfer_jobs = [] # type: List[Job]
-    self.clean_jobs = [] # type: List[Job]
-    self.pkl_path = configuration_facade.pkl_path # type: str
-    self.warnings = [] # type: List[str]
-    self.dates = set() # type: Set[str]
-    self.members = set() # type: Set[str]
-    self.sections = set() # type: Set[str]
-    self.section_jobs_map = {} # type: Dict[str, List[Job]]
+    self.configuration_facade: AutosubmitConfigurationFacade = configuration_facade
+    self.sim_jobs: List[Job] = [] 
+    self.post_jobs: List[Job] = [] 
+    self.transfer_jobs: List[Job] = [] 
+    self.clean_jobs: List[Job] = [] 
+    self.pkl_path: str = configuration_facade.pkl_path
+    self.warnings: List[str] = [] 
+    self.dates: Set[str] = set() 
+    self.members: Set[str] = set() 
+    self.sections: Set[str] = set() 
+    self.section_jobs_map: Dict[str, List[Job]] = {}
     # self.is_wrapper_type_in_pkl = is_wrapper_type_in_pkl_version(configuration_facade.get_autosubmit_version())
     self._process_pkl()
 
   def prepare_jobs_for_performance_metrics(self):
-    # type: () -> None
     self.identify_dates_members_sections()
     self.distribute_jobs()
     self._sort_distributed_jobs()
     self._validate_current()
 
-  def get_completed_section_jobs(self, section):
-    # type: (str) -> List[Job]
+  def get_completed_section_jobs(self, section: str) -> List[Job]:
     if section in self.section_jobs_map:
       return [job for job in self.section_jobs_map[section] if job.status == Status.COMPLETED]
     else:
       return []
       # raise KeyError("Section not supported.")
 
-  def get_simple_jobs(self, tmp_path):
-    # type: (str) -> List[SimpleJob]
+  def get_simple_jobs(self, tmp_path: str) -> List[SimpleJob]:
     """ Get jobs in pkl as SimpleJob objects."""
     return [SimpleJob(job.name, tmp_path, job.status) for job in self.current_content]
 
@@ -65,7 +62,6 @@ class PklOrganizer(object):
       raise Exception("Pkl file {0} not found.".format(self.pkl_path))
 
   def identify_dates_members_sections(self):
-    # type: () -> None
     for job in self.current_content:
       if job.date and job.date not in self.dates:
         self.dates.add(job.date)
@@ -76,7 +72,6 @@ class PklOrganizer(object):
 
 
   def distribute_jobs(self):
-    # type: () -> None
     for pkl_job in self.current_content:
       if JobSection.SIM == pkl_job.section:
         self.sim_jobs.append(factory.get_job_from_factory(pkl_job.section).from_pkl(pkl_job))
@@ -94,7 +89,6 @@ class PklOrganizer(object):
     }
 
   def _sort_distributed_jobs(self):
-    # type : () -> None
     """ SIM jobs are sorted by start_time  """
     self._sort_list_by_start_time(self.sim_jobs)
     self._sort_list_by_finish_time(self.post_jobs)
@@ -102,7 +96,6 @@ class PklOrganizer(object):
     self._sort_list_by_finish_time(self.clean_jobs)
 
   def _validate_current(self):
-    # type : () -> None
     if len(self.get_completed_section_jobs(JobSection.SIM)) == 0:
       self._add_warning("We couldn't find COMPLETED SIM jobs in the experiment.")
     if len(self.get_completed_section_jobs(JobSection.POST)) == 0:
@@ -112,17 +105,14 @@ class PklOrganizer(object):
     if len(self.get_completed_section_jobs(JobSection.TRANSFER)) == 0 and len(self.get_completed_section_jobs(JobSection.CLEAN)) > 0:
       self._add_warning("RSYPD | There are no TRANSFER (COMPLETED) jobs in the experiment. We will use (COMPLETED) CLEAN jobs to compute RSYPD.")
 
-  def _add_warning(self, message):
-    # type: (str) -> None
+  def _add_warning(self, message: str):
     self.warnings.append(message)
 
-  def _sort_list_by_finish_time(self, jobs):
-    # type: (List[Job]) -> None
+  def _sort_list_by_finish_time(self, jobs: List[Job]):
     if len(jobs):
       jobs.sort(key = lambda x: x.finish, reverse=False)
 
-  def _sort_list_by_start_time(self, jobs):
-    # type: (List[Job]) -> None
+  def _sort_list_by_start_time(self, jobs: List[Job]):
     if len(jobs):
       jobs.sort(key = lambda x: x.start, reverse=False)
 

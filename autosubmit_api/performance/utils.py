@@ -1,8 +1,7 @@
 #!/usr/bin/env pytthon
 from autosubmit_api.common.utils import Status, datechunk_to_year
 
-def calculate_SYPD_perjob(chunk_unit, chunk_size, job_chunk, run_time, status):
-    # type: (str, int, int, int, int) -> float
+def calculate_SYPD_perjob(chunk_unit: str, chunk_size: int, job_chunk: int, run_time: int, status: int) -> float:
     """
     Generalization of SYPD at job level.
     """
@@ -13,8 +12,7 @@ def calculate_SYPD_perjob(chunk_unit, chunk_size, job_chunk, run_time, status):
     return None
 
 
-def calculate_ASYPD_perjob(chunk_unit, chunk_size, job_chunk, queue_run_time, average_post, status):
-    # type: (str, int, int, int, float, int) -> float
+def calculate_ASYPD_perjob(chunk_unit: str, chunk_size: int, job_chunk: int, queue_run_time: int, average_post: float, status: int) -> float:
     """
     Generalization of ASYPD at job level
     """

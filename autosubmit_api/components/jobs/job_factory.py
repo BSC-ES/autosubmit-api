@@ -25,41 +25,41 @@ class Job(metaclass=ABCMeta):
   """ Abstract Job """
 
   def __init__(self):
-    self.name = None # type: str
-    self._id = None # type: int
-    self.status = Status.UNKNOWN # type: int
-    self.priority = 0 # type: int
-    self.date = None # type: str
-    self.member = None # type: str
-    self.chunk = None # type: str
-    self.out_path_local = None # type: str
-    self.err_path_local = None # type: str
-    self.out_path_remote = None # type: str
-    self.err_path_remote = None # type: str
-    self.section = "" # type: str
-    self._queue_time = 0 # type: int
-    self._run_time = 0 # type: int
-    self.energy = 0 # type: int
-    self._submit = 0 # type: int
-    self._start = 0 # type: int
-    self._finish = 0 # type: int
-    self.ncpus = 0 # type: int
-    self.platform = None # type: str
-    self.qos = "" # type: str
-    self.wallclock = "" # type: str
-    self.parents_names = set() # type: Set[str]
-    self.children_names = set() # type: Set[str]
-    self.package = None # type: str
-    self.package_code = None # type: str
-    self.package_symbol = None # type: str
-    self.running_time_text = None # type: str
-    self.tree_parent = [] # type: List[str]
-    self.run_id = None # type: int
-    self.x_coordinate = 0 # type: int
-    self.y_coordinate = 0 # type: int
-    self.level = 0 # type: int
-    self.horizontal_order = 1 # type: int
-    self.barycentric_value = 0.0 # type: float
+    self.name: str = None
+    self._id: int = None
+    self.status: int = Status.UNKNOWN
+    self.priority: int = 0
+    self.date: str = None
+    self.member: str = None
+    self.chunk: str = None
+    self.out_path_local: str = None
+    self.err_path_local: str = None
+    self.out_path_remote: str = None
+    self.err_path_remote: str = None
+    self.section: str = ""
+    self._queue_time: int = 0
+    self._run_time: int = 0
+    self.energy: int = 0
+    self._submit: int = 0
+    self._start: int = 0
+    self._finish: int = 0
+    self.ncpus: int = 0
+    self.platform: str = None
+    self.qos: str = ""
+    self.wallclock: str = ""
+    self.parents_names: Set[str] = set()
+    self.children_names: Set[str] = set()
+    self.package: str = None
+    self.package_code: str = None
+    self.package_symbol: str = None
+    self.running_time_text: str = None
+    self.tree_parent: List[str] = []
+    self.run_id: int = None
+    self.x_coordinate: int = 0
+    self.y_coordinate: int = 0
+    self.level: int = 0
+    self.horizontal_order: int = 1
+    self.barycentric_value: float = 0.0
 
   def has_parents(self):
     return len(self.parents_names) > 0
@@ -80,27 +80,23 @@ class Job(metaclass=ABCMeta):
     return None
 
   @property
-  def package_tag(self):
+  def package_tag(self) -> str:
     """ Also known as wrapper_tag """
-    # type: () -> str
     if self.package and len(self.package) > 0:
       return JUtils.wrapped_title_format.format(self.package)
     return None
 
   @property
-  def rm_id(self):
-    # type: () -> int
+  def rm_id(self) -> int:
     return self._id
 
   @property
-  def queue_time(self):
-    # type: () -> int
+  def queue_time(self) -> int:
     """ Queue time fixed is provided. """
     return self._queue_time
 
   @property
-  def run_time(self):
-    # type: () -> int
+  def run_time(self) -> int:
     """ Proper run time is provided. """
     return self._run_time
 
@@ -135,42 +131,35 @@ class Job(metaclass=ABCMeta):
     return self.finish
 
   @property
-  def submit_datetime(self):
-    # type: () -> str
+  def submit_datetime(self) -> str:
     return util.timestamp_to_datetime_format(self.submit)
 
   @property
-  def start_datetime(self):
-    # type: () -> str
+  def start_datetime(self) -> str:
     return util.timestamp_to_datetime_format(self.start)
 
   @property
-  def finish_datetime(self):
-    # type: () -> str
+  def finish_datetime(self) -> str:
     return util.timestamp_to_datetime_format(self.finish)
 
   @property
-  def status_color(self):
+  def status_color(self) -> str:
     return Monitor.color_status(self.status)
 
   @property
-  def status_text(self):
-    # type: () -> str
+  def status_text(self) -> str:
     return str(Status.VALUE_TO_KEY[self.status])
 
   @property
-  def total_time(self):
-    # type: () -> int
+  def total_time(self) -> int:
     return self.queue_time + self.run_time
 
   @property
-  def total_processors(self):
-    # type: () -> int
+  def total_processors(self) -> int:
     return self.ncpus
 
   @property
-  def total_wallclock(self):
-    # type: () -> float
+  def total_wallclock(self) -> float:
     """ In hours """
     if self.wallclock:
       hours, minutes = self.wallclock.split(':')
@@ -178,8 +167,7 @@ class Job(metaclass=ABCMeta):
     return 0
 
   @property
-  def tree_title(self):
-    # type: () -> str
+  def tree_title(self) -> str:
     title = "{0} <span class='badge' style='background-color: {1}; color:{3};'>#{2}</span>".format(self.name, self.status_color, self.status_text, JUtils.get_status_text_color(self.status))
     if self.running_time_text and len(self.running_time_text) > 0:
       title += " ~ {0}".format(self.running_time_text)
@@ -194,8 +182,7 @@ class Job(metaclass=ABCMeta):
     return title
 
   @property
-  def leaf(self):
-    # type: () -> Dict[str, str]
+  def leaf(self) -> Dict[str, str]:
     return {
       "title": self.tree_title,
       "refKey": self.name,
@@ -205,12 +192,10 @@ class Job(metaclass=ABCMeta):
 
   @abstractmethod
   def do_print(self):
-    # type: () -> None
     print(("Job {0} \n Date {5} \n Section {1} \n Qos {2} \n Children: {3} \n Platform {4} \n TreeParent {6}. ".format(
       self.name, self.section, self.qos, self.children_names, self.platform, self.date, self.tree_parent)))
 
-  def update_from_jobrow(self, jobrow):
-    # type: (JobRow) -> None
+  def update_from_jobrow(self, jobrow: JobRow):
     """ Updates: submit, start, finish, queue_time, run_time, energy, run_id. """
     if jobrow:
       self._queue_time = max(int(jobrow.queue_time), 0)
@@ -221,22 +206,18 @@ class Job(metaclass=ABCMeta):
       self._finish = int(jobrow.finish)
       self.run_id = jobrow.run_id
 
-  def set_ncpus(self, parallelization):
-    # type: (int) -> None
+  def set_ncpus(self, parallelization: int) -> None:
     self.ncpus = parallelization
 
-  def set_years_per_sim(self, years_per_sim):
-    # type: (float) -> None
+  def set_years_per_sim(self, years_per_sim: float) -> None:
     self.years_per_sim = max(years_per_sim, 0.0)
 
-  def get_date_ini_end(self, chunk_size, chunk_unit):
-    # type: (int, str) -> Tuple[str, str]
+  def get_date_ini_end(self, chunk_size: int, chunk_unit: str) -> Tuple[str, str]:
     return util.date_plus(self.date, chunk_unit, self.chunk, chunk_size)
 
 
   @classmethod
-  def from_pkl(cls, pkl_item):
-    # type: (str) -> Job
+  def from_pkl(cls, pkl_item: str) -> "Job":
     job = cls()
     job.name = pkl_item.name
     job._id = pkl_item.id
@@ -278,8 +259,7 @@ class Job(metaclass=ABCMeta):
     return job
 
   @classmethod
-  def from_job_data_dc(cls, job_data_dc):
-    # type: (JobData) -> Job
+  def from_job_data_dc(cls, job_data_dc: JobData) -> "Job":
     job = cls()
     job.name = job_data_dc.job_name
     job._id = job_data_dc._id
@@ -316,35 +296,31 @@ class SimJob(Job):
   def __init__(self):
     super(SimJob, self).__init__()
     self.section = util.JobSection.SIM
-    self.post_jobs_total_time_average = 0.0 # type: float
-    self.years_per_sim = 0 # type: float
+    self.post_jobs_total_time_average: float = 0.0
+    self.years_per_sim: float = 0
 
 
   @property
-  def CHSY(self):
-    # type: () -> float
+  def CHSY(self) -> float:
     if self.years_per_sim > 0:
       return round(((self.ncpus * self.run_time) / self.years_per_sim) / util.SECONDS_IN_ONE_HOUR, 2)
     return 0
 
   @property
-  def JPSY(self):
-    # type: () -> float
+  def JPSY(self) -> float:
     if self.years_per_sim > 0:
       return round(self.energy / self.years_per_sim, 2)
     return 0
 
   @property
-  def SYPD(self):
-    # type: () -> float
+  def SYPD(self) -> float:
     if self.years_per_sim > 0 and self.run_time > 0:
       return round((self.years_per_sim * util.SECONDS_IN_A_DAY) / self.run_time, 2)
     return 0
 
   @property
-  def ASYPD(self):
+  def ASYPD(self) -> float:
     """ ASYPD calculation requires the average of the queue and run time of all post jobs """
-    # type: () -> float
     divisor = self.total_time + self.post_jobs_total_time_average
     if divisor > 0:
       return round((self.years_per_sim * util.SECONDS_IN_A_DAY) / (divisor), 2)
@@ -354,8 +330,7 @@ class SimJob(Job):
   def do_print(self):
     return super(SimJob, self).do_print()
 
-  def set_post_jobs_total_average(self, val):
-    # type: (float) -> None
+  def set_post_jobs_total_average(self, val: float):
     self.post_jobs_total_time_average = val
 
 
@@ -404,43 +379,35 @@ class JobFactory(metaclass=ABCMeta):
   """ Generic Factory """
 
   @abstractmethod
-  def factory_method(self):
-    # type: () -> Job
+  def factory_method(self) -> Job:
     """ """
 
 class SimFactory(JobFactory):
-  def factory_method(self):
-    # type: () -> Job
+  def factory_method(self) -> Job:
     return SimJob()
 
 class PostFactory(JobFactory):
-  def factory_method(self):
-    # type: () -> Job
+  def factory_method(self) -> Job:
     return PostJob()
 
 class TransferMemberFactory(JobFactory):
-  def factory_method(self):
-    # type: () -> Job
+  def factory_method(self) -> Job:
     return TransferMemberJob()
 
 class TransferFactory(JobFactory):
-  def factory_method(self):
-    # type: () -> Job
+  def factory_method(self) -> Job:
     return TransferJob()
 
 class CleanMemberFactory(JobFactory):
-  def factory_method(self):
-    # type: () -> Job
+  def factory_method(self) -> Job:
     return CleanMemberJob()
 
 class CleanFactory(JobFactory):
-  def factory_method(self):
-    # type: () -> Job
+  def factory_method(self) -> Job:
     return CleanJob()
 
 
-def get_job_from_factory(section):
-  # type: (str) -> StandardJob
+def get_job_from_factory(section: str) -> StandardJob:
   factories = {
     util.JobSection.SIM : SimFactory(),
     util.JobSection.POST : PostFactory(),

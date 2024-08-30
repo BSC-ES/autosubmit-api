@@ -1,12 +1,12 @@
 #!/bin/env/python
-from ..components.jobs import utils as JobUtils
+from autosubmit_api.components.jobs import utils as JobUtils
 from datetime import datetime, timedelta
-from ..config.basicConfig import APIBasicConfig
-from ..components.jobs.job_factory import Job
-from .job_stat import JobStat
-from .stats_summary import StatsSummary
-from ..components.jobs.job_support import JobSupport
-from .utils import timedelta2hours
+from autosubmit_api.config.basicConfig import APIBasicConfig
+from autosubmit_api.components.jobs.job_factory import Job
+from autosubmit_api.statistics.job_stat import JobStat
+from autosubmit_api.statistics.stats_summary import StatsSummary
+from autosubmit_api.components.jobs.job_support import JobSupport
+from autosubmit_api.statistics.utils import timedelta2hours
 from typing import List, Union, Dict
 # from collections import namedtuple
 
@@ -15,8 +15,7 @@ _FAILED_RETRIAL = 0
 
 class Statistics(object):
 
-    def __init__(self, expid, jobs, start, end, queue_time_fix, basic_config):
-        # type: (str, List[Job], datetime, datetime, Dict[str, int], APIBasicConfig) -> None
+    def __init__(self, expid: str, jobs: List[Job], start: datetime, end: datetime, queue_time_fix: Dict[str, int], basic_config: APIBasicConfig):
         """
         """
         self.expid = expid
@@ -25,26 +24,25 @@ class Statistics(object):
         self._end = end
         self._queue_time_fixes = queue_time_fix
         self.basic_config = basic_config
-        self._name_to_jobstat_dict = dict() # type: Dict[str, JobStat]
-        self.jobs_stat = [] # type: List[JobStat]
+        self._name_to_jobstat_dict: Dict[str, JobStat] = dict()
+        self.jobs_stat: List[JobStat] = []
         # Old format
-        self.max_time = 0.0 # type: float
-        self.max_fail = 0 # type: int
-        self.start_times = [] # type: List[Union[datetime, None]]
-        self.end_times = [] # type: List[Union[datetime, None]]
-        self.queued = [] # type: List[timedelta]
-        self.run = [] # type: List[timedelta]
-        self.failed_jobs = [] # type: List[int]
-        self.fail_queued = [] # type: List[timedelta]
-        self.fail_run = [] # type: List[timedelta]
-        self.wallclocks = [] # type: List[float]
-        self.threshold = 0.0 # type: float
-        self.failed_jobs_dict = {} # type: Dict[str, int]
+        self.max_time: float = 0.0
+        self.max_fail: int = 0
+        self.start_times: List[Union[datetime, None]] = []
+        self.end_times: List[Union[datetime, None]] = []
+        self.queued: List[timedelta] = []
+        self.run: List[timedelta] = []
+        self.failed_jobs: List[int] = []
+        self.fail_queued: List[timedelta] = []
+        self.fail_run: List[timedelta] = []
+        self.wallclocks: List[float] = []
+        self.threshold: float = 0.0
+        self.failed_jobs_dict: Dict[str, int] = {}
         self.summary = StatsSummary()
         self.totals = [" Description text \n", "Line 1"]
 
-    def calculate_statistics(self):
-      # type: () -> List[JobStat]
+    def calculate_statistics(self) -> List[JobStat]:
       for index, job in enumerate(self._jobs):
           retrials = JobSupport(self.expid, job, self.basic_config).get_last_retrials()
           for retrial in retrials:
@@ -71,8 +69,7 @@ class Statistics(object):
       self.jobs_stat = sorted(list(self._name_to_jobstat_dict.values()), key=lambda x: (x.date if x.date else datetime.now(), x.member if x.member else "", x.section if x.section else "", x.chunk if x.chunk is not None else 0))
       return self.jobs_stat
 
-    def calculate_summary(self):
-      # type: () -> StatsSummary
+    def calculate_summary(self) -> StatsSummary:
       stat_summary = StatsSummary()
       for job in self.jobs_stat:
         job_stat_dict = job.get_as_dict()
@@ -108,7 +105,6 @@ class Statistics(object):
         }
 
     def make_old_format(self):
-      # type: () -> None
       """ Makes old format """
       self.start_times = [job.start_time for job in self.jobs_stat]
       self.end_times = [job.finish_time for job in self.jobs_stat]
@@ -126,8 +122,7 @@ class Statistics(object):
       max_fail_run = max(self.fail_run)
       self.max_time = max(max_queue, max_run, max_fail_queue, max_fail_run, self.threshold)
 
-    def build_failed_jobs_only_list(self):
-      # type: () -> Dict[str, int]
+    def build_failed_jobs_only_list(self) -> Dict[str, int]:
       for i, job in enumerate(self.jobs_stat):
         if self.failed_jobs[i] > 0:
           self.failed_jobs_dict[job._name] = self.failed_jobs[i]

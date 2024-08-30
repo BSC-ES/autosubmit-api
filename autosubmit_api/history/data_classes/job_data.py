@@ -18,9 +18,9 @@
 
 import collections
 import time
-from .. import utils as HUtils
-from ..database_managers import database_models as Models
-from ...common import utils as common_utils
+from autosubmit_api.history import utils as HUtils
+from autosubmit_api.history.database_managers import database_models as Models
+from autosubmit_api.common import utils as common_utils
 from datetime import datetime, timedelta
 from json import dumps, loads
 from typing import List
@@ -271,8 +271,7 @@ class JobData(object):
             return None
 
     @property
-    def running_time(self):
-        # type: () -> int
+    def running_time(self) -> int:
         """
         Calculates and returns the running time of the job, in seconds.
         """
@@ -281,8 +280,7 @@ class JobData(object):
         # return 0
 
     @property
-    def queuing_time(self):
-        # type: () -> int
+    def queuing_time(self) -> int:
         """
         Calculates and returns the queuing time of the job, in seconds.
         """
@@ -290,8 +288,7 @@ class JobData(object):
         return HUtils.calculate_queue_time_in_seconds(self.submit, self.start)
         # return 0
 
-    def queuing_time_considering_package(self, jobs_in_package):
-        # type: (List[JobData]) -> int
+    def queuing_time_considering_package(self, jobs_in_package: List["JobData"]) -> int:
         considered_jobs = [job for job in jobs_in_package if job.job_name != self.job_name and job.start < (self.start - 20)]
         if len(considered_jobs) > 0:
             considered_jobs.sort(key=lambda x: x.queuing_time, reverse=True)
@@ -300,8 +297,7 @@ class JobData(object):
             return max(0, int(self.start - self.submit) - int(max_queue))
         return self.queuing_time
 
-    def delta_queueing_time_considering_package(self, jobs_in_package):
-        # type: (List[JobData]) -> str
+    def delta_queueing_time_considering_package(self, jobs_in_package: List["JobData"]) -> str:
         return str(timedelta(seconds=self.queuing_time_considering_package(jobs_in_package)))
 
     def get_hdata(self):
