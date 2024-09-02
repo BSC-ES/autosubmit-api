@@ -19,18 +19,9 @@
 
 from configparser import ConfigParser as PyConfigParser
 from autosubmitconfigparser.config.configcommon import AutosubmitConfig as Autosubmit4Config
-import os
 import re
-import subprocess
-import json
-import logging
-import locale
 
-from pyparsing import nestedExpr
 from bscearth.utils.config_parser import ConfigParserFactory, ConfigParser
-from bscearth.utils.date import parse_date
-from bscearth.utils.log import Log
-from ..config.basicConfig import APIBasicConfig
 from abc import ABC, abstractmethod
 
 

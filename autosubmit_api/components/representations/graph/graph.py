@@ -1,18 +1,16 @@
 #!/usr/bin/env python
 
-from multiprocessing.sharedctypes import Value
 import networkx as nx
 from autosubmit_api.performance import utils as PUtils
 # import common.utils as utils
 from autosubmit_api.common.utils import Status, get_average_total_time
-from networkx.linalg.laplacianmatrix import laplacian_matrix
 from autosubmit_api.components.jobs.job_factory import Job
 from autosubmit_api.components.jobs.joblist_loader import JobListLoader
 from autosubmit_api.monitor.monitor import Monitor
 from autosubmit_api.database.db_jobdata import ExperimentGraphDrawing
 
 from autosubmit_api.components.representations.graph.edge import Edge, RealEdge
-from typing import List, Dict, Optional, Tuple, Set, Any
+from typing import List, Dict, Optional, Tuple, Any
 from scipy.sparse import linalg
 
 GRAPHVIZ_MULTIPLIER = 90

@@ -10,7 +10,6 @@ from autosubmit_api.database import prepare_db
 from autosubmit_api.experiment import common_requests as CommonRequests
 from autosubmit_api.logger import get_app_logger
 from autosubmit_api.config.basicConfig import APIBasicConfig
-import sys
 from autosubmit_api.config import (
     PROTECTION_LEVEL,
     RUN_BACKGROUND_TASKS_ON_START,

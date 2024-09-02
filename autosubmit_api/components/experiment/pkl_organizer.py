@@ -1,8 +1,6 @@
 #!/usr/bin/env python
 import os
-import pickle
 
-from networkx import DiGraph
 from autosubmit_api.components.jobs import job_factory as factory
 from autosubmit_api.common.utils import JobSection, PklJob, PklJob14, Status
 from autosubmit_api.components.experiment.configuration_facade import AutosubmitConfigurationFacade

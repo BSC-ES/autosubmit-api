@@ -17,12 +17,9 @@
 # You should have received a copy of the GNU General Public License
 # along with Autosubmit.  If not, see <http://www.gnu.org/licenses/>.
 
-import time
 import os
 from datetime import datetime
-from typing import Dict, Any, Tuple
-from typing import Any, Union
-from datetime import datetime
+from typing import Dict, Any, Tuple, Union
 
 DATETIME_FORMAT = '%Y-%m-%d-%H:%M:%S'
 SAFE_TIME_LIMIT = 300

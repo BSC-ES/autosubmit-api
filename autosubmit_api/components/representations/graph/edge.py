@@ -1,7 +1,7 @@
 
 #!/usr/bin/env python
-from abc import ABCMeta, abstractmethod
-from typing import List, Dict
+from abc import ABCMeta
+from typing import Dict
 
 class Edge(object, metaclass=ABCMeta):
   """ Abstract Edge """

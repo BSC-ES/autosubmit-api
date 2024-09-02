@@ -86,10 +86,6 @@ class confConfigStrategy(IConfigStrategy):
         return self._jobs_parser
 
     @property
-    def jobs_parser(self):
-        return self._jobs_parser
-
-    @property
     def experiment_file(self):
         """
         Returns experiment's config file name
