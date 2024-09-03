@@ -18,6 +18,7 @@
 
 import sqlite3
 import os
+from typing import Tuple, List
 from autosubmit_api.history import utils as HUtils
 from autosubmit_api.history.database_managers import database_models as Models
 from autosubmit_api.config.basicConfig import APIBasicConfig
@@ -31,15 +32,13 @@ class DatabaseManager(metaclass=ABCMeta):
   """ Simple database manager. Needs expid. """
   AS_TIMES_DB_NAME = "as_times.db" # default AS_TIMES location
   ECEARTH_DB_NAME = "ecearth.db" # default EC_EARTH_DB_NAME location
-  def __init__(self, expid, basic_config):
-    # type: (str, APIBasicConfig) -> None
+  def __init__(self, expid: str, basic_config: APIBasicConfig):
     self.expid = expid
     self.JOBDATA_DIR = basic_config.JOBDATA_DIR
     self.LOCAL_ROOT_DIR = basic_config.LOCAL_ROOT_DIR
     self.db_version = Models.DatabaseVersion.NO_DATABASE.value
 
-  def get_connection(self, path):
-    # type : (str) -> Sqlite3Connection
+  def get_connection(self, path: str) -> sqlite3.Connection:
     """
     Create a database connection to the SQLite database specified by path.
     :param path: database file name
@@ -49,14 +48,12 @@ class DatabaseManager(metaclass=ABCMeta):
         self._create_database_file(path)
     return sqlite3.connect(path)
 
-  def _create_database_file(self, path):
-    # type : (str) -> None
+  def _create_database_file(self, path: str):
     """ creates a database files with full permissions """
     os.umask(0)
     os.open(path, os.O_WRONLY | os.O_CREAT, 0o776)
 
-  def execute_statement_on_dbfile(self, path, statement):
-    # type : (str, str) -> None
+  def execute_statement_on_dbfile(self, path: str, statement: str):
     """ Executes a statement on a database file specified by path. """
     conn = self.get_connection(path)
     cursor = conn.cursor()
@@ -64,8 +61,7 @@ class DatabaseManager(metaclass=ABCMeta):
     conn.commit()
     conn.close()
 
-  def execute_statement_with_arguments_on_dbfile(self, path, statement, arguments):
-    # type : (str, str, Tuple) -> None
+  def execute_statement_with_arguments_on_dbfile(self, path: str, statement: str, arguments: Tuple):
     """ Executes an statement with arguments on a database file specified by path. """
     conn = self.get_connection(path)
     cursor = conn.cursor()
@@ -73,8 +69,7 @@ class DatabaseManager(metaclass=ABCMeta):
     conn.commit()
     conn.close()
 
-  def execute_many_statement_with_arguments_on_dbfile(self, path, statement, arguments_list):
-    # type : (str, str, List[Tuple]) -> None
+  def execute_many_statement_with_arguments_on_dbfile(self, path: str, statement: str, arguments_list: List[Tuple]) -> None:
     """ Executes many statements from a list of arguments specified by a path. """
     conn = self.get_connection(path)
     cursor = conn.cursor()
@@ -82,8 +77,7 @@ class DatabaseManager(metaclass=ABCMeta):
     conn.commit()
     conn.close()
 
-  def execute_many_statements_on_dbfile(self, path, statements):
-    # type : (str, List[str]) -> None
+  def execute_many_statements_on_dbfile(self, path: str, statements: List[str]) -> None:
     """
     Updates the table schema using a **small** list of statements. No Exception raised.
     Should be used to execute a list of schema updates that might have been already applied.
@@ -94,8 +88,7 @@ class DatabaseManager(metaclass=ABCMeta):
       except Exception as exp:
           pass
 
-  def get_from_statement(self, path, statement):
-    # type : (str, str) -> List[Tuple]
+  def get_from_statement(self, path: str, statement: str) -> List[Tuple]:
     """ Get the rows from a statement with no arguments """
     conn = self.get_connection(path)
     conn.text_factory = str
@@ -105,8 +98,7 @@ class DatabaseManager(metaclass=ABCMeta):
     conn.close()
     return statement_rows
 
-  def get_from_statement_with_arguments(self, path, statement, arguments):
-    # type : (str, str, Tuple) -> List[Tuple]
+  def get_from_statement_with_arguments(self, path: str, statement: str, arguments: Tuple) -> List[Tuple]:
     """ Get the rows from a statement with arguments """
     conn = self.get_connection(path)
     conn.text_factory = str
@@ -116,8 +108,7 @@ class DatabaseManager(metaclass=ABCMeta):
     conn.close()
     return statement_rows
 
-  def insert_statement(self, path, statement):
-    # type : (str, str) -> int
+  def insert_statement(self, path: str, statement: str) -> int:
     """ Insert statement into path """
     conn = self.get_connection(path)
     conn.text_factory = str
@@ -128,8 +119,7 @@ class DatabaseManager(metaclass=ABCMeta):
     conn.close()
     return lastrow_id
 
-  def insert_statement_with_arguments(self, path, statement, arguments):
-    # type : (str, str, Tuple) -> int
+  def insert_statement_with_arguments(self, path: str, statement: str, arguments: Tuple) -> int:
     """ Insert statement with arguments into path """
     conn = self.get_connection(path)
     conn.text_factory = str
@@ -140,8 +130,7 @@ class DatabaseManager(metaclass=ABCMeta):
     conn.close()
     return lastrow_id
 
-  def get_built_select_statement(self, table_name, conditions=None):
-    # type : (str, namedtuple, str) -> str
+  def get_built_select_statement(self, table_name: str, conditions: str = None) -> str:
     """ Build and return a SELECT statement with the same fields as the model. Requires that the table is associated with a model (namedtuple). """
     model = Models.get_correct_model_for_table_and_version(table_name, self.db_version) # Models.table_name_to_model[table_name]
     if conditions:

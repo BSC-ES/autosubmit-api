@@ -3,14 +3,13 @@ from datetime import datetime, timedelta
 from .utils import timedelta2hours
 
 class JobStat(object):
-    def __init__(self, name, processors, wallclock, section, date, member, chunk):
-      # type: (str, int, float, str, str, str, str) -> None
+    def __init__(self, name: str, processors: int, wallclock: float, section: str, date: str, member: str, chunk: str):
       self._name = name
       self._processors = processors
       self._wallclock = wallclock
-      self.submit_time = None # type: datetime
-      self.start_time = None # type: datetime
-      self.finish_time = None # type: datetime
+      self.submit_time: datetime = None
+      self.start_time: datetime = None
+      self.finish_time: datetime = None
       self.completed_queue_time = timedelta()
       self.completed_run_time = timedelta()
       self.failed_queue_time = timedelta()

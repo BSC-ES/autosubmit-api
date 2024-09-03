@@ -571,8 +571,7 @@ def get_job_log(expid, logfile, nlines=150):
         'logcontent': logcontent}
 
 
-def get_experiment_pkl(expid):
-    # type: (str) -> Dict[str, Any]
+def get_experiment_pkl(expid: str) -> Dict:
     """
     Gets the current state of the pkl in a format proper for graph update.
     """
@@ -628,8 +627,7 @@ def get_experiment_pkl(expid):
     }
 
 
-def get_experiment_tree_pkl(expid):
-    # type: (str) -> Dict[str, Any]
+def get_experiment_tree_pkl(expid: str) -> Dict[str, Any]:
     """
     Gets the current state of the pkl in a format for tree update
     """
@@ -916,8 +914,7 @@ def get_quick_view(expid):
     return {"error": error, "error_message": error_message, "view_data": view_data, "tree_view": list(quick_tree_view), "total": total_count, "completed": completed_count, "failed": failed_count, "running": running_count, "queuing": queuing_count}
 
 
-def get_job_history(expid, job_name):
-    # type: (str, str) -> Dict[str, Any]
+def get_job_history(expid: str, job_name: str) -> Dict[str, Any]:
     error = False
     error_message = ""
     path_to_job_logs = ""

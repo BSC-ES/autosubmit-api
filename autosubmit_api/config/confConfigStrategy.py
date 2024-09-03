@@ -31,8 +31,8 @@ from pyparsing import nestedExpr
 from bscearth.utils.config_parser import ConfigParserFactory, ConfigParser
 from bscearth.utils.date import parse_date
 from bscearth.utils.log import Log
-from ..config.basicConfig import APIBasicConfig
-from ..config.IConfigStrategy import IConfigStrategy
+from autosubmit_api.config.basicConfig import APIBasicConfig
+from autosubmit_api.config.IConfigStrategy import IConfigStrategy
 
 logger = logging.getLogger('gunicorn.error')
 
@@ -44,48 +44,42 @@ class confConfigStrategy(IConfigStrategy):
     :type expid: str
     """
 
-    def __init__(self, expid, basic_config, parser_factory, extension=".conf"):
-        # type: (str, APIBasicConfig, ConfigParserFactory, Extension) -> None
-
+    def __init__(self, expid: str, basic_config: APIBasicConfig, parser_factory: ConfigParserFactory, extension: str=".conf"):
         self.expid = expid
         self.basic_config = basic_config
         self.parser_factory = parser_factory
 
         # By default check for .yml files first as it is the new standard for AS 4.0
-        self._conf_parser = None  # type: ConfigParser
+        self._conf_parser: ConfigParser = None
         self._conf_parser_file = os.path.join(self.basic_config.LOCAL_ROOT_DIR, expid, "conf",
                                               "autosubmit_" + expid + extension)
         if os.path.exists(self._conf_parser_file) == False:
            return None
 
-        self._exp_parser = None  # type: ConfigParser
+        self._exp_parser: ConfigParser = None
         self._exp_parser_file = os.path.join(self.basic_config.LOCAL_ROOT_DIR, expid, "conf",
                                              "expdef_" + expid + extension)
         if os.path.exists(self._exp_parser_file) == False:
            return None
 
-        self._platforms_parser = None  # type: ConfigParser
+        self._platforms_parser: ConfigParser = None
         self._platforms_parser_file = os.path.join(self.basic_config.LOCAL_ROOT_DIR, expid, "conf",
                                                    "platforms_" + expid + extension)
         if os.path.exists(self._platforms_parser_file) == False:
            return None
 
-        self._jobs_parser = None  # type: ConfigParser
+        self._jobs_parser: ConfigParser = None
         self._jobs_parser_file = os.path.join(self.basic_config.LOCAL_ROOT_DIR, expid, "conf",
                                               "jobs_" + expid + extension)
         if os.path.exists(self._jobs_parser_file) == False:
            return None
 
-        self._proj_parser = None  # type: ConfigParser
+        self._proj_parser: ConfigParser = None
         self._proj_parser_file = os.path.join(self.basic_config.LOCAL_ROOT_DIR, expid, "conf",
                                               "proj_" + expid + extension)
         if os.path.exists(self._proj_parser_file) == False:
            return None
 
-
-    @property
-    def jobs_parser(self):
-        return self._jobs_parser
 
     @property
     def jobs_parser(self):
@@ -952,8 +946,7 @@ class confConfigStrategy(IConfigStrategy):
             return default
         return int(chunk_ini)
 
-    def get_chunk_size_unit(self):
-        # type: () -> str
+    def get_chunk_size_unit(self) -> str:
         """
         Unit for the chunk length
 
@@ -968,8 +961,7 @@ class confConfigStrategy(IConfigStrategy):
         #         res = self.autosubmit_conf.get('experiment')
         return self._exp_parser.get('experiment', 'CHUNKSIZEUNIT').lower()
 
-    def get_chunk_size(self, default=1):
-        # type: (int) -> int
+    def get_chunk_size(self, default: int = 1) -> int:
         """
         Chunk Size as defined in the expdef file.
 

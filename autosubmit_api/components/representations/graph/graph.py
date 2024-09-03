@@ -1,18 +1,16 @@
 #!/usr/bin/env python
 
-from multiprocessing.sharedctypes import Value
 import networkx as nx
-from ....performance import utils as PUtils
+from autosubmit_api.performance import utils as PUtils
 # import common.utils as utils
-from ....common.utils import Status, get_average_total_time
-from networkx.linalg.laplacianmatrix import laplacian_matrix
-from ...jobs.job_factory import Job
-from ...jobs.joblist_loader import JobListLoader
-from ....monitor.monitor import Monitor
-from ....database.db_jobdata import ExperimentGraphDrawing
+from autosubmit_api.common.utils import Status, get_average_total_time
+from autosubmit_api.components.jobs.job_factory import Job
+from autosubmit_api.components.jobs.joblist_loader import JobListLoader
+from autosubmit_api.monitor.monitor import Monitor
+from autosubmit_api.database.db_jobdata import ExperimentGraphDrawing
 
-from .edge import Edge, RealEdge
-from typing import List, Dict, Tuple, Set, Any
+from autosubmit_api.components.representations.graph.edge import Edge, RealEdge
+from typing import List, Dict, Optional, Tuple, Any
 from scipy.sparse import linalg
 
 GRAPHVIZ_MULTIPLIER = 90
@@ -31,8 +29,7 @@ class GroupedBy:
 
 class GraphRepresentation(object):
   """ Graph Representation of Experiment """
-  def __init__(self, expid, job_list_loader, layout, grouped=GroupedBy.NO_GROUP):
-    # type: (str, JobListLoader, str, str) -> None
+  def __init__(self, expid: str, job_list_loader: JobListLoader, layout: str, grouped: str = GroupedBy.NO_GROUP):
     self.expid = expid
     self.layout = layout
     self.grouped_by = grouped
@@ -40,15 +37,15 @@ class GraphRepresentation(object):
     self.joblist_helper = self.joblist_loader.joblist_helper
     self.jobs = self.joblist_loader.jobs
     self.job_dictionary = self.joblist_loader.job_dictionary
-    self.average_post_time = 0.0 # type: float
-    self.we_have_valid_graph_drawing = False # type: bool
-    self.we_have_valid_graphviz_drawing = False # type: bool
-    self.edges = [] # type: List[Edge]
-    self.package_edges = [] # type: List[Edge]
-    self.nodes = [] # type: List[Dict[str, Any]]
-    self.groups = {} # type: Dict[str, Dict[str, Any]]
-    self.max_children_count = 0 # type: int
-    self.max_parent_count = 0 # type: int
+    self.average_post_time: float = 0.0
+    self.we_have_valid_graph_drawing: bool = False
+    self.we_have_valid_graphviz_drawing: bool = False
+    self.edges: List[Edge] = []
+    self.package_edges: List[Edge] = []
+    self.nodes: List[Dict[str, Any]] = []
+    self.groups: Dict[str, Dict[str, Any]] = {}
+    self.max_children_count: int = 0
+    self.max_parent_count: int = 0
 
   @property
   def job_count(self):
@@ -59,7 +56,6 @@ class GraphRepresentation(object):
     return len(self.edges)
 
   def perform_calculations(self):
-    # type: () -> None
     """ Calculate Graph Representation """
     self.joblist_loader.validate_job_list_configuration()
     self.add_normal_edges()
@@ -106,16 +102,14 @@ class GraphRepresentation(object):
     else:
       raise ValueError("You have provided an invalid grouping selection: {}".format(self.grouped_by))
 
-  def _get_grouped_by_status_dict(self):
-    # type: () -> Dict[str, Dict[str, Any]]
+  def _get_grouped_by_status_dict(self) -> Dict[str, Dict[str, Any]]:
     groups = {}
     groups['WAITING'] = {"color": Monitor.color_status(Status.WAITING)}
     groups['COMPLETED'] = {"color": Monitor.color_status(Status.COMPLETED)}
     groups['SUSPENDED'] = {"color": Monitor.color_status(Status.SUSPENDED)}
     return groups
 
-  def _get_grouped_by_date_member_dict(self):
-    # type: () -> Dict[str, Dict[str, Any]]
+  def _get_grouped_by_date_member_dict(self) -> Dict[str, Dict[str, Any]]:
     if len(self.joblist_loader.dates) == 0 or len(self.joblist_loader.members) == 0:
       raise Exception("This experiment doesn't admit grouping by date and member because there are {} dates and {} members.".format(
                       len(self.joblist_loader.dates), len(self.joblist_loader.members)))
@@ -144,8 +138,7 @@ class GraphRepresentation(object):
     return groups
 
 
-  def _solve_group_collisions(self, group_coordinates):
-    # type: (List[Tuple[str, int, int]]) -> Dict[str, Tuple[int, int]]
+  def _solve_group_collisions(self, group_coordinates: List[Tuple[str, int, int]]) -> Dict[str, Tuple[int, int]]:
     group_coordinates.sort(key=lambda group_triple: group_triple[2], reverse=True)
     new_group_coordinates = dict()
     visited = set()
@@ -163,8 +156,7 @@ class GraphRepresentation(object):
       new_group_coordinates[group_name] =  (x_i_coordinate, y_i_coordinate)
     return new_group_coordinates
 
-  def _get_defined_group_color(self, status_counters):
-    # type: (Dict[int, int]) -> str
+  def _get_defined_group_color(self, status_counters: Dict[int, int]) -> str:
     if status_counters.get(Status.FAILED, 0) > 0:
       return Monitor.color_status(Status.FAILED)
     elif status_counters.get(Status.RUNNING, 0) > 0:
@@ -203,9 +195,7 @@ class GraphRepresentation(object):
     self.we_have_valid_graphviz_drawing = False
 
   def update_jobs_level(self):
-    # type: () -> None
-    def update_level(parent_job):
-      # type: (Job) -> None
+    def update_level(parent_job: Job):
       stack.append(parent_job)
       while stack:
         current = stack.pop()
@@ -280,26 +270,22 @@ class GraphRepresentation(object):
         "y": job.y_coordinate
       })
 
-  def _calculate_max_children_parent(self, children_count, parent_count):
-    # type: (int, int) -> None
+  def _calculate_max_children_parent(self, children_count: int, parent_count: int):
     self.max_children_count = max(self.max_children_count, children_count)
     self.max_parent_count = max(self.max_parent_count, parent_count)
 
-  def _assign_coordinates_to_jobs(self, valid_coordinates):
+  def _assign_coordinates_to_jobs(self, valid_coordinates: Optional[Dict[str, Tuple[int, int]]]) -> bool:
     """ False if valid_coordinates is None OR empty"""
-    # type: (Dict[str, Tuple[int, int]] | None) -> bool
     if valid_coordinates and len(valid_coordinates) > 0:
       for job_name in self.job_dictionary:
         self.job_dictionary[job_name].x_coordinate, self.job_dictionary[job_name].y_coordinate = valid_coordinates[job_name]
       return True
     return False
 
-  def _get_graph_drawing_data(self):
-    # type: () -> Dict[str, Tuple[int, int]] | None
+  def _get_graph_drawing_data(self) -> Optional[Dict[str, Tuple[int, int]]]:
     return ExperimentGraphDrawing(self.expid).get_validated_data(self.jobs)
 
-  def _get_calculated_graph_drawing(self):
-    # type: () -> Dict[str, Tuple[int, int]]
+  def _get_calculated_graph_drawing(self) -> Dict[str, Tuple[int, int]]:
     coordinates = dict()
     graph = Monitor().create_tree_list(self.expid, self.jobs, None, dict(), False, self.job_dictionary)
     graph_viz_result = graph.create("dot", format="plain")
@@ -309,8 +295,7 @@ class GraphRepresentation(object):
         coordinates[str(node_data[1].decode())] = (int(float(node_data[2])) * GRAPHVIZ_MULTIPLIER, int(float(node_data[3])) * -GRAPHVIZ_MULTIPLIER)
     return coordinates
 
-  def _get_calculated_graph_laplacian_drawing(self):
-    # type: () -> Dict[str, Tuple[int, int]]
+  def _get_calculated_graph_laplacian_drawing(self) -> Dict[str, Tuple[int, int]]:
     coordinates = dict()
     nx_graph = nx.Graph()
     for job_name in self.job_dictionary:
@@ -327,8 +312,7 @@ class GraphRepresentation(object):
       coordinates[job_name] = (int(x_coords[i]), int(y_coords[i]))
     return coordinates
 
-  def _get_calculated_hierarchical_drawing(self):
-    # type: () -> Dict[str, Tuple[int, int]]
+  def _get_calculated_hierarchical_drawing(self) -> Dict[str, Tuple[int, int]]:
     coordinates = {}
     processed_packages = set()
     max_level = max(job.level for job in self.jobs)

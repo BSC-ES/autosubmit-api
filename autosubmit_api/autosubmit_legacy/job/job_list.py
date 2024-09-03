@@ -42,7 +42,7 @@ from autosubmit_api.database.db_jobdata import JobDataStructure, JobRow
 from autosubmit_api.builders.experiment_history_builder import ExperimentHistoryDirector, ExperimentHistoryBuilder
 from autosubmit_api.history.data_classes.job_data import JobData
 
-from typing import List, Dict, Tuple
+from typing import List, Dict, Optional, Tuple
 
 from autosubmit_api.persistance.experiment import ExperimentPaths
 
@@ -631,8 +631,9 @@ class JobList:
         return (job_running_time_seconds, job_running_to_runtext, [])
 
     @staticmethod
-    def _job_running_check(status_code, name, tmp_path):
-        # type: (int, str, str) -> Tuple[datetime.datetime, datetime.datetime, datetime.datetime, str]
+    def _job_running_check(
+        status_code: int, name: str, tmp_path: str
+    ) -> Tuple[datetime.datetime, datetime.datetime, datetime.datetime, str]:
         """
         Receives job data and returns the data from its TOTAL_STATS file in an ordered way.
         :param status_code: Status of job
@@ -701,8 +702,15 @@ class JobList:
         return (submit_time, start_time, finish_time, current_status)
 
     @staticmethod
-    def retrieve_times(status_code, name, tmp_path, make_exception=False, job_times=None, seconds=False, job_data_collection=None):
-        # type: (int, str, str, bool, Dict[str, Tuple[int, int, int, int, int]], bool, List[JobData]) -> JobRow
+    def retrieve_times(
+        status_code: int,
+        name: str,
+        tmp_path: str,
+        make_exception: bool = False,
+        job_times: Optional[Dict[str, Tuple[int, int, int, int, int]]] = None,
+        seconds: bool = False,
+        job_data_collection: Optional[List[JobData]] = None,
+    ) -> JobRow:
         """
         Retrieve job timestamps from database.
         :param status_code: Code of the Status of the job

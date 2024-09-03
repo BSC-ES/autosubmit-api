@@ -19,18 +19,9 @@
 
 from configparser import ConfigParser as PyConfigParser
 from autosubmitconfigparser.config.configcommon import AutosubmitConfig as Autosubmit4Config
-import os
 import re
-import subprocess
-import json
-import logging
-import locale
 
-from pyparsing import nestedExpr
 from bscearth.utils.config_parser import ConfigParserFactory, ConfigParser
-from bscearth.utils.date import parse_date
-from bscearth.utils.log import Log
-from ..config.basicConfig import APIBasicConfig
 from abc import ABC, abstractmethod
 
 
@@ -508,8 +499,7 @@ class IConfigStrategy(ABC):
         """
 
 
-    def get_chunk_size_unit(self):
-        # type: () -> str
+    def get_chunk_size_unit(self) -> str:
         """
         Unit for the chunk length
 
@@ -519,8 +509,7 @@ class IConfigStrategy(ABC):
 
         pass
 
-    def get_chunk_size(self, default=1):
-        # type: (int) -> int
+    def get_chunk_size(self, default: int = 1) -> int:
         """
         Chunk Size as defined in the expdef file.
 
@@ -805,6 +794,5 @@ class IConfigStrategy(ABC):
        pass
 
     @staticmethod
-    def get_parser(parser_factory, file_path):
-        # type: (ConfigParserFactory, str) -> ConfigParser
+    def get_parser(parser_factory: ConfigParserFactory, file_path: str) -> ConfigParser:
         pass

@@ -2,7 +2,6 @@
 
 import unittest
 import common.utils_for_testing as UtilsForTesting
-from mock import Mock
 from components.representations.tree.tree import TreeRepresentation
 from components.jobs.joblist_loader import JobListLoader
 from components.experiment.pkl_organizer import PklOrganizer
@@ -11,9 +10,7 @@ from components.experiment.configuration_facade import AutosubmitConfigurationFa
 from bscearth.utils.config_parser import ConfigParserFactory
 from config.config_common import AutosubmitConfigResolver
 
-from common.utils import Status
 from components.jobs.joblist_helper import JobListHelper
-from config.basicConfig import APIBasicConfig
 
 class TestTreeRepresentation(unittest.TestCase):
   def setUp(self):

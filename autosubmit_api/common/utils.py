@@ -38,8 +38,7 @@ SECONDS_IN_A_DAY = 86400
 PklJob = namedtuple('PklJob', ['name', 'id', 'status', 'priority', 'section', 'date', 'member', 'chunk', 'out_path_local', 'err_path_local', 'out_path_remote', 'err_path_remote'])
 PklJob14 = namedtuple('PklJob14', ['name', 'id', 'status', 'priority', 'section', 'date', 'member', 'chunk', 'out_path_local', 'err_path_local', 'out_path_remote', 'err_path_remote', 'wrapper_type'])
 
-def tostamp(string_date):
-  # type: (str) -> int
+def tostamp(string_date: str) -> int:
   """
   String datetime to timestamp
   """
@@ -56,9 +55,8 @@ def tostamp(string_date):
 
 
 
-def parse_number_processors(processors_str):
+def parse_number_processors(processors_str: str) -> int:
   """ Defaults to 1 in case of error """
-  # type: (str) -> int
   if ':' in processors_str:  
     components = processors_str.split(":")
     processors = int(sum(
@@ -156,16 +154,14 @@ def _date_to_str_space(date_str):
   else:
       return ""
 
-def get_average_total_time(jobs):
-  # type: (List[object]) -> float
+def get_average_total_time(jobs: List[object]) -> float:
   """ Job has attribute total_time (See JobFactory)"""
   if len(jobs):
     average = sum(job.total_time for job in jobs)/ len(jobs)
     return round(average, 4)
   return 0.0
 
-def parse_version_number(str_version):
-  # type : (str) -> Tuple[int, int]
+def parse_version_number(str_version: str) -> Tuple[int, int]:
   if len(str_version.strip()) > 0:
     version_split = str_version.split('.')
     main = int(version_split[0])
@@ -185,20 +181,17 @@ def is_wrapper_type_in_pkl_version(str_version):
     return True
   return False
 
-def get_current_timestamp():
-  # type: () -> int
+def get_current_timestamp() -> int:
   return int(time.time())
 
 
-def get_experiments_from_folder(root_folder):     
-  # type: (str) -> List[str]
+def get_experiments_from_folder(root_folder: str) -> List[str]:     
   currentDirectories = subprocess.Popen(['ls', '-t', root_folder], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
   stdOut, _ = currentDirectories.communicate()
   folders = stdOut.split()      
   return [expid for expid in folders if len(expid) == 4]
 
-def timestamp_to_datetime_format(timestamp):
-  # type: (int) -> str
+def timestamp_to_datetime_format(timestamp: int) -> str:
   """ %Y-%m-%d %H:%M:%S """
   try:
     if timestamp and timestamp > 0:
@@ -208,8 +201,7 @@ def timestamp_to_datetime_format(timestamp):
     return None
   return None
 
-def datechunk_to_year(chunk_unit, chunk_size):
-    # type: (str, int) -> float
+def datechunk_to_year(chunk_unit: int, chunk_size: int) -> float:
     """
     Gets chunk unit and size and returns the value in years
 

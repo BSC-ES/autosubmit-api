@@ -108,7 +108,6 @@ class DetailsProcessor:
             conn.commit()
 
     def _clean_table(self):
-        # type: () -> None
         with self.main_db_engine.connect() as conn:
             with conn.execution_options(isolation_level="AUTOCOMMIT"):
                 conn.execute(tables.details_table.delete())

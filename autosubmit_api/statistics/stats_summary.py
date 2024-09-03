@@ -13,7 +13,7 @@ class StatsSummary(object):
     self.real_consumption = 0.0
     self.failed_real_consumption = 0.0
     # CPU Consumption
-    self.expected_cpu_consumption = 0.0 # type: float
+    self.expected_cpu_consumption: float = 0.0
     self.cpu_consumption = 0.0
     self.failed_cpu_consumption = 0.0
     self.total_queue_time = 0.0

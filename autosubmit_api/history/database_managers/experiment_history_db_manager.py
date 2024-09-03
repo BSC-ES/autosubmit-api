@@ -25,7 +25,7 @@ from autosubmit_api.history.data_classes.job_data import JobData
 from autosubmit_api.history.data_classes.experiment_run import ExperimentRun
 from autosubmit_api.config.basicConfig import APIBasicConfig
 from autosubmit_api.history.database_managers.database_manager import DatabaseManager
-from typing import List
+from typing import List, Optional
 from collections import namedtuple
 
 DEFAULT_MAX_COUNTER = 0
@@ -33,8 +33,7 @@ DEFAULT_MAX_COUNTER = 0
 class ExperimentHistoryDbManager(DatabaseManager):
   """ Manages actions directly on the database.
   """
-  def __init__(self, expid, basic_config):
-    # type: (str, APIBasicConfig) -> None
+  def __init__(self, expid: str, basic_config: APIBasicConfig):
     """ Requires expid and jobdata_dir_path. """
     super(ExperimentHistoryDbManager, self).__init__(expid, basic_config)
     self._set_schema_changes()
@@ -135,7 +134,6 @@ class ExperimentHistoryDbManager(DatabaseManager):
       ''')
 
   def _set_schema_changes(self):
-    # type : () -> None
     """ Creates the list of schema changes"""
     self.version_schema_changes = [
       "ALTER TABLE job_data ADD COLUMN nnodes INTEGER NOT NULL DEFAULT 0",
@@ -196,14 +194,12 @@ class ExperimentHistoryDbManager(DatabaseManager):
       raise Exception("No Experiment Runs registered.")
     return self.experiment_run_row_model(*max_experiment_run[0])
 
-  def get_experiment_run_by_id(self, run_id):
-    # type: (int) -> ExperimentRun | None
+  def get_experiment_run_by_id(self, run_id: int) -> Optional[ExperimentRun]:
     if run_id:
       return ExperimentRun.from_model(self._get_experiment_run_by_id(run_id))
     return None
 
-  def _get_experiment_run_by_id(self, run_id):
-    # type: (int) -> namedtuple
+  def _get_experiment_run_by_id(self, run_id: int) -> namedtuple:
     statement = self.get_built_select_statement("experiment_run", "run_id=?")
     arguments = (run_id,)
     experiment_run = self.get_from_statement_with_arguments(self.historicaldb_file_path, statement, arguments)
@@ -211,13 +207,11 @@ class ExperimentHistoryDbManager(DatabaseManager):
       raise Exception("Experiment run {0} for experiment {1} does not exists.".format(run_id, self.expid))
     return self.experiment_run_row_model(*experiment_run[0])
 
-  def get_experiment_runs_dcs(self):
-    # type: () -> List[ExperimentRun]
+  def get_experiment_runs_dcs(self) -> List[ExperimentRun]:
     experiment_run_rows = self._get_experiment_runs()
     return [ExperimentRun.from_model(row) for row in experiment_run_rows]
 
-  def _get_experiment_runs(self):
-    # type: () -> List[namedtuple]
+  def _get_experiment_runs(self) -> List[namedtuple]:
     statement = self.get_built_select_statement("experiment_run")
     experiment_runs = self.get_from_statement(self.historicaldb_file_path, statement)
     return [self.experiment_run_row_model(*row) for row in experiment_runs]
@@ -229,8 +223,7 @@ class ExperimentHistoryDbManager(DatabaseManager):
       return True
     return False
 
-  def get_job_data_dcs_all(self):
-    # type: () -> List[JobData]
+  def get_job_data_dcs_all(self) -> List[JobData]:
     """ Gets all content from job_data ordered by id (from table). """
     return [JobData.from_model(row) for row in self.get_job_data_all()]
 
@@ -279,8 +272,7 @@ class ExperimentHistoryDbManager(DatabaseManager):
     job_data_rows_last = self.get_from_statement_with_arguments(self.historicaldb_file_path, statement, arguments)
     return [self.job_data_row_model(*row) for row in job_data_rows_last]
 
-  def get_job_data_dc_COMPLETED_by_wrapper_run_id(self, package_code, run_id):
-    # type: (int, int) -> List[JobData]
+  def get_job_data_dc_COMPLETED_by_wrapper_run_id(self, package_code: int, run_id: int) -> List[JobData]:
     if not run_id or package_code <= Models.RowType.NORMAL:
       return []
     job_data_rows = self._get_job_data_dc_COMPLETED_by_wrapper_run_id(package_code, run_id)
@@ -288,8 +280,7 @@ class ExperimentHistoryDbManager(DatabaseManager):
       return []
     return [JobData.from_model(row) for row in job_data_rows]
 
-  def _get_job_data_dc_COMPLETED_by_wrapper_run_id(self, package_code, run_id):
-    # type: (int, int) -> List[namedtuple]
+  def _get_job_data_dc_COMPLETED_by_wrapper_run_id(self, package_code: int, run_id: int) -> List[namedtuple]:
     statement = self.get_built_select_statement("job_data", "run_id=? and rowtype=? and status=? ORDER BY id")
     arguments = (run_id, package_code, "COMPLETED")
     job_data_rows = self.get_from_statement_with_arguments(self.historicaldb_file_path, statement, arguments)
@@ -312,8 +303,7 @@ class ExperimentHistoryDbManager(DatabaseManager):
     else:
       return []
 
-  def get_job_data_dcs_COMPLETED_by_section(self, section):
-    # type: (str) -> List[JobData]
+  def get_job_data_dcs_COMPLETED_by_section(self, section: str) -> List[JobData]:
     arguments = {"status": "COMPLETED", "section": section}
     job_data_rows = self._get_job_data_COMPLETD_by_section(section)
     return [JobData.from_model(row) for row in job_data_rows]
@@ -343,21 +333,18 @@ class ExperimentHistoryDbManager(DatabaseManager):
     job_data_rows = self.get_from_statement(self.historicaldb_file_path, statement)
     return [self.job_data_row_model(*row) for row in job_data_rows]
 
-  def get_job_data_dcs_by_name(self, job_name):
-    # type: (str) -> List[JobData]
+  def get_job_data_dcs_by_name(self, job_name: str) -> List[JobData]:
     job_data_rows = self._get_job_data_by_name(job_name)
     return [JobData.from_model(row) for row in job_data_rows]
 
-  def _get_job_data_by_name(self, job_name):
-    # type: (str) -> List[namedtuple]
+  def _get_job_data_by_name(self, job_name: str) -> List[namedtuple]:
     """ Get List of Models.JobDataRow for job_name """
     statement = self.get_built_select_statement("job_data", "job_name=? ORDER BY counter DESC")
     arguments = (job_name,)
     job_data_rows = self.get_from_statement_with_arguments(self.historicaldb_file_path, statement, arguments)
     return [self.job_data_row_model(*row) for row in job_data_rows]
 
-  def _insert_job_data(self, job_data):
-    # type : (JobData) -> int
+  def _insert_job_data(self, job_data: JobData) -> int:
     """ Insert data class JobData into job_data table. """
     statement = ''' INSERT INTO job_data(counter, job_name, created, modified,
                 submit, start, finish, status, rowtype, ncpus,
@@ -384,8 +371,7 @@ class ExperimentHistoryDbManager(DatabaseManager):
                 experiment_run.submitted, experiment_run.suspended, experiment_run.metadata)
     return self.insert_statement_with_arguments(self.historicaldb_file_path, statement, arguments)
 
-  def update_many_job_data_change_status(self, changes):
-    # type : (List[Tuple]) -> None
+  def update_many_job_data_change_status(self, changes: List[tuple]):
     """
     Update many job_data rows in bulk. Requires a changes list of argument tuples.
     Only updates finish, modified, status, and rowstatus by id.
@@ -455,8 +441,7 @@ class ExperimentHistoryDbManager(DatabaseManager):
     statement = "pragma user_version={v:d};".format(v=version)
     self.execute_statement_on_dbfile(self.historicaldb_file_path, statement)
 
-  def _get_pragma_version(self):
-    # type: () -> int
+  def _get_pragma_version(self) -> int:
     """ Gets current pragma version as int. """
     statement = "pragma user_version;"
     pragma_result = self.get_from_statement(self.historicaldb_file_path, statement)

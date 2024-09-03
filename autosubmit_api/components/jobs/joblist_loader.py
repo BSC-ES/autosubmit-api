@@ -16,15 +16,14 @@ logger = logging.getLogger('gunicorn.error')
 
 class JobListLoader(object):
   """ Class that manages loading the list of jobs from the pkl. Adds other resources. """
-  def __init__(self, expid, joblist_helper):
-    # type: (str, JobListHelper) -> None
+  def __init__(self, expid: str, joblist_helper: JobListHelper):
     self.expid = expid
     self.joblist_helper = joblist_helper
     self.configuration_facade = self.joblist_helper.configuration_facade
     self.pkl_organizer = self.joblist_helper.pkl_organizer
-    self._jobs = [] # type: List[Job]
-    self._structure_adjacency = {} # type: Dict[str, List[str]]
-    self._job_dictionary = {} # type: Dict[str, Job]
+    self._jobs: List[Job] = []
+    self._structure_adjacency: Dict[str, List[str]] = {}
+    self._job_dictionary: Dict[str, Job] = {}
 
 
   def load_jobs(self):
@@ -41,8 +40,7 @@ class JobListLoader(object):
     self._generate_job_dictionary()
     self._update_job_logs()
 
-  def are_these_in_same_package(self, *names):
-    # type: (List[str]) -> bool
+  def are_these_in_same_package(self, *names: List[str]) -> bool:
     packages = set()
     for job_name in names:
       package_name = self.joblist_helper.job_to_package.get(job_name, None)
@@ -66,8 +64,7 @@ class JobListLoader(object):
     if len(dates) != len(set(dates)):
       raise Exception("Repeated dates found. Autosubmit API can't generate a representation for this configuration. Review your configuration files.")
 
-  def get_all_jobs_in_package(self, package_name):
-    # type: (str) -> List[Job]
+  def get_all_jobs_in_package(self, package_name: str) -> List[Job]:
     jobs = []
     job_names = self.joblist_helper.package_to_jobs.get(package_name, [])
     if job_names and len(job_names) > 0:
@@ -80,30 +77,25 @@ class JobListLoader(object):
     return self.configuration_facade.log_path
 
   @property
-  def package_names(self):
-    # type: () -> Set[str]
+  def package_names(self) -> Set[str]:
     if self.joblist_helper.package_to_jobs:
       return set([package for package in self.joblist_helper.package_to_jobs])
     return []
 
   @property
-  def jobs(self):
-    # type: () -> List[Job]
+  def jobs(self) -> List[Job]:
     return self._jobs
 
   @property
-  def job_dictionary(self):
-    # type: () -> Dict[str, Job]
+  def job_dictionary(self) -> Dict[str, Job]:
     return self._job_dictionary
 
   @property
-  def chunk_unit(self):
-    # type: () -> str
+  def chunk_unit(self) -> str:
     return self.configuration_facade.chunk_unit
 
   @property
-  def chunk_size(self):
-    # type: () -> int
+  def chunk_size(self) -> int:
     return self.configuration_facade.chunk_size
 
   @property
@@ -111,8 +103,7 @@ class JobListLoader(object):
     return self.pkl_organizer.dates
 
   @property
-  def dates_formatted_dict(self):
-    # type: () -> Dict[str, str]
+  def dates_formatted_dict(self) -> Dict[str, str]:
     if len(self.dates) > 0:
       date_format = self.date_format
       return {date: date2str(date, date_format) for date in self.dates}
@@ -128,8 +119,7 @@ class JobListLoader(object):
     return self.pkl_organizer.sections
 
   @property
-  def date_format(self):
-    # type: () -> str
+  def date_format(self) -> str:
     date_format = ''
     for date in self.pkl_organizer.dates:
       if date.hour > 1:
@@ -156,7 +146,6 @@ class JobListLoader(object):
       job.parents_names = set(parents_adjacency.get(job.name, []))
 
   def assign_configuration_data_to_jobs(self):
-    # type: () -> None
     """ Sets Number of Processors, Platform, QoS, Wallclock"""
     section_to_config = {}
     for job in self._jobs:
@@ -178,8 +167,7 @@ class JobListLoader(object):
       job_platform = self.configuration_facade.get_main_platform()
     return job_platform
 
-  def _determine_qos(self, job):
-    # type: (Job) -> None
+  def _determine_qos(self, job: Job):
     job_qos = ""
     if job.package is not None:
       job_qos = self.configuration_facade.get_wrapper_qos()
@@ -190,8 +178,7 @@ class JobListLoader(object):
              job_qos = self.configuration_facade.get_platform_qos(job.platform, job.ncpus)
     return job_qos
 
-  def _determine_wallclock(self, job):
-    # type: (Job) -> None
+  def _determine_wallclock(self, job: Job):
     wallclock = self.configuration_facade.get_section_wallclock(job.section)
     if len(wallclock.strip()) == 0:
         if job.platform != "None":
@@ -199,7 +186,6 @@ class JobListLoader(object):
     return wallclock
 
   def assign_packages_to_jobs(self):
-    # type: () -> None
     if self.joblist_helper.job_to_package:
       for job in self._jobs:
         job.package = self.joblist_helper.job_to_package.get(job.name, None)
@@ -214,7 +200,6 @@ class JobListLoader(object):
 
 
   def _update_job_logs(self):
-    # type: () -> None
     """
     Updates job out and err logs of the job list
     """

@@ -28,8 +28,7 @@ from typing import List, Dict, Tuple, Any
 SECONDS_WAIT_PLATFORM = 60
 
 class ExperimentHistory():
-  def __init__(self, expid, basic_config, experiment_history_db_manager, logger):
-    # type: (str, APIBasicConfig, ExperimentHistoryDbManager, Logging) -> None
+  def __init__(self, expid: str, basic_config: APIBasicConfig, experiment_history_db_manager: ExperimentHistoryDbManager, logger: Logging) -> None:
     self.expid = expid
     self._log = logger
     self.basic_config = basic_config
@@ -46,20 +45,19 @@ class ExperimentHistory():
       return self.manager.is_header_ready_db_version()
     return False
 
-  def get_historic_job_data(self, job_name):
-    # type: (str) -> List[Dict[str, Any]]
+  def get_historic_job_data(self, job_name: str) -> List[Dict[str, Any]]:
     result = []
     all_job_data_dcs = self.manager.get_job_data_dcs_by_name(job_name)
     post_job_data_dcs = self.manager.get_job_data_dcs_COMPLETED_by_section("POST")
 
-    run_id_to_POST_job_data_dcs = {} # type: Dict[int, List[JobData]]
-    run_id_wrapper_code_to_job_data_dcs = {} # type: Dict[Tuple[int, int], List[JobData]]
+    run_id_to_POST_job_data_dcs: Dict[int, List[JobData]] = {}
+    run_id_wrapper_code_to_job_data_dcs: Dict[Tuple[int, int], List[JobData]] = {}
     for job_data_dc in post_job_data_dcs:
       run_id_to_POST_job_data_dcs.setdefault(job_data_dc.run_id, []).append(job_data_dc)
       if (job_data_dc.run_id, job_data_dc.rowtype) not in run_id_wrapper_code_to_job_data_dcs:
         run_id_wrapper_code_to_job_data_dcs[(job_data_dc.run_id, job_data_dc.rowtype)] = self.manager.get_job_data_dc_COMPLETED_by_wrapper_run_id(job_data_dc.rowtype, job_data_dc.run_id)
 
-    run_id_to_experiment_run_involved = {} # type: Dict[int, ExperimentRun]
+    run_id_to_experiment_run_involved: Dict[int, ExperimentRun] = {}
     for job_data_dc in all_job_data_dcs:
       if job_data_dc.run_id not in run_id_to_experiment_run_involved:
         run_id_to_experiment_run_involved[job_data_dc.run_id] = self.manager.get_experiment_run_by_id(job_data_dc.run_id)

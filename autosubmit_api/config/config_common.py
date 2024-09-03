@@ -37,9 +37,7 @@ class AutosubmitConfigResolver(object):
     :configWrapper: IConfigStrategy -> handling strategy for the type of config files used
     """
 
-    def __init__(self, expid, basic_config, parser_factory):
-        # type: (str, APIBasicConfig, ConfigParserFactory) -> None
-
+    def __init__(self, expid: str, basic_config: APIBasicConfig, parser_factory: ConfigParserFactory):
         self.expid = expid
         self._configWrapper = None
         self.basic_config = basic_config
@@ -528,8 +526,7 @@ class AutosubmitConfigResolver(object):
         """
         return self._configWrapper.get_chunk_ini(default)
 
-    def get_chunk_size_unit(self):
-        # type: () -> str
+    def get_chunk_size_unit(self) -> str:
         """
         Unit for the chunk length
 
@@ -539,8 +536,7 @@ class AutosubmitConfigResolver(object):
 
         return self._configWrapper.get_chunk_size_unit()
 
-    def get_chunk_size(self, default=1):
-        # type: (int) -> int
+    def get_chunk_size(self, default: int = 1) -> int:
         """
         Chunk Size as defined in the expdef file.
 
@@ -817,8 +813,7 @@ class AutosubmitConfigResolver(object):
         return self._configWrapper.is_valid_git_repository()
 
 
-    def get_parser(self, parser_factory, file_path) -> ConfigParser:
-        # type: (ConfigParserFactory, str) -> ConfigParser
+    def get_parser(self, parser_factory: ConfigParserFactory, file_path: str) -> ConfigParser:
         """
         Gets parser for given file
 

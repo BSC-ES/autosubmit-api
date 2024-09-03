@@ -5,9 +5,8 @@ import math
 import autosubmit_api.common.utils_for_testing  as TestUtils
 
 from autosubmit_api.common.utils import Status
-from autosubmit_api.components.representations.graph.graph import GraphRepresentation, GroupedBy, Layout
+from autosubmit_api.components.representations.graph.graph import GraphRepresentation, Layout
 from autosubmit_api.builders.joblist_loader_builder import JobListLoaderBuilder, JobListLoaderDirector
-from collections import Counter
 
 CASE_NO_WRAPPERS = "a3tb" # Job count = 55
 CASE_WITH_WRAPPERS = "a28v"
@@ -21,14 +20,12 @@ class TestGraph(unittest.TestCase):
   def get_loader(self, expid):
     return JobListLoaderDirector(JobListLoaderBuilder(expid)).build_loaded_joblist_loader(TestUtils.get_mock_basic_config())
 
-  def get_standard_case_with_no_calculations(self):
-    # type: () -> GraphRepresentation
+  def get_standard_case_with_no_calculations(self) -> GraphRepresentation:
     """  """
     loader = JobListLoaderDirector(JobListLoaderBuilder(CASE_NO_WRAPPERS)).build_loaded_joblist_loader(TestUtils.get_mock_basic_config())
     return GraphRepresentation(CASE_NO_WRAPPERS, loader, Layout.STANDARD)
 
-  def get_wrapper_case_with_no_calculations(self):
-    # type: () -> GraphRepresentation
+  def get_wrapper_case_with_no_calculations(self) -> GraphRepresentation:
     loader = JobListLoaderDirector(JobListLoaderBuilder(CASE_WITH_WRAPPERS)).build_loaded_joblist_loader(TestUtils.get_mock_basic_config())
     return GraphRepresentation(CASE_WITH_WRAPPERS, loader, Layout.STANDARD)
 

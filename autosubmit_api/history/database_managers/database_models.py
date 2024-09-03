@@ -51,8 +51,7 @@ ExperimentStatusRow = collections.namedtuple('ExperimentStatusRow', ['exp_id', '
 
 
 
-def get_experiment_row_model(db_version):
-  # type: (int) -> collections.namedtuple
+def get_experiment_row_model(db_version: int) -> collections.namedtuple:
   if db_version >= DatabaseVersion.EXPERIMENT_HEADER_PLATFORM_ADDED.value:    
     return ExperimentRunRow
   elif db_version >= DatabaseVersion.EXPERIMENT_HEADER_SCHEMA_CHANGES.value:    
@@ -60,8 +59,7 @@ def get_experiment_row_model(db_version):
   else:    
     return ExperimentRunRowBase
 
-def get_job_data_row_model(db_version):
-  # type: (int) -> collections.namedtuple
+def get_job_data_row_model(db_version: int) -> collections.namedtuple:
   if db_version >= DatabaseVersion.EXPERIMENT_HEADER_PLATFORM_ADDED.value:
     return JobDataRow
   elif db_version >= DatabaseVersion.EXPERIMENT_HEADER_SCHEMA_CHANGES.value:
@@ -102,8 +100,7 @@ table_name_to_model = {
   "pragma_version" : PragmaVersion
 }
 
-def get_correct_model_for_table_and_version(table_name, db_version=0):
-  # type: (str, int) -> collections.namedtuple
+def get_correct_model_for_table_and_version(table_name: str, db_version: int = 0) -> collections.namedtuple:
   if table_name == "experiment_run":
     return get_experiment_row_model(db_version)
   elif table_name == "job_data":

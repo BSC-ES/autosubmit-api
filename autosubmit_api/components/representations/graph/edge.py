@@ -1,7 +1,7 @@
 
 #!/usr/bin/env python
-from abc import ABCMeta, abstractmethod
-from typing import List, Dict
+from abc import ABCMeta
+from typing import Dict
 
 class Edge(object, metaclass=ABCMeta):
   """ Abstract Edge """
@@ -13,12 +13,10 @@ class Edge(object, metaclass=ABCMeta):
     self._is_in_wrapper = ""
     self._dashed = ""    
 
-  def _get_build_identifier(self):
-    # type: () -> str
+  def _get_build_identifier(self) -> str:
     return "{0}-{1}".format(self._from, self._to)
 
-  def get_as_json(self):
-    # type: () -> Dict[str, str]
+  def get_as_json(self) -> Dict[str, str]:
     return {
       "id": self._id,
       "from": self._from,
@@ -28,8 +26,7 @@ class Edge(object, metaclass=ABCMeta):
     }
   
 class RealEdge(Edge):
-  def __init__(self, from_node_name, to_node_name, in_wrapper_and_same_wrapper):
-    # type: (str, str, bool) -> None
+  def __init__(self, from_node_name: str, to_node_name: str, in_wrapper_and_same_wrapper: bool):
     super(RealEdge, self).__init__()    
     self._from = from_node_name
     self._to = to_node_name
@@ -38,8 +35,7 @@ class RealEdge(Edge):
     self._dashed = False
 
 class PackageInnerEdge(Edge):
-  def __init__(self, from_node_name, to_node_name):
-    # type: (str, str) -> None
+  def __init__(self, from_node_name: str, to_node_name: str):
     super(PackageInnerEdge, self).__init__()
     self._from = from_node_name
     self._to = to_node_name

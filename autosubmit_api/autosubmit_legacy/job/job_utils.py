@@ -270,8 +270,7 @@ def job_times_to_text(minutes_queue, minutes_running, status):
     return running_text
 
 
-def datechunk_to_year(chunk_unit, chunk_size):
-    # type: (str, int) -> float
+def datechunk_to_year(chunk_unit: str, chunk_size: int) -> float:
     """
     Gets chunk unit and size and returns the value in years
 
@@ -292,8 +291,7 @@ def datechunk_to_year(chunk_unit, chunk_size):
         return 0.0
 
 
-def tostamp(string_date):
-    # type: (str) -> int
+def tostamp(string_date: str) -> int:
     """
     String datetime to timestamp
     """

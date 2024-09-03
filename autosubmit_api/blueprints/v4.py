@@ -1,5 +1,4 @@
 from flask import Blueprint
-from autosubmit_api.views import v3 as v3_views
 from autosubmit_api.views import v4 as v4_views
 
 

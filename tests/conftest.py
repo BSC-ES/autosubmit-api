@@ -4,11 +4,9 @@
 import os
 from flask import Flask
 import pytest
-from autosubmitconfigparser.config.basicconfig import BasicConfig
 from autosubmit_api.app import create_app
 from autosubmit_api.config.basicConfig import APIBasicConfig
 from autosubmit_api import config
-from tests.custom_utils import custom_return_value
 
 FAKE_EXP_DIR = "./tests/experiments/"
 
