@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import networkx as nx
+from autosubmit_api.builders.experiment_history_builder import ExperimentHistoryBuilder, ExperimentHistoryDirector
 from autosubmit_api.performance import utils as PUtils
 # import common.utils as utils
 from autosubmit_api.common.utils import Status, get_average_total_time
@@ -226,10 +227,32 @@ class GraphRepresentation(object):
     self.average_post_time = get_average_total_time(post_jobs)
 
   def _generate_node_data(self):
+    # Get last run data for each job
+    try:
+      experiment_history = ExperimentHistoryDirector(ExperimentHistoryBuilder(self.expid)).build_reader_experiment_history()
+      last_jobs_run = experiment_history.get_all_jobs_last_run_dict()
+    except Exception:
+      last_jobs_run = {}
+
+    # Generate node data
     for job_name in self.job_dictionary:
       job = self.job_dictionary[job_name]
       self._calculate_max_children_parent(len(job.children_names), len(job.parents_names))
-      ini_date, end_date = job.get_date_ini_end(self.joblist_loader.chunk_size, self.joblist_loader.chunk_unit)
+
+      # Get chunk size and unit
+      chunk_size = self.joblist_loader.chunk_size
+      chunk_unit = self.joblist_loader.chunk_unit
+      last_run = last_jobs_run.get(job_name)
+      if last_run and last_run.chunk_unit and last_run.chunk_size:
+        chunk_unit, chunk_size = last_run.chunk_unit, last_run.chunk_size
+
+      # Calculate dates
+      ini_date, end_date = job.get_date_ini_end(chunk_size, chunk_unit)
+
+      # Calculate performance metrics
+      SYPD = PUtils.calculate_SYPD_perjob(chunk_unit, chunk_size, job.chunk, job.run_time, job.status)
+      ASYPD = PUtils.calculate_ASYPD_perjob(chunk_unit, chunk_size, job.chunk, job.total_time, self.average_post_time, job.status)
+
       self.nodes.append({
         "id": job.name,
         "internal_id": job.name,
@@ -239,13 +262,15 @@ class GraphRepresentation(object):
         "status_color": job.status_color,
         "platform_name": job.platform,
         "chunk": job.chunk,
+        "chunk_size": chunk_size,
+        "chunk_unit": chunk_unit,
         "package": job.package,
         "wrapper": job.package,
         "member": job.member,
         "date": ini_date,
         "date_plus": end_date,
-        "SYPD": PUtils.calculate_SYPD_perjob(self.joblist_loader.chunk_unit, self.joblist_loader.chunk_size, job.chunk, job.run_time, job.status),
-        "ASYPD": PUtils.calculate_ASYPD_perjob(self.joblist_loader.chunk_unit, self.joblist_loader.chunk_size, job.chunk, job.total_time, self.average_post_time, job.status),
+        "SYPD": SYPD,
+        "ASYPD": ASYPD,
         "minutes_queue": job.queue_time,
         "minutes": job.run_time,
         "submit": job.submit_datetime,

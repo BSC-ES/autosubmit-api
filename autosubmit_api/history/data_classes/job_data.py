@@ -62,11 +62,11 @@ class JobData(object):
       self.job_id = job_id if job_id else 0
       try:
           self.extra_data_parsed = loads(extra_data)
-      except Exception as exp:
+      except Exception:
           self.extra_data_parsed = {} # Fail fast
       self.extra_data = extra_data
       self.nnodes = nnodes
-      self.run_id = run_id
+      self.run_id: int = run_id
       self.require_update = False
       # DB VERSION 15 attributes
       self.MaxRSS = MaxRSS

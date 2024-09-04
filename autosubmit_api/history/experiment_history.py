@@ -23,7 +23,7 @@ from autosubmit_api.history.data_classes.job_data import JobData
 from autosubmit_api.history.data_classes.experiment_run import ExperimentRun
 from autosubmit_api.history.internal_logging import Logging
 from autosubmit_api.config.basicConfig import APIBasicConfig
-from typing import List, Dict, Tuple, Any
+from typing import List, Dict, Optional, Tuple, Any
 
 SECONDS_WAIT_PLATFORM = 60
 
@@ -101,3 +101,18 @@ class ExperimentHistory():
                       "err": job_data_dc.err
                       })
     return result
+
+  def get_all_jobs_last_run_dict(self) -> Dict[str, Optional[ExperimentRun]]:
+    """
+    Gets the last run of all jobs in the experiment
+    """
+    # Map all experiment runs by run_id
+    runs = self.manager.get_experiment_runs_dcs()
+    runs_dict = {run.run_id: run for run in runs}
+
+    # Map last jobs data by job name
+    last_jobs_data = self.manager.get_all_last_job_data_dcs()
+    return {
+      job_data.job_name: runs_dict.get(job_data.run_id)
+      for job_data in last_jobs_data
+    }

@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+from autosubmit_api.builders.experiment_history_builder import ExperimentHistoryBuilder, ExperimentHistoryDirector
 from autosubmit_api.components.jobs import utils as JUtils
 from autosubmit_api.performance import utils as PUtils
 from autosubmit_api.components.jobs.joblist_loader import JobListLoader
@@ -53,10 +54,10 @@ class TreeRepresentation(object):
         self._distributed_dates[job.date] = None
         self._distributed_members[job.member] = None
       elif job.date is not None and job.member is None:
-        parents_members = {self.joblist_loader.job_dictionary[parent_name].member for parent_name in job.parents_names}
-        children_members = {self.joblist_loader.job_dictionary[children_name].member for children_name in job.children_names}
-        intersection_member_parent = self.joblist_loader.members & parents_members
-        intersection_member_children = self.joblist_loader.members & children_members
+        # parents_members = {self.joblist_loader.job_dictionary[parent_name].member for parent_name in job.parents_names}
+        # children_members = {self.joblist_loader.job_dictionary[children_name].member for children_name in job.children_names}
+        # intersection_member_parent = self.joblist_loader.members & parents_members
+        # intersection_member_children = self.joblist_loader.members & children_members
         self._date_member_distribution.setdefault((job.date, DEFAULT_MEMBER), []).append(job)
         self._distributed_dates[job.date] = None
         self._distributed_members[DEFAULT_MEMBER] = None
@@ -259,8 +260,28 @@ class TreeRepresentation(object):
     self.average_post_time = get_average_total_time(post_jobs)
 
   def _generate_node_data(self):
+    # Get last run data for each job
+    try:
+      experiment_history = ExperimentHistoryDirector(ExperimentHistoryBuilder(self.expid)).build_reader_experiment_history()
+      last_jobs_run = experiment_history.get_all_jobs_last_run_dict()
+    except Exception:
+      last_jobs_run = {}
+    
     for job in self.joblist_loader.jobs:
-      ini_date, end_date = job.get_date_ini_end(self.joblist_loader.chunk_size, self.joblist_loader.chunk_unit)
+      # Get chunk size and unit
+      chunk_size = self.joblist_loader.chunk_size
+      chunk_unit = self.joblist_loader.chunk_unit
+      last_run = last_jobs_run.get(job.name)
+      if last_run and last_run.chunk_unit and last_run.chunk_size:
+        chunk_unit, chunk_size = last_run.chunk_unit, last_run.chunk_size
+
+      # Calculate dates
+      ini_date, end_date = job.get_date_ini_end(chunk_size, chunk_unit)
+
+      # Calculate performance metrics
+      SYPD = PUtils.calculate_SYPD_perjob(chunk_unit, chunk_size, job.chunk, job.run_time, job.status)
+      ASYPD = PUtils.calculate_ASYPD_perjob(chunk_unit, chunk_size, job.chunk, job.total_time, self.average_post_time, job.status)
+
       self.nodes.append({
         "id": job.name,
         "internal_id": job.name,
@@ -269,13 +290,14 @@ class TreeRepresentation(object):
         "status_code": job.status,
         "platform_name": job.platform,
         "chunk": job.chunk,
+        "chunk_size": chunk_size,
+        "chunk_unit": chunk_unit,
         "member": job.member,
         "title" : job.tree_title,
         "date": ini_date,
         "date_plus": end_date,
-        "SYPD": PUtils.calculate_SYPD_perjob(self.joblist_loader.chunk_unit, self.joblist_loader.chunk_size, job.chunk, job.run_time, job.status),
-        "ASYPD": PUtils.calculate_ASYPD_perjob(self.joblist_loader.chunk_unit, self.joblist_loader.chunk_size, job.chunk, job.total_time, self.average_post_time, job.status),
-        "minutes_queue": job.queue_time,
+        "SYPD": SYPD,
+        "ASYPD": ASYPD,
         "minutes": job.run_time,
         "submit": job.submit_datetime,
         "start": job.start_datetime,
