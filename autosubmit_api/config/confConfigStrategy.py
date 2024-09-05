@@ -663,14 +663,14 @@ class confConfigStrategy(IConfigStrategy):
         """
         Creates parser objects for configuration files
         """
-        if not os.path.exists(self._conf_parser_file): raise IOError(
-            "Required file not found {0}".format(self._conf_parser_file))
-        if not os.path.exists(self._platforms_parser_file): raise IOError(
-            "Required file not found {0}".format(self._platforms_parser_file))
-        if not os.path.exists(self._jobs_parser_file): raise IOError(
-            "Required file not found {0}".format(self._jobs_parser_file))
-        if not os.path.exists(self._exp_parser_file): raise IOError(
-            "Required file not found {0}".format(self._exp_parser_file))
+        if not os.path.exists(self._conf_parser_file):
+            raise IOError("Required file not found {0}".format(self._conf_parser_file))
+        if not os.path.exists(self._platforms_parser_file):
+            raise IOError("Required file not found {0}".format(self._platforms_parser_file))
+        if not os.path.exists(self._jobs_parser_file):
+            raise IOError("Required file not found {0}".format(self._jobs_parser_file))
+        if not os.path.exists(self._exp_parser_file):
+            raise IOError("Required file not found {0}".format(self._exp_parser_file))
         self._conf_parser = confConfigStrategy.get_parser(self.parser_factory, self._conf_parser_file)
         self._platforms_parser = confConfigStrategy.get_parser(self.parser_factory, self._platforms_parser_file)
         self._jobs_parser = confConfigStrategy.get_parser(self.parser_factory, self._jobs_parser_file)
