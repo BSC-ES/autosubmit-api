@@ -178,7 +178,7 @@ def get_job_total_stats(status_code: int, name: str, tmp_path: str) -> Tuple[dat
                     values) > 1 else submit_time
                 finish_time = parse_date(values[2]) if len(
                     values) > 2 else start_time
-        except Exception as exp:
+        except Exception:
             start_time = now
             finish_time = now
             # NA if reading fails

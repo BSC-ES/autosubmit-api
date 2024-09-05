@@ -94,7 +94,7 @@ class Monitor:
             for (exp_id, package_name, job_name) in packages:
                 jobs_packages_dict[job_name] = package_name
 
-        packages_subgraphs_dict = dict()
+        # packages_subgraphs_dict = dict()
         date_member_cluster = dict()
         # print("Iteration joblist: ")
         for job in joblist:

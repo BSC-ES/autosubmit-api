@@ -209,7 +209,7 @@ def datechunk_to_year(chunk_unit: int, chunk_size: int) -> float:
     :rtype: float
     """    
     chunk_size = chunk_size * 1.0
-    options = ["year", "month", "day", "hour"]
+    # options = ["year", "month", "day", "hour"]
     if (chunk_unit == "year"):
         return chunk_size
     elif (chunk_unit == "month"):

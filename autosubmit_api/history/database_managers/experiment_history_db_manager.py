@@ -304,7 +304,7 @@ class ExperimentHistoryDbManager(DatabaseManager):
       return []
 
   def get_job_data_dcs_COMPLETED_by_section(self, section: str) -> List[JobData]:
-    arguments = {"status": "COMPLETED", "section": section}
+    # arguments = {"status": "COMPLETED", "section": section}
     job_data_rows = self._get_job_data_COMPLETD_by_section(section)
     return [JobData.from_model(row) for row in job_data_rows]
 

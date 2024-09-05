@@ -237,7 +237,7 @@ def shutdown(route, user_id: Optional[str] = None):
     try:
         user = request.args.get("loggedUser", default="null", type=str)
         expid = request.args.get("expid", default="null", type=str)
-    except Exception as exp:
+    except Exception:
         logger.info("Bad parameters for user and expid in route.")
 
     if user != "null":
@@ -261,7 +261,7 @@ def shutdown(route, user_id: Optional[str] = None):
                     logger.info("killed worker " + str(k))
             lock.release()
             logger.info("Workers now: " + str(D))
-        except Exception as exp:
+        except Exception:
             logger.info(
                 "[CRITICAL] Could not shutdown process "
                 + expid

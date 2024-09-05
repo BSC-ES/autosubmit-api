@@ -201,7 +201,7 @@ class JobData(object):
         self.job_id = job_id if job_id else 0
         try:
             self.extra_data = loads(extra_data)
-        except Exception as exp:
+        except Exception:
             self.extra_data = ""
             pass
         self.nnodes = nnodes
@@ -575,7 +575,7 @@ class ExperimentGraphDrawing(MainDataBase):
         except portalocker.AlreadyLocked:
             print("It is locked")
             self.locked = True
-        except Exception as exp:
+        except Exception:
             self.locked = True
 
     def get_validated_data(self, allJobs):
@@ -861,7 +861,7 @@ class JobDataStructure(MainDataBase):
                                                               jobitem.wallclock, jobitem.qos, jobitem.energy, jobitem.date, jobitem.section, jobitem.member, jobitem.chunk, jobitem.last, jobitem.platform, jobitem.job_id, jobitem.extra_data, jobitem.nnodes, jobitem.run_id))
                     return current_collection
             return None
-        except Exception as exp:
+        except Exception:
             print((traceback.format_exc()))
             print((
                 "Error on returning current job data. run_id {0}".format(run_id)))
@@ -891,7 +891,7 @@ class JobDataStructure(MainDataBase):
                     return None
             else:
                 raise Exception("Not a valid connection.")
-        except sqlite3.Error as e:
+        except sqlite3.Error:
             if _debug is True:
                 print((traceback.format_exc()))
             print(("Error while retrieving run {0} information. {1}".format(
@@ -1025,7 +1025,7 @@ def parse_output_number(string_number):
             number = string_number
         try:
             number = float(number) * multiplier
-        except Exception as exp:
+        except Exception:
             number = 0.0
             pass
     return number

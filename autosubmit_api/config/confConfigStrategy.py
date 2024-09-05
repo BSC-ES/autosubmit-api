@@ -159,7 +159,7 @@ class confConfigStrategy(IConfigStrategy):
         """
         try:
             return json.dumps(self.get_full_config_as_dict())
-        except Exception as exp:
+        except Exception:
             Log.warning(
                 "Autosubmit was not able to retrieve and save the configuration into the historical database.")
             return ""
@@ -1322,6 +1322,6 @@ class confConfigStrategy(IConfigStrategy):
         if file_path.find('proj_') > 0:
             parser.read(file_path)
         else:
-            with open(file_path) as f:
+            with open(file_path):
                 parser.read(file_path)
         return parser

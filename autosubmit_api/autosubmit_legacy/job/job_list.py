@@ -584,9 +584,9 @@ class JobList:
         :return: job running to min (queue, run, status), job running to text (text)
         """
         # Getting information
-        path_local_root = basic_config.LOCAL_ROOT_DIR
+        # path_local_root = basic_config.LOCAL_ROOT_DIR
         path_structure = basic_config.STRUCTURES_DIR
-        db_file = os.path.join(path_local_root, basic_config.DB_FILE)
+        # db_file = os.path.join(path_local_root, basic_config.DB_FILE)
         # Job information from job historic data
         # print("Get current job data structure...")
         job_data = None
@@ -598,7 +598,7 @@ class JobList:
         # Result variables
         job_running_time_seconds = dict()
         job_running_to_runtext = dict()
-        result = dict()
+        # result = dict()
         current_table_structure = dict()
         job_name_to_job_info = dict()
         # Work variables
@@ -688,7 +688,7 @@ class JobList:
                         values) > 1 else submit_time
                     finish_time = parse_date(values[2]) if len(
                         values) > 2 else start_time
-            except Exception as exp:
+            except Exception:
                 start_time = now
                 finish_time = now
                 # NA if reading fails
@@ -823,7 +823,7 @@ class JobList:
                     start_time = 0
                     finish_time = 0
 
-        except Exception as exp:
+        except Exception:
             print((traceback.format_exc()))
             return
 

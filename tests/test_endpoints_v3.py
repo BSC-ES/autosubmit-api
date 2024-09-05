@@ -577,7 +577,6 @@ class TestRunningExps:
     endpoint = "/v3/running/"
 
     def test_search_by_expid(self, fixture_client: FlaskClient):
-        expid = "a3tb"
         response = fixture_client.get(self.endpoint)
         resp_obj: dict = response.get_json()
 

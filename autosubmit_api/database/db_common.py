@@ -257,7 +257,7 @@ def search_experiment_by_id(query, exp_type=None, only_active=None, owner=None):
             wrapper = autosubmit_config_facade.get_wrapper_type()
             last_modified_pkl_datetime = autosubmit_config_facade.get_pkl_last_modified_time_as_datetime()
             hpc = autosubmit_config_facade.get_main_platform()
-        except Exception as exp:
+        except Exception:
             last_modified_pkl_datetime = None
             pass
 
@@ -276,7 +276,7 @@ def search_experiment_by_id(query, exp_type=None, only_active=None, owner=None):
                 running = current_run.running
                 failed = current_run.failed
                 suspended = current_run.suspended
-                last_modified_timestamp = current_run.modified_timestamp
+                # last_modified_timestamp = current_run.modified_timestamp
         except Exception as exp:
             print(("Exception on search_experiment_by_id : {}".format(exp)))
             pass
@@ -338,7 +338,7 @@ def get_current_running_exp():
                 wrapper = autosubmit_config_facade.get_wrapper_type()
                 last_modified_pkl_datetime = autosubmit_config_facade.get_pkl_last_modified_time_as_datetime()
                 hpc = autosubmit_config_facade.get_main_platform()
-            except Exception as exp:
+            except Exception:
                 last_modified_pkl_datetime = None
                 pass
             if (expid in experiment_times):
@@ -361,7 +361,7 @@ def get_current_running_exp():
                     running = current_run.running
                     failed = current_run.failed
                     suspended = current_run.suspended
-                    last_modified_timestamp = current_run.modified_timestamp
+                    # last_modified_timestamp = current_run.modified_timestamp
             except Exception as exp:
                 print(("Exception on get_current_running_exp : {}".format(exp)))
                 pass
@@ -483,7 +483,7 @@ def _update_experiment_descrip_version(name, description=None, version=None):
         return False
     try:
         (conn, cursor) = open_conn()
-    except DbException as e:
+    except DbException:
         raise Exception(
             "Could not establish a connection to the database.")
     conn.isolation_level = None
