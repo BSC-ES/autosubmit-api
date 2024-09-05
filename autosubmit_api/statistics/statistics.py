@@ -58,9 +58,9 @@ class Statistics(object):
                   job_stat.completed_run_time += max(job_stat.finish_time - job_stat.start_time, timedelta())
               else:
                   job_stat.inc_failed_retrial_count()
-                  job_stat.submit_time = retrial[0] if len(retrial) >= 1 and type(retrial[0]) == datetime else None
-                  job_stat.start_time = retrial[1] if len(retrial) >= 2 and type(retrial[1]) == datetime else None
-                  job_stat.finish_time = retrial[2] if len(retrial) >= 3 and type(retrial[2]) == datetime else None
+                  job_stat.submit_time = retrial[0] if len(retrial) >= 1 and isinstance(retrial[0], datetime) else None
+                  job_stat.start_time = retrial[1] if len(retrial) >= 2 and isinstance(retrial[1], datetime) else None
+                  job_stat.finish_time = retrial[2] if len(retrial) >= 3 and isinstance(retrial[2], datetime) else None
                   if job_stat.finish_time and job_stat.start_time:
                       job_stat.failed_run_time += max(job_stat.finish_time - job_stat.start_time, timedelta())
                   if job_stat.start_time and job_stat.submit_time:
