@@ -477,7 +477,7 @@ class MainDataBase():
         try:
             conn = sqlite3.connect(db_file)
             return conn
-        except:
+        except Exception:
             return None
 
     def create_table(self):

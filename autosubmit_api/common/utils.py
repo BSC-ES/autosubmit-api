@@ -46,10 +46,10 @@ def tostamp(string_date: str) -> int:
   if string_date and len(string_date) > 0:    
     try:
       timestamp_value = int(time.mktime(datetime.datetime.strptime(string_date,"%Y-%m-%d %H:%M:%S").timetuple()))
-    except:
+    except Exception:
       try: 
         timestamp_value = int(time.mktime(datetime.datetime.strptime(string_date,"%Y-%m-%d-%H:%M:%S").timetuple()))
-      except:        
+      except Exception:        
         pass
   return timestamp_value
 
@@ -66,7 +66,7 @@ def parse_number_processors(processors_str: str) -> int:
     try:
       processors = int(processors_str)
       return processors
-    except:
+    except Exception:
       return 1
 
 

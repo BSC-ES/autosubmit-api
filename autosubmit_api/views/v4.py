@@ -231,7 +231,7 @@ class ExperimentView(MethodView):
             else:
                 page_size = None
                 offset = None
-        except:
+        except Exception:
             return {"error": {"message": "Invalid params"}}, HTTPStatus.BAD_REQUEST
 
         # Query

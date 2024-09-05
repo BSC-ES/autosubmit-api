@@ -23,7 +23,7 @@ def with_log_run_times(
             try:
                 path = request.full_path
                 method = request.method
-            except:
+            except Exception:
                 path = ""
                 method = ""
             _logger.info("{}|RECEIVED|{}{}".format(_tag, method, path))

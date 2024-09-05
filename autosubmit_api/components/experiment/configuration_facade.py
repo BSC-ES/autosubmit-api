@@ -160,7 +160,7 @@ class AutosubmitConfigurationFacade(ConfigurationFacade):
       stdout = os.popen("id -nu {0}".format(str(self.get_owner_id())))
       owner_name = stdout.read().strip()
       return str(owner_name)
-    except:
+    except Exception:
       return "NA"
 
   def get_autosubmit_version(self) -> str:
@@ -245,7 +245,7 @@ class AutosubmitConfigurationFacade(ConfigurationFacade):
                 conf_job_processors, num_processors))
         else:
             num_processors = int(conf_job_processors)
-    except:
+    except Exception:
         self._add_warning(
             "CHSY Critical | Autosubmit API could not parse the number of processors for the SIM job.")
         pass
