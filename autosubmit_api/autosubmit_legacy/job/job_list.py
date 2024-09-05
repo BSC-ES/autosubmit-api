@@ -232,7 +232,7 @@ class JobList:
                     #     current_title = current_title + target
                     # if len(job._parents) == 0:
                     #     current_title = current_title + source
-                    if job.member == None:
+                    if job.member is None:
                         current_title = current_title + sync
                         sync_jobs.append(job.job_name)
                     current_title = current_title + wrapped

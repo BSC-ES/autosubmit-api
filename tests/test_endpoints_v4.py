@@ -44,7 +44,7 @@ class TestJWTVerify:
 
         assert response.status_code == HTTPStatus.UNAUTHORIZED
         assert resp_obj.get("authenticated") == False
-        assert resp_obj.get("user") == None
+        assert resp_obj.get("user") is None
 
     def test_unauthorized_random_token(self, fixture_client: FlaskClient):
         random_token = str(uuid4())
@@ -55,7 +55,7 @@ class TestJWTVerify:
 
         assert response.status_code == HTTPStatus.UNAUTHORIZED
         assert resp_obj.get("authenticated") == False
-        assert resp_obj.get("user") == None
+        assert resp_obj.get("user") is None
 
     def test_authorized(self, fixture_client: FlaskClient):
         random_user = str(uuid4())
@@ -99,7 +99,7 @@ class TestExperimentList:
         # Unbounded page size
         response = fixture_client.get(self.endpoint, query_string={"page_size": -1})
         resp_obj: dict = response.get_json()
-        assert resp_obj["pagination"]["page_size"] == None
+        assert resp_obj["pagination"]["page_size"] is None
         assert (
             resp_obj["pagination"]["page_items"]
             == resp_obj["pagination"]["total_items"]

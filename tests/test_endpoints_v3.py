@@ -196,7 +196,7 @@ class TestTree:
             if job["section"] == "SIM":
                 assert isinstance(job["wrapper"], str) and len(job["wrapper"]) > 0
             else:
-                assert job["wrapper"] == None
+                assert job["wrapper"] is None
 
         assert (
             resp_obj["tree"][2]["title"] == "Wrappers" and resp_obj["tree"][2]["folder"]
@@ -351,7 +351,7 @@ class TestGraph:
             if node["section"] == "SIM":
                 assert isinstance(node["wrapper"], str) and len(node["wrapper"]) > 0
             else:
-                assert node["wrapper"] == None
+                assert node["wrapper"] is None
 
         assert "packages" in list(resp_obj.keys())
         assert len(resp_obj["packages"].keys()) > 0

@@ -175,7 +175,7 @@ class Job(metaclass=ABCMeta):
       title += JUtils.target_tag
     if len(self.parents_names) == 0:
       title += JUtils.source_tag
-    if self.date is not None and self.member == None:
+    if self.date is not None and self.member is None:
       title += JUtils.sync_tag
     if self.package and len(self.package) > 0:
       title += self.package_tag
