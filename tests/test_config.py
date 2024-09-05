@@ -61,7 +61,7 @@ class TestConfigResolver:
 class TestYMLConfigStrategy:
     def test_exclusive(self, fixture_mock_basic_config):
         wrapper = ymlConfigStrategy("a007", fixture_mock_basic_config)
-        assert True == wrapper.get_exclusive(JobSection.SIM)
+        assert wrapper.get_exclusive(JobSection.SIM) is True
 
         wrapper = ymlConfigStrategy("a003", fixture_mock_basic_config)
-        assert False == wrapper.get_exclusive(JobSection.SIM)
+        assert wrapper.get_exclusive(JobSection.SIM) is False

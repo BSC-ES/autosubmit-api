@@ -53,31 +53,31 @@ class confConfigStrategy(IConfigStrategy):
         self._conf_parser: ConfigParser = None
         self._conf_parser_file = os.path.join(self.basic_config.LOCAL_ROOT_DIR, expid, "conf",
                                               "autosubmit_" + expid + extension)
-        if os.path.exists(self._conf_parser_file) == False:
+        if os.path.exists(self._conf_parser_file) is False:
            return None
 
         self._exp_parser: ConfigParser = None
         self._exp_parser_file = os.path.join(self.basic_config.LOCAL_ROOT_DIR, expid, "conf",
                                              "expdef_" + expid + extension)
-        if os.path.exists(self._exp_parser_file) == False:
+        if os.path.exists(self._exp_parser_file) is False:
            return None
 
         self._platforms_parser: ConfigParser = None
         self._platforms_parser_file = os.path.join(self.basic_config.LOCAL_ROOT_DIR, expid, "conf",
                                                    "platforms_" + expid + extension)
-        if os.path.exists(self._platforms_parser_file) == False:
+        if os.path.exists(self._platforms_parser_file) is False:
            return None
 
         self._jobs_parser: ConfigParser = None
         self._jobs_parser_file = os.path.join(self.basic_config.LOCAL_ROOT_DIR, expid, "conf",
                                               "jobs_" + expid + extension)
-        if os.path.exists(self._jobs_parser_file) == False:
+        if os.path.exists(self._jobs_parser_file) is False:
            return None
 
         self._proj_parser: ConfigParser = None
         self._proj_parser_file = os.path.join(self.basic_config.LOCAL_ROOT_DIR, expid, "conf",
                                               "proj_" + expid + extension)
-        if os.path.exists(self._proj_parser_file) == False:
+        if os.path.exists(self._proj_parser_file) is False:
            return None
 
 
@@ -988,7 +988,7 @@ class confConfigStrategy(IConfigStrategy):
         """
         member_list = list()
         string = self._exp_parser.get('experiment',
-                                      'MEMBERS') if run_only == False else self._exp_parser.get_option(
+                                      'MEMBERS') if run_only is False else self._exp_parser.get_option(
             'experiment', 'RUN_ONLY_MEMBERS', '')
         if not string.startswith("["):
             string = '[{0}]'.format(string)

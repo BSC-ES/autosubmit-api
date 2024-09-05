@@ -23,7 +23,7 @@ class TestLogin:
         resp_obj: dict = response.get_json()
 
         assert response.status_code == HTTPStatus.UNAUTHORIZED
-        assert resp_obj.get("authenticated") == False
+        assert resp_obj.get("authenticated") is False
 
     def test_redirect(
         self,
@@ -51,7 +51,7 @@ class TestVerifyToken:
         resp_obj: dict = response.get_json()
 
         assert response.status_code == HTTPStatus.UNAUTHORIZED
-        assert resp_obj.get("isValid") == False
+        assert resp_obj.get("isValid") is False
 
     def test_unauthorized_random_token(self, fixture_client: FlaskClient):
         random_token = str(uuid4())
@@ -61,7 +61,7 @@ class TestVerifyToken:
         resp_obj: dict = response.get_json()
 
         assert response.status_code == HTTPStatus.UNAUTHORIZED
-        assert resp_obj.get("isValid") == False
+        assert resp_obj.get("isValid") is False
 
     def test_authorized(self, fixture_client: FlaskClient):
         random_user = str(uuid4())
@@ -79,7 +79,7 @@ class TestVerifyToken:
         resp_obj: dict = response.get_json()
 
         assert response.status_code == HTTPStatus.OK
-        assert resp_obj.get("isValid") == True
+        assert resp_obj.get("isValid") is True
 
 
 class TestExpInfo:
@@ -90,7 +90,7 @@ class TestExpInfo:
         response = fixture_client.get(self.endpoint.format(expid=expid))
         resp_obj: dict = response.get_json()
         assert resp_obj["error_message"] == ""
-        assert resp_obj["error"] == False
+        assert resp_obj["error"] is False
         assert resp_obj["expid"] == expid
         assert resp_obj["total_jobs"] == 8
 
@@ -99,7 +99,7 @@ class TestExpInfo:
         response = fixture_client.get(self.endpoint.format(expid=expid))
         resp_obj: dict = response.get_json()
         assert resp_obj["error_message"] == ""
-        assert resp_obj["error"] == False
+        assert resp_obj["error"] is False
         assert resp_obj["expid"] == expid
         assert resp_obj["total_jobs"] == 55
         assert resp_obj["completed_jobs"] == 28
@@ -160,7 +160,7 @@ class TestTree:
         resp_obj: dict = response.get_json()
 
         assert resp_obj["error_message"] == ""
-        assert resp_obj["error"] == False
+        assert resp_obj["error"] is False
         assert resp_obj["total"] == 8
         assert resp_obj["total"] == len(resp_obj["jobs"])
         for job in resp_obj["jobs"]:
@@ -176,7 +176,7 @@ class TestTree:
         resp_obj: dict = response.get_json()
 
         assert resp_obj["error_message"] == ""
-        assert resp_obj["error"] == False
+        assert resp_obj["error"] is False
         assert resp_obj["total"] == 55
         assert resp_obj["total"] == len(resp_obj["jobs"])
         assert (
@@ -213,7 +213,7 @@ class TestRunsList:
         resp_obj: dict = response.get_json()
 
         assert resp_obj["error_message"] == ""
-        assert resp_obj["error"] == False
+        assert resp_obj["error"] is False
         assert isinstance(resp_obj["runs"], list)
 
 
@@ -227,7 +227,7 @@ class TestRunDetail:
         resp_obj: dict = response.get_json()
 
         assert resp_obj["error_message"] == ""
-        assert resp_obj["error"] == False
+        assert resp_obj["error"] is False
         assert resp_obj["total"] == 8
 
 
@@ -240,7 +240,7 @@ class TestQuick:
         resp_obj: dict = response.get_json()
 
         assert resp_obj["error_message"] == ""
-        assert resp_obj["error"] == False
+        assert resp_obj["error"] is False
         assert resp_obj["total"] == len(resp_obj["tree_view"])
         assert resp_obj["total"] == len(resp_obj["view_data"])
 
@@ -257,7 +257,7 @@ class TestGraph:
         )
         resp_obj: dict = response.get_json()
         assert resp_obj["error_message"] == ""
-        assert resp_obj["error"] == False
+        assert resp_obj["error"] is False
         assert resp_obj["total_jobs"] == len(resp_obj["nodes"])
 
     def test_graph_standard_datemember(self, fixture_client: FlaskClient):
@@ -271,7 +271,7 @@ class TestGraph:
         )
         resp_obj: dict = response.get_json()
         assert resp_obj["error_message"] == ""
-        assert resp_obj["error"] == False
+        assert resp_obj["error"] is False
         assert resp_obj["total_jobs"] == len(resp_obj["nodes"])
 
     def test_graph_standard_status(self, fixture_client: FlaskClient):
@@ -283,7 +283,7 @@ class TestGraph:
         )
         resp_obj: dict = response.get_json()
         assert resp_obj["error_message"] == ""
-        assert resp_obj["error"] == False
+        assert resp_obj["error"] is False
         assert resp_obj["total_jobs"] == len(resp_obj["nodes"])
 
     def test_graph_laplacian_none(self, fixture_client: FlaskClient):
@@ -295,7 +295,7 @@ class TestGraph:
         )
         resp_obj: dict = response.get_json()
         assert resp_obj["error_message"] == ""
-        assert resp_obj["error"] == False
+        assert resp_obj["error"] is False
         assert resp_obj["total_jobs"] == len(resp_obj["nodes"])
 
     def test_graph_standard_none_retro3(self, fixture_client: FlaskClient):
@@ -307,7 +307,7 @@ class TestGraph:
         )
         resp_obj: dict = response.get_json()
         assert resp_obj["error_message"] == ""
-        assert resp_obj["error"] == False
+        assert resp_obj["error"] is False
         assert resp_obj["total_jobs"] == len(resp_obj["nodes"])
 
     def test_graph_standard_datemember_retro3(self, fixture_client: FlaskClient):
@@ -321,7 +321,7 @@ class TestGraph:
         )
         resp_obj: dict = response.get_json()
         assert resp_obj["error_message"] == ""
-        assert resp_obj["error"] == False
+        assert resp_obj["error"] is False
         assert resp_obj["total_jobs"] == len(resp_obj["nodes"])
 
     def test_graph_standard_status_retro3(self, fixture_client: FlaskClient):
@@ -333,7 +333,7 @@ class TestGraph:
         )
         resp_obj: dict = response.get_json()
         assert resp_obj["error_message"] == ""
-        assert resp_obj["error"] == False
+        assert resp_obj["error"] is False
         assert resp_obj["total_jobs"] == len(resp_obj["nodes"])
 
     def test_wrappers(self, fixture_client: FlaskClient):
@@ -366,7 +366,7 @@ class TestExpCount:
         resp_obj: dict = response.get_json()
 
         assert resp_obj["error_message"] == ""
-        assert resp_obj["error"] == False
+        assert resp_obj["error"] is False
         assert resp_obj["total"] == sum(
             [resp_obj["counters"][key] for key in resp_obj["counters"]]
         )
@@ -380,7 +380,7 @@ class TestExpCount:
         resp_obj: dict = response.get_json()
 
         assert resp_obj["error_message"] == ""
-        assert resp_obj["error"] == False
+        assert resp_obj["error"] is False
         assert resp_obj["total"] == sum(
             [resp_obj["counters"][key] for key in resp_obj["counters"]]
         )
@@ -405,7 +405,7 @@ class TestSummary:
         resp_obj: dict = response.get_json()
 
         assert resp_obj["error_message"] == ""
-        assert resp_obj["error"] == False
+        assert resp_obj["error"] is False
         assert resp_obj["n_sim"] > 0
 
 
@@ -420,7 +420,7 @@ class TestStatistics:
         resp_obj: dict = response.get_json()
 
         assert resp_obj["error_message"] == ""
-        assert resp_obj["error"] == False
+        assert resp_obj["error"] is False
         assert resp_obj["Statistics"]["Period"]["From"] == "None"
 
 
@@ -433,7 +433,7 @@ class TestCurrentConfig:
         resp_obj: dict = response.get_json()
 
         assert resp_obj["error_message"] == ""
-        assert resp_obj["error"] == False
+        assert resp_obj["error"] is False
         assert (
             resp_obj["configuration_filesystem"]["CONFIG"]["AUTOSUBMIT_VERSION"]
             == "4.0.95"
@@ -445,7 +445,7 @@ class TestCurrentConfig:
         resp_obj: dict = response.get_json()
 
         assert resp_obj["error_message"] == ""
-        assert resp_obj["error"] == False
+        assert resp_obj["error"] is False
         assert (
             resp_obj["configuration_filesystem"]["conf"]["config"]["AUTOSUBMIT_VERSION"]
             == "3.13.0"
@@ -461,7 +461,7 @@ class TestPklInfo:
         resp_obj: dict = response.get_json()
 
         assert resp_obj["error_message"] == ""
-        assert resp_obj["error"] == False
+        assert resp_obj["error"] is False
         assert len(resp_obj["pkl_content"]) == 8
 
         for job_obj in resp_obj["pkl_content"]:
@@ -477,7 +477,7 @@ class TestPklTreeInfo:
         resp_obj: dict = response.get_json()
 
         assert resp_obj["error_message"] == ""
-        assert resp_obj["error"] == False
+        assert resp_obj["error"] is False
         assert len(resp_obj["pkl_content"]) == 8
 
         for job_obj in resp_obj["pkl_content"]:
@@ -493,8 +493,8 @@ class TestExpRunLog:
         resp_obj: dict = response.get_json()
 
         assert resp_obj["error_message"] == ""
-        assert resp_obj["error"] == False
-        assert resp_obj["found"] == True
+        assert resp_obj["error"] is False
+        assert resp_obj["found"] is True
 
 
 class TestIfRunFromLog:
@@ -506,7 +506,7 @@ class TestIfRunFromLog:
         resp_obj: dict = response.get_json()
 
         assert resp_obj["error_message"] == ""
-        assert resp_obj["error"] == False
+        assert resp_obj["error"] is False
         assert isinstance(resp_obj["is_running"], bool)
         assert isinstance(resp_obj["log_path"], str)
         assert isinstance(resp_obj["timediff"], int)
@@ -521,7 +521,7 @@ class TestQuickIfRun:
         resp_obj: dict = response.get_json()
 
         assert resp_obj["error_message"] == ""
-        assert resp_obj["error"] == False
+        assert resp_obj["error"] is False
         assert isinstance(resp_obj["running"], bool)
 
 
@@ -534,8 +534,8 @@ class TestJobLogLines:
         resp_obj: dict = response.get_json()
 
         assert resp_obj["error_message"] == ""
-        assert resp_obj["error"] == False
-        assert resp_obj["found"] == True
+        assert resp_obj["error"] is False
+        assert resp_obj["found"] is True
         assert isinstance(resp_obj["lastModified"], str)
         assert isinstance(resp_obj["logfile"], str)
         assert isinstance(resp_obj["timeStamp"], int)
@@ -555,7 +555,7 @@ class TestJobHistory:
         resp_obj: dict = response.get_json()
 
         assert resp_obj["error_message"] == ""
-        assert resp_obj["error"] == False
+        assert resp_obj["error"] is False
         assert isinstance(resp_obj["path_to_logs"], str)
         assert isinstance(resp_obj["history"], list)
         assert len(resp_obj["history"]) > 0

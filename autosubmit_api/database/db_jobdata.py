@@ -497,7 +497,7 @@ class MainDataBase():
             Log.warning(exp)
             return None
         except sqlite3.Error as e:
-            if _debug == True:
+            if _debug is True:
                 Log.info(traceback.format_exc())
             Log.warning("Error on create table : " + str(type(e).__name__))
             return None
@@ -516,7 +516,7 @@ class MainDataBase():
             Log.warning(exp)
             return None
         except sqlite3.Error as e:
-            if _debug == True:
+            if _debug is True:
                 Log.info(traceback.format_exc())
             Log.debug(str(type(e).__name__))
             Log.warning("Error on create index . create_index")
@@ -603,7 +603,7 @@ class ExperimentGraphDrawing(MainDataBase):
         :return: Last row Id
         :rtype: int
         """
-        lock_name = "calculation_{}_in_progress.lock".format(self.expid) if independent == True else self.lock_name
+        lock_name = "calculation_{}_in_progress.lock".format(self.expid) if independent is True else self.lock_name
         lock_path_file = os.path.join(self.folder_path, lock_name)
         try:
             with portalocker.Lock(lock_path_file, timeout=1) as fh:
@@ -826,7 +826,7 @@ class JobDataStructure(MainDataBase):
                 raise Exception("Job data folder not found {0} or the database version is outdated.".format(
                     str(self.database_path)))
         except Exception as exp:
-            if _debug == True:
+            if _debug is True:
                 Log.info(traceback.format_exc())
             Log.debug(traceback.format_exc())
             Log.warning(
@@ -892,7 +892,7 @@ class JobDataStructure(MainDataBase):
             else:
                 raise Exception("Not a valid connection.")
         except sqlite3.Error as e:
-            if _debug == True:
+            if _debug is True:
                 print((traceback.format_exc()))
             print(("Error while retrieving run {0} information. {1}".format(
                 run_id, "_get_experiment_run_by_id")))
@@ -918,7 +918,7 @@ class JobDataStructure(MainDataBase):
                     # Starting value
                     return None
         except sqlite3.Error as e:
-            if _debug == True:
+            if _debug is True:
                 Log.info(traceback.format_exc())
             Log.debug(traceback.format_exc())
             Log.warning("Error while retrieving version: " +
@@ -948,7 +948,7 @@ class JobDataStructure(MainDataBase):
                     return None
             return None
         except sqlite3.Error as e:
-            if _debug == True:
+            if _debug is True:
                 Log.info(traceback.format_exc())
             Log.debug(traceback.format_exc())
             Log.warning("Error on select max run_id : " +
@@ -970,7 +970,7 @@ class JobDataStructure(MainDataBase):
                 self.conn.text_factory = str
                 cur = self.conn.cursor()
                 request_string = ""
-                if all_states == False:
+                if all_states is False:
                     if self.db_version >= CURRENT_DB_VERSION:
                         request_string = "SELECT id, counter, job_name, created, modified, submit, start, finish, status, rowtype, ncpus, wallclock, qos, energy, date, section, member, chunk, last, platform, job_id, extra_data, nnodes, run_id, MaxRSS, AveRSS, out, err, rowstatus  from job_data WHERE run_id=? and last=1 and finish > 0 and rowtype >= 2 ORDER BY id"
                     else:
@@ -990,7 +990,7 @@ class JobDataStructure(MainDataBase):
                 else:
                     return None
         except sqlite3.Error as e:
-            if _debug == True:
+            if _debug is True:
                 print((traceback.format_exc()))
             print(("Error on select job data: {0}".format(
                 str(type(e).__name__))))

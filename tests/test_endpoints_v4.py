@@ -43,7 +43,7 @@ class TestJWTVerify:
         resp_obj: dict = response.get_json()
 
         assert response.status_code == HTTPStatus.UNAUTHORIZED
-        assert resp_obj.get("authenticated") == False
+        assert resp_obj.get("authenticated") is False
         assert resp_obj.get("user") is None
 
     def test_unauthorized_random_token(self, fixture_client: FlaskClient):
@@ -54,7 +54,7 @@ class TestJWTVerify:
         resp_obj: dict = response.get_json()
 
         assert response.status_code == HTTPStatus.UNAUTHORIZED
-        assert resp_obj.get("authenticated") == False
+        assert resp_obj.get("authenticated") is False
         assert resp_obj.get("user") is None
 
     def test_authorized(self, fixture_client: FlaskClient):
@@ -75,7 +75,7 @@ class TestJWTVerify:
         resp_obj: dict = response.get_json()
 
         assert response.status_code == HTTPStatus.OK
-        assert resp_obj.get("authenticated") == True
+        assert resp_obj.get("authenticated") is True
         assert resp_obj.get("user") == random_user
 
 

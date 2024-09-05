@@ -771,7 +771,7 @@ class JobList:
                                 _, c_start, _, _, _ = job_times.get(name, (0, t_start, t_finish, 0, 0))
                                 job_data.start = c_start if t_start > c_start else t_start
 
-                        if seconds == False:
+                        if seconds is False:
                             queue_time = math.ceil(job_data.queuing_time / 60)
                             running_time = math.ceil(job_data.running_time / 60)
                         else:
@@ -783,7 +783,7 @@ class JobList:
                         return JobRow(job_data.job_name, int(queue_time), int(running_time), status, energy, t_submit, t_start, t_finish, job_data.ncpus, job_data.run_id)
 
             # Using standard procedure
-            if status_code in [Status.RUNNING, Status.SUBMITTED, Status.QUEUING, Status.FAILED] or make_exception == True:
+            if status_code in [Status.RUNNING, Status.SUBMITTED, Status.QUEUING, Status.FAILED] or make_exception is True:
                 # COMPLETED adds too much overhead so these values are now stored in a database and retrieved separatedly
                 submit_time, start_time, finish_time, status = JobList._job_running_check(status_code, name, tmp_path)
                 if status_code in [Status.RUNNING, Status.FAILED]:
@@ -831,7 +831,7 @@ class JobList:
             (-1) if seconds_queued < 0 else seconds_queued
         seconds_running = seconds_running * \
             (-1) if seconds_running < 0 else seconds_running
-        if seconds == False:
+        if seconds is False:
             queue_time = math.ceil(
                 seconds_queued / 60) if seconds_queued > 0 else 0
             running_time = math.ceil(

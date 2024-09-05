@@ -47,7 +47,7 @@ def login():
         if referrer and referrer.find(allowed_client) >= 0:
             referrer = allowed_client
             is_allowed = True
-    if is_allowed == False:
+    if is_allowed is False:
         return {
             "authenticated": False,
             "user": None,
@@ -250,7 +250,7 @@ def shutdown(route, user_id: Optional[str] = None):
             logger.info("Workers before: " + str(D))
             lock.acquire()
             for k, v in list(D.items()):
-                if v[0] == user and v[1] == route and v[-1] == True:
+                if v[0] == user and v[1] == route and v[-1] is True:
                     if v[2] == expid:
                         D[k] = [user, route, expid, False]
                     else:
