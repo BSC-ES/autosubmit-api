@@ -6,7 +6,7 @@ import datetime
 import math
 from collections import namedtuple
 from bscearth.utils.date import date2str
-from dateutil.relativedelta import *
+from dateutil.relativedelta import relativedelta
 from typing import List, Tuple
 
 class Section:

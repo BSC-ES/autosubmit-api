@@ -26,7 +26,7 @@ import math
 # End Spectral imports
 
 from time import time, mktime
-from dateutil.relativedelta import *
+from dateutil.relativedelta import relativedelta
 
 from autosubmit_api.autosubmit_legacy.job.job_utils import SubJob
 from autosubmit_api.autosubmit_legacy.job.job_utils import SubJobManager, job_times_to_text
