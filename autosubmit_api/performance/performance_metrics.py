@@ -17,6 +17,7 @@ class PerformanceMetrics(object):
     self.error_message = ""
     self.total_sim_run_time: int = 0
     self.total_sim_queue_time: int = 0
+    self.valid_sim_yps_sum: float = 0.0
     self.SYPD: float = 0
     self.ASYPD: float = 0
     self.CHSY: float = 0
@@ -61,9 +62,11 @@ class PerformanceMetrics(object):
       self.joblist_helper.update_with_timedata(self.pkl_organizer.post_jobs)
       self.joblist_helper.update_with_timedata(self.pkl_organizer.clean_jobs)
       self.joblist_helper.update_with_timedata(self.pkl_organizer.transfer_jobs)
+      # Update yps with the latest historical data
       self.joblist_helper.update_with_yps_per_run(self.pkl_organizer.sim_jobs)
 
   def _calculate_global_metrics(self):
+      self.valid_sim_yps_sum = sum(job.years_per_sim for job in self.sim_jobs_valid)
       self.SYPD = self._calculate_SYPD()
       self.ASYPD = self._calculate_ASYPD()
       self.RSYPD = self._calculate_RSYPD()
@@ -116,21 +119,22 @@ class PerformanceMetrics(object):
 
   def _calculate_SYPD(self):
     if self.total_sim_run_time > 0:
-      SYPD = ((self.configuration_facade.current_years_per_sim * len(self._considered) * utils.SECONDS_IN_A_DAY) /
-                  (self.total_sim_run_time))
+      SYPD = ((self.valid_sim_yps_sum * utils.SECONDS_IN_A_DAY) /
+                  (self.total_sim_run_time)) 
       return round(SYPD, 4)
     return 0
 
   def _calculate_ASYPD(self):
     if len(self.sim_jobs_valid) > 0 and (self.total_sim_run_time + self.total_sim_queue_time + self.post_jobs_total_time_average)>0:
-      ASYPD = (self.configuration_facade.current_years_per_sim * len(self.sim_jobs_valid) * utils.SECONDS_IN_A_DAY) / (self.total_sim_run_time + self.total_sim_queue_time + self.post_jobs_total_time_average)
+      ASYPD = ((self.valid_sim_yps_sum * utils.SECONDS_IN_A_DAY) / 
+                 (self.total_sim_run_time + self.total_sim_queue_time + self.post_jobs_total_time_average))
       return round(ASYPD, 4)
     return 0
 
   def _calculate_RSYPD(self):
     divisor = self._get_RSYPD_divisor()
     if len(self.sim_jobs_valid) > 0 and divisor > 0:
-      RSYPD = (self.configuration_facade.current_years_per_sim * len(self.sim_jobs_valid) * utils.SECONDS_IN_A_DAY) / divisor
+      RSYPD = (self.valid_sim_yps_sum * utils.SECONDS_IN_A_DAY) / divisor
       return round(RSYPD, 4)
     return 0
 
