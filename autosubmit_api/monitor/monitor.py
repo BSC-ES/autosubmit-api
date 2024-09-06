@@ -90,15 +90,15 @@ class Monitor:
         Log.debug('Creating job graph...')
 
         jobs_packages_dict = dict()
-        if packages != None and packages:
+        if packages is not None and packages:
             for (exp_id, package_name, job_name) in packages:
                 jobs_packages_dict[job_name] = package_name
 
-        packages_subgraphs_dict = dict()
+        # packages_subgraphs_dict = dict()
         date_member_cluster = dict()
         # print("Iteration joblist: ")
         for job in joblist:
-            if job.date != None and job.member != None and job.has_parents():
+            if job.date is not None and job.member is not None and job.has_parents():
                 date_member_cluster[job.name] = str(
                     str(job.name[0:13]) + str(job.member))
                 # date_member_cluster[(job.long_name[0:13], job.member)].append(job.name)

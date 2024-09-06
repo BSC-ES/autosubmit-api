@@ -328,7 +328,7 @@ class ymlConfigStrategy(IConfigStrategy):
         try:
             # return DEFAULT.HPCARCH
             return self._conf_parser.get_platform()
-        except:
+        except Exception:
             return ""
 
     def set_platform(self, hpc):

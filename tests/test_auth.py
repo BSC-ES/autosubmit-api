@@ -84,13 +84,13 @@ class TestCommonAuth:
     ):
         # No ALLOWED_CLIENTS
         monkeypatch.setattr(APIBasicConfig, "ALLOWED_CLIENTS", [])
-        assert False == validate_client(str(uuid4()))
+        assert validate_client(str(uuid4())) is False
 
         # Wildcard ALLOWED_CLIENTS
         monkeypatch.setattr(APIBasicConfig, "ALLOWED_CLIENTS", ["*"])
-        assert True == validate_client(str(uuid4()))
+        assert validate_client(str(uuid4())) is True
 
         # Registered client. The received with longer path
         random_client = str(uuid4())
         monkeypatch.setattr(APIBasicConfig, "ALLOWED_CLIENTS", [random_client])
-        assert True == validate_client(random_client + str(uuid4()))
+        assert validate_client(random_client + str(uuid4())) is True

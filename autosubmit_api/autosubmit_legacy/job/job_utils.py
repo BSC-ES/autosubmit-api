@@ -26,7 +26,7 @@ import time
 def transitive_reduction(graph):
     try:
         return networkx.algorithms.dag.transitive_reduction(graph)
-    except Exception as exp:
+    except Exception:
         return None
     # if not is_directed_acyclic_graph(graph):
     #     raise NetworkXError("Transitive reduction only uniquely defined on directed acyclic graphs.")
@@ -235,7 +235,7 @@ def parse_output_number(self, string_number):
             number = string_number
         try:
             number = float(number) * multiplier
-        except Exception as exp:
+        except Exception:
             number = 0.0
             pass
     return number
@@ -278,7 +278,7 @@ def datechunk_to_year(chunk_unit: str, chunk_size: int) -> float:
     :rtype: float
     """
     chunk_size = chunk_size * 1.0
-    options = ["year", "month", "day", "hour"]
+    # options = ["year", "month", "day", "hour"]
     if (chunk_unit == "year"):
         return chunk_size
     elif (chunk_unit == "month"):

@@ -53,31 +53,31 @@ class confConfigStrategy(IConfigStrategy):
         self._conf_parser: ConfigParser = None
         self._conf_parser_file = os.path.join(self.basic_config.LOCAL_ROOT_DIR, expid, "conf",
                                               "autosubmit_" + expid + extension)
-        if os.path.exists(self._conf_parser_file) == False:
+        if os.path.exists(self._conf_parser_file) is False:
            return None
 
         self._exp_parser: ConfigParser = None
         self._exp_parser_file = os.path.join(self.basic_config.LOCAL_ROOT_DIR, expid, "conf",
                                              "expdef_" + expid + extension)
-        if os.path.exists(self._exp_parser_file) == False:
+        if os.path.exists(self._exp_parser_file) is False:
            return None
 
         self._platforms_parser: ConfigParser = None
         self._platforms_parser_file = os.path.join(self.basic_config.LOCAL_ROOT_DIR, expid, "conf",
                                                    "platforms_" + expid + extension)
-        if os.path.exists(self._platforms_parser_file) == False:
+        if os.path.exists(self._platforms_parser_file) is False:
            return None
 
         self._jobs_parser: ConfigParser = None
         self._jobs_parser_file = os.path.join(self.basic_config.LOCAL_ROOT_DIR, expid, "conf",
                                               "jobs_" + expid + extension)
-        if os.path.exists(self._jobs_parser_file) == False:
+        if os.path.exists(self._jobs_parser_file) is False:
            return None
 
         self._proj_parser: ConfigParser = None
         self._proj_parser_file = os.path.join(self.basic_config.LOCAL_ROOT_DIR, expid, "conf",
                                               "proj_" + expid + extension)
-        if os.path.exists(self._proj_parser_file) == False:
+        if os.path.exists(self._proj_parser_file) is False:
            return None
 
 
@@ -159,7 +159,7 @@ class confConfigStrategy(IConfigStrategy):
         """
         try:
             return json.dumps(self.get_full_config_as_dict())
-        except Exception as exp:
+        except Exception:
             Log.warning(
                 "Autosubmit was not able to retrieve and save the configuration into the historical database.")
             return ""
@@ -663,14 +663,14 @@ class confConfigStrategy(IConfigStrategy):
         """
         Creates parser objects for configuration files
         """
-        if not os.path.exists(self._conf_parser_file): raise IOError(
-            "Required file not found {0}".format(self._conf_parser_file))
-        if not os.path.exists(self._platforms_parser_file): raise IOError(
-            "Required file not found {0}".format(self._platforms_parser_file))
-        if not os.path.exists(self._jobs_parser_file): raise IOError(
-            "Required file not found {0}".format(self._jobs_parser_file))
-        if not os.path.exists(self._exp_parser_file): raise IOError(
-            "Required file not found {0}".format(self._exp_parser_file))
+        if not os.path.exists(self._conf_parser_file):
+            raise IOError("Required file not found {0}".format(self._conf_parser_file))
+        if not os.path.exists(self._platforms_parser_file):
+            raise IOError("Required file not found {0}".format(self._platforms_parser_file))
+        if not os.path.exists(self._jobs_parser_file):
+            raise IOError("Required file not found {0}".format(self._jobs_parser_file))
+        if not os.path.exists(self._exp_parser_file):
+            raise IOError("Required file not found {0}".format(self._exp_parser_file))
         self._conf_parser = confConfigStrategy.get_parser(self.parser_factory, self._conf_parser_file)
         self._platforms_parser = confConfigStrategy.get_parser(self.parser_factory, self._platforms_parser_file)
         self._jobs_parser = confConfigStrategy.get_parser(self.parser_factory, self._jobs_parser_file)
@@ -988,7 +988,7 @@ class confConfigStrategy(IConfigStrategy):
         """
         member_list = list()
         string = self._exp_parser.get('experiment',
-                                      'MEMBERS') if run_only == False else self._exp_parser.get_option(
+                                      'MEMBERS') if run_only is False else self._exp_parser.get_option(
             'experiment', 'RUN_ONLY_MEMBERS', '')
         if not string.startswith("["):
             string = '[{0}]'.format(string)
@@ -1322,6 +1322,6 @@ class confConfigStrategy(IConfigStrategy):
         if file_path.find('proj_') > 0:
             parser.read(file_path)
         else:
-            with open(file_path) as f:
+            with open(file_path):
                 parser.read(file_path)
         return parser

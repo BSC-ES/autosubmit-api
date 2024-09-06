@@ -231,7 +231,7 @@ class ExperimentView(MethodView):
             else:
                 page_size = None
                 offset = None
-        except:
+        except Exception:
             return {"error": {"message": "Invalid params"}}, HTTPStatus.BAD_REQUEST
 
         # Query
@@ -270,7 +270,7 @@ class ExperimentView(MethodView):
             exp = exp_builder.product
 
             # Get current run data from history
-            last_modified_timestamp = exp.created
+            # last_modified_timestamp = exp.created
             completed = 0
             total = 0
             submitted = 0
@@ -292,7 +292,7 @@ class ExperimentView(MethodView):
                     running = current_run.running
                     failed = current_run.failed
                     suspended = current_run.suspended
-                    last_modified_timestamp = current_run.modified_timestamp
+                    # last_modified_timestamp = current_run.modified_timestamp
             except Exception as exc:
                 logger.warning((f"Exception getting the current run on search: {exc}"))
                 logger.warning(traceback.format_exc())

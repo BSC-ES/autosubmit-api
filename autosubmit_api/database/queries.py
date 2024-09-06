@@ -55,12 +55,12 @@ def generate_query_listexp_extended(
         filter_stmts.append(tables.details_table.c.user == owner)
 
     if exp_type == "test":
-        filter_stmts.append(tables.experiment_table.c.name.like(f"t%"))
+        filter_stmts.append(tables.experiment_table.c.name.like("t%"))
     elif exp_type == "operational":
-        filter_stmts.append(tables.experiment_table.c.name.like(f"o%"))
+        filter_stmts.append(tables.experiment_table.c.name.like("o%"))
     elif exp_type == "experiment":
-        filter_stmts.append(tables.experiment_table.c.name.not_like(f"t%"))
-        filter_stmts.append(tables.experiment_table.c.name.not_like(f"o%"))
+        filter_stmts.append(tables.experiment_table.c.name.not_like("t%"))
+        filter_stmts.append(tables.experiment_table.c.name.not_like("o%"))
 
     if autosubmit_version:
         filter_stmts.append(

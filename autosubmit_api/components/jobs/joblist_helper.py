@@ -35,7 +35,7 @@ class JobListHelper(object):
       self.package_to_jobs = job_package_reader.package_to_jobs
       self.package_to_package_id = job_package_reader.package_to_package_id
       self.package_to_symbol = job_package_reader.package_to_symbol
-    except:
+    except Exception:
       self.warning_messages.append("Failed to read job_packages")
       
     self.job_name_to_job_row, self.job_running_time_to_text, self.warning_messages  = JobList.get_job_times_collection(

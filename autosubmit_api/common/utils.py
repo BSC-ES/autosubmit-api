@@ -6,7 +6,7 @@ import datetime
 import math
 from collections import namedtuple
 from bscearth.utils.date import date2str
-from dateutil.relativedelta import *
+from dateutil.relativedelta import relativedelta
 from typing import List, Tuple
 
 class Section:
@@ -46,10 +46,10 @@ def tostamp(string_date: str) -> int:
   if string_date and len(string_date) > 0:    
     try:
       timestamp_value = int(time.mktime(datetime.datetime.strptime(string_date,"%Y-%m-%d %H:%M:%S").timetuple()))
-    except:
+    except Exception:
       try: 
         timestamp_value = int(time.mktime(datetime.datetime.strptime(string_date,"%Y-%m-%d-%H:%M:%S").timetuple()))
-      except:        
+      except Exception:        
         pass
   return timestamp_value
 
@@ -66,7 +66,7 @@ def parse_number_processors(processors_str: str) -> int:
     try:
       processors = int(processors_str)
       return processors
-    except:
+    except Exception:
       return 1
 
 
@@ -209,7 +209,7 @@ def datechunk_to_year(chunk_unit: int, chunk_size: int) -> float:
     :rtype: float
     """    
     chunk_size = chunk_size * 1.0
-    options = ["year", "month", "day", "hour"]
+    # options = ["year", "month", "day", "hour"]
     if (chunk_unit == "year"):
         return chunk_size
     elif (chunk_unit == "month"):

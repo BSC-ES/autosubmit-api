@@ -47,9 +47,12 @@ class ConfigurationFacade(metaclass=ABCMeta):
     self.tmp_path = exp_paths.tmp_dir
     self.log_path = exp_paths.tmp_log_dir
     self.structures_path = self.basic_configuration.STRUCTURES_DIR
-    if not os.path.exists(self.experiment_path): raise IOError("Experiment folder {0} not found".format(self.experiment_path))
-    if not os.path.exists(self.pkl_path): raise IOError("Required file {0} not found.".format(self.pkl_path))
-    if not os.path.exists(self.tmp_path): raise IOError("Required folder {0} not found.".format(self.tmp_path))
+    if not os.path.exists(self.experiment_path):
+      raise IOError("Experiment folder {0} not found".format(self.experiment_path))
+    if not os.path.exists(self.pkl_path):
+      raise IOError("Required file {0} not found.".format(self.pkl_path))
+    if not os.path.exists(self.tmp_path):
+      raise IOError("Required folder {0} not found.".format(self.tmp_path))
 
   @abstractmethod
   def _process_advanced_config(self):
@@ -160,7 +163,7 @@ class AutosubmitConfigurationFacade(ConfigurationFacade):
       stdout = os.popen("id -nu {0}".format(str(self.get_owner_id())))
       owner_name = stdout.read().strip()
       return str(owner_name)
-    except:
+    except Exception:
       return "NA"
 
   def get_autosubmit_version(self) -> str:
@@ -245,7 +248,7 @@ class AutosubmitConfigurationFacade(ConfigurationFacade):
                 conf_job_processors, num_processors))
         else:
             num_processors = int(conf_job_processors)
-    except:
+    except Exception:
         self._add_warning(
             "CHSY Critical | Autosubmit API could not parse the number of processors for the SIM job.")
         pass

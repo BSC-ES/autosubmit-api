@@ -55,7 +55,7 @@ def get_structure(expid, structures_path):
             # pkl folder not found
             raise Exception("structures db not found " +
                             str(db_structure_path))
-    except Exception as exp:
+    except Exception:
         print((traceback.format_exc()))
 
 
@@ -68,7 +68,7 @@ def create_connection(db_file):
     try:
         conn = sqlite3.connect(db_file)
         return conn
-    except:
+    except Exception:
         return None
 
 
@@ -99,6 +99,6 @@ def _get_exp_structure(path):
                 "SELECT e_from, e_to FROM experiment_structure")
             rows = cur.fetchall()
         return rows
-    except Exception as exp:
+    except Exception:
         print((traceback.format_exc()))
         return dict()

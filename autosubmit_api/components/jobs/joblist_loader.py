@@ -209,7 +209,7 @@ class JobListLoader(object):
       out_set = [name for name in file_names if name.split('.')[-1] == 'out']
       out_set.sort()
       new_outs = {name.split('.')[0]: name for name in out_set}
-    except:
+    except Exception:
       out_set = set()
       new_outs = dict()
 
@@ -217,7 +217,7 @@ class JobListLoader(object):
       err_set = [name for name in file_names if name.split('.')[-1] == 'err']
       err_set.sort()
       new_errs = {name.split('.')[0]: name for name in err_set}
-    except:
+    except Exception:
       err_set = set()
       new_errs = dict()
 

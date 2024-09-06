@@ -26,7 +26,7 @@ import math
 # End Spectral imports
 
 from time import time, mktime
-from dateutil.relativedelta import *
+from dateutil.relativedelta import relativedelta
 
 from autosubmit_api.autosubmit_legacy.job.job_utils import SubJob
 from autosubmit_api.autosubmit_legacy.job.job_utils import SubJobManager, job_times_to_text
@@ -232,7 +232,7 @@ class JobList:
                     #     current_title = current_title + target
                     # if len(job._parents) == 0:
                     #     current_title = current_title + source
-                    if job.member == None:
+                    if job.member is None:
                         current_title = current_title + sync
                         sync_jobs.append(job.job_name)
                     current_title = current_title + wrapped
@@ -584,9 +584,9 @@ class JobList:
         :return: job running to min (queue, run, status), job running to text (text)
         """
         # Getting information
-        path_local_root = basic_config.LOCAL_ROOT_DIR
+        # path_local_root = basic_config.LOCAL_ROOT_DIR
         path_structure = basic_config.STRUCTURES_DIR
-        db_file = os.path.join(path_local_root, basic_config.DB_FILE)
+        # db_file = os.path.join(path_local_root, basic_config.DB_FILE)
         # Job information from job historic data
         # print("Get current job data structure...")
         job_data = None
@@ -598,7 +598,7 @@ class JobList:
         # Result variables
         job_running_time_seconds = dict()
         job_running_to_runtext = dict()
-        result = dict()
+        # result = dict()
         current_table_structure = dict()
         job_name_to_job_info = dict()
         # Work variables
@@ -688,7 +688,7 @@ class JobList:
                         values) > 1 else submit_time
                     finish_time = parse_date(values[2]) if len(
                         values) > 2 else start_time
-            except Exception as exp:
+            except Exception:
                 start_time = now
                 finish_time = now
                 # NA if reading fails
@@ -771,7 +771,7 @@ class JobList:
                                 _, c_start, _, _, _ = job_times.get(name, (0, t_start, t_finish, 0, 0))
                                 job_data.start = c_start if t_start > c_start else t_start
 
-                        if seconds == False:
+                        if seconds is False:
                             queue_time = math.ceil(job_data.queuing_time / 60)
                             running_time = math.ceil(job_data.running_time / 60)
                         else:
@@ -783,7 +783,7 @@ class JobList:
                         return JobRow(job_data.job_name, int(queue_time), int(running_time), status, energy, t_submit, t_start, t_finish, job_data.ncpus, job_data.run_id)
 
             # Using standard procedure
-            if status_code in [Status.RUNNING, Status.SUBMITTED, Status.QUEUING, Status.FAILED] or make_exception == True:
+            if status_code in [Status.RUNNING, Status.SUBMITTED, Status.QUEUING, Status.FAILED] or make_exception is True:
                 # COMPLETED adds too much overhead so these values are now stored in a database and retrieved separatedly
                 submit_time, start_time, finish_time, status = JobList._job_running_check(status_code, name, tmp_path)
                 if status_code in [Status.RUNNING, Status.FAILED]:
@@ -823,7 +823,7 @@ class JobList:
                     start_time = 0
                     finish_time = 0
 
-        except Exception as exp:
+        except Exception:
             print((traceback.format_exc()))
             return
 
@@ -831,7 +831,7 @@ class JobList:
             (-1) if seconds_queued < 0 else seconds_queued
         seconds_running = seconds_running * \
             (-1) if seconds_running < 0 else seconds_running
-        if seconds == False:
+        if seconds is False:
             queue_time = math.ceil(
                 seconds_queued / 60) if seconds_queued > 0 else 0
             running_time = math.ceil(

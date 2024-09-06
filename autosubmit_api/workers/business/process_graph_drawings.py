@@ -38,7 +38,7 @@ def process_active_graphs():
                     autosubmit_configuration_facade.get_autosubmit_version()
                 ):
                     _process_graph(expid, autosubmit_configuration_facade.chunk_size)
-            except Exception as exp:
+            except Exception:
                 print((traceback.format_exc()))
                 print(("Error while processing: {}".format(expid)))
 
