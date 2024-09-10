@@ -183,3 +183,102 @@ class TestExperimentWrappers:
             assert isinstance(wrapper["wrapper_name"], str) and wrapper[
                 "wrapper_name"
             ].startswith(expid)
+
+
+class TestExperimentFSConfig:
+    endpoint = "/v4/experiments/{expid}/filesystem-config"
+
+    def test_fs_config(self, fixture_client: FlaskClient):
+        expid = "a6zj"
+
+        response = fixture_client.get(self.endpoint.format(expid=expid))
+        resp_obj: dict = response.get_json()
+
+        assert isinstance(resp_obj, dict)
+        assert isinstance(resp_obj["config"], dict)
+        assert (
+            isinstance(resp_obj["config"]["contains_nones"], bool)
+            and not resp_obj["config"]["contains_nones"]
+        )
+        assert isinstance(resp_obj["config"]["JOBS"], dict)
+        assert isinstance(resp_obj["config"]["WRAPPERS"], dict)
+        assert isinstance(resp_obj["config"]["WRAPPERS"]["WRAPPER_V"], dict)
+
+    def test_fs_config_v3_retro(self, fixture_client: FlaskClient):
+        expid = "a3tb"
+
+        response = fixture_client.get(self.endpoint.format(expid=expid))
+        resp_obj: dict = response.get_json()
+
+        assert isinstance(resp_obj, dict)
+        assert isinstance(resp_obj["config"], dict)
+
+        ALLOWED_CONFIG_KEYS = ["conf", "exp", "jobs", "platforms", "proj"]
+        assert len(resp_obj["config"].keys()) == len(ALLOWED_CONFIG_KEYS) + 1
+        assert (
+            isinstance(resp_obj["config"]["contains_nones"], bool)
+            and not resp_obj["config"]["contains_nones"]
+        )
+        for key in ALLOWED_CONFIG_KEYS:
+            assert key in resp_obj["config"]
+            assert isinstance(resp_obj["config"][key], dict)
+
+
+class TestExperimentRuns:
+    endpoint = "/v4/experiments/{expid}/runs"
+
+    @pytest.mark.parametrize("expid, num_runs", [("a6zj", 1), ("a3tb", 51)])
+    def test_runs(self, expid: str, num_runs: int, fixture_client: FlaskClient):
+        response = fixture_client.get(self.endpoint.format(expid=expid))
+        resp_obj: dict = response.get_json()
+
+        assert isinstance(resp_obj, dict)
+        assert isinstance(resp_obj["runs"], list)
+        assert len(resp_obj["runs"]) == num_runs
+
+        for run in resp_obj["runs"]:
+            assert isinstance(run, dict)
+            assert isinstance(run["run_id"], int)
+            assert isinstance(run["start"], str) or run["start"] is None
+            assert isinstance(run["finish"], str) or run["finish"] is None
+
+
+class TestExperimentRunConfig:
+    endpoint = "/v4/experiments/{expid}/runs/{run_id}/config"
+
+    def test_run_config(self, fixture_client: FlaskClient):
+        expid = "a6zj"
+        run_id = 1
+
+        response = fixture_client.get(self.endpoint.format(expid=expid, run_id=run_id))
+        resp_obj: dict = response.get_json()
+
+        assert isinstance(resp_obj, dict)
+        assert isinstance(resp_obj["config"], dict)
+        assert (
+            isinstance(resp_obj["config"]["contains_nones"], bool)
+            and not resp_obj["config"]["contains_nones"]
+        )
+        assert isinstance(resp_obj["config"]["JOBS"], dict)
+        assert isinstance(resp_obj["config"]["WRAPPERS"], dict)
+        assert isinstance(resp_obj["config"]["WRAPPERS"]["WRAPPER_V"], dict)
+
+    @pytest.mark.parametrize("run_id", [51, 48, 31])
+    def test_run_config_v3_retro(self, run_id: int, fixture_client: FlaskClient):
+        expid = "a3tb"
+
+        response = fixture_client.get(self.endpoint.format(expid=expid, run_id=run_id))
+        resp_obj: dict = response.get_json()
+
+        assert isinstance(resp_obj, dict)
+        assert isinstance(resp_obj["config"], dict)
+
+        ALLOWED_CONFIG_KEYS = ["conf", "exp", "jobs", "platforms", "proj"]
+        assert len(resp_obj["config"].keys()) == len(ALLOWED_CONFIG_KEYS) + 1
+        assert (
+            isinstance(resp_obj["config"]["contains_nones"], bool)
+            and not resp_obj["config"]["contains_nones"]
+        )
+        for key in ALLOWED_CONFIG_KEYS:
+            assert key in resp_obj["config"]
+            assert isinstance(resp_obj["config"][key], dict)
