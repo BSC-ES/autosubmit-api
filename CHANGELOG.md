@@ -1,5 +1,11 @@
 # CHANGELOG
 
+### Pre-release v4.0.1b3 - Release date: TBD
+
+* Added more CLI options related to gunicorn workers
+* Fixed inconsistency in performance metrics calculations due to incorrect chunk size
+* General code improvements
+
 ### Pre-release v4.0.1b2 - Release date: 2024-07-18
 
 * Fix threshold value on outlier detection algorithm.
