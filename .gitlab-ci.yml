@@ -4,9 +4,8 @@ before_script:
 
 stages:
   - prepare
-  - docs
+  - lint
   - test
-  - report
   - clean
 
 
@@ -20,7 +19,13 @@ prepare:
     - conda create -n autosubmit_api python=3.9
     - conda install -n autosubmit_api graphviz pytest pytest-cov pytest-mock
     - conda activate autosubmit_api
-    - pip install .
+    - pip install .[all]
+
+lint:
+  stage: lint
+  script:
+    - conda activate autosubmit_api
+    - ruff check .
 
 test_python3:
   stage: test
@@ -46,6 +51,7 @@ test_python3:
 #     - cd docs
 #     - pip install -r requirements.txt
 #     - make html
+
 
 
 clean:

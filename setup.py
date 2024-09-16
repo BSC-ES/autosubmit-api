@@ -42,7 +42,8 @@ install_requires = [
 # Test dependencies
 test_requires = [
     "pytest",
-    "pytest-cov"
+    "pytest-cov",
+    "ruff"
 ]
 
 extras_require = {
