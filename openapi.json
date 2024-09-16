@@ -11,7 +11,9 @@
   "paths": {
     "/v3/login": {
       "post": {
-        "tags": ["v3"],
+        "tags": [
+          "v3"
+        ],
         "summary": "Login",
         "responses": {
           "200": {
@@ -22,7 +24,9 @@
     },
     "/v3/tokentest": {
       "get": {
-        "tags": ["v3"],
+        "tags": [
+          "v3"
+        ],
         "summary": "Token test",
         "responses": {
           "200": {
@@ -31,7 +35,9 @@
         }
       },
       "post": {
-        "tags": ["v3"],
+        "tags": [
+          "v3"
+        ],
         "summary": "Token test",
         "responses": {
           "200": {
@@ -42,7 +48,9 @@
     },
     "/v3/updatedesc": {
       "get": {
-        "tags": ["v3"],
+        "tags": [
+          "v3"
+        ],
         "summary": "Update description",
         "responses": {
           "200": {
@@ -51,7 +59,9 @@
         }
       },
       "post": {
-        "tags": ["v3"],
+        "tags": [
+          "v3"
+        ],
         "summary": "Update description",
         "responses": {
           "200": {
@@ -62,7 +72,9 @@
     },
     "/v3/cconfig/{expid}": {
       "get": {
-        "tags": ["v3"],
+        "tags": [
+          "v3"
+        ],
         "summary": "Get current configuration",
         "parameters": [
           {
@@ -83,7 +95,9 @@
     },
     "/v3/expinfo/{expid}": {
       "get": {
-        "tags": ["v3"],
+        "tags": [
+          "v3"
+        ],
         "summary": "Get experiment info",
         "parameters": [
           {
@@ -104,7 +118,9 @@
     },
     "/v3/expcount/{expid}": {
       "get": {
-        "tags": ["v3"],
+        "tags": [
+          "v3"
+        ],
         "summary": "Get experiment counters",
         "parameters": [
           {
@@ -125,7 +141,9 @@
     },
     "/v3/searchowner/{owner}/{exptype}/{onlyactive}": {
       "get": {
-        "tags": ["v3"],
+        "tags": [
+          "v3"
+        ],
         "summary": "Search owner",
         "parameters": [
           {
@@ -162,7 +180,9 @@
     },
     "/v3/searchowner/{owner}": {
       "get": {
-        "tags": ["v3"],
+        "tags": [
+          "v3"
+        ],
         "summary": "Search owner",
         "parameters": [
           {
@@ -183,7 +203,9 @@
     },
     "/v3/search/{expid}/{exptype}/{onlyactive}": {
       "get": {
-        "tags": ["v3"],
+        "tags": [
+          "v3"
+        ],
         "summary": "Search experiment",
         "parameters": [
           {
@@ -220,7 +242,9 @@
     },
     "/v3/search/{expid}": {
       "get": {
-        "tags": ["v3"],
+        "tags": [
+          "v3"
+        ],
         "summary": "Search experiment",
         "parameters": [
           {
@@ -241,7 +265,9 @@
     },
     "/v3/running": {
       "get": {
-        "tags": ["v3"],
+        "tags": [
+          "v3"
+        ],
         "summary": "Running experiments",
         "operationId": "get-v3-running",
         "responses": {
@@ -363,7 +389,9 @@
     },
     "/v3/runs/{expid}": {
       "get": {
-        "tags": ["v3"],
+        "tags": [
+          "v3"
+        ],
         "summary": "Get runs",
         "parameters": [
           {
@@ -384,7 +412,9 @@
     },
     "/v3/ifrun/{expid}": {
       "get": {
-        "tags": ["v3"],
+        "tags": [
+          "v3"
+        ],
         "summary": "Get if running",
         "parameters": [
           {
@@ -405,7 +435,9 @@
     },
     "/v3/logrun/{expid}": {
       "get": {
-        "tags": ["v3"],
+        "tags": [
+          "v3"
+        ],
         "summary": "Get status and log path experiment",
         "parameters": [
           {
@@ -426,7 +458,9 @@
     },
     "/v3/summary/{expid}": {
       "get": {
-        "tags": ["v3"],
+        "tags": [
+          "v3"
+        ],
         "summary": "Get experiment summary",
         "parameters": [
           {
@@ -447,7 +481,9 @@
     },
     "/v3/shutdown/{route}": {
       "get": {
-        "tags": ["v3"],
+        "tags": [
+          "v3"
+        ],
         "summary": "Shutdown route",
         "parameters": [
           {
@@ -468,7 +504,9 @@
     },
     "/v3/performance/{expid}": {
       "get": {
-        "tags": ["v3"],
+        "tags": [
+          "v3"
+        ],
         "summary": "Get experiment performance metrics",
         "parameters": [
           {
@@ -489,7 +527,9 @@
     },
     "/v3/graph/{expid}/{layout}/{grouped}": {
       "get": {
-        "tags": ["v3"],
+        "tags": [
+          "v3"
+        ],
         "summary": "Get graph format",
         "parameters": [
           {
@@ -526,7 +566,9 @@
     },
     "/v3/tree/{expid}": {
       "get": {
-        "tags": ["v3"],
+        "tags": [
+          "v3"
+        ],
         "summary": "Get experiment tree",
         "parameters": [
           {
@@ -547,7 +589,9 @@
     },
     "/v3/quick/{expid}": {
       "get": {
-        "tags": ["v3"],
+        "tags": [
+          "v3"
+        ],
         "summary": "Get quick view data",
         "parameters": [
           {
@@ -568,7 +612,9 @@
     },
     "/v3/exprun/{expid}": {
       "get": {
-        "tags": ["v3"],
+        "tags": [
+          "v3"
+        ],
         "summary": "Get experiment run log",
         "parameters": [
           {
@@ -589,7 +635,9 @@
     },
     "/v3/joblog/{logfile}": {
       "get": {
-        "tags": ["v3"],
+        "tags": [
+          "v3"
+        ],
         "summary": "Get job log from path",
         "parameters": [
           {
@@ -610,7 +658,9 @@
     },
     "/v3/pklinfo/{expid}/{timeStamp}": {
       "get": {
-        "tags": ["v3"],
+        "tags": [
+          "v3"
+        ],
         "summary": "Get experiment pklinfo",
         "parameters": [
           {
@@ -639,7 +689,9 @@
     },
     "/v3/pkltreeinfo/{expid}/{timeStamp}": {
       "get": {
-        "tags": ["v3"],
+        "tags": [
+          "v3"
+        ],
         "summary": "Get experiment tree pklinfo",
         "parameters": [
           {
@@ -668,7 +720,9 @@
     },
     "/v3/stats/{expid}/{filter_period}/{filter_type}": {
       "get": {
-        "tags": ["v3"],
+        "tags": [
+          "v3"
+        ],
         "summary": "Get experiment statistics",
         "parameters": [
           {
@@ -705,7 +759,9 @@
     },
     "/v3/history/{expid}/{jobname}": {
       "get": {
-        "tags": ["v3"],
+        "tags": [
+          "v3"
+        ],
         "summary": "Get experiment job history",
         "parameters": [
           {
@@ -734,7 +790,9 @@
     },
     "/v3/rundetail/{expid}/{runid}": {
       "get": {
-        "tags": ["v3"],
+        "tags": [
+          "v3"
+        ],
         "summary": "Get experiment run job detail",
         "parameters": [
           {
@@ -763,7 +821,9 @@
     },
     "/v3/filestatus/": {
       "get": {
-        "tags": ["v3"],
+        "tags": [
+          "v3"
+        ],
         "summary": "[LEGACY] Get file status",
         "responses": {
           "200": {
@@ -774,7 +834,9 @@
     },
     "/v4/experiments": {
       "get": {
-        "tags": ["v4"],
+        "tags": [
+          "v4"
+        ],
         "summary": "Search experiments",
         "description": "",
         "operationId": "get-v4-experiments",
@@ -805,7 +867,11 @@
             "in": "query",
             "schema": {
               "type": "string",
-              "enum": ["test", "operational", "experiment"]
+              "enum": [
+                "test",
+                "operational",
+                "experiment"
+              ]
             }
           },
           {
@@ -820,7 +886,11 @@
             "in": "query",
             "schema": {
               "type": "string",
-              "enum": ["expid", "created", "description"]
+              "enum": [
+                "expid",
+                "created",
+                "description"
+              ]
             }
           },
           {
@@ -994,7 +1064,9 @@
     },
     "/v4/experiments/{expid}": {
       "get": {
-        "tags": ["v4"],
+        "tags": [
+          "v4"
+        ],
         "summary": "Get experiment info",
         "operationId": "get-v4-experiments-expid",
         "parameters": [
@@ -1016,7 +1088,9 @@
     },
     "/v4/experiments/{expid}/jobs": {
       "get": {
-        "tags": ["v4"],
+        "tags": [
+          "v4"
+        ],
         "summary": "List experiment jobs",
         "operationId": "get-v4-experiments-expid-jobs",
         "parameters": [
@@ -1026,7 +1100,10 @@
             "description": "Data view selector",
             "schema": {
               "type": "string",
-              "enum": ["base", "quick"]
+              "enum": [
+                "base",
+                "quick"
+              ]
             }
           },
           {
@@ -1083,7 +1160,9 @@
     },
     "/v4/experiments/{expid}/wrappers": {
       "get": {
-        "tags": ["v4"],
+        "tags": [
+          "v4"
+        ],
         "summary": "List experiment wrappers",
         "operationId": "get-v4-experiments-expid-wrappers",
         "parameters": [
@@ -1131,7 +1210,9 @@
     },
     "/v4/auth/verify-token": {
       "get": {
-        "tags": ["v4"],
+        "tags": [
+          "v4"
+        ],
         "summary": "Verify JWT Token",
         "operationId": "get-v4-auth-verify-token",
         "parameters": [
@@ -1204,7 +1285,9 @@
     },
     "/v4/auth/cas/v2/login": {
       "get": {
-        "tags": ["v4"],
+        "tags": [
+          "v4"
+        ],
         "summary": "CAS v2 Login",
         "operationId": "get-v4-auth-cas-v2-login",
         "parameters": [
@@ -1304,7 +1387,9 @@
     },
     "/v4/auth/oauth2/github/login": {
       "get": {
-        "tags": ["v4"],
+        "tags": [
+          "v4"
+        ],
         "summary": "GitHub Oauth2 App Login",
         "operationId": "get-v4-auth-oauth2-github-login",
         "parameters": [
@@ -1382,6 +1467,139 @@
                       "message": "Unauthorized",
                       "token": null,
                       "user": null
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v4/experiments/{expid}/filesystem-config": {
+      "get": {
+        "tags": [
+          "v4"
+        ],
+        "summary": "Get Filesystem current configuration",
+        "operationId": "get-experiments-expid-filesystem-config",
+        "parameters": [
+          {
+            "name": "expid",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "config": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v4/experiments/{expid}/runs": {
+      "get": {
+        "tags": [
+          "v4"
+        ],
+        "summary": "List runs",
+        "operationId": "get-v4-experiments-expid-runs",
+        "parameters": [
+          {
+            "name": "expid",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "runs": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "run_id": {
+                            "type": "integer"
+                          },
+                          "start": {
+                            "type": "string"
+                          },
+                          "finish": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v4/experiments/{expid}/runs/{run_id}/config": {
+      "get": {
+        "tags": [
+          "v4"
+        ],
+        "summary": "Get configuration of an experiment run",
+        "operationId": "get-v4-experiments-expid-runs-run_id-config",
+        "parameters": [
+          {
+            "name": "expid",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "run_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "run_id": {
+                      "type": "integer"
+                    },
+                    "config": {
+                      "type": "object"
                     }
                   }
                 }

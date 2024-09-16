@@ -21,9 +21,6 @@ def create_v4_blueprint():
     # blueprint.route("/experiments/<string:expid>/description", methods=["PUT"])(
     #     v4_views.experiment_description_view
     # )
-    # blueprint.route("/experiments/<string:expid>/config")(
-    #     v3_views.get_current_configuration
-    # )
     # blueprint.route("/experiments/<string:expid>/info")(v3_views.exp_info)
     # blueprint.route("/experiments/<string:expid>/status-counters")(
     #     v3_views.exp_counters
@@ -46,6 +43,18 @@ def create_v4_blueprint():
     blueprint.add_url_rule(
         "/experiments/<string:expid>/wrappers",
         view_func=v4_views.ExperimentWrappersView.as_view("ExperimentWrappersView"),
+    )
+    blueprint.add_url_rule(
+        "/experiments/<string:expid>/filesystem-config",
+        view_func=v4_views.ExperimentFSConfigView.as_view("ExperimentFSConfigView"),
+    )
+    blueprint.add_url_rule(
+        "/experiments/<string:expid>/runs",
+        view_func=v4_views.ExperimentRunsView.as_view("ExperimentRunsView"),
+    )
+    blueprint.add_url_rule(
+        "experiments/<string:expid>/runs/<string:run_id>/config",
+        view_func=v4_views.ExperimentRunConfigView.as_view("ExperimentRunConfigView"),
     )
 
     # blueprint.route("/experiments/<string:expid>/runs")(v3_views.get_runs)

@@ -101,6 +101,12 @@ class ExperimentHistory():
                       "err": job_data_dc.err
                       })
     return result
+  
+  def get_experiment_runs(self) -> List[ExperimentRun]:
+    """
+    Gets all the experiment runs
+    """
+    return self.manager.get_experiment_runs_dcs()
 
   def get_all_jobs_last_run_dict(self) -> Dict[str, Optional[ExperimentRun]]:
     """

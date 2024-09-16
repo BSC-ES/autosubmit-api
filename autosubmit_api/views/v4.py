@@ -1,10 +1,11 @@
 from collections import deque
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from enum import Enum
 from http import HTTPStatus
+import json
 import math
 import traceback
-from typing import Dict, List, Optional
+from typing import Any, Dict, List, Optional
 from flask import redirect, request
 from flask.views import MethodView
 import jwt
@@ -17,17 +18,22 @@ from autosubmit_api.builders.experiment_history_builder import (
     ExperimentHistoryDirector,
 )
 from autosubmit_api.common.utils import Status
+from autosubmit_api.config.basicConfig import APIBasicConfig
+from autosubmit_api.config.confConfigStrategy import confConfigStrategy
+from autosubmit_api.config.config_common import AutosubmitConfigResolver
 from autosubmit_api.database import tables
 from autosubmit_api.database.common import (
     create_main_db_conn,
     execute_with_limit_offset,
 )
+from autosubmit_api.database.db_jobdata import JobDataStructure
 from autosubmit_api.database.queries import generate_query_listexp_extended
 from autosubmit_api.logger import logger, with_log_run_times
 from cas import CASClient
 from autosubmit_api import config
 from autosubmit_api.persistance.job_package_reader import JobPackageReader
 from autosubmit_api.persistance.pkl_reader import PklReader
+from bscearth.utils.config_parser import ConfigParserFactory
 
 
 PAGINATION_LIMIT_DEFAULT = 12
@@ -412,7 +418,6 @@ class ExperimentWrappersView(MethodView):
     decorators = [with_auth_token(), with_log_run_times(logger, "WRAPPERS")]
 
     def get(self, expid: str, user_id: Optional[str] = None):
-
         job_package_reader = JobPackageReader(expid)
         job_package_reader.read()
 
@@ -424,3 +429,114 @@ class ExperimentWrappersView(MethodView):
 
         logger.debug(wrappers)
         return {"wrappers": wrappers}
+
+
+class ExperimentFSConfigView(MethodView):
+    decorators = [with_auth_token(), with_log_run_times(logger, "EXP_FS_CONFIG")]
+
+    @staticmethod
+    def _format_config_response(
+        config: Dict[str, Any], is_as3: bool = False
+    ) -> Dict[str, Any]:
+        """
+        Format the config response, removing some keys if it's an AS3 config
+        Also, add a key to indicate if the config is empty
+        :param config: The config to format
+        :param is_as3: If the config is an AS3 config
+        """
+        ALLOWED_CONFIG_KEYS = ["conf", "exp", "jobs", "platforms", "proj"]
+        formatted_config = {
+            key: config[key]
+            for key in config
+            if not is_as3 or (key.lower() in ALLOWED_CONFIG_KEYS)
+        }
+        formatted_config["contains_nones"] = not config or (
+            None in list(config.values())
+        )
+        return formatted_config
+
+    def get(self, expid: str, user_id: Optional[str] = None):
+        """
+        Get the filesystem config of an experiment
+        """
+        # Read the config
+        APIBasicConfig.read()
+        as_config = AutosubmitConfigResolver(
+            expid, APIBasicConfig, ConfigParserFactory()
+        )
+        is_as3 = isinstance(as_config._configWrapper, confConfigStrategy)
+        as_config.reload()
+        curr_fs_config: Dict[str, Any] = as_config.get_full_config_as_dict()
+
+        # Format the response
+        response = {
+            "config": ExperimentFSConfigView._format_config_response(
+                curr_fs_config, is_as3
+            )
+        }
+        return response, HTTPStatus.OK
+
+
+class ExperimentRunsView(MethodView):
+    decorators = [with_auth_token(), with_log_run_times(logger, "EXP_RUNS")]
+
+    def get(self, expid: str, user_id: Optional[str] = None):
+        """
+        List all the runs of an experiment
+        It returns minimal information about the runs
+        """
+        try:
+            experiment_history = ExperimentHistoryDirector(
+                ExperimentHistoryBuilder(expid)
+            ).build_reader_experiment_history()
+            exp_runs = experiment_history.get_experiment_runs()
+        except Exception:
+            logger.error("Error while getting experiment runs")
+            logger.error(traceback.format_exc())
+            return {
+                "message": "Error while getting experiment runs"
+            }, HTTPStatus.INTERNAL_SERVER_ERROR
+
+        # Format the response
+        response = {"runs": []}
+        for run in exp_runs:
+            response["runs"].append(
+                {
+                    "run_id": run.run_id,
+                    "start": datetime.fromtimestamp(run.start, timezone.utc).isoformat(
+                        timespec="seconds"
+                    )
+                    if run.start > 0
+                    else None,
+                    "finish": datetime.fromtimestamp(
+                        run.finish, timezone.utc
+                    ).isoformat(timespec="seconds")
+                    if run.finish > 0
+                    else None,
+                }
+            )
+
+        return response, HTTPStatus.OK
+
+
+class ExperimentRunConfigView(MethodView):
+    decorators = [with_auth_token(), with_log_run_times(logger, "EXP_RUN_CONFIG")]
+
+    def get(self, expid: str, run_id: str, user_id: Optional[str] = None):
+        """
+        Get the config of a specific run of an experiment
+        """
+        historical_db = JobDataStructure(expid, APIBasicConfig)
+        experiment_run = historical_db.get_experiment_run_by_id(run_id=run_id)
+        metadata = (
+            json.loads(experiment_run.metadata)
+            if experiment_run and experiment_run.metadata
+            else {}
+        )
+
+        # Format the response
+        response = {
+            "run_id": experiment_run.run_id if experiment_run else None,
+            "config": ExperimentFSConfigView._format_config_response(metadata),
+        }
+        return response, HTTPStatus.OK
