@@ -6,7 +6,7 @@ from autosubmit_api import auth
 from autosubmit_api.auth.utils import validate_client
 from autosubmit_api.config.basicConfig import APIBasicConfig
 from autosubmit_api import config
-from tests.custom_utils import custom_return_value, dummy_response
+from tests.utils import custom_return_value, dummy_response
 
 
 class TestCommonAuth:
