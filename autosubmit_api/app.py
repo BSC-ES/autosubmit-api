@@ -1,6 +1,5 @@
 import os
 import sys
-import requests
 from flask_cors import CORS
 from flask import Flask
 from autosubmit_api.bgtasks.scheduler import create_bind_scheduler
@@ -40,14 +39,6 @@ def create_app():
 
     # Enforce Language Locale
     CommonRequests.enforceLocal(app.logger)
-
-    requests.packages.urllib3.util.ssl_.DEFAULT_CIPHERS += "HIGH:!DH:!aNULL"
-    try:
-        requests.packages.urllib3.contrib.pyopenssl.DEFAULT_SSL_CIPHER_LIST += (
-            "HIGH:!DH:!aNULL"
-        )
-    except AttributeError:
-        app.logger.warning("No pyopenssl support used / needed / available")
 
     # Initial read config
     APIBasicConfig.read()

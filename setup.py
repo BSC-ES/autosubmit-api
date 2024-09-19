@@ -22,7 +22,7 @@ def get_authors():
 install_requires = [
     "Flask~=2.2.5",
     "pyjwt~=2.8.0",
-    "requests~=2.28.1",
+    "requests<=2.31.0",
     "flask_cors~=3.0.10",
     "bscearth.utils~=0.5.2",
     "pydotplus~=2.0.2",
@@ -31,7 +31,7 @@ install_requires = [
     "scipy~=1.11.4",
     "python-dotenv~=1.0.1",
     "autosubmitconfigparser>=1.0.65",
-    "autosubmit>=4.2.0",
+    "autosubmit>=4.2.0a1",
     "Flask-APScheduler~=1.13.1",
     "gunicorn~=22.0.0",
     "pydantic~=2.5.2",
