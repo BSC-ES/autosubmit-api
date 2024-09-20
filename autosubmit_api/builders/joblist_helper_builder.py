@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 from typing import Optional
+from autosubmit_api.components.experiment.pkl_organizer import PklOrganizer
 from autosubmit_api.config.basicConfig import APIBasicConfig
 from autosubmit_api.builders.configuration_facade_builder import AutosubmitConfigurationFacadeBuilder, ConfigurationFacadeDirector
 from autosubmit_api.builders.basic_builder import BasicBuilder
-from autosubmit_api.builders.pkl_organizer_builder import PklOrganizerBuilder, PklOrganizerDirector
 from autosubmit_api.components.jobs.joblist_helper import JobListHelper
 from abc import ABCMeta, abstractmethod
 
@@ -42,7 +42,7 @@ class JobListHelperBuilder(Builder):
 
   def generate_pkl_organizer(self):
     self._validate_autosubmit_configuration_facade()
-    self.pkl_organizer = PklOrganizerDirector(PklOrganizerBuilder(self.expid)).build_pkl_organizer_with_configuration_provided(self.configuration_facade)
+    self.pkl_organizer = PklOrganizer(self.expid)
 
   def make_joblist_helper(self) -> JobListHelper:
     self._validate_basic_config()

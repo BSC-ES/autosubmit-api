@@ -292,7 +292,7 @@ def _is_exp_running(expid: str, time_condition=300) -> Tuple[bool, str, bool, in
         return (error, error_message, is_running, timediff, definite_log_path)
 
 
-def get_experiment_summary(expid, log):
+def get_experiment_summary(expid: str, log):
     """
     Gets job summary for the experiment. Consider seconds.
     :param expid: Name of experiment
@@ -329,9 +329,7 @@ def get_experiment_summary(expid, log):
         fakeAllJobs = list()
 
         # Read PKL
-        autosubmit_config_facade = ConfigurationFacadeDirector(
-            AutosubmitConfigurationFacadeBuilder(expid)).build_autosubmit_configuration_facade()
-        pkl_organizer = PklOrganizer(autosubmit_config_facade)
+        pkl_organizer = PklOrganizer(expid)
         for job_item in pkl_organizer.current_content:
             status_code = job_item.status
             job_name = job_item.name
@@ -782,7 +780,7 @@ def get_experiment_tree_structured(expid, log):
         return {'tree': [], 'jobs': [], 'total': 0, 'reference': [], 'error': True, 'error_message': str(e), 'pkl_timestamp': 0}
 
 
-def get_experiment_counters(expid):
+def get_experiment_counters(expid: str):
     """
     Returns status counters of the experiment.
     """
@@ -794,9 +792,7 @@ def get_experiment_counters(expid):
     # Default counter per status
     experiment_counters = {name: 0 for name in common_utils.Status.STRING_TO_CODE}
     try:
-        autosubmit_config_facade = ConfigurationFacadeDirector(
-            AutosubmitConfigurationFacadeBuilder(expid)).build_autosubmit_configuration_facade()
-        pkl_organizer = PklOrganizer(autosubmit_config_facade)
+        pkl_organizer = PklOrganizer(expid)
         for job_item in pkl_organizer.current_content:
             status_code = int(job_item.status)
             total += 1
@@ -812,7 +808,7 @@ def get_experiment_counters(expid):
 
 
 # TODO: Update to current representation standards and classes
-def get_quick_view(expid):
+def get_quick_view(expid: str):
     """ Lighter View """
     error = False
     error_message = ""
@@ -844,9 +840,7 @@ def get_quick_view(expid):
         
         # Reading PKL
         try:
-            autosubmit_config_facade = ConfigurationFacadeDirector(
-                AutosubmitConfigurationFacadeBuilder(expid)).build_autosubmit_configuration_facade()
-            pkl_organizer = PklOrganizer(autosubmit_config_facade)
+            pkl_organizer = PklOrganizer(expid)
             for job_item in pkl_organizer.current_content:
                 status_code = int(job_item.status)
                 # counters

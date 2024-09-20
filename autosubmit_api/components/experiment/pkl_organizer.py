@@ -1,9 +1,7 @@
 #!/usr/bin/env python
-import os
 
 from autosubmit_api.components.jobs import job_factory as factory
 from autosubmit_api.common.utils import JobSection, PklJob, PklJob14, Status
-from autosubmit_api.components.experiment.configuration_facade import AutosubmitConfigurationFacade
 from autosubmit_api.components.jobs.job_factory import Job, SimpleJob
 from typing import List, Dict, Set, Union
 
@@ -17,20 +15,18 @@ class PklOrganizer(object):
   Warnings are stored in self.warnings.
   """
 
-  def __init__(self, configuration_facade: AutosubmitConfigurationFacade):
+  def __init__(self, expid: str):
     self.current_content: List[Union[PklJob,PklJob14]] = []
-    self.configuration_facade: AutosubmitConfigurationFacade = configuration_facade
+    self.expid = expid
     self.sim_jobs: List[Job] = [] 
     self.post_jobs: List[Job] = [] 
     self.transfer_jobs: List[Job] = [] 
     self.clean_jobs: List[Job] = [] 
-    self.pkl_path: str = configuration_facade.pkl_path
     self.warnings: List[str] = [] 
     self.dates: Set[str] = set() 
     self.members: Set[str] = set() 
     self.sections: Set[str] = set() 
     self.section_jobs_map: Dict[str, List[Job]] = {}
-    # self.is_wrapper_type_in_pkl = is_wrapper_type_in_pkl_version(configuration_facade.get_autosubmit_version())
     self._process_pkl()
 
   def prepare_jobs_for_performance_metrics(self):
@@ -51,13 +47,10 @@ class PklOrganizer(object):
     return [SimpleJob(job.name, tmp_path, job.status) for job in self.current_content]
 
   def _process_pkl(self):
-    if os.path.exists(self.pkl_path):
-      try:
-        self.current_content = PklReader(self.configuration_facade.expid).parse_job_list()
-      except Exception as exc:
-        raise Exception("Exception while reading the pkl content: {}".format(str(exc)))
-    else:
-      raise Exception("Pkl file {0} not found.".format(self.pkl_path))
+    try:
+      self.current_content = PklReader(self.expid).parse_job_list()
+    except Exception as exc:
+      raise Exception("Exception while reading the pkl content: {}".format(str(exc)))
 
   def identify_dates_members_sections(self):
     for job in self.current_content:
@@ -115,11 +108,10 @@ class PklOrganizer(object):
       jobs.sort(key = lambda x: x.start, reverse=False)
 
   def __repr__(self):
-    return "Path: {5} \nTotal {0}\nSIM {1}\nPOST {2}\nTRANSFER {3}\nCLEAN {4}".format(
+    return "Total {0}\nSIM {1}\nPOST {2}\nTRANSFER {3}\nCLEAN {4}".format(
       len(self.current_content),
       len(self.sim_jobs),
       len(self.post_jobs),
       len(self.transfer_jobs),
-      len(self.clean_jobs),
-      self.pkl_path
+      len(self.clean_jobs)
     )
