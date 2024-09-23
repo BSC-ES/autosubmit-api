@@ -51,6 +51,7 @@ def start_app_gunicorn(
         "preload_app": True,
         "capture_output": True,
         "timeout": 600,
+        "worker_class": "uvicorn.workers.UvicornWorker"
     }
     if bind and len(bind) > 0:
         options["bind"] = bind
@@ -77,7 +78,7 @@ def start_app_gunicorn(
     if keepalive and keepalive > 0:
         options["keepalive"] = keepalive
 
-    g_app = StandaloneApplication("autosubmit_api.app:create_app()", options)
+    g_app = StandaloneApplication("autosubmit_api.app:app", options)
     print("Starting with gunicorn options: " + str(g_app.options))
     g_app.run()
 

@@ -19,7 +19,9 @@ from autosubmit_api.config import (
 )
 from autosubmit_api.views import handle_HTTP_exception, home
 from werkzeug.exceptions import HTTPException
-
+from fastapi import FastAPI
+from fastapi.middleware.wsgi import WSGIMiddleware
+from contextlib import asynccontextmanager
 
 def create_app():
     """
@@ -87,3 +89,15 @@ def create_app():
     app.register_error_handler(HTTPException, handle_HTTP_exception)
 
     return app
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Startup
+    flask_app = create_app()
+    app.mount("/", WSGIMiddleware(flask_app), name="flask")
+    yield
+    # Shutdown
+
+
+app = FastAPI(lifespan=lifespan)
