@@ -263,16 +263,7 @@ class ExperimentView(MethodView):
         for raw_exp in query_result:
             exp_builder = ExperimentBuilder()
             exp_builder.produce_base_from_dict(raw_exp._mapping)
-
-            # Get additional data from config files
-            try:
-                exp_builder.produce_config_data()
-            except Exception as exc:
-                logger.warning(
-                    f"Config files params were unable to get on search: {exc}"
-                )
-                logger.warning(traceback.format_exc())
-
+            exp_builder.produce_pkl_modified_time()
             exp = exp_builder.product
 
             # Get current run data from history
