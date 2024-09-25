@@ -35,7 +35,7 @@ from autosubmit_api.performance.utils import calculate_ASYPD_perjob, calculate_S
 from autosubmit_api.components.jobs import utils as JUtils
 from autosubmit_api.monitor.monitor import Monitor
 from autosubmit_api.common.utils import Status
-from bscearth.utils.date import date2str, parse_date
+from bscearth.utils.date import date2str
 # from autosubmit_legacy.job.tree import Tree
 from autosubmit_api.database import db_structure as DbStructure
 from autosubmit_api.database.db_jobdata import JobDataStructure, JobRow
@@ -645,61 +645,7 @@ class JobList:
         :return: submit time, start time, end time, status
         :rtype: 4-tuple in datetime format
         """
-        values = list()
-        status_from_job = str(Status.VALUE_TO_KEY[status_code])
-        now = datetime.datetime.now()
-        submit_time = now
-        start_time = now
-        finish_time = now
-        current_status = status_from_job
-        path = os.path.join(tmp_path, name + '_TOTAL_STATS')
-        if os.path.exists(path):
-            request = 'tail -1 ' + path
-            last_line = os.popen(request).readline()
-            # print(last_line)
-
-            values = last_line.split()
-            # print(last_line)
-            try:
-                if status_code in [Status.RUNNING]:
-                    submit_time = parse_date(
-                        values[0]) if len(values) > 0 else now
-                    start_time = parse_date(values[1]) if len(
-                        values) > 1 else submit_time
-                    finish_time = now
-                elif status_code in [Status.QUEUING, Status.SUBMITTED, Status.HELD]:
-                    submit_time = parse_date(
-                        values[0]) if len(values) > 0 else now
-                    start_time = parse_date(
-                        values[1]) if len(values) > 1 and values[0] != values[1] else now
-                elif status_code in [Status.COMPLETED]:
-                    submit_time = parse_date(
-                        values[0]) if len(values) > 0 else now
-                    start_time = parse_date(
-                        values[1]) if len(values) > 1 else submit_time
-                    if len(values) > 3:
-                        finish_time = parse_date(values[len(values) - 2])
-                    else:
-                        finish_time = submit_time
-                else:
-                    submit_time = parse_date(
-                        values[0]) if len(values) > 0 else now
-                    start_time = parse_date(values[1]) if len(
-                        values) > 1 else submit_time
-                    finish_time = parse_date(values[2]) if len(
-                        values) > 2 else start_time
-            except Exception:
-                start_time = now
-                finish_time = now
-                # NA if reading fails
-                current_status = "NA"
-
-        current_status = values[3] if (len(values) > 3 and len(
-            values[3]) != 14) else status_from_job
-        # TOTAL_STATS last line has more than 3 items, status is different from pkl, and status is not "NA"
-        if len(values) > 3 and current_status != status_from_job and current_status != "NA":
-            current_status = "SUSPICIOUS"
-        return (submit_time, start_time, finish_time, current_status)
+        return JUtils.get_job_total_stats(status_code, name, tmp_path)
 
     @staticmethod
     def retrieve_times(

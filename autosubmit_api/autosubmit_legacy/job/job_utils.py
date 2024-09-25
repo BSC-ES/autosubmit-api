@@ -17,37 +17,7 @@
 # You should have received a copy of the GNU General Public License
 # along with Autosubmit.  If not, see <http://www.gnu.org/licenses/>.
 
-import networkx
 import datetime
-import time
-
-
-
-def transitive_reduction(graph):
-    try:
-        return networkx.algorithms.dag.transitive_reduction(graph)
-    except Exception:
-        return None
-    # if not is_directed_acyclic_graph(graph):
-    #     raise NetworkXError("Transitive reduction only uniquely defined on directed acyclic graphs.")
-    # reduced_graph = DiGraph()
-    # reduced_graph.add_nodes_from(graph.nodes())
-    # for u in graph:
-    #     u_edges = set(graph[u])
-    #     for v in graph[u]:
-    #         u_edges -= {y for x, y in dfs_edges(graph, v)}
-    #     reduced_graph.add_edges_from((u, v) for v in u_edges)
-    # return reduced_graph
-
-class SimpleJob(object):
-    """
-    A simple replacement for jobs
-    """
-
-    def __init__(self, name, tmppath, statuscode):
-        self.name = name
-        self._tmp_path = tmppath
-        self.status = statuscode
 
 
 class SubJob(object):
@@ -209,38 +179,6 @@ class SubJobManager(object):
         return self.subjobList
 
 
-def parse_output_number(self, string_number):
-    """
-    Parses number in format 1.0K 1.0M 1.0G
-
-    :param string_number: String representation of number
-    :type string_number: str
-    :return: number in float format
-    :rtype: float
-    """
-    number = 0.0
-    if (string_number):
-        last_letter = string_number.strip()[-1]
-        multiplier = 1
-        if last_letter == "G":
-            multiplier = 1000000000
-            number = string_number[:-1]
-        elif last_letter == "M":
-            multiplier = 1000000
-            number = string_number[:-1]
-        elif last_letter == "K":
-            multiplier = 1000
-            number = string_number[:-1]
-        else:
-            number = string_number
-        try:
-            number = float(number) * multiplier
-        except Exception:
-            number = 0.0
-            pass
-    return number
-
-
 def job_times_to_text(minutes_queue, minutes_running, status):
     """
     Return text correpsonding to queue and running time
@@ -268,35 +206,3 @@ def job_times_to_text(minutes_queue, minutes_running, status):
         running_text = running_text + \
             " <small><i><b>SUSPICIOUS</b></i></small>"
     return running_text
-
-
-def datechunk_to_year(chunk_unit: str, chunk_size: int) -> float:
-    """
-    Gets chunk unit and size and returns the value in years
-
-    :return: years
-    :rtype: float
-    """
-    chunk_size = chunk_size * 1.0
-    # options = ["year", "month", "day", "hour"]
-    if (chunk_unit == "year"):
-        return chunk_size
-    elif (chunk_unit == "month"):
-        return chunk_size / 12
-    elif (chunk_unit == "day"):
-        return chunk_size / 365
-    elif (chunk_unit == "hour"):
-        return chunk_size / 8760
-    else:
-        return 0.0
-
-
-def tostamp(string_date: str) -> int:
-    """
-    String datetime to timestamp
-    """
-    if string_date and len(string_date) > 0:
-        return int(time.mktime(datetime.datetime.strptime(string_date,
-                                                          "%Y-%m-%d %H:%M:%S").timetuple()))
-    else:
-        return 0
