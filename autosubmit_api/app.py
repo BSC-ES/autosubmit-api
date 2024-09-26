@@ -12,13 +12,13 @@ from autosubmit_api.logger import get_app_logger
 from autosubmit_api.config.basicConfig import APIBasicConfig
 from autosubmit_api.config import (
     PROTECTION_LEVEL,
-    RUN_BACKGROUND_TASKS_ON_START,
     CAS_LOGIN_URL,
     CAS_VERIFY_URL,
+    get_run_background_tasks_on_start,
+    get_disable_background_tasks,
 )
 from autosubmit_api.views import handle_HTTP_exception, home
 from werkzeug.exceptions import HTTPException
-
 
 
 def create_app():
@@ -59,14 +59,15 @@ def create_app():
                 "PROTECTION_LEVEL": PROTECTION_LEVEL,
                 "CAS_LOGIN_URL": CAS_LOGIN_URL,
                 "CAS_VERIFY_URL": CAS_VERIFY_URL,
-                "RUN_BACKGROUND_TASKS_ON_START": RUN_BACKGROUND_TASKS_ON_START,
+                "DISABLE_BACKGROUND_TASKS": get_disable_background_tasks(),
+                "RUN_BACKGROUND_TASKS_ON_START": get_run_background_tasks_on_start(),
             }
         )
     )
 
     # Prepare DB
     prepare_db()
-    
+
     # Background Scheduler
     create_bind_scheduler(app)
 
@@ -75,7 +76,9 @@ def create_app():
     app.route("/")(home)
 
     v3_blueprint = create_v3_blueprint()
-    app.register_blueprint(v3_blueprint, name="root") # Add v3 to root but will be DEPRECATED
+    app.register_blueprint(
+        v3_blueprint, name="root"
+    )  # Add v3 to root but will be DEPRECATED
     app.register_blueprint(v3_blueprint, url_prefix="/v3")
 
     v4_blueprint = create_v4_blueprint()

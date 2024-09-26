@@ -30,15 +30,19 @@ GITHUB_OAUTH_CLIENT_SECRET = os.environ.get("GITHUB_OAUTH_CLIENT_SECRET")
 GITHUB_OAUTH_WHITELIST_ORGANIZATION = os.environ.get("GITHUB_OAUTH_WHITELIST_ORGANIZATION")
 GITHUB_OAUTH_WHITELIST_TEAM = os.environ.get("GITHUB_OAUTH_WHITELIST_TEAM")
 
-# Startup options
-RUN_BACKGROUND_TASKS_ON_START = os.environ.get("RUN_BACKGROUND_TASKS_ON_START") in [
-    "True",
-    "T",
-    "true",
-]  # Default false
 
-DISABLE_BACKGROUND_TASKS = os.environ.get("DISABLE_BACKGROUND_TASKS") in [
-    "True",
-    "T",
-    "true",
-]  # Default false
+# Startup options
+def get_run_background_tasks_on_start():
+    return os.environ.get("RUN_BACKGROUND_TASKS_ON_START") in [
+        "True",
+        "T",
+        "true",
+    ]  # Default false
+
+
+def get_disable_background_tasks():
+    return os.environ.get("DISABLE_BACKGROUND_TASKS") in [
+        "True",
+        "T",
+        "true",
+    ]  # Default false

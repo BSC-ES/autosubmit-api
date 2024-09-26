@@ -46,6 +46,7 @@ from autosubmit_api.monitor.monitor import Monitor
 from autosubmit_api.persistance.experiment import ExperimentPaths
 
 from autosubmit_api.persistance.job_package_reader import JobPackageReader
+from autosubmit_api.persistance.pkl_reader import PklReader
 from autosubmit_api.statistics.statistics import Statistics
 
 from autosubmit_api.config.basicConfig import APIBasicConfig
@@ -292,7 +293,7 @@ def _is_exp_running(expid: str, time_condition=300) -> Tuple[bool, str, bool, in
         return (error, error_message, is_running, timediff, definite_log_path)
 
 
-def get_experiment_summary(expid, log):
+def get_experiment_summary(expid: str, log):
     """
     Gets job summary for the experiment. Consider seconds.
     :param expid: Name of experiment
@@ -329,9 +330,7 @@ def get_experiment_summary(expid, log):
         fakeAllJobs = list()
 
         # Read PKL
-        autosubmit_config_facade = ConfigurationFacadeDirector(
-            AutosubmitConfigurationFacadeBuilder(expid)).build_autosubmit_configuration_facade()
-        pkl_organizer = PklOrganizer(autosubmit_config_facade)
+        pkl_organizer = PklOrganizer(expid)
         for job_item in pkl_organizer.current_content:
             status_code = job_item.status
             job_name = job_item.name
@@ -571,120 +570,131 @@ def get_job_log(expid, logfile, nlines=150):
         'logcontent': logcontent}
 
 
-def get_experiment_pkl(expid: str) -> Dict:
+def _retrieve_pkl_data(expid: str, out_format: str = "tree"):
     """
-    Gets the current state of the pkl in a format proper for graph update.
+    Retrieves pkl data for the experiment.
     """
     pkl_file_path = ""
     error = False
     error_message = ""
     pkl_content = list()
-    pkl_timestamp = 0
     package_to_jobs = dict()
+    pkl_timestamp = 0
+
     try:
-        autosubmit_config_facade = ConfigurationFacadeDirector(AutosubmitConfigurationFacadeBuilder(expid)).build_autosubmit_configuration_facade()
-        pkl_file_path = autosubmit_config_facade.pkl_path
-        pkl_timestamp = autosubmit_config_facade.get_pkl_last_modified_timestamp()
+        pkl_reader = PklReader(expid)
+        pkl_file_path = pkl_reader.pkl_path
+        pkl_timestamp = pkl_reader.get_modified_time()
 
-        if not os.path.exists(autosubmit_config_facade.pkl_path):
-            raise Exception("Pkl file {} not found.".format(autosubmit_config_facade.pkl_path))
+        if not os.path.exists(pkl_file_path):
+            raise Exception("Pkl file {} not found.".format(pkl_file_path))
 
-        job_list_loader = JobListLoaderDirector(JobListLoaderBuilder(expid)).build_loaded_joblist_loader()
+        # Get last run data for each job
+        try:
+            experiment_history = ExperimentHistoryDirector(
+                ExperimentHistoryBuilder(expid)
+            ).build_reader_experiment_history()
+            last_jobs_run = experiment_history.get_all_jobs_last_run_dict()
+        except Exception:
+            last_jobs_run = {}
+
+        job_list_loader = JobListLoaderDirector(
+            JobListLoaderBuilder(expid)
+        ).build_loaded_joblist_loader()
         package_to_jobs = job_list_loader.joblist_helper.package_to_jobs
 
         for job in job_list_loader.jobs:
-            pkl_content.append({'name': job.name,
-                                'rm_id': job.rm_id,
-                                'status_code': job.status,
-                                'SYPD': calculate_SYPD_perjob(autosubmit_config_facade.chunk_unit, autosubmit_config_facade.chunk_size, job.chunk, job.run_time, job.status),
-                                'minutes': job.run_time,
-                                'minutes_queue': job.queue_time,
-                                'submit': common_utils.timestamp_to_datetime_format(job.submit),
-                                'start': common_utils.timestamp_to_datetime_format(job.start),
-                                'finish': common_utils.timestamp_to_datetime_format(job.finish),
-                                'running_text': job.running_time_text,
-                                'dashed': True if job.package else False,
-                                'shape': job_list_loader.joblist_helper.package_to_symbol.get(job.package, "dot"),
-                                'package': job.package,
-                                'status': job.status_text,
-                                'status_color': job.status_color,
-                                'out': job.out_file_path,
-                                'err': job.err_file_path,
-                                'priority': job.priority})
+            # Calculate SYPD
+            SYPD = None
+            last_run = last_jobs_run.get(job.name)
+            if last_run and last_run.chunk_unit and last_run.chunk_size:
+                SYPD = calculate_SYPD_perjob(
+                    last_run.chunk_unit,
+                    last_run.chunk_size,
+                    job.chunk,
+                    job.run_time,
+                    job.status,
+                )
 
-    except Exception as e:
+            formatted_job_data = {
+                "name": job.name,
+                "rm_id": job.rm_id,
+                "status_code": job.status,
+                "SYPD": SYPD,
+                "minutes": job.run_time,
+                "minutes_queue": job.queue_time,
+                "submit": common_utils.timestamp_to_datetime_format(job.submit),
+                "start": common_utils.timestamp_to_datetime_format(job.start),
+                "finish": common_utils.timestamp_to_datetime_format(job.finish),
+                "running_text": job.running_time_text,
+                "status": job.status_text,
+                "status_color": job.status_color,
+                "out": job.out_file_path,
+                "err": job.err_file_path,
+                "priority": job.priority,
+            }
+
+            if out_format == "tree":
+                formatted_job_data.update(
+                    {
+                        "wrapper": job.package,
+                        "wrapper_tag": job.package_tag,
+                        "wrapper_id": job.package_code,
+                        "title": job.tree_title,
+                    }
+                )
+            elif out_format == "graph":
+                formatted_job_data.update(
+                    {
+                        "dashed": True if job.package else False,
+                        "shape": job_list_loader.joblist_helper.package_to_symbol.get(
+                            job.package, "dot"
+                        ),
+                        "package": job.package,
+                    }
+                )
+
+            pkl_content.append(formatted_job_data)
+
+    except Exception as exc:
         error = True
-        error_message = str(e)
+        error_message = str(exc)
 
-    return {
-        'pkl_file_name': pkl_file_path,
-        'error': error,
-        'error_message': error_message,
-        'has_changed': True,
-        'pkl_content': pkl_content,
-        'pkl_timestamp': pkl_timestamp,
-        'packages': package_to_jobs,
+    result = {
+        "pkl_file_name": pkl_file_path,
+        "error": error,
+        "error_message": error_message,
+        "has_changed": True,
+        "pkl_content": pkl_content,
+        "pkl_timestamp": pkl_timestamp,
+        "packages": package_to_jobs,
     }
+
+    if out_format == "tree":
+        result.update(
+            {
+                "source_tag": JUtils.source_tag,
+                "target_tag": JUtils.target_tag,
+                "sync_tag": JUtils.sync_tag,
+                "check_mark": JUtils.checkmark_tag,
+            }
+        )
+
+    return result
+
+
+def get_experiment_pkl(expid: str) -> Dict[str, Any]:
+    """
+    Gets the current state of the pkl in a format proper for graph update.
+    """
+    return _retrieve_pkl_data(expid, out_format="graph")
 
 
 def get_experiment_tree_pkl(expid: str) -> Dict[str, Any]:
     """
     Gets the current state of the pkl in a format for tree update
     """
-    pkl_file_path = ""
-    error = False
-    error_message = ""
-    pkl_content = list()
-    package_to_jobs = {}
-    pkl_timestamp = 0
-
-    try:
-        autosubmit_config_facade = ConfigurationFacadeDirector(AutosubmitConfigurationFacadeBuilder(expid)).build_autosubmit_configuration_facade()
-        pkl_file_path = autosubmit_config_facade.pkl_path
-        pkl_timestamp = autosubmit_config_facade.get_pkl_last_modified_timestamp()
-
-        if not os.path.exists(autosubmit_config_facade.pkl_path):
-            raise Exception("Pkl file {} not found.".format(autosubmit_config_facade.pkl_path))
-
-        job_list_loader = JobListLoaderDirector(JobListLoaderBuilder(expid)).build_loaded_joblist_loader()
-        package_to_jobs = job_list_loader.joblist_helper.package_to_jobs
-        for job in job_list_loader.jobs:
-            pkl_content.append({'name': job.name,
-                                'rm_id': job.rm_id,
-                                'status_code': job.status,
-                                'SYPD': calculate_SYPD_perjob(autosubmit_config_facade.chunk_unit, autosubmit_config_facade.chunk_size, job.chunk, job.run_time, job.status),
-                                'minutes': job.run_time,
-                                'minutes_queue': job.queue_time,
-                                'submit': common_utils.timestamp_to_datetime_format(job.submit),
-                                'start': common_utils.timestamp_to_datetime_format(job.start),
-                                'finish': common_utils.timestamp_to_datetime_format(job.finish),
-                                'running_text': job.running_time_text,
-                                'status': job.status_text,
-                                'status_color': job.status_color,
-                                'wrapper': job.package,
-                                'wrapper_tag': job.package_tag,
-                                'wrapper_id': job.package_code,
-                                'out': job.out_file_path,
-                                'err': job.err_file_path,
-                                'title': job.tree_title,
-                                'priority': job.priority})
-    except Exception as e:
-        error = True
-        error_message = str(e)
-
-    return {
-        'pkl_file_name': pkl_file_path,
-        'error': error,
-        'error_message': error_message,
-        'has_changed': True,
-        'pkl_content': pkl_content,
-        'packages': list(package_to_jobs.keys()),
-        'pkl_timestamp': pkl_timestamp,
-        'source_tag': JUtils.source_tag,
-        'target_tag': JUtils.target_tag,
-        'sync_tag': JUtils.sync_tag,
-        'check_mark': JUtils.checkmark_tag,
-    }
+    return _retrieve_pkl_data(expid, out_format="tree")
 
 
 def get_experiment_graph(expid, log, layout=Layout.STANDARD, grouped=GroupedBy.NO_GROUP):
@@ -782,7 +792,7 @@ def get_experiment_tree_structured(expid, log):
         return {'tree': [], 'jobs': [], 'total': 0, 'reference': [], 'error': True, 'error_message': str(e), 'pkl_timestamp': 0}
 
 
-def get_experiment_counters(expid):
+def get_experiment_counters(expid: str):
     """
     Returns status counters of the experiment.
     """
@@ -794,9 +804,7 @@ def get_experiment_counters(expid):
     # Default counter per status
     experiment_counters = {name: 0 for name in common_utils.Status.STRING_TO_CODE}
     try:
-        autosubmit_config_facade = ConfigurationFacadeDirector(
-            AutosubmitConfigurationFacadeBuilder(expid)).build_autosubmit_configuration_facade()
-        pkl_organizer = PklOrganizer(autosubmit_config_facade)
+        pkl_organizer = PklOrganizer(expid)
         for job_item in pkl_organizer.current_content:
             status_code = int(job_item.status)
             total += 1
@@ -812,7 +820,7 @@ def get_experiment_counters(expid):
 
 
 # TODO: Update to current representation standards and classes
-def get_quick_view(expid):
+def get_quick_view(expid: str):
     """ Lighter View """
     error = False
     error_message = ""
@@ -844,9 +852,7 @@ def get_quick_view(expid):
         
         # Reading PKL
         try:
-            autosubmit_config_facade = ConfigurationFacadeDirector(
-                AutosubmitConfigurationFacadeBuilder(expid)).build_autosubmit_configuration_facade()
-            pkl_organizer = PklOrganizer(autosubmit_config_facade)
+            pkl_organizer = PklOrganizer(expid)
             for job_item in pkl_organizer.current_content:
                 status_code = int(job_item.status)
                 # counters
