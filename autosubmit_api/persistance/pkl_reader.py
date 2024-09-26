@@ -1,3 +1,4 @@
+import os
 from typing import List, Union
 import pickle
 from networkx import DiGraph
@@ -7,7 +8,6 @@ from autosubmit_api.persistance.experiment import ExperimentPaths
 
 
 class PklReader:
-
     def __init__(self, expid: str) -> None:
         self.expid = expid
         APIBasicConfig.read()
@@ -16,6 +16,9 @@ class PklReader:
     def read_pkl(self) -> Union[List, DiGraph]:
         with open(self.pkl_path, "rb") as f:
             return pickle.load(f, encoding="latin1")
+
+    def get_modified_time(self) -> int:
+        return int(os.stat(self.pkl_path).st_mtime)
 
     def parse_job_list(self) -> List[PklJobModel]:
         job_list = []
