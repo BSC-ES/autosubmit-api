@@ -2,11 +2,11 @@ from datetime import datetime, timedelta
 from http import HTTPStatus
 import random
 from uuid import uuid4
-from flask.testing import FlaskClient
+from fastapi.testclient import TestClient
 import jwt
 import pytest
 from autosubmit_api import config
-from autosubmit_api.views.v4 import PAGINATION_LIMIT_DEFAULT, ExperimentJobsViewOptEnum
+from autosubmit_api.models.requests import PAGINATION_LIMIT_DEFAULT
 from tests.utils import custom_return_value
 
 
@@ -14,50 +14,51 @@ class TestCASV2Login:
     endpoint = "/v4/auth/cas/v2/login"
 
     def test_redirect(
-        self, fixture_client: FlaskClient, monkeypatch: pytest.MonkeyPatch
+        self, fixture_fastapi_client: TestClient, monkeypatch: pytest.MonkeyPatch
     ):
         random_url = f"https://${str(uuid4())}/"
         monkeypatch.setattr(config, "CAS_SERVER_URL", random_url)
         assert random_url == config.CAS_SERVER_URL
 
-        response = fixture_client.get(self.endpoint)
+        response = fixture_fastapi_client.get(self.endpoint, follow_redirects=False)
 
-        assert response.status_code == HTTPStatus.FOUND
-        assert config.CAS_SERVER_URL in response.location
+        assert response.status_code in [HTTPStatus.FOUND, HTTPStatus.TEMPORARY_REDIRECT]
+        assert response.has_redirect_location
+        assert config.CAS_SERVER_URL in response.headers["Location"]
 
     def test_invalid_client(
-        self, fixture_client: FlaskClient, monkeypatch: pytest.MonkeyPatch
+        self, fixture_fastapi_client: TestClient, monkeypatch: pytest.MonkeyPatch
     ):
         monkeypatch.setattr(
-            "autosubmit_api.views.v4.validate_client", custom_return_value(False)
+            "autosubmit_api.auth.utils.validate_client", custom_return_value(False)
         )
-        response = fixture_client.get(self.endpoint, query_string={"service": "asd"})
+        response = fixture_fastapi_client.get(self.endpoint, params={"service": "asd"})
         assert response.status_code == HTTPStatus.UNAUTHORIZED
 
 
 class TestJWTVerify:
     endpoint = "/v4/auth/verify-token"
 
-    def test_unauthorized_no_token(self, fixture_client: FlaskClient):
-        response = fixture_client.get(self.endpoint)
-        resp_obj: dict = response.get_json()
+    def test_unauthorized_no_token(self, fixture_fastapi_client: TestClient):
+        response = fixture_fastapi_client.get(self.endpoint)
+        resp_obj: dict = response.json()
 
         assert response.status_code == HTTPStatus.UNAUTHORIZED
         assert resp_obj.get("authenticated") is False
         assert resp_obj.get("user") is None
 
-    def test_unauthorized_random_token(self, fixture_client: FlaskClient):
+    def test_unauthorized_random_token(self, fixture_fastapi_client: TestClient):
         random_token = str(uuid4())
-        response = fixture_client.get(
+        response = fixture_fastapi_client.get(
             self.endpoint, headers={"Authorization": random_token}
         )
-        resp_obj: dict = response.get_json()
+        resp_obj: dict = response.json()
 
         assert response.status_code == HTTPStatus.UNAUTHORIZED
         assert resp_obj.get("authenticated") is False
         assert resp_obj.get("user") is None
 
-    def test_authorized(self, fixture_client: FlaskClient):
+    def test_authorized(self, fixture_fastapi_client: TestClient):
         random_user = str(uuid4())
         payload = {
             "user_id": random_user,
@@ -69,10 +70,10 @@ class TestJWTVerify:
         }
         jwt_token = jwt.encode(payload, config.JWT_SECRET, config.JWT_ALGORITHM)
 
-        response = fixture_client.get(
-            self.endpoint, headers={"Authorization": jwt_token}
+        response = fixture_fastapi_client.get(
+            self.endpoint, headers={"Authorization": "Bearer " + jwt_token}
         )
-        resp_obj: dict = response.get_json()
+        resp_obj: dict = response.json()
 
         assert response.status_code == HTTPStatus.OK
         assert resp_obj.get("authenticated") is True
@@ -82,23 +83,23 @@ class TestJWTVerify:
 class TestExperimentList:
     endpoint = "/v4/experiments"
 
-    def test_page_size(self, fixture_client: FlaskClient):
+    def test_page_size(self, fixture_fastapi_client: TestClient):
         # Default page size
-        response = fixture_client.get(self.endpoint)
-        resp_obj: dict = response.get_json()
+        response = fixture_fastapi_client.get(self.endpoint)
+        resp_obj: dict = response.json()
         assert resp_obj["pagination"]["page_size"] == PAGINATION_LIMIT_DEFAULT
 
         # Any page size
         page_size = random.randint(2, 100)
-        response = fixture_client.get(
-            self.endpoint, query_string={"page_size": page_size}
+        response = fixture_fastapi_client.get(
+            self.endpoint, params={"page_size": page_size}
         )
-        resp_obj: dict = response.get_json()
+        resp_obj: dict = response.json()
         assert resp_obj["pagination"]["page_size"] == page_size
 
         # Unbounded page size
-        response = fixture_client.get(self.endpoint, query_string={"page_size": -1})
-        resp_obj: dict = response.get_json()
+        response = fixture_fastapi_client.get(self.endpoint, params={"page_size": -1})
+        resp_obj: dict = response.json()
         assert resp_obj["pagination"]["page_size"] is None
         assert (
             resp_obj["pagination"]["page_items"]
@@ -111,10 +112,10 @@ class TestExperimentList:
 class TestExperimentDetail:
     endpoint = "/v4/experiments/{expid}"
 
-    def test_detail(self, fixture_client: FlaskClient):
+    def test_detail(self, fixture_fastapi_client: TestClient):
         expid = "a003"
-        response = fixture_client.get(self.endpoint.format(expid=expid))
-        resp_obj: dict = response.get_json()
+        response = fixture_fastapi_client.get(self.endpoint.format(expid=expid))
+        resp_obj: dict = response.json()
 
         assert resp_obj["id"] == 1
         assert resp_obj["name"] == expid
@@ -131,14 +132,13 @@ class TestExperimentDetail:
 class TestExperimentJobs:
     endpoint = "/v4/experiments/{expid}/jobs"
 
-    def test_quick(self, fixture_client: FlaskClient):
+    def test_quick(self, fixture_fastapi_client: TestClient):
         expid = "a003"
-
-        response = fixture_client.get(
+        response = fixture_fastapi_client.get(
             self.endpoint.format(expid=expid),
-            query_string={"view": ExperimentJobsViewOptEnum.QUICK.value},
+            params={"view": "quick"},
         )
-        resp_obj: dict = response.get_json()
+        resp_obj: dict = response.json()
 
         assert len(resp_obj["jobs"]) == 8
 
@@ -147,14 +147,13 @@ class TestExperimentJobs:
             assert isinstance(job["name"], str) and job["name"].startswith(expid)
             assert isinstance(job["status"], str)
 
-    def test_base(self, fixture_client: FlaskClient):
+    def test_base(self, fixture_fastapi_client: TestClient):
         expid = "a003"
-
-        response = fixture_client.get(
+        response = fixture_fastapi_client.get(
             self.endpoint.format(expid=expid),
-            query_string={"view": ExperimentJobsViewOptEnum.BASE.value},
+            params={"view": "base"},
         )
-        resp_obj: dict = response.get_json()
+        resp_obj: dict = response.json()
 
         assert len(resp_obj["jobs"]) == 8
 
@@ -167,11 +166,10 @@ class TestExperimentJobs:
 class TestExperimentWrappers:
     endpoint = "/v4/experiments/{expid}/wrappers"
 
-    def test_wrappers(self, fixture_client: FlaskClient):
+    def test_wrappers(self, fixture_fastapi_client: TestClient):
         expid = "a6zj"
-
-        response = fixture_client.get(self.endpoint.format(expid=expid))
-        resp_obj: dict = response.get_json()
+        response = fixture_fastapi_client.get(self.endpoint.format(expid=expid))
+        resp_obj: dict = response.json()
 
         assert isinstance(resp_obj, dict)
         assert isinstance(resp_obj["wrappers"], list)
@@ -188,11 +186,10 @@ class TestExperimentWrappers:
 class TestExperimentFSConfig:
     endpoint = "/v4/experiments/{expid}/filesystem-config"
 
-    def test_fs_config(self, fixture_client: FlaskClient):
+    def test_fs_config(self, fixture_fastapi_client: TestClient):
         expid = "a6zj"
-
-        response = fixture_client.get(self.endpoint.format(expid=expid))
-        resp_obj: dict = response.get_json()
+        response = fixture_fastapi_client.get(self.endpoint.format(expid=expid))
+        resp_obj: dict = response.json()
 
         assert isinstance(resp_obj, dict)
         assert isinstance(resp_obj["config"], dict)
@@ -204,11 +201,10 @@ class TestExperimentFSConfig:
         assert isinstance(resp_obj["config"]["WRAPPERS"], dict)
         assert isinstance(resp_obj["config"]["WRAPPERS"]["WRAPPER_V"], dict)
 
-    def test_fs_config_v3_retro(self, fixture_client: FlaskClient):
+    def test_fs_config_v3_retro(self, fixture_fastapi_client: TestClient):
         expid = "a3tb"
-
-        response = fixture_client.get(self.endpoint.format(expid=expid))
-        resp_obj: dict = response.get_json()
+        response = fixture_fastapi_client.get(self.endpoint.format(expid=expid))
+        resp_obj: dict = response.json()
 
         assert isinstance(resp_obj, dict)
         assert isinstance(resp_obj["config"], dict)
@@ -228,9 +224,9 @@ class TestExperimentRuns:
     endpoint = "/v4/experiments/{expid}/runs"
 
     @pytest.mark.parametrize("expid, num_runs", [("a6zj", 1), ("a3tb", 51)])
-    def test_runs(self, expid: str, num_runs: int, fixture_client: FlaskClient):
-        response = fixture_client.get(self.endpoint.format(expid=expid))
-        resp_obj: dict = response.get_json()
+    def test_runs(self, expid: str, num_runs: int, fixture_fastapi_client: TestClient):
+        response = fixture_fastapi_client.get(self.endpoint.format(expid=expid))
+        resp_obj: dict = response.json()
 
         assert isinstance(resp_obj, dict)
         assert isinstance(resp_obj["runs"], list)
@@ -246,12 +242,13 @@ class TestExperimentRuns:
 class TestExperimentRunConfig:
     endpoint = "/v4/experiments/{expid}/runs/{run_id}/config"
 
-    def test_run_config(self, fixture_client: FlaskClient):
+    def test_run_config(self, fixture_fastapi_client: TestClient):
         expid = "a6zj"
         run_id = 1
-
-        response = fixture_client.get(self.endpoint.format(expid=expid, run_id=run_id))
-        resp_obj: dict = response.get_json()
+        response = fixture_fastapi_client.get(
+            self.endpoint.format(expid=expid, run_id=run_id)
+        )
+        resp_obj: dict = response.json()
 
         assert isinstance(resp_obj, dict)
         assert isinstance(resp_obj["config"], dict)
@@ -264,11 +261,14 @@ class TestExperimentRunConfig:
         assert isinstance(resp_obj["config"]["WRAPPERS"]["WRAPPER_V"], dict)
 
     @pytest.mark.parametrize("run_id", [51, 48, 31])
-    def test_run_config_v3_retro(self, run_id: int, fixture_client: FlaskClient):
+    def test_run_config_v3_retro(
+        self, run_id: int, fixture_fastapi_client: TestClient
+    ):
         expid = "a3tb"
-
-        response = fixture_client.get(self.endpoint.format(expid=expid, run_id=run_id))
-        resp_obj: dict = response.get_json()
+        response = fixture_fastapi_client.get(
+            self.endpoint.format(expid=expid, run_id=run_id)
+        )
+        resp_obj: dict = response.json()
 
         assert isinstance(resp_obj, dict)
         assert isinstance(resp_obj["config"], dict)

@@ -88,7 +88,7 @@ def login():
         return {
             "authenticated": True,
             "user": user,
-            "token": jwt_token,
+            "token": f"Bearer {jwt_token}",
             "message": "Token generated.",
         }
 
