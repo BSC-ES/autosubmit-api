@@ -2,9 +2,6 @@ import os
 import sys
 import time
 from fastapi.responses import JSONResponse
-import requests
-from flask_cors import CORS
-from flask import Flask
 from autosubmit_api import routers
 from autosubmit_api.bgtasks.scheduler import create_scheduler
 from autosubmit_api.database import prepare_db
@@ -19,44 +16,23 @@ from autosubmit_api.config import (
     get_disable_background_tasks,
 )
 from fastapi import FastAPI, HTTPException as FastAPIHTTPException, Request
-from fastapi.middleware.wsgi import WSGIMiddleware
 from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
 from autosubmit_api import __version__ as APIVersion
 
+sys.path.insert(0, os.path.abspath("."))
 
-def create_app():
-    """
-    Autosubmit Flask application factory
-    This function initializes the application properly
-    """
 
-    sys.path.insert(0, os.path.abspath("."))
-
-    app = Flask(__name__)
-
-    # CORS setup
-    CORS(app)
-
-    # Logger binding
-    app.logger = get_app_logger()
-    app.logger.info("PYTHON VERSION: " + sys.version)
-
-    # Enforce Language Locale
-    CommonRequests.enforceLocal(app.logger)
-
-    requests.packages.urllib3.util.ssl_.DEFAULT_CIPHERS += "HIGH:!DH:!aNULL"
-    try:
-        requests.packages.urllib3.contrib.pyopenssl.DEFAULT_SSL_CIPHER_LIST += (
-            "HIGH:!DH:!aNULL"
-        )
-    except AttributeError:
-        app.logger.warning("No pyopenssl support used / needed / available")
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Startup
+    logger.info("PYTHON VERSION: " + sys.version)
+    CommonRequests.enforceLocal(logger)
 
     # Initial read config
     APIBasicConfig.read()
-    app.logger.debug("API Basic config: " + str(APIBasicConfig().props()))
-    app.logger.debug(
+    logger.debug("API Basic config: " + str(APIBasicConfig().props()))
+    logger.debug(
         "Env Config: "
         + str(
             {
@@ -72,18 +48,14 @@ def create_app():
     # Prepare DB
     prepare_db()
 
-    ################################ ROUTES ################################
-
-    return app
-
-
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    # Startup
+    # Initial background tasks
     scheduler = create_scheduler()
     scheduler.start()
+
     yield
+
     # Shutdown
+    # Shutdown background tasks
     logger.info("Shutting down background tasks...")
     scheduler.shutdown()
     logger.info("Background tasks shut down.")
@@ -155,6 +127,3 @@ async def log_runtime(request: Request, call_next):
 
 
 app.include_router(routers.router)
-
-flask_app = create_app()
-app.mount("/v3", WSGIMiddleware(flask_app), name="flask")
