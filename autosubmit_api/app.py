@@ -6,10 +6,10 @@ import requests
 from flask_cors import CORS
 from flask import Flask
 from autosubmit_api import routers
-from autosubmit_api.bgtasks.scheduler import create_bind_scheduler
+from autosubmit_api.bgtasks.scheduler import create_scheduler
 from autosubmit_api.database import prepare_db
 from autosubmit_api.experiment import common_requests as CommonRequests
-from autosubmit_api.logger import get_app_logger
+from autosubmit_api.logger import get_app_logger, logger
 from autosubmit_api.config.basicConfig import APIBasicConfig
 from autosubmit_api.config import (
     PROTECTION_LEVEL,
@@ -72,9 +72,6 @@ def create_app():
     # Prepare DB
     prepare_db()
 
-    # Background Scheduler
-    create_bind_scheduler(app)
-
     ################################ ROUTES ################################
 
     return app
@@ -83,8 +80,13 @@ def create_app():
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # Startup
+    scheduler = create_scheduler()
+    scheduler.start()
     yield
     # Shutdown
+    logger.info("Shutting down background tasks...")
+    scheduler.shutdown()
+    logger.info("Background tasks shut down.")
 
 
 app = FastAPI(
