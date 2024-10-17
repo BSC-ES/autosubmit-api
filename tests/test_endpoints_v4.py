@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from http import HTTPStatus
 import random
 from uuid import uuid4
@@ -65,7 +65,8 @@ class TestJWTVerify:
             "sub": random_user,
             "iat": int(datetime.now().timestamp()),
             "exp": (
-                datetime.utcnow() + timedelta(seconds=config.JWT_EXP_DELTA_SECONDS)
+                datetime.now(timezone.utc)
+                + timedelta(seconds=config.JWT_EXP_DELTA_SECONDS)
             ),
         }
         jwt_token = jwt.encode(payload, config.JWT_SECRET, config.JWT_ALGORITHM)
@@ -261,9 +262,7 @@ class TestExperimentRunConfig:
         assert isinstance(resp_obj["config"]["WRAPPERS"]["WRAPPER_V"], dict)
 
     @pytest.mark.parametrize("run_id", [51, 48, 31])
-    def test_run_config_v3_retro(
-        self, run_id: int, fixture_fastapi_client: TestClient
-    ):
+    def test_run_config_v3_retro(self, run_id: int, fixture_fastapi_client: TestClient):
         expid = "a3tb"
         response = fixture_fastapi_client.get(
             self.endpoint.format(expid=expid, run_id=run_id)

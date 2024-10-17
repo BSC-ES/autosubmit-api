@@ -44,6 +44,7 @@ install_requires = [
 test_requires = [
     "pytest",
     "pytest-cov",
+    "pytest-asyncio",
     "ruff"
 ]
 

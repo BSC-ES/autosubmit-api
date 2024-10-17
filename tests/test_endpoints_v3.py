@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from http import HTTPStatus
 from uuid import uuid4
 from fastapi.testclient import TestClient
@@ -38,7 +38,7 @@ class TestLogin:
             self.endpoint, headers={"Referer": random_referer}, follow_redirects=False
         )
 
-        assert response.status_code == HTTPStatus.FOUND
+        assert response.status_code in [HTTPStatus.FOUND, HTTPStatus.TEMPORARY_REDIRECT]
         assert config.CAS_LOGIN_URL in response.headers["Location"]
         assert random_referer in response.headers["Location"]
 
@@ -68,13 +68,13 @@ class TestVerifyToken:
         payload = {
             "user_id": random_user,
             "exp": (
-                datetime.utcnow() + timedelta(seconds=config.JWT_EXP_DELTA_SECONDS)
+                datetime.now(timezone.utc) + timedelta(seconds=config.JWT_EXP_DELTA_SECONDS)
             ),
         }
         jwt_token = jwt.encode(payload, config.JWT_SECRET, config.JWT_ALGORITHM)
 
         response = fixture_fastapi_client.get(
-            self.endpoint, headers={"Authorization": jwt_token}
+            self.endpoint, headers={"Authorization": f"Bearer {jwt_token}"}
         )
         resp_obj: dict = response.json()
 

@@ -7,7 +7,6 @@ from flask_cors import CORS
 from flask import Flask
 from autosubmit_api import routers
 from autosubmit_api.bgtasks.scheduler import create_bind_scheduler
-from autosubmit_api.blueprints.v3 import create_v3_blueprint
 from autosubmit_api.database import prepare_db
 from autosubmit_api.experiment import common_requests as CommonRequests
 from autosubmit_api.logger import get_app_logger
@@ -19,8 +18,6 @@ from autosubmit_api.config import (
     get_run_background_tasks_on_start,
     get_disable_background_tasks,
 )
-from autosubmit_api.views import handle_HTTP_exception
-from werkzeug.exceptions import HTTPException
 from fastapi import FastAPI, HTTPException as FastAPIHTTPException, Request
 from fastapi.middleware.wsgi import WSGIMiddleware
 from fastapi.middleware.cors import CORSMiddleware
@@ -79,13 +76,6 @@ def create_app():
     create_bind_scheduler(app)
 
     ################################ ROUTES ################################
-
-    v3_blueprint = create_v3_blueprint()
-    app.register_blueprint(
-        v3_blueprint, name="root"
-    )  # Add v3 to root but will be DEPRECATED
-
-    app.register_error_handler(HTTPException, handle_HTTP_exception)
 
     return app
 
