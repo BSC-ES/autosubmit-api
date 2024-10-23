@@ -19,6 +19,7 @@ from fastapi import FastAPI, HTTPException as FastAPIHTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
 from autosubmit_api import __version__ as APIVersion
+from autosubmit_api.middleware import HttpUrlModifyMiddleware
 
 sys.path.insert(0, os.path.abspath("."))
 
@@ -79,6 +80,9 @@ def create_app():
 app = create_app()
 
 
+# Exception handlers
+
+
 @app.exception_handler(FastAPIHTTPException)
 async def http_exception_handler(request: Request, exc: FastAPIHTTPException):
     return JSONResponse(
@@ -95,6 +99,8 @@ async def global_exception_handler(request: Request, exc: Exception):
     )
 
 
+# Middlewares
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -109,7 +115,9 @@ async def log_runtime(request: Request, call_next):
     logger = get_app_logger()
     start_time = time.time()
     try:
-        path = request.url.path + "?" + request.url.query
+        path = request.url.path
+        if request.url.query:
+            path += "?" + request.url.query
         method = request.method
     except Exception:
         path = ""
@@ -131,5 +139,12 @@ async def log_runtime(request: Request, call_next):
     )
     return response
 
+
+# NOTE: Middleware is executed in the inverse order of the order they are added.
+# So, the HttpUrlModifyMiddleware should be added at the end.
+app.add_middleware(HttpUrlModifyMiddleware)
+
+
+# Routers
 
 app.include_router(routers.router)
