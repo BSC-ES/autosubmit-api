@@ -22,10 +22,23 @@ from autosubmit_api import __version__ as APIVersion
 
 sys.path.insert(0, os.path.abspath("."))
 
+scheduler = create_scheduler()
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    """
+    Beware this lifespan will run on every worker
+    """
     # Startup
+    yield
+    # Shutdown
+
+
+def create_app():
+    """
+    Create the FastAPI app. It will run this only once before the server starts when using multiple workers.
+    """
     logger.info("PYTHON VERSION: " + sys.version)
     CommonRequests.enforceLocal(logger)
 
@@ -49,28 +62,21 @@ async def lifespan(app: FastAPI):
     prepare_db()
 
     # Initial background tasks
-    scheduler = create_scheduler()
     scheduler.start()
 
-    yield
+    return FastAPI(
+        lifespan=lifespan,
+        redirect_slashes=True,
+        title="Autosubmit API",
+        version=APIVersion,
+        license_info={
+            "name": "GNU General Public License",
+            "url": "https://www.gnu.org/licenses/gpl-3.0.html",
+        },
+    )
 
-    # Shutdown
-    # Shutdown background tasks
-    logger.info("Shutting down background tasks...")
-    scheduler.shutdown()
-    logger.info("Background tasks shut down.")
 
-
-app = FastAPI(
-    lifespan=lifespan,
-    redirect_slashes=True,
-    title="Autosubmit API",
-    version=APIVersion,
-    license_info={
-        "name": "GNU General Public License",
-        "url": "https://www.gnu.org/licenses/gpl-3.0.html",
-    },
-)
+app = create_app()
 
 
 @app.exception_handler(FastAPIHTTPException)
@@ -103,7 +109,7 @@ async def log_runtime(request: Request, call_next):
     logger = get_app_logger()
     start_time = time.time()
     try:
-        path = request.url.path
+        path = request.url.path + "?" + request.url.query
         method = request.method
     except Exception:
         path = ""
