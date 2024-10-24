@@ -12,6 +12,7 @@ from autosubmit_api.config import (
     PROTECTION_LEVEL,
     CAS_LOGIN_URL,
     CAS_VERIFY_URL,
+    AS_API_ROOT_PATH,
     get_run_background_tasks_on_start,
     get_disable_background_tasks,
 )
@@ -55,6 +56,7 @@ def create_app():
                 "CAS_VERIFY_URL": CAS_VERIFY_URL,
                 "DISABLE_BACKGROUND_TASKS": get_disable_background_tasks(),
                 "RUN_BACKGROUND_TASKS_ON_START": get_run_background_tasks_on_start(),
+                "AS_API_ROOT_PATH": AS_API_ROOT_PATH,
             }
         )
     )
@@ -66,6 +68,7 @@ def create_app():
     scheduler.start()
 
     return FastAPI(
+        root_path=AS_API_ROOT_PATH,
         lifespan=lifespan,
         redirect_slashes=True,
         title="Autosubmit API",
