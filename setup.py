@@ -20,10 +20,9 @@ def get_authors():
 
 
 install_requires = [
-    "Flask~=2.2.5",
+    "fastapi[all]==0.115.0",
     "pyjwt~=2.8.0",
     "requests~=2.28.1",
-    "flask_cors~=3.0.10",
     "bscearth.utils~=0.5.2",
     "pydotplus~=2.0.2",
     "portalocker~=2.6.0",
@@ -32,7 +31,7 @@ install_requires = [
     "python-dotenv~=1.0.1",
     "autosubmitconfigparser>=1.0.65",
     "autosubmit>=3.13",
-    "Flask-APScheduler~=1.13.1",
+    "APScheduler~=3.10.4",
     "gunicorn~=22.0.0",
     "pydantic~=2.5.2",
     "SQLAlchemy~=2.0.23",
@@ -43,6 +42,7 @@ install_requires = [
 test_requires = [
     "pytest",
     "pytest-cov",
+    "pytest-asyncio",
     "ruff"
 ]
 

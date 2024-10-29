@@ -46,3 +46,5 @@ def get_disable_background_tasks():
         "T",
         "true",
     ]  # Default false
+
+AS_API_ROOT_PATH=os.environ.get("AS_API_ROOT_PATH", "")
