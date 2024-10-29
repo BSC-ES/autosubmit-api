@@ -1,7 +1,7 @@
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from http import HTTPStatus
 from uuid import uuid4
-from flask.testing import FlaskClient
+from fastapi.testclient import TestClient
 import jwt
 from autosubmit_api import config
 import pytest
@@ -13,70 +13,70 @@ class TestLogin:
 
     def test_not_allowed_client(
         self,
-        fixture_client: FlaskClient,
+        fixture_fastapi_client: TestClient,
         fixture_mock_basic_config: APIBasicConfig,
         monkeypatch: pytest.MonkeyPatch,
     ):
         monkeypatch.setattr(APIBasicConfig, "ALLOWED_CLIENTS", [])
 
-        response = fixture_client.get(self.endpoint)
-        resp_obj: dict = response.get_json()
+        response = fixture_fastapi_client.get(self.endpoint)
+        resp_obj: dict = response.json()
 
         assert response.status_code == HTTPStatus.UNAUTHORIZED
         assert resp_obj.get("authenticated") is False
 
     def test_redirect(
         self,
-        fixture_client: FlaskClient,
+        fixture_fastapi_client: TestClient,
         fixture_mock_basic_config: APIBasicConfig,
         monkeypatch: pytest.MonkeyPatch,
     ):
         random_referer = str(f"https://${str(uuid4())}/")
         monkeypatch.setattr(APIBasicConfig, "ALLOWED_CLIENTS", [random_referer])
 
-        response = fixture_client.get(
-            self.endpoint, headers={"Referer": random_referer}
+        response = fixture_fastapi_client.get(
+            self.endpoint, headers={"Referer": random_referer}, follow_redirects=False
         )
 
-        assert response.status_code == HTTPStatus.FOUND
-        assert config.CAS_LOGIN_URL in response.location
-        assert random_referer in response.location
+        assert response.status_code in [HTTPStatus.FOUND, HTTPStatus.TEMPORARY_REDIRECT]
+        assert config.CAS_LOGIN_URL in response.headers["Location"]
+        assert random_referer in response.headers["Location"]
 
 
 class TestVerifyToken:
     endpoint = "/v3/tokentest"
 
-    def test_unauthorized_no_token(self, fixture_client: FlaskClient):
-        response = fixture_client.get(self.endpoint)
-        resp_obj: dict = response.get_json()
+    def test_unauthorized_no_token(self, fixture_fastapi_client: TestClient):
+        response = fixture_fastapi_client.get(self.endpoint)
+        resp_obj: dict = response.json()
 
         assert response.status_code == HTTPStatus.UNAUTHORIZED
         assert resp_obj.get("isValid") is False
 
-    def test_unauthorized_random_token(self, fixture_client: FlaskClient):
+    def test_unauthorized_random_token(self, fixture_fastapi_client: TestClient):
         random_token = str(uuid4())
-        response = fixture_client.get(
+        response = fixture_fastapi_client.get(
             self.endpoint, headers={"Authorization": random_token}
         )
-        resp_obj: dict = response.get_json()
+        resp_obj: dict = response.json()
 
         assert response.status_code == HTTPStatus.UNAUTHORIZED
         assert resp_obj.get("isValid") is False
 
-    def test_authorized(self, fixture_client: FlaskClient):
+    def test_authorized(self, fixture_fastapi_client: TestClient):
         random_user = str(uuid4())
         payload = {
             "user_id": random_user,
             "exp": (
-                datetime.utcnow() + timedelta(seconds=config.JWT_EXP_DELTA_SECONDS)
+                datetime.now(timezone.utc) + timedelta(seconds=config.JWT_EXP_DELTA_SECONDS)
             ),
         }
         jwt_token = jwt.encode(payload, config.JWT_SECRET, config.JWT_ALGORITHM)
 
-        response = fixture_client.get(
-            self.endpoint, headers={"Authorization": jwt_token}
+        response = fixture_fastapi_client.get(
+            self.endpoint, headers={"Authorization": f"Bearer {jwt_token}"}
         )
-        resp_obj: dict = response.get_json()
+        resp_obj: dict = response.json()
 
         assert response.status_code == HTTPStatus.OK
         assert resp_obj.get("isValid") is True
@@ -85,19 +85,20 @@ class TestVerifyToken:
 class TestExpInfo:
     endpoint = "/v3/expinfo/{expid}"
 
-    def test_info(self, fixture_client: FlaskClient):
+    def test_info(self, fixture_fastapi_client: TestClient):
         expid = "a003"
-        response = fixture_client.get(self.endpoint.format(expid=expid))
-        resp_obj: dict = response.get_json()
+        response = fixture_fastapi_client.get(self.endpoint.format(expid=expid))
+        resp_obj: dict = response.json()
+        assert response.status_code == HTTPStatus.OK
         assert resp_obj["error_message"] == ""
         assert resp_obj["error"] is False
         assert resp_obj["expid"] == expid
         assert resp_obj["total_jobs"] == 8
 
-    def test_retro3_info(self, fixture_client: FlaskClient):
+    def test_retro3_info(self, fixture_fastapi_client: TestClient):
         expid = "a3tb"
-        response = fixture_client.get(self.endpoint.format(expid=expid))
-        resp_obj: dict = response.get_json()
+        response = fixture_fastapi_client.get(self.endpoint.format(expid=expid))
+        resp_obj: dict = response.json()
         assert resp_obj["error_message"] == ""
         assert resp_obj["error"] is False
         assert resp_obj["expid"] == expid
@@ -108,13 +109,13 @@ class TestExpInfo:
 class TestPerformance:
     endpoint = "/v3/performance/{expid}"
 
-    def test_parallelization(self, fixture_client: FlaskClient):
+    def test_parallelization(self, fixture_fastapi_client: TestClient):
         """
         Test parallelization without PROCESSORS_PER_NODE
         """
         expid = "a007"
-        response = fixture_client.get(self.endpoint.format(expid=expid))
-        resp_obj: dict = response.get_json()
+        response = fixture_fastapi_client.get(self.endpoint.format(expid=expid))
+        resp_obj: dict = response.json()
         assert resp_obj["error_message"] == ""
         assert resp_obj["error"] is False
         assert resp_obj["Parallelization"] == 8
@@ -123,8 +124,8 @@ class TestPerformance:
         )
 
         expid = "a3tb"
-        response = fixture_client.get(self.endpoint.format(expid=expid))
-        resp_obj: dict = response.get_json()
+        response = fixture_fastapi_client.get(self.endpoint.format(expid=expid))
+        resp_obj: dict = response.json()
         assert resp_obj["error_message"] == ""
         assert resp_obj["error"] is False
         assert resp_obj["Parallelization"] == 768
@@ -132,13 +133,13 @@ class TestPerformance:
             resp_obj["not_considered"], list
         )
 
-    def test_parallelization_platforms(self, fixture_client: FlaskClient):
+    def test_parallelization_platforms(self, fixture_fastapi_client: TestClient):
         """
         Test parallelization that comes from default platform
         """
         expid = "a003"
-        response = fixture_client.get(self.endpoint.format(expid=expid))
-        resp_obj: dict = response.get_json()
+        response = fixture_fastapi_client.get(self.endpoint.format(expid=expid))
+        resp_obj: dict = response.json()
         assert resp_obj["error_message"] == ""
         assert resp_obj["error"] is False
         assert resp_obj["Parallelization"] == 16
@@ -150,14 +151,14 @@ class TestPerformance:
 class TestTree:
     endpoint = "/v3/tree/{expid}"
 
-    def test_tree(self, fixture_client: FlaskClient):
+    def test_tree(self, fixture_fastapi_client: TestClient):
         expid = "a003"
         random_user = str(uuid4())
-        response = fixture_client.get(
+        response = fixture_fastapi_client.get(
             self.endpoint.format(expid=expid),
-            query_string={"loggedUser": random_user},
+            params={"loggedUser": random_user},
         )
-        resp_obj: dict = response.get_json()
+        resp_obj: dict = response.json()
 
         assert resp_obj["error_message"] == ""
         assert resp_obj["error"] is False
@@ -166,14 +167,14 @@ class TestTree:
         for job in resp_obj["jobs"]:
             assert job["id"][:4] == expid
 
-    def test_retro3(self, fixture_client: FlaskClient):
+    def test_retro3(self, fixture_fastapi_client: TestClient):
         expid = "a3tb"
         random_user = str(uuid4())
-        response = fixture_client.get(
+        response = fixture_fastapi_client.get(
             self.endpoint.format(expid=expid),
-            query_string={"loggedUser": random_user},
+            params={"loggedUser": random_user},
         )
-        resp_obj: dict = response.get_json()
+        resp_obj: dict = response.json()
 
         assert resp_obj["error_message"] == ""
         assert resp_obj["error"] is False
@@ -185,10 +186,10 @@ class TestTree:
         for job in resp_obj["jobs"]:
             assert job["id"][:4] == expid
 
-    def test_wrappers(self, fixture_client: FlaskClient):
+    def test_wrappers(self, fixture_fastapi_client: TestClient):
         expid = "a6zj"
-        response = fixture_client.get(self.endpoint.format(expid=expid))
-        resp_obj: dict = response.get_json()
+        response = fixture_fastapi_client.get(self.endpoint.format(expid=expid))
+        resp_obj: dict = response.json()
 
         assert len(resp_obj["jobs"]) == 10
 
@@ -206,11 +207,11 @@ class TestTree:
 class TestRunsList:
     endpoint = "/v3/runs/{expid}"
 
-    def test_runs_list(self, fixture_client: FlaskClient):
+    def test_runs_list(self, fixture_fastapi_client: TestClient):
         expid = "a003"
 
-        response = fixture_client.get(self.endpoint.format(expid=expid))
-        resp_obj: dict = response.get_json()
+        response = fixture_fastapi_client.get(self.endpoint.format(expid=expid))
+        resp_obj: dict = response.json()
 
         assert resp_obj["error_message"] == ""
         assert resp_obj["error"] is False
@@ -220,11 +221,13 @@ class TestRunsList:
 class TestRunDetail:
     endpoint = "/v3/rundetail/{expid}/{runId}"
 
-    def test_runs_detail(self, fixture_client: FlaskClient):
+    def test_runs_detail(self, fixture_fastapi_client: TestClient):
         expid = "a003"
 
-        response = fixture_client.get(self.endpoint.format(expid=expid, runId=2))
-        resp_obj: dict = response.get_json()
+        response = fixture_fastapi_client.get(
+            self.endpoint.format(expid=expid, runId=2)
+        )
+        resp_obj: dict = response.json()
 
         assert resp_obj["error_message"] == ""
         assert resp_obj["error"] is False
@@ -234,10 +237,10 @@ class TestRunDetail:
 class TestQuick:
     endpoint = "/v3/quick/{expid}"
 
-    def test_quick(self, fixture_client: FlaskClient):
+    def test_quick(self, fixture_fastapi_client: TestClient):
         expid = "a007"
-        response = fixture_client.get(self.endpoint.format(expid=expid))
-        resp_obj: dict = response.get_json()
+        response = fixture_fastapi_client.get(self.endpoint.format(expid=expid))
+        resp_obj: dict = response.json()
 
         assert resp_obj["error_message"] == ""
         assert resp_obj["error"] is False
@@ -248,102 +251,102 @@ class TestQuick:
 class TestGraph:
     endpoint = "/v3/graph/{expid}/{graph_type}/{grouped}"
 
-    def test_graph_standard_none(self, fixture_client: FlaskClient):
+    def test_graph_standard_none(self, fixture_fastapi_client: TestClient):
         expid = "a003"
         random_user = str(uuid4())
-        response = fixture_client.get(
+        response = fixture_fastapi_client.get(
             self.endpoint.format(expid=expid, graph_type="standard", grouped="none"),
-            query_string={"loggedUser": random_user},
+            params={"loggedUser": random_user},
         )
-        resp_obj: dict = response.get_json()
+        resp_obj: dict = response.json()
         assert resp_obj["error_message"] == ""
         assert resp_obj["error"] is False
         assert resp_obj["total_jobs"] == len(resp_obj["nodes"])
 
-    def test_graph_standard_datemember(self, fixture_client: FlaskClient):
+    def test_graph_standard_datemember(self, fixture_fastapi_client: TestClient):
         expid = "a003"
         random_user = str(uuid4())
-        response = fixture_client.get(
+        response = fixture_fastapi_client.get(
             self.endpoint.format(
                 expid=expid, graph_type="standard", grouped="date-member"
             ),
-            query_string={"loggedUser": random_user},
+            params={"loggedUser": random_user},
         )
-        resp_obj: dict = response.get_json()
+        resp_obj: dict = response.json()
         assert resp_obj["error_message"] == ""
         assert resp_obj["error"] is False
         assert resp_obj["total_jobs"] == len(resp_obj["nodes"])
 
-    def test_graph_standard_status(self, fixture_client: FlaskClient):
+    def test_graph_standard_status(self, fixture_fastapi_client: TestClient):
         expid = "a003"
         random_user = str(uuid4())
-        response = fixture_client.get(
+        response = fixture_fastapi_client.get(
             self.endpoint.format(expid=expid, graph_type="standard", grouped="status"),
-            query_string={"loggedUser": random_user},
+            params={"loggedUser": random_user},
         )
-        resp_obj: dict = response.get_json()
+        resp_obj: dict = response.json()
         assert resp_obj["error_message"] == ""
         assert resp_obj["error"] is False
         assert resp_obj["total_jobs"] == len(resp_obj["nodes"])
 
-    def test_graph_laplacian_none(self, fixture_client: FlaskClient):
+    def test_graph_laplacian_none(self, fixture_fastapi_client: TestClient):
         expid = "a003"
         random_user = str(uuid4())
-        response = fixture_client.get(
+        response = fixture_fastapi_client.get(
             self.endpoint.format(expid=expid, graph_type="laplacian", grouped="none"),
-            query_string={"loggedUser": random_user},
+            params={"loggedUser": random_user},
         )
-        resp_obj: dict = response.get_json()
+        resp_obj: dict = response.json()
         assert resp_obj["error_message"] == ""
         assert resp_obj["error"] is False
         assert resp_obj["total_jobs"] == len(resp_obj["nodes"])
 
-    def test_graph_standard_none_retro3(self, fixture_client: FlaskClient):
+    def test_graph_standard_none_retro3(self, fixture_fastapi_client: TestClient):
         expid = "a3tb"
         random_user = str(uuid4())
-        response = fixture_client.get(
+        response = fixture_fastapi_client.get(
             self.endpoint.format(expid=expid, graph_type="standard", grouped="none"),
-            query_string={"loggedUser": random_user},
+            params={"loggedUser": random_user},
         )
-        resp_obj: dict = response.get_json()
+        resp_obj: dict = response.json()
         assert resp_obj["error_message"] == ""
         assert resp_obj["error"] is False
         assert resp_obj["total_jobs"] == len(resp_obj["nodes"])
 
-    def test_graph_standard_datemember_retro3(self, fixture_client: FlaskClient):
+    def test_graph_standard_datemember_retro3(self, fixture_fastapi_client: TestClient):
         expid = "a3tb"
         random_user = str(uuid4())
-        response = fixture_client.get(
+        response = fixture_fastapi_client.get(
             self.endpoint.format(
                 expid=expid, graph_type="standard", grouped="date-member"
             ),
-            query_string={"loggedUser": random_user},
+            params={"loggedUser": random_user},
         )
-        resp_obj: dict = response.get_json()
+        resp_obj: dict = response.json()
         assert resp_obj["error_message"] == ""
         assert resp_obj["error"] is False
         assert resp_obj["total_jobs"] == len(resp_obj["nodes"])
 
-    def test_graph_standard_status_retro3(self, fixture_client: FlaskClient):
+    def test_graph_standard_status_retro3(self, fixture_fastapi_client: TestClient):
         expid = "a3tb"
         random_user = str(uuid4())
-        response = fixture_client.get(
+        response = fixture_fastapi_client.get(
             self.endpoint.format(expid=expid, graph_type="standard", grouped="status"),
-            query_string={"loggedUser": random_user},
+            params={"loggedUser": random_user},
         )
-        resp_obj: dict = response.get_json()
+        resp_obj: dict = response.json()
         assert resp_obj["error_message"] == ""
         assert resp_obj["error"] is False
         assert resp_obj["total_jobs"] == len(resp_obj["nodes"])
 
-    def test_wrappers(self, fixture_client: FlaskClient):
+    def test_wrappers(self, fixture_fastapi_client: TestClient):
         expid = "a6zj"
         random_user = str(uuid4())
-        response = fixture_client.get(
+        response = fixture_fastapi_client.get(
             self.endpoint.format(expid=expid, graph_type="standard", grouped="none"),
-            query_string={"loggedUser": random_user},
+            params={"loggedUser": random_user},
         )
-        resp_obj: dict = response.get_json()
+        resp_obj: dict = response.json()
 
         assert len(resp_obj["nodes"]) == 10
 
@@ -360,10 +363,10 @@ class TestGraph:
 class TestExpCount:
     endpoint = "/v3/expcount/{expid}"
 
-    def test_exp_count(self, fixture_client: FlaskClient):
+    def test_exp_count(self, fixture_fastapi_client: TestClient):
         expid = "a003"
-        response = fixture_client.get(self.endpoint.format(expid=expid))
-        resp_obj: dict = response.get_json()
+        response = fixture_fastapi_client.get(self.endpoint.format(expid=expid))
+        resp_obj: dict = response.json()
 
         assert resp_obj["error_message"] == ""
         assert resp_obj["error"] is False
@@ -374,10 +377,10 @@ class TestExpCount:
         assert resp_obj["counters"]["READY"] == 1
         assert resp_obj["counters"]["WAITING"] == 7
 
-    def test_retro3(self, fixture_client: FlaskClient):
+    def test_retro3(self, fixture_fastapi_client: TestClient):
         expid = "a3tb"
-        response = fixture_client.get(self.endpoint.format(expid=expid))
-        resp_obj: dict = response.get_json()
+        response = fixture_fastapi_client.get(self.endpoint.format(expid=expid))
+        resp_obj: dict = response.json()
 
         assert resp_obj["error_message"] == ""
         assert resp_obj["error"] is False
@@ -395,14 +398,14 @@ class TestExpCount:
 class TestSummary:
     endpoint = "/v3/summary/{expid}"
 
-    def test_summary(self, fixture_client: FlaskClient):
+    def test_summary(self, fixture_fastapi_client: TestClient):
         expid = "a007"
         random_user = str(uuid4())
-        response = fixture_client.get(
+        response = fixture_fastapi_client.get(
             self.endpoint.format(expid=expid),
-            query_string={"loggedUser": random_user},
+            params={"loggedUser": random_user},
         )
-        resp_obj: dict = response.get_json()
+        resp_obj: dict = response.json()
 
         assert resp_obj["error_message"] == ""
         assert resp_obj["error"] is False
@@ -412,12 +415,12 @@ class TestSummary:
 class TestStatistics:
     endpoint = "/v3/stats/{expid}/{period}/{section}"
 
-    def test_period_none(self, fixture_client: FlaskClient):
+    def test_period_none(self, fixture_fastapi_client: TestClient):
         expid = "a003"
-        response = fixture_client.get(
+        response = fixture_fastapi_client.get(
             self.endpoint.format(expid=expid, period=0, section="Any")
         )
-        resp_obj: dict = response.get_json()
+        resp_obj: dict = response.json()
 
         assert resp_obj["error_message"] == ""
         assert resp_obj["error"] is False
@@ -427,10 +430,10 @@ class TestStatistics:
 class TestCurrentConfig:
     endpoint = "/v3/cconfig/{expid}"
 
-    def test_current_config(self, fixture_client: FlaskClient):
+    def test_current_config(self, fixture_fastapi_client: TestClient):
         expid = "a007"
-        response = fixture_client.get(self.endpoint.format(expid=expid))
-        resp_obj: dict = response.get_json()
+        response = fixture_fastapi_client.get(self.endpoint.format(expid=expid))
+        resp_obj: dict = response.json()
 
         assert resp_obj["error_message"] == ""
         assert resp_obj["error"] is False
@@ -439,10 +442,10 @@ class TestCurrentConfig:
             == "4.0.95"
         )
 
-    def test_retrocomp_v3_conf_files(self, fixture_client: FlaskClient):
+    def test_retrocomp_v3_conf_files(self, fixture_fastapi_client: TestClient):
         expid = "a3tb"
-        response = fixture_client.get(self.endpoint.format(expid=expid))
-        resp_obj: dict = response.get_json()
+        response = fixture_fastapi_client.get(self.endpoint.format(expid=expid))
+        resp_obj: dict = response.json()
 
         assert resp_obj["error_message"] == ""
         assert resp_obj["error"] is False
@@ -455,10 +458,12 @@ class TestCurrentConfig:
 class TestPklInfo:
     endpoint = "/v3/pklinfo/{expid}/{timestamp}"
 
-    def test_pkl_info(self, fixture_client: FlaskClient):
+    def test_pkl_info(self, fixture_fastapi_client: TestClient):
         expid = "a003"
-        response = fixture_client.get(self.endpoint.format(expid=expid, timestamp=0))
-        resp_obj: dict = response.get_json()
+        response = fixture_fastapi_client.get(
+            self.endpoint.format(expid=expid, timestamp=0)
+        )
+        resp_obj: dict = response.json()
 
         assert resp_obj["error_message"] == ""
         assert resp_obj["error"] is False
@@ -471,10 +476,12 @@ class TestPklInfo:
 class TestPklTreeInfo:
     endpoint = "/v3/pkltreeinfo/{expid}/{timestamp}"
 
-    def test_pkl_tree_info(self, fixture_client: FlaskClient):
+    def test_pkl_tree_info(self, fixture_fastapi_client: TestClient):
         expid = "a003"
-        response = fixture_client.get(self.endpoint.format(expid=expid, timestamp=0))
-        resp_obj: dict = response.get_json()
+        response = fixture_fastapi_client.get(
+            self.endpoint.format(expid=expid, timestamp=0)
+        )
+        resp_obj: dict = response.json()
 
         assert resp_obj["error_message"] == ""
         assert resp_obj["error"] is False
@@ -487,10 +494,10 @@ class TestPklTreeInfo:
 class TestExpRunLog:
     endpoint = "/v3/exprun/{expid}"
 
-    def test_exp_run_log(self, fixture_client: FlaskClient):
+    def test_exp_run_log(self, fixture_fastapi_client: TestClient):
         expid = "a003"
-        response = fixture_client.get(self.endpoint.format(expid=expid))
-        resp_obj: dict = response.get_json()
+        response = fixture_fastapi_client.get(self.endpoint.format(expid=expid))
+        resp_obj: dict = response.json()
 
         assert resp_obj["error_message"] == ""
         assert resp_obj["error"] is False
@@ -500,10 +507,10 @@ class TestExpRunLog:
 class TestIfRunFromLog:
     endpoint = "/v3/logrun/{expid}"
 
-    def test_run_status_from_log(self, fixture_client: FlaskClient):
+    def test_run_status_from_log(self, fixture_fastapi_client: TestClient):
         expid = "a003"
-        response = fixture_client.get(self.endpoint.format(expid=expid))
-        resp_obj: dict = response.get_json()
+        response = fixture_fastapi_client.get(self.endpoint.format(expid=expid))
+        resp_obj: dict = response.json()
 
         assert resp_obj["error_message"] == ""
         assert resp_obj["error"] is False
@@ -515,10 +522,10 @@ class TestIfRunFromLog:
 class TestQuickIfRun:
     endpoint = "/v3/ifrun/{expid}"
 
-    def test_quick_run_status(self, fixture_client: FlaskClient):
+    def test_quick_run_status(self, fixture_fastapi_client: TestClient):
         expid = "a003"
-        response = fixture_client.get(self.endpoint.format(expid=expid))
-        resp_obj: dict = response.get_json()
+        response = fixture_fastapi_client.get(self.endpoint.format(expid=expid))
+        resp_obj: dict = response.json()
 
         assert resp_obj["error_message"] == ""
         assert resp_obj["error"] is False
@@ -528,10 +535,10 @@ class TestQuickIfRun:
 class TestJobLogLines:
     endpoint = "/v3/joblog/{logfile}"
 
-    def test_get_logfile_content(self, fixture_client: FlaskClient):
+    def test_get_logfile_content(self, fixture_fastapi_client: TestClient):
         logfile = "a3tb_19930101_fc01_1_SIM.20211201184808.err"
-        response = fixture_client.get(self.endpoint.format(logfile=logfile))
-        resp_obj: dict = response.get_json()
+        response = fixture_fastapi_client.get(self.endpoint.format(logfile=logfile))
+        resp_obj: dict = response.json()
 
         assert resp_obj["error_message"] == ""
         assert resp_obj["error"] is False
@@ -546,13 +553,13 @@ class TestJobLogLines:
 class TestJobHistory:
     endpoint = "/v3/history/{expid}/{jobname}"
 
-    def test_job_history(self, fixture_client: FlaskClient):
+    def test_job_history(self, fixture_fastapi_client: TestClient):
         expid = "a3tb"
         jobname = "a3tb_19930101_fc01_1_SIM"
-        response = fixture_client.get(
+        response = fixture_fastapi_client.get(
             self.endpoint.format(expid=expid, jobname=jobname)
         )
-        resp_obj: dict = response.get_json()
+        resp_obj: dict = response.json()
 
         assert resp_obj["error_message"] == ""
         assert resp_obj["error"] is False
@@ -564,10 +571,10 @@ class TestJobHistory:
 class TestSearchExpid:
     endpoint = "/v3/search/{expid}"
 
-    def test_search_by_expid(self, fixture_client: FlaskClient):
+    def test_search_by_expid(self, fixture_fastapi_client: TestClient):
         expid = "a3tb"
-        response = fixture_client.get(self.endpoint.format(expid=expid))
-        resp_obj: dict = response.get_json()
+        response = fixture_fastapi_client.get(self.endpoint.format(expid=expid))
+        resp_obj: dict = response.json()
 
         assert isinstance(resp_obj["experiment"], list)
         assert len(resp_obj["experiment"]) > 0
@@ -576,8 +583,8 @@ class TestSearchExpid:
 class TestRunningExps:
     endpoint = "/v3/running/"
 
-    def test_search_by_expid(self, fixture_client: FlaskClient):
-        response = fixture_client.get(self.endpoint)
-        resp_obj: dict = response.get_json()
+    def test_search_by_expid(self, fixture_fastapi_client: TestClient):
+        response = fixture_fastapi_client.get(self.endpoint)
+        resp_obj: dict = response.json()
 
         assert isinstance(resp_obj["experiment"], list)

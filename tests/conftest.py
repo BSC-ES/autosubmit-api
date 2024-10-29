@@ -3,9 +3,8 @@
 
 import os
 import tempfile
-from flask import Flask
 import pytest
-from autosubmit_api.app import create_app
+from fastapi.testclient import TestClient
 from autosubmit_api.config.basicConfig import APIBasicConfig
 from autosubmit_api import config
 
@@ -38,24 +37,11 @@ def fixture_mock_basic_config(request: pytest.FixtureRequest):
 
 
 @pytest.fixture
-def fixture_app(fixture_mock_basic_config):
-    app = create_app()
-    app.config.update(
-        {
-            "TESTING": True,
-        }
-    )
-    yield app
+def fixture_fastapi_client(fixture_mock_basic_config):
+    from autosubmit_api import app
 
-
-@pytest.fixture
-def fixture_client(fixture_app: Flask):
-    return fixture_app.test_client()
-
-
-@pytest.fixture
-def fixture_runner(fixture_app: Flask):
-    return fixture_app.test_cli_runner()
+    with TestClient(app.app) as client:
+        yield client
 
 
 # Fixtures sqlite
