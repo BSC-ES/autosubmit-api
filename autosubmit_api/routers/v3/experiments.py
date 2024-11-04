@@ -413,7 +413,7 @@ async def get_experiment_run_job_detail(
     return result
 
 
-@router.get("/filestatus", name="[UNSUPPORTED] Get File Status")
+@router.get("/filestatus", name="[UNSUPPORTED] Get File Status", deprecated=True)
 async def get_file_status() -> dict:
     """
     This endpoint is not supported in this version of the API.

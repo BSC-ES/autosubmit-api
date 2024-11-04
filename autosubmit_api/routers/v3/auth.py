@@ -17,6 +17,7 @@ router = APIRouter()
 
 
 @router.get("/tokentest", name="Test JWT token")
+@router.post("/tokentest", name="Test JWT token")
 async def test_token(
     user_id: Optional[str] = Depends(
         auth_token_dependency(threshold=ProtectionLevels.NONE, raise_on_fail=False)

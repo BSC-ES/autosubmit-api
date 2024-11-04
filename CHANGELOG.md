@@ -3,6 +3,7 @@
 ### Pre-release v4.0.1b4 - Release date: 2024-10-29
 
 * **Major migration: From Flask to FastAPI**
+* `/v3` endpoints are now only available with the `/v3` prefix and not at the root
 * Now is possible to check the OpenAPI documentation at `/docs` or `/openapi.json`
 * Bearer tokens now are returned with its prefix (e.g. `Bearer <token>`) in all the login endpoints
 * Now you can define the root path in which you are serving the API by setting `AS_API_ROOT_PATH` environment variable (see more about how it works [here](https://fastapi.tiangolo.com/advanced/behind-a-proxy/))
