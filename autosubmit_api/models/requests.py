@@ -10,6 +10,7 @@ class ExperimentsSearchRequest(BaseModel):
     owner: Optional[str] = None
     exp_type: Optional[Literal["test", "operational", "experiment"]] = None
     autosubmit_version: Optional[str] = None
+    hpc: Optional[str] = None
 
     order_by: Optional[Literal["expid", "created", "description"]] = None
     order_desc: bool = True

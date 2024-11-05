@@ -1,7 +1,19 @@
 from typing import Optional
 from pyparsing import Any
-from sqlalchemy import Column, select, or_
+from sqlalchemy import Column, Select, select, or_
 from autosubmit_api.database import tables
+
+
+def wildcard_search(query: str, column: Column) -> str:
+    """
+    Replace * to % for wildcard search and seek if the query is negated
+    """
+    # Replace * to % for wildcard search
+    query = query.replace("*", "%")
+    # Check if the query is negated
+    if query.startswith("!"):
+        return column.not_like(query[1:])
+    return column.like(query)
 
 
 def generate_query_listexp_extended(
@@ -10,9 +22,10 @@ def generate_query_listexp_extended(
     owner: str = None,
     exp_type: str = None,
     autosubmit_version: str = None,
+    hpc: str = None,
     order_by: str = None,
     order_desc: bool = False,
-):
+) -> Select:
     """
     Query listexp without accessing the view with status and total/completed jobs.
     """
@@ -42,7 +55,7 @@ def generate_query_listexp_extended(
     if query:
         filter_stmts.append(
             or_(
-                tables.experiment_table.c.name.like(f"{query}%"),
+                tables.experiment_table.c.name.like(f"%{query}%"),
                 tables.experiment_table.c.description.like(f"%{query}%"),
                 tables.details_table.c.user.like(f"%{query}%"),
             )
@@ -52,7 +65,7 @@ def generate_query_listexp_extended(
         filter_stmts.append(tables.experiment_status_table.c.status == "RUNNING")
 
     if owner:
-        filter_stmts.append(tables.details_table.c.user == owner)
+        filter_stmts.append(wildcard_search(owner, tables.details_table.c.user))
 
     if exp_type == "test":
         filter_stmts.append(tables.experiment_table.c.name.like("t%"))
@@ -64,8 +77,13 @@ def generate_query_listexp_extended(
 
     if autosubmit_version:
         filter_stmts.append(
-            tables.experiment_table.c.autosubmit_version == autosubmit_version
+            wildcard_search(
+                autosubmit_version, tables.experiment_table.c.autosubmit_version
+            )
         )
+
+    if hpc:
+        filter_stmts.append(wildcard_search(hpc, tables.details_table.c.hpc))
 
     statement = statement.where(*filter_stmts)
 
