@@ -62,6 +62,12 @@ BASE_FROM = (
             [BASE_FROM, "experiment.autosubmit_version LIKE :autosubmit_version_1"],
             {"autosubmit_version_1": "1.0"},
         ),
+        # Test the query generation with hpc filter
+        (
+            dict(hpc="MN5"),
+            [BASE_FROM, "details.hpc LIKE :hpc_1"],
+            {"hpc_1": "MN5"},
+        ),
         # Test the query generation with order by
         (
             dict(order_by="expid"),
@@ -95,13 +101,14 @@ BASE_FROM = (
             {"autosubmit_version_1": "3.%.0"},
         ),
         (
-            dict(owner="!foo*bar*baz", autosubmit_version="3.*.0"),
+            dict(owner="!foo*bar*baz", autosubmit_version="3.*.0", hpc="MN*"),
             [
                 BASE_FROM,
                 'details."user" NOT LIKE :user_1',
                 "experiment.autosubmit_version LIKE :autosubmit_version_1",
+                "details.hpc LIKE :hpc_1",
             ],
-            {"user_1": "foo%bar%baz", "autosubmit_version_1": "3.%.0"},
+            {"user_1": "foo%bar%baz", "autosubmit_version_1": "3.%.0", "hpc_1": "MN%"},
         ),
     ],
 )

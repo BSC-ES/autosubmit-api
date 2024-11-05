@@ -22,6 +22,7 @@ def generate_query_listexp_extended(
     owner: str = None,
     exp_type: str = None,
     autosubmit_version: str = None,
+    hpc: str = None,
     order_by: str = None,
     order_desc: bool = False,
 ) -> Select:
@@ -80,6 +81,9 @@ def generate_query_listexp_extended(
                 autosubmit_version, tables.experiment_table.c.autosubmit_version
             )
         )
+
+    if hpc:
+        filter_stmts.append(wildcard_search(hpc, tables.details_table.c.hpc))
 
     statement = statement.where(*filter_stmts)
 

@@ -68,6 +68,7 @@ async def search_experiments(
         owner=query_params.owner,
         exp_type=query_params.exp_type,
         autosubmit_version=query_params.autosubmit_version,
+        hpc=query_params.hpc,
         order_by=query_params.order_by,
         order_desc=query_params.order_desc,
     )
