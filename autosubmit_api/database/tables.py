@@ -1,4 +1,4 @@
-from sqlalchemy import MetaData, Integer, String, Text, Table
+from sqlalchemy import Column, MetaData, Integer, String, Text, Table
 from sqlalchemy.orm import DeclarativeBase, mapped_column, Mapped
 
 
@@ -52,18 +52,16 @@ class ExperimentStatusTable(BaseTable):
     modified: Mapped[str] = mapped_column(Text, nullable=False)
 
 
-class GraphDataTable(BaseTable):
-    """
-    Stores the coordinates and it is used exclusively to speed up the process
-    of generating the graph layout
-    """
-
-    __tablename__ = "experiment_graph_draw"
-
-    id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    job_name: Mapped[str] = mapped_column(Text, nullable=False)
-    x: Mapped[int] = mapped_column(Integer, nullable=False)
-    y: Mapped[int] = mapped_column(Integer, nullable=False)
+GraphDataTable = Table(
+    "experiment_graph_draw",
+    metadata_obj,
+    Column("id", Integer, primary_key=True),
+    Column("job_name", Text, nullable=False),
+    Column("x", Integer, nullable=False),
+    Column("y", Integer, nullable=False),
+)
+"""Stores the coordinates and it is used exclusively 
+to speed up the process of generating the graph layout"""
 
 
 class JobPackageTable(BaseTable):
@@ -103,7 +101,7 @@ details_table: Table = DetailsTable.__table__
 experiment_status_table: Table = ExperimentStatusTable.__table__
 
 # Graph Data TABLES
-graph_data_table: Table = GraphDataTable.__table__
+graph_data_table: Table = GraphDataTable
 
 # Job package TABLES
 job_package_table: Table = JobPackageTable.__table__

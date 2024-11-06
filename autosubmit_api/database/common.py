@@ -55,14 +55,19 @@ def create_main_db_conn() -> Connection:
     return builder.product
 
 
+def create_sqlite_db_engine(db_path: str) -> Engine:
+    """
+    Create an engine for a SQLite DDBB.
+    """
+    return create_engine(f"sqlite:///{ os.path.abspath(db_path)}", poolclass=NullPool)
+
+
 def create_autosubmit_db_engine() -> Engine:
     """
     Create an engine for the autosubmit DDBB. Usually named autosubmit.db
     """
     APIBasicConfig.read()
-    return create_engine(
-        f"sqlite:///{ os.path.abspath(APIBasicConfig.DB_PATH)}", poolclass=NullPool
-    )
+    return create_sqlite_db_engine(APIBasicConfig.DB_PATH)
 
 
 def create_as_times_db_engine() -> Engine:
@@ -71,7 +76,7 @@ def create_as_times_db_engine() -> Engine:
     """
     APIBasicConfig.read()
     db_path = os.path.join(APIBasicConfig.DB_DIR, APIBasicConfig.AS_TIMES_DB)
-    return create_engine(f"sqlite:///{ os.path.abspath(db_path)}", poolclass=NullPool)
+    return create_sqlite_db_engine(db_path)
 
 
 def execute_with_limit_offset(

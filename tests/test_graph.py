@@ -44,6 +44,8 @@ class TestPopulateDB:
             JobListLoaderBuilder(expid)
         ).build_loaded_joblist_loader()
 
+        assert len(job_list_loader.jobs) == 8
+
         autosubmit_configuration_facade = ConfigurationFacadeDirector(
             AutosubmitConfigurationFacadeBuilder(expid)
         ).build_autosubmit_configuration_facade()
@@ -63,7 +65,7 @@ class TestPopulateDB:
             )
 
             assert (
-                experimentGraphDrawing.coordinates
+                isinstance(experimentGraphDrawing.coordinates, list)
                 and len(experimentGraphDrawing.coordinates) == 8
             )
 

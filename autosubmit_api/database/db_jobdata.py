@@ -23,10 +23,11 @@ import textwrap
 import traceback
 import sqlite3
 import collections
+from typing import List, Optional, Tuple
 import portalocker
 from datetime import datetime, timedelta
 from json import loads
-from time import mktime
+from autosubmit_api.logger import logger
 from autosubmit_api.components.jobs.utils import generate_job_html_title
 # from networkx import DiGraph
 from autosubmit_api.config.basicConfig import APIBasicConfig
@@ -39,6 +40,7 @@ from autosubmit_api.common.utils import get_jobs_with_no_outliers, Status, datec
 from bscearth.utils.date import Log
 
 from autosubmit_api.persistance.experiment import ExperimentPaths
+from autosubmit_api.repositories.graph_layout import create_exp_graph_layout_repository
 
 
 # Version 15 includes out err MaxRSS AveRSS and rowstatus
@@ -425,41 +427,6 @@ class JobData(object):
             self._energy = energy if energy else 0
 
 
-class JobStepExtraData():
-    def __init__(self, key, dict_data):
-        self.key = key
-        if isinstance(dict_data, dict):
-            # dict_data["ncpus"] if dict_data and "ncpus" in dict_data.keys(
-            self.ncpus = dict_data.get("ncpus", 0) if dict_data else 0
-            # ) else 0
-            self.nnodes = dict_data.get(
-                "nnodes", 0) if dict_data else 0  # and "nnodes" in dict_data.keys(
-            # ) else 0
-            self.submit = int(mktime(datetime.strptime(dict_data["submit"], "%Y-%m-%dT%H:%M:%S").timetuple())) if dict_data and "submit" in list(dict_data.keys(
-            )) else 0
-            self.start = int(mktime(datetime.strptime(dict_data["start"], "%Y-%m-%dT%H:%M:%S").timetuple())) if dict_data and "start" in list(dict_data.keys(
-            )) else 0
-            self.finish = int(mktime(datetime.strptime(dict_data["finish"], "%Y-%m-%dT%H:%M:%S").timetuple())) if dict_data and "finish" in list(dict_data.keys(
-            )) and dict_data["finish"] != "Unknown" else 0
-            self.energy = parse_output_number(dict_data["energy"]) if dict_data and "energy" in list(dict_data.keys(
-            )) else 0
-            # if dict_data and "MaxRSS" in dict_data.keys(
-            self.maxRSS = dict_data.get("MaxRSS", 0)
-            # ) else 0
-            # if dict_data and "AveRSS" in dict_data.keys(
-            self.aveRSS = dict_data.get("AveRSS", 0)
-            # ) else 0
-        else:
-            self.ncpus = 0
-            self.nnodes = 0
-            self.submit = 0
-            self.start = 0
-            self.finish = 0
-            self.energy = 0
-            self.maxRSS = 0
-            self.aveRSS = 0
-
-
 class MainDataBase():
     def __init__(self, expid):
         self.expid = expid
@@ -523,39 +490,17 @@ class MainDataBase():
             return None
 
 
-class ExperimentGraphDrawing(MainDataBase):
-    def __init__(self, expid):
+class ExperimentGraphDrawing:
+    def __init__(self, expid: str):
         """
         Sets and validates graph drawing.
+
         :param expid: Name of experiment
-        :type expid: str
-        :param allJobs: list of all jobs objects (usually from job_list)
-        :type allJobs: list()
         """
-        MainDataBase.__init__(self, expid)
         APIBasicConfig.read()
         self.expid = expid
-        exp_paths = ExperimentPaths(expid)
         self.folder_path = APIBasicConfig.LOCAL_ROOT_DIR
-        self.database_path = exp_paths.graph_data_db
-        self.create_table_query = textwrap.dedent(
-            '''CREATE TABLE
-        IF NOT EXISTS experiment_graph_draw (
-        id INTEGER PRIMARY KEY,
-        job_name text NOT NULL,
-        x INTEGER NOT NULL,
-        y INTEGER NOT NULL
-        );''')
-
-        if not os.path.exists(self.database_path):
-            os.umask(0)
-            if not os.path.exists(os.path.dirname(self.database_path)):
-                os.makedirs(os.path.dirname(self.database_path))
-            os.open(self.database_path, os.O_WRONLY | os.O_CREAT, 0o777)
-            self.conn = self.create_connection(self.database_path)
-            self.create_table()
-        else:
-            self.conn = self.create_connection(self.database_path)
+        self.graph_data_repository = create_exp_graph_layout_repository(expid)
         self.lock_name = "calculation_in_progress.lock"
         self.current_position_dictionary = None
         self.current_jobs_set = set()
@@ -607,7 +552,6 @@ class ExperimentGraphDrawing(MainDataBase):
         lock_path_file = os.path.join(self.folder_path, lock_name)
         try:
             with portalocker.Lock(lock_path_file, timeout=1) as fh:
-                self.conn = self.create_connection(self.database_path)
                 monitor = Monitor()
                 graph = monitor.create_tree_list(
                     self.expid, allJobs, None, dict(), False, job_dictionary)
@@ -671,46 +615,35 @@ class ExperimentGraphDrawing(MainDataBase):
             self.current_position_dictionary = {row[1]: (row[2], row[3]) for row in current_table}
             self.current_jobs_set = set(self.current_position_dictionary.keys())
 
-    def _get_current_position(self):
+    def _get_current_position(self) -> List[Tuple[int, str, int, int]]:
         """
         Get all registers from experiment_graph_draw.\n
         :return: row content: id, job_name, x, y
         :rtype: 4-tuple (int, str, int, int)
         """
         try:
-            if self.conn:
-                # conn = create_connection(DB_FILE_AS_TIMES)
-                self.conn.text_factory = str
-                cur = self.conn.cursor()
-                cur.execute(
-                    "SELECT id, job_name, x, y FROM experiment_graph_draw")
-                rows = cur.fetchall()
-                return rows
-            return None
+            result = self.graph_data_repository.get_all()
+            return [
+                (item.id, item.job_name, item.x, item.y)
+                for item in result
+            ]
         except Exception as exp:
             print((traceback.format_exc()))
             print((str(exp)))
             return None
 
-    def _insert_many_graph_coordinates(self, values):
+    def _insert_many_graph_coordinates(
+        self, values: List[Tuple[str, int, int]]
+    ) -> Optional[int]:
         """
         Create many graph coordinates
-        :param conn:
-        :param details:
-        :return:
         """
         try:
-            if self.conn:
-                # exp_id = self._get_id_db()
-                # conn = create_connection(DB_FILE_AS_TIMES)
-                # creation_date = datetime.today().strftime('%Y-%m-%d-%H:%M:%S')
-                sql = ''' INSERT INTO experiment_graph_draw(job_name, x, y) VALUES(?,?,?) '''
-                # print(row_content)
-                cur = self.conn.cursor()
-                cur.executemany(sql, values)
-                # print(cur)
-                self.conn.commit()
-                return cur.lastrowid
+            _vals = [
+                {"job_name": item[0], "x": item[1], "y": item[2]} for item in values
+            ]
+            logger.debug(_vals)
+            return self.graph_data_repository.insert_many(_vals)
         except Exception as exp:
             print((traceback.format_exc()))
             Log.warning(
@@ -722,19 +655,12 @@ class ExperimentGraphDrawing(MainDataBase):
         Clear all content from graph drawing database
         """
         try:
-            if self.conn:
-                # conn = create_connection(DB_FILE_AS_TIMES)
-                # modified_date = datetime.today().strftime('%Y-%m-%d-%H:%M:%S')
-                sql = ''' DELETE FROM experiment_graph_draw '''
-                cur = self.conn.cursor()
-                cur.execute(sql, )
-                self.conn.commit()
-                return True
-            return False
+            self.graph_data_repository.delete_all()
         except Exception as exp:
             print((traceback.format_exc()))
             print(("Error on Database clear: {}".format(str(exp))))
             return False
+        return True
 
 class JobDataStructure(MainDataBase):
 
@@ -995,37 +921,3 @@ class JobDataStructure(MainDataBase):
             print(("Error on select job data: {0}".format(
                 str(type(e).__name__))))
             return None
-
-
-def parse_output_number(string_number):
-    """
-    Parses number in format 1.0K 1.0M 1.0G
-
-    :param string_number: String representation of number
-    :type string_number: str
-    :return: number in float format
-    :rtype: float
-    """
-    number = 0.0
-    if (string_number):
-        if string_number == "NA":
-            return 0.0
-        last_letter = string_number.strip()[-1]
-        multiplier = 1.0
-        if last_letter == "G":
-            multiplier = 1000000000.0
-            number = string_number[:-1]
-        elif last_letter == "M":
-            multiplier = 1000000.0
-            number = string_number[:-1]
-        elif last_letter == "K":
-            multiplier = 1000.0
-            number = string_number[:-1]
-        else:
-            number = string_number
-        try:
-            number = float(number) * multiplier
-        except Exception:
-            number = 0.0
-            pass
-    return number
