@@ -1,5 +1,5 @@
 livereload
-pydata-sphinx-theme==0.15.*
+pydata-sphinx-theme==0.16.*
 sphinx==8.*
 sphinx-autobuild==2024.10.*
 sphinx_rtd_theme
