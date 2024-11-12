@@ -1,6 +1,6 @@
 livereload
 pydata-sphinx-theme==0.15.*
-sphinx==5.*
+sphinx==8.*
 sphinx-autobuild==2021.3.*
 sphinx_rtd_theme
 sphinx-reredirects==0.1.*
