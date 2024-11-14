@@ -1,4 +1,13 @@
-from sqlalchemy import Column, MetaData, Integer, String, Text, Table
+from sqlalchemy import (
+    Column,
+    Float,
+    MetaData,
+    Integer,
+    String,
+    Text,
+    Table,
+    UniqueConstraint,
+)
 from sqlalchemy.orm import DeclarativeBase, mapped_column, Mapped
 
 
@@ -106,3 +115,60 @@ graph_data_table: Table = GraphDataTable
 # Job package TABLES
 job_package_table: Table = JobPackageTable.__table__
 wrapper_job_package_table: Table = WrapperJobPackageTable.__table__
+
+ExperimentRunTable = Table(
+    "experiment_run",
+    metadata_obj,
+    Column("run_id", Integer, primary_key=True),
+    Column("created", Text, nullable=False),
+    Column("modified", Text, nullable=True),
+    Column("start", Integer, nullable=False),
+    Column("finish", Integer),
+    Column("chunk_unit", Text, nullable=False),
+    Column("chunk_size", Integer, nullable=False),
+    Column("completed", Integer, nullable=False),
+    Column("total", Integer, nullable=False),
+    Column("failed", Integer, nullable=False),
+    Column("queuing", Integer, nullable=False),
+    Column("running", Integer, nullable=False),
+    Column("submitted", Integer, nullable=False),
+    Column("suspended", Integer, nullable=False, default=0),
+    Column("metadata", Text),
+)
+
+JobDataTable = Table(
+    "job_data",
+    metadata_obj,
+    Column("id", Integer, nullable=False, primary_key=True),
+    Column("counter", Integer, nullable=False),
+    Column("job_name", Text, nullable=False, index=True),
+    Column("created", Text, nullable=False),
+    Column("modified", Text, nullable=False),
+    Column("submit", Integer, nullable=False),
+    Column("start", Integer, nullable=False),
+    Column("finish", Integer, nullable=False),
+    Column("status", Text, nullable=False),
+    Column("rowtype", Integer, nullable=False),
+    Column("ncpus", Integer, nullable=False),
+    Column("wallclock", Text, nullable=False),
+    Column("qos", Text, nullable=False),
+    Column("energy", Integer, nullable=False),
+    Column("date", Text, nullable=False),
+    Column("section", Text, nullable=False),
+    Column("member", Text, nullable=False),
+    Column("chunk", Integer, nullable=False),
+    Column("last", Integer, nullable=False),
+    Column("platform", Text, nullable=False),
+    Column("job_id", Integer, nullable=False),
+    Column("extra_data", Text, nullable=False),
+    Column("nnodes", Integer, nullable=False, default=0),
+    Column("run_id", Integer),
+    Column("MaxRSS", Float, nullable=False, default=0.0),
+    Column("AveRSS", Float, nullable=False, default=0.0),
+    Column("out", Text, nullable=False),
+    Column("err", Text, nullable=False),
+    Column("rowstatus", Integer, nullable=False, default=0),
+    Column("children", Text, nullable=True),
+    Column("platform_output", Text, nullable=True),
+    UniqueConstraint("counter", "job_name", name="unique_counter_and_job_name"),
+)
