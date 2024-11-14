@@ -113,8 +113,7 @@ class JobList:
             chunk_size = experiment_run.chunk_size
         else:
             raise Exception("Autosubmit couldn't fin the experiment header information necessary to complete this request.")
-        job_list = job_data_structure.get_current_job_data(
-            run_id, all_states=True)
+        job_list = job_data_structure.get_current_job_data(run_id)
         if not job_list:
             return [], [], {}
         else:
