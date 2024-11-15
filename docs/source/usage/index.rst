@@ -26,6 +26,20 @@ Once Autosubmit API is installed, the Command Line Interface can be used:
     The Error log file to write to
   ``-D, --daemon``
     Daemonize the Gunicorn process
+  ``--threads THREADS``
+    The number of worker threads for handling requests.
+  ``--worker-connections WORKER_CONNECTIONS``
+    The maximum number of simultaneous clients.
+  ``--max-requests MAX_REQUESTS``
+    The maximum number of requests a worker will process before restarting.
+  ``--max-requests-jitter MAX_REQUESTS_JITTER``
+    The maximum jitter to add to the max_requests setting.
+  ``--timeout TIMEOUT``
+    Workers silent for more than this many seconds are killed and restarted.
+  ``--graceful-timeout GRACEFUL_TIMEOUT``
+    Timeout for graceful workers restart.
+  ``--keepalive KEEPALIVE``
+    The number of seconds to wait for requests on a Keep-Alive connection.
 
 
-You can go to the API reference here: `Reference <../api.html>`_
+You can go to the API reference here: `Reference <../api.html>`_ (Outdated. Go to :ref:`openapiGuide` to see how to generate the latest API specification)

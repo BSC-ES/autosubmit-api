@@ -11,3 +11,4 @@ Autosubmit API
    /installation/index
    /configuration/index
    /usage/index
+   /guides/index
