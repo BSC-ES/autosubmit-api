@@ -27,8 +27,17 @@ CAS_VERIFY_URL = os.environ.get(
 
 GITHUB_OAUTH_CLIENT_ID = os.environ.get("GITHUB_OAUTH_CLIENT_ID")
 GITHUB_OAUTH_CLIENT_SECRET = os.environ.get("GITHUB_OAUTH_CLIENT_SECRET")
-GITHUB_OAUTH_WHITELIST_ORGANIZATION = os.environ.get("GITHUB_OAUTH_WHITELIST_ORGANIZATION")
+GITHUB_OAUTH_WHITELIST_ORGANIZATION = os.environ.get(
+    "GITHUB_OAUTH_WHITELIST_ORGANIZATION"
+)
 GITHUB_OAUTH_WHITELIST_TEAM = os.environ.get("GITHUB_OAUTH_WHITELIST_TEAM")
+
+# OpenID Connect
+
+OIDC_TOKEN_URL = os.environ.get("OIDC_TOKEN_URL")
+OIDC_USERINFO_URL = os.environ.get("OIDC_USERINFO_URL")
+OIDC_CLIENT_ID = os.environ.get("OIDC_CLIENT_ID")
+OIDC_CLIENT_SECRET = os.environ.get("OIDC_CLIENT_SECRET")
 
 
 # Startup options
@@ -47,4 +56,5 @@ def get_disable_background_tasks():
         "true",
     ]  # Default false
 
-AS_API_ROOT_PATH=os.environ.get("AS_API_ROOT_PATH", "")
+
+AS_API_ROOT_PATH = os.environ.get("AS_API_ROOT_PATH", "")

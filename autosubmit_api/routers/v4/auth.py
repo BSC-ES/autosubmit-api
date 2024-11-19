@@ -198,3 +198,70 @@ async def github_oauth2_login(code: Optional[str] = None) -> LoginResponse:
             },
             status_code=HTTPStatus.UNAUTHORIZED,
         )
+
+
+@router.get("/oidc/login", name="OpenID Connect login")
+async def openid_connect_login(code: Optional[str] = None, redirect_uri: Optional[str] = None) -> LoginResponse:
+    """
+    Authenticate user using a configured OpenID Connect provider.
+    Is used as a callback URL for the OpenID Connect provider /authorize?response_type=code endpoint.
+    This internally exchanges the code for an access token and then uses the access token to get user info.
+    The user info must contain a `sub` field (following the OIDC spec) which is used as the user id.
+    """
+    if not code:
+        return JSONResponse(
+            content={
+                "authenticated": False,
+                "user": None,
+                "token": None,
+                "message": "Can't verify user",
+            },
+            status_code=HTTPStatus.UNAUTHORIZED,
+        )
+
+    resp_obj: dict = requests.post(
+        config.OIDC_TOKEN_URL,
+        data={
+            "client_id": config.OIDC_CLIENT_ID,
+            "client_secret": config.OIDC_CLIENT_SECRET,
+            "code": code,
+            "grant_type": "authorization_code",
+            "redirect_uri": redirect_uri,
+        },
+        headers={"Accept": "application/json"},
+    ).json()
+    access_token = resp_obj.get("access_token")
+
+    user_info: dict = requests.get(
+        config.OIDC_USERINFO_URL,
+        headers={"Authorization": f"Bearer {access_token}"},
+    ).json()
+    username = user_info.get("sub")
+
+    if not username:
+        return JSONResponse(
+            content={
+                "authenticated": False,
+                "user": None,
+                "token": None,
+                "message": "Couldn't find user on OpenID Connect provider",
+            },
+            status_code=HTTPStatus.UNAUTHORIZED,
+        )
+    else:
+        payload = {
+            "user_id": username,
+            "sub": username,
+            "iat": int(datetime.now().timestamp()),
+            "exp": (datetime.now() + timedelta(seconds=config.JWT_EXP_DELTA_SECONDS)),
+        }
+        jwt_token = jwt.encode(payload, config.JWT_SECRET, config.JWT_ALGORITHM)
+        return JSONResponse(
+            content={
+                "authenticated": True,
+                "user": username,
+                "token": f"Bearer {jwt_token}",
+                "message": "Token generated",
+            },
+            status_code=HTTPStatus.OK,
+        )
