@@ -11,6 +11,7 @@ General variables
 **************************
 
 * ``SECRET_KEY``: The secret key to encode the JWT tokens from the Authorization Module.
+* ``AS_API_ROOT_PATH``: The root path of the API. This is useful if you are serving it with a reverse proxy. Default is an empty string. 
 
 .. important:: Always set ``SECRET_KEY`` when deploying the API on production.
 
