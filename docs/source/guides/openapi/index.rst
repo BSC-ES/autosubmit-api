@@ -15,7 +15,7 @@ The OpenAPI specification is generated using the FastAPI library and the Swagger
 
 
 .. figure:: swagger.png
-   :name: authprocess
+   :name: swaggerUI
    :width: 100%
    :align: center
 
