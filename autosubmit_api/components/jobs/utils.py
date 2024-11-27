@@ -5,6 +5,7 @@ import os
 from autosubmit_api.common.utils import Status
 from typing import List, Dict, Tuple
 from bscearth.utils.date import parse_date
+import subprocess
 
 wrapped_title_format = " <span class='badge' style='background-color:#94b8b8'>Wrapped {0} </span>"
 source_tag = " <span class='badge' style='background-color:#80d4ff'>SOURCE</span>"
@@ -144,8 +145,9 @@ def get_job_total_stats(status_code: int, name: str, tmp_path: str) -> Tuple[dat
     current_status = status_from_job
     path = os.path.join(tmp_path, name + '_TOTAL_STATS')
     if os.path.exists(path):
-        request = 'tail -1 ' + path
-        last_line = os.popen(request).readline()
+        process = subprocess.Popen(['tail', '-1', path], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        stdout, _ = process.communicate()
+        last_line = stdout.decode()
         # print(last_line)
 
         values = last_line.split()
