@@ -245,12 +245,13 @@ def _is_exp_running(expid: str, time_condition=300) -> Tuple[bool, str, bool, in
         # print("Experiment {0} version {1} \nLook {2} \nLook {3}".format(
         #     expid, current_version, pathlog_first, pathlog_second))
         # print(pathlog)
-        reading = os.popen(
-            'ls -t ' + pathlog_first + ' | grep "_run.log"').read() if (os.path.exists(pathlog_first)) else ""
+        dir_files = []
+        if os.path.exists(pathlog_first):
+            dir_files = get_files_from_dir_with_pattern(pathlog_first, "_run.log")
 
         #print("Length {0}".format(len(reading)))
-        if (reading) and len(reading) > 0:
-            log_file_name = reading.split()[0]
+        if (dir_files) and len(dir_files) > 0:
+            log_file_name = dir_files[0]
             definite_log_path = pathlog_first + '/' + log_file_name
             current_stat = os.stat(definite_log_path)
             timest = current_stat.st_mtime
@@ -265,11 +266,13 @@ def _is_exp_running(expid: str, time_condition=300) -> Tuple[bool, str, bool, in
             return (error, error_message, is_running, timediff, definite_log_path)
 
         # print(pathlog)
-        reading = os.popen(
-            'ls -t ' + pathlog_second + ' | grep "_run.log"').read() if (os.path.exists(pathlog_second)) else ""
+        dir_files = []
+        if os.path.exists(pathlog_second):
+            dir_files = get_files_from_dir_with_pattern(pathlog_second, "_run.log")
+
         #print("Second reading {0}".format(reading))
-        if (reading) and len(reading) > 0:
-            log_file_name = reading.split()[0]
+        if (dir_files) and len(dir_files) > 0:
+            log_file_name = dir_files[0]
             definite_log_path = pathlog_second + '/' + log_file_name
             current_stat = os.stat(definite_log_path)
             timest = current_stat.st_mtime

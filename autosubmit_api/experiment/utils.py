@@ -62,17 +62,15 @@ def get_files_from_dir_with_pattern(dir_path: str, pattern: str) -> List[str]:
   grep_process = subprocess.Popen(
     ['grep', pattern],
     stdin=ls_process.stdout,
-    stdout=subprocess.PIPE
+    stdout=subprocess.PIPE,
+    stderr=subprocess.PIPE
   )
-  
+
   # Allow ls_process to receive a SIGPIPE if grep_process exits
   ls_process.stdout.close()
 
   # Read the output of grep
-  stdout, stderr = grep_process.communicate()
-
-  if grep_process.returncode != 0:
-    raise ValueError(stderr.decode())
+  stdout, _ = grep_process.communicate()
   
   stdout = stdout.decode()
   files = stdout.split()
