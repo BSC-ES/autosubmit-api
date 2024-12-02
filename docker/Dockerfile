@@ -16,16 +16,17 @@ RUN apt-get update && apt-get install -y git graphviz gcc lsof && \
 ARG GIT_REF
 ARG AUTOSUBMIT_VERSION
 RUN if [ -n "${GIT_REF}" ] ; then \
-      pip3 install git+https://earth.bsc.es/gitlab/es/autosubmit-api.git@${GIT_REF}; \
+      pip3 install --no-cache-dir git+https://github.com/BSC-ES/autosubmit-api.git@${GIT_REF}; \
     elif [ -n "${AUTOSUBMIT_VERSION}" ] ; then \
-      pip3 install autosubmit-api==${AUTOSUBMIT_VERSION}; \
+      pip3 install --no-cache-dir autosubmit-api==${AUTOSUBMIT_VERSION}; \
     else \
-      pip3 install autosubmit-api; \
+      pip3 install --no-cache-dir autosubmit-api; \
     fi
 
 COPY autosubmitrc /app/configs/autosubmitrc
 
 # Setup API env vars
+ENV AS_API_ROOT_PATH=""
 ENV PROTECTION_LEVEL=ALL
 ENV JWT_SECRET="k87;Zg,o5?MSC(/@#-LbzgE3PH-5ki.ZvS}N.s09v>I#v8I'00THrA-:ykh3HX?"
 
