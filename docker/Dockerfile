@@ -1,4 +1,6 @@
-FROM python:3.9-slim-bullseye
+# Use build argument for Python version
+ARG PYTHON_VERSION=3.9-slim-bullseye
+FROM python:${PYTHON_VERSION}
 
 # Set the environment
 ARG AUTOSUBMIT_ROOT_DIR=/app/autosubmit/
@@ -39,6 +41,15 @@ ENV GITHUB_OAUTH_WHITELIST_ORGANIZATION=""
 ENV GITHUB_OAUTH_WHITELIST_TEAM=""
 
 ENV AUTOSUBMIT_CONFIGURATION="/app/configs/autosubmitrc"
+
+# Create a non-root user and group
+RUN groupadd -r appgroup && useradd -r -g appgroup appuser
+
+# Change ownership of the working directory
+RUN chown -R appuser:appgroup "${AUTOSUBMIT_ROOT_DIR}"
+
+# Switch to the non-root user
+USER appuser
 
 # Entrypoint
 ENTRYPOINT ["autosubmit_api"]
