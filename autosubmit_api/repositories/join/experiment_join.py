@@ -1,7 +1,11 @@
-from typing import Optional
-from pyparsing import Any
-from sqlalchemy import Column, Select, select, or_
+from abc import ABC, abstractmethod
+from typing import Dict, List, Optional, Tuple, Any
+from sqlalchemy import Column, Select, or_, select
 from autosubmit_api.database import tables
+from autosubmit_api.database.common import (
+    create_main_db_conn,
+    execute_with_limit_offset,
+)
 
 
 def wildcard_search(query: str, column: Column) -> str:
@@ -103,3 +107,65 @@ def generate_query_listexp_extended(
         statement = statement.order_by(order_col)
 
     return statement
+
+
+class ExperimentJoinRepository(ABC):
+    @abstractmethod
+    def search(
+        self,
+        query: str = None,
+        only_active: bool = False,
+        owner: str = None,
+        exp_type: str = None,
+        autosubmit_version: str = None,
+        hpc: str = None,
+        order_by: str = None,
+        order_desc: bool = False,
+        limit: int = None,
+        offset: int = None,
+    ) -> Tuple[List[Dict[str, Any]], int]:
+        """
+        Search experiments with extended information.
+
+        :return: A tuple with a list of experiments and the total number of rows
+        """
+
+
+class ExperimentJoinSQLRepository(ExperimentJoinRepository):
+    def _get_connection(self):
+        return create_main_db_conn()
+
+    def search(
+        self,
+        query: str = None,
+        only_active: bool = False,
+        owner: str = None,
+        exp_type: str = None,
+        autosubmit_version: str = None,
+        hpc: str = None,
+        order_by: str = None,
+        order_desc: bool = False,
+        limit: int = None,
+        offset: int = None,
+    ):
+        statement = generate_query_listexp_extended(
+            query=query,
+            only_active=only_active,
+            owner=owner,
+            exp_type=exp_type,
+            autosubmit_version=autosubmit_version,
+            hpc=hpc,
+            order_by=order_by,
+            order_desc=order_desc,
+        )
+        with self._get_connection() as conn:
+            query_result, total_rows = execute_with_limit_offset(
+                statement=statement, conn=conn, limit=limit, offset=offset
+            )
+
+        result = [row._asdict() for row in query_result]
+        return result, total_rows
+
+
+def create_experiment_join_repository() -> ExperimentJoinRepository:
+    return ExperimentJoinSQLRepository()

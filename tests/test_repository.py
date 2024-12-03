@@ -1,5 +1,5 @@
 from typing import Any, Dict, List
-from autosubmit_api.database.queries import generate_query_listexp_extended
+from autosubmit_api.repositories.join.experiment_join import generate_query_listexp_extended
 import pytest
 
 BASE_FROM = (
