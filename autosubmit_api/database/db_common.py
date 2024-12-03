@@ -28,9 +28,8 @@ from bscearth.utils.log import Log
 from autosubmit_api.config.basicConfig import APIBasicConfig
 from autosubmit_api.builders.experiment_history_builder import ExperimentHistoryDirector, ExperimentHistoryBuilder
 from autosubmit_api.builders.configuration_facade_builder import ConfigurationFacadeDirector, AutosubmitConfigurationFacadeBuilder
-from autosubmit_api.database.utils import get_headers_sqlite, map_row_result_to_dict_sqlite
 from autosubmit_api.experiment import common_db_requests as DbRequests
-from typing import Dict, Any, Tuple
+from typing import Tuple
 
 CURRENT_DATABASE_VERSION = 1
 
@@ -196,6 +195,7 @@ def search_experiment_by_id(query, exp_type=None, only_active=None, owner=None):
     :return: list of experiments that match the search
     :rtype: JSON
     """
+    # TODO: Use repository
     if not check_db():
         return False
     try:
@@ -370,25 +370,6 @@ def get_current_running_exp():
                            'version': version, 'wrapper': wrapper, "submitted": submitted, "queuing": queuing,
                            "running": running, "failed": failed, "suspended": suspended, "modified": last_modified_pkl_datetime})
     return {'experiment': result}
-
-
-def get_experiment_by_id(expid: str) -> Dict[str, Any]:
-    result = {'id': 0, 'name': expid, 'description': "NA", 'version': "NA"}
-    if not check_db():
-        return result
-    (conn, cursor) = open_conn()
-    query = "SELECT id, name, description, autosubmit_version FROM experiment WHERE name ='" + expid + "'"
-    cursor.execute(query)
-    headers = get_headers_sqlite(cursor)
-    row = cursor.fetchone()
-    close_conn(conn, cursor)
-    if row is not None:
-        obj = map_row_result_to_dict_sqlite(row, headers)
-        result['id'] = obj["id"]
-        result['name'] = obj["name"]
-        result['description'] = obj["description"]
-        result['version'] = obj["autosubmit_version"]
-    return result
 
 
 def _update_database(version, cursor):
