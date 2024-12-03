@@ -48,6 +48,7 @@ from autosubmit_api.persistance.experiment import ExperimentPaths
 
 from autosubmit_api.persistance.job_package_reader import JobPackageReader
 from autosubmit_api.persistance.pkl_reader import PklReader
+from autosubmit_api.repositories.experiment import create_experiment_repository
 from autosubmit_api.statistics.statistics import Statistics
 
 from autosubmit_api.config.basicConfig import APIBasicConfig
@@ -165,7 +166,11 @@ def get_experiment_data(expid):
         result["owner"] = autosubmit_config_facade.get_owner_name()
         result["time_last_access"] = autosubmit_config_facade.get_experiment_last_access_time_as_datetime()
         result["time_last_mod"] = autosubmit_config_facade.get_experiment_last_modified_time_as_datetime()
-        result["description"] = db_common.get_experiment_by_id(expid)["description"]
+        try:
+            experiment_repo = create_experiment_repository()
+            result["description"] = experiment_repo.get_by_expid(expid).description
+        except Exception:
+            result["description"] = "NA"
         result["version"] = autosubmit_config_facade.get_autosubmit_version()
         result["model"] = autosubmit_config_facade.get_model()
         result["branch"] = autosubmit_config_facade.get_branch()
