@@ -33,21 +33,13 @@ def read_tail(file_path: str, num_lines: int =150) -> List[dict]:
     """
     tail_content = []
 
-    process = subprocess.Popen(
-        ["tail",  "-{0}".format(num_lines), file_path],
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
-    )
-    
-    stdout, stderr = process.communicate()
+    lines = subprocess.check_output(
+        ["tail", "-{0}".format(num_lines), file_path], text=True
+    ).splitlines()
 
-    if process.returncode != 0:
-        raise ValueError(stderr.decode())
-    
-    lines = stdout.decode().splitlines()
     for i, item in enumerate(lines):
         tail_content.append({"index": i, "content": item})
-  
+
     return tail_content
 
 def get_files_from_dir_with_pattern(dir_path: str, pattern: str) -> List[str]:
