@@ -3,6 +3,7 @@ import subprocess
 from typing import List
 import xml.etree.ElementTree as ET
 import traceback
+from pathlib import Path
 
 def get_cas_user_from_xml(xmlstring):    
     """
@@ -46,24 +47,11 @@ def get_files_from_dir_with_pattern(dir_path: str, pattern: str) -> List[str]:
   """
   Returns a list of files ordered by creation date in a directory that match a pattern.
   """
-  # Submits the commands
-  ls_process = subprocess.Popen(
-    ['ls', '-t', dir_path],
-    stdout=subprocess.PIPE
+  path = Path(dir_path)
+  files = sorted(
+    [file for file in path.glob(f"*{pattern}*")],
+    key=lambda x: Path(x).stat().st_mtime,
+    reverse=True
   )
-  grep_process = subprocess.Popen(
-    ['grep', pattern],
-    stdin=ls_process.stdout,
-    stdout=subprocess.PIPE,
-    stderr=subprocess.PIPE
-  )
-
-  # Allow ls_process to receive a SIGPIPE if grep_process exits
-  ls_process.stdout.close()
-
-  # Read the output of grep
-  stdout, _ = grep_process.communicate()
-  
-  stdout = stdout.decode()
-  files = stdout.split()
+  files = [file.name for file in files]
   return files
