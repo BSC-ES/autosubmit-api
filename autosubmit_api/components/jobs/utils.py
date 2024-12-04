@@ -145,13 +145,9 @@ def get_job_total_stats(status_code: int, name: str, tmp_path: str) -> Tuple[dat
     current_status = status_from_job
     path = os.path.join(tmp_path, name + '_TOTAL_STATS')
     if os.path.exists(path):
-        process = subprocess.Popen(['tail', '-1', path], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        stdout, _ = process.communicate()
-        last_line = stdout.decode()
-        # print(last_line)
+        last_line = subprocess.check_output(['tail', '-1', path], text=True)
 
         values = last_line.split()
-        # print(last_line)
         try:
             if status_code in [Status.RUNNING]:
                 submit_time = parse_date(
