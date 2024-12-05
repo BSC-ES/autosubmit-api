@@ -776,8 +776,9 @@ def get_experiment_tree_structured(expid, log):
     try:
         APIBasicConfig.read()
 
-        # TODO: Encapsulate this following 2 lines or move to the parent function in app.py
-        curr_exp_as_version = db_common.get_autosubmit_version(expid, log)
+        experiment_repo = create_experiment_repository()
+        curr_exp_as_version = experiment_repo.get_by_expid(expid).autosubmit_version
+
         main, secondary = common_utils.parse_version_number(curr_exp_as_version)
         if main and main >= 4:
             as_conf = Autosubmit4Config(expid)
