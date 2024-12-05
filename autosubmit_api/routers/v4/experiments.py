@@ -12,14 +12,12 @@ from autosubmit_api.auth import auth_token_dependency
 from autosubmit_api.builders.experiment_builder import ExperimentBuilder
 from autosubmit_api.config.config_common import AutosubmitConfigResolver
 from autosubmit_api.database import tables
-from autosubmit_api.database.common import (
-    create_main_db_conn,
-    execute_with_limit_offset,
-)
 from autosubmit_api.common.utils import Status
 from autosubmit_api.database.db_jobdata import JobDataStructure
 from autosubmit_api.database.models import BaseExperimentModel
-from autosubmit_api.database.queries import generate_query_listexp_extended
+from autosubmit_api.repositories.join.experiment_join import (
+    create_experiment_join_repository,
+)
 from autosubmit_api.logger import logger
 from autosubmit_api.builders.experiment_history_builder import (
     ExperimentHistoryBuilder,
@@ -62,7 +60,8 @@ async def search_experiments(
         query_params.page_size = None
 
     # Query
-    statement = generate_query_listexp_extended(
+    experiment_join_repo = create_experiment_join_repository()
+    query_result, total_rows = experiment_join_repo.search(
         query=query_params.query,
         only_active=query_params.only_active,
         owner=query_params.owner,
@@ -71,18 +70,13 @@ async def search_experiments(
         hpc=query_params.hpc,
         order_by=query_params.order_by,
         order_desc=query_params.order_desc,
+        limit=query_params.page_size,
+        offset=offset,
     )
-    with create_main_db_conn() as conn:
-        query_result, total_rows = execute_with_limit_offset(
-            statement=statement,
-            conn=conn,
-            limit=query_params.page_size,
-            offset=offset,
-        )
 
-    async def _get_experiment(raw_exp):
+    async def _get_experiment(raw_exp: Dict[str, Any]) -> Dict[str, Any]:
         exp_builder = ExperimentBuilder()
-        exp_builder.produce_base_from_dict(raw_exp._mapping)
+        exp_builder.produce_base_from_dict(raw_exp)
         exp_builder.produce_pkl_modified_time()
         exp = exp_builder.product
 
