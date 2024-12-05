@@ -39,6 +39,7 @@ from autosubmit_api.common import utils as common_utils
 from autosubmit_api.components.jobs import utils as JUtils
 
 from autosubmit_api.autosubmit_legacy.job.job_list import JobList
+from autosubmit_api.experiment.utils import get_files_from_dir_with_pattern, read_tail
 from autosubmit_api.logger import logger
 
 from autosubmit_api.performance.utils import calculate_SYPD_perjob
@@ -244,12 +245,13 @@ def _is_exp_running(expid: str, time_condition=300) -> Tuple[bool, str, bool, in
         # print("Experiment {0} version {1} \nLook {2} \nLook {3}".format(
         #     expid, current_version, pathlog_first, pathlog_second))
         # print(pathlog)
-        reading = os.popen(
-            'ls -t ' + pathlog_first + ' | grep "_run.log"').read() if (os.path.exists(pathlog_first)) else ""
+        dir_files = []
+        if os.path.exists(pathlog_first):
+            dir_files = get_files_from_dir_with_pattern(pathlog_first, "_run.log")
 
         #print("Length {0}".format(len(reading)))
-        if (reading) and len(reading) > 0:
-            log_file_name = reading.split()[0]
+        if dir_files:
+            log_file_name = dir_files[0]
             definite_log_path = pathlog_first + '/' + log_file_name
             current_stat = os.stat(definite_log_path)
             timest = current_stat.st_mtime
@@ -264,11 +266,13 @@ def _is_exp_running(expid: str, time_condition=300) -> Tuple[bool, str, bool, in
             return (error, error_message, is_running, timediff, definite_log_path)
 
         # print(pathlog)
-        reading = os.popen(
-            'ls -t ' + pathlog_second + ' | grep "_run.log"').read() if (os.path.exists(pathlog_second)) else ""
+        dir_files = []
+        if os.path.exists(pathlog_second):
+            dir_files = get_files_from_dir_with_pattern(pathlog_second, "_run.log")
+
         #print("Second reading {0}".format(reading))
-        if (reading) and len(reading) > 0:
-            log_file_name = reading.split()[0]
+        if dir_files:
+            log_file_name = dir_files[0]
             definite_log_path = pathlog_second + '/' + log_file_name
             current_stat = os.stat(definite_log_path)
             timest = current_stat.st_mtime
@@ -489,29 +493,33 @@ def get_experiment_log_last_lines(expid):
     error = False
     error_message = ""
     logcontent = []
-    reading = ""
 
     try:
         APIBasicConfig.read()
         exp_paths = ExperimentPaths(expid)
-        path = exp_paths.tmp_as_logs_dir
-        reading = os.popen('ls -t ' + path + ' | grep "run.log"').read() if (os.path.exists(path)) else ""
 
-        # Finding log files
-        if len(reading) == 0:
-            path = APIBasicConfig.LOCAL_ROOT_DIR + '/' + expid + '/' + APIBasicConfig.LOCAL_TMP_DIR
-            reading = os.popen('ls -t ' + path + ' | grep "run.log"').read() if (os.path.exists(path)) else ""
+        dir_files = []
+        path = None
 
-        if len(reading) > 0:
-            log_file_name = reading.split()[0]
-            current_stat = os.stat(path + '/' + log_file_name)
+        # Try to read from the tmp_as_logs folder
+        if os.path.exists(exp_paths.tmp_as_logs_dir):
+            dir_files = get_files_from_dir_with_pattern(exp_paths.tmp_as_logs_dir, 'run.log')
+            path = exp_paths.tmp_as_logs_dir
+
+        # Try to read from the tmp folder
+        if len(dir_files) == 0 and os.path.exists(exp_paths.tmp_dir):
+            dir_files = get_files_from_dir_with_pattern(exp_paths.tmp_dir, 'run.log')
+            path = exp_paths.tmp_dir
+
+        if len(dir_files) > 0:
+            log_file_name = dir_files[0]
+            log_file_path = str(os.path.join(path, log_file_name))
+            current_stat = os.stat(log_file_path)
             timest = int(current_stat.st_mtime)
             log_file_lastmodified = common_utils.timestamp_to_datetime_format(timest)
             found = True
-            request = 'tail -150 ' + path + '/' + log_file_name
-            last_lines = os.popen(request)
-            for i, item in enumerate(last_lines.readlines()):
-                logcontent.append({'index': i, 'content': item[0:-1]})
+
+            logcontent = read_tail(log_file_path, 150)
     except Exception as e:
         error = True
         error_message = str(e)
@@ -550,12 +558,8 @@ def get_job_log(expid, logfile, nlines=150):
             timest = int(current_stat.st_mtime)
             log_file_lastmodified = common_utils.timestamp_to_datetime_format(timest)
             found = True
-            request = "tail -{0} {1}".format(nlines, logfilepath)
-            last50 = os.popen(request)
-            i = 0
-            for item in last50.readlines():
-                logcontent.append({'index': i, 'content': item[0:-1]})
-                i += 1
+
+            logcontent = read_tail(logfilepath, nlines)
     except Exception as e:
         error = True
         error_message = str(e)
