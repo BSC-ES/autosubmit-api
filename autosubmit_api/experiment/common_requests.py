@@ -250,7 +250,7 @@ def _is_exp_running(expid: str, time_condition=300) -> Tuple[bool, str, bool, in
             dir_files = get_files_from_dir_with_pattern(pathlog_first, "_run.log")
 
         #print("Length {0}".format(len(reading)))
-        if (dir_files) and len(dir_files) > 0:
+        if dir_files:
             log_file_name = dir_files[0]
             definite_log_path = pathlog_first + '/' + log_file_name
             current_stat = os.stat(definite_log_path)
@@ -271,7 +271,7 @@ def _is_exp_running(expid: str, time_condition=300) -> Tuple[bool, str, bool, in
             dir_files = get_files_from_dir_with_pattern(pathlog_second, "_run.log")
 
         #print("Second reading {0}".format(reading))
-        if (dir_files) and len(dir_files) > 0:
+        if dir_files:
             log_file_name = dir_files[0]
             definite_log_path = pathlog_second + '/' + log_file_name
             current_stat = os.stat(definite_log_path)
