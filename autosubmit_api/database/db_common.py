@@ -28,8 +28,9 @@ from bscearth.utils.log import Log
 from autosubmit_api.config.basicConfig import APIBasicConfig
 from autosubmit_api.builders.experiment_history_builder import ExperimentHistoryDirector, ExperimentHistoryBuilder
 from autosubmit_api.builders.configuration_facade_builder import ConfigurationFacadeDirector, AutosubmitConfigurationFacadeBuilder
-from autosubmit_api.experiment import common_db_requests as DbRequests
 from typing import Tuple
+
+from autosubmit_api.repositories.join.experiment_join import create_experiment_join_repository
 
 CURRENT_DATABASE_VERSION = 1
 
@@ -195,50 +196,14 @@ def search_experiment_by_id(query, exp_type=None, only_active=None, owner=None):
     :return: list of experiments that match the search
     :rtype: JSON
     """
-    # TODO: Use repository
-    if not check_db():
-        return False
-    try:
-        (conn, cursor) = open_conn()
-    except DbException as e:
-        Log.error(
-            'Connection to database could not be established: {0}', e.message)
-        return False
-    if owner:
-        query = "SELECT id,name,user,created,model,branch,hpc,description FROM experiment e left join details d on e.id = d.exp_id WHERE user='{0}'".format(owner)
-        # print(query)
-    else:
-        query = "SELECT id,name,user,created,model,branch,hpc,description FROM experiment e left join details d on e.id = d.exp_id WHERE (name LIKE '" + query + \
-            "%' OR description LIKE '%" + query + \
-                "%' OR user LIKE '%" + query + "%')"
-    if exp_type and len(exp_type) > 0:
-        if exp_type == "test":
-            query += " AND name LIKE 't%'"
-        elif exp_type == "experiment":
-            query += " AND name NOT LIKE 't%'"
-        else:
-            # Indistinct
-            pass
-    # Query DESC by name
-    query += " ORDER BY name DESC"
-    # print(query)
-    cursor.execute(query)
-    table = cursor.fetchall()
-    cursor.close()
-    conn.close()
+    experiment_join_repo = create_experiment_join_repository()
+    query_result, _ = experiment_join_repo.search(
+        query=query, exp_type=exp_type, only_active=only_active, owner=owner
+    )
+
     result = list()
-    experiment_status = dict()
-    experiment_times = dict()
-    if len(table) > 0:
-        experiment_status = DbRequests.get_experiment_status()
-        # REMOVED: experiment_times = DbRequests.get_experiment_times()
-    for row in table:
-        expid = str(row[1])
-
-        status = experiment_status.get(expid, "NOT RUNNING")
-        if only_active == "active" and status != "RUNNING":
-            continue
-
+    for row in query_result:
+        expid = str(row["name"])
         completed = "NA"
         total = "NA"
         submitted = 0
@@ -248,26 +213,32 @@ def search_experiment_by_id(query, exp_type=None, only_active=None, owner=None):
         suspended = 0
         version = "Unknown"
         wrapper = None
-        last_modified_timestamp = None
+        # last_modified_timestamp = None
         last_modified_pkl_datetime = None
-        hpc = row[6]
+        hpc = row["hpc"]
         try:
-            autosubmit_config_facade = ConfigurationFacadeDirector(AutosubmitConfigurationFacadeBuilder(expid)).build_autosubmit_configuration_facade()
+            autosubmit_config_facade = ConfigurationFacadeDirector(
+                AutosubmitConfigurationFacadeBuilder(expid)
+            ).build_autosubmit_configuration_facade()
             version = autosubmit_config_facade.get_autosubmit_version()
             wrapper = autosubmit_config_facade.get_wrapper_type()
-            last_modified_pkl_datetime = autosubmit_config_facade.get_pkl_last_modified_time_as_datetime()
+            last_modified_pkl_datetime = (
+                autosubmit_config_facade.get_pkl_last_modified_time_as_datetime()
+            )
             hpc = autosubmit_config_facade.get_main_platform()
         except Exception:
             last_modified_pkl_datetime = None
             pass
 
-        total, completed, last_modified_timestamp = experiment_times.get(
-            expid, ("NA", "NA", None))
+        total, completed = ("NA", "NA")
 
         # Getting run data from historical database
-
         try:
-            current_run = ExperimentHistoryDirector(ExperimentHistoryBuilder(expid)).build_reader_experiment_history().manager.get_experiment_run_dc_with_max_id()
+            current_run = (
+                ExperimentHistoryDirector(ExperimentHistoryBuilder(expid))
+                .build_reader_experiment_history()
+                .manager.get_experiment_run_dc_with_max_id()
+            )
             if current_run and current_run.total > 0:
                 completed = current_run.completed
                 total = current_run.total
@@ -281,11 +252,27 @@ def search_experiment_by_id(query, exp_type=None, only_active=None, owner=None):
             print(("Exception on search_experiment_by_id : {}".format(exp)))
             pass
 
-        result.append({'id': row[0], 'name': row[1], 'user': row[2], 'description': row[7],
-                        'hpc': hpc, 'status': status, 'completed': completed, 'total': total,
-                        'version': version, 'wrapper': wrapper, "submitted": submitted, "queuing": queuing,
-                        "running": running, "failed": failed, "suspended": suspended, "modified": last_modified_pkl_datetime})
-    return {'experiment': result}
+        result.append(
+            {
+                "id": row["id"],
+                "name": row["name"],
+                "user": row["user"],
+                "description": row["description"],
+                "hpc": hpc,
+                "status": row["status"],
+                "completed": completed,
+                "total": total,
+                "version": version,
+                "wrapper": wrapper,
+                "submitted": submitted,
+                "queuing": queuing,
+                "running": running,
+                "failed": failed,
+                "suspended": suspended,
+                "modified": last_modified_pkl_datetime,
+            }
+        )
+    return {"experiment": result}
 
 
 def get_current_running_exp():
@@ -294,28 +281,12 @@ def get_current_running_exp():
 
     :rtype: list of users
     """
-    if not check_db():
-        return False
-    try:
-        (conn, cursor) = open_conn()
-    except DbException as e:
-        Log.error(
-            'Connection to database could not be established: {0}', e.message)
-        return False
-    query = "SELECT id,name,user,created,model,branch,hpc,description FROM experiment e left join details d on e.id = d.exp_id"
-    APIBasicConfig.read()
-    # print(query)
-    cursor.execute(query)
-    table = cursor.fetchall()
-    cursor.close()
-    conn.close()
+    experiment_join_repo = create_experiment_join_repository()
+    query_result, _ = experiment_join_repo.search(only_active=True)
+
     result = list()
-    experiment_status = dict()
-    experiment_times = dict()
-    experiment_status = DbRequests.get_experiment_status()
-    # REMOVED: experiment_times = DbRequests.get_experiment_times()
-    for row in table:
-        expid = str(row[1])
+    for row in query_result:
+        expid = str(row["name"])
         status = "NOT RUNNING"
         completed = "NA"
         total = "NA"
@@ -324,35 +295,34 @@ def get_current_running_exp():
         running = 0
         failed = 0
         suspended = 0
-        user = str(row[2])
+        user = str(row["user"])
         version = "Unknown"
         wrapper = None
-        last_modified_timestamp = None
+        # last_modified_timestamp = None
         last_modified_pkl_datetime = None
-        if (expid in experiment_status):
-            status = experiment_status[expid]
+        status = str(row["status"])
         if status == "RUNNING":
             try:
-                autosubmit_config_facade = ConfigurationFacadeDirector(AutosubmitConfigurationFacadeBuilder(expid)).build_autosubmit_configuration_facade()
+                autosubmit_config_facade = ConfigurationFacadeDirector(
+                    AutosubmitConfigurationFacadeBuilder(expid)
+                ).build_autosubmit_configuration_facade()
                 version = autosubmit_config_facade.get_autosubmit_version()
                 wrapper = autosubmit_config_facade.get_wrapper_type()
-                last_modified_pkl_datetime = autosubmit_config_facade.get_pkl_last_modified_time_as_datetime()
+                last_modified_pkl_datetime = (
+                    autosubmit_config_facade.get_pkl_last_modified_time_as_datetime()
+                )
                 hpc = autosubmit_config_facade.get_main_platform()
             except Exception:
-                last_modified_pkl_datetime = None
+                # last_modified_pkl_datetime = None
                 pass
-            if (expid in experiment_times):
-                if len(user) == 0:
-                    # Retrieve user from path
-                    path = APIBasicConfig.LOCAL_ROOT_DIR + '/' + expid
-                    if (os.path.exists(path)):
-                        main_folder = os.stat(path)
-                        user = os.popen(
-                            'id -nu {0}'.format(str(main_folder.st_uid))).read().strip()
-                total, completed, last_modified_timestamp = experiment_times[expid]
+
             # Try to retrieve experiment_run data
             try:
-                current_run = ExperimentHistoryDirector(ExperimentHistoryBuilder(expid)).build_reader_experiment_history().manager.get_experiment_run_dc_with_max_id()
+                current_run = (
+                    ExperimentHistoryDirector(ExperimentHistoryBuilder(expid))
+                    .build_reader_experiment_history()
+                    .manager.get_experiment_run_dc_with_max_id()
+                )
                 if current_run and current_run.total > 0:
                     completed = current_run.completed
                     total = current_run.total
@@ -364,12 +334,29 @@ def get_current_running_exp():
                     # last_modified_timestamp = current_run.modified_timestamp
             except Exception as exp:
                 print(("Exception on get_current_running_exp : {}".format(exp)))
-                pass
-            result.append({'id': row[0], 'name': row[1], 'user': user, 'description': row[7],
-                           'hpc': hpc, 'status': status, 'completed': completed, 'total': total,
-                           'version': version, 'wrapper': wrapper, "submitted": submitted, "queuing": queuing,
-                           "running": running, "failed": failed, "suspended": suspended, "modified": last_modified_pkl_datetime})
-    return {'experiment': result}
+
+            # Append to result
+            result.append(
+                {
+                    "id": row["id"],
+                    "name": row["name"],
+                    "user": user,
+                    "description": row["description"],
+                    "hpc": hpc,
+                    "status": status,
+                    "completed": completed,
+                    "total": total,
+                    "version": version,
+                    "wrapper": wrapper,
+                    "submitted": submitted,
+                    "queuing": queuing,
+                    "running": running,
+                    "failed": failed,
+                    "suspended": suspended,
+                    "modified": last_modified_pkl_datetime,
+                }
+            )
+    return {"experiment": result}
 
 
 def _update_database(version, cursor):
