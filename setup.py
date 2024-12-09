@@ -56,7 +56,7 @@ setup(
     description="An extension to the Autosubmit package that serves its information as an API",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://earth.bsc.es/gitlab/es/autosubmit_api",
+    url="https://github.com/BSC-ES/autosubmit-api",
     author=get_authors(),
     author_email="support-autosubmit@bsc.es",
     license="GNU GPL",

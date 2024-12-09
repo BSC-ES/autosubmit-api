@@ -1,5 +1,13 @@
 # CHANGELOG
 
+### Pre-release v4.0.1b5 - Release date: 2024-12-10
+
+* Improved search filters
+* Fixed `/v3/login` allowed methods which made the legacy GUI doesn't work
+* Fixed graph layout DB handler that kept connections open
+* Update dependency `autosubmitconfigparser>=1.0.72` to include relevant changes and bugfixes
+* Multiple code and security improvements
+
 ### Pre-release v4.0.1b4 - Release date: 2024-10-29
 
 * **Major migration: From Flask to FastAPI**
