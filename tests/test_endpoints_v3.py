@@ -494,14 +494,40 @@ class TestPklTreeInfo:
 class TestExpRunLog:
     endpoint = "/v3/exprun/{expid}"
 
-    def test_exp_run_log(self, fixture_fastapi_client: TestClient):
-        expid = "a003"
+    @pytest.mark.parametrize(
+        "expid,expected",
+        [
+            (
+                "a003",
+                [
+                    (
+                        2,
+                        "2024-01-12 16:34:27,344 Job ID: 1589427"
+                    ),
+                    (149, "2024-01-12 16:35:14,054 Run successful"),
+                ],
+            ),
+        ],
+    )
+    def test_exp_run_log(self, fixture_fastapi_client: TestClient, expid, expected):
         response = fixture_fastapi_client.get(self.endpoint.format(expid=expid))
         resp_obj: dict = response.json()
 
         assert resp_obj["error_message"] == ""
         assert resp_obj["error"] is False
         assert resp_obj["found"] is True
+
+        assert resp_obj["logfile"] == "20240112_163324_run.log"
+
+        assert isinstance(resp_obj["logcontent"], list)
+        assert len(resp_obj["logcontent"]) > 0 and len(resp_obj["logcontent"]) <= 150
+
+        for idx, content in expected:
+            assert isinstance(resp_obj["logcontent"][idx], dict)
+            assert isinstance(resp_obj["logcontent"][idx]["index"], int)
+            assert isinstance(resp_obj["logcontent"][idx]["content"], str)
+            assert resp_obj["logcontent"][idx]["index"] == idx
+            assert resp_obj["logcontent"][idx]["content"] == content
 
 
 class TestIfRunFromLog:
@@ -535,8 +561,25 @@ class TestQuickIfRun:
 class TestJobLogLines:
     endpoint = "/v3/joblog/{logfile}"
 
-    def test_get_logfile_content(self, fixture_fastapi_client: TestClient):
-        logfile = "a3tb_19930101_fc01_1_SIM.20211201184808.err"
+    @pytest.mark.parametrize(
+        "logfile,expected",
+        [
+            (
+                "a3tb_19930101_fc01_1_SIM.20211201184808.err",
+                [(0, "++ local __f"), (149, "+ end_current_save_ic_date=")],
+            ),
+            (
+                "a3tb_19930101_fc01_1_SIM.20211201184808.out",
+                [
+                    (0, "[INFO] JOBID=18944395"),
+                    (2, "*II* !!!! CMIP FIX YEAR SETTINGS:"),
+                ],
+            ),
+        ],
+    )
+    def test_get_logfile_content(
+        self, fixture_fastapi_client: TestClient, logfile, expected
+    ):
         response = fixture_fastapi_client.get(self.endpoint.format(logfile=logfile))
         resp_obj: dict = response.json()
 
@@ -548,6 +591,13 @@ class TestJobLogLines:
         assert isinstance(resp_obj["timeStamp"], int)
         assert isinstance(resp_obj["logcontent"], list)
         assert len(resp_obj["logcontent"]) > 0 and len(resp_obj["logcontent"]) <= 150
+
+        for idx, content in expected:
+            assert isinstance(resp_obj["logcontent"][idx], dict)
+            assert isinstance(resp_obj["logcontent"][idx]["index"], int)
+            assert isinstance(resp_obj["logcontent"][idx]["content"], str)
+            assert resp_obj["logcontent"][idx]["index"] == idx
+            assert resp_obj["logcontent"][idx]["content"] == content
 
 
 class TestJobHistory:
