@@ -24,6 +24,16 @@ class ExperimentStatusRepository(ABC):
         """
 
     @abstractmethod
+    def get_by_expid(self, expid: str) -> ExperimentStatusModel:
+        """
+        Get experiment status by expid
+
+        :param expid: Experiment name
+        :return: Experiment status
+        :raises ValueError: If the experiment status does not exist
+        """
+
+    @abstractmethod
     def upsert_status(self, exp_id: int, expid: str, status: str) -> int:
         """
         Delete and insert experiment status by expid
@@ -47,6 +57,20 @@ class ExperimentStatusSQLRepository(ExperimentStatusRepository):
             ExperimentStatusModel.model_validate(row, from_attributes=True)
             for row in result
         ]
+
+    def get_by_expid(self, expid: str):
+        with self.engine.connect() as conn:
+            statement = self.table.select().where(self.table.c.name == expid)
+            result = conn.execute(statement).first()
+        if result is None:
+            raise ValueError(f"Experiment status {expid} not found")
+        return ExperimentStatusModel(
+            exp_id=result.exp_id,
+            name=result.name,
+            status=result.status,
+            seconds_diff=result.seconds_diff,
+            modified=result.modified,
+        )
 
     def upsert_status(self, exp_id: int, expid: str, status: str):
         with self.engine.connect() as conn:
