@@ -1,11 +1,12 @@
 import datetime
+from autosubmit_api.logger import logger
 from autosubmit_api.builders import BaseBuilder
-from autosubmit_api.database import tables
-from autosubmit_api.database.common import (
-    create_autosubmit_db_engine,
-)
 from autosubmit_api.database.models import ExperimentModel
 from autosubmit_api.persistance.pkl_reader import PklReader
+from autosubmit_api.repositories.experiment import create_experiment_repository
+from autosubmit_api.repositories.experiment_details import (
+    create_experiment_details_repository,
+)
 
 
 class ExperimentBuilder(BaseBuilder):
@@ -30,12 +31,7 @@ class ExperimentBuilder(BaseBuilder):
         """
         Produce basic information from the main experiment table
         """
-        with create_autosubmit_db_engine().connect() as conn:
-            result = conn.execute(
-                tables.experiment_table.select().where(
-                    tables.experiment_table.c.name == expid
-                )
-            ).one()
+        result = create_experiment_repository().get_by_expid(expid)
 
         # Set new product
         self._product = ExperimentModel(
@@ -50,20 +46,18 @@ class ExperimentBuilder(BaseBuilder):
         Produce data from the details table
         """
         exp_id = self._product.id
-        with create_autosubmit_db_engine().connect() as conn:
-            result = conn.execute(
-                tables.details_table.select().where(
-                    tables.details_table.c.exp_id == exp_id
-                )
-            ).one_or_none()
 
-        # Set details props
-        if result:
+        try:
+            result = create_experiment_details_repository().get_by_exp_id(exp_id)
+
+            # Set details props
             self._product.user = result.user
             self._product.created = result.created
             self._product.model = result.model
             self._product.branch = result.branch
             self._product.hpc = result.hpc
+        except Exception:
+            logger.error(f"Error getting details for exp_id {exp_id}")
 
     @property
     def product(self) -> ExperimentModel:
