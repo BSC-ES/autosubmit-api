@@ -39,6 +39,12 @@ class ExperimentStatusRepository(ABC):
         Delete and insert experiment status by expid
         """
 
+    @abstractmethod
+    def get_only_running_expids(self) -> List[str]:
+        """
+        Gets list of running experiments expids
+        """
+
 
 class ExperimentStatusSQLRepository(ExperimentStatusRepository):
     def __init__(self, engine: Engine, table: Table):
@@ -92,6 +98,12 @@ class ExperimentStatusSQLRepository(ExperimentStatusRepository):
                     raise exc
 
         return result.rowcount
+
+    def get_only_running_expids(self):
+        with self.engine.connect() as conn:
+            statement = self.table.select().where(self.table.c.status == "RUNNING")
+            result = conn.execute(statement).all()
+        return [row.name for row in result]
 
 
 def create_experiment_status_repository() -> ExperimentStatusRepository:
