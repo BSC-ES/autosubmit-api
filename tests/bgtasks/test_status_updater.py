@@ -1,27 +1,30 @@
 from autosubmit_api.bgtasks.tasks.status_updater import StatusUpdater
-from autosubmit_api.database import prepare_db, tables
-from autosubmit_api.database.common import (
-    create_autosubmit_db_engine,
-    create_as_times_db_engine,
-)
+from autosubmit_api.database import prepare_db
 from autosubmit_api.history.database_managers.database_models import RunningStatus
+from autosubmit_api.repositories.experiment import create_experiment_repository
+from autosubmit_api.repositories.experiment_status import create_experiment_status_repository
 
 
 class TestStatusUpdater:
     def test_same_tables(self, fixture_mock_basic_config):
+        # Prepare the repository
         prepare_db()
 
-        with create_as_times_db_engine().connect() as conn:
-            exps_status = conn.execute(tables.experiment_status_table.delete())
+        experiment_repo = create_experiment_repository()
+        experiment_status_repo = create_experiment_status_repository()
 
+        experiment_status_repo.delete_all()
+        exps_status = experiment_status_repo.get_all()
+        assert len(exps_status) == 0
+
+        # Run the task
         StatusUpdater.run()
 
-        with create_autosubmit_db_engine().connect() as conn:
-            experiments = conn.execute(tables.experiment_table.select()).all()
+        # Check the results
+        experiments = experiment_repo.get_all()
+        exps_status = experiment_status_repo.get_all()
 
-        with create_as_times_db_engine().connect() as conn:
-            exps_status = conn.execute(tables.experiment_status_table.select()).all()
-
+        assert len(experiments) > 0 and len(exps_status) > 0
         assert len(experiments) == len(exps_status)
         assert set([x.id for x in experiments]) == set([x.exp_id for x in exps_status])
         assert set([x.name for x in experiments]) == set([x.name for x in exps_status])

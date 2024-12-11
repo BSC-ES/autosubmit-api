@@ -1,20 +1,21 @@
-from datetime import datetime
 import os
 import time
 from typing import Dict, List
 
-from sqlalchemy import select
 from autosubmit_api.bgtasks.bgtask import BackgroundTaskTemplate
-from autosubmit_api.database import tables
-from autosubmit_api.database.common import (
-    create_autosubmit_db_engine,
-    create_as_times_db_engine,
-    create_main_db_conn,
-)
-from autosubmit_api.database.models import ExperimentModel
 from autosubmit_api.experiment.common_requests import _is_exp_running
 from autosubmit_api.history.database_managers.database_models import RunningStatus
 from autosubmit_api.persistance.experiment import ExperimentPaths
+from autosubmit_api.repositories.experiment import (
+    create_experiment_repository,
+    ExperimentModel,
+)
+from autosubmit_api.repositories.experiment_status import (
+    create_experiment_status_repository,
+)
+from autosubmit_api.repositories.join.experiment_join import (
+    create_experiment_join_repository,
+)
 
 
 class StatusUpdater(BackgroundTaskTemplate):
@@ -26,38 +27,30 @@ class StatusUpdater(BackgroundTaskTemplate):
         """
         Clears the experiments that are not in the experiments table
         """
-        with create_main_db_conn() as conn:
-            try:
-                del_stmnt = tables.experiment_status_table.delete().where(
-                    tables.experiment_status_table.c.exp_id.not_in(
-                        select(tables.experiment_table.c.id)
-                    )
-                )
-                conn.execute(del_stmnt)
-                conn.commit()
-            except Exception as exc:
-                conn.rollback()
-                cls.logger.error(
-                    f"[{cls.id}] Error while clearing missing experiments status: {exc}"
-                )
+        try:
+            experiment_join_repo = create_experiment_join_repository()
+            experiment_join_repo.drop_status_from_deleted_experiments()
+        except Exception as exc:
+            cls.logger.error(
+                f"[{cls.id}] Error while clearing missing experiments status: {exc}"
+            )
 
     @classmethod
     def _get_experiments(cls) -> List[ExperimentModel]:
         """
         Get the experiments list
         """
-        with create_autosubmit_db_engine().connect() as conn:
-            query_result = conn.execute(tables.experiment_table.select()).all()
-        return [ExperimentModel.model_validate(row._mapping) for row in query_result]
+        experiment_repository = create_experiment_repository()
+        return experiment_repository.get_all()
 
     @classmethod
     def _get_current_status(cls) -> Dict[str, str]:
         """
         Get the current status of the experiments
         """
-        with create_as_times_db_engine().connect() as conn:
-            query_result = conn.execute(tables.experiment_status_table.select()).all()
-        return {row.name: row.status for row in query_result}
+        status_repository = create_experiment_status_repository()
+        experiment_statuses = status_repository.get_all()
+        return {row.name: row.status for row in experiment_statuses}
 
     @classmethod
     def _check_exp_running(cls, expid: str) -> bool:
@@ -87,30 +80,17 @@ class StatusUpdater(BackgroundTaskTemplate):
 
     @classmethod
     def _update_experiment_status(cls, experiment: ExperimentModel, is_running: bool):
-        with create_as_times_db_engine().connect() as conn:
-            try:
-                del_stmnt = tables.experiment_status_table.delete().where(
-                    tables.experiment_status_table.c.exp_id == experiment.id
-                )
-                ins_stmnt = tables.experiment_status_table.insert().values(
-                    exp_id=experiment.id,
-                    name=experiment.name,
-                    status=(
-                        RunningStatus.RUNNING
-                        if is_running
-                        else RunningStatus.NOT_RUNNING
-                    ),
-                    seconds_diff=0,
-                    modified=datetime.now().isoformat(sep="-", timespec="seconds"),
-                )
-                conn.execute(del_stmnt)
-                conn.execute(ins_stmnt)
-                conn.commit()
-            except Exception as exc:
-                conn.rollback()
-                cls.logger.error(
-                    f"[{cls.id}] Error while doing database operations on experiment {experiment.name}: {exc}"
-                )
+        status_repository = create_experiment_status_repository()
+        try:
+            status_repository.upsert_status(
+                experiment.id,
+                experiment.name,
+                RunningStatus.RUNNING if is_running else RunningStatus.NOT_RUNNING,
+            )
+        except Exception as exc:
+            cls.logger.error(
+                f"[{cls.id}] Error while doing database operations on experiment {experiment.name}: {exc}"
+            )
 
     @classmethod
     def procedure(cls):
@@ -131,10 +111,7 @@ class StatusUpdater(BackgroundTaskTemplate):
             new_status = (
                 RunningStatus.RUNNING if is_running else RunningStatus.NOT_RUNNING
             )
-            if (
-                current_status.get(experiment.name, RunningStatus.NOT_RUNNING)
-                != new_status
-            ):
+            if current_status.get(experiment.name) != new_status:
                 cls.logger.info(
                     f"[{cls.id}] Updating status of {experiment.name} to {new_status}"
                 )

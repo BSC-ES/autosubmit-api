@@ -1,9 +1,6 @@
 from typing import Dict, List
-from sqlalchemy import select
 from autosubmit_api.logger import logger
-from autosubmit_api.database import tables
-from autosubmit_api.database.common import AttachedDatabaseConnBuilder
-from autosubmit_api.persistance.experiment import ExperimentPaths
+from autosubmit_api.repositories.job_packages import create_job_packages_repository
 
 
 class JobPackageReader:
@@ -17,23 +14,17 @@ class JobPackageReader:
         self._package_to_symbol: Dict[str, str] = {}
 
     def read(self):
-        conn_builder = AttachedDatabaseConnBuilder()
-        conn_builder.attach_db(
-            ExperimentPaths(self.expid).job_packages_db, "job_packages"
-        )
-
-        with conn_builder.product as conn:
-            try:
-                statement = select(tables.JobPackageTable)
-                self._content = [x._mapping for x in conn.execute(statement).all()]
-                if len(self._content) == 0:
-                    raise Warning(
-                        "job_packages table empty, trying wrapper_job_packages"
-                    )
-            except Exception as exc:
-                logger.warning(exc)
-                statement = select(tables.WrapperJobPackageTable)
-                self._content = [x._mapping for x in conn.execute(statement).all()]
+        try:
+            raw_content = create_job_packages_repository(self.expid).get_all()
+            self._content = [x.model_dump() for x in raw_content]
+            if len(self._content) == 0:
+                raise Warning("job_packages table empty, trying wrapper_job_packages")
+        except Exception as exc:
+            logger.warning(exc)
+            raw_content = create_job_packages_repository(
+                self.expid, wrapper=True
+            ).get_all()
+            self._content = [x.model_dump() for x in raw_content]
 
         self._build_job_to_package()
         self._build_package_to_jobs()
