@@ -16,7 +16,8 @@ class ExperimentBuilder(BaseBuilder):
         """
         try:
             self._product.modified = datetime.datetime.fromtimestamp(
-                PklReader(self._product.name).get_modified_time()
+                PklReader(self._product.name).get_modified_time(),
+                tz=datetime.timezone.utc
             ).isoformat()
         except Exception:
             self._product.modified = None

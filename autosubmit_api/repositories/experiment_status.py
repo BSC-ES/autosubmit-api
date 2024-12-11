@@ -44,6 +44,12 @@ class ExperimentStatusRepository(ABC):
         """
         Gets list of running experiments expids
         """
+    
+    @abstractmethod
+    def delete_all(self) -> int:
+        """
+        Delete all experiment status
+        """
 
 
 class ExperimentStatusSQLRepository(ExperimentStatusRepository):
@@ -82,7 +88,7 @@ class ExperimentStatusSQLRepository(ExperimentStatusRepository):
         with self.engine.connect() as conn:
             with conn.begin():
                 try:
-                    del_stmnt = delete(self.table).where(self.table.c.id == exp_id)
+                    del_stmnt = delete(self.table).where(self.table.c.exp_id == exp_id)
                     ins_stmnt = insert(self.table).values(
                         exp_id=exp_id,
                         name=expid,
@@ -104,6 +110,13 @@ class ExperimentStatusSQLRepository(ExperimentStatusRepository):
             statement = self.table.select().where(self.table.c.status == "RUNNING")
             result = conn.execute(statement).all()
         return [row.name for row in result]
+    
+    def delete_all(self):
+        with self.engine.connect() as conn:
+            statement = delete(self.table)
+            result = conn.execute(statement)
+            conn.commit()
+        return result.rowcount
 
 
 def create_experiment_status_repository() -> ExperimentStatusRepository:
