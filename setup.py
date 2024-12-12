@@ -34,21 +34,14 @@ install_requires = [
     "gunicorn~=22.0.0",
     "pydantic~=2.5.2",
     "SQLAlchemy~=2.0.23",
-    "python-cas~=1.6.0"
+    "python-cas~=1.6.0",
+    "autosubmit>=4.1.11",
 ]
 
 # Test dependencies
-test_requires = [
-    "pytest",
-    "pytest-cov",
-    "pytest-asyncio",
-    "ruff"
-]
+test_requires = ["pytest", "pytest-cov", "pytest-asyncio", "ruff"]
 
-extras_require = {
-    'test': test_requires,
-    'all': install_requires + test_requires
-}
+extras_require = {"test": test_requires, "all": install_requires + test_requires}
 
 setup(
     name="autosubmit_api",
