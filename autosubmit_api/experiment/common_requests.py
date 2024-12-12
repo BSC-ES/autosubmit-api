@@ -25,7 +25,6 @@ import time
 import traceback
 import datetime
 import json
-import multiprocessing
 import subprocess
 
 from collections import deque
@@ -1187,72 +1186,8 @@ def read_esarchive(result):
 
 
 def test_esarchive_status():
-    try:
-        t0 = time.time()
-        manager = multiprocessing.Manager()
-        result = manager.list()
-        p = multiprocessing.Process(target=read_esarchive, name="ESARCHIVE", args=(result,))
-        p.start()
-        p.join(10)
-        if p.is_alive():
-            print("Test running... killing it")
-            p.terminate()
-            p.join()
-            result = [False, -1.0, -1.0, 0.0, 0.0]
-        t1 = time.time()
-        #print(t1 - t0)
-        rtime = t1 - t0
-        # print(result)
-        status = result[0]
-        abandwith = result[1]
-        alatency = result[2]
-        cbandwidth = result[3]
-        clatency = result[4]
-        DbRequests.insert_archive_status(
-            status, alatency, abandwith, clatency, cbandwidth, rtime)
-    except Exception:
-        print((traceback.format_exc()))
-        # error_message = str(exp)
+    logger.warning("WARNING: This background task have been REMOVED")
 
-
-def get_last_test_archive_status():
-    error = False
-    error_message = ""
-    str_status = "OFFLINE"
-    latency_warning = None
-    bandwidth_warning = None
-    response_warning = None
-    try:
-        status, alatency, abandwidth, clatency, cbandwidth, rtime, date = DbRequests.get_last_read_archive_status()
-        if status == 1:
-            str_status = "ONLINE"
-            # 4.0 as a standard
-            latency_warning = "Higher latency than usual" if clatency > (
-                alatency + alatency * 0.1) or clatency > 4.0 else None
-            # 90.0  as a standard
-            bandwidth_warning = "Lower bandwidth than usual" if cbandwidth < (
-                abandwidth - abandwidth * 0.1) or cbandwidth < 90.0 else None
-            response_warning = "Higher response times than usual" if int(
-                rtime) > 1 else None
-        else:
-            str_status = "OFFLINE"
-    except Exception as exc:
-        error = True
-        error_message = exc
-
-    return {"status": str_status,
-            "error": error,
-            "error_message": error_message,
-            "avg_latency": alatency,
-            "avg_bandwidth": abandwidth,
-            "current_latency": clatency,
-            "current_bandwidth": cbandwidth,
-            "reponse_time": rtime,
-            "datetime": date,
-            "latency_warning": latency_warning,
-            "bandwidth_warning": bandwidth_warning,
-            "response_warning": response_warning,
-            }
 
 def enforceLocal(log):
     try:
