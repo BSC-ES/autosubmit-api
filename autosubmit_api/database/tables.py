@@ -61,6 +61,14 @@ class ExperimentStatusTable(BaseTable):
     modified: Mapped[str] = mapped_column(Text, nullable=False)
 
 
+ExperimentStructureTable = Table(
+    "experiment_structure",
+    metadata_obj,
+    Column("e_from", Text, nullable=False, primary_key=True),
+    Column("e_to", Text, nullable=False, primary_key=True),
+)
+"""Table that holds the structure of the experiment jobs."""
+
 GraphDataTable = Table(
     "experiment_graph_draw",
     metadata_obj,
