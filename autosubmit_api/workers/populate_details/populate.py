@@ -1,10 +1,4 @@
-import textwrap
-
-from sqlalchemy import text
 from autosubmit_api.logger import logger
-from autosubmit_api.database import tables
-
-from autosubmit_api.database.common import create_autosubmit_db_engine
 from autosubmit_api.builders.configuration_facade_builder import (
     ConfigurationFacadeDirector,
     AutosubmitConfigurationFacadeBuilder,
@@ -12,6 +6,11 @@ from autosubmit_api.builders.configuration_facade_builder import (
 from autosubmit_api.config.basicConfig import APIBasicConfig
 from collections import namedtuple
 from typing import List
+
+from autosubmit_api.repositories.experiment import create_experiment_repository
+from autosubmit_api.repositories.experiment_details import (
+    create_experiment_details_repository,
+)
 
 
 ExperimentDetails = namedtuple(
@@ -23,23 +22,21 @@ Experiment = namedtuple("Experiment", ["id", "name"])
 class DetailsProcessor:
     def __init__(self, basic_config: APIBasicConfig):
         self.basic_config = basic_config
-        self.main_db_engine = create_autosubmit_db_engine()
+        # self.main_db_engine = create_autosubmit_db_engine()
+        self.experiment_db = create_experiment_repository()
+        self.details_db = create_experiment_details_repository()
 
     def process(self):
         new_details = self._get_all_details()
-        self.create_details_table_if_not_exists()
         self._clean_table()
         return self._insert_many_into_details_table(new_details)
 
     def _get_experiments(self) -> List[Experiment]:
         experiments = []
-        with self.main_db_engine.connect() as conn:
-            query_result = conn.execute(tables.experiment_table.select()).all()
+        query_result = self.experiment_db.get_all()
 
         for exp in query_result:
-            experiments.append(
-                Experiment(exp._mapping.get("id"), exp._mapping.get("name"))
-            )
+            experiments.append(Experiment(exp.id, exp.name))
 
         return experiments
 
@@ -81,34 +78,9 @@ class DetailsProcessor:
         return result
 
     def _insert_many_into_details_table(self, values: List[dict]) -> int:
-        with self.main_db_engine.connect() as conn:
-            result = conn.execute(
-                tables.details_table.insert(), values
-            )  # Executemany style https://docs.sqlalchemy.org/en/20/tutorial/data_insert.html#insert-usually-generates-the-values-clause-automatically
-            conn.commit()
-        return result.rowcount
+        rowcount = self.details_db.insert_many(values)
+        return rowcount
 
-    def create_details_table_if_not_exists(self):
-        create_table_query = textwrap.dedent(
-            """
-            CREATE TABLE
-            IF NOT EXISTS details (
-            exp_id integer PRIMARY KEY,
-            user text NOT NULL,
-            created text NOT NULL,
-            model text NOT NULL,
-            branch text NOT NULL,
-            hpc text NOT NULL,
-            FOREIGN KEY (exp_id) REFERENCES experiment (id)
-            );
-        """
-        )
-        with self.main_db_engine.connect() as conn:
-            conn.execute(text(create_table_query))
-            conn.commit()
-
-    def _clean_table(self):
-        with self.main_db_engine.connect() as conn:
-            with conn.execution_options(isolation_level="AUTOCOMMIT"):
-                conn.execute(tables.details_table.delete())
-                conn.execute(text("VACUUM;"))
+    def _clean_table(self) -> int:
+        rowcount = self.details_db.delete_all()
+        return rowcount

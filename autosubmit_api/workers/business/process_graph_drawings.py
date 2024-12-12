@@ -1,7 +1,5 @@
 import time
 import traceback
-from autosubmit_api.database import tables
-from autosubmit_api.database.common import create_as_times_db_engine
 from autosubmit_api.common import utils as common_utils
 from autosubmit_api.database.db_jobdata import ExperimentGraphDrawing
 from autosubmit_api.builders.configuration_facade_builder import (
@@ -14,20 +12,15 @@ from autosubmit_api.builders.joblist_loader_builder import (
 )
 from typing import List, Any, Optional
 
+from autosubmit_api.repositories.experiment_status import create_experiment_status_repository
+
 
 def process_active_graphs():
     """
     Process the list of active experiments to generate the positioning of their graphs
     """
     try:
-        with create_as_times_db_engine().connect() as conn:
-            query_result = conn.execute(
-                tables.experiment_status_table.select().where(
-                    tables.experiment_status_table.c.status == "RUNNING"
-                )
-            ).all()
-
-        active_experiments: List[str] = [exp.name for exp in query_result]
+        active_experiments = create_experiment_status_repository().get_only_running_expids()
 
         for expid in active_experiments:
             try:
