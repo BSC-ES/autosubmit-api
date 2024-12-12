@@ -1,0 +1,137 @@
+CONFIG:
+  AUTOSUBMIT_VERSION: 4.1.11
+  MAXWAITINGJOBS: 20
+  TOTALJOBS: 20
+  SAFETYSLEEPTIME: 10
+  RETRIALS: 0
+MAIL:
+  NOTIFICATIONS: false
+  TO:
+STORAGE:
+  TYPE: pkl
+  COPY_REMOTE_LOGS: true
+DEFAULT:
+  EXPID: a1ve
+  HPCARCH: LOCAL
+EXPERIMENT:
+  DATELIST: '20000101'
+  MEMBERS: fc0
+  CHUNKSIZEUNIT: month
+  CHUNKSIZE: 4
+  NUMCHUNKS: 2
+  CHUNKINI: ''
+  CALENDAR: standard
+PROJECT:
+  PROJECT_TYPE: none
+  PROJECT_DESTINATION: ''
+GIT:
+  PROJECT_ORIGIN: ''
+  PROJECT_BRANCH: ''
+  PROJECT_COMMIT: ''
+  PROJECT_SUBMODULES: ''
+  FETCH_SINGLE_BRANCH: true
+SVN:
+  PROJECT_URL: ''
+  PROJECT_REVISION: ''
+LOCAL:
+  PROJECT_PATH: ''
+PROJECT_FILES:
+  FILE_PROJECT_CONF: ''
+  FILE_JOBS_CONF: ''
+  JOB_SCRIPTS_TYPE: ''
+RERUN:
+  RERUN: false
+  RERUN_JOBLIST: ''
+JOBS:
+  INI:
+    FILE: ini.sh
+    RUNNING: once
+    DEPENDENCIES: {}
+    ADDITIONAL_FILES: []
+  SIM:
+    FILE: sim.sh
+    DEPENDENCIES:
+      INI: {}
+      SIM-1: {}
+    RUNNING: once
+    ADDITIONAL_FILES: []
+  ASIM:
+    FILE: asim.sh
+    DEPENDENCIES:
+      SIM: {}
+    RUNNING: once
+    SPLITS: 3
+    ADDITIONAL_FILES: []
+  POST:
+    FILE: post.sh
+    RUNNING: once
+    DEPENDENCIES:
+      ASIM:
+        SPLITS_FROM:
+          2,3:
+            SPLITS_TO: 1,2*,3*
+    SPLITS: 3
+    ADDITIONAL_FILES: []
+PLATFORMS:
+  MARENOSTRUM4:
+    TYPE: slurm
+    HOST: mn1.bsc.es
+    PROJECT: bsc32
+    USER:
+    QUEUE: debug
+    SCRATCH_DIR: /gpfs/scratch
+    ADD_PROJECT_TO_HOST: false
+    MAX_WALLCLOCK: 48:00
+    TEMP_DIR: ''
+  MARENOSTRUM_ARCHIVE:
+    TYPE: ps
+    HOST: dt02.bsc.es
+    PROJECT: bsc32
+    USER:
+    SCRATCH_DIR: /gpfs/scratch
+    ADD_PROJECT_TO_HOST: false
+    TEST_SUITE: false
+  TRANSFER_NODE:
+    TYPE: ps
+    HOST: dt01.bsc.es
+    PROJECT: bsc32
+    USER:
+    ADD_PROJECT_TO_HOST: false
+    SCRATCH_DIR: /gpfs/scratch
+  TRANSFER_NODE_BSCEARTH000:
+    TYPE: ps
+    HOST: bscearth000
+    USER:
+    PROJECT: Earth
+    ADD_PROJECT_TO_HOST: false
+    QUEUE: serial
+    SCRATCH_DIR: /esarchive/scratch
+  BSCEARTH000:
+    TYPE: ps
+    HOST: bscearth000
+    USER:
+    PROJECT: Earth
+    ADD_PROJECT_TO_HOST: false
+    QUEUE: serial
+    SCRATCH_DIR: /esarchive/scratch
+  NORD3:
+    TYPE: SLURM
+    HOST: nord1.bsc.es
+    PROJECT: bsc32
+    USER:
+    QUEUE: debug
+    SCRATCH_DIR: /gpfs/scratch
+    MAX_WALLCLOCK: 48:00
+  ECMWF-XC40:
+    TYPE: ecaccess
+    VERSION: pbs
+    HOST: cca
+    USER:
+    PROJECT: spesiccf
+    ADD_PROJECT_TO_HOST: false
+    SCRATCH_DIR: /scratch/ms
+    QUEUE: np
+    SERIAL_QUEUE: ns
+    MAX_WALLCLOCK: 48:00
+ROOTDIR: /home/ltenorio/autosubmit/a1ve
+PROJDIR: /home/ltenorio/autosubmit/a1ve/proj/
