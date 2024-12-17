@@ -16,10 +16,6 @@ class Builder(BasicBuilder, metaclass=ABCMeta):
     pass
 
   @abstractmethod
-  def initialize_experiment_history_db_manager(self):
-    pass
-
-  @abstractmethod
   def generate_logger(self):
     pass
 
@@ -34,11 +30,6 @@ class ExperimentHistoryBuilder(Builder):
   def generate_experiment_history_db_manager(self):
     self._validate_basic_config()
     self.experiment_history_db_manager = ExperimentHistoryDbManager(self.expid, self.basic_config)
-
-  def initialize_experiment_history_db_manager(self):
-    if not self.experiment_history_db_manager:
-      raise Exception("Experiment Database Manager is missing")
-    self.experiment_history_db_manager.initialize()
 
   def generate_logger(self):
     self._validate_basic_config()
@@ -58,17 +49,6 @@ class ExperimentHistoryBuilder(Builder):
 class ExperimentHistoryDirector(object):
   def __init__(self, builder: Builder):
     self.builder = builder
-
-  def build_current_experiment_history(self, basic_config: Optional[APIBasicConfig] = None) -> ExperimentHistory:
-    """ Builds ExperimentHistory updated to current version. """
-    if basic_config:
-      self.builder.set_basic_config(basic_config)
-    else:
-      self.builder.generate_basic_config()
-    self.builder.generate_experiment_history_db_manager()
-    self.builder.initialize_experiment_history_db_manager()
-    self.builder.generate_logger()
-    return self.builder.make_experiment_history()
 
   def build_reader_experiment_history(self, basic_config: Optional[APIBasicConfig] = None) -> ExperimentHistory:
     """ Buids ExperimentHistory that doesn't update to current version automatically. """

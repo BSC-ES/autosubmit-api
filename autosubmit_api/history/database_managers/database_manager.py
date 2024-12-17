@@ -49,25 +49,6 @@ class DatabaseManager(metaclass=ABCMeta):
     os.umask(0)
     os.open(path, os.O_WRONLY | os.O_CREAT, 0o776)
 
-  def execute_statement_on_dbfile(self, path: str, statement: str):
-    """ Executes a statement on a database file specified by path. """
-    conn = self.get_connection(path)
-    cursor = conn.cursor()
-    cursor.execute(statement)
-    conn.commit()
-    conn.close()
-
-  def execute_many_statements_on_dbfile(self, path: str, statements: List[str]) -> None:
-    """
-    Updates the table schema using a **small** list of statements. No Exception raised.
-    Should be used to execute a list of schema updates that might have been already applied.
-    """
-    for statement in statements:
-      try:
-          self.execute_statement_on_dbfile(path, statement)
-      except Exception:
-          pass
-
   def get_from_statement(self, path: str, statement: str) -> List[Tuple]:
     """ Get the rows from a statement with no arguments """
     conn = self.get_connection(path)
