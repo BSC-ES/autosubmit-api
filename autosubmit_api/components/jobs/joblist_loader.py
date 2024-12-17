@@ -134,7 +134,7 @@ class JobListLoader(object):
       self._job_dictionary[job.name] = job
 
   def load_existing_structure_adjacency(self):
-    self._structure_adjacency = get_structure(self.expid, self.configuration_facade.structures_path)
+    self._structure_adjacency = get_structure(self.expid)
 
   def distribute_adjacency_into_jobs(self):
     parents_adjacency = {}

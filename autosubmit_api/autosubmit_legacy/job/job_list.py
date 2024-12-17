@@ -583,11 +583,6 @@ class JobList:
         :return: job running to min (queue, run, status), job running to text (text)
         """
         # Getting information
-        # path_local_root = basic_config.LOCAL_ROOT_DIR
-        path_structure = basic_config.STRUCTURES_DIR
-        # db_file = os.path.join(path_local_root, basic_config.DB_FILE)
-        # Job information from job historic data
-        # print("Get current job data structure...")
         job_data = None
         try:
             experiment_history = ExperimentHistoryDirector(ExperimentHistoryBuilder(expid)).build_reader_experiment_history()
@@ -605,7 +600,7 @@ class JobList:
         # Get structure  if there are packages because package require special time calculation
         # print("Get Structure")
         if (job_to_package):
-            current_table_structure = DbStructure.get_structure(expid, path_structure)
+            current_table_structure = DbStructure.get_structure(expid)
         # Main loop
         # print("Start main loop")
         for job in allJobs:

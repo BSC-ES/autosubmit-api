@@ -24,10 +24,6 @@ from autosubmit_api.history.database_managers import database_models as Models
 from autosubmit_api.config.basicConfig import APIBasicConfig
 from abc import ABCMeta
 
-DEFAULT_JOBDATA_DIR = os.path.join('/esarchive', 'autosubmit', 'as_metadata', 'data')
-DEFAULT_HISTORICAL_LOGS_DIR = os.path.join('/esarchive', 'autosubmit', 'as_metadata', 'logs')
-DEFAULT_LOCAL_ROOT_DIR = os.path.join('/esarchive', 'autosubmit')
-
 class DatabaseManager(metaclass=ABCMeta):
   """ Simple database manager. Needs expid. """
   AS_TIMES_DB_NAME = "as_times.db" # default AS_TIMES location
@@ -61,22 +57,6 @@ class DatabaseManager(metaclass=ABCMeta):
     conn.commit()
     conn.close()
 
-  def execute_statement_with_arguments_on_dbfile(self, path: str, statement: str, arguments: Tuple):
-    """ Executes an statement with arguments on a database file specified by path. """
-    conn = self.get_connection(path)
-    cursor = conn.cursor()
-    cursor.execute(statement, arguments)
-    conn.commit()
-    conn.close()
-
-  def execute_many_statement_with_arguments_on_dbfile(self, path: str, statement: str, arguments_list: List[Tuple]) -> None:
-    """ Executes many statements from a list of arguments specified by a path. """
-    conn = self.get_connection(path)
-    cursor = conn.cursor()
-    cursor.executemany(statement, arguments_list)
-    conn.commit()
-    conn.close()
-
   def execute_many_statements_on_dbfile(self, path: str, statements: List[str]) -> None:
     """
     Updates the table schema using a **small** list of statements. No Exception raised.
@@ -107,28 +87,6 @@ class DatabaseManager(metaclass=ABCMeta):
     statement_rows = cursor.fetchall()
     conn.close()
     return statement_rows
-
-  def insert_statement(self, path: str, statement: str) -> int:
-    """ Insert statement into path """
-    conn = self.get_connection(path)
-    conn.text_factory = str
-    cursor = conn.cursor()
-    cursor.execute(statement)
-    lastrow_id = cursor.lastrowid
-    conn.commit()
-    conn.close()
-    return lastrow_id
-
-  def insert_statement_with_arguments(self, path: str, statement: str, arguments: Tuple) -> int:
-    """ Insert statement with arguments into path """
-    conn = self.get_connection(path)
-    conn.text_factory = str
-    cursor = conn.cursor()
-    cursor.execute(statement, arguments)
-    lastrow_id = cursor.lastrowid
-    conn.commit()
-    conn.close()
-    return lastrow_id
 
   def get_built_select_statement(self, table_name: str, conditions: str = None) -> str:
     """ Build and return a SELECT statement with the same fields as the model. Requires that the table is associated with a model (namedtuple). """
