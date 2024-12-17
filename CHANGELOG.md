@@ -1,5 +1,11 @@
 # CHANGELOG
 
+### Pre-release v4.0.1b6 - Release date: TBD
+
+* Updated `autosubmit` dependency to handle correctly the pkl file reader
+* Updated docker image
+* Updated all DB interactions through SQLAlchemy
+
 ### Pre-release v4.0.1b5 - Release date: 2024-12-10
 
 * Improved search filters
