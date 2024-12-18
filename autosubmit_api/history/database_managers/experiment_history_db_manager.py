@@ -86,9 +86,9 @@ class ExperimentHistoryDbManager(DatabaseManager):
 
   def get_job_data_dcs_all(self) -> List[JobData]:
     """ Gets all content from job_data ordered by id (from table). """
-    return [JobData.from_model(row) for row in self.get_job_data_all()]
+    return [JobData.from_model(row) for row in self._get_job_data_all()]
 
-  def get_job_data_all(self):
+  def _get_job_data_all(self):
     """ Gets all content from job_data as list of Models.JobDataRow from database. """
     statement = self.get_built_select_statement("job_data", "id > 0 ORDER BY id")
     job_data_rows = self.get_from_statement(self.historicaldb_file_path, statement)
