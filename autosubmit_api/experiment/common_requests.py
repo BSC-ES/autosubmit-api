@@ -235,7 +235,6 @@ def get_experiment_data(expid: str) -> Dict[str, Any]:
         if experiment_run and experiment_run.total > 0:
             result["total_jobs"] = experiment_run.total
             result["completed_jobs"] = experiment_run.completed
-            result["db_historic_version"] = experiment_history.manager.db_version
     except Exception as exc:
         logger.warning((traceback.format_exc()))
         logger.warning(
