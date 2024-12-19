@@ -40,11 +40,6 @@ class ExperimentHistory():
       self._log.log(str(exp), traceback.format_exc())
       self.manager = None
 
-  def is_header_ready(self):
-    if self.manager:
-      return self.manager.is_header_ready_db_version()
-    return False
-
   def get_historic_job_data(self, job_name: str) -> List[Dict[str, Any]]:
     result = []
     all_job_data_dcs = self.manager.get_job_data_dcs_by_name(job_name)

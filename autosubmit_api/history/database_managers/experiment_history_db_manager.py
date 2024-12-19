@@ -15,46 +15,32 @@
 
 # You should have received a copy of the GNU General Public License
 # along with Autosubmit.  If not, see <http://www.gnu.org/licenses/>.
-import os
 
-from autosubmit_api.persistance.experiment import ExperimentPaths
 from autosubmit_api.history.database_managers import database_models as Models
 from autosubmit_api.history.data_classes.job_data import JobData
 from autosubmit_api.history.data_classes.experiment_run import ExperimentRun
 from autosubmit_api.config.basicConfig import APIBasicConfig
-from autosubmit_api.history.database_managers.database_manager import DatabaseManager
 from typing import List, Optional
 from collections import namedtuple
 
 from autosubmit_api.repositories.experiment_run import create_experiment_run_repository
 from autosubmit_api.repositories.job_data import create_experiment_job_data_repository
 
-class ExperimentHistoryDbManager(DatabaseManager):
+class ExperimentHistoryDbManager:
   """ Manages actions directly on the database.
   """
   def __init__(self, expid: str, basic_config: APIBasicConfig):
-    """ Requires expid and jobdata_dir_path. """
-    super(ExperimentHistoryDbManager, self).__init__(expid, basic_config)
-    exp_paths = ExperimentPaths(expid)
-    self.historicaldb_file_path = exp_paths.job_data_db
-    if self.my_database_exists():
-      self.set_db_version_models()
+    """ Requires expid """
+    self.expid = expid
+    self.set_db_version_models()
 
     self.runs_repo = create_experiment_run_repository(expid)
     self.jobs_repo = create_experiment_job_data_repository(expid)
 
   def set_db_version_models(self):
-    self.db_version = self._get_pragma_version()
-    self.experiment_run_row_model = Models.get_experiment_row_model(self.db_version)
-    self.job_data_row_model = Models.get_job_data_row_model(self.db_version)
-
-  def my_database_exists(self):
-    return os.path.exists(self.historicaldb_file_path)
-
-  def is_header_ready_db_version(self):
-    if self.my_database_exists():
-      return self._get_pragma_version() >= Models.DatabaseVersion.EXPERIMENT_HEADER_SCHEMA_CHANGES.value
-    return False
+    # From version 3.13.0 of Autosubmit, latest model is used.
+    self.experiment_run_row_model = Models.ExperimentRunRow
+    self.job_data_row_model = Models.JobDataRow
 
   def get_experiment_run_dc_with_max_id(self):
     """ Get Current (latest) ExperimentRun data class. """
@@ -148,11 +134,3 @@ class ExperimentHistoryDbManager(DatabaseManager):
       self.job_data_row_model(**(job_data.model_dump()))
       for job_data in job_data_rows
     ]
-
-  def _get_pragma_version(self) -> int:
-    """ Gets current pragma version as int. """
-    statement = "pragma user_version;"
-    pragma_result = self.get_from_statement(self.historicaldb_file_path, statement)
-    if len(pragma_result) <= 0:
-      raise Exception("Error while getting the pragma version. This might be a signal of a deeper problem. Review previous errors.")
-    return int(Models.PragmaVersion(*pragma_result[0]).version)
