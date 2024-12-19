@@ -26,6 +26,9 @@ from autosubmit_api.history.database_managers.database_manager import DatabaseMa
 from typing import List, Optional
 from collections import namedtuple
 
+from autosubmit_api.repositories.experiment_run import create_experiment_run_repository
+from autosubmit_api.repositories.job_data import create_experiment_job_data_repository
+
 class ExperimentHistoryDbManager(DatabaseManager):
   """ Manages actions directly on the database.
   """
@@ -36,6 +39,9 @@ class ExperimentHistoryDbManager(DatabaseManager):
     self.historicaldb_file_path = exp_paths.job_data_db
     if self.my_database_exists():
       self.set_db_version_models()
+
+    self.runs_repo = create_experiment_run_repository(expid)
+    self.jobs_repo = create_experiment_job_data_repository(expid)
 
   def set_db_version_models(self):
     self.db_version = self._get_pragma_version()
@@ -56,11 +62,8 @@ class ExperimentHistoryDbManager(DatabaseManager):
 
   def _get_experiment_run_with_max_id(self):
     """ Get Models.ExperimentRunRow for the maximum id run. """
-    statement = self.get_built_select_statement("experiment_run", "run_id > 0 ORDER BY run_id DESC LIMIT 0, 1")
-    max_experiment_run = self.get_from_statement(self.historicaldb_file_path, statement)
-    if len(max_experiment_run) == 0:
-      raise Exception("No Experiment Runs registered.")
-    return self.experiment_run_row_model(*max_experiment_run[0])
+    max_experiment_run = self.runs_repo.get_last_run()
+    return self.experiment_run_row_model(**(max_experiment_run.model_dump()))
 
   def get_experiment_run_by_id(self, run_id: int) -> Optional[ExperimentRun]:
     if run_id:
@@ -68,21 +71,19 @@ class ExperimentHistoryDbManager(DatabaseManager):
     return None
 
   def _get_experiment_run_by_id(self, run_id: int) -> namedtuple:
-    statement = self.get_built_select_statement("experiment_run", "run_id=?")
-    arguments = (run_id,)
-    experiment_run = self.get_from_statement_with_arguments(self.historicaldb_file_path, statement, arguments)
-    if len(experiment_run) == 0:
-      raise Exception("Experiment run {0} for experiment {1} does not exists.".format(run_id, self.expid))
-    return self.experiment_run_row_model(*experiment_run[0])
+    experiment_run = self.runs_repo.get_run_by_id(run_id)
+    return self.experiment_run_row_model(**(experiment_run.model_dump()))
 
   def get_experiment_runs_dcs(self) -> List[ExperimentRun]:
     experiment_run_rows = self._get_experiment_runs()
     return [ExperimentRun.from_model(row) for row in experiment_run_rows]
 
   def _get_experiment_runs(self) -> List[namedtuple]:
-    statement = self.get_built_select_statement("experiment_run")
-    experiment_runs = self.get_from_statement(self.historicaldb_file_path, statement)
-    return [self.experiment_run_row_model(*row) for row in experiment_runs]
+    experiment_runs = self.runs_repo.get_all()
+    return [
+      self.experiment_run_row_model(**(run.model_dump()))
+      for run in experiment_runs
+    ]
 
   def get_job_data_dcs_all(self) -> List[JobData]:
     """ Gets all content from job_data ordered by id (from table). """
@@ -90,9 +91,11 @@ class ExperimentHistoryDbManager(DatabaseManager):
 
   def _get_job_data_all(self):
     """ Gets all content from job_data as list of Models.JobDataRow from database. """
-    statement = self.get_built_select_statement("job_data", "id > 0 ORDER BY id")
-    job_data_rows = self.get_from_statement(self.historicaldb_file_path, statement)
-    return [self.job_data_row_model(*row) for row in job_data_rows]
+    job_data_rows = self.jobs_repo.get_all()
+    return [
+      self.job_data_row_model(**(job_data.model_dump()))
+      for job_data in job_data_rows
+    ]
 
   def get_job_data_dc_COMPLETED_by_wrapper_run_id(self, package_code: int, run_id: int) -> List[JobData]:
     if not run_id or package_code <= Models.RowType.NORMAL:
@@ -103,10 +106,11 @@ class ExperimentHistoryDbManager(DatabaseManager):
     return [JobData.from_model(row) for row in job_data_rows]
 
   def _get_job_data_dc_COMPLETED_by_wrapper_run_id(self, package_code: int, run_id: int) -> List[namedtuple]:
-    statement = self.get_built_select_statement("job_data", "run_id=? and rowtype=? and status=? ORDER BY id")
-    arguments = (run_id, package_code, "COMPLETED")
-    job_data_rows = self.get_from_statement_with_arguments(self.historicaldb_file_path, statement, arguments)
-    return [self.job_data_row_model(*row) for row in job_data_rows]
+    job_data_rows = self.jobs_repo.get_job_data_COMPLETED_by_rowtype_run_id(package_code, run_id)
+    return [
+      self.job_data_row_model(**(job_data.model_dump()))
+      for job_data in job_data_rows
+    ]
 
   def get_job_data_dcs_COMPLETED_by_section(self, section: str) -> List[JobData]:
     # arguments = {"status": "COMPLETED", "section": section}
@@ -114,10 +118,11 @@ class ExperimentHistoryDbManager(DatabaseManager):
     return [JobData.from_model(row) for row in job_data_rows]
 
   def _get_job_data_COMPLETD_by_section(self, section):
-    statement = self.get_built_select_statement("job_data", "status=? and (section=? or member=?) ORDER BY id")
-    arguments = ("COMPLETED", section, section)
-    job_data_rows = self.get_from_statement_with_arguments(self.historicaldb_file_path, statement, arguments)
-    return [self.job_data_row_model(*row) for row in job_data_rows]
+    job_data_rows = self.jobs_repo.get_job_data_COMPLETD_by_section(section)
+    return [
+      self.job_data_row_model(**(job_data.model_dump()))
+      for job_data in job_data_rows
+    ]
 
   def get_all_last_job_data_dcs(self):
     """ Gets JobData data classes in job_data for last=1. """
@@ -126,9 +131,11 @@ class ExperimentHistoryDbManager(DatabaseManager):
 
   def _get_all_last_job_data_rows(self):
     """ Get List of Models.JobDataRow for last=1. """
-    statement = self.get_built_select_statement("job_data", "last=1 and rowtype >= 2")
-    job_data_rows = self.get_from_statement(self.historicaldb_file_path, statement)
-    return [self.job_data_row_model(*row) for row in job_data_rows]
+    job_data_rows = self.jobs_repo.get_last_job_data()
+    return [
+      self.job_data_row_model(**(job_data.model_dump()))
+      for job_data in job_data_rows
+    ]
 
   def get_job_data_dcs_by_name(self, job_name: str) -> List[JobData]:
     job_data_rows = self._get_job_data_by_name(job_name)
@@ -136,10 +143,11 @@ class ExperimentHistoryDbManager(DatabaseManager):
 
   def _get_job_data_by_name(self, job_name: str) -> List[namedtuple]:
     """ Get List of Models.JobDataRow for job_name """
-    statement = self.get_built_select_statement("job_data", "job_name=? ORDER BY counter DESC")
-    arguments = (job_name,)
-    job_data_rows = self.get_from_statement_with_arguments(self.historicaldb_file_path, statement, arguments)
-    return [self.job_data_row_model(*row) for row in job_data_rows]
+    job_data_rows = self.jobs_repo.get_jobs_by_name(job_name)
+    return [
+      self.job_data_row_model(**(job_data.model_dump()))
+      for job_data in job_data_rows
+    ]
 
   def _get_pragma_version(self) -> int:
     """ Gets current pragma version as int. """
