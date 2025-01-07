@@ -191,11 +191,18 @@ def get_experiments_from_folder(root_folder: str) -> List[str]:
   folders = stdOut.split()      
   return [expid for expid in folders if len(expid) == 4]
 
+
+def get_local_tz():
+  return datetime.datetime.now(datetime.timezone.utc).astimezone().tzinfo
+
+
 def timestamp_to_datetime_format(timestamp: int) -> str:
-  """ %Y-%m-%d %H:%M:%S """
+  """
+  Formats a timestamp to a iso format datetime string with timezone information.
+  """
   try:
     if timestamp and timestamp > 0:
-      return datetime.datetime.fromtimestamp(timestamp).strftime('%Y-%m-%d %H:%M:%S')
+      return datetime.datetime.fromtimestamp(timestamp, tz=get_local_tz()).isoformat()
   except Exception as exp:    
     print(("Timestamp {} cannot be converted to datetime string. {}".format(str(timestamp), str(exp))))
     return None
