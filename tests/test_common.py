@@ -61,5 +61,5 @@ def test_timestamp_to_datetime_format(
     timestamp: int, expected: Union[str, None], timezone: str
 ):
     mock_tzinfo = ZoneInfo(timezone)
-    with patch("autosubmit_api.common.utils.get_local_tz", return_value=mock_tzinfo):
+    with patch("autosubmit_api.common.utils.LOCAL_TZ", mock_tzinfo):
         assert timestamp_to_datetime_format(timestamp) == expected

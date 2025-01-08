@@ -9,6 +9,8 @@ from bscearth.utils.date import date2str
 from dateutil.relativedelta import relativedelta
 from typing import List, Tuple
 
+LOCAL_TZ = datetime.datetime.now(datetime.timezone.utc).astimezone().tzinfo
+
 class Section:
   CONFIG = "CONFIG"
   MAIL = "MAIL"
@@ -191,18 +193,13 @@ def get_experiments_from_folder(root_folder: str) -> List[str]:
   folders = stdOut.split()      
   return [expid for expid in folders if len(expid) == 4]
 
-
-def get_local_tz():
-  return datetime.datetime.now(datetime.timezone.utc).astimezone().tzinfo
-
-
 def timestamp_to_datetime_format(timestamp: int) -> str:
   """
   Formats a timestamp to a iso format datetime string with timezone information.
   """
   try:
     if timestamp and timestamp > 0:
-      return datetime.datetime.fromtimestamp(timestamp, tz=get_local_tz()).isoformat()
+      return datetime.datetime.fromtimestamp(timestamp, tz=LOCAL_TZ).isoformat()
   except Exception as exp:    
     print(("Timestamp {} cannot be converted to datetime string. {}".format(str(timestamp), str(exp))))
     return None
