@@ -124,79 +124,126 @@ def get_experiment_stats(expid: str, filter_period: int, filter_type: str) -> Di
     }
 
 
-def get_experiment_data(expid):
+def get_experiment_data(expid: str) -> Dict[str, Any]:
     """
-    Get data of the experiment. Depends on the worker that updates ecearth.db.
+    Get data of the experiment. Depends on the databases and config files.
     """
     result = {
-            'expid': expid,
-            'path': "NA",
-            'owner_id': 0,
-            'owner': "NA",
-            'time_last_access': "",
-            'time_last_mod': "",
-            'error_message': "",
-            'description': "",
-            'version': "",
-            'model': "",
-            'branch': "",
-            'hpc': "",
-            'updateTime': 0,
-            'error': False,
-            'running': False,
-            'pkl_timestamp': int(time.time()),
-            "chunk_size": 0,
-            "chunk_unit": "default",
-            'total_jobs': 0,
-            'completed_jobs': 0,
-            'db_historic_version': "NA"}
+        "expid": expid,
+        "path": "NA",
+        "owner_id": 0,
+        "owner": "NA",
+        "time_last_access": "",
+        "time_last_mod": "",
+        "error_message": "",
+        "description": "",
+        "version": "",
+        "model": "",
+        "branch": "",
+        "hpc": "",
+        "updateTime": 0,
+        "error": False,
+        "running": False,
+        "pkl_timestamp": int(time.time()),
+        "chunk_size": 0,
+        "chunk_unit": "default",
+        "total_jobs": 0,
+        "completed_jobs": 0,
+        "db_historic_version": "NA",
+    }
+
+    # Get info from as conf facade
     try:
-        autosubmit_config_facade = ConfigurationFacadeDirector(AutosubmitConfigurationFacadeBuilder(expid)).build_autosubmit_configuration_facade()
-        try:
-            _, experiment_status = DbRequests.get_specific_experiment_status(expid)
-            result["running"] = (experiment_status == "RUNNING")
-        except Exception as exc:
-            logger.warning((traceback.format_exc()))
-            logger.warning((f"Warning: Error in get_experiment_data: {exc}. Trying to get the status exhaustively."))
-            _, _, is_running, _, _ = _is_exp_running(expid)
-            result["running"] = is_running
+        autosubmit_config_facade = ConfigurationFacadeDirector(
+            AutosubmitConfigurationFacadeBuilder(expid)
+        ).build_autosubmit_configuration_facade()
+
+        # Get directory stat data
         result["path"] = autosubmit_config_facade.experiment_path
         result["owner_id"] = autosubmit_config_facade.get_owner_id()
         result["owner"] = autosubmit_config_facade.get_owner_name()
-        result["time_last_access"] = autosubmit_config_facade.get_experiment_last_access_time_as_datetime()
-        result["time_last_mod"] = autosubmit_config_facade.get_experiment_last_modified_time_as_datetime()
-        try:
-            experiment_repo = create_experiment_repository()
-            result["description"] = experiment_repo.get_by_expid(expid).description
-        except Exception:
-            result["description"] = "NA"
+        result["time_last_access"] = (
+            autosubmit_config_facade.get_experiment_last_access_time_as_datetime()
+        )
+        result["time_last_mod"] = (
+            autosubmit_config_facade.get_experiment_last_modified_time_as_datetime()
+        )
+
+        # Get from parsing config files
         result["version"] = autosubmit_config_facade.get_autosubmit_version()
         result["model"] = autosubmit_config_facade.get_model()
         result["branch"] = autosubmit_config_facade.get_branch()
         result["hpc"] = autosubmit_config_facade.get_main_platform()
         result["updateTime"] = autosubmit_config_facade.get_safety_sleep_time()
-        result["pkl_timestamp"] = autosubmit_config_facade.get_pkl_last_modified_timestamp()
+        result["pkl_timestamp"] = (
+            autosubmit_config_facade.get_pkl_last_modified_timestamp()
+        )
         result["chunk_size"] = autosubmit_config_facade.chunk_size
         result["chunk_unit"] = autosubmit_config_facade.chunk_unit
-
-        result["total_jobs"] = 0
-        result["completed_jobs"] = 0
-        result["db_historic_version"] = "NA"
-        try:
-            experiment_history = ExperimentHistoryDirector(ExperimentHistoryBuilder(expid)).build_reader_experiment_history()
-            experiment_run = experiment_history.manager.get_experiment_run_dc_with_max_id()
-            if experiment_run and experiment_run.total > 0:
-                result["total_jobs"] = experiment_run.total
-                result["completed_jobs"] = experiment_run.completed
-                result["db_historic_version"] = experiment_history.manager.db_version
-        except Exception as exc:
-            logger.warning((traceback.format_exc()))
-            logger.warning((f"Warning: Error in get_experiment_data while reading historical data: {exc}"))
-
-    except Exception as exp:
+    except Exception as exc:
         result["error"] = True
-        result["error_message"] = str(exp)
+        result["error_message"] += f"{str(exc)}\n"
         logger.error((traceback.format_exc()))
+
+    # Get from experiment table
+    try:
+        experiment = create_experiment_repository().get_by_expid(expid)
+        result["description"] = experiment.description
+        # Overwrite version from conf
+        result["version"] = experiment.autosubmit_version
+    except Exception as exc:
+        result["error"] = True
+        result["error_message"] += f"{str(exc)}\n"
+        logger.warning((traceback.format_exc()))
+        logger.warning(
+            (
+                f"Warning: Error in get_experiment_data while retrieving experiment from DB by id: {exc}"
+            )
+        )
+
+    # Get status
+    try:
+        _, experiment_status = DbRequests.get_specific_experiment_status(expid)
+        result["running"] = experiment_status == "RUNNING"
+    except Exception as exc:
+        logger.warning((traceback.format_exc()))
+        logger.warning(
+            (
+                f"Warning: Error in get_experiment_data while quickly get experiment status: {exc}."
+                "Trying to get the status exhaustively. "
+            )
+        )
+        try:
+            _, _, is_running, _, _ = _is_exp_running(expid)
+            result["running"] = is_running
+        except Exception as exc:
+            result["error"] = True
+            result["error_message"] += f"{str(exc)}\n"
+            logger.warning((traceback.format_exc()))
+            logger.warning(
+                (
+                    f"Warning: Error in get_experiment_data while retrieving the status exhaustively: {exc}. "
+                )
+            )
+
+    # Get historic data
+    try:
+        experiment_history = ExperimentHistoryDirector(
+            ExperimentHistoryBuilder(expid)
+        ).build_reader_experiment_history()
+        experiment_run = experiment_history.manager.get_experiment_run_dc_with_max_id()
+        if experiment_run and experiment_run.total > 0:
+            result["total_jobs"] = experiment_run.total
+            result["completed_jobs"] = experiment_run.completed
+            result["db_historic_version"] = experiment_history.manager.db_version
+    except Exception as exc:
+        logger.warning((traceback.format_exc()))
+        logger.warning(
+            (
+                f"Warning: Error in get_experiment_data while reading historical data: {exc}"
+            )
+        )
+
     return result
 
 
