@@ -1,7 +1,10 @@
-from typing import List
+from typing import List, Union
+from unittest.mock import patch
 import pytest
 from autosubmit_api.common import utils
 from autosubmit_api.components.jobs.job_factory import SimJob
+from autosubmit_api.common.utils import timestamp_to_datetime_format
+from zoneinfo import ZoneInfo
 
 
 @pytest.mark.parametrize(
@@ -39,3 +42,24 @@ def test_outlier_detection(
 
     assert len(valid_jobs) == len(valid_run_times)
     assert len(outliers) == (len(outlier_run_times) + zeros)
+
+
+@pytest.mark.parametrize(
+    "timestamp, expected, timezone",
+    [
+        (1633072800, "2021-10-01T07:20:00+00:00", "UTC"),  # Valid timestamp
+        (0, None, "UTC"),  # Invalid timestamp (0)
+        (-1, None, "UTC"),  # Invalid timestamp (negative)
+        (None, None, "UTC"),  # None timestamp
+        (1633072800.0, "2021-10-01T07:20:00+00:00", "UTC"),  # Valid timestamp as float
+        (1736208000, "2025-01-07T00:00:00+00:00", "UTC"),
+        (1633072800, "2021-10-01T02:20:00-05:00", "America/Lima"),  # Other timezone
+        (1633072800, "2021-10-01T05:20:00-02:00", "Etc/GMT+2"),
+    ],
+)
+def test_timestamp_to_datetime_format(
+    timestamp: int, expected: Union[str, None], timezone: str
+):
+    mock_tzinfo = ZoneInfo(timezone)
+    with patch("autosubmit_api.common.utils.LOCAL_TZ", mock_tzinfo):
+        assert timestamp_to_datetime_format(timestamp) == expected
