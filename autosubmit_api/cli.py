@@ -5,6 +5,12 @@ from gunicorn.app.wsgiapp import WSGIApplication
 from autosubmit_api import __version__ as api_version
 from gunicorn.config import KNOWN_SETTINGS, Setting as GunicornSetting
 
+FIXED_GUNICORN_SETTINGS = [
+    "preload_app",
+    "capture_output",
+    "worker_class",
+]
+
 
 class StandaloneApplication(WSGIApplication):
     def __init__(self, app_uri, options=None):
@@ -41,8 +47,8 @@ def start_app_gunicorn(
     options = {  # Options to always have
         "preload_app": True,
         "capture_output": True,
-        "timeout": 600,
         "worker_class": "uvicorn.workers.UvicornWorker",
+        "timeout": 600, # Change the default timeout to 10 minutes
         **kwargs,
     }
 
@@ -87,7 +93,8 @@ def main():
     for setting in KNOWN_SETTINGS:
         setting: GunicornSetting = setting
 
-        if setting.name in ["preload_app", "capture_output", "worker_class"]:
+        # Skip fixed parameters
+        if setting.name in FIXED_GUNICORN_SETTINGS:
             continue
 
         if isinstance(setting.cli, list):
