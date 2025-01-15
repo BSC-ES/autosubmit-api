@@ -1,10 +1,10 @@
+from autosubmit_api.bgtasks.tasks.details_updater import PopulateDetailsDB
 from autosubmit_api.config.basicConfig import APIBasicConfig
 from autosubmit_api.database import tables
 from autosubmit_api.database.common import create_autosubmit_db_engine
 from autosubmit_api.repositories.experiment_details import (
     create_experiment_details_repository,
 )
-from autosubmit_api.workers.populate_details.populate import DetailsProcessor
 
 
 class TestDetailsPopulate:
@@ -16,7 +16,7 @@ class TestDetailsPopulate:
             rows = conn.execute(tables.details_table.select()).all()
             assert len(rows) == 0
 
-            count = DetailsProcessor(fixture_mock_basic_config).process()
+            count = PopulateDetailsDB.procedure()
 
             rows = conn.execute(tables.details_table.select()).all()
 
