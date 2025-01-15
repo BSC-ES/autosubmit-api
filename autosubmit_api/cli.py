@@ -1,9 +1,15 @@
 import sys
 import os
 import argparse
-from typing import List
 from gunicorn.app.wsgiapp import WSGIApplication
 from autosubmit_api import __version__ as api_version
+from gunicorn.config import KNOWN_SETTINGS, Setting as GunicornSetting
+
+FIXED_GUNICORN_SETTINGS = [
+    "preload_app",
+    "capture_output",
+    "worker_class",
+]
 
 
 class StandaloneApplication(WSGIApplication):
@@ -25,18 +31,6 @@ class StandaloneApplication(WSGIApplication):
 def start_app_gunicorn(
     init_bg_tasks: bool = False,
     disable_bg_tasks: bool = False,
-    bind: List[str] = [],
-    workers: int = 1,
-    log_level: str = "info",
-    log_file: str = "-",
-    daemon: bool = False,
-    threads: int = 1,
-    worker_connections: int = 1000,
-    max_requests: int = 0,
-    max_requests_jitter: int = 0,
-    timeout: int = 600,
-    graceful_timeout: int = 30,
-    keepalive: int = 2,
     **kwargs,
 ):
     # API options
@@ -47,36 +41,16 @@ def start_app_gunicorn(
         os.environ.setdefault("DISABLE_BACKGROUND_TASKS", str(disable_bg_tasks))
 
     # Gunicorn options
+    ## Drop None values in kwargs
+    kwargs = {k: v for k, v in kwargs.items() if v is not None}
+
     options = {  # Options to always have
         "preload_app": True,
         "capture_output": True,
-        "timeout": 600,
-        "worker_class": "uvicorn.workers.UvicornWorker"
+        "worker_class": "uvicorn.workers.UvicornWorker",
+        "timeout": 600, # Change the default timeout to 10 minutes
+        **kwargs,
     }
-    if bind and len(bind) > 0:
-        options["bind"] = bind
-    if workers and workers > 0:
-        options["workers"] = workers
-    if log_level:
-        options["loglevel"] = log_level
-    if log_file:
-        options["errorlog"] = log_file
-    if daemon:
-        options["daemon"] = daemon
-    if threads and threads > 0:
-        options["threads"] = threads
-    if worker_connections and worker_connections > 0:
-        options["worker_connections"] = worker_connections
-    if max_requests and max_requests > 0:
-        options["max_requests"] = max_requests
-    if max_requests_jitter and max_requests_jitter > 0:
-        options["max_requests_jitter"] = max_requests_jitter
-    if timeout and timeout > 0:
-        options["timeout"] = timeout
-    if graceful_timeout and graceful_timeout > 0:
-        options["graceful_timeout"] = graceful_timeout
-    if keepalive and keepalive > 0:
-        options["keepalive"] = keepalive
 
     g_app = StandaloneApplication("autosubmit_api.app:app", options)
     print("Starting with gunicorn options: " + str(g_app.options))
@@ -116,57 +90,29 @@ def main():
     )
 
     # Gunicorn args
-    start_parser.add_argument(
-        "-b", "--bind", action="append", help="the socket to bind"
-    )
-    start_parser.add_argument(
-        "-w",
-        "--workers",
-        type=int,
-        help="the number of worker processes for handling requests",
-    )
-    start_parser.add_argument(
-        "--log-level", type=str, help="the granularity of Error log outputs"
-    )
-    start_parser.add_argument(
-        "--log-file", type=str, help="The Error log file to write to"
-    )
-    start_parser.add_argument(
-        "-D", "--daemon", action="store_true", help="Daemonize the Gunicorn process"
-    )
-    start_parser.add_argument(
-        "--threads",
-        type=int,
-        help="The number of worker threads for handling requests.",
-    )
-    start_parser.add_argument(
-        "--worker-connections",
-        type=int,
-        help="The maximum number of simultaneous clients.",
-    )
-    start_parser.add_argument(
-        "--max-requests",
-        type=int,
-        help="The maximum number of requests a worker will process before restarting.",
-    )
-    start_parser.add_argument(
-        "--max-requests-jitter",
-        type=int,
-        help="The maximum jitter to add to the max_requests setting.",
-    )
-    start_parser.add_argument(
-        "--timeout",
-        type=int,
-        help="Workers silent for more than this many seconds are killed and restarted.",
-    )
-    start_parser.add_argument(
-        "--graceful-timeout", type=int, help="Timeout for graceful workers restart."
-    )
-    start_parser.add_argument(
-        "--keepalive",
-        type=int,
-        help="The number of seconds to wait for requests on a Keep-Alive connection.",
-    )
+    for setting in KNOWN_SETTINGS:
+        setting: GunicornSetting = setting
+
+        # Skip fixed parameters
+        if setting.name in FIXED_GUNICORN_SETTINGS:
+            continue
+
+        if isinstance(setting.cli, list):
+            arg_options = {
+                "dest": setting.name,
+            }
+            if isinstance(setting.desc, str):
+                # Get first part of the description
+                description = setting.desc.split("\n")[0]
+                arg_options["help"] = f"[gunicorn] {description}"
+            if setting.type is not None:
+                arg_options["type"] = setting.type
+            if setting.action is not None:
+                arg_options["action"] = setting.action
+            if setting.const is not None:
+                arg_options["const"] = setting.const
+
+            start_parser.add_argument(*setting.cli, **arg_options)
 
     args = parser.parse_args()
     print("Starting autosubmit_api with args: " + str(vars(args)))
