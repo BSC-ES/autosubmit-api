@@ -38,6 +38,22 @@ class ExperimentDetailsRepository(ABC):
         :raises ValueError: If the experiment detail is not found
         """
 
+    @abstractmethod
+    def upsert_details(
+        self, exp_id: int, user: str, created: str, model: str, branch: str, hpc: str
+    ) -> int:
+        """
+        Upsert the experiment details
+
+        :param exp_id: The numerical experiment id
+        :param user: The user who created the experiment
+        :param created: The creation date of the experiment
+        :param model: The model used in the experiment
+        :param branch: The branch of the model
+        :param hpc: The HPC used in the experiment
+        :return: The number of rows affected
+        """
+
 
 class ExperimentDetailsSQLRepository(ExperimentDetailsRepository):
     def __init__(self, engine: Engine, table: Table):
@@ -58,7 +74,7 @@ class ExperimentDetailsSQLRepository(ExperimentDetailsRepository):
             conn.commit()
         return result.rowcount
 
-    def get_by_exp_id(self, exp_id):
+    def get_by_exp_id(self, exp_id: int):
         with self.engine.connect() as conn:
             statement = self.table.select().where(self.table.c.exp_id == exp_id)
             result = conn.execute(statement).first()
@@ -72,6 +88,27 @@ class ExperimentDetailsSQLRepository(ExperimentDetailsRepository):
             branch=result.branch,
             hpc=result.hpc,
         )
+
+    def upsert_details(self, exp_id, user, created, model, branch, hpc):
+        with self.engine.connect() as conn:
+            with conn.begin():
+                try:
+                    del_stmnt = self.table.delete().where(self.table.c.exp_id == exp_id)
+                    ins_stmnt = self.table.insert().values(
+                        exp_id=exp_id,
+                        user=user,
+                        created=created,
+                        model=model,
+                        branch=branch,
+                        hpc=hpc,
+                    )
+                    conn.execute(del_stmnt)
+                    result = conn.execute(ins_stmnt)
+                    conn.commit()
+                    return result.rowcount
+                except Exception as exc:
+                    conn.rollback()
+                    raise exc
 
 
 def create_experiment_details_repository() -> ExperimentDetailsRepository:

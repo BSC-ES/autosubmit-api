@@ -4,9 +4,9 @@ from apscheduler.triggers.interval import IntervalTrigger
 from apscheduler.triggers.cron import CronTrigger
 from autosubmit_api.bgtasks.bgtask import (
     BackgroundTaskTemplate,
-    PopulateDetailsDB,
     PopulateGraph,
 )
+from autosubmit_api.bgtasks.tasks.details_updater import PopulateDetailsDB
 from autosubmit_api.bgtasks.tasks.status_updater import StatusUpdater
 from autosubmit_api.config import (
     get_disable_background_tasks,

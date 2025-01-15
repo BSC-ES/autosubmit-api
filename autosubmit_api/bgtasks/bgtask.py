@@ -1,9 +1,7 @@
 from abc import ABC, abstractmethod
 import traceback
 from autosubmit_api.logger import logger
-from autosubmit_api.config.basicConfig import APIBasicConfig
 from autosubmit_api.workers.business import process_graph_drawings
-from autosubmit_api.workers.populate_details.populate import DetailsProcessor
 
 
 class BackgroundTaskTemplate(ABC):
@@ -39,16 +37,6 @@ class BackgroundTaskTemplate(ABC):
     @abstractmethod
     def trigger_options(self) -> dict:
         raise NotImplementedError
-
-
-class PopulateDetailsDB(BackgroundTaskTemplate):
-    id = "TASK_POPDET"
-    trigger_options = {"trigger": "interval", "minutes": 240}
-
-    @classmethod
-    def procedure(cls):
-        APIBasicConfig.read()
-        return DetailsProcessor(APIBasicConfig).process()
 
 
 class PopulateGraph(BackgroundTaskTemplate):
