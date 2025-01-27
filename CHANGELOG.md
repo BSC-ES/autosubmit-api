@@ -1,5 +1,14 @@
 # CHANGELOG
 
+### Pre-release v4.0.1b6 - Release date: TBD
+
+* Updated `autosubmit` dependency to handle correctly the pkl file reader
+* Updated docker image
+* Updated all DB interactions through SQLAlchemy
+* Update date strings in responses to follow ISO 8601, if possible
+* Update `/v3/expinfo/{expid}` to get all the data it can get without being blocked by an exception
+* Updated CLI to have all the `gunicorn` settings that are not fixed by the API
+
 ### Pre-release v4.0.1b5 - Release date: 2024-12-10
 
 * Improved search filters
