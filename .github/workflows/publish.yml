@@ -5,6 +5,10 @@ on:
     types:
       - created # Trigger on release creation
 
+permissions:
+  id-token: write
+  contents: read
+
 jobs:
   publish:
     runs-on: ubuntu-latest
