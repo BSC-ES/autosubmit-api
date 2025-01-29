@@ -1,6 +1,10 @@
 # CHANGELOG
 
-### Pre-release v4.0.1b6 - Release date: TBD
+### Pre-release v4.0.1b7 - Release date: TBD
+
+
+
+### Pre-release v4.0.1b6 - Release date: 2025-01-27
 
 * Updated `autosubmit` dependency to handle correctly the pkl file reader
 * Updated docker image
