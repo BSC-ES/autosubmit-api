@@ -586,7 +586,7 @@ class JobList:
         job_data = None
         try:
             experiment_history = ExperimentHistoryDirector(ExperimentHistoryBuilder(expid)).build_reader_experiment_history()
-            job_data = experiment_history.manager.get_all_last_job_data_dcs() if experiment_history.is_header_ready() else None
+            job_data = experiment_history.manager.get_all_last_job_data_dcs()
         except Exception:
             print(traceback.print_exc())
         # Result variables

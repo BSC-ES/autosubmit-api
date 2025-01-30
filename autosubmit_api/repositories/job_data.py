@@ -39,6 +39,7 @@ class ExperimentJobDataModel(BaseModel):
     err: Any
     rowstatus: Any
     children: Any
+    platform_output: Any
 
 
 class ExperimentJobDataRepository(ABC):
