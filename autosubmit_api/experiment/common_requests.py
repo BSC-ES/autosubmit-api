@@ -28,6 +28,7 @@ import json
 import subprocess
 
 from collections import deque
+from autosubmit_api.components.experiment.file_metadata import FileMetadata
 from autosubmit_api.components.experiment.pkl_organizer import PklOrganizer
 from autosubmit_api.components.jobs.job_factory import SimpleJob
 from autosubmit_api.config.confConfigStrategy import confConfigStrategy
@@ -152,34 +153,38 @@ def get_experiment_data(expid: str) -> Dict[str, Any]:
         "db_historic_version": "NA",
     }
 
+    # Get data from file metadata
+    try:
+        exp_paths = ExperimentPaths(expid)
+        file_metadata = FileMetadata(exp_paths.exp_dir)
+
+        result["path"] = exp_paths.exp_dir
+        result["owner_id"] = file_metadata.owner_id
+        result["owner"] = file_metadata.owner_name
+        result["time_last_access"] = file_metadata.access_time
+        result["time_last_mod"] = file_metadata.modified_time
+    except Exception as exc:
+        result["error"] = True
+        result["error_message"] += f"{str(exc)}\n"
+        logger.error((traceback.format_exc()))
+
     # Get info from as conf facade
     try:
         autosubmit_config_facade = ConfigurationFacadeDirector(
             AutosubmitConfigurationFacadeBuilder(expid)
         ).build_autosubmit_configuration_facade()
 
-        # Get directory stat data
-        result["path"] = autosubmit_config_facade.experiment_path
-        result["owner_id"] = autosubmit_config_facade.get_owner_id()
-        result["owner"] = autosubmit_config_facade.get_owner_name()
-        result["time_last_access"] = (
-            autosubmit_config_facade.get_experiment_last_access_time_as_datetime()
-        )
-        result["time_last_mod"] = (
-            autosubmit_config_facade.get_experiment_last_modified_time_as_datetime()
-        )
-
         # Get from parsing config files
-        result["version"] = autosubmit_config_facade.get_autosubmit_version()
-        result["model"] = autosubmit_config_facade.get_model()
-        result["branch"] = autosubmit_config_facade.get_branch()
         result["hpc"] = autosubmit_config_facade.get_main_platform()
+        result["branch"] = autosubmit_config_facade.get_branch()
+        result["model"] = autosubmit_config_facade.get_model()
+        result["chunk_size"] = autosubmit_config_facade.chunk_size
+        result["chunk_unit"] = autosubmit_config_facade.chunk_unit
+        result["version"] = autosubmit_config_facade.get_autosubmit_version()
         result["updateTime"] = autosubmit_config_facade.get_safety_sleep_time()
         result["pkl_timestamp"] = (
             autosubmit_config_facade.get_pkl_last_modified_timestamp()
         )
-        result["chunk_size"] = autosubmit_config_facade.chunk_size
-        result["chunk_unit"] = autosubmit_config_facade.chunk_unit
     except Exception as exc:
         result["error"] = True
         result["error_message"] += f"{str(exc)}\n"
