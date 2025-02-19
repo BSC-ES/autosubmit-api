@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 import math
 import os
+from autosubmit_api.components.experiment.file_metadata import FileMetadata
 from autosubmit_api.logger import logger
 from autosubmit_api.components.jobs.utils import convert_int_default
 from autosubmit_api.config.ymlConfigStrategy import ymlConfigStrategy
@@ -12,6 +13,7 @@ from autosubmit_api.common.utils import JobSection, parse_number_processors, tim
 from typing import List, Optional
 
 from autosubmit_api.persistance.experiment import ExperimentPaths
+from autosubmit_api.persistance.pkl_reader import PklReader
 
 class ProjectType:
   GIT = "git"
@@ -31,11 +33,6 @@ class ConfigurationFacade(metaclass=ABCMeta):
     self.log_path: str = ""
     self.pkl_filename: str = ""
     self.structures_path: str = ""
-    self.chunk_unit: str = ""
-    self.chunk_size = ""
-    self.current_years_per_sim: float = 0.0
-    self.sim_processors: int = 0
-    self.experiment_stat_data: os.stat_result = None
     self.warnings: List[str] = []
     self._process_basic_config()
 
@@ -113,56 +110,138 @@ class AutosubmitConfigurationFacade(ConfigurationFacade):
   def __init__(self, expid: str, basic_config: APIBasicConfig, autosubmit_config: AutosubmitConfigResolver):
     super(AutosubmitConfigurationFacade, self).__init__(expid, basic_config)
     self.autosubmit_conf = autosubmit_config
+    self.pkl_reader = PklReader(expid)
+    self.file_metadata = FileMetadata(self.experiment_path)
     self._process_advanced_config()
 
   def _process_advanced_config(self):
     """ Advanced Configuration from AutosubmitConfig """
     self.autosubmit_conf.reload()
-    self.chunk_unit = self.autosubmit_conf.get_chunk_size_unit()
-    self.chunk_size = self.autosubmit_conf.get_chunk_size()
-    self.current_years_per_sim = datechunk_to_year(self.chunk_unit, self.chunk_size)
-    self.sim_processors = self._get_processors_number(self.autosubmit_conf.get_processors(JobSection.SIM))
-    
-    # Process for yml
-    if isinstance(self.autosubmit_conf._configWrapper, ymlConfigStrategy):
-      self.sim_tasks = convert_int_default(self.autosubmit_conf._configWrapper.get_tasks(JobSection.SIM))
-      self.sim_nodes = convert_int_default(self.autosubmit_conf._configWrapper.get_nodes(JobSection.SIM))
-      self.sim_processors_per_node = convert_int_default(self.autosubmit_conf._configWrapper.get_processors_per_node(JobSection.SIM))
-      self.sim_exclusive = self.autosubmit_conf._configWrapper.get_exclusive(JobSection.SIM)
-    else:
-      self.sim_tasks = None
-      self.sim_nodes = None
-      self.sim_processors_per_node = None
-      self.sim_exclusive = False
-    
-    self.sim_processing_elements = self._calculate_processing_elements()
 
-    self.experiment_stat_data = os.stat(self.experiment_path)
+  @property
+  def chunk_unit(self) -> str:
+    if not hasattr(self, '_chunk_unit'):
+      self._chunk_unit = self.autosubmit_conf.get_chunk_size_unit()
+    return self._chunk_unit
+
+  @chunk_unit.setter
+  def chunk_unit(self, value: str):
+    self._chunk_unit = value
+  
+  @property
+  def chunk_size(self) -> int:
+    if not hasattr(self, '_chunk_size'):
+      self._chunk_size = self.autosubmit_conf.get_chunk_size()
+    return self._chunk_size
+
+  @chunk_size.setter
+  def chunk_size(self, value: int):
+    self._chunk_size = value
+  
+  @property
+  def current_years_per_sim(self) -> float:
+    if not hasattr(self, '_current_years_per_sim'):
+      self._current_years_per_sim = datechunk_to_year(self.chunk_unit, self.chunk_size)
+    return self._current_years_per_sim
+
+  @current_years_per_sim.setter
+  def current_years_per_sim(self, value: float):
+    self._current_years_per_sim = value
+  
+  @property
+  def sim_processors(self) -> int:
+    if not hasattr(self, '_sim_processors'):
+      self._sim_processors = self._get_processors_number(self.autosubmit_conf.get_processors(JobSection.SIM))
+    return self._sim_processors
+
+  @sim_processors.setter
+  def sim_processors(self, value: int):
+    self._sim_processors = value
+  
+  @property
+  def sim_processing_elements(self) -> int:
+    if not hasattr(self, '_sim_processing_elements'):
+      self._sim_processing_elements = self._calculate_processing_elements()
+    return self._sim_processing_elements
+
+  @sim_processing_elements.setter
+  def sim_processing_elements(self, value: int):
+    self._sim_processing_elements = value
+
+  @property
+  def sim_tasks(self) -> Optional[int]:
+    if not hasattr(self, '_sim_tasks'):
+      if isinstance(self.autosubmit_conf._configWrapper, ymlConfigStrategy):
+        self._sim_tasks = convert_int_default(self.autosubmit_conf._configWrapper.get_tasks(JobSection.SIM))
+      else:
+        self._sim_tasks = None
+    return self._sim_tasks
+
+  @sim_tasks.setter
+  def sim_tasks(self, value: Optional[int]):
+    self._sim_tasks = value
+  
+  @property
+  def sim_nodes(self) -> Optional[int]:
+    if not hasattr(self, '_sim_nodes'):
+      if isinstance(self.autosubmit_conf._configWrapper, ymlConfigStrategy):
+        self._sim_nodes = convert_int_default(self.autosubmit_conf._configWrapper.get_nodes(JobSection.SIM))
+      else:
+        self._sim_nodes = None
+    return self._sim_nodes
+
+  @sim_nodes.setter
+  def sim_nodes(self, value: Optional[int]):
+    self._sim_nodes = value
+  
+  @property
+  def sim_processors_per_node(self) -> Optional[int]:
+    if not hasattr(self, '_sim_processors_per_node'):
+      if isinstance(self.autosubmit_conf._configWrapper, ymlConfigStrategy):
+        self._sim_processors_per_node = convert_int_default(self.autosubmit_conf._configWrapper.get_processors_per_node(JobSection.SIM))
+      else:
+        self._sim_processors_per_node = None
+    return self._sim_processors_per_node
+
+  @sim_processors_per_node.setter
+  def sim_processors_per_node(self, value: Optional[int]):
+    self._sim_processors_per_node = value
+  
+  @property
+  def sim_exclusive(self) -> bool:
+    if not hasattr(self, '_sim_exclusive'):
+      if isinstance(self.autosubmit_conf._configWrapper, ymlConfigStrategy):
+        self._sim_exclusive = self.autosubmit_conf._configWrapper.get_exclusive(JobSection.SIM)
+      else:
+        self._sim_exclusive = False
+    return self._sim_exclusive
+
+  @sim_exclusive.setter
+  def sim_exclusive(self, value: bool):
+    self._sim_exclusive = value
 
   def get_pkl_last_modified_timestamp(self) -> int:
-    return int(os.stat(self.pkl_path).st_mtime)
+    return self.pkl_reader.get_modified_time()
 
   def get_pkl_last_modified_time_as_datetime(self) -> str:
     return timestamp_to_datetime_format(self.get_pkl_last_modified_timestamp())
 
   def get_experiment_last_access_time_as_datetime(self) -> str:
-    return timestamp_to_datetime_format(int(self.experiment_stat_data.st_atime))
+    return self.file_metadata.access_time
 
   def get_experiment_last_modified_time_as_datetime(self) -> str:
-    return timestamp_to_datetime_format(int(self.experiment_stat_data.st_mtime))
+    return self.file_metadata.modified_time
 
   def get_experiment_created_time_as_datetime(self) -> str:
     """ Important: Under OpenSUSE, it returns the last modified time."""
-    return timestamp_to_datetime_format(int(self.experiment_stat_data.st_ctime))
+    return self.file_metadata.created_time
 
   def get_owner_id(self) -> int:
-    return int(self.experiment_stat_data.st_uid)
+    return self.file_metadata.owner_id
 
   def get_owner_name(self) -> str:
     try:
-      stdout = os.popen("id -nu {0}".format(str(self.get_owner_id())))
-      owner_name = stdout.read().strip()
-      return str(owner_name)
+      return self.file_metadata.owner_name
     except Exception:
       return "NA"
 
