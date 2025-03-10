@@ -201,7 +201,9 @@ async def github_oauth2_login(code: Optional[str] = None) -> LoginResponse:
 
 
 @router.get("/oidc/login", name="OpenID Connect login")
-async def openid_connect_login(code: Optional[str] = None, redirect_uri: Optional[str] = None) -> LoginResponse:
+async def openid_connect_login(
+    code: Optional[str] = None, redirect_uri: Optional[str] = None
+) -> LoginResponse:
     """
     Authenticate user using a configured OpenID Connect provider.
     Is used as a callback URL for the OpenID Connect provider /authorize?response_type=code endpoint.
@@ -219,16 +221,23 @@ async def openid_connect_login(code: Optional[str] = None, redirect_uri: Optiona
             status_code=HTTPStatus.UNAUTHORIZED,
         )
 
+    payload = "&".join(
+        [
+            f"client_id={config.OIDC_CLIENT_ID}",
+            f"client_secret={config.OIDC_CLIENT_SECRET}",
+            f"code={code}",
+            "grant_type=authorization_code",
+            f"redirect_uri={redirect_uri}",
+        ]
+    )
+
     resp_obj: dict = requests.post(
         config.OIDC_TOKEN_URL,
-        data={
-            "client_id": config.OIDC_CLIENT_ID,
-            "client_secret": config.OIDC_CLIENT_SECRET,
-            "code": code,
-            "grant_type": "authorization_code",
-            "redirect_uri": redirect_uri,
+        data=payload,
+        headers={
+            "Accept": "application/json",
+            "Content-Type": "application/x-www-form-urlencoded",
         },
-        headers={"Accept": "application/json"},
     ).json()
     access_token = resp_obj.get("access_token")
 
