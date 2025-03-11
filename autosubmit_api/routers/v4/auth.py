@@ -1,14 +1,13 @@
-from datetime import datetime, timedelta
 from http import HTTPStatus
 from typing import Optional
 from fastapi import APIRouter, Depends, Request
 from fastapi.responses import JSONResponse, RedirectResponse
-import jwt
 from cas import CASClient
 import requests
 from autosubmit_api import config
-from autosubmit_api.auth import ProtectionLevels, auth_token_dependency
+from autosubmit_api.auth import ProtectionLevels, auth_token_dependency, oidc
 from autosubmit_api.auth.utils import validate_client
+from autosubmit_api.auth.utils import generate_jwt_token
 from autosubmit_api.models.responses import AuthResponse, LoginResponse
 
 
@@ -80,13 +79,7 @@ async def cas_v2_login(
             status_code=HTTPStatus.UNAUTHORIZED,
         )
     else:  # Login successful
-        payload = {
-            "user_id": user,
-            "sub": user,
-            "iat": int(datetime.now().timestamp()),
-            "exp": (datetime.now() + timedelta(seconds=config.JWT_EXP_DELTA_SECONDS)),
-        }
-        jwt_token = jwt.encode(payload, config.JWT_SECRET, config.JWT_ALGORITHM)
+        jwt_token = generate_jwt_token(user)
         return JSONResponse(
             content={
                 "authenticated": True,
@@ -172,13 +165,7 @@ async def github_oauth2_login(code: Optional[str] = None) -> LoginResponse:
 
     # Login successful
     if is_member:
-        payload = {
-            "user_id": username,
-            "sub": username,
-            "iat": int(datetime.now().timestamp()),
-            "exp": (datetime.now() + timedelta(seconds=config.JWT_EXP_DELTA_SECONDS)),
-        }
-        jwt_token = jwt.encode(payload, config.JWT_SECRET, config.JWT_ALGORITHM)
+        jwt_token = generate_jwt_token(username)
         return JSONResponse(
             content={
                 "authenticated": True,
@@ -197,4 +184,60 @@ async def github_oauth2_login(code: Optional[str] = None) -> LoginResponse:
                 "message": "User is not member of organization or team",
             },
             status_code=HTTPStatus.UNAUTHORIZED,
+        )
+
+
+@router.get("/oidc/login", name="OpenID Connect login")
+async def openid_connect_login(
+    code: Optional[str] = None, redirect_uri: Optional[str] = None
+) -> LoginResponse:
+    """
+    Authenticate user using a configured OpenID Connect provider.
+    Is used as a callback URL for the OpenID Connect provider /authorize?response_type=code endpoint.
+    This internally exchanges the code for an access token and id_token.
+
+    Username will be get from either the id_token or the userinfo endpoint configured by the
+    OIDC_USERNAME_SOURCE ["id_token", "userinfo"].
+    The JSON data will be the content of the id_token or it will use the access token to get user info.
+    The attribute to use as username is configured by the OIDC_USERNAME_CLAIM (default: "sub").
+    """
+    if not code:
+        return JSONResponse(
+            content={
+                "authenticated": False,
+                "user": None,
+                "token": None,
+                "message": "Can't verify user, missing code",
+            },
+            status_code=HTTPStatus.UNAUTHORIZED,
+        )
+
+    # Exchange code for access token and id_token
+    resp_obj = oidc.oidc_token_exchange(code, redirect_uri)
+
+    # Get username from id_token or userinfo
+    username = oidc.oidc_resolve_username(
+        resp_obj.get("id_token"), resp_obj.get("access_token")
+    )
+
+    if not username:
+        return JSONResponse(
+            content={
+                "authenticated": False,
+                "user": None,
+                "token": None,
+                "message": "Couldn't find user on OpenID Connect provider",
+            },
+            status_code=HTTPStatus.UNAUTHORIZED,
+        )
+    else:
+        jwt_token = generate_jwt_token(username)
+        return JSONResponse(
+            content={
+                "authenticated": True,
+                "user": username,
+                "token": f"Bearer {jwt_token}",
+                "message": "Token generated",
+            },
+            status_code=HTTPStatus.OK,
         )
