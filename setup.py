@@ -35,7 +35,7 @@ install_requires = [
     "pydantic~=2.5.2",
     "SQLAlchemy~=2.0.23",
     "python-cas~=1.6.0",
-    "autosubmit>=4.1.11",
+    "autosubmit==4.1.11",
 ]
 
 # Test dependencies
