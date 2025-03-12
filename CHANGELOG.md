@@ -1,6 +1,12 @@
 # CHANGELOG
 
-### Pre-release v4.0.1b6 - Release date: TBD
+### Pre-release v4.0.1b7 - Release date: 2025-03-12
+
+* **Important:** Added support to new job list pkl format introduced in Autosubmit version 4.1.12
+* Updated history module DB interactions through SQLAlchemy
+* Patched unintended creation of `structure_{expid}.db` file
+
+### Pre-release v4.0.1b6 - Release date: 2025-01-27
 
 * Updated `autosubmit` dependency to handle correctly the pkl file reader
 * Updated docker image
