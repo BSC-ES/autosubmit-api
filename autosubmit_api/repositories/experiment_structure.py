@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import List
 from pydantic import BaseModel
+from sqlalchemy.schema import CreateTable
 from sqlalchemy import Engine, Table
 from autosubmit_api.database import tables
 from autosubmit_api.database.common import (
@@ -29,6 +30,11 @@ class ExperimentStructureSQLRepository(ExperimentStructureRepository):
         self.expid = expid
         self.engine = engine
         self.table = table
+
+        # Initialize the table
+        with self.engine.connect() as conn:
+            conn.execute(CreateTable(self.table, if_not_exists=True))
+            conn.commit()
 
     def get_all(self):
         with self.engine.connect() as conn:

@@ -38,8 +38,8 @@ class PklJobModel(BaseJobModel):
     date: Optional[datetime.datetime]
     member: Optional[str]
     chunk: Optional[int]
-    out_path_local: str
-    err_path_local: str
-    out_path_remote: str
-    err_path_remote: str
+    out_path_local: Optional[str]
+    err_path_local: Optional[str]
+    out_path_remote: Optional[str]
+    err_path_remote: Optional[str]
     wrapper_type: Optional[str]
