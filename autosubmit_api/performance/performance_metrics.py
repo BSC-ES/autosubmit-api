@@ -18,6 +18,8 @@ class PerformanceMetrics(object):
     self.total_sim_run_time: int = 0
     self.total_sim_queue_time: int = 0
     self.valid_sim_yps_sum: float = 0.0
+    self.valid_sim_energy_sum: float= 0.0
+    self.valid_sim_footprint_sum: float = 0.0
     self.SYPD: float = 0
     self.ASYPD: float = 0
     self.CHSY: float = 0
@@ -31,6 +33,14 @@ class PerformanceMetrics(object):
     self.post_jobs_total_time_average: int = 0
     self.sim_jobs_valid: List[SimJob] = []
     self.sim_jobs_invalid: List[SimJob] = []
+    self.footprint_platform: Dict[str, Dict[str, float]] = { #TODO: Search information about the platforms
+        "marenostrum5": {"CF": 0.7, "PUE": 4.0},
+        "marenostrum4": {"CF": 0.3, "PUE": 1.35},
+        "local": {"CF": 0.0, "PUE": 0.0},
+    }
+    self.sim_jobs_platform = ""
+    self.sim_platform_CF = 0.0
+    self.sim_platform_PUE = 0.0
     try:
       self.joblist_helper: JobListHelper = joblist_helper
       self.configuration_facade: AutosubmitConfigurationFacade = self.joblist_helper.configuration_facade
@@ -44,7 +54,8 @@ class PerformanceMetrics(object):
       logger.error((traceback.format_exc()))
       logger.error((str(exp)))
     if self.error is False:
-      self.configuration_facade.update_sim_jobs(self.pkl_organizer.sim_jobs) # This will assign self.configuration_facade.sim_processors to all the SIM jobs
+      self.configuration_facade.update_sim_jobs(self.pkl_organizer.sim_jobs) 
+      self._update_sim_jobs_platform(self.configuration_facade.get_section_platform(utils.JobSection.SIM))
       self._update_jobs_with_time_data()
       self._calculate_post_jobs_total_time_average()
       self.sim_jobs_valid, self.sim_jobs_invalid = utils.separate_job_outliers(self.pkl_organizer.get_completed_section_jobs(utils.JobSection.SIM))
@@ -56,6 +67,20 @@ class PerformanceMetrics(object):
       self._calculate_global_metrics()
       self._unify_warnings()
 
+  def _update_sim_jobs_platform(self, platform_conf: str):
+    if isinstance(platform_conf, str):
+      platform = platform_conf.lower()
+      if platform in self.footprint_platform:
+        self.sim_jobs_platform = platform
+        self.sim_platform_CF = self.footprint_platform[platform]["CF"]
+        self.sim_platform_PUE = self.footprint_platform[platform]["PUE"]
+      else:
+        warning_msg = "The platform '%s' is not registered for footprint calculation; therefore the footprint will be 0." % platform
+        self.warnings.append(warning_msg)
+    else:
+      warning_msg = "The platform could not be obtained; therefore the footprint will be 0."
+      self.warnings.append(warning_msg)
+
 
   def _update_jobs_with_time_data(self):
       self.joblist_helper.update_with_timedata(self.pkl_organizer.sim_jobs)
@@ -66,7 +91,9 @@ class PerformanceMetrics(object):
       self.joblist_helper.update_with_yps_per_run(self.pkl_organizer.sim_jobs)
 
   def _calculate_global_metrics(self):
-      self.valid_sim_yps_sum = sum(job.years_per_sim for job in self.sim_jobs_valid)
+      self.valid_sim_yps_sum = self._calculate_sum_yps()
+      self.valid_sim_energy_sum = self._calculate_sum_energy()
+      self.valid_sim_footprint_sum = self._calculate_sum_footprint()
       self.SYPD = self._calculate_SYPD()
       self.ASYPD = self._calculate_ASYPD()
       self.RSYPD = self._calculate_RSYPD()
@@ -151,6 +178,17 @@ class PerformanceMetrics(object):
       CHSY = sum(job.CHSY for job in self.sim_jobs_valid)/len(self.sim_jobs_valid)
       return round(CHSY, 4)
     return 0
+  
+  def _calculate_sum_yps(self):
+    return sum(job.years_per_sim for job in self.sim_jobs_valid)
+  
+  def _calculate_sum_energy(self):
+    return sum(job.energy for job in self.sim_jobs_valid)
+  
+  def _calculate_sum_footprint(self):
+    if self.sim_jobs_platform == "":
+      return 0.0
+    return sum(job.energy * self.sim_platform_CF * self.sim_platform_PUE for job in self.sim_jobs_valid)
 
   def _get_RSYPD_support_list(self) -> List[Job]:
     """ The support list for the divisor can have a different source """
@@ -170,7 +208,7 @@ class PerformanceMetrics(object):
       divisor = max(support_list[-1].finish_ts - self.sim_jobs_valid[0].start_ts, 0.0)
     return divisor
 
-  def _sim_job_to_dict(self, simjob: SimJob):
+  def _sim_job_to_dict(self, simjob: SimJob): 
     return {
       "name": simjob.name,
       "queue": simjob.queue_time,
@@ -182,16 +220,22 @@ class PerformanceMetrics(object):
       "energy": simjob.energy,
       "yps": simjob.years_per_sim,
       "ncpus": simjob.ncpus,
-      "chunk": simjob.chunk
+      "chunk": simjob.chunk,
+      "footprint": simjob.energy * self.sim_platform_CF * self.sim_platform_PUE, #TODO: Add precise units (ask Sergi)
     }
 
   def to_json(self) -> Dict:
-    return {"SYPD": self.SYPD,
+    return {"SY": self.valid_sim_yps_sum,
+            "SYPD": self.SYPD,
             "ASYPD": self.ASYPD,
             "RSYPD": self.RSYPD,
             "CHSY": self.CHSY,
             "JPSY": self.JPSY,
             "Parallelization": self.processing_elements,
+            "Total_energy": self.valid_sim_energy_sum,
+            "Total_footprint": self.valid_sim_footprint_sum,
+            "SIM_platform_info":{"name": self.sim_jobs_platform, "CF": self.sim_platform_CF, "PUE": self.sim_platform_PUE}, #TODO: Send None when no info? (ask Sergi)
+            "Platform_PUE": self.sim_platform_PUE,
             "considered": self._considered,
             "not_considered": self._not_considered,
             "error": self.error,
