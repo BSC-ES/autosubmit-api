@@ -33,15 +33,18 @@ class PerformanceMetrics(object):
     self.post_jobs_total_time_average: int = 0
     self.sim_jobs_valid: List[SimJob] = []
     self.sim_jobs_invalid: List[SimJob] = []
-    self.footprint_platform: Dict[str, Dict[str, float]] = { #TODO: Search information about the platforms
-        "marenostrum5": {"CF": 357000, "PUE": 1.35}, 
-        "marenostrum4": {"CF": 357000, "PUE": 1.35},
-        "local": {"CF": 0.0, "PUE": 0.0},
+    self.footprint_platform: Dict[str, Dict[str, float]] = { 
+      "marenostrum5": {"CF": 357000, "PUE": 1.08},
+      "mn5": {"CF": 357000, "PUE": 1.08},
+      "marenostrum4": {"CF": 357000, "PUE": 1.35},
+      "mn4": {"CF": 357000, "PUE": 1.35},
+      "lumi": {"CF": 0, "PUE": 1.04},
+      "local": {"CF": 0.0, "PUE": 0.0},
     }
     self.sim_jobs_platform = ""
     self.sim_platform_CF = 0.0
     self.sim_platform_PUE = 0.0
-    self.units_conversor_energy = 3.6e9 # Joules to MWh
+    self.units_conversor_energy = 3.6e9 
     try:
       self.joblist_helper: JobListHelper = joblist_helper
       self.configuration_facade: AutosubmitConfigurationFacade = self.joblist_helper.configuration_facade
