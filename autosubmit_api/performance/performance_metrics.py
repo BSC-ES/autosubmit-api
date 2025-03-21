@@ -34,13 +34,14 @@ class PerformanceMetrics(object):
     self.sim_jobs_valid: List[SimJob] = []
     self.sim_jobs_invalid: List[SimJob] = []
     self.footprint_platform: Dict[str, Dict[str, float]] = { #TODO: Search information about the platforms
-        "marenostrum5": {"CF": 0.7, "PUE": 4.0},
-        "marenostrum4": {"CF": 0.3, "PUE": 1.35},
+        "marenostrum5": {"CF": 357000, "PUE": 1.35}, 
+        "marenostrum4": {"CF": 357000, "PUE": 1.35},
         "local": {"CF": 0.0, "PUE": 0.0},
     }
     self.sim_jobs_platform = ""
     self.sim_platform_CF = 0.0
     self.sim_platform_PUE = 0.0
+    self.units_conversor_energy = 3.6e9 # Joules to MWh
     try:
       self.joblist_helper: JobListHelper = joblist_helper
       self.configuration_facade: AutosubmitConfigurationFacade = self.joblist_helper.configuration_facade
@@ -188,7 +189,7 @@ class PerformanceMetrics(object):
   def _calculate_sum_footprint(self):
     if self.sim_jobs_platform == "":
       return 0.0
-    return sum(job.energy * self.sim_platform_CF * self.sim_platform_PUE for job in self.sim_jobs_valid)
+    return sum(job.energy * self.sim_platform_CF * self.sim_platform_PUE for job in self.sim_jobs_valid) / self.units_conversor_energy
 
   def _get_RSYPD_support_list(self) -> List[Job]:
     """ The support list for the divisor can have a different source """
@@ -221,7 +222,7 @@ class PerformanceMetrics(object):
       "yps": simjob.years_per_sim,
       "ncpus": simjob.ncpus,
       "chunk": simjob.chunk,
-      "footprint": simjob.energy * self.sim_platform_CF * self.sim_platform_PUE, #TODO: Add precise units (ask Sergi)
+      "footprint": (simjob.energy / self.units_conversor_energy) * self.sim_platform_CF * self.sim_platform_PUE, 
     }
 
   def to_json(self) -> Dict:
@@ -234,7 +235,7 @@ class PerformanceMetrics(object):
             "Parallelization": self.processing_elements,
             "Total_energy": self.valid_sim_energy_sum,
             "Total_footprint": self.valid_sim_footprint_sum,
-            "SIM_platform_info":{"name": self.sim_jobs_platform, "CF": self.sim_platform_CF, "PUE": self.sim_platform_PUE}, #TODO: Send None when no info? (ask Sergi)
+            "SIM_platform_info":{"name": self.sim_jobs_platform, "CF": self.sim_platform_CF, "PUE": self.sim_platform_PUE},
             "Platform_PUE": self.sim_platform_PUE,
             "considered": self._considered,
             "not_considered": self._not_considered,
