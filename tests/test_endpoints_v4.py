@@ -36,6 +36,76 @@ class TestCASV2Login:
         assert response.status_code == HTTPStatus.UNAUTHORIZED
 
 
+class TestOIDCLogin:
+    endpoint = "/v4/auth/oidc/login"
+
+    def test_no_code(self, fixture_fastapi_client: TestClient):
+        resp_obj = fixture_fastapi_client.get(
+            self.endpoint, params={"redirect_uri": "foo"}
+        ).json()
+        assert resp_obj.get("authenticated") is False
+        assert resp_obj.get("user") is None
+        assert resp_obj.get("token") is None
+
+    def test_valid(
+        self, fixture_fastapi_client: TestClient, monkeypatch: pytest.MonkeyPatch
+    ):
+        username = str(uuid4())
+        monkeypatch.setattr(
+            "autosubmit_api.auth.oidc.oidc_token_exchange",
+            custom_return_value(
+                {
+                    "access_token": "access",
+                    "id_token": "id",
+                }
+            ),
+        )
+        monkeypatch.setattr(
+            "autosubmit_api.auth.oidc.oidc_resolve_username",
+            custom_return_value(username),
+        )
+
+        response = fixture_fastapi_client.get(
+            self.endpoint,
+            params={"code": "123", "redirect_uri": "foo"},
+            follow_redirects=False,
+        )
+        resp_obj: dict = response.json()
+
+        assert response.status_code == HTTPStatus.OK
+        assert resp_obj.get("authenticated") is True
+        assert resp_obj.get("user") == username
+        assert resp_obj.get("token") is not None
+
+    def test_no_username(
+        self, fixture_fastapi_client: TestClient, monkeypatch: pytest.MonkeyPatch
+    ):
+        monkeypatch.setattr(
+            "autosubmit_api.auth.oidc.oidc_token_exchange",
+            custom_return_value(
+                {
+                    "access_token": "access",
+                    "id_token": "id",
+                }
+            ),
+        )
+        monkeypatch.setattr(
+            "autosubmit_api.auth.oidc.oidc_resolve_username", custom_return_value(None)
+        )
+
+        response = fixture_fastapi_client.get(
+            self.endpoint,
+            params={"code": "123", "redirect_uri": "foo"},
+            follow_redirects=False,
+        )
+        resp_obj: dict = response.json()
+
+        assert response.status_code == HTTPStatus.UNAUTHORIZED
+        assert resp_obj.get("authenticated") is False
+        assert resp_obj.get("user") is None
+        assert resp_obj.get("token") is None
+
+
 class TestJWTVerify:
     endpoint = "/v4/auth/verify-token"
 
