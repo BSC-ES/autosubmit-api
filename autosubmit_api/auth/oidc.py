@@ -54,8 +54,9 @@ def oidc_resolve_username(id_token: str, access_token: str) -> str:
         username = user_info.get(oidc_username_claim)
     else:
         # Get username from id_token
+        id_token_bytes = id_token.encode("utf-8")
         id_token_payload: dict = jwt.decode(
-            id_token, options={"verify_signature": False}
+            id_token_bytes, options={"verify_signature": False}
         )
         username = id_token_payload.get(oidc_username_claim)
 
