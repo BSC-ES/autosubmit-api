@@ -68,7 +68,8 @@ class TestVerifyToken:
         payload = {
             "user_id": random_user,
             "exp": (
-                datetime.now(timezone.utc) + timedelta(seconds=config.JWT_EXP_DELTA_SECONDS)
+                datetime.now(timezone.utc)
+                + timedelta(seconds=config.JWT_EXP_DELTA_SECONDS)
             ),
         }
         jwt_token = jwt.encode(payload, config.JWT_SECRET, config.JWT_ALGORITHM)
@@ -109,40 +110,25 @@ class TestExpInfo:
 class TestPerformance:
     endpoint = "/v3/performance/{expid}"
 
-    def test_parallelization(self, fixture_fastapi_client: TestClient):
+    @pytest.mark.parametrize(
+        "expid,expected_parallelization",
+        [
+            ("a007", 8),  # without PROCESSORS_PER_NODE
+            ("a3tb", 768),  # without PROCESSORS_PER_NODE
+            ("a003", 16),  # Parallelization that comes from default platform
+        ],
+    )
+    def test_parallelization(
+        self, fixture_fastapi_client: TestClient, expid, expected_parallelization
+    ):
         """
         Test parallelization without PROCESSORS_PER_NODE
         """
-        expid = "a007"
         response = fixture_fastapi_client.get(self.endpoint.format(expid=expid))
         resp_obj: dict = response.json()
         assert resp_obj["error_message"] == ""
         assert resp_obj["error"] is False
-        assert resp_obj["Parallelization"] == 8
-        assert isinstance(resp_obj["considered"], list) and isinstance(
-            resp_obj["not_considered"], list
-        )
-
-        expid = "a3tb"
-        response = fixture_fastapi_client.get(self.endpoint.format(expid=expid))
-        resp_obj: dict = response.json()
-        assert resp_obj["error_message"] == ""
-        assert resp_obj["error"] is False
-        assert resp_obj["Parallelization"] == 768
-        assert isinstance(resp_obj["considered"], list) and isinstance(
-            resp_obj["not_considered"], list
-        )
-
-    def test_parallelization_platforms(self, fixture_fastapi_client: TestClient):
-        """
-        Test parallelization that comes from default platform
-        """
-        expid = "a003"
-        response = fixture_fastapi_client.get(self.endpoint.format(expid=expid))
-        resp_obj: dict = response.json()
-        assert resp_obj["error_message"] == ""
-        assert resp_obj["error"] is False
-        assert resp_obj["Parallelization"] == 16
+        assert resp_obj["Parallelization"] == expected_parallelization
         assert isinstance(resp_obj["considered"], list) and isinstance(
             resp_obj["not_considered"], list
         )
@@ -500,10 +486,7 @@ class TestExpRunLog:
             (
                 "a003",
                 [
-                    (
-                        2,
-                        "2024-01-12 16:34:27,344 Job ID: 1589427"
-                    ),
+                    (2, "2024-01-12 16:34:27,344 Job ID: 1589427"),
                     (149, "2024-01-12 16:35:14,054 Run successful"),
                 ],
             ),
