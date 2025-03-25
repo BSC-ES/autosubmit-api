@@ -68,11 +68,24 @@ class PerformanceMetrics(object):
     if platform: 
       self.sim_jobs_platform = platform
       conf_platform = self.configuration_facade.get_platorm_conf_footprint(platform)
-      self.sim_platform_CF = conf_platform["CF"]
-      self.sim_platform_PUE = conf_platform["PUE"]
+      cf = conf_platform["CF"]
+      pue = conf_platform["PUE"]
+      if not cf:
+        self.warnings.append("The CF for platform {0} could not be obtained; therefore the footprint will be 0.".format(self.sim_jobs_platform))
+      else:
+        try:
+          self.sim_platform_CF = float(cf)
+        except ValueError:
+          self.warnings.append("The CF for platform {0} value is not a valid number; therefore the footprint will be 0.".format(self.sim_jobs_platform))
+      if not pue:
+        self.warnings.append("The PUE for platform {0} could not be obtained; therefore the footprint will be 0.".format(self.sim_jobs_platform))
+      else:
+        try:
+          self.sim_platform_PUE = float(pue)
+        except ValueError:
+          self.warnings.append("The PUE for platform {0} value is not a valid number; therefore the footprint will be 0.".format(self.sim_jobs_platform))
     else:
-      warning_msg = "The platform could not be obtained; therefore the footprint will be 0."
-      self.warnings.append(warning_msg)
+      self.warnings.append("The platform could not be obtained; therefore the footprint will be 0.")
 
 
   def _update_jobs_with_time_data(self):

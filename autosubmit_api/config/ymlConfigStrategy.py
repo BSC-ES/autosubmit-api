@@ -135,8 +135,6 @@ class ymlConfigStrategy(IConfigStrategy):
     def get_platform_conf_footprint(self, platform) -> dict:
         cf = self._get_platform_config(platform).get("CF", "")
         pue = self._get_platform_config(platform).get("PUE", "")
-        cf = float(cf) if cf else 0
-        pue = float(pue) if pue else 0
         return {"CF": cf, "PUE": pue}
     
     def get_platform_PUE(self, platform):
