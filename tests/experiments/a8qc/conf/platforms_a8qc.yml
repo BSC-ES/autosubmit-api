@@ -10,6 +10,8 @@ PLATFORMS:
     TEST_SUITE: 'False'
     MAX_WALLCLOCK: 48:00
     MAX_PROCESSORS: '9600'
+    CF: '357000'
+    PUE: '1.08'
   marenostrum_archive:
     TYPE: ps
     HOST: transfer1.bsc.es,transfer2.bsc.es

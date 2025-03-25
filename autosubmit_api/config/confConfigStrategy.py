@@ -199,6 +199,13 @@ class confConfigStrategy(IConfigStrategy):
 
     def get_platform_wallclock(self, platform):
         return self._platforms_parser.get_option(platform, 'MAX_WALLCLOCK', '')
+    
+    def get_platform_conf_footprint(self, platform):
+        cf = self._platforms_parser.get_option(platform, 'CF', '')
+        pue = self._platforms_parser.get_option(platform, 'PUE', '')
+        cf = float(cf) if cf else 0
+        pue = float(pue) if pue else 0
+        return {"CF": cf, "PUE": pue}
 
     def get_wallclock(self, section):
         """
