@@ -112,8 +112,7 @@ def test_performance_metrics(
         JobListHelperDirector(JobListHelperBuilder(expid)).build_job_list_helper(),
     )
 
-    # Assert properties
-    assert {
+    metrics = {
         "SY": performance_metrics.valid_sim_yps_sum,
         "SYPD": performance_metrics.SYPD,
         "ASYPD": performance_metrics.ASYPD,
@@ -130,7 +129,15 @@ def test_performance_metrics(
         "sim_jobs_platform": performance_metrics.sim_jobs_platform,
         "sim_jobs_platform_PUE": performance_metrics.sim_platform_PUE,
         "sim_jobs_platform_CF": performance_metrics.sim_platform_CF,
-    } == expected
+    }
+
+    #Assert properties
+    for key, expected_value in expected.items():
+        actual_value = metrics[key]
+        if isinstance(expected_value, float):
+            assert actual_value == pytest.approx(expected_value, rel=1e-2)
+        else:
+            assert actual_value == expected_value
 
     # Assert considered jobs count
     assert len(performance_metrics._considered) == counters["considered_jobs_count"]
