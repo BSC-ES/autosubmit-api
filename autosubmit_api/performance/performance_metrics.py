@@ -8,6 +8,8 @@ from autosubmit_api.components.jobs.joblist_helper import JobListHelper
 from autosubmit_api.components.jobs.job_factory import Job, SimJob
 from typing import List, Dict
 
+UNITS_CONVERSOR_ENERGY = 3.6e9 
+
 class PerformanceMetrics(object):
   """ Manages Performance Metrics """
 
@@ -33,18 +35,9 @@ class PerformanceMetrics(object):
     self.post_jobs_total_time_average: int = 0
     self.sim_jobs_valid: List[SimJob] = []
     self.sim_jobs_invalid: List[SimJob] = []
-    self.footprint_platform: Dict[str, Dict[str, float]] = { 
-      "marenostrum5": {"CF": 357000, "PUE": 1.08},
-      "mn5": {"CF": 357000, "PUE": 1.08},
-      "marenostrum4": {"CF": 357000, "PUE": 1.35},
-      "mn4": {"CF": 357000, "PUE": 1.35},
-      "lumi": {"CF": 0, "PUE": 1.04},
-      "local": {"CF": 0.0, "PUE": 0.0},
-    }
     self.sim_jobs_platform = ""
     self.sim_platform_CF = 0.0
     self.sim_platform_PUE = 0.0
-    self.units_conversor_energy = 3.6e9 
     try:
       self.joblist_helper: JobListHelper = joblist_helper
       self.configuration_facade: AutosubmitConfigurationFacade = self.joblist_helper.configuration_facade
@@ -58,7 +51,7 @@ class PerformanceMetrics(object):
       logger.error((traceback.format_exc()))
       logger.error((str(exp)))
     if self.error is False:
-      self.configuration_facade.update_sim_jobs(self.pkl_organizer.sim_jobs) 
+      self.configuration_facade.update_sim_jobs(self.pkl_organizer.sim_jobs) # This will assign self.configuration_facade.sim_processors to all the SIM jobs
       self._update_sim_jobs_platform(self.configuration_facade.get_section_platform(utils.JobSection.SIM))
       self._update_jobs_with_time_data()
       self._calculate_post_jobs_total_time_average()
@@ -71,19 +64,28 @@ class PerformanceMetrics(object):
       self._calculate_global_metrics()
       self._unify_warnings()
 
-  def _update_sim_jobs_platform(self, platform_conf: str):
-    if isinstance(platform_conf, str):
-      platform = platform_conf.lower()
-      if platform in self.footprint_platform:
-        self.sim_jobs_platform = platform
-        self.sim_platform_CF = self.footprint_platform[platform]["CF"]
-        self.sim_platform_PUE = self.footprint_platform[platform]["PUE"]
+  def _update_sim_jobs_platform(self, platform: str):
+    if platform: 
+      self.sim_jobs_platform = platform
+      conf_platform = self.configuration_facade.get_platorm_conf_footprint(platform)
+      cf = conf_platform["CF"]
+      pue = conf_platform["PUE"]
+      if not cf:
+        self.warnings.append("The CF for platform {0} could not be obtained; therefore the footprint will be 0.".format(self.sim_jobs_platform))
       else:
-        warning_msg = "The platform '%s' is not registered for footprint calculation; therefore the footprint will be 0." % platform
-        self.warnings.append(warning_msg)
+        try:
+          self.sim_platform_CF = float(cf)
+        except ValueError:
+          self.warnings.append("The CF for platform {0} value is not a valid number; therefore the footprint will be 0.".format(self.sim_jobs_platform))
+      if not pue:
+        self.warnings.append("The PUE for platform {0} could not be obtained; therefore the footprint will be 0.".format(self.sim_jobs_platform))
+      else:
+        try:
+          self.sim_platform_PUE = float(pue)
+        except ValueError:
+          self.warnings.append("The PUE for platform {0} value is not a valid number; therefore the footprint will be 0.".format(self.sim_jobs_platform))
     else:
-      warning_msg = "The platform could not be obtained; therefore the footprint will be 0."
-      self.warnings.append(warning_msg)
+      self.warnings.append("The platform could not be obtained; therefore the footprint will be 0.")
 
 
   def _update_jobs_with_time_data(self):
@@ -192,7 +194,12 @@ class PerformanceMetrics(object):
   def _calculate_sum_footprint(self):
     if self.sim_jobs_platform == "":
       return 0.0
-    return sum(job.energy * self.sim_platform_CF * self.sim_platform_PUE for job in self.sim_jobs_valid) / self.units_conversor_energy
+    return sum(job.energy * self.sim_platform_CF * self.sim_platform_PUE for job in self.sim_jobs_valid) / UNITS_CONVERSOR_ENERGY
+  
+  def _calculate_sim_job_footprint(self, simjob: SimJob):
+    if self.sim_jobs_platform == "":
+      return 0.0
+    return (simjob.energy / UNITS_CONVERSOR_ENERGY) * self.sim_platform_CF * self.sim_platform_PUE
 
   def _get_RSYPD_support_list(self) -> List[Job]:
     """ The support list for the divisor can have a different source """
@@ -225,7 +232,7 @@ class PerformanceMetrics(object):
       "yps": simjob.years_per_sim,
       "ncpus": simjob.ncpus,
       "chunk": simjob.chunk,
-      "footprint": (simjob.energy / self.units_conversor_energy) * self.sim_platform_CF * self.sim_platform_PUE, 
+      "footprint": self._calculate_sim_job_footprint(simjob), 
     }
 
   def to_json(self) -> Dict:
@@ -239,7 +246,6 @@ class PerformanceMetrics(object):
             "Total_energy": self.valid_sim_energy_sum,
             "Total_footprint": self.valid_sim_footprint_sum,
             "SIM_platform_info":{"name": self.sim_jobs_platform, "CF": self.sim_platform_CF, "PUE": self.sim_platform_PUE},
-            "Platform_PUE": self.sim_platform_PUE,
             "considered": self._considered,
             "not_considered": self._not_considered,
             "error": self.error,

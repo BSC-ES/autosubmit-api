@@ -27,3 +27,5 @@ GIT:
 PLATFORMS:
   MN4:
     PROCESSORS: 16
+    CF: '357000'
+    PUE: '1.35'

@@ -280,6 +280,9 @@ class AutosubmitConfigurationFacade(ConfigurationFacade):
 
   def get_platform_max_wallclock(self, platform_name):
     return str(self.autosubmit_conf.get_platform_wallclock(platform_name))
+  
+  def get_platorm_conf_footprint(self, platform_name):
+    return self.autosubmit_conf.get_platform_conf_footprint(platform_name)
 
   def get_safety_sleep_time(self) -> int:
     return self.autosubmit_conf.get_safetysleeptime()
