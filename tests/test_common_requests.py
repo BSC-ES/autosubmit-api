@@ -27,14 +27,18 @@ class TestGetExperimentData:
             mock.side_effect = Exception("AutosubmitConfig failed")
             result = get_experiment_data(expid)
 
+            # Successful ones
             assert result.get("expid") == expid
             assert result.get("description") == "networkx pkl"
             assert result.get("total_jobs") == 8
             assert result.get("completed_jobs") == 8
+            assert result.get("path") != "NA"
+            assert len(result.get("time_last_access")) > 0
 
             # Failed ones giving default values
-            assert result.get("path") == "NA"
-            assert len(result.get("time_last_access")) == 0
+            assert result.get("hpc") == ""
+            assert result.get("chunk_size") == 0
+            assert result.get("chunk_unit") == "default"
 
     def test_dbs_missing(self, fixture_mock_basic_config):
         expid = "a1ve"
@@ -58,6 +62,9 @@ class TestGetExperimentData:
             assert result.get("expid") == expid
             assert result.get("path") != "NA"
             assert len(result.get("time_last_access")) > 0
+            assert result.get("hpc") == "LOCAL"
+            assert result.get("chunk_size") == 4
+            assert result.get("chunk_unit") == "month"
 
             # Failed ones giving default values
             assert result.get("description") == ""
