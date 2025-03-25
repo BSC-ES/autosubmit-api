@@ -1,0 +1,37 @@
+PLATFORMS:
+  marenostrum5:
+    TYPE: slurm
+    HOST: glogin1.bsc.es
+    QUEUE: gp_resa
+    PROJECT: cns109
+    USER: bsc341003
+    SCRATCH_DIR: /gpfs/scratch
+    ADD_PROJECT_TO_HOST: 'False'
+    TEST_SUITE: 'False'
+    MAX_WALLCLOCK: 48:00
+    MAX_PROCESSORS: '9600'
+  marenostrum_archive:
+    TYPE: ps
+    HOST: transfer1.bsc.es,transfer2.bsc.es
+    PROJECT: cns109
+    USER: bsc341003
+    SCRATCH_DIR: /gpfs/scratch
+    ADD_PROJECT_TO_HOST: 'False'
+    TEST_SUITE: 'False'
+  nord3v2:
+    TYPE: slurm
+    HOST: nord3.bsc.es
+    PROJECT: cns109
+    USER: bsc341003
+    ADD_PROJECT_TO_HOST: 'False'
+    SCRATCH_DIR: /gpfs/scratch
+    TEST_SUITE: 'False'
+    MAX_WALLCLOCK: 48:00
+    MAX_PROCESSORS: '1024'
+    PROCESSORS_PER_NODE: '16'
+  bscearth000:
+    TYPE: ps
+    HOST: bscearth001.int.bsc.es
+    PROJECT: Earth
+    USER: jyun
+    SCRATCH_DIR: /esarchive/scratch
