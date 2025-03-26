@@ -194,11 +194,9 @@ class PerformanceMetrics(object):
   def _calculate_sum_footprint(self):
     if self.sim_jobs_platform == "":
       return 0.0
-    return sum(job.energy * self.sim_platform_CF * self.sim_platform_PUE for job in self.sim_jobs_valid) / UNITS_CONVERSOR_ENERGY
+    return  ((self.valid_sim_energy_sum / UNITS_CONVERSOR_ENERGY) * self.sim_platform_CF * self.sim_platform_PUE)  
   
   def _calculate_sim_job_footprint(self, simjob: SimJob):
-    if self.sim_jobs_platform == "":
-      return 0.0
     return (simjob.energy / UNITS_CONVERSOR_ENERGY) * self.sim_platform_CF * self.sim_platform_PUE
 
   def _get_RSYPD_support_list(self) -> List[Job]:
@@ -245,7 +243,7 @@ class PerformanceMetrics(object):
             "Parallelization": self.processing_elements,
             "Total_energy": self.valid_sim_energy_sum,
             "Total_footprint": self.valid_sim_footprint_sum,
-            "SIM_platform_info":{"name": self.sim_jobs_platform, "CF": self.sim_platform_CF, "PUE": self.sim_platform_PUE},
+            "platform_info":{"name": self.sim_jobs_platform, "CF": self.sim_platform_CF, "PUE": self.sim_platform_PUE},
             "considered": self._considered,
             "not_considered": self._not_considered,
             "error": self.error,
