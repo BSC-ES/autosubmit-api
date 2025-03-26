@@ -54,3 +54,13 @@ To se tup the **GitHub OAuth App** authentication, you need to:
 - Create a GitHub OAuth App in your GitHub account.
 - Set up the environment variables with prefix ``GITHUB_OAUTH_CLIENT_`` as it is explained in :ref:`configuration` which identifies the third-party authentication service.
 - In case of whitelist users, you need to set up the environment variable ``GITHUB_OAUTH_WHITELIST_ORGANIZATION`` or ``GITHUB_OAUTH_WHITELIST_TEAM`` with the name of the organization/team in GitHub.
+
+
+OpenID Connect
+^^^^^^^^^^^^^^^^^^^^
+
+To set up the **OpenID Connect** authentication, you need to set up the environment variables with prefix ``OIDC_`` as it is explained in :ref:`configuration` which identifies the third-party authentication service.
+
+Basically, the API will request a token to the OpenID Connect server and will use it to authenticate the user in the API. For that, the environment variable ``OIDC_TOKEN_URL``, ``OIDC_CLIENT_ID``, and ``OIDC_CLIENT_SECRET`` are required.
+
+Then, the API will retrieve the username depending on the value of the environment variable ``OIDC_USERNAME_SOURCE``. If it is set to ``userinfo``, the API will request the username to the OpenID Connect server. If it is set to ``id_token``, the API will use the content of the token to get the username. In both cases, the claim to use as username is set in the environment variable ``OIDC_USERNAME_CLAIM``.

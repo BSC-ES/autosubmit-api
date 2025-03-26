@@ -32,3 +32,9 @@ Authentication variables
 * ``GITHUB_OAUTH_CLIENT_SECRET``: Secret key of the Github Oauth app.
 * ``GITHUB_OAUTH_WHITELIST_ORGANIZATION``: Used to use authorization based on the membership of a Github organization.
 * ``GITHUB_OAUTH_WHITELIST_TEAM``: Used to use authorization based on the membership of a Github team in an organization. ``GITHUB_OAUTH_WHITELIST_ORGANIZATION`` is required
+* ``OIDC_TOKEN_URL``: OpenID Connect token URL.
+* ``OIDC_CLIENT_ID``: OpenID Connect client ID.
+* ``OIDC_CLIENT_SECRET``: OpenID Connect client secret.
+* ``OIDC_USERNAME_SOURCE``: Method to use to get the username. Possible values: ``userinfo`` and ``id_token``. Default is ``id_token``.
+* ``OIDC_USERNAME_CLAIM``: Claim to use as username. e.g. ``preferred_username``. Default is ``sub``.
+* ``OIDC_USERINFO_URL``: OpenID Connect userinfo URL.
