@@ -1,0 +1,134 @@
+JOBS:
+  LOCAL_SETUP:
+    FILE: templates/local_setup.py
+    TYPE: python
+    PLATFORM: LOCAL
+    RUNNING: once
+    NOTIFY_ON: FAILED COMPLETED
+  LOCAL_SEND_INITIAL:
+    FILE: templates/local_send_initial.sh
+    PLATFORM: marenostrum_archive
+    DEPENDENCIES: LOCAL_SETUP
+    RUNNING: chunk
+    NOTIFY_ON: FAILED COMPLETED
+  LOCAL_SEND_SPINUP:
+    FILE: templates/local_send_spinup.sh
+    PLATFORM: marenostrum_archive
+    DEPENDENCIES: LOCAL_SETUP
+    RUNNING: member
+    NOTIFY_ON: FAILED COMPLETED
+  LOCAL_SEND_SOURCE:
+    FILE: templates/local_send_source.sh
+    PLATFORM: marenostrum_archive
+    DEPENDENCIES: LOCAL_SETUP
+    RUNNING: once
+  LOCAL_SEND_STATIC:
+    FILE: templates/local_send_static.sh
+    PLATFORM: marenostrum_archive
+    DEPENDENCIES: LOCAL_SETUP
+    RUNNING: once
+    NOTIFY: FAILED
+  LOCAL_SEND_HERMES:
+    FILE: templates/hermes/local_send_hermes.sh
+    DEPENDENCIES: LOCAL_SEND_SOURCE
+    PLATFORM: marenostrum_archive
+    RUNNING: once
+    NOTIFY: FAILED
+  LOCAL_SEND_EMISSIONS:
+    FILE: templates/hermes/local_send_emissions.sh
+    PLATFORM: marenostrum_archive
+    DEPENDENCIES: LOCAL_SETUP
+    RUNNING: chunk
+    SYNCHRONIZE: member
+    NOTIFY_ON: FAILED
+  LOCAL_SEND_CHEM:
+    FILE: templates/local_send_chem.sh
+    PLATFORM: marenostrum_archive
+    DEPENDENCIES: LOCAL_SETUP LOCAL_SEND_CHEM-1 SIM-1
+    RUNNING: chunk
+    NOTIFY_ON: FAILED COMPLETED
+  REMOTE_COMPILE:
+    FILE: templates/compile.sh
+    DEPENDENCIES: LOCAL_SEND_SOURCE
+    RUNNING: once
+    PROCESSORS: '4'
+    WALLCLOCK: 00:50
+    CUSTOM_DIRECTIVES: '["#SBATCH -p interactive"]'
+  PREPROCFIX:
+    FILE: templates/preproc_fix.sh
+    DEPENDENCIES: REMOTE_COMPILE LOCAL_SEND_STATIC
+    RUNNING: once
+    WALLCLOCK: 00:30
+  PREPROCVAR:
+    FILE: templates/preproc_var.sh
+    DEPENDENCIES: LOCAL_SEND_INITIAL LOCAL_SEND_CHEM PREPROCFIX
+    RUNNING: chunk
+    WALLCLOCK: 00:30
+    NOTIFY_ON: FAILED COMPLETED
+    CUSTOM_DIRECTIVES: '["#SBATCH --exclusive"]'
+  HERMES_GR_PREPROC:
+    FILE: templates/hermes/hermes_gr_preproc.sh
+    DEPENDENCIES: LOCAL_SEND_HERMES PREPROCFIX
+    RUNNING: date
+    WALLCLOCK: 00:30
+    NOTIFY_ON: FAILED COMPLETED
+    PROCESSORS: '100'
+    RETRIALS: '2'
+  HERMES_GR:
+    FILE: templates/hermes/hermes_gr.sh
+    #DEPENDENCIES: LOCAL_SEND_SOURCE HERMES_GR_PREPROC LOCAL_SEND_EMISSIONS HERMES_GR-10
+    DEPENDENCIES: LOCAL_SETUP LOCAL_SEND_EMISSIONS HERMES_GR_PREPROC HERMES_GR-1 SIM-1
+    RUNNING: chunk
+    SYNCHRONIZE: member
+    WALLCLOCK: 00:20
+    PROCESSORS: '100'
+    RETRIALS: '2'
+    NOTIFY_ON: FAILED
+  PERTURB_HERMES:
+    FILE: templates/hermes/perturb_hermes.sh
+    DEPENDENCIES: HERMES_GR
+    RUNNING: chunk
+    WALLCLOCK: 00:20
+    PROCESSORS: '48'
+    NOTIFY_ON: FAILED
+    CUSTOM_DIRECTIVES: '["#SBATCH --exclusive"]'
+    RETRIALS: '2'
+  SIM:
+    FILE: templates/sim.sh
+    DEPENDENCIES: LOCAL_SEND_SPINUP PREPROCVAR SIM-1 PERTURB_HERMES
+    RUNNING: chunk
+    PROCESSORS: '288'
+    WALLCLOCK: 00:40
+    NOTIFY_ON: FAILED COMPLETED
+  DA_PREPROC:
+    FILE: templates/da_preproc.sh
+    DEPENDENCIES: SIM DA_PREPROC-1
+    RUNNING: chunk
+    PROCESSORS: '24'
+    WALLCLOCK: 00:15
+    NOTIFY_ON: FAILED COMPLETED
+    RETRIALS: '2'
+  POSTPROC_CTRL:
+    FILE: templates/postprocess.sh
+    DEPENDENCIES: SIM+1 POSTPROC_CTRL-1
+    RUNNING: chunk
+    SELECT_MEMBERS: SIM*[6]
+    EXCLUDED_MEMBERS: '[0:5]'
+    PROCESSORS: '48'
+    WALLCLOCK: 01:00
+    NOTIFY_ON: FAILED
+    RETRIALS: '2'
+  ARCHIVE:
+    FILE: templates/archive.sh
+    DEPENDENCIES: POSTPROC_CTRL DA_PREPROC ARCHIVE-1
+    PLATFORM: marenostrum_archive
+    RUNNING: chunk
+    WALLCLOCK: 00:10
+    NOTIFY_ON: FAILED COMPLETED
+  CLEAN:
+    FILE: templates/clean.sh
+    DEPENDENCIES: POSTPROC_CTRL+1 ARCHIVE
+    PLATFORM: marenostrum_archive
+    RUNNING: chunk
+    WALLCLOCK: 00:10
+    NOTIFY_ON: FAILED

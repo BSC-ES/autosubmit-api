@@ -1,0 +1,17 @@
+config:
+  EXPID: a8et
+  AUTOSUBMIT_VERSION: "4.1.9"
+  MAXWAITINGJOBS: '20'
+  TOTALJOBS: '20'
+  SAFETYSLEEPTIME: '10'
+  RETRIALS: '2'
+mail:
+  NOTIFICATIONS: False
+  TO: ""
+communications:
+  API: paramiko
+storage:
+  TYPE: pkl
+  COPY_REMOTE_LOGS: 'True'
+migrate:
+  TO_USER: ''

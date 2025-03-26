@@ -151,6 +151,9 @@ class AutosubmitConfigResolver(object):
 
     def get_platform_wallclock(self, platform):
         return self._configWrapper.get_platform_wallclock(platform)
+    
+    def get_platform_conf_footprint(self, platform):
+        return self._configWrapper.get_platform_conf_footprint(platform)
 
     def get_wallclock(self, section):
         """

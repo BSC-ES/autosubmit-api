@@ -131,6 +131,14 @@ class ymlConfigStrategy(IConfigStrategy):
     def get_platform_wallclock(self, platform: str) -> str:
         logger.debug("get_platform_wallclock")
         return self._get_platform_config(platform).get('MAX_WALLCLOCK', "")
+    
+    def get_platform_conf_footprint(self, platform) -> dict:
+        cf = self._get_platform_config(platform).get("CF", "")
+        pue = self._get_platform_config(platform).get("PUE", "")
+        return {"CF": cf, "PUE": pue}
+    
+    def get_platform_PUE(self, platform):
+        return
 
     def get_wallclock(self, section: str) -> str:
         return self._conf_parser.jobs_data[section].get('WALLCLOCK', '')

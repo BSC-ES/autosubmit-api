@@ -1,0 +1,32 @@
+DEFAULT:
+  EXPID: "a8qc"
+  HPCARCH: "marenostrum5"
+experiment:
+  DATELIST: '20220630'
+  MEMBERS: 00[0-6]
+  CHUNKSIZEUNIT: day
+  CHUNKSIZE: '1'
+  NUMCHUNKS: '1'
+  CHUNKINI: '1'
+  CALENDAR: standard
+project:
+  PROJECT_TYPE: git
+  PROJECT_DESTINATION: auto-monarch
+git:
+  PROJECT_ORIGIN: https://earth.bsc.es/gitlab/es/auto-monarch.git
+  PROJECT_BRANCH: 705-pre-offline-DA-AS4
+  PROJECT_COMMIT: ''
+  PROJECT_SUBMODULES: ''
+  FETCH_SINGLE_BRANCH: 'true'
+svn:
+  PROJECT_URL: ''
+  PROJECT_REVISION: ''
+local:
+  PROJECT_PATH: ''
+project_files:
+  FILE_PROJECT_CONF: conf/autosubmit/operational/proj_REGIONAL_CHEM.cams2_40.ira.conf
+  FILE_JOBS_CONF: conf/autosubmit/operational/jobs_REGIONAL_CHEM.cams2_40.ira.conf
+  JOB_SCRIPTS_TYPE: ''
+rerun:
+  RERUN: 'FALSE'
+  CHUNKLIST: ''

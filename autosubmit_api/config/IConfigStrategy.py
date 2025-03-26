@@ -130,6 +130,10 @@ class IConfigStrategy(ABC):
     def get_platform_wallclock(self, platform):
         pass
 
+    @abstractmethod
+    def get_platform_conf_footprint(self, platform):
+        pass
+
     def get_wallclock(self, section):
         """
         Gets wallclock for the given job type
