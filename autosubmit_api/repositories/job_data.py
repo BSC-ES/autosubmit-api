@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import Any, List
+from typing import Any, Generator, List
 from pydantic import BaseModel
 from sqlalchemy import Engine, Table, or_, Index
 from sqlalchemy.schema import CreateTable
@@ -81,6 +81,12 @@ class ExperimentJobDataRepository(ABC):
     ) -> List[ExperimentJobDataModel]:
         """
         Gets job data by section
+        """
+
+    @abstractmethod
+    def get_all_generator(self) -> Generator[ExperimentJobDataModel, Any, None]:
+        """
+        Gets all job data as generator
         """
 
 
@@ -188,6 +194,16 @@ class ExperimentJobDataSQLRepository(ExperimentJobDataRepository):
             ExperimentJobDataModel.model_validate(row, from_attributes=True)
             for row in result
         ]
+
+    def get_all_generator(self):
+        with self.engine.connect() as conn:
+            statement = (
+                self.table.select().where(self.table.c.id > 0).order_by(self.table.c.id)
+            )
+            result = conn.execute(statement)
+
+            for row in result:
+                yield ExperimentJobDataModel.model_validate(row, from_attributes=True)
 
 
 def create_experiment_job_data_repository(expid: str):
