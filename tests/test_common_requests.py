@@ -1,5 +1,8 @@
-from unittest.mock import patch
-from autosubmit_api.experiment.common_requests import get_experiment_data
+from unittest.mock import MagicMock, patch
+from autosubmit_api.experiment.common_requests import (
+    get_experiment_data,
+    get_experiment_tree_structured,
+)
 
 
 class TestGetExperimentData:
@@ -43,13 +46,17 @@ class TestGetExperimentData:
     def test_dbs_missing(self, fixture_mock_basic_config):
         expid = "a1ve"
 
-        with patch(
-            "autosubmit_api.experiment.common_requests.create_experiment_repository"
-        ) as exp_repo_mock, patch(
-            "autosubmit_api.experiment.common_requests.DbRequests"
-        ) as dbrequests_mock, patch(
-            "autosubmit_api.experiment.common_requests.ExperimentHistoryBuilder"
-        ) as history_mock:
+        with (
+            patch(
+                "autosubmit_api.experiment.common_requests.create_experiment_repository"
+            ) as exp_repo_mock,
+            patch(
+                "autosubmit_api.experiment.common_requests.DbRequests"
+            ) as dbrequests_mock,
+            patch(
+                "autosubmit_api.experiment.common_requests.ExperimentHistoryBuilder"
+            ) as history_mock,
+        ):
             exp_repo_mock.side_effect = Exception("Experiment repository failed")
             dbrequests_mock.get_specific_experiment_status.side_effect = Exception(
                 "Experiment status failed"
@@ -70,3 +77,23 @@ class TestGetExperimentData:
             assert result.get("description") == ""
             assert result.get("total_jobs") == 0
             assert result.get("completed_jobs") == 0
+
+
+class TestGetTreeStructure:
+    def test_get_tree_structure(self, fixture_mock_basic_config):
+        logger = MagicMock()
+        logger.info = MagicMock()
+        logger.info.return_value = None
+
+        response = get_experiment_tree_structured("a1vx", logger)
+
+        jobs = response.get("jobs")
+
+        assert len(jobs) == 8
+
+        workflow_commits = [
+            job.get("workflow_commit") for job in jobs if job.get("workflow_commit")
+        ]
+        assert len(workflow_commits) == 1
+
+        assert workflow_commits[0] == "947903ff8b5859ac623abeae4cbc3cf40d36a013"
