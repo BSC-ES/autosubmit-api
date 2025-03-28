@@ -40,6 +40,7 @@ class ExperimentJobDataModel(BaseModel):
     rowstatus: Any
     children: Any
     platform_output: Any
+    workflow_commit: Any
 
 
 class ExperimentJobDataRepository(ABC):
