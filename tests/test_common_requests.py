@@ -1,6 +1,8 @@
 from unittest.mock import MagicMock, patch
 from autosubmit_api.experiment.common_requests import (
+    _retrieve_pkl_data,
     get_experiment_data,
+    get_experiment_graph,
     get_experiment_tree_structured,
 )
 
@@ -80,7 +82,7 @@ class TestGetExperimentData:
 
 
 class TestGetTreeStructure:
-    def test_get_tree_structure(self, fixture_mock_basic_config):
+    def test_tree_workflow_commit(self, fixture_mock_basic_config):
         logger = MagicMock()
         logger.info = MagicMock()
         logger.info.return_value = None
@@ -88,6 +90,40 @@ class TestGetTreeStructure:
         response = get_experiment_tree_structured("a1vx", logger)
 
         jobs = response.get("jobs")
+
+        assert len(jobs) == 8
+
+        workflow_commits = [
+            job.get("workflow_commit") for job in jobs if job.get("workflow_commit")
+        ]
+        assert len(workflow_commits) == 1
+
+        assert workflow_commits[0] == "947903ff8b5859ac623abeae4cbc3cf40d36a013"
+
+    def test_pkl_tree_workflow_commit(self, fixture_mock_basic_config):
+        response = _retrieve_pkl_data("a1vx")
+
+        jobs = response.get("pkl_content")
+
+        assert len(jobs) == 8
+
+        workflow_commits = [
+            job.get("workflow_commit") for job in jobs if job.get("workflow_commit")
+        ]
+        assert len(workflow_commits) == 1
+
+        assert workflow_commits[0] == "947903ff8b5859ac623abeae4cbc3cf40d36a013"
+
+
+class TestGetGraph:
+    def test_graph_workflow_commit(self, fixture_mock_basic_config):
+        logger = MagicMock()
+        logger.info = MagicMock()
+        logger.info.return_value = None
+
+        response = get_experiment_graph("a1vx", logger)
+
+        jobs = response.get("nodes")
 
         assert len(jobs) == 8
 

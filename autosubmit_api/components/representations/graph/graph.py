@@ -292,7 +292,8 @@ class GraphRepresentation(object):
         "custom_directives": None,
         "rm_id": job.rm_id,
         "x": job.x_coordinate,
-        "y": job.y_coordinate
+        "y": job.y_coordinate,
+        "workflow_commit": job.workflow_commit,
       })
 
   def _calculate_max_children_parent(self, children_count: int, parent_count: int):
