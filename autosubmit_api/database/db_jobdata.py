@@ -69,7 +69,21 @@ ExperimentRow = collections.namedtuple(
     'ExperimentRow', ['exp_id', 'expid', 'status', 'seconds'])
 
 JobRow = collections.namedtuple(
-    'JobRow', ['name', 'queue_time', 'run_time', 'status', 'energy', 'submit', 'start', 'finish', 'ncpus', 'run_id'])
+    "JobRow",
+    [
+        "name",
+        "queue_time",
+        "run_time",
+        "status",
+        "energy",
+        "submit",
+        "start",
+        "finish",
+        "ncpus",
+        "run_id",
+        "workflow_commit",
+    ],
+)
 
 
 class ExperimentRun():

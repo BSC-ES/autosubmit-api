@@ -32,10 +32,41 @@ class JobData(object):
     Robust representation of a row in the job_data table of the experiment history database.
     """
 
-    def __init__(self, _id, counter=1, job_name="None", created=None, modified=None, submit=0, start=0, finish=0,
-                status="UNKNOWN", rowtype=0, ncpus=0, wallclock="00:00", qos="debug", energy=0, date="", section="",
-                member="", chunk=0, last=1, platform="NA", job_id=0, extra_data="", nnodes=0, run_id=None, MaxRSS=0.0,
-                AveRSS=0.0, out="", err="", rowstatus=Models.RowStatus.INITIAL, children="", platform_output=""):
+    def __init__(
+        self,
+        _id,
+        counter=1,
+        job_name="None",
+        created=None,
+        modified=None,
+        submit=0,
+        start=0,
+        finish=0,
+        status="UNKNOWN",
+        rowtype=0,
+        ncpus=0,
+        wallclock="00:00",
+        qos="debug",
+        energy=0,
+        date="",
+        section="",
+        member="",
+        chunk=0,
+        last=1,
+        platform="NA",
+        job_id=0,
+        extra_data="",
+        nnodes=0,
+        run_id=None,
+        MaxRSS=0.0,
+        AveRSS=0.0,
+        out="",
+        err="",
+        rowstatus=Models.RowStatus.INITIAL,
+        children="",
+        platform_output="",
+        workflow_commit=None
+    ):
       """
       """
       self._id = _id
@@ -76,43 +107,47 @@ class JobData(object):
       self.rowstatus = rowstatus
       self.children = children # DB 17
       self.platform_output = platform_output # DB 17
+      self.workflow_commit = workflow_commit # DB 18
 
     @classmethod
     def from_model(cls, row):
-      """ Build JobData from JobDataRow. """
-      row_dict = row._asdict()
-      job_data = cls(row_dict['id'],
-                      row_dict['counter'],
-                      row_dict['job_name'],
-                      row_dict['created'],
-                      row_dict['modified'],
-                      row_dict['submit'],
-                      row_dict['start'],
-                      row_dict['finish'],
-                      row_dict['status'],
-                      row_dict.get('rowtype', Models.RowType.NORMAL),
-                      row_dict.get('ncpus', 0),
-                      row_dict.get('wallclock', "01:00"),
-                      row_dict.get('qos', ""),
-                      row_dict.get('energy', 0),
-                      row_dict['date'],
-                      row_dict['section'],
-                      row_dict['member'],
-                      row_dict['chunk'],
-                      row_dict['last'],
-                      row_dict.get('platform', ""),
-                      row_dict.get('job_id', 0),
-                      row_dict.get('extra_data', ""),
-                      row_dict.get('nnodes', 0),
-                      row_dict.get('run_id', None),
-                      row_dict.get('MaxRSS', 0.0),
-                      row_dict.get('AveRSS', 0.0),
-                      row_dict.get('out', ""),
-                      row_dict.get('err', ""),
-                      row_dict.get('rowstatus', Models.RowStatus.INITIAL),
-                      row_dict.get('children', ""),
-                      row_dict.get('platform_output', ""))
-      return job_data
+        """Build JobData from JobDataRow."""
+        row_dict = row._asdict()
+        job_data = cls(
+            row_dict["id"],
+            row_dict["counter"],
+            row_dict["job_name"],
+            row_dict["created"],
+            row_dict["modified"],
+            row_dict["submit"],
+            row_dict["start"],
+            row_dict["finish"],
+            row_dict["status"],
+            row_dict.get("rowtype", Models.RowType.NORMAL),
+            row_dict.get("ncpus", 0),
+            row_dict.get("wallclock", "01:00"),
+            row_dict.get("qos", ""),
+            row_dict.get("energy", 0),
+            row_dict["date"],
+            row_dict["section"],
+            row_dict["member"],
+            row_dict["chunk"],
+            row_dict["last"],
+            row_dict.get("platform", ""),
+            row_dict.get("job_id", 0),
+            row_dict.get("extra_data", ""),
+            row_dict.get("nnodes", 0),
+            row_dict.get("run_id", None),
+            row_dict.get("MaxRSS", 0.0),
+            row_dict.get("AveRSS", 0.0),
+            row_dict.get("out", ""),
+            row_dict.get("err", ""),
+            row_dict.get("rowstatus", Models.RowStatus.INITIAL),
+            row_dict.get("children", ""),
+            row_dict.get("platform_output", ""),
+            row_dict.get("workflow_commit", None)
+        )
+        return job_data
 
     @property
     def status_code(self):

@@ -594,7 +594,7 @@ class JobList:
         job_running_to_runtext = dict()
         # result = dict()
         current_table_structure = dict()
-        job_name_to_job_info = dict()
+        job_name_to_job_info: Dict[str, JobRow] = dict()
         # Work variables
         subjobs = list()
         # Get structure  if there are packages because package require special time calculation
@@ -618,8 +618,19 @@ class JobList:
             current_job_info = job_name_to_job_info.get(sub.name, None)  # if sub.name in job_name_to_job_info.keys(
             # ) else None
             if current_job_info:
-                job_running_time_seconds[sub.name] = JobRow(sub.name, sub.queue, sub.run, sub.status, current_job_info.energy,
-                                                            current_job_info.submit, current_job_info.start, current_job_info.finish, current_job_info.ncpus, current_job_info.run_id)
+                job_running_time_seconds[sub.name] = JobRow(
+                    sub.name,
+                    sub.queue,
+                    sub.run,
+                    sub.status,
+                    current_job_info.energy,
+                    current_job_info.submit,
+                    current_job_info.start,
+                    current_job_info.finish,
+                    current_job_info.ncpus,
+                    current_job_info.run_id,
+                    current_job_info.workflow_commit,
+                )
                 job_running_to_runtext[sub.name] = job_times_to_text(sub.queue, sub.run, sub.status)
 
         return (job_running_time_seconds, job_running_to_runtext, [])
@@ -720,7 +731,19 @@ class JobList:
 
                         if status_code in [Status.SUSPENDED]:
                             t_submit = t_start = t_finish = 0
-                        return JobRow(job_data.job_name, int(queue_time), int(running_time), status, energy, t_submit, t_start, t_finish, job_data.ncpus, job_data.run_id)
+                        return JobRow(
+                            job_data.job_name,
+                            int(queue_time),
+                            int(running_time),
+                            status,
+                            energy,
+                            t_submit,
+                            t_start,
+                            t_finish,
+                            job_data.ncpus,
+                            job_data.run_id,
+                            job_data.workflow_commit,
+                        )
 
             # Using standard procedure
             if status_code in [Status.RUNNING, Status.SUBMITTED, Status.QUEUING, Status.FAILED] or make_exception is True:
@@ -780,13 +803,16 @@ class JobList:
             queue_time = seconds_queued
             running_time = seconds_running
             # print(name + "\t" + str(queue_time) + "\t" + str(running_time))
-        return JobRow(name,
-                    int(queue_time),
-                    int(running_time),
-                    status,
-                    energy,
-                    int(submit_time),
-                    int(start_time),
-                    int(finish_time),
-                    None,
-                    None)
+        return JobRow(
+            name,
+            int(queue_time),
+            int(running_time),
+            status,
+            energy,
+            int(submit_time),
+            int(start_time),
+            int(finish_time),
+            None,
+            None,
+            None,
+        )

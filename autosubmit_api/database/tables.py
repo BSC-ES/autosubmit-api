@@ -10,6 +10,19 @@ from sqlalchemy import (
 )
 from sqlalchemy.orm import DeclarativeBase, mapped_column, Mapped
 
+## Table utils
+
+
+def table_copy(table: Table) -> Table:
+    """
+    Copy a table schema
+    """
+    return Table(
+        table.name,
+        MetaData(),
+        *[col.copy() for col in table.columns],
+    )
+
 
 metadata_obj = MetaData()
 
@@ -180,3 +193,7 @@ JobDataTable = Table(
     Column("platform_output", Text, nullable=True),
     UniqueConstraint("counter", "job_name", name="unique_counter_and_job_name"),
 )
+
+# Copy JobDataTable to an alternative version which has an additional column
+JobDataTableV18 = table_copy(JobDataTable)
+JobDataTableV18.append_column(Column("workflow_commit", Text, nullable=True))

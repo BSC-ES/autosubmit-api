@@ -30,7 +30,7 @@ class DatabaseVersion(Enum):
 JobDataRow = collections.namedtuple('JobDataRow', ['id', 'counter', 'job_name', 'created', 'modified', 'submit', 'start', 'finish', 
                                                   'status', 'rowtype', 'ncpus', 'wallclock', 'qos', 'energy', 'date', 'section', 'member', 
                                                   'chunk', 'last', 'platform', 'job_id', 'extra_data', 'nnodes', 'run_id', 'MaxRSS', 'AveRSS', 
-                                                  'out', 'err', 'rowstatus', 'children', 'platform_output'])
+                                                  'out', 'err', 'rowstatus', 'children', 'platform_output', 'workflow_commit'])
 
 JobDataRow10 = collections.namedtuple('JobItem', ['id', 'counter', 'job_name', 'created', 'modified', 'submit', 'start', 'finish',
                                                 'status', 'rowtype', 'ncpus', 'wallclock', 'qos', 'energy', 'date', 'section', 'member', 'chunk', 'last', 'platform', 'job_id', 'extra_data'])

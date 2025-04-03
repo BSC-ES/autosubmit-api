@@ -691,6 +691,7 @@ def _retrieve_pkl_data(expid: str, out_format: str = "tree"):
                 "out": job.out_file_path,
                 "err": job.err_file_path,
                 "priority": job.priority,
+                "workflow_commit": job.workflow_commit,
             }
 
             if out_format == "tree":

@@ -1,15 +1,16 @@
 #!/usr/bin/env python
-import collections
 from autosubmit_api.common import utils as util
 from autosubmit_api.components.jobs import utils as JUtils
 from autosubmit_api.common.utils import Status
 from autosubmit_api.monitor.monitor import Monitor
 from autosubmit_api.history.data_classes.job_data import JobData
-from typing import Tuple, List, Dict, Set
+from typing import TYPE_CHECKING, Tuple, List, Dict, Set
 # from autosubmitAPIwu.database.db_jobdata import JobData
 from abc import ABCMeta, abstractmethod
-JobRow = collections.namedtuple(
-    'JobRow', ['name', 'queue_time', 'run_time', 'status', 'energy', 'submit', 'start', 'finish', 'ncpus', 'run_id'])
+
+if TYPE_CHECKING:
+    # Avoid circular imports
+  from autosubmit_api.database.db_jobdata import JobRow
 
 class SimpleJob(object):
     """
@@ -60,6 +61,7 @@ class Job(metaclass=ABCMeta):
     self.level: int = 0
     self.horizontal_order: int = 1
     self.barycentric_value: float = 0.0
+    self.workflow_commit: str = None
 
   def has_parents(self):
     return len(self.parents_names) > 0
@@ -195,7 +197,7 @@ class Job(metaclass=ABCMeta):
     print(("Job {0} \n Date {5} \n Section {1} \n Qos {2} \n Children: {3} \n Platform {4} \n TreeParent {6}. ".format(
       self.name, self.section, self.qos, self.children_names, self.platform, self.date, self.tree_parent)))
 
-  def update_from_jobrow(self, jobrow: JobRow):
+  def update_from_jobrow(self, jobrow: "JobRow"):
     """ Updates: submit, start, finish, queue_time, run_time, energy, run_id. """
     if jobrow:
       self._queue_time = max(int(jobrow.queue_time), 0)
@@ -205,6 +207,7 @@ class Job(metaclass=ABCMeta):
       self._start = int(jobrow.start)
       self._finish = int(jobrow.finish)
       self.run_id = jobrow.run_id
+      self.workflow_commit = jobrow.workflow_commit
 
   def set_ncpus(self, parallelization: int) -> None:
     self.ncpus = parallelization
