@@ -80,6 +80,14 @@ class TestGetExperimentData:
             assert result.get("total_jobs") == 0
             assert result.get("completed_jobs") == 0
 
+    def test_workflow_commit(self, fixture_mock_basic_config):
+        expid = "a1vx"
+        result = get_experiment_data(expid)
+
+        assert (
+            result.get("workflow_commit") == "947903ff8b5859ac623abeae4cbc3cf40d36a013"
+        )
+
 
 class TestGetTreeStructure:
     def test_tree_workflow_commit(self, fixture_mock_basic_config):

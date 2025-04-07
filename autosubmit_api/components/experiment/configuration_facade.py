@@ -314,6 +314,9 @@ class AutosubmitConfigurationFacade(ConfigurationFacade):
 
   def get_svn_project_url(self) -> str:
     return self.autosubmit_conf.get_svn_project_url()
+  
+  def get_workflow_commit(self) -> str:
+    return self.autosubmit_conf.get_workflow_commit()
 
   def update_sim_jobs(self, sim_jobs: List[SimJob]):
     """ Update the jobs with the latest configuration values: Processors, years per sim """

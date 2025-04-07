@@ -775,6 +775,13 @@ class IConfigStrategy(ABC):
         """
         pass
 
+    def get_workflow_commit(self) -> str:
+        """
+        Returns the commit of the workflow
+
+        :return: commit
+        """
+
     @staticmethod
     def is_valid_mail_address(mail_address):
         if re.match('^[_a-z0-9-]+(\.[_a-z0-9-]+)*@[a-z0-9-]+(\.[a-z0-9-]+)*(\.[a-z]{2,4})$', mail_address):

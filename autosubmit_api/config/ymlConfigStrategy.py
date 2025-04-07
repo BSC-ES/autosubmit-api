@@ -411,6 +411,11 @@ class ymlConfigStrategy(IConfigStrategy):
     def get_storage_type(self):
         return self._conf_parser.get_storage_type()
 
+    def get_workflow_commit(self) -> str:
+        return self._conf_parser.experiment_data.get("AUTOSUBMIT", {}).get(
+            "WORKFLOW_COMMIT", None
+        )
+
     @staticmethod
     def is_valid_mail_address(mail_address: str) -> bool:
         return Autosubmit4Config.is_valid_mail_address(mail_address)

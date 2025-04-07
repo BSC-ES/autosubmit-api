@@ -185,6 +185,7 @@ def get_experiment_data(expid: str) -> Dict[str, Any]:
         result["pkl_timestamp"] = (
             autosubmit_config_facade.get_pkl_last_modified_timestamp()
         )
+        result["workflow_commit"] = autosubmit_config_facade.get_workflow_commit()
     except Exception as exc:
         result["error"] = True
         result["error_message"] += f"{str(exc)}\n"

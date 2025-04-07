@@ -1274,6 +1274,9 @@ class confConfigStrategy(IConfigStrategy):
         :rtype: str
         """
         return self._conf_parser.get_option('storage', 'TYPE', 'pkl').lower()
+    
+    def get_workflow_commit(self):
+        return None
 
     @staticmethod
     def is_valid_mail_address(mail_address):
