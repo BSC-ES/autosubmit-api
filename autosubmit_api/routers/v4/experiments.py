@@ -364,20 +364,26 @@ async def get_jobs_history(
 
         csv_file = StringIO()
         writer = csv.writer(csv_file)
-        writer.writerow(
-            [
-                "job_name",
-                "run_id",
-                "section",
-                "status",
-                "submit",
-                "start",
-                "finish",
-                "out",
-                "err",
-            ]
-        )
 
+        # Yield the header first
+        header = [
+            "job_name",
+            "run_id",
+            "section",
+            "status",
+            "submit",
+            "start",
+            "finish",
+            "out",
+            "err",
+        ]
+        writer.writerow(header)
+        csv_file.seek(0)
+        yield csv_file.read()
+        csv_file.seek(0)
+        csv_file.truncate(0)
+
+        # Yield each job row
         for job in job_generator:
             writer.writerow(
                 [
