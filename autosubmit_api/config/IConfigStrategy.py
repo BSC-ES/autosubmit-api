@@ -18,6 +18,7 @@
 # along with Autosubmit.  If not, see <http://www.gnu.org/licenses/>.
 
 from configparser import ConfigParser as PyConfigParser
+from typing import Union
 from autosubmitconfigparser.config.configcommon import AutosubmitConfig as Autosubmit4Config
 import re
 
@@ -775,7 +776,7 @@ class IConfigStrategy(ABC):
         """
         pass
 
-    def get_workflow_commit(self) -> str:
+    def get_workflow_commit(self) -> Union[str, None]:
         """
         Returns the commit of the workflow
 
