@@ -29,6 +29,7 @@ class PerformanceMetrics(object):
     self.JPSY: float = 0
     self.RSYPD: float = 0
     self.WSYPD: float = 0
+    self.IWSYPD: float = 0
     self.processing_elements: int = 1
     self._considered: List[Dict] = []
     self._not_considered: List[Dict] = []
@@ -40,7 +41,7 @@ class PerformanceMetrics(object):
     self.sim_jobs_platform = ""
     self.sim_platform_CF = 0.0
     self.sim_platform_PUE = 0.0
-    self.critical_path = []
+    self.ideal_critical_path = []
     self.phases = {}
     try:
       self.joblist_helper: JobListHelper = joblist_helper
@@ -111,9 +112,10 @@ class PerformanceMetrics(object):
       self.RSYPD = self._calculate_RSYPD()
       self.JPSY = self._calculate_JPSY()
       self.CHSY = self._calculate_CHSY()
-      self.critical_path = self.pkl_organizer.find_critical_path()
-      self.phases = self.pkl_organizer.calculate_critical_path_phases(self.critical_path)
+      self.ideal_critical_path = self.pkl_organizer.find_ideal_critical_path()
+      self.phases = self.pkl_organizer.calculate_ideal_critical_path_phases(self.ideal_critical_path)
       self.WSYPD = self._calculate_WSYPD()
+      self.IWSYPD = self._calculate_IWSYPD()
 
   def _identify_outlied_jobs(self):
     """ Generates warnings """
@@ -195,10 +197,17 @@ class PerformanceMetrics(object):
     return 0
 
   def _calculate_WSYPD(self):
-    time_workflow = self.phases.get("total_time", 0)
+    time_workflow = self.phases.get("total_run_time", 0)
     if len(self.sim_jobs_valid) > 0 and time_workflow > 0:
       WSYPD = ((self.valid_sim_yps_sum * utils.SECONDS_IN_A_DAY) / time_workflow)
       return round(WSYPD, 4)
+    return 0
+  
+  def _calculate_IWSYPD(self):
+    time_workflow = self.phases.get("total_run_queue_time", 0)
+    if len(self.sim_jobs_valid) > 0 and time_workflow > 0:
+      IWSYPD = ((self.valid_sim_yps_sum * utils.SECONDS_IN_A_DAY) / time_workflow)
+      return round(IWSYPD, 4)
     return 0
 
   def _calculate_sum_yps(self):
@@ -236,13 +245,24 @@ class PerformanceMetrics(object):
       divisor = max(support_list[-1].finish_ts - self.sim_jobs_valid[0].start_ts, 0.0)
     return divisor
 
-  def _process_critical_path(self):
+  def _process_ideal_critical_path(self):
     """
     Process the critical path to get the jobs in the critical path
     """
-    if len(self.critical_path) > 0:
-      return [self._job_to_dict(job) for job in self.critical_path]
+    if len(self.ideal_critical_path) > 0:
+      return [self._job_to_dict(job) for job in self.ideal_critical_path]
     return []
+  
+  def _process_ideal_critical_path_phases(self):
+    """
+    Process the critical path phases to get the time in each phase
+    """
+    return {
+      "pre_sim_time": self.phases.get("pre_sim_run_time", 0),
+      "sim_time": self.phases.get("sim_run_time", 0),
+      "post_sim_time": self.phases.get("post_sim_run_time", 0),
+      "total_time": self.phases.get("total_run_time", 0),
+    }
   
   def _sim_job_to_dict(self, simjob: SimJob): 
     return {
@@ -263,7 +283,6 @@ class PerformanceMetrics(object):
   def _job_to_dict(self, job: Job):
     return {
       "name": job.name,
-      "queue": job.queue_time,
       "running": job.run_time,
     }
 
@@ -275,13 +294,14 @@ class PerformanceMetrics(object):
             "CHSY": self.CHSY,
             "JPSY": self.JPSY,
             "WSYPD": self.WSYPD,
+            "IWSYPD": self.IWSYPD,
             "Parallelization": self.processing_elements,
             "Total_energy": self.valid_sim_energy_sum,
             "Total_footprint": self.valid_sim_footprint_sum,
             "platform_info":{"name": self.sim_jobs_platform, "CF": self.sim_platform_CF, "PUE": self.sim_platform_PUE},
             "Total_core_hours": self.valid_sim_core_hours_sum,
-            "critical_path": self._process_critical_path(),
-            "phases": self.phases,
+            "ideal_critical_path": self._process_ideal_critical_path(),
+            "ideal_phases": self._process_ideal_critical_path_phases(),
             "considered": self._considered,
             "not_considered": self._not_considered,
             "error": self.error,

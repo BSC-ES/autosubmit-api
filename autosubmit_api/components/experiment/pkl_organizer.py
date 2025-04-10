@@ -141,7 +141,7 @@ class PklOrganizer(object):
     except Exception as exc:
       self._add_warning(f"Could not assign parent-child relationships: {str(exc)}")
 
-  def find_critical_path(self) -> List[Job]:
+  def find_ideal_critical_path(self) -> List[Job]:
     """
     Finds the critical path of jobs in the experiment.
     The critical path is the path with the highest sum of queue time and run time.
@@ -191,18 +191,18 @@ class PklOrganizer(object):
                         
     end_job_name = max(longest_path, key=longest_path.get)
     
-    critical_path = []
+    ideal_critical_path = []
     current_job_name = end_job_name
     
     while current_job_name:
-        critical_path.append(job_map[current_job_name])
+        ideal_critical_path.append(job_map[current_job_name])
         current_job_name = predecessor[current_job_name]
     
-    critical_path.reverse()
+    ideal_critical_path.reverse()
     
-    return critical_path
+    return ideal_critical_path
     
-  def calculate_critical_path_phases(self, critical_path: List[Job]) -> Dict[str, float]:
+  def calculate_ideal_critical_path_phases(self, ideal_critical_path: List[Job]) -> Dict[str, float]:
     """
     Calculates the total time of three phases in the critical path:
     1. Pre-SIM: Jobs executed before the first SIM job
@@ -212,19 +212,20 @@ class PklOrganizer(object):
     Returns a dictionary with the total time for each phase.
     """
     
-    if not critical_path:
+    if not ideal_critical_path:
         self._add_warning("Cannot calculate critical path phases: No critical path found.")
         return {
             "pre_sim_time": 0.0,
             "sim_time": 0.0,
             "post_sim_time": 0.0,
-            "total_time": 0.0
+            "total_run_time": 0.0,
+            "total_run_queue_time": 0.0,
         }
     
     first_sim_index = -1
     last_sim_index = -1
     
-    for i, job in enumerate(critical_path):
+    for i, job in enumerate(ideal_critical_path):
         if job.section == JobSection.SIM:
             if first_sim_index == -1:
                 first_sim_index = i
@@ -233,26 +234,29 @@ class PklOrganizer(object):
     pre_sim_time = 0.0
     sim_time = 0.0
     post_sim_time = 0.0
+    total_run_queue_time = 0.0
     
-    for i, job in enumerate(critical_path):
-        job_time = (job.run_time or 0.0) 
+    for i, job in enumerate(ideal_critical_path):
+        
+        total_run_queue_time += (job.run_time or 0) + (job.queue_time or 0)
         
         if first_sim_index == -1:
-            post_sim_time += job_time
+            post_sim_time += job.run_time
         elif i < first_sim_index:
-            pre_sim_time += job_time
+            pre_sim_time += job.run_time
         elif i <= last_sim_index:
-            sim_time += job_time
+            sim_time += job.run_time
         else:
-            post_sim_time += job_time
+            post_sim_time += job.run_time
     
     total_time = pre_sim_time + sim_time + post_sim_time
     
     return {
-        "pre_sim_time": pre_sim_time,
-        "sim_time": sim_time,
-        "post_sim_time": post_sim_time,
-        "total_time": total_time
+        "pre_sim_run_time": pre_sim_time,
+        "sim_run_time": sim_time,
+        "post_sim_run_time": post_sim_time,
+        "total_time": total_time,
+        "total_run_time": total_run_queue_time,
     }
     
   def __repr__(self):
