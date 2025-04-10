@@ -1,8 +1,10 @@
 #!/usr/bin/env python
 
+from collections import deque
 from autosubmit_api.components.jobs import job_factory as factory
 from autosubmit_api.common.utils import JobSection, PklJob, PklJob14, Status
-from autosubmit_api.components.jobs.job_factory import Job, SimpleJob
+from autosubmit_api.components.jobs.job_factory import Job, SimpleJob, StandardJob
+from autosubmit_api.database.db_structure import get_structure
 from typing import List, Dict, Set, Union
 
 from autosubmit_api.persistance.pkl_reader import PklReader
@@ -21,7 +23,8 @@ class PklOrganizer(object):
     self.sim_jobs: List[Job] = [] 
     self.post_jobs: List[Job] = [] 
     self.transfer_jobs: List[Job] = [] 
-    self.clean_jobs: List[Job] = [] 
+    self.clean_jobs: List[Job] = []
+    self.other_jobs: List[Job] = [] 
     self.warnings: List[str] = [] 
     self.dates: Set[str] = set() 
     self.members: Set[str] = set() 
@@ -34,6 +37,7 @@ class PklOrganizer(object):
     self.distribute_jobs()
     self._sort_distributed_jobs()
     self._validate_current()
+    self.load_and_assign_parent_child_relationships()
 
   def get_completed_section_jobs(self, section: str) -> List[Job]:
     if section in self.section_jobs_map:
@@ -72,11 +76,14 @@ class PklOrganizer(object):
         self.transfer_jobs.append(factory.get_job_from_factory(pkl_job.section).from_pkl(pkl_job))
       elif JobSection.CLEAN == pkl_job.section:
         self.clean_jobs.append(factory.get_job_from_factory(pkl_job.section).from_pkl(pkl_job))
+      else:
+        self.other_jobs.append(StandardJob.from_pkl(pkl_job))
     self.section_jobs_map = {
       JobSection.SIM : self.sim_jobs,
       JobSection.POST : self.post_jobs,
       JobSection.TRANSFER : self.transfer_jobs,
-      JobSection.CLEAN : self.clean_jobs
+      JobSection.CLEAN : self.clean_jobs,
+      JobSection.OTHER : self.other_jobs,
     }
 
   def _sort_distributed_jobs(self):
@@ -107,11 +114,153 @@ class PklOrganizer(object):
     if len(jobs):
       jobs.sort(key = lambda x: x.start, reverse=False)
 
+  def load_and_assign_parent_child_relationships(self):
+    """
+    Loads structure adjacency and assigns parent-child relationships to all jobs.
+    """
+    try:
+      structure_adjacency = get_structure(self.expid)
+      
+      job_name_map = {}
+      for section in self.section_jobs_map:
+        for job in self.section_jobs_map[section]:
+          job_name_map[job.name] = job
+      
+      parents_adjacency = {}
+      
+      for job_name, job in job_name_map.items():
+        children = set(structure_adjacency.get(job_name, []))
+        job.children_names = children
+        
+        for child_name in children:
+          parents_adjacency.setdefault(child_name, set()).add(job_name)
+      
+      for job_name, job in job_name_map.items():
+        job.parents_names = set(parents_adjacency.get(job_name, []))
+          
+    except Exception as exc:
+      self._add_warning(f"Could not assign parent-child relationships: {str(exc)}")
+
+  def find_critical_path(self) -> List[Job]:
+    """
+    Finds the critical path of jobs in the experiment.
+    The critical path is the path with the highest sum of queue time and run time.
+    Returns a list of jobs representing the critical path.
+    """
+    longest_path = {}
+    predecessor = {}
+    job_map = {}
+    
+    completed_jobs = []
+    for section in self.section_jobs_map:
+      completed_jobs.extend(self.get_completed_section_jobs(section))
+    
+    if not completed_jobs:
+        self._add_warning("Critical path: No completed jobs found.")
+        return []
+    
+    for job in completed_jobs:
+        job_map[job.name] = job
+        base_time = max((job.run_time or 0), 0.001) 
+        longest_path[job.name] = base_time
+        predecessor[job.name] = None
+
+    in_degree = { job.name: 0 for job in completed_jobs }
+    for job in completed_jobs:
+        if job.has_children():
+            for child_name in job.children_names:
+                if child_name in job_map:
+                    in_degree[child_name] += 1
+
+    queue = deque([job for job in completed_jobs if in_degree[job.name] == 0])
+
+    while queue:
+        current = queue.popleft()
+        if current.has_children():
+            for child_name in current.children_names:
+                if child_name in job_map:
+                    child = job_map[child_name]
+                    child_time = max((child.run_time or 0) , 0.001)
+                    new_path_length = longest_path[current.name] + child_time
+                    if new_path_length > longest_path[child_name]:
+                        longest_path[child_name] = new_path_length
+                        predecessor[child_name] = current.name
+                    in_degree[child_name] -= 1
+                    if in_degree[child_name] == 0:
+                        queue.append(child)
+                        
+    end_job_name = max(longest_path, key=longest_path.get)
+    
+    critical_path = []
+    current_job_name = end_job_name
+    
+    while current_job_name:
+        critical_path.append(job_map[current_job_name])
+        current_job_name = predecessor[current_job_name]
+    
+    critical_path.reverse()
+    
+    return critical_path
+    
+  def calculate_critical_path_phases(self, critical_path: List[Job]) -> Dict[str, float]:
+    """
+    Calculates the total time of three phases in the critical path:
+    1. Pre-SIM: Jobs executed before the first SIM job
+    2. SIM: All SIM jobs in the critical path
+    3. Post-SIM: Jobs executed after the last SIM job
+    
+    Returns a dictionary with the total time for each phase.
+    """
+    
+    if not critical_path:
+        self._add_warning("Cannot calculate critical path phases: No critical path found.")
+        return {
+            "pre_sim_time": 0.0,
+            "sim_time": 0.0,
+            "post_sim_time": 0.0,
+            "total_time": 0.0
+        }
+    
+    first_sim_index = -1
+    last_sim_index = -1
+    
+    for i, job in enumerate(critical_path):
+        if job.section == JobSection.SIM:
+            if first_sim_index == -1:
+                first_sim_index = i
+            last_sim_index = i
+    
+    pre_sim_time = 0.0
+    sim_time = 0.0
+    post_sim_time = 0.0
+    
+    for i, job in enumerate(critical_path):
+        job_time = (job.run_time or 0.0) 
+        
+        if first_sim_index == -1:
+            post_sim_time += job_time
+        elif i < first_sim_index:
+            pre_sim_time += job_time
+        elif i <= last_sim_index:
+            sim_time += job_time
+        else:
+            post_sim_time += job_time
+    
+    total_time = pre_sim_time + sim_time + post_sim_time
+    
+    return {
+        "pre_sim_time": pre_sim_time,
+        "sim_time": sim_time,
+        "post_sim_time": post_sim_time,
+        "total_time": total_time
+    }
+    
   def __repr__(self):
-    return "Total {0}\nSIM {1}\nPOST {2}\nTRANSFER {3}\nCLEAN {4}".format(
+    return "Total {0}\nSIM {1}\nPOST {2}\nTRANSFER {3}\nCLEAN {4}\nOTHER {5}".format(
       len(self.current_content),
       len(self.sim_jobs),
       len(self.post_jobs),
       len(self.transfer_jobs),
-      len(self.clean_jobs)
+      len(self.clean_jobs),
+      len(self.other_jobs)
     )

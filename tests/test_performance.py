@@ -30,6 +30,7 @@ from autosubmit_api.performance.performance_metrics import PerformanceMetrics
                 "sim_jobs_platform": 'MN4',
                 "sim_jobs_platform_PUE": 1.35,
                 "sim_jobs_platform_CF": 357000,
+                "total_core_hours": 0.0,
             },
             {"considered_jobs_count": 0, "not_considered_jobs_count": 0},
         ),
@@ -52,6 +53,7 @@ from autosubmit_api.performance.performance_metrics import PerformanceMetrics
                 "sim_jobs_platform": '',
                 "sim_jobs_platform_PUE": 0.0,
                 "sim_jobs_platform_CF": 0.0,
+                "total_core_hours": 583.68,
             },
             {"considered_jobs_count": 6, "not_considered_jobs_count": 0},
         ),
@@ -74,6 +76,7 @@ from autosubmit_api.performance.performance_metrics import PerformanceMetrics
                 "sim_jobs_platform": 'LOCAL',
                 "sim_jobs_platform_PUE": 0.0,
                 "sim_jobs_platform_CF": 0.0,
+                "total_core_hours": 0.02,
             },
             {"considered_jobs_count": 2, "not_considered_jobs_count": 0},
         ),
@@ -96,6 +99,7 @@ from autosubmit_api.performance.performance_metrics import PerformanceMetrics
                 "sim_jobs_platform": 'MARENOSTRUM5',
                 "sim_jobs_platform_PUE": 1.08,
                 "sim_jobs_platform_CF": 357000,
+                "total_core_hours": 365.84,
             },
             {"considered_jobs_count": 7, "not_considered_jobs_count": 0},
         )
@@ -129,15 +133,18 @@ def test_performance_metrics(
         "sim_jobs_platform": performance_metrics.sim_jobs_platform,
         "sim_jobs_platform_PUE": performance_metrics.sim_platform_PUE,
         "sim_jobs_platform_CF": performance_metrics.sim_platform_CF,
+        "total_core_hours": performance_metrics.valid_sim_core_hours_sum,
     }
 
     #Assert properties
     for key, expected_value in expected.items():
         actual_value = metrics[key]
         if isinstance(expected_value, float):
-            assert actual_value == pytest.approx(expected_value, rel=1e-2)
+            assert actual_value == pytest.approx(expected_value, rel=1e-2), \
+                f"Assertion failed for key '{key}': expected {expected_value}, but got {actual_value}"
         else:
-            assert actual_value == expected_value
+            assert actual_value == expected_value, \
+                f"Assertion failed for key '{key}': expected {expected_value}, but got {actual_value}"
 
     # Assert considered jobs count
     assert len(performance_metrics._considered) == counters["considered_jobs_count"]

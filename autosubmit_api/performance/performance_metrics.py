@@ -21,12 +21,14 @@ class PerformanceMetrics(object):
     self.total_sim_queue_time: int = 0
     self.valid_sim_yps_sum: float = 0.0
     self.valid_sim_energy_sum: float= 0.0
+    self.valid_sim_core_hours_sum: float = 0.0
     self.valid_sim_footprint_sum: float = 0.0
     self.SYPD: float = 0
     self.ASYPD: float = 0
     self.CHSY: float = 0
     self.JPSY: float = 0
     self.RSYPD: float = 0
+    self.WSYPD: float = 0
     self.processing_elements: int = 1
     self._considered: List[Dict] = []
     self._not_considered: List[Dict] = []
@@ -38,6 +40,8 @@ class PerformanceMetrics(object):
     self.sim_jobs_platform = ""
     self.sim_platform_CF = 0.0
     self.sim_platform_PUE = 0.0
+    self.critical_path = []
+    self.phases = {}
     try:
       self.joblist_helper: JobListHelper = joblist_helper
       self.configuration_facade: AutosubmitConfigurationFacade = self.joblist_helper.configuration_facade
@@ -93,6 +97,7 @@ class PerformanceMetrics(object):
       self.joblist_helper.update_with_timedata(self.pkl_organizer.post_jobs)
       self.joblist_helper.update_with_timedata(self.pkl_organizer.clean_jobs)
       self.joblist_helper.update_with_timedata(self.pkl_organizer.transfer_jobs)
+      self.joblist_helper.update_with_timedata(self.pkl_organizer.other_jobs)
       # Update yps with the latest historical data
       self.joblist_helper.update_with_yps_per_run(self.pkl_organizer.sim_jobs)
 
@@ -100,11 +105,15 @@ class PerformanceMetrics(object):
       self.valid_sim_yps_sum = self._calculate_sum_yps()
       self.valid_sim_energy_sum = self._calculate_sum_energy()
       self.valid_sim_footprint_sum = self._calculate_sum_footprint()
+      self.valid_sim_core_hours_sum = self._calculate_sum_core_hours()
       self.SYPD = self._calculate_SYPD()
       self.ASYPD = self._calculate_ASYPD()
       self.RSYPD = self._calculate_RSYPD()
       self.JPSY = self._calculate_JPSY()
       self.CHSY = self._calculate_CHSY()
+      self.critical_path = self.pkl_organizer.find_critical_path()
+      self.phases = self.pkl_organizer.calculate_critical_path_phases(self.critical_path)
+      self.WSYPD = self._calculate_WSYPD()
 
   def _identify_outlied_jobs(self):
     """ Generates warnings """
@@ -184,7 +193,14 @@ class PerformanceMetrics(object):
       CHSY = sum(job.CHSY for job in self.sim_jobs_valid)/len(self.sim_jobs_valid)
       return round(CHSY, 4)
     return 0
-  
+
+  def _calculate_WSYPD(self):
+    time_workflow = self.phases.get("total_time", 0)
+    if len(self.sim_jobs_valid) > 0 and time_workflow > 0:
+      WSYPD = ((self.valid_sim_yps_sum * utils.SECONDS_IN_A_DAY) / time_workflow)
+      return round(WSYPD, 4)
+    return 0
+
   def _calculate_sum_yps(self):
     return sum(job.years_per_sim for job in self.sim_jobs_valid)
   
@@ -198,6 +214,9 @@ class PerformanceMetrics(object):
   
   def _calculate_sim_job_footprint(self, simjob: SimJob):
     return (simjob.energy / UNITS_CONVERSOR_ENERGY) * self.sim_platform_CF * self.sim_platform_PUE
+  
+  def _calculate_sum_core_hours(self):
+    return round((self._sim_processors * self.total_sim_run_time) / utils.SECONDS_IN_ONE_HOUR , 2)
 
   def _get_RSYPD_support_list(self) -> List[Job]:
     """ The support list for the divisor can have a different source """
@@ -217,6 +236,14 @@ class PerformanceMetrics(object):
       divisor = max(support_list[-1].finish_ts - self.sim_jobs_valid[0].start_ts, 0.0)
     return divisor
 
+  def _process_critical_path(self):
+    """
+    Process the critical path to get the jobs in the critical path
+    """
+    if len(self.critical_path) > 0:
+      return [self._job_to_dict(job) for job in self.critical_path]
+    return []
+  
   def _sim_job_to_dict(self, simjob: SimJob): 
     return {
       "name": simjob.name,
@@ -232,6 +259,13 @@ class PerformanceMetrics(object):
       "chunk": simjob.chunk,
       "footprint": self._calculate_sim_job_footprint(simjob), 
     }
+  
+  def _job_to_dict(self, job: Job):
+    return {
+      "name": job.name,
+      "queue": job.queue_time,
+      "running": job.run_time,
+    }
 
   def to_json(self) -> Dict:
     return {"SY": self.valid_sim_yps_sum,
@@ -240,10 +274,14 @@ class PerformanceMetrics(object):
             "RSYPD": self.RSYPD,
             "CHSY": self.CHSY,
             "JPSY": self.JPSY,
+            "WSYPD": self.WSYPD,
             "Parallelization": self.processing_elements,
             "Total_energy": self.valid_sim_energy_sum,
             "Total_footprint": self.valid_sim_footprint_sum,
             "platform_info":{"name": self.sim_jobs_platform, "CF": self.sim_platform_CF, "PUE": self.sim_platform_PUE},
+            "Total_core_hours": self.valid_sim_core_hours_sum,
+            "critical_path": self._process_critical_path(),
+            "phases": self.phases,
             "considered": self._considered,
             "not_considered": self._not_considered,
             "error": self.error,
