@@ -215,9 +215,9 @@ class PklOrganizer(object):
     if not ideal_critical_path:
         self._add_warning("Cannot calculate critical path phases: No critical path found.")
         return {
-            "pre_sim_time": 0.0,
+            "pre_sim_run_time": 0.0,
             "sim_time": 0.0,
-            "post_sim_time": 0.0,
+            "post_sim_run_time": 0.0,
             "total_run_time": 0.0,
             "total_run_queue_time": 0.0,
         }
@@ -231,9 +231,9 @@ class PklOrganizer(object):
                 first_sim_index = i
             last_sim_index = i
     
-    pre_sim_time = 0.0
+    pre_sim_run_time = 0.0
     sim_time = 0.0
-    post_sim_time = 0.0
+    post_sim_run_time = 0.0
     total_run_queue_time = 0.0
     
     for i, job in enumerate(ideal_critical_path):
@@ -241,22 +241,22 @@ class PklOrganizer(object):
         total_run_queue_time += (job.run_time or 0) + (job.queue_time or 0)
         
         if first_sim_index == -1:
-            post_sim_time += job.run_time
+            post_sim_run_time += job.run_time
         elif i < first_sim_index:
-            pre_sim_time += job.run_time
+            pre_sim_run_time += job.run_time
         elif i <= last_sim_index:
             sim_time += job.run_time
         else:
-            post_sim_time += job.run_time
+            post_sim_run_time += job.run_time
     
-    total_time = pre_sim_time + sim_time + post_sim_time
+    total_run_time = pre_sim_run_time + sim_time + post_sim_run_time
     
     return {
-        "pre_sim_run_time": pre_sim_time,
+        "pre_sim_run_time": pre_sim_run_time,
         "sim_run_time": sim_time,
-        "post_sim_run_time": post_sim_time,
-        "total_time": total_time,
-        "total_run_time": total_run_queue_time,
+        "post_sim_run_time": post_sim_run_time,
+        "total_run_time": total_run_time,
+        "total_run_queue_time": total_run_queue_time,
     }
     
   def __repr__(self):

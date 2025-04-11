@@ -322,8 +322,14 @@ class SimJob(Job):
   def ASYPD(self) -> float:
     """ ASYPD calculation requires the average of the queue and run time of all post jobs """
     divisor = self.total_time + self.post_jobs_total_time_average
-    if divisor > 0:
+    if (divisor > 0) and (self.post_jobs_total_time_average > 0):
       return round((self.years_per_sim * util.SECONDS_IN_A_DAY) / (divisor), 2)
+    return 0
+  
+  @property
+  def QSYPD(self) -> float:
+    if self.total_time > 0:
+      return round((self.years_per_sim * util.SECONDS_IN_A_DAY) / (self.total_time), 2)
     return 0
 
 

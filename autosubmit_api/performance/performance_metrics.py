@@ -25,6 +25,7 @@ class PerformanceMetrics(object):
     self.valid_sim_footprint_sum: float = 0.0
     self.SYPD: float = 0
     self.ASYPD: float = 0
+    self.QSYPD: float = 0
     self.CHSY: float = 0
     self.JPSY: float = 0
     self.RSYPD: float = 0
@@ -109,6 +110,7 @@ class PerformanceMetrics(object):
       self.valid_sim_core_hours_sum = self._calculate_sum_core_hours()
       self.SYPD = self._calculate_SYPD()
       self.ASYPD = self._calculate_ASYPD()
+      self.QSYPD = self._calculate_QSYPD()
       self.RSYPD = self._calculate_RSYPD()
       self.JPSY = self._calculate_JPSY()
       self.CHSY = self._calculate_CHSY()
@@ -169,10 +171,17 @@ class PerformanceMetrics(object):
     return 0
 
   def _calculate_ASYPD(self):
-    if len(self.sim_jobs_valid) > 0 and (self.total_sim_run_time + self.total_sim_queue_time + self.post_jobs_total_time_average)>0:
+    if len(self.sim_jobs_valid) > 0 and (self.total_sim_run_time + self.total_sim_queue_time) > 0 and (self.post_jobs_total_time_average) > 0.0:
       ASYPD = ((self.valid_sim_yps_sum * utils.SECONDS_IN_A_DAY) / 
                  (self.total_sim_run_time + self.total_sim_queue_time + self.post_jobs_total_time_average))
       return round(ASYPD, 4)
+    return 0
+  
+  def _calculate_QSYPD(self):
+    if len(self.sim_jobs_valid) > 0 and (self.total_sim_run_time + self.total_sim_queue_time)>0:
+      QSYPD = ((self.valid_sim_yps_sum * utils.SECONDS_IN_A_DAY) / 
+                 (self.total_sim_run_time + self.total_sim_queue_time))
+      return round(QSYPD, 4)
     return 0
 
   def _calculate_RSYPD(self):
@@ -272,6 +281,7 @@ class PerformanceMetrics(object):
       "CHSY": simjob.CHSY,
       "SYPD": simjob.SYPD,
       "ASYPD": simjob.ASYPD,
+      "QSYPD": simjob.QSYPD,
       "JPSY": simjob.JPSY,
       "energy": simjob.energy,
       "yps": simjob.years_per_sim,
@@ -290,6 +300,7 @@ class PerformanceMetrics(object):
     return {"SY": self.valid_sim_yps_sum,
             "SYPD": self.SYPD,
             "ASYPD": self.ASYPD,
+            "QSYPD": self.QSYPD,
             "RSYPD": self.RSYPD,
             "CHSY": self.CHSY,
             "JPSY": self.JPSY,
