@@ -36,6 +36,7 @@ class PerformanceMetrics(object):
     self._not_considered: List[Dict] = []
     self._sim_processors: int = 1
     self.warnings: List[str] = []
+    self.deprecated_warnings: List[str] = []
     self.post_jobs_total_time_average: int = 0
     self.sim_jobs_valid: List[SimJob] = []
     self.sim_jobs_invalid: List[SimJob] = []
@@ -125,10 +126,18 @@ class PerformanceMetrics(object):
     for job in outlied:
       self.warnings.append("Considered | Job {0} (Package {1}) has no energy information and is not going to be considered for energy calculations.".format(job.name, self.joblist_helper.job_to_package.get(job.name, "No Package")))
 
+  def _deprecated_metrics(self):
+    """ Deprecated metrics """
+    return [
+      "RSYPD is deprecated; use WSYPD instead.",
+      "ASYPD is deprecated; the new name assigned is X.",
+    ]
+  
   def _unify_warnings(self):
     self.warnings.extend(self.pkl_organizer.warnings)
     self.warnings.extend(self.configuration_facade.warnings)
     self.warnings.extend(self.joblist_helper.warning_messages)
+    self.deprecated_warnings.extend(self._deprecated_metrics())
 
   def _calculate_post_jobs_total_time_average(self):
     """ Average run+queue of all completed POST jobs """
@@ -318,4 +327,5 @@ class PerformanceMetrics(object):
             "error": self.error,
             "error_message": self.error_message,
             "warnings_job_data": self.warnings,
+            "warnings_deprecated_metrics": self.deprecated_warnings,
             }
