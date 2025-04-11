@@ -97,7 +97,7 @@ class PklOrganizer(object):
     if len(self.get_completed_section_jobs(JobSection.SIM)) == 0:
       self._add_warning("We couldn't find COMPLETED SIM jobs in the experiment.")
     if len(self.get_completed_section_jobs(JobSection.POST)) == 0:
-      self._add_warning("We couldn't find COMPLETED POST jobs in the experiment. ASYPD can't be calculated.")
+      self._add_warning("We couldn't find COMPLETED POST jobs in the experiment. The time of the POST jobs will not be included in the PSYD calculation.")
     if len(self.get_completed_section_jobs(JobSection.TRANSFER)) == 0 and len(self.get_completed_section_jobs(JobSection.CLEAN)) == 0:
       self._add_warning("RSYPD | There are no TRANSFER nor CLEAN (COMPLETED) jobs in the experiment, RSYPD cannot be computed.")
     if len(self.get_completed_section_jobs(JobSection.TRANSFER)) == 0 and len(self.get_completed_section_jobs(JobSection.CLEAN)) > 0:

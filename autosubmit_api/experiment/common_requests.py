@@ -1179,7 +1179,7 @@ def get_experiment_runs(expid):
                                 "total": experiment_run.total,
                                 "suspended": experiment_run.suspended,
                                 "SYPD": experiment_run.getSYPD(valid_SIM_in_run),
-                                "ASYPD": experiment_run.getASYPD(valid_SIM_in_run, valid_POST_in_run, run_id_wrapper_code_to_job_dcs)})
+                                "PSYPD": experiment_run.getPSYPD(valid_SIM_in_run, valid_POST_in_run, run_id_wrapper_code_to_job_dcs)})
             result.sort(key=lambda x: x["run_id"], reverse=True)
         else:
             error = True

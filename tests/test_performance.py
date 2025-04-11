@@ -18,7 +18,7 @@ from autosubmit_api.performance.performance_metrics import PerformanceMetrics
                 "total_sim_queue_time": 0,
                 "SY": 0,
                 "SYPD": 0,
-                "ASYPD": 0,
+                "PSYPD": 0,
                 "QSYPD": 0,
                 "CHSY": 0,
                 "JPSY": 0,
@@ -40,7 +40,7 @@ from autosubmit_api.performance.performance_metrics import PerformanceMetrics
             {
                 "SY": 0.49999999999999994,
                 "SYPD": 15.7895,
-                "ASYPD": 0,
+                "PSYPD": 12.9109,
                 "QSYPD": 12.9109,
                 "CHSY": 1167.36,
                 "JPSY": 57300000.0,
@@ -64,7 +64,7 @@ from autosubmit_api.performance.performance_metrics import PerformanceMetrics
             {
                 "SY": 0.6666666666666666,
                 "SYPD": 5760.0,
-                "ASYPD": 3840.0,
+                "PSYPD": 3840.0,
                 "QSYPD": 5760.0,
                 "CHSY": 0.03,
                 "JPSY": 0,
@@ -88,7 +88,7 @@ from autosubmit_api.performance.performance_metrics import PerformanceMetrics
             {
                 "SY": 0.01917808219178082,
                 "SYPD": 0.3623,
-                "ASYPD": 0,
+                "PSYPD": 0.3538,
                 "QSYPD": 0.3538,
                 "CHSY": 19075.9429,
                 "JPSY": 574614285.7143,
@@ -123,7 +123,7 @@ def test_performance_metrics(
     metrics = {
         "SY": performance_metrics.valid_sim_yps_sum,
         "SYPD": performance_metrics.SYPD,
-        "ASYPD": performance_metrics.ASYPD,
+        "PSYPD": performance_metrics.PSYPD,
         "QSYPD": performance_metrics.QSYPD,
         "CHSY": performance_metrics.CHSY,
         "JPSY": performance_metrics.JPSY,

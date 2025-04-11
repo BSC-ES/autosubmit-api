@@ -12,13 +12,13 @@ def calculate_SYPD_perjob(chunk_unit: str, chunk_size: int, job_chunk: int, run_
     return None
 
 
-def calculate_ASYPD_perjob(chunk_unit: str, chunk_size: int, job_chunk: int, queue_run_time: int, average_post: float, status: int) -> float:
+def calculate_PSYPD_perjob(chunk_unit: str, chunk_size: int, job_chunk: int, queue_run_time: int, average_post: float, status: int) -> float:
     """
-    Generalization of ASYPD at job level
+    Generalization of PSYPD at job level
     """
     if status == Status.COMPLETED and job_chunk and job_chunk > 0:
         years_per_sim = datechunk_to_year(chunk_unit, chunk_size)
-        # print("YPS in ASYPD calculation: {}".format(years_per_sim))
+        # print("YPS in PSYPD calculation: {}".format(years_per_sim))
         divisor = queue_run_time + average_post
         if divisor > 0.0:
             return round((years_per_sim * 86400) / divisor, 2)

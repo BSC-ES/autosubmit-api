@@ -31,7 +31,7 @@ from autosubmit_api.components.jobs.utils import generate_job_html_title
 # from networkx import DiGraph
 from autosubmit_api.config.basicConfig import APIBasicConfig
 from autosubmit_api.monitor.monitor import Monitor
-from autosubmit_api.performance.utils import calculate_ASYPD_perjob
+from autosubmit_api.performance.utils import calculate_PSYPD_perjob
 from autosubmit_api.components.jobs.job_factory import SimJob
 from autosubmit_api.common.utils import (
     get_jobs_with_no_outliers,
@@ -113,9 +113,9 @@ class ExperimentRun():
                 return round((years_per_sim * number_SIM * seconds_per_day) / total_run_time, 2)
         return None
 
-    def getASYPD(self, job_sim_list, job_post_list, package_jobs):
+    def getPSYPD(self, job_sim_list, job_post_list, package_jobs):
         """
-        Gets ASYPD per run
+        Gets PSYPD per run
         package_jobs package_name => { job_id => (queue_time, parents, job_id, start_time) }
         """
         SIM_no_outlier_list = []
@@ -221,7 +221,7 @@ class JobData(object):
 
         self.require_update = False
         self.metric_SYPD = None
-        self.metric_ASYPD = None
+        self.metric_PSYPD = None
         # self.title = getTitle(self.job_name, Monitor.color_status(
         #     Status.STRING_TO_CODE[self.status]), self.status)
         self.tree_parent = []
@@ -242,9 +242,9 @@ class JobData(object):
             self.metric_SYPD = round(years_per_sim * seconds_in_a_day /
                                      self.running_time(), 2) if self.running_time() > 0 else None
 
-    def calculateASYPD(self, chunk_unit, chunk_size, job_package_data, average_post_time):
+    def calculatePSYPD(self, chunk_unit, chunk_size, job_package_data, average_post_time):
         """
-        Calculates ASYPD for a job in a run
+        Calculates PSYPD for a job in a run
 
         :param chunk_unit: chunk unit of the experiment
         :type chunk_unit: str
@@ -257,9 +257,9 @@ class JobData(object):
         :return: void
         :rtype: void
         """
-        result_ASYPD = calculate_ASYPD_perjob(
+        result_PSYPD = calculate_PSYPD_perjob(
             chunk_unit, chunk_size, self.chunk, self.queuing_time(job_package_data) + self.running_time(), average_post_time, Status.STRING_TO_CODE[self.status])
-        self.metric_ASYPD = result_ASYPD if result_ASYPD > 0 else None
+        self.metric_PSYPD = result_PSYPD if result_PSYPD > 0 else None
 
     def delta_queue_time(self, job_data_in_package=None):
         """
