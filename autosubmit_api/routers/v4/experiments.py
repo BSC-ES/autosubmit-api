@@ -352,7 +352,7 @@ async def get_run_config(
 )
 async def get_run_user_metrics(
     expid: str,
-    run_id: str,
+    run_id: int,
     user_id: Optional[str] = Depends(auth_token_dependency()),
 ):
     """
