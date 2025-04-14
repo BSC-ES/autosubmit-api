@@ -9,7 +9,6 @@ from typing import List, Dict, Set, Union
 
 from autosubmit_api.persistance.pkl_reader import PklReader
 
-
 class PklOrganizer(object):
   """
   Identifies dates, members, and sections. Distributes jobs into SIM, POST, TRANSFER, and CLEAN).
@@ -26,6 +25,7 @@ class PklOrganizer(object):
     self.clean_jobs: List[Job] = []
     self.other_jobs: List[Job] = [] 
     self.warnings: List[str] = [] 
+    self.workflow_structure_error = False  # New attribute to track structure errors
     self.dates: Set[str] = set() 
     self.members: Set[str] = set() 
     self.sections: Set[str] = set() 
@@ -97,7 +97,7 @@ class PklOrganizer(object):
     if len(self.get_completed_section_jobs(JobSection.SIM)) == 0:
       self._add_warning("We couldn't find COMPLETED SIM jobs in the experiment.")
     if len(self.get_completed_section_jobs(JobSection.POST)) == 0:
-      self._add_warning("We couldn't find COMPLETED POST jobs in the experiment. The time of the POST jobs will not be included in the PSYD calculation.")
+      self._add_warning("We couldn't find COMPLETED POST jobs in the experiment. The time of the POST jobs will not be included in the PSYPD calculation.")
     if len(self.get_completed_section_jobs(JobSection.TRANSFER)) == 0 and len(self.get_completed_section_jobs(JobSection.CLEAN)) == 0:
       self._add_warning("RSYPD | There are no TRANSFER nor CLEAN (COMPLETED) jobs in the experiment, RSYPD cannot be computed.")
     if len(self.get_completed_section_jobs(JobSection.TRANSFER)) == 0 and len(self.get_completed_section_jobs(JobSection.CLEAN)) > 0:
@@ -120,103 +120,131 @@ class PklOrganizer(object):
     """
     try:
       structure_adjacency = get_structure(self.expid)
-      
-      job_name_map = {}
-      for section in self.section_jobs_map:
-        for job in self.section_jobs_map[section]:
-          job_name_map[job.name] = job
-      
-      parents_adjacency = {}
-      
-      for job_name, job in job_name_map.items():
-        children = set(structure_adjacency.get(job_name, []))
-        job.children_names = children
-        
-        for child_name in children:
-          parents_adjacency.setdefault(child_name, set()).add(job_name)
-      
-      for job_name, job in job_name_map.items():
-        job.parents_names = set(parents_adjacency.get(job_name, []))
-          
     except Exception as exc:
-      self._add_warning(f"Could not assign parent-child relationships: {str(exc)}")
+      warning_msg = ("Could not obtain the workflow structure; ideal critical path will not be calculated.")
+      self._add_warning(warning_msg)
+      self.workflow_structure_error = True
+      return  # Exit early since no structure is available
 
-  def find_ideal_critical_path(self) -> List[Job]:
+    job_name_map = {}
+    for section in self.section_jobs_map:
+      for job in self.section_jobs_map[section]:
+        job_name_map[job.name] = job
+
+    parents_adjacency = {}
+      
+    for job_name, job in job_name_map.items():
+      children = set(structure_adjacency.get(job_name, []))
+      job.children_names = children
+      
+      for child_name in children:
+        parents_adjacency.setdefault(child_name, set()).add(job_name)
+      
+    for job_name, job in job_name_map.items():
+      job.parents_names = set(parents_adjacency.get(job_name, []))
+
+  def find_ideal_critical_path_ini(self) -> List[dict]:
     """
-    Finds the critical path of jobs in the experiment.
-    The critical path is the path with the highest sum of queue time and run time.
-    Returns a list of jobs representing the critical path.
+    Prepares the completed jobs for critical path calculation.
+    Processes the jobs into a dictionary and calls the generalized algorithm.
+    Returns a list of dictionaries representing the jobs of the ideal critical path.
     """
-    longest_path = {}
-    predecessor = {}
-    job_map = {}
-    
+    if self.workflow_structure_error:
+      return []
+
     completed_jobs = []
     for section in self.section_jobs_map:
-      completed_jobs.extend(self.get_completed_section_jobs(section))
+        completed_jobs.extend(self.get_completed_section_jobs(section))
     
     if not completed_jobs:
         self._add_warning("Critical path: No completed jobs found.")
         return []
     
+    jobs_dict = {}
     for job in completed_jobs:
-        job_map[job.name] = job
-        base_time = max((job.run_time or 0), 0.001) 
-        longest_path[job.name] = base_time
-        predecessor[job.name] = None
+        jobs_dict[job.name] = {
+            'run_time': job.run_time or 0,
+            'queue_time': job.queue_time or 0,
+            'children_names': job.children_names,
+            'section': job.section
+        }
+    
+    return self.find_ideal_critical_path_gen(jobs_dict)
 
-    in_degree = { job.name: 0 for job in completed_jobs }
-    for job in completed_jobs:
-        if job.has_children():
-            for child_name in job.children_names:
-                if child_name in job_map:
-                    in_degree[child_name] += 1
-
-    queue = deque([job for job in completed_jobs if in_degree[job.name] == 0])
-
+  def find_ideal_critical_path_gen(self, jobs_dict: Dict[str, dict]) -> List[dict]:
+    """
+    Generalized algorithm that receives a dictionary where each key is the job name
+    and the value contains 'run_time', 'queue_time', 'children_names', and 'section'.
+    Returns a list of dictionaries representing the jobs of the ideal critical path.
+    """
+    longest_path = {}
+    predecessor = {}
+    in_degree = {job_name: 0 for job_name in jobs_dict}
+    
+    for job_name, info in jobs_dict.items():
+        base_time = max(info['run_time'], 0.001)
+        longest_path[job_name] = base_time
+        predecessor[job_name] = None
+    
+    for job_name, info in jobs_dict.items():
+        for child_name in info['children_names']:
+            if child_name in jobs_dict:
+                in_degree[child_name] += 1
+    
+    queue = deque([name for name, deg in in_degree.items() if deg == 0])
+    
     while queue:
-        current = queue.popleft()
-        if current.has_children():
-            for child_name in current.children_names:
-                if child_name in job_map:
-                    child = job_map[child_name]
-                    child_time = max((child.run_time or 0) , 0.001)
-                    new_path_length = longest_path[current.name] + child_time
-                    if new_path_length > longest_path[child_name]:
-                        longest_path[child_name] = new_path_length
-                        predecessor[child_name] = current.name
-                    in_degree[child_name] -= 1
-                    if in_degree[child_name] == 0:
-                        queue.append(child)
-                        
+        current_name = queue.popleft()
+        current_info = jobs_dict[current_name]
+        for child_name in current_info['children_names']:
+            if child_name in jobs_dict:
+                child_info = jobs_dict[child_name]
+                child_run = max(child_info['run_time'], 0.001)
+                new_path_length = longest_path[current_name] + child_run
+                if new_path_length > longest_path[child_name]:
+                    longest_path[child_name] = new_path_length
+                    predecessor[child_name] = current_name
+                in_degree[child_name] -= 1
+                if in_degree[child_name] == 0:
+                    queue.append(child_name)
+    
+    if not longest_path:
+        return []
     end_job_name = max(longest_path, key=longest_path.get)
+    path_names = []
+    curr = end_job_name
+    while curr:
+        path_names.append(curr)
+        curr = predecessor[curr]
+    path_names.reverse()
     
-    ideal_critical_path = []
-    current_job_name = end_job_name
-    
-    while current_job_name:
-        ideal_critical_path.append(job_map[current_job_name])
-        current_job_name = predecessor[current_job_name]
-    
-    ideal_critical_path.reverse()
-    
-    return ideal_critical_path
-    
-  def calculate_ideal_critical_path_phases(self, ideal_critical_path: List[Job]) -> Dict[str, float]:
+    critical_path = [
+        {
+            "name": name,
+            "run_time": jobs_dict[name]['run_time'],
+            "queue_time": jobs_dict[name]['queue_time'],
+            "section": jobs_dict[name]['section'],
+        }
+        for name in path_names
+    ]
+    return critical_path
+
+  def calculate_critical_path_phases(self, ideal_critical_path: List[dict]) -> Dict[str, float]:
     """
-    Calculates the total time of three phases in the critical path:
-    1. Pre-SIM: Jobs executed before the first SIM job
-    2. SIM: All SIM jobs in the critical path
-    3. Post-SIM: Jobs executed after the last SIM job
+    Calculates the total run times for three phases in the critical path based on a list of dictionaries:
+    1. Pre-SIM: Jobs executed before the first SIM job.
+    2. SIM: All SIM jobs in the critical path.
+    3. Post-SIM: Jobs executed after the last SIM job.
     
-    Returns a dictionary with the total time for each phase.
+    Each dictionary has keys: 'name', 'run_time', 'queue_time', and 'section'.
+    Returns a dictionary with the total run time and total run+queue time.
     """
-    
-    if not ideal_critical_path:
-        self._add_warning("Cannot calculate critical path phases: No critical path found.")
+
+    if not ideal_critical_path or ideal_critical_path == []:
+        self._add_warning("Cannot calculate critical path phases; no critical path found.")
         return {
             "pre_sim_run_time": 0.0,
-            "sim_time": 0.0,
+            "sim_run_time": 0.0,
             "post_sim_run_time": 0.0,
             "total_run_time": 0.0,
             "total_run_queue_time": 0.0,
@@ -226,34 +254,35 @@ class PklOrganizer(object):
     last_sim_index = -1
     
     for i, job in enumerate(ideal_critical_path):
-        if job.section == JobSection.SIM:
+        if job.get("section") == JobSection.SIM:
             if first_sim_index == -1:
                 first_sim_index = i
             last_sim_index = i
     
     pre_sim_run_time = 0.0
-    sim_time = 0.0
+    sim_run_time = 0.0
     post_sim_run_time = 0.0
     total_run_queue_time = 0.0
     
     for i, job in enumerate(ideal_critical_path):
-        
-        total_run_queue_time += (job.run_time or 0) + (job.queue_time or 0)
+        run_time = job.get("run_time", 0)
+        queue_time = job.get("queue_time", 0)
+        total_run_queue_time += run_time + queue_time
         
         if first_sim_index == -1:
-            post_sim_run_time += job.run_time
+            post_sim_run_time += run_time
         elif i < first_sim_index:
-            pre_sim_run_time += job.run_time
+            pre_sim_run_time += run_time
         elif i <= last_sim_index:
-            sim_time += job.run_time
+            sim_run_time += run_time
         else:
-            post_sim_run_time += job.run_time
+            post_sim_run_time += run_time
     
-    total_run_time = pre_sim_run_time + sim_time + post_sim_run_time
+    total_run_time = pre_sim_run_time + sim_run_time + post_sim_run_time
     
     return {
         "pre_sim_run_time": pre_sim_run_time,
-        "sim_run_time": sim_time,
+        "sim_run_time": sim_run_time,
         "post_sim_run_time": post_sim_run_time,
         "total_run_time": total_run_time,
         "total_run_queue_time": total_run_queue_time,

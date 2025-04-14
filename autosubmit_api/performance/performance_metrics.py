@@ -36,7 +36,6 @@ class PerformanceMetrics(object):
     self._not_considered: List[Dict] = []
     self._sim_processors: int = 1
     self.warnings: List[str] = []
-    self.deprecated_warnings: List[str] = []
     self.post_jobs_total_time_average: int = 0
     self.sim_jobs_valid: List[SimJob] = []
     self.sim_jobs_invalid: List[SimJob] = []
@@ -115,8 +114,8 @@ class PerformanceMetrics(object):
       self.RSYPD = self._calculate_RSYPD()
       self.JPSY = self._calculate_JPSY()
       self.CHSY = self._calculate_CHSY()
-      self.ideal_critical_path = self.pkl_organizer.find_ideal_critical_path()
-      self.phases = self.pkl_organizer.calculate_ideal_critical_path_phases(self.ideal_critical_path)
+      self.ideal_critical_path = self.pkl_organizer.find_ideal_critical_path_ini()
+      self.phases = self.pkl_organizer.calculate_critical_path_phases(self.ideal_critical_path)
       self.WSYPD = self._calculate_WSYPD()
       self.IWSYPD = self._calculate_IWSYPD()
 
@@ -130,14 +129,14 @@ class PerformanceMetrics(object):
     """ Deprecated metrics """
     return [
       "RSYPD is deprecated; use WSYPD instead.",
-      "PSYPD is deprecated; the new name assigned is X.",
+      "ASYPD is deprecated; the new name assigned is PSYPD.",
     ]
   
   def _unify_warnings(self):
     self.warnings.extend(self.pkl_organizer.warnings)
     self.warnings.extend(self.configuration_facade.warnings)
     self.warnings.extend(self.joblist_helper.warning_messages)
-    self.deprecated_warnings.extend(self._deprecated_metrics())
+    self.warnings.extend(self._deprecated_metrics())
 
   def _calculate_post_jobs_total_time_average(self):
     """ Average run+queue of all completed POST jobs """
@@ -215,14 +214,14 @@ class PerformanceMetrics(object):
     return 0
 
   def _calculate_WSYPD(self):
-    time_workflow = self.phases.get("total_run_time", 0)
+    time_workflow = self.phases.get("total_run_queue_time", 0)
     if len(self.sim_jobs_valid) > 0 and time_workflow > 0:
       WSYPD = ((self.valid_sim_yps_sum * utils.SECONDS_IN_A_DAY) / time_workflow)
       return round(WSYPD, 4)
     return 0
   
   def _calculate_IWSYPD(self):
-    time_workflow = self.phases.get("total_run_queue_time", 0)
+    time_workflow = self.phases.get("total_run_time", 0)
     if len(self.sim_jobs_valid) > 0 and time_workflow > 0:
       IWSYPD = ((self.valid_sim_yps_sum * utils.SECONDS_IN_A_DAY) / time_workflow)
       return round(IWSYPD, 4)
@@ -265,21 +264,21 @@ class PerformanceMetrics(object):
 
   def _process_ideal_critical_path(self):
     """
-    Process the critical path to get the jobs in the critical path
+    Process the critical path to get the jobs in the critical path.
+    Returns a list of dictionaries with only 'name' and 'running' (run_time).
     """
     if len(self.ideal_critical_path) > 0:
-      return [self._job_to_dict(job) for job in self.ideal_critical_path]
+      return [{"name": job["name"], "running": job["run_time"]} for job in self.ideal_critical_path]
     return []
   
-  def _process_ideal_critical_path_phases(self):
+  def _process_critical_path_phases(self):
     """
     Process the critical path phases to get the time in each phase
     """
     return {
-      "pre_sim_time": self.phases.get("pre_sim_run_time", 0),
-      "sim_time": self.phases.get("sim_run_time", 0),
-      "post_sim_time": self.phases.get("post_sim_run_time", 0),
-      "total_time": self.phases.get("total_run_time", 0),
+      "pre_sim": self.phases.get("pre_sim_run_time", 0),
+      "sim": self.phases.get("sim_run_time", 0),
+      "post_sim": self.phases.get("post_sim_run_time", 0),
     }
   
   def _sim_job_to_dict(self, simjob: SimJob): 
@@ -289,6 +288,7 @@ class PerformanceMetrics(object):
       "running": simjob.run_time,
       "CHSY": simjob.CHSY,
       "SYPD": simjob.SYPD,
+      "ASYPD": simjob.PSYPD,
       "PSYPD": simjob.PSYPD,
       "QSYPD": simjob.QSYPD,
       "JPSY": simjob.JPSY,
@@ -297,12 +297,6 @@ class PerformanceMetrics(object):
       "ncpus": simjob.ncpus,
       "chunk": simjob.chunk,
       "footprint": self._calculate_sim_job_footprint(simjob), 
-    }
-  
-  def _job_to_dict(self, job: Job):
-    return {
-      "name": job.name,
-      "running": job.run_time,
     }
 
   def to_json(self) -> Dict:
@@ -322,11 +316,10 @@ class PerformanceMetrics(object):
             "platform_info":{"name": self.sim_jobs_platform, "CF": self.sim_platform_CF, "PUE": self.sim_platform_PUE},
             "Total_core_hours": self.valid_sim_core_hours_sum,
             "ideal_critical_path": self._process_ideal_critical_path(),
-            "ideal_phases": self._process_ideal_critical_path_phases(),
+            "phases_run_times": self._process_critical_path_phases(),
             "considered": self._considered,
             "not_considered": self._not_considered,
             "error": self.error,
             "error_message": self.error_message,
             "warnings_job_data": self.warnings,
-            "warnings_deprecated_metrics": self.deprecated_warnings,
             }

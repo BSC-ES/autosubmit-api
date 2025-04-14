@@ -35,16 +35,22 @@ be the set of POST jobs that are `COMPLETED`.
 
 **Experiment's Post Simulated Years Per Day**: :math:`PSYPD = \frac{\sum_{i \in C} y_i \cdot 86400}{\sum_{i \in C} (q_i + r_i) + \frac{1}{|P|}\sum_{j \in P}(q_j+r_j)}`
 
-The computation of *Real Simulated Year Per Day* will only consider experiments
-that have a TRANSFER or a CLEAN job at the end of the workflow. AutosubmitAPI
-checks when the first SIM job started (not submitted), and when the
-last TRANSFER job finished. If the workflow does not have a TRANSFER job, then it
-checks the last CLEAN job finish time.
+.. important:: This metric was previously known as Actual Simulated Years Per Day.
 
-Let :math:`t_s` be the time, in seconds, that the first SIM job started. Let
-:math:`t_f` be the time in which the last TRANSFER or CLEAN job ended.
+**Experiment's Workflow Simulated Years Per Day**: :math:`WSYPD = \frac{\sum_{i \in C} y_i \cdot 86400}{\sum_{i \in jobs critical path} (q_i + r_i)}`
 
-**Experiment's Real Simulated Years Per Day**: :math:`RSYPD = \frac{\sum_{i \in C} y_i \cdot 86400}{t_f - t_s}`
+WSYPD represents the effective throughput of the experiment's workflow. It is 
+calculated by multiplying the sum of simulated years from the valid 
+simulation jobs by the number of seconds in a day and dividing by the 
+total combined run and queue time measured along the workflow’s critical path.
+
+.. important:: This metric was previously known as Real Simulated Years Per Day.
+
+**Experiment's Ideal Workflow Simulated Years Per Day**: :math:`IWSYPD = \frac{\sum_{i \in C} y_i \cdot 86400}{\sum_{i \in jobs critical path} (r_i)}}`
+
+IWSYPD represents the ideal throughput of the workflow under optimal conditions. 
+It is calculated by multiplying the sum of simulated years by the number of seconds in a day
+and dividing by the total run measured along the workflow’s critical path.
 
 Generalization of SYPD and PSYPD
 ================================
