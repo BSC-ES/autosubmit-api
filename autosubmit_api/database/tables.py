@@ -197,3 +197,14 @@ JobDataTable = Table(
 # Copy JobDataTable to an alternative version which has an additional column
 JobDataTableV18 = table_copy(JobDataTable)
 JobDataTableV18.append_column(Column("workflow_commit", Text, nullable=True))
+
+UserMetricTable = Table(
+    "user_metrics",
+    metadata_obj,
+    Column("user_metric_id", Integer, primary_key=True),
+    Column("run_id", Integer, nullable=False),
+    Column("job_name", Text, nullable=False),
+    Column("metric_name", Text, nullable=False),
+    Column("metric_value", Text, nullable=False),
+    Column("modified", Text, nullable=False),
+)
