@@ -6,7 +6,8 @@ from autosubmit_api.builders.joblist_helper_builder import (
     JobListHelperDirector,
 )
 from autosubmit_api.performance.performance_metrics import PerformanceMetrics
-from autosubmit_api.persistance.pkl_reader import PklReader #Avoid errors with Pklreader when using dummy
+from autosubmit_api.persistance.pkl_reader import PklReader  # Avoid errors with Pklreader when using dummy
+from autosubmit_api.components.experiment.pkl_organizer import PklOrganizer  
 
 _original_parse_job_list = PklReader.parse_job_list
 def _patched_parse_job_list(self):
@@ -15,8 +16,7 @@ def _patched_parse_job_list(self):
     return _original_parse_job_list(self)
 PklReader.parse_job_list = _patched_parse_job_list
 
-from autosubmit_api.components.experiment.pkl_organizer import PklOrganizer
-ORGANIZER = PklOrganizer("dummy")
+ORGANIZER = PklOrganizer("dummy") 
 
 @pytest.mark.parametrize(
     "expid, expected, counters",

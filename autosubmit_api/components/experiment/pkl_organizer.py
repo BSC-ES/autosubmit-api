@@ -120,11 +120,11 @@ class PklOrganizer(object):
     """
     try:
       structure_adjacency = get_structure(self.expid)
-    except Exception as exc:
+    except Exception:
       warning_msg = ("Could not obtain the workflow structure; ideal critical path will not be calculated.")
       self._add_warning(warning_msg)
       self.workflow_structure_error = True
-      return  # Exit early since no structure is available
+      return  
 
     job_name_map = {}
     for section in self.section_jobs_map:
