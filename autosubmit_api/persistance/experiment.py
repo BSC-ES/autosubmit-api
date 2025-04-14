@@ -45,7 +45,7 @@ class ExperimentPaths:
         tmp/LOG_{expid} dir
         """
         return os.path.join(self.tmp_dir, f"LOG_{self.expid}")
-    
+
     @property
     def tmp_as_logs_dir(self):
         """
@@ -56,10 +56,14 @@ class ExperimentPaths:
     @property
     def job_data_db(self):
         return os.path.join(APIBasicConfig.JOBDATA_DIR, f"job_data_{self.expid}.db")
-    
+
     @property
     def structure_db(self):
         return os.path.join(APIBasicConfig.STRUCTURES_DIR, f"structure_{self.expid}.db")
+
+    @property
+    def user_metric_db(self):
+        return os.path.join(self.tmp_dir, f"metrics_{self.expid}.db")
 
     @property
     def graph_data_db(self):
