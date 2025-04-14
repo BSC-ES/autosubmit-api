@@ -351,3 +351,26 @@ class TestExperimentRunConfig:
         for key in ALLOWED_CONFIG_KEYS:
             assert key in resp_obj["config"]
             assert isinstance(resp_obj["config"][key], dict)
+
+
+class TestUserMetrics:
+    endpoint = "/v4/experiments/{expid}/runs/{run_id}/user-metrics"
+
+    def test_user_metrics(self, fixture_fastapi_client: TestClient):
+        expid = "a6zj"
+        run_id = 1
+        response = fixture_fastapi_client.get(
+            self.endpoint.format(expid=expid, run_id=run_id)
+        )
+        resp_obj: dict = response.json()
+
+        assert isinstance(resp_obj, dict)
+        assert resp_obj["run_id"] == run_id
+
+        assert isinstance(resp_obj["metrics"], list)
+        assert len(resp_obj["metrics"]) == 1
+        assert isinstance(resp_obj["metrics"][0], dict)
+        assert resp_obj["metrics"][0]["job_name"] == "a6zj_LOCAL_SETUP"
+        assert resp_obj["metrics"][0]["metric_name"] == "metric1"
+        assert resp_obj["metrics"][0]["metric_value"] == "123.45"
+
