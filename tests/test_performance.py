@@ -6,6 +6,17 @@ from autosubmit_api.builders.joblist_helper_builder import (
     JobListHelperDirector,
 )
 from autosubmit_api.performance.performance_metrics import PerformanceMetrics
+from autosubmit_api.persistance.pkl_reader import PklReader #Avoid errors with Pklreader when using dummy
+
+_original_parse_job_list = PklReader.parse_job_list
+def _patched_parse_job_list(self):
+    if self.expid == "dummy":
+        return []  # return empty list for dummy expid
+    return _original_parse_job_list(self)
+PklReader.parse_job_list = _patched_parse_job_list
+
+from autosubmit_api.components.experiment.pkl_organizer import PklOrganizer
+ORGANIZER = PklOrganizer("dummy")
 
 @pytest.mark.parametrize(
     "expid, expected, counters",
@@ -201,31 +212,17 @@ def test_performance_metrics(
         == counters["not_considered_jobs_count"]
     )
 
-
-from autosubmit_api.persistance.pkl_reader import PklReader #Avoid errors with Pklreader when using dummy
-
-_original_parse_job_list = PklReader.parse_job_list
-def _patched_parse_job_list(self):
-    if self.expid == "dummy":
-        return []  # return empty list for dummy expid
-    return _original_parse_job_list(self)
-PklReader.parse_job_list = _patched_parse_job_list
-
 def test_performance_metrics_find_ideal_critical_path_gen_empty():
-    from autosubmit_api.components.experiment.pkl_organizer import PklOrganizer
-    organizer = PklOrganizer("dummy")
-    result = organizer.find_ideal_critical_path_gen({})
+    result = ORGANIZER.find_ideal_critical_path_gen({})
     assert result == []
 
 def test_performance_metrics_find_ideal_critical_path_gen_simple_chain():
-    from autosubmit_api.components.experiment.pkl_organizer import PklOrganizer
-    organizer = PklOrganizer("dummy")
     jobs_dict = {
         "A": {"run_time": 5, "queue_time": 1, "children_names": {"B"}, "section": "SIM"},
         "B": {"run_time": 10, "queue_time": 2, "children_names": {"C"}, "section": "SIM"},
         "C": {"run_time": 15, "queue_time": 3, "children_names": set(), "section": "SIM"},
     }
-    result = organizer.find_ideal_critical_path_gen(jobs_dict)
+    result = ORGANIZER.find_ideal_critical_path_gen(jobs_dict)
     expected = [
         {"name": "A", "run_time": 5, "queue_time": 1, "section": "SIM"},
         {"name": "B", "run_time": 10, "queue_time": 2, "section": "SIM"},
@@ -234,15 +231,13 @@ def test_performance_metrics_find_ideal_critical_path_gen_simple_chain():
     assert result == expected
 
 def test_performance_metrics_find_ideal_critical_path_gen_branching():
-    from autosubmit_api.components.experiment.pkl_organizer import PklOrganizer
-    organizer = PklOrganizer("dummy")
     jobs_dict = {
         "A": {"run_time": 5, "queue_time": 0, "children_names": {"B", "C"}, "section": "SIM"},
         "B": {"run_time": 5, "queue_time": 0, "children_names": {"D"}, "section": "SIM"},
         "C": {"run_time": 10, "queue_time": 0, "children_names": set(), "section": "SIM"},
         "D": {"run_time": 20, "queue_time": 0, "children_names": set(), "section": "SIM"},
     }
-    result = organizer.find_ideal_critical_path_gen(jobs_dict)
+    result = ORGANIZER.find_ideal_critical_path_gen(jobs_dict)
     expected = [
         {"name": "A", "run_time": 5, "queue_time": 0, "section": "SIM"},
         {"name": "B", "run_time": 5, "queue_time": 0, "section": "SIM"},
@@ -251,13 +246,11 @@ def test_performance_metrics_find_ideal_critical_path_gen_branching():
     assert result == expected
 
 def test_performance_metrics_find_ideal_critical_path_gen_zero_run_time():
-    from autosubmit_api.components.experiment.pkl_organizer import PklOrganizer
-    organizer = PklOrganizer("dummy")
     jobs_dict = {
         "X": {"run_time": 0, "queue_time": 0, "children_names": {"Y"}, "section": "SIM"},
         "Y": {"run_time": 0, "queue_time": 0, "children_names": set(), "section": "SIM"},
     }
-    result = organizer.find_ideal_critical_path_gen(jobs_dict)
+    result = ORGANIZER.find_ideal_critical_path_gen(jobs_dict)
     expected = [
         {"name": "X", "run_time": 0, "queue_time": 0, "section": "SIM"},
         {"name": "Y", "run_time": 0, "queue_time": 0, "section": "SIM"},
