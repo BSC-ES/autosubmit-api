@@ -4,6 +4,7 @@ from autosubmit_api.components.experiment.configuration_facade import Autosubmit
 from autosubmit_api.components.experiment.pkl_organizer import PklOrganizer
 from autosubmit_api.logger import logger
 from autosubmit_api.common import utils as utils
+from autosubmit_api.performance.utils import calculate_critical_path_phases
 from autosubmit_api.components.jobs.joblist_helper import JobListHelper
 from autosubmit_api.components.jobs.job_factory import Job, SimJob
 from typing import List, Dict
@@ -114,8 +115,7 @@ class PerformanceMetrics(object):
       self.RSYPD = self._calculate_RSYPD()
       self.JPSY = self._calculate_JPSY()
       self.CHSY = self._calculate_CHSY()
-      self.ideal_critical_path = self.pkl_organizer.find_ideal_critical_path_ini()
-      self.phases = self.pkl_organizer.calculate_critical_path_phases(self.ideal_critical_path)
+      self._calculate_critical_path_and_phases()
       self.WSYPD = self._calculate_WSYPD()
       self.IWSYPD = self._calculate_IWSYPD()
 
@@ -261,6 +261,12 @@ class PerformanceMetrics(object):
     if len(support_list) > 0 and len(self.sim_jobs_valid):
       divisor = max(support_list[-1].finish_ts - self.sim_jobs_valid[0].start_ts, 0.0)
     return divisor
+  
+  def _calculate_critical_path_and_phases(self):
+        self.ideal_critical_path = self.pkl_organizer.find_ideal_critical_path()
+        if not self.ideal_critical_path or self.ideal_critical_path == []:
+          self.warnings.append("The ideal critical path could not be calculated.")
+        self.phases = calculate_critical_path_phases(self.ideal_critical_path)
 
   def _process_ideal_critical_path(self):
     """
