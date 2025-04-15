@@ -44,21 +44,18 @@ account:
 
 .. important:: This metric was previously known as Actual Simulated Years Per Day.
 
+**Experiment's Queue Simulated Years Per Day**: :math:`QSYPD = \frac{\sum_{i \in C} y_i \cdot 86400}{\sum_{i \in C} (q_i + r_i)}`
+
 **Experiment's Workflow Simulated Years Per Day**: :math:`WSYPD = \frac{\sum_{i \in C} y_i \cdot 86400}{\sum_{i \in W} (q_i + r_i)}`
 
-WSYPD represents the effective throughput of the experiment's workflow. It is 
-calculated by multiplying the sum of simulated years from the valid 
-simulation jobs, by the number of seconds in a day and dividing by the 
-total run and queue time measured along the jobs of the workflow’s critical path.
+WSYPD represents the effective throughput of the experiment's workflow.
 
 .. important:: This metric was previously known as Real Simulated Years Per Day.
 
 **Experiment's Ideal Workflow Simulated Years Per Day**: :math:`IWSYPD = \frac{\sum_{i \in C} y_i \cdot 86400}{\sum_{i \in W} (r_i)}`
 
 IWSYPD represents the ideal throughput of the workflow under optimal conditions where 
-the queue time of each job is not included. It is calculated by multiplying the sum of 
-simulated years by the number of seconds in a day and dividing by the total run measured 
-along the jobs of the workflow’s critical path.
+the queue time of each job is not included.
 
 Generalization of SYPD and PSYPD
 ================================
