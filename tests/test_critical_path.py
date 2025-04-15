@@ -1,4 +1,4 @@
-from typing import Any, Dict, List
+from typing import Dict, List
 import pytest
 
 from autosubmit_api.performance.utils import find_critical_path
