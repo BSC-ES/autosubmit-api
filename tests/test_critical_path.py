@@ -4,7 +4,7 @@ import pytest
 from autosubmit_api.performance.utils import find_critical_path
 
 @pytest.mark.parametrize(
-    "input", "expected",
+    "input, expected",
     [
         # No jobs in the dictionary
         (
@@ -41,8 +41,8 @@ from autosubmit_api.performance.utils import find_critical_path
         # Merging jobs
         (
             {
-                "A": {"run_time": 5, "queue_time": 0, "children_names": {"B, C"}, "section": "SIM"},
-                "B": {"run_time": 10, "queue_time": 0, "children_names": {"D, E"}, "section": "SIM"},
+                "A": {"run_time": 5, "queue_time": 0, "children_names": {"B" , "C"}, "section": "SIM"},
+                "B": {"run_time": 10, "queue_time": 0, "children_names": {"D" , "E"}, "section": "SIM"},
                 "C": {"run_time": 15, "queue_time": 0, "children_names": {"D"}, "section": "SIM"},
                 "D": {"run_time": 20, "queue_time": 0, "children_names": set(), "section": "SIM"},
                 "E": {"run_time": 20, "queue_time": 0, "children_names": set(), "section": "SIM"},
@@ -52,7 +52,7 @@ from autosubmit_api.performance.utils import find_critical_path
                 {"name": "C", "run_time": 15, "queue_time": 0, "section": "SIM"},
                 {"name": "D", "run_time": 20, "queue_time": 0, "section": "SIM"},
             ]
-        )
+        ),
         # Jobs with zero run time
         (
             {
@@ -91,9 +91,9 @@ from autosubmit_api.performance.utils import find_critical_path
 
         ),
 
-    ],
+    ]
 )
 
-def test_critical_path(input: Dict[str, Any], expected: List[Any]):
+def test_critical_path(input: Dict[str, dict], expected: List[dict]):
     result = find_critical_path(input)
     assert expected == result
