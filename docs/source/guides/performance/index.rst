@@ -34,7 +34,7 @@ Let :math:`C` be the set of SIM jobs that are `COMPLETED`.
 
 Let :math:`P` be the set of POST jobs that are `COMPLETED`.
 
-Let :math:`W` be the set of jobs that are `COMPLETED` and are from the experiment's critical path. For each job :math:`i \in W` the following attributes are taken into
+Let :math:`W` be the set of jobs that are `COMPLETED` and are from the experiment's workflow critical path. For each job :math:`i \in W` the following attributes are taken into
 account:
 
 - time in seconds in queue, :math:`q_i`
