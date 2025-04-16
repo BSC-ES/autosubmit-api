@@ -6,9 +6,9 @@ Understanding the Performance Metrics
 
 Autosubmit computes metrics to measure experiment performance. Besides the
 usual metrics, *Simulated Years Per Day* (SYPD), *Core Hours per Simulated
-Year* (CHSY), and *Joules Per Simulated Year* (JPSY), it also calculates two
-variations of SYPD, *Post Simulated Years Per Day* (PSYPD) and *Workflow
-Simulated Years Per Day* (WSYPD).
+Year* (CHSY), and *Joules Per Simulated Year* (JPSY), it also calculates three
+variations of SYPD, *Queue Simulated Years Per Day* (QSYPD), *Post Simulated Years Per Day* (PSYPD) 
+and *Workflow Simulated Years Per Day* (WSYPD).
 
 Metrics Definition
 ==================
