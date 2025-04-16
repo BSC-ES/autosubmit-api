@@ -34,41 +34,45 @@ Let :math:`C` be the set of SIM jobs that are `COMPLETED`.
 
 Let :math:`P` be the set of POST jobs that are `COMPLETED`.
 
-Let :math:`W` be the set of jobs that are `COMPLETED` and are from the critical path. For each job :math:`i \in W` the following attributes are taken into
+Let :math:`W` be the set of jobs that are `COMPLETED` and are from the experiment's critical path. For each job :math:`i \in W` the following attributes are taken into
 account:
 
 - time in seconds in queue, :math:`q_i`
 - runtime in seconds, :math:`r_i`
 
+**Experiment's Queue Simulated Years Per Day**: :math:`QSYPD = \frac{\sum_{i \in C} y_i \cdot 86400}{\sum_{i \in C} (q_i + r_i)}`
+
 **Experiment's Post Simulated Years Per Day**: :math:`PSYPD = \frac{\sum_{i \in C} y_i \cdot 86400}{\sum_{i \in C} (q_i + r_i) + \frac{1}{|P|}\sum_{j \in P}(q_j+r_j)}`
 
 .. important:: This metric was previously known as Actual Simulated Years Per Day.
 
-**Experiment's Queue Simulated Years Per Day**: :math:`QSYPD = \frac{\sum_{i \in C} y_i \cdot 86400}{\sum_{i \in C} (q_i + r_i)}`
+WSYPD represents the real performance of the experiment's workflow.
 
 **Experiment's Workflow Simulated Years Per Day**: :math:`WSYPD = \frac{\sum_{i \in C} y_i \cdot 86400}{\sum_{i \in W} (q_i + r_i)}`
 
-WSYPD represents the effective throughput of the experiment's workflow.
-
 .. important:: This metric was previously known as Real Simulated Years Per Day.
+
+IWSYPD represents the ideal performance of the workflow under optimal conditions where 
+the queue time of each job is not considered.
 
 **Experiment's Ideal Workflow Simulated Years Per Day**: :math:`IWSYPD = \frac{\sum_{i \in C} y_i \cdot 86400}{\sum_{i \in W} (r_i)}`
 
-IWSYPD represents the ideal throughput of the workflow under optimal conditions where 
-the queue time of each job is not included.
-
-Generalization of SYPD and PSYPD
-================================
+Generalization of SYPD, QSYPD and PSYPD
+=======================================
 
 AutosubmitAPI can also compute SYPD and PSYPD for any job that has a `chunk` value.
 These jobs share the same attributes as SIM jobs. Only `COMPLETED` jobs are considered.
 
 **Generalized Simulated Years Per Day**: :math:`SYPD_i = \frac{y_i \cdot 86400}{r_i}`
 
+**Generalized Queue Simulated Years Per Day**: :math:`QSYPD_i = \frac{y_i \cdot 86400}{(q_i + r_i)}`
+
 As for PSYPD, it will only consider experiments that have at least one POST
 job.
 
 **Generalized Post Simulated Years Per Day**: :math:`PSYPD_i = \frac{y_i \cdot 86400}{(q_i + r_i) + \frac{1}{|P|}\sum_{j \in P}(q_j+r_j)}`
+
+.. important:: This metric was previously known as Generalized Actual Simulated Years Per Day.
 
 Parallelization estimation
 ==========================
