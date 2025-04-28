@@ -30,10 +30,24 @@ from bscearth.utils.log import Log
 
 class Monitor:
     """Class to handle monitoring of Jobs at HPC."""
-    _table = dict([(Status.UNKNOWN, 'white'), (Status.WAITING, '#aaaaaa'), (Status.READY, 'lightblue'), (Status.PREPARED, 'lightsalmon'),
-                   (Status.SUBMITTED, 'cyan'), (Status.HELD,
-                                                'salmon'), (Status.QUEUING, 'lightpink'), (Status.RUNNING, 'green'),
-                   (Status.COMPLETED, 'yellow'), (Status.FAILED, 'red'), (Status.SUSPENDED, 'orange'), (Status.SKIPPED, 'lightyellow')])
+
+    _table = dict(
+        [
+            (Status.UNKNOWN, "white"),
+            (Status.WAITING, "#aaaaaa"),
+            (Status.READY, "lightblue"),
+            (Status.PREPARED, "lightsalmon"),
+            (Status.SUBMITTED, "cyan"),
+            (Status.HELD, "salmon"),
+            (Status.QUEUING, "lightpink"),
+            (Status.RUNNING, "green"),
+            (Status.COMPLETED, "yellow"),
+            (Status.FAILED, "red"),
+            (Status.SUSPENDED, "orange"),
+            (Status.SKIPPED, "lightyellow"),
+            (Status.DELAYED, "lightcyan"),
+        ]
+    )
 
     @staticmethod
     def color_status(status):
@@ -53,20 +67,22 @@ class Monitor:
             return Monitor._table[Status.PREPARED]
         elif status == Status.SUBMITTED:
             return Monitor._table[Status.SUBMITTED]
+        elif status == Status.HELD:
+            return Monitor._table[Status.HELD]
         elif status == Status.QUEUING:
             return Monitor._table[Status.QUEUING]
         elif status == Status.RUNNING:
             return Monitor._table[Status.RUNNING]
         elif status == Status.COMPLETED:
             return Monitor._table[Status.COMPLETED]
-        elif status == Status.HELD:
-            return Monitor._table[Status.HELD]
+        elif status == Status.SKIPPED:
+            return Monitor._table[Status.SKIPPED]
         elif status == Status.FAILED:
             return Monitor._table[Status.FAILED]
         elif status == Status.SUSPENDED:
             return Monitor._table[Status.SUSPENDED]
-        elif status == Status.SKIPPED:
-            return Monitor._table[Status.SKIPPED]
+        elif status == Status.DELAYED:
+            return Monitor._table[Status.DELAYED]
         else:
             return Monitor._table[Status.UNKNOWN]
 
