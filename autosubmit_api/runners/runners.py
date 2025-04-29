@@ -4,6 +4,9 @@ import signal
 import subprocess
 import os
 import psutil
+from autosubmit_api.repositories.runner_processes import (
+    create_runner_processes_repository,
+)
 from autosubmit_api.runners import module_loaders
 from autosubmit_api.logger import logger
 
@@ -46,6 +49,7 @@ class LocalRunner(Runner):
 
     def __init__(self, module_loader: module_loaders.ModuleLoader):
         self.module_loader = module_loader
+        self.runners_repo = create_runner_processes_repository()
 
     async def version(self):
         """
@@ -95,9 +99,16 @@ class LocalRunner(Runner):
 
         :param expid: The experiment ID to run.
         """
-        autosubmit_command = f"autosubmit run -np {expid}"
+        # Check if other runner with the same expid is running
+        active_procs = self.runners_repo.get_active_processes_by_expid(expid)
+        if active_procs:
+            logger.error(
+                f"Experiment {expid} is already running with pid {active_procs[0].pid}"
+            )
+            raise RuntimeError(f"Experiment {expid} is already running.")
 
         # Generate the command to run
+        autosubmit_command = f"autosubmit run -np {expid}"
         wrapped_command = self.module_loader.generate_command(autosubmit_command)
         logger.debug(f"Running command: {wrapped_command}")
 
@@ -111,7 +122,12 @@ class LocalRunner(Runner):
             executable="/bin/bash",
         )
 
-        # TODO: Store the pid in the DB
+        # Store the pid in the DB
+        self.runners_repo.insert_process(
+            expid=expid,
+            pid=process.pid,
+            status="ACTIVE",
+        )
 
         # Return the pid of the process to the caller
         return process
@@ -125,8 +141,13 @@ class LocalRunner(Runner):
         # Wait for the command to finish and get the output
         stdout, stderr = process.communicate()
 
-        # TODO: Update the status of the subprocess in the DB
+        # Update the status of the subprocess in the DB
+        self.runners_repo.update_process_status(
+            id=process.pid,
+            status="COMPLETED" if process.returncode == 0 else "FAILED",
+        )
 
+        # Check if the command was successful
         if process.returncode != 0:
             logger.error(f"Command failed with error: {stderr}")
             raise subprocess.CalledProcessError(
@@ -148,13 +169,13 @@ class LocalRunner(Runner):
         :param expid: The experiment ID to get the status of.
         :return: The status of the experiment.
         """
-        # TODO: Get the pid & status from the DB
-        pid = 12345  # Placeholder for the actual pid
-        status = "PLACEHOLDER"  # Placeholder for the actual status
+        # Get the pid & status from the DB
+        active_procs = self.runners_repo.get_active_processes_by_expid(expid)
 
-        # TODO
-        pid
-        status
+        return {
+            "status": active_procs[0].status if active_procs else "NOT_FOUND",
+            "pid": active_procs[0].pid if active_procs else None,
+        }
 
     async def stop(self, expid: str, force: bool = False):
         """
@@ -163,8 +184,14 @@ class LocalRunner(Runner):
 
         :param expid: The experiment ID to stop.
         """
-        # TODO: Get the pid from the DB
-        pid = 12345  # Placeholder for the actual pid
+        # Get the process from the DB
+        active_procs = self.runners_repo.get_active_processes_by_expid(expid)
+        if not active_procs:
+            logger.error(f"Experiment {expid} is not running.")
+            raise RuntimeError(f"Experiment {expid} is not running.")
+
+        # Get the pid of the process
+        pid = active_procs[0].pid
 
         try:
             if force:
@@ -179,7 +206,15 @@ class LocalRunner(Runner):
                 os.kill(pid, signal.SIGINT)
             logger.debug(f"Process {pid} of experiment {expid} killed successfully.")
 
-            # TODO: Update the status of the subprocess in the DB
+            # Wait for the process to finish
+            process = psutil.Process(pid)
+            process.wait(timeout=5)
+
+            # Update the status of the subprocess in the DB
+            self.runners_repo.update_process_status(
+                id=active_procs[0].id,
+                status="STOPPED",
+            )
 
         except OSError as e:
             logger.error(f"Failed to kill process {pid} of experiment {expid}: {e}")
