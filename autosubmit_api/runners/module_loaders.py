@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import List, Union
 from enum import Enum
+import os
 
 
 # Enum for module types
@@ -12,6 +13,9 @@ class ModuleLoaderType(str, Enum):
 
 
 class ModuleLoader(ABC):
+    module_loader_type: ModuleLoaderType
+    module_names: List[str] = []
+
     @abstractmethod
     def generate_command(self, command: str, *args, **kwargs) -> str:
         """
@@ -30,6 +34,7 @@ class CondaModuleLoader(ModuleLoader):
             raise ValueError("Invalid characters in environment name")
 
         self.base_command = f"conda run -n {self.env_name} "
+        self.module_names = [env_name]
 
     def generate_command(self, command: str, *args, **kwargs):
         """
@@ -52,6 +57,8 @@ class LmodModuleLoader(ModuleLoader):
 
         self.base_command = f"module load {' '.join(self.modules_list)} && "
 
+        self.module_names = modules_list
+
     def generate_command(self, command: str, *args, **kwargs):
         """
         Generates a command to run with the specified module loaded.
@@ -67,9 +74,13 @@ class VenvModuleLoader(ModuleLoader):
         self.venv_path = venv_path
         self.base_command = f"source {self.venv_path}/bin/activate && "
 
-        # Check if command injection in the venv_path
-        if any(char in venv_path for char in [" ", ";", "&", "|", "`", "$", ">", "<"]):
-            raise ValueError("Invalid characters in virtual environment path")
+        # Check if path exists and doesn't have invalid characters
+        if not os.path.exists(venv_path) or any(
+            char in venv_path for char in [";", "&", "|", "`", "$", ">", "<"]
+        ):
+            raise ValueError("Invalid or non-existent virtual environment path")
+
+        self.module_names = [venv_path]
 
     def generate_command(self, command: str, *args, **kwargs):
         """
@@ -84,6 +95,7 @@ class NoModuleLoader(ModuleLoader):
 
     def __init__(self):
         self.base_command = ""
+        self.module_names = []
 
     def generate_command(self, command: str, *args, **kwargs):
         """

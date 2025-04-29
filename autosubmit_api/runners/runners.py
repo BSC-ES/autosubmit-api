@@ -1,14 +1,28 @@
 from abc import ABC, abstractmethod
+from enum import Enum
 import signal
 import subprocess
 import os
 import psutil
-import asyncio
 from autosubmit_api.runners import module_loaders
 from autosubmit_api.logger import logger
 
 
+class RunnerType(str, Enum):
+    LOCAL = "local"
+
+
 class Runner(ABC):
+    runner_type: RunnerType
+
+    @abstractmethod
+    async def version(self):
+        """
+        Get the version of the Autosubmit module.
+
+        :return: The version of the Autosubmit module.
+        """
+
     @abstractmethod
     async def run(self, expid: str):
         """
@@ -26,18 +40,36 @@ class Runner(ABC):
         :param force: Whether to force stop the experiment.
         """
 
-    @abstractmethod
-    async def version(self):
-        """
-        Get the version of the Autosubmit module.
-
-        :return: The version of the Autosubmit module.
-        """
-
 
 class LocalRunner(Runner):
+    runner_type = RunnerType.LOCAL
+
     def __init__(self, module_loader: module_loaders.ModuleLoader):
         self.module_loader = module_loader
+
+    async def version(self):
+        """
+        Get the version of the Autosubmit module using the local runner in a subprocess asynchronously.
+
+        :return: The version of the Autosubmit module.
+        :raise subprocess.CalledProcessError: If the command fails.
+        """
+        autosubmit_command = "autosubmit -v"
+
+        wrapped_command = self.module_loader.generate_command(autosubmit_command)
+
+        # Launch the command in a subprocess and get the output
+        try:
+            logger.debug(f"Running command: {wrapped_command}")
+            output = subprocess.check_output(
+                wrapped_command, shell=True, text=True, executable="/bin/bash"
+            ).strip()
+        except subprocess.CalledProcessError as exc:
+            logger.error(f"Command failed with error: {exc}")
+            raise exc
+
+        logger.debug(f"Command output: {output}")
+        return output
 
     def _is_pid_running(self, pid: int) -> bool:
         """
@@ -152,52 +184,16 @@ class LocalRunner(Runner):
         except OSError as e:
             logger.error(f"Failed to kill process {pid} of experiment {expid}: {e}")
 
-    async def version(self):
-        """
-        Get the version of the Autosubmit module using the local runner in a subprocess asynchronously.
 
-        :return: The version of the Autosubmit module.
-        :raise subprocess.CalledProcessError: If the command fails.
-        """
-        autosubmit_command = "autosubmit -v"
+def get_runner(runner_type: RunnerType, module_loader: module_loaders.ModuleLoader):
+    """
+    Get the runner for the specified runner type and module loader.
 
-        wrapped_command = self.module_loader.generate_command(autosubmit_command)
-        logger.debug(f"Running command: {wrapped_command}")
-
-        # Launch the command in a subprocess and get the output
-        try:
-            output = subprocess.check_output(
-                wrapped_command, shell=True, text=True, executable="/bin/bash"
-            )
-        except subprocess.CalledProcessError as exc:
-            logger.error(f"Command failed with error: {exc}")
-            raise exc
-
-        logger.debug(f"Command output: {output}")
-        return output
-
-
-if __name__ == "__main__":
-    # redirect logger to stdout
-    import logging
-
-    logger.setLevel(logging.DEBUG)
-    logger.addHandler(logging.StreamHandler())
-
-    python_version = subprocess.check_output(
-        ["python3", "--version"], text=True
-    ).strip()
-    logger.debug(f"Running Python version: {python_version}")
-
-    expid = "a007"
-    # module_loader = module_loaders.get_module_loader("conda", "autosubmit")
-    module_loader = module_loaders.get_module_loader("venv", "~/venvs/autosubmit4.1.10")
-    local_runner = LocalRunner(module_loader)
-    # Run the local runner
-    # using asyncio to run the asynchronous method
-    asyncio.run(local_runner.version())
-
-    python_version = subprocess.check_output(
-        ["python3", "--version"], text=True
-    ).strip()
-    logger.debug(f"Running Python version: {python_version}")
+    :param runner_type: The type of the runner to get.
+    :param module_loader: The module loader to use.
+    :return: The runner for the specified type and module loader.
+    """
+    if runner_type == RunnerType.LOCAL:
+        return LocalRunner(module_loader)
+    else:
+        raise ValueError(f"Unknown runner type: {runner_type}")
