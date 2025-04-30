@@ -798,6 +798,14 @@ class AutosubmitConfigResolver(object):
         :rtype: str
         """
         return self._configWrapper.get_storage_type()
+    
+    def get_workflow_commit(self) -> str:
+        """
+        Returns the commit of the workflow used in the experiment
+
+        :return commit: workflow commit
+        """
+        return self._configWrapper.get_workflow_commit()
 
     def is_valid_mail_address(self, mail_address):
         #TODO: push to parent class as static method

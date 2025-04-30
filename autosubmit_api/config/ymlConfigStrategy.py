@@ -17,7 +17,7 @@
 # You should have received a copy of the GNU General Public License
 # along with Autosubmit.  If not, see <http://www.gnu.org/licenses/>.
 
-from typing import Any
+from typing import Any, Union
 from autosubmitconfigparser.config.configcommon import AutosubmitConfig as Autosubmit4Config
 from autosubmit_api.logger import logger
 from autosubmit_api.config.basicConfig import APIBasicConfig
@@ -410,6 +410,11 @@ class ymlConfigStrategy(IConfigStrategy):
 
     def get_storage_type(self):
         return self._conf_parser.get_storage_type()
+
+    def get_workflow_commit(self) -> Union[str, None]:
+        return self._conf_parser.experiment_data.get("AUTOSUBMIT", {}).get(
+            "WORKFLOW_COMMIT", None
+        )
 
     @staticmethod
     def is_valid_mail_address(mail_address: str) -> bool:

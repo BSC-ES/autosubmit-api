@@ -19,6 +19,7 @@
 # along with Autosubmit.  If not, see <http://www.gnu.org/licenses/>.
 
 from configparser import ConfigParser as PyConfigParser
+from typing import Union
 from autosubmitconfigparser.config.configcommon import AutosubmitConfig as Autosubmit4Config
 
 import os
@@ -1274,6 +1275,9 @@ class confConfigStrategy(IConfigStrategy):
         :rtype: str
         """
         return self._conf_parser.get_option('storage', 'TYPE', 'pkl').lower()
+    
+    def get_workflow_commit(self) -> Union[str, None]:
+        return None
 
     @staticmethod
     def is_valid_mail_address(mail_address):

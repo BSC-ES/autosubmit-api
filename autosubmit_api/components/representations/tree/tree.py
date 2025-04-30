@@ -318,5 +318,6 @@ class TreeRepresentation(object):
         "tree_parents": job.tree_parent,
         "custom_directives": None,
         "rm_id": job.rm_id,
-        "status_color": job.status_color
+        "status_color": job.status_color,
+        "workflow_commit": job.workflow_commit,
       })
