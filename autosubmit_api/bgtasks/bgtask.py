@@ -43,7 +43,7 @@ class BackgroundTaskTemplate(ABC):
 
 class PopulateDetailsDB(BackgroundTaskTemplate):
     id = "TASK_POPDET"
-    trigger_options = {"trigger": "interval", "hours": 4}
+    trigger_options = {"trigger": "interval", "minutes": 240}
 
     @classmethod
     def procedure(cls):
@@ -53,7 +53,7 @@ class PopulateDetailsDB(BackgroundTaskTemplate):
 
 class PopulateGraph(BackgroundTaskTemplate):
     id = "TASK_POPGRPH"
-    trigger_options = {"trigger": "interval", "hours": 24}
+    trigger_options = {"trigger": "interval", "minutes": 1440}
 
     @classmethod
     def procedure(cls):

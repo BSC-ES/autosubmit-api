@@ -5,9 +5,19 @@ from autosubmit_api.config.confConfigStrategy import confConfigStrategy
 from autosubmit_api.config.basicConfig import APIBasicConfig
 
 from autosubmit_api.config.config_common import AutosubmitConfigResolver
+from autosubmit_api.config.config_file import DEFAULT_CONFIG_PATH, read_config_file_path
 from autosubmit_api.config.ymlConfigStrategy import ymlConfigStrategy
 
 from tests.utils import custom_return_value
+
+
+class TestAPIConfigFile:
+    def test_api_config_file_path(self, monkeypatch: pytest.MonkeyPatch):
+        monkeypatch.delenv("AS_API_CONFIG_FILE", raising=False)
+        assert read_config_file_path() == os.path.expanduser(DEFAULT_CONFIG_PATH)
+
+        monkeypatch.setenv("AS_API_CONFIG_FILE", "test_config.yaml")
+        assert read_config_file_path() == "test_config.yaml"
 
 
 class TestConfigResolver:
