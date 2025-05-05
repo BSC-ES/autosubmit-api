@@ -351,3 +351,25 @@ class TestExperimentRunConfig:
         for key in ALLOWED_CONFIG_KEYS:
             assert key in resp_obj["config"]
             assert isinstance(resp_obj["config"][key], dict)
+
+
+class TestJobHistory:
+    endpoint = "/v4/experiments/{expid}/jobs-history"
+
+    def test_csv_stream_response(self, fixture_fastapi_client: TestClient):
+        expid = "a3tb"
+        response = fixture_fastapi_client.get(
+            self.endpoint.format(expid=expid),
+            params={"format": "csv"},
+        )
+
+        assert response.status_code == HTTPStatus.OK
+        assert response.headers["Content-Type"] == "text/csv; charset=utf-8"
+        assert response.headers["Content-Disposition"].startswith(
+            "attachment; filename="
+        )
+        assert response.headers["Content-Disposition"].endswith(".csv")
+
+        csv_content = response.content.decode("utf-8")
+        assert len(csv_content) > 0
+        assert csv_content.count("\n") > 1

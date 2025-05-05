@@ -1,13 +1,15 @@
 import asyncio
 from collections import deque
+import csv
 from datetime import datetime, timezone
 from http import HTTPStatus
+from io import StringIO
 import json
 import math
 import traceback
 from typing import Annotated, Any, Dict, List, Literal, Optional
 from fastapi import APIRouter, Depends, HTTPException, Query
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, StreamingResponse
 from autosubmit_api.auth import auth_token_dependency
 from autosubmit_api.builders.experiment_builder import ExperimentBuilder
 from autosubmit_api.config.config_common import AutosubmitConfigResolver
@@ -15,6 +17,7 @@ from autosubmit_api.database import tables
 from autosubmit_api.common.utils import Status
 from autosubmit_api.database.db_jobdata import JobDataStructure
 from autosubmit_api.database.models import BaseExperimentModel
+from autosubmit_api.repositories.job_data import create_experiment_job_data_repository
 from autosubmit_api.repositories.join.experiment_join import (
     create_experiment_join_repository,
 )
@@ -344,3 +347,69 @@ async def get_run_config(
         "config": _format_config_response(metadata),
     }
     return response
+
+
+@router.get("/{expid}/jobs-history", name="Get experiment jobs history")
+async def get_jobs_history(
+    expid: str,
+    format: Annotated[Literal["json", "csv"], Query()] = "json",
+    user_id: Optional[str] = Depends(auth_token_dependency()),
+) -> Dict[str, Any]:
+    """
+    Get the jobs history of an experiment
+    """
+
+    def _generate_csv(expid: str):
+        job_generator = create_experiment_job_data_repository(expid).get_all_generator()
+
+        csv_file = StringIO()
+        writer = csv.writer(csv_file)
+
+        # Yield the header first
+        header = [
+            "job_name",
+            "run_id",
+            "section",
+            "status",
+            "submit",
+            "start",
+            "finish",
+            "out",
+            "err",
+        ]
+        writer.writerow(header)
+        csv_file.seek(0)
+        yield csv_file.read()
+        csv_file.seek(0)
+        csv_file.truncate(0)
+
+        # Yield each job row
+        for job in job_generator:
+            writer.writerow(
+                [
+                    job.job_name,
+                    job.run_id,
+                    job.section,
+                    job.status,
+                    job.submit,
+                    job.start,
+                    job.finish,
+                    job.out,
+                    job.err,
+                ]
+            )
+            csv_file.seek(0)
+            yield csv_file.read()
+            csv_file.seek(0)
+            csv_file.truncate(0)
+
+    if format == "csv":
+        response = StreamingResponse(_generate_csv(expid), media_type="text/csv")
+        response.headers["Content-Disposition"] = (
+            f"attachment; filename=jobs_history_{expid}.csv"
+        )
+        return response
+
+    raise HTTPException(
+        status_code=HTTPStatus.NOT_IMPLEMENTED, detail="Only format=csv is supported"
+    )
