@@ -16,6 +16,9 @@ class RunnerProcessesDataModel(BaseModel):
     expid: str
     pid: int
     status: str
+    runner: str
+    module_loader: str
+    modules: str
     created: str
     modified: str
 
@@ -31,7 +34,13 @@ class RunnerProcessesRepository(ABC):
 
     @abstractmethod
     def insert_process(
-        self, expid: str, pid: int, status: str
+        self,
+        expid: str,
+        pid: int,
+        status: str,
+        runner: str,
+        module_loader: str,
+        modules: str,
     ) -> RunnerProcessesDataModel:
         """
         Inserts a new process status
@@ -79,7 +88,13 @@ class RunnerProcessesSQLRepository(RunnerProcessesRepository):
         ]
 
     def insert_process(
-        self, expid: str, pid: int, status: str
+        self,
+        expid: str,
+        pid: int,
+        status: str,
+        runner: str,
+        module_loader: str,
+        modules: str,
     ) -> RunnerProcessesDataModel:
         with self.engine.connect() as conn:
             _now = datetime.now(tz=LOCAL_TZ).isoformat(timespec="seconds")
@@ -87,6 +102,9 @@ class RunnerProcessesSQLRepository(RunnerProcessesRepository):
                 expid=expid,
                 pid=pid,
                 status=status,
+                runner=runner,
+                module_loader=module_loader,
+                modules=modules,
                 created=_now,
                 modified=_now,
             )
@@ -97,6 +115,9 @@ class RunnerProcessesSQLRepository(RunnerProcessesRepository):
             expid=expid,
             pid=pid,
             status=status,
+            runner=runner,
+            module_loader=module_loader,
+            modules=modules,
             created=_now,
             modified=_now,
         )

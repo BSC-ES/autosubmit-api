@@ -1,69 +1,16 @@
-from abc import ABC, abstractmethod
+import psutil
 import asyncio
 import asyncio.subprocess
-from enum import Enum
+import os
 import signal
 import subprocess
-import os
-import psutil
+
+from autosubmit_api.logger import logger
 from autosubmit_api.repositories.runner_processes import (
     create_runner_processes_repository,
 )
 from autosubmit_api.runners import module_loaders
-from autosubmit_api.logger import logger
-
-
-class RunnerType(str, Enum):
-    LOCAL = "local"
-
-
-# Runner Exceptions
-class RunnerAlreadyRunningError(Exception):
-    """
-    Exception raised when a runner is already running.
-    """
-
-    def __init__(self, expid: str):
-        super().__init__(f"Runner for experiment {expid} is already running.")
-        self.expid = expid
-
-
-class Runner(ABC):
-    """
-    Base class for runners
-    """
-
-    @property
-    @abstractmethod
-    def runner_type(self) -> RunnerType:
-        """
-        The type of the runner.
-        """
-
-    @abstractmethod
-    async def version(self):
-        """
-        Get the version of the Autosubmit module.
-
-        :return: The version of the Autosubmit module.
-        """
-
-    @abstractmethod
-    async def run(self, expid: str):
-        """
-        Run an Autosubmit experiment.
-
-        :param expid: The experiment ID to run.
-        """
-
-    @abstractmethod
-    async def stop(self, expid: str, force: bool = False):
-        """
-        Stop an Autosubmit experiment.
-
-        :param expid: The experiment ID to stop.
-        :param force: Whether to force stop the experiment.
-        """
+from autosubmit_api.runners.base import Runner, RunnerAlreadyRunningError, RunnerType
 
 
 class LocalRunner(Runner):
@@ -73,7 +20,7 @@ class LocalRunner(Runner):
         self.module_loader = module_loader
         self.runners_repo = create_runner_processes_repository()
 
-    async def version(self):
+    async def version(self) -> str:
         """
         Get the version of the Autosubmit module using the local runner in a subprocess asynchronously.
 
@@ -142,8 +89,7 @@ class LocalRunner(Runner):
         Run an Autosubmit experiment using the local runner in a subprocess asynchronously.
         This method will use a module loader to prepare the environment and run the command.
         Once the subprocess is launched, the pid is catched and stored in the DB.
-        Then, when the subprocess is finished, the status of the subprocess is updated in the DB
-        and the output is logged.
+        Then, when the subprocess is finished, the status of the subprocess is updated in the DB.
 
         :param expid: The experiment ID to run.
         """
@@ -171,13 +117,16 @@ class LocalRunner(Runner):
             expid=expid,
             pid=process.pid,
             status="ACTIVE",
+            runner=self.runner_type.value,
+            module_loader=self.module_loader.module_loader_type.value,
+            modules=str(self.module_loader.modules),
         )
 
         # Run the wait_run on the background
         asyncio.create_task(self.wait_run(runner_proc.id, process))
 
-        # Return the pid of the process to the caller
-        return runner_proc, process
+        # Return the runner data
+        return runner_proc
 
     async def wait_run(
         self, runner_process_id: int, process: asyncio.subprocess.Process
@@ -200,9 +149,7 @@ class LocalRunner(Runner):
             # Check if the command was successful
             if process.returncode != 0:
                 logger.error(f"Command failed with error: {stderr}")
-                raise RuntimeError(
-                    "Command failed with error"
-                )
+                raise RuntimeError("Command failed with error")
             logger.debug(
                 f"Runner {runner_process_id} with pid {process.pid} completed successfully."
             )
@@ -256,17 +203,3 @@ class LocalRunner(Runner):
 
         except OSError as e:
             logger.error(f"Failed to kill process {pid} of experiment {expid}: {e}")
-
-
-def get_runner(runner_type: RunnerType, module_loader: module_loaders.ModuleLoader):
-    """
-    Get the runner for the specified runner type and module loader.
-
-    :param runner_type: The type of the runner to get.
-    :param module_loader: The module loader to use.
-    :return: The runner for the specified type and module loader.
-    """
-    if runner_type == RunnerType.LOCAL:
-        return LocalRunner(module_loader)
-    else:
-        raise ValueError(f"Unknown runner type: {runner_type}")

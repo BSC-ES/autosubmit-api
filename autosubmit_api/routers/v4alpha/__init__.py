@@ -5,7 +5,8 @@ from pydantic import BaseModel
 from autosubmit_api.config.config_file import read_config_file
 from autosubmit_api.runners import module_loaders
 from autosubmit_api.runners.module_loaders import ModuleLoaderType
-from autosubmit_api.runners.runners import RunnerAlreadyRunningError, get_runner, RunnerType
+from autosubmit_api.runners.runner_factory import get_runner
+from autosubmit_api.runners.base import RunnerAlreadyRunningError, RunnerType
 from autosubmit_api.logger import logger
 
 router = APIRouter()
@@ -96,13 +97,11 @@ async def run_experiment(expid: str, body: GetRunnerBody):
             detail="Runner or module loader is not enabled in the config file",
         )
 
-    module_loader = module_loaders.get_module_loader(
-        body.module_loader, body.modules
-    )
+    module_loader = module_loaders.get_module_loader(body.module_loader, body.modules)
     runner = get_runner(body.runner, module_loader)
 
     try:
-        runner_data, process = await runner.run(expid)
+        runner_data = await runner.run(expid)
     except RunnerAlreadyRunningError:
         raise HTTPException(
             status_code=400,
@@ -120,5 +119,5 @@ async def run_experiment(expid: str, body: GetRunnerBody):
         "module_loader": module_loader.module_loader_type,
         "modules": module_loader.modules,
         "runner_id": runner_data.id,
-        "pid": process.pid,
+        "pid": runner_data.pid,
     }

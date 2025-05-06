@@ -205,6 +205,9 @@ RunnerProcessesTable = Table(
     Column("expid", Text, nullable=False),
     Column("pid", Integer, nullable=False),
     Column("status", String(50), nullable=False),
+    Column("runner", String(50), nullable=False),
+    Column("module_loader", String(50), nullable=False),
+    Column("modules", Text, nullable=False),
     Column("created", Text, nullable=False),
     Column("modified", Text, nullable=False),
 )
