@@ -152,15 +152,15 @@ done
   echo "RJPSY = " ${real_jules_per_simulated_year}
 
   #
-  # ASYPD Actual simulated years per day
+  # PSYPD Post simulated years per day
   #
-  # ASYPD is the actual SYPD obtained from a typical longrunning simulation with the model. This number may
+  # PSYPD is the actual SYPD obtained from a typical longrunning simulation with the model. This number may
   # be lower than SYPD because of system interruptions,
   # queue wait time, or issues with the model workflow.
   # This is measured for a long production run by measuring the time between first submission and the date of
   # arrival of the last history file on the storage file system.
   # This is measured separately in throughput and speed
-  # mode. For a run of N years in length, ASYPD ≡ N / ( tN − t0 )
+  # mode. For a run of N years in length, PSYPD ≡ N / ( tN − t0 )
   # where t0 is the time of submission of the first job in the
   # experiment, and tN is the time stamp of the history file
   # for year N.
@@ -171,9 +171,9 @@ done
 
   start_date=$(cat *_SIM_STAT | sort -n | head -n1)
   end_date=$(cat *_POST_STAT | sort -n | tail -n1)
-  asypd=$(echo "scale=2;(${years_simulated_in_seconds}/(${end_date}-${start_date}))" | bc)
-  echo "# Actual simulated years per day"
-  echo "ASYPD = "${asypd}
+  PSYPD=$(echo "scale=2;(${years_simulated_in_seconds}/(${end_date}-${start_date}))" | bc)
+  echo "# Post simulated years per day"
+  echo "PSYPD = "${PSYPD}
   #
   # RSYPD
   #
@@ -367,10 +367,10 @@ time_cum=$(grep "${member}_1_POST =" t0ni_GENERAL_STATS | awk '{print $4}' | awk
 sec_cum=$(echo $time_cum | awk -F: '{ print ($1 * 3600) + ($2 * 60) + $3 }')
 total_sec=$(echo "$sec_cum+$total_sec" | bc)
 #
-# recompute ASYPD
+# recompute PSYPD
 #
-asypd=$(echo "scale=2;(${years_simulated_in_seconds}/(${total_sec}))" | bc)
-sed -i "s/\(^ASYPD =\).*/ASYPD = $asypd/" t0ni_GENERAL_STATS
+PSYPD=$(echo "scale=2;(${years_simulated_in_seconds}/(${total_sec}))" | bc)
+sed -i "s/\(^PSYPD =\).*/PSYPD = $PSYPD/" t0ni_GENERAL_STATS
 
 ###################
 # Autosubmit tailer

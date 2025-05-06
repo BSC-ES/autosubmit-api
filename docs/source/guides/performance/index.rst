@@ -6,9 +6,9 @@ Understanding the Performance Metrics
 
 Autosubmit computes metrics to measure experiment performance. Besides the
 usual metrics, *Simulated Years Per Day* (SYPD), *Core Hours per Simulated
-Year* (CHSY), and *Joules Per Simulated Year* (JPSY), it also calculates two
-variations of SYPD, *Actual Simulated Years Per Day* (ASYPD) and *Real
-Simulated Years Per Day* (RSYPD).
+Year* (CHSY), and *Joules Per Simulated Year* (JPSY), it also calculates three
+variations of SYPD, *Queue Simulated Years Per Day* (QSYPD), *Post Simulated Years Per Day* (PSYPD) 
+and *Workflow Simulated Years Per Day* (WSYPD).
 
 Metrics Definition
 ==================
@@ -30,34 +30,49 @@ account:
 - runtime in seconds, :math:`r_i`
 - energy consumption in joules, :math:`\eta_i`
 
-Let :math:`C` be the set of SIM jobs that are `COMPLETED`. Let :math:`P`
-be the set of POST jobs that are `COMPLETED`.
+Let :math:`C` be the set of SIM jobs that are `COMPLETED`. 
 
-**Experiment's Actual Simulated Years Per Day**: :math:`ASYPD = \frac{\sum_{i \in C} y_i \cdot 86400}{\sum_{i \in C} (q_i + r_i) + \frac{1}{|P|}\sum_{j \in P}(q_j+r_j)}`
+Let :math:`P` be the set of POST jobs that are `COMPLETED`.
 
-The computation of *Real Simulated Year Per Day* will only consider experiments
-that have a TRANSFER or a CLEAN job at the end of the workflow. AutosubmitAPI
-checks when the first SIM job started (not submitted), and when the
-last TRANSFER job finished. If the workflow does not have a TRANSFER job, then it
-checks the last CLEAN job finish time.
+Let :math:`W` be the set of jobs that are `COMPLETED` and are from the experiment's workflow critical path. For each job :math:`i \in W` the following attributes are taken into
+account:
 
-Let :math:`t_s` be the time, in seconds, that the first SIM job started. Let
-:math:`t_f` be the time in which the last TRANSFER or CLEAN job ended.
+- time in seconds in queue, :math:`q_i`
+- runtime in seconds, :math:`r_i`
 
-**Experiment's Real Simulated Years Per Day**: :math:`RSYPD = \frac{\sum_{i \in C} y_i \cdot 86400}{t_f - t_s}`
+**Experiment's Queue Simulated Years Per Day**: :math:`QSYPD = \frac{\sum_{i \in C} y_i \cdot 86400}{\sum_{i \in C} (q_i + r_i)}`
 
-Generalization of SYPD and ASYPD
-================================
+**Experiment's Post Simulated Years Per Day**: :math:`PSYPD = \frac{\sum_{i \in C} y_i \cdot 86400}{\sum_{i \in C} (q_i + r_i) + \frac{1}{|P|}\sum_{j \in P}(q_j+r_j)}`
 
-AutosubmitAPI can also compute SYPD and ASYPD for any job that has a `chunk` value.
+.. important:: This metric was previously known as Actual Simulated Years Per Day.
+
+WSYPD represents the real performance of the experiment's workflow.
+
+**Experiment's Workflow Simulated Years Per Day**: :math:`WSYPD = \frac{\sum_{i \in C} y_i \cdot 86400}{\sum_{i \in W} (q_i + r_i)}`
+
+.. important:: This metric was previously known as Real Simulated Years Per Day.
+
+IWSYPD represents the ideal performance of the workflow under optimal conditions where 
+the queue time of each job is not considered.
+
+**Experiment's Ideal Workflow Simulated Years Per Day**: :math:`IWSYPD = \frac{\sum_{i \in C} y_i \cdot 86400}{\sum_{i \in W} (r_i)}`
+
+Generalization of SYPD, QSYPD and PSYPD
+=======================================
+
+AutosubmitAPI can also compute SYPD and PSYPD for any job that has a `chunk` value.
 These jobs share the same attributes as SIM jobs. Only `COMPLETED` jobs are considered.
 
 **Generalized Simulated Years Per Day**: :math:`SYPD_i = \frac{y_i \cdot 86400}{r_i}`
 
-As for ASYPD, it will only consider experiments that have at least one POST
+**Generalized Queue Simulated Years Per Day**: :math:`QSYPD_i = \frac{y_i \cdot 86400}{(q_i + r_i)}`
+
+As for PSYPD, it will only consider experiments that have at least one POST
 job.
 
-**Generalized Actual Simulated Years Per Day**: :math:`ASYPD_i = \frac{y_i \cdot 86400}{(q_i + r_i) + \frac{1}{|P|}\sum_{j \in P}(q_j+r_j)}`
+**Generalized Post Simulated Years Per Day**: :math:`PSYPD_i = \frac{y_i \cdot 86400}{(q_i + r_i) + \frac{1}{|P|}\sum_{j \in P}(q_j+r_j)}`
+
+.. important:: This metric was previously known as Generalized Actual Simulated Years Per Day.
 
 Parallelization estimation
 ==========================

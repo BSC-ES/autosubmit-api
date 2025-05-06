@@ -4,6 +4,7 @@ from autosubmit_api.components.experiment.configuration_facade import Autosubmit
 from autosubmit_api.components.experiment.pkl_organizer import PklOrganizer
 from autosubmit_api.logger import logger
 from autosubmit_api.common import utils as utils
+from autosubmit_api.performance.utils import calculate_critical_path_phases
 from autosubmit_api.components.jobs.joblist_helper import JobListHelper
 from autosubmit_api.components.jobs.job_factory import Job, SimJob
 from typing import List, Dict
@@ -21,12 +22,16 @@ class PerformanceMetrics(object):
     self.total_sim_queue_time: int = 0
     self.valid_sim_yps_sum: float = 0.0
     self.valid_sim_energy_sum: float= 0.0
+    self.valid_sim_core_hours_sum: float = 0.0
     self.valid_sim_footprint_sum: float = 0.0
     self.SYPD: float = 0
-    self.ASYPD: float = 0
+    self.PSYPD: float = 0
+    self.QSYPD: float = 0
     self.CHSY: float = 0
     self.JPSY: float = 0
     self.RSYPD: float = 0
+    self.WSYPD: float = 0
+    self.IWSYPD: float = 0
     self.processing_elements: int = 1
     self._considered: List[Dict] = []
     self._not_considered: List[Dict] = []
@@ -38,6 +43,8 @@ class PerformanceMetrics(object):
     self.sim_jobs_platform = ""
     self.sim_platform_CF = 0.0
     self.sim_platform_PUE = 0.0
+    self.ideal_critical_path = []
+    self.phases = {}
     try:
       self.joblist_helper: JobListHelper = joblist_helper
       self.configuration_facade: AutosubmitConfigurationFacade = self.joblist_helper.configuration_facade
@@ -93,6 +100,7 @@ class PerformanceMetrics(object):
       self.joblist_helper.update_with_timedata(self.pkl_organizer.post_jobs)
       self.joblist_helper.update_with_timedata(self.pkl_organizer.clean_jobs)
       self.joblist_helper.update_with_timedata(self.pkl_organizer.transfer_jobs)
+      self.joblist_helper.update_with_timedata(self.pkl_organizer.other_jobs)
       # Update yps with the latest historical data
       self.joblist_helper.update_with_yps_per_run(self.pkl_organizer.sim_jobs)
 
@@ -100,11 +108,16 @@ class PerformanceMetrics(object):
       self.valid_sim_yps_sum = self._calculate_sum_yps()
       self.valid_sim_energy_sum = self._calculate_sum_energy()
       self.valid_sim_footprint_sum = self._calculate_sum_footprint()
+      self.valid_sim_core_hours_sum = self._calculate_sum_core_hours()
       self.SYPD = self._calculate_SYPD()
-      self.ASYPD = self._calculate_ASYPD()
+      self.PSYPD = self._calculate_PSYPD()
+      self.QSYPD = self._calculate_QSYPD()
       self.RSYPD = self._calculate_RSYPD()
       self.JPSY = self._calculate_JPSY()
       self.CHSY = self._calculate_CHSY()
+      self._calculate_critical_path_and_phases()
+      self.WSYPD = self._calculate_WSYPD()
+      self.IWSYPD = self._calculate_IWSYPD()
 
   def _identify_outlied_jobs(self):
     """ Generates warnings """
@@ -112,10 +125,18 @@ class PerformanceMetrics(object):
     for job in outlied:
       self.warnings.append("Considered | Job {0} (Package {1}) has no energy information and is not going to be considered for energy calculations.".format(job.name, self.joblist_helper.job_to_package.get(job.name, "No Package")))
 
+  def _deprecated_metrics(self):
+    """ Deprecated metrics """
+    return [
+      "RSYPD is deprecated; use WSYPD instead.",
+      "ASYPD is deprecated; the new name assigned is PSYPD.",
+    ]
+  
   def _unify_warnings(self):
     self.warnings.extend(self.pkl_organizer.warnings)
     self.warnings.extend(self.configuration_facade.warnings)
     self.warnings.extend(self.joblist_helper.warning_messages)
+    self.warnings.extend(self._deprecated_metrics())
 
   def _calculate_post_jobs_total_time_average(self):
     """ Average run+queue of all completed POST jobs """
@@ -157,11 +178,18 @@ class PerformanceMetrics(object):
       return round(SYPD, 4)
     return 0
 
-  def _calculate_ASYPD(self):
-    if len(self.sim_jobs_valid) > 0 and (self.total_sim_run_time + self.total_sim_queue_time + self.post_jobs_total_time_average)>0:
-      ASYPD = ((self.valid_sim_yps_sum * utils.SECONDS_IN_A_DAY) / 
+  def _calculate_PSYPD(self):
+    if len(self.sim_jobs_valid) > 0 and (self.total_sim_run_time + self.total_sim_queue_time + self.post_jobs_total_time_average) > 0.0:
+      PSYPD = ((self.valid_sim_yps_sum * utils.SECONDS_IN_A_DAY) / 
                  (self.total_sim_run_time + self.total_sim_queue_time + self.post_jobs_total_time_average))
-      return round(ASYPD, 4)
+      return round(PSYPD, 4)
+    return 0
+  
+  def _calculate_QSYPD(self):
+    if len(self.sim_jobs_valid) > 0 and (self.total_sim_run_time + self.total_sim_queue_time)>0:
+      QSYPD = ((self.valid_sim_yps_sum * utils.SECONDS_IN_A_DAY) / 
+                 (self.total_sim_run_time + self.total_sim_queue_time))
+      return round(QSYPD, 4)
     return 0
 
   def _calculate_RSYPD(self):
@@ -184,7 +212,21 @@ class PerformanceMetrics(object):
       CHSY = sum(job.CHSY for job in self.sim_jobs_valid)/len(self.sim_jobs_valid)
       return round(CHSY, 4)
     return 0
+
+  def _calculate_WSYPD(self):
+    time_workflow = self.phases.get("total_run_queue_time", 0)
+    if len(self.sim_jobs_valid) > 0 and time_workflow > 0:
+      WSYPD = ((self.valid_sim_yps_sum * utils.SECONDS_IN_A_DAY) / time_workflow)
+      return round(WSYPD, 4)
+    return 0
   
+  def _calculate_IWSYPD(self):
+    time_workflow = self.phases.get("total_run_time", 0)
+    if len(self.sim_jobs_valid) > 0 and time_workflow > 0:
+      IWSYPD = ((self.valid_sim_yps_sum * utils.SECONDS_IN_A_DAY) / time_workflow)
+      return round(IWSYPD, 4)
+    return 0
+
   def _calculate_sum_yps(self):
     return sum(job.years_per_sim for job in self.sim_jobs_valid)
   
@@ -198,6 +240,9 @@ class PerformanceMetrics(object):
   
   def _calculate_sim_job_footprint(self, simjob: SimJob):
     return (simjob.energy / UNITS_CONVERSOR_ENERGY) * self.sim_platform_CF * self.sim_platform_PUE
+  
+  def _calculate_sum_core_hours(self):
+    return round((self._sim_processors * self.total_sim_run_time) / utils.SECONDS_IN_ONE_HOUR , 2)
 
   def _get_RSYPD_support_list(self) -> List[Job]:
     """ The support list for the divisor can have a different source """
@@ -216,7 +261,32 @@ class PerformanceMetrics(object):
     if len(support_list) > 0 and len(self.sim_jobs_valid):
       divisor = max(support_list[-1].finish_ts - self.sim_jobs_valid[0].start_ts, 0.0)
     return divisor
+  
+  def _calculate_critical_path_and_phases(self):
+        self.ideal_critical_path = self.pkl_organizer.find_ideal_critical_path()
+        if not self.ideal_critical_path or self.ideal_critical_path == []:
+          self.warnings.append("The ideal critical path could not be calculated.")
+        self.phases = calculate_critical_path_phases(self.ideal_critical_path)
 
+  def _process_ideal_critical_path(self):
+    """
+    Process the critical path to get the jobs in the critical path.
+    Returns a list of dictionaries with only 'name' and 'running' (run_time).
+    """
+    if len(self.ideal_critical_path) > 0:
+      return [{"name": job["name"], "running": job["run_time"]} for job in self.ideal_critical_path]
+    return []
+  
+  def _process_critical_path_phases(self):
+    """
+    Process the critical path phases to get the time in each phase
+    """
+    return {
+      "pre_sim": self.phases.get("pre_sim_run_time", 0),
+      "sim": self.phases.get("sim_run_time", 0),
+      "post_sim": self.phases.get("post_sim_run_time", 0),
+    }
+  
   def _sim_job_to_dict(self, simjob: SimJob): 
     return {
       "name": simjob.name,
@@ -224,7 +294,9 @@ class PerformanceMetrics(object):
       "running": simjob.run_time,
       "CHSY": simjob.CHSY,
       "SYPD": simjob.SYPD,
-      "ASYPD": simjob.ASYPD,
+      "ASYPD": simjob.PSYPD,
+      "PSYPD": simjob.PSYPD,
+      "QSYPD": simjob.QSYPD,
       "JPSY": simjob.JPSY,
       "energy": simjob.energy,
       "yps": simjob.years_per_sim,
@@ -236,14 +308,21 @@ class PerformanceMetrics(object):
   def to_json(self) -> Dict:
     return {"SY": self.valid_sim_yps_sum,
             "SYPD": self.SYPD,
-            "ASYPD": self.ASYPD,
+            "PSYPD": self.PSYPD,
+            "ASYPD": self.PSYPD,
+            "QSYPD": self.QSYPD,
             "RSYPD": self.RSYPD,
             "CHSY": self.CHSY,
             "JPSY": self.JPSY,
+            "WSYPD": self.WSYPD,
+            "IWSYPD": self.IWSYPD,
             "Parallelization": self.processing_elements,
             "Total_energy": self.valid_sim_energy_sum,
             "Total_footprint": self.valid_sim_footprint_sum,
             "platform_info":{"name": self.sim_jobs_platform, "CF": self.sim_platform_CF, "PUE": self.sim_platform_PUE},
+            "Total_core_hours": self.valid_sim_core_hours_sum,
+            "ideal_critical_path": self._process_ideal_critical_path(),
+            "phases_run_times": self._process_critical_path_phases(),
             "considered": self._considered,
             "not_considered": self._not_considered,
             "error": self.error,

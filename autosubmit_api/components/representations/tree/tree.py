@@ -280,7 +280,7 @@ class TreeRepresentation(object):
 
       # Calculate performance metrics
       SYPD = PUtils.calculate_SYPD_perjob(chunk_unit, chunk_size, job.chunk, job.run_time, job.status)
-      ASYPD = PUtils.calculate_ASYPD_perjob(chunk_unit, chunk_size, job.chunk, job.total_time, self.average_post_time, job.status)
+      PSYPD = PUtils.calculate_PSYPD_perjob(chunk_unit, chunk_size, job.chunk, job.total_time, self.average_post_time, job.status)
 
       self.nodes.append({
         "id": job.name,
@@ -297,7 +297,8 @@ class TreeRepresentation(object):
         "date": ini_date,
         "date_plus": end_date,
         "SYPD": SYPD,
-        "ASYPD": ASYPD,
+        "PSYPD": PSYPD,
+        "ASYPD": PSYPD,
         "minutes": job.run_time,
         "submit": job.submit_datetime,
         "start": job.start_datetime,

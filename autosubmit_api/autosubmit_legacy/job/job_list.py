@@ -31,7 +31,7 @@ from dateutil.relativedelta import relativedelta
 from autosubmit_api.autosubmit_legacy.job.job_utils import SubJob
 from autosubmit_api.autosubmit_legacy.job.job_utils import SubJobManager, job_times_to_text
 from autosubmit_api.config.basicConfig import APIBasicConfig
-from autosubmit_api.performance.utils import calculate_ASYPD_perjob, calculate_SYPD_perjob
+from autosubmit_api.performance.utils import calculate_PSYPD_perjob, calculate_SYPD_perjob
 from autosubmit_api.components.jobs import utils as JUtils
 from autosubmit_api.monitor.monitor import Monitor
 from autosubmit_api.common.utils import Status
@@ -467,7 +467,7 @@ class JobList:
         result_header['chunk_size'] = chunk_size
         nodes = list()
 
-        # ASYPD : POST jobs in experiment
+        # PSYPD : POST jobs in experiment
         post_jobs = [job for job in job_list if job.member ==
                      "POST" and job.status in {"COMPLETED", "RUNNING"}]
         average_post_time = 0
@@ -499,7 +499,7 @@ class JobList:
                           'date': ini_date,
                           'date_plus': end_date,
                           'SYPD': calculate_SYPD_perjob(chunk_unit, chunk_size, job.chunk, job.running_time() if job else 0, Status.STRING_TO_CODE[job.status]),
-                          'ASYPD': calculate_ASYPD_perjob(chunk_unit, chunk_size, job.chunk, job.running_time() + job.queuing_time(package_to_jobs_for_normalization.get(job.rowtype, None)) if job else 0, average_post_time, Status.STRING_TO_CODE[job.status]),
+                          'PSYPD': calculate_PSYPD_perjob(chunk_unit, chunk_size, job.chunk, job.running_time() + job.queuing_time(package_to_jobs_for_normalization.get(job.rowtype, None)) if job else 0, average_post_time, Status.STRING_TO_CODE[job.status]),
                           'minutes_queue': job.queuing_time(package_to_jobs_for_normalization.get(job.rowtype, None)),
                           # job_running_to_min[job.job_name] if job.job_name in list(job_running_to_min.keys()) else -1,
                           'minutes': job.running_time(),

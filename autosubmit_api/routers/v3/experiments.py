@@ -236,7 +236,7 @@ async def get_exp_performance(
     except Exception as exc:
         result = {
             "SYPD": None,
-            "ASYPD": None,
+            "PSYPD": None,
             "RSYPD": None,
             "CHSY": None,
             "JPSY": None,
