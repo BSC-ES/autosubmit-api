@@ -1,5 +1,5 @@
-from typing import Any, Dict, List, Union
-from fastapi import APIRouter, HTTPException
+from typing import Annotated, Any, Dict, List, Union
+from fastapi import APIRouter, HTTPException, Query
 from pydantic import BaseModel
 
 from autosubmit_api.config.config_file import read_config_file
@@ -45,26 +45,28 @@ def check_runner_permissions(runner: str, module_loader: str) -> bool:
 
 class GetRunnerBody(BaseModel):
     runner: RunnerType
-    module_type: ModuleLoaderType
-    module_names: Union[str, List[str], None] = None
+    module_loader: ModuleLoaderType
+    modules: Union[str, List[str], None] = None
 
 
-@router.get("/experiments/{expid}/runner-detail", name="Get runner detail")
-async def get_runner_detail(expid: str, body: GetRunnerBody):
+@router.get("/runner-detail", name="Get runner detail")
+async def get_runner_detail(query_params: Annotated[GetRunnerBody, Query()]):
     """
     Get the details of the runner for a given experiment ID.
     """
     # Check if the runner and module loader are enabled
-    if not check_runner_permissions(body.runner.value, body.module_type.value):
+    if not check_runner_permissions(
+        query_params.runner.value, query_params.module_loader.value
+    ):
         raise HTTPException(
             status_code=403,
             detail="Runner or module loader is not enabled in the config file",
         )
 
     module_loader = module_loaders.get_module_loader(
-        body.module_type, body.module_names
+        query_params.module_loader, query_params.modules
     )
-    runner = get_runner(body.runner, module_loader)
+    runner = get_runner(query_params.runner, module_loader)
 
     try:
         version = await runner.version()
@@ -75,10 +77,9 @@ async def get_runner_detail(expid: str, body: GetRunnerBody):
         )
 
     return {
-        "expid": expid,
         "runner": runner.runner_type,
-        "module_type": module_loader.module_loader_type,
-        "module_names": module_loader.module_names,
+        "module_loader": module_loader.module_loader_type,
+        "modules": module_loader.modules,
         "version": version,
     }
 
@@ -89,20 +90,22 @@ async def run_experiment(expid: str, body: GetRunnerBody):
     Run an experiment with the specified ID and module.
     """
     # Check if the runner and module loader are enabled
-    if not check_runner_permissions(body.runner.value, body.module_type.value):
+    if not check_runner_permissions(body.runner.value, body.module_loader.value):
         raise HTTPException(
             status_code=403,
             detail="Runner or module loader is not enabled in the config file",
         )
 
     module_loader = module_loaders.get_module_loader(
-        body.module_type, body.module_names
+        body.module_loader, body.modules
     )
     runner = get_runner(body.runner, module_loader)
+
+    # TODO Implement the logic to run the experiment
 
     return {
         "expid": expid,
         "runner": runner.runner_type,
-        "module_type": module_loader.module_loader_type,
-        "module_names": module_loader.module_names,
+        "module_loader": module_loader.module_loader_type,
+        "modules": module_loader.modules,
     }

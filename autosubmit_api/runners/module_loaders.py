@@ -13,8 +13,14 @@ class ModuleLoaderType(str, Enum):
 
 
 class ModuleLoader(ABC):
-    module_loader_type: ModuleLoaderType
-    module_names: List[str] = []
+    modules: List[str] = []
+
+    @property
+    @abstractmethod
+    def module_loader_type(self) -> ModuleLoaderType:
+        """
+        Returns the type of the module loader.
+        """
 
     @abstractmethod
     def generate_command(self, command: str, *args, **kwargs) -> str:
@@ -26,15 +32,28 @@ class ModuleLoader(ABC):
 class CondaModuleLoader(ModuleLoader):
     module_loader_type = ModuleLoaderType.CONDA
 
-    def __init__(self, env_name: str):
-        self.env_name = env_name.strip()
+    def __init__(self, env_name: Union[str, List[str], None]):
+        if isinstance(env_name, str):
+            self.modules = [env_name]
+        elif (
+            isinstance(env_name, list)
+            and len(env_name) == 1
+            and isinstance(env_name[0], str)
+        ):
+            self.modules = env_name
+        else:
+            raise ValueError(
+                "Conda environment name must be a string or a list containing a single string"
+            )
 
-        # Check if command injection in the env_name
-        if any(char in env_name for char in [" ", ";", "&", "|", "`", "$", ">", "<"]):
-            raise ValueError("Invalid characters in environment name")
+        # Inspect command injection in the env_name
+        for module in self.modules:
+            if any(char in module for char in [" ", ";", "&", "|", "`", "$", ">", "<"]):
+                raise ValueError("Invalid characters in environment name")
 
-        self.base_command = f"conda run -n {self.env_name} "
-        self.module_names = [env_name]
+    @property
+    def base_command(self):
+        return f"conda run -n {self.modules[0].strip()} "
 
     def generate_command(self, command: str, *args, **kwargs):
         """
@@ -47,17 +66,26 @@ class CondaModuleLoader(ModuleLoader):
 class LmodModuleLoader(ModuleLoader):
     module_loader_type = ModuleLoaderType.LMOD
 
-    def __init__(self, modules_list: list):
-        self.modules_list = modules_list
+    def __init__(self, modules_list: Union[str, List[str], None]):
+        if isinstance(modules_list, str):
+            self.modules = [modules_list]
+        elif isinstance(modules_list, list) and all(
+            isinstance(module, str) for module in modules_list
+        ):
+            self.modules = modules_list
+        else:
+            raise ValueError(
+                "Modules list must be a string or a list containing strings"
+            )
 
-        # Check if command injection in the modules_list
-        for module in modules_list:
+        # Check if command injection in the modules
+        for module in self.modules:
             if any(char in module for char in [" ", ";", "&", "|", "`", "$", ">", "<"]):
                 raise ValueError(f"Invalid characters in module name: {module}")
 
-        self.base_command = f"module load {' '.join(self.modules_list)} && "
-
-        self.module_names = modules_list
+    @property
+    def base_command(self):
+        return f"module load {' '.join(self.modules)} && "
 
     def generate_command(self, command: str, *args, **kwargs):
         """
@@ -70,17 +98,30 @@ class LmodModuleLoader(ModuleLoader):
 class VenvModuleLoader(ModuleLoader):
     module_loader_type = ModuleLoaderType.VENV
 
-    def __init__(self, venv_path: str):
-        self.venv_path = venv_path
-        self.base_command = f"source {self.venv_path}/bin/activate && "
-
-        # Check if path exists and doesn't have invalid characters
-        if not os.path.exists(venv_path) or any(
-            char in venv_path for char in [";", "&", "|", "`", "$", ">", "<"]
+    def __init__(self, venv_path: Union[str, List[str], None]):
+        if isinstance(venv_path, str):
+            self.modules = [venv_path]
+        elif (
+            isinstance(venv_path, list)
+            and len(venv_path) == 1
+            and isinstance(venv_path[0], str)
         ):
-            raise ValueError("Invalid or non-existent virtual environment path")
+            self.modules = venv_path
+        else:
+            raise ValueError(
+                "Venv path must be a string or a list containing a single string"
+            )
 
-        self.module_names = [venv_path]
+        # Inspect comand injection in the venv_path
+        for module in self.modules:
+            if not os.path.exists(module):
+                raise ValueError(f"Venv path does not exist: {module}")
+            if any(char in module for char in [";", "&", "|", "`", "$", ">", "<"]):
+                raise ValueError(f"Invalid characters in venv path: {module}")
+
+    @property
+    def base_command(self):
+        return f"source {self.modules[0].strip()}/bin/activate && "
 
     def generate_command(self, command: str, *args, **kwargs):
         """
@@ -94,8 +135,11 @@ class NoModuleLoader(ModuleLoader):
     module_loader_type = ModuleLoaderType.NO_MODULE
 
     def __init__(self):
-        self.base_command = ""
-        self.module_names = []
+        self.modules = []
+
+    @property
+    def base_command(self):
+        return ""
 
     def generate_command(self, command: str, *args, **kwargs):
         """
@@ -106,26 +150,18 @@ class NoModuleLoader(ModuleLoader):
 
 
 def get_module_loader(
-    module_type: str, module_names: Union[str, List[str], None]
+    module_loader: str, modules: Union[str, List[str], None]
 ) -> ModuleLoader:
     """
     Factory function to get the appropriate module loader based on the module type.
     """
-    if module_type == ModuleLoaderType.CONDA:
-        if not isinstance(module_names, str):
-            raise ValueError("Conda module name must be a string")
-        return CondaModuleLoader(module_names)
-    elif module_type == ModuleLoaderType.LMOD:
-        if isinstance(module_names, str):
-            module_names = [module_names]
-        elif not isinstance(module_names, list):
-            raise ValueError("Lmod module names must be a list")
-        return LmodModuleLoader(module_names)
-    elif module_type == ModuleLoaderType.VENV:
-        if not isinstance(module_names, str):
-            raise ValueError("Venv path must be a string")
-        return VenvModuleLoader(module_names)
-    elif module_type == ModuleLoaderType.NO_MODULE:
+    if module_loader == ModuleLoaderType.CONDA:
+        return CondaModuleLoader(modules)
+    elif module_loader == ModuleLoaderType.LMOD:
+        return LmodModuleLoader(modules)
+    elif module_loader == ModuleLoaderType.VENV:
+        return VenvModuleLoader(modules)
+    elif module_loader == ModuleLoaderType.NO_MODULE:
         return NoModuleLoader()
     else:
-        raise ValueError(f"Unknown module type: {module_type}")
+        raise ValueError(f"Unknown module type: {module_loader}")

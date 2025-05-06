@@ -16,7 +16,16 @@ class RunnerType(str, Enum):
 
 
 class Runner(ABC):
-    runner_type: RunnerType
+    """
+    Base class for runners
+    """
+
+    @property
+    @abstractmethod
+    def runner_type(self) -> RunnerType:
+        """
+        The type of the runner.
+        """
 
     @abstractmethod
     async def version(self):
@@ -74,6 +83,22 @@ class LocalRunner(Runner):
 
         logger.debug(f"Command output: {output}")
         return output
+
+    def is_runner_active(self, expid: str) -> bool:
+        """
+        Check if the Autosubmit experiment is running using the local runner in a subprocess.
+
+        :param expid: The experiment ID to check.
+        :return: True if the experiment is running, False otherwise.
+        """
+        # Get the pid from the DB
+        active_procs = self.runners_repo.get_active_processes_by_expid(expid)
+        if not active_procs:
+            return False
+
+        # Check if the process is still running
+        pid = active_procs[0].pid
+        return self._is_pid_running(pid)
 
     def _is_pid_running(self, pid: int) -> bool:
         """
