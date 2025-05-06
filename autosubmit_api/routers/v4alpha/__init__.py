@@ -5,7 +5,7 @@ from pydantic import BaseModel
 from autosubmit_api.config.config_file import read_config_file
 from autosubmit_api.runners import module_loaders
 from autosubmit_api.runners.module_loaders import ModuleLoaderType
-from autosubmit_api.runners.runners import get_runner, RunnerType
+from autosubmit_api.runners.runners import RunnerAlreadyRunningError, get_runner, RunnerType
 from autosubmit_api.logger import logger
 
 router = APIRouter()
@@ -101,11 +101,24 @@ async def run_experiment(expid: str, body: GetRunnerBody):
     )
     runner = get_runner(body.runner, module_loader)
 
-    # TODO Implement the logic to run the experiment
+    try:
+        runner_data, process = await runner.run(expid)
+    except RunnerAlreadyRunningError:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Runner for experiment {expid} is already running.",
+        )
+    except Exception as exc:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to run experiment {expid}: {exc}",
+        )
 
     return {
         "expid": expid,
         "runner": runner.runner_type,
         "module_loader": module_loader.module_loader_type,
         "modules": module_loader.modules,
+        "runner_id": runner_data.id,
+        "pid": process.pid,
     }

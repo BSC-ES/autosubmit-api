@@ -1,4 +1,6 @@
 from abc import ABC, abstractmethod
+import asyncio
+import asyncio.subprocess
 from enum import Enum
 import signal
 import subprocess
@@ -13,6 +15,17 @@ from autosubmit_api.logger import logger
 
 class RunnerType(str, Enum):
     LOCAL = "local"
+
+
+# Runner Exceptions
+class RunnerAlreadyRunningError(Exception):
+    """
+    Exception raised when a runner is already running.
+    """
+
+    def __init__(self, expid: str):
+        super().__init__(f"Runner for experiment {expid} is already running.")
+        self.expid = expid
 
 
 class Runner(ABC):
@@ -84,22 +97,6 @@ class LocalRunner(Runner):
         logger.debug(f"Command output: {output}")
         return output
 
-    def is_runner_active(self, expid: str) -> bool:
-        """
-        Check if the Autosubmit experiment is running using the local runner in a subprocess.
-
-        :param expid: The experiment ID to check.
-        :return: True if the experiment is running, False otherwise.
-        """
-        # Get the pid from the DB
-        active_procs = self.runners_repo.get_active_processes_by_expid(expid)
-        if not active_procs:
-            return False
-
-        # Check if the process is still running
-        pid = active_procs[0].pid
-        return self._is_pid_running(pid)
-
     def _is_pid_running(self, pid: int) -> bool:
         """
         Check if a process with the given PID is running.
@@ -114,6 +111,32 @@ class LocalRunner(Runner):
             logger.error(f"Error checking process {pid}: {exc}")
             return False
 
+    def get_runner_status(self, expid: str) -> str:
+        """
+        Get the status of the runner for a given expid.
+        It will update the status in the DB if the process is not running anymore.
+
+        :param expid: The experiment ID to get the status of.
+        :return: The status of the experiment.
+        """
+        # Get active processes from the DB
+        active_procs = self.runners_repo.get_active_processes_by_expid(expid)
+        if not active_procs:
+            return "NO_RUNNER"
+
+        # Check if the process is still running
+        pid = active_procs[0].pid
+        is_pid_running = self._is_pid_running(pid)
+
+        if not is_pid_running:
+            # Update the status of the subprocess in the DB
+            updated_proc = self.runners_repo.update_process_status(
+                id=active_procs[0].id, status="FAILED"
+            )
+            return updated_proc.status
+        else:
+            return active_procs[0].status
+
     async def run(self, expid: str):
         """
         Run an Autosubmit experiment using the local runner in a subprocess asynchronously.
@@ -124,83 +147,73 @@ class LocalRunner(Runner):
 
         :param expid: The experiment ID to run.
         """
-        # Check if other runner with the same expid is running
-        active_procs = self.runners_repo.get_active_processes_by_expid(expid)
-        if active_procs:
-            logger.error(
-                f"Experiment {expid} is already running with pid {active_procs[0].pid}"
-            )
-            raise RuntimeError(f"Experiment {expid} is already running.")
+        # Check if other runner with the same expid is active
+        runner_status = self.get_runner_status(expid)
+        if runner_status == "ACTIVE":
+            logger.error(f"Experiment {expid} is already running.")
+            raise RunnerAlreadyRunningError(expid)
 
         # Generate the command to run
-        autosubmit_command = f"autosubmit run -np {expid}"
+        autosubmit_command = f"autosubmit run {expid}"
         wrapped_command = self.module_loader.generate_command(autosubmit_command)
         logger.debug(f"Running command: {wrapped_command}")
 
         # Launch the command in a subprocess and get the pid
-        process = subprocess.Popen(
+        process: asyncio.subprocess.Process = await asyncio.create_subprocess_shell(
             wrapped_command,
-            shell=True,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
-            text=True,
             executable="/bin/bash",
         )
 
         # Store the pid in the DB
-        self.runners_repo.insert_process(
+        runner_proc = self.runners_repo.insert_process(
             expid=expid,
             pid=process.pid,
             status="ACTIVE",
         )
 
-        # Return the pid of the process to the caller
-        return process
+        # Run the wait_run on the background
+        asyncio.create_task(self.wait_run(runner_proc.id, process))
 
-    async def wait_run(self, process: subprocess.Popen):
+        # Return the pid of the process to the caller
+        return runner_proc, process
+
+    async def wait_run(
+        self, runner_process_id: int, process: asyncio.subprocess.Process
+    ):
         """
         Wait for the Autosubmit experiment to finish and get the output.
         This method will check the status of the process and update the status in the DB.
         :param process: The subprocess to wait for.
         """
-        # Wait for the command to finish and get the output
-        stdout, stderr = process.communicate()
+        try:
+            # Wait for the command to finish and get the output
+            stdout, stderr = await process.communicate()
 
-        # Update the status of the subprocess in the DB
-        self.runners_repo.update_process_status(
-            id=process.pid,
-            status="COMPLETED" if process.returncode == 0 else "FAILED",
-        )
-
-        # Check if the command was successful
-        if process.returncode != 0:
-            logger.error(f"Command failed with error: {stderr}")
-            raise subprocess.CalledProcessError(
-                returncode=process.returncode,
-                cmd=process.args,
-                output=stdout,
-                stderr=stderr,
+            # Update the status of the subprocess in the DB
+            self.runners_repo.update_process_status(
+                id=runner_process_id,
+                status="COMPLETED" if process.returncode == 0 else "FAILED",
             )
-        logger.debug(f"Command output: {stdout}")
-        return stdout
 
-    async def get_run_status(self, expid: str):
-        """
-        Get the status of an Autosubmit experiment using the local runner in a subprocess asynchronously.
-        This method will get the pid from the DB and check if the process is still running.
-        It can return the status of the process (running, completed, failed, stopped).
-        This method will also check if the process is still running and update the status in the DB.
-
-        :param expid: The experiment ID to get the status of.
-        :return: The status of the experiment.
-        """
-        # Get the pid & status from the DB
-        active_procs = self.runners_repo.get_active_processes_by_expid(expid)
-
-        return {
-            "status": active_procs[0].status if active_procs else "NOT_FOUND",
-            "pid": active_procs[0].pid if active_procs else None,
-        }
+            # Check if the command was successful
+            if process.returncode != 0:
+                logger.error(f"Command failed with error: {stderr}")
+                raise RuntimeError(
+                    "Command failed with error"
+                )
+            logger.debug(
+                f"Runner {runner_process_id} with pid {process.pid} completed successfully."
+            )
+            return stdout
+        except Exception as exc:
+            logger.error(
+                f"Error while waiting runner {runner_process_id} for process {process.pid}: {exc}"
+            )
+            raise exc
+        finally:
+            await process.wait()
 
     async def stop(self, expid: str, force: bool = False):
         """
