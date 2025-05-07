@@ -3,6 +3,9 @@ from fastapi import APIRouter, HTTPException, Query
 from pydantic import BaseModel
 
 from autosubmit_api.config.config_file import read_config_file
+from autosubmit_api.repositories.runner_processes import (
+    create_runner_processes_repository,
+)
 from autosubmit_api.runners import module_loaders
 from autosubmit_api.runners.module_loaders import ModuleLoaderType
 from autosubmit_api.runners.runner_factory import get_runner, get_runner_from_expid
@@ -138,3 +141,35 @@ async def stop_experiment(expid: str):
         )
 
     return {"message": f"Experiment {expid} stopped successfully."}
+
+
+@router.get(
+    "/experiments/{expid}/get-runner-status", name="Get experiment's runner status"
+)
+async def get_experiment_runner_status(expid: str):
+    """
+    Get the status of the runner for a given experiment ID.
+    """
+    try:
+        runner_repo = create_runner_processes_repository()
+
+        last_process = runner_repo.get_last_process_by_expid(expid)
+        if not last_process:
+            raise ValueError(f"No runner process found for expid: {expid}")
+    except Exception as exc:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to get status for experiment {expid}: {exc}",
+        )
+
+    return {
+        "expid": expid,
+        "runner_id": last_process.id,
+        "runner": last_process.runner,
+        "module_loader": last_process.module_loader,
+        "modules": last_process.modules,
+        "status": last_process.status,
+        "pid": last_process.pid,
+        "created": last_process.created,
+        "modified": last_process.modified,
+    }
