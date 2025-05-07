@@ -46,6 +46,9 @@ class CondaModuleLoader(ModuleLoader):
                 "Conda environment name must be a string or a list containing a single string"
             )
 
+        self._validate_modules()
+
+    def _validate_modules(self):
         # Inspect command injection in the env_name
         for module in self.modules:
             if any(char in module for char in [" ", ";", "&", "|", "`", "$", ">", "<"]):
@@ -78,6 +81,9 @@ class LmodModuleLoader(ModuleLoader):
                 "Modules list must be a string or a list containing strings"
             )
 
+        self._validate_modules()
+
+    def _validate_modules(self):
         # Check if command injection in the modules
         for module in self.modules:
             if any(char in module for char in [" ", ";", "&", "|", "`", "$", ">", "<"]):
@@ -100,22 +106,27 @@ class VenvModuleLoader(ModuleLoader):
 
     def __init__(self, venv_path: Union[str, List[str], None]):
         if isinstance(venv_path, str):
-            self.modules = [os.path.expanduser(venv_path)]
+            self.modules = [venv_path]
         elif (
             isinstance(venv_path, list)
             and len(venv_path) == 1
             and isinstance(venv_path[0], str)
         ):
-            self.modules = [os.path.expanduser(venv_path[0])]
+            self.modules = venv_path
         else:
             raise ValueError(
                 "Venv path must be a string or a list containing a single string"
             )
 
+        self._validate_modules()
+
+    def _validate_modules(self):
         # Inspect comand injection in the venv_path
         for module in self.modules:
-            if not os.path.exists(module):
-                raise ValueError(f"Venv path does not exist: {module}")
+            # Check that it's a valid absolute path
+            if not os.path.isabs(self.modules[0]):
+                raise ValueError("Venv path must be an absolute path")
+            # Check if command injection in the venv_path
             if any(char in module for char in [";", "&", "|", "`", "$", ">", "<"]):
                 raise ValueError(f"Invalid characters in venv path: {module}")
 

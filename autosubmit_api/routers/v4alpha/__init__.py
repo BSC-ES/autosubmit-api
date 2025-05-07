@@ -15,7 +15,9 @@ from autosubmit_api.logger import logger
 router = APIRouter()
 
 
-def check_runner_permissions(runner: str, module_loader: str) -> bool:
+def check_runner_permissions(
+    runner: str, module_loader: str, modules: Union[str, List[str], None] = None
+) -> bool:
     """
     Check if the runner and module loader are enabled in the configuration file.
 
@@ -29,7 +31,7 @@ def check_runner_permissions(runner: str, module_loader: str) -> bool:
         )
         is_runner_enabled: bool = runner_config.get("ENABLED", False)
         if not is_runner_enabled:
-            return False
+            raise ValueError(f"Runner {runner} is not enabled in the config file.")
 
         # Check if the module loader is enabled in the config file
         module_loader_config: Dict[str, Any] = runner_config.get(
@@ -37,11 +39,35 @@ def check_runner_permissions(runner: str, module_loader: str) -> bool:
         ).get(module_loader.upper(), {})
         is_module_loader_enabled: bool = module_loader_config.get("ENABLED", False)
         if not is_module_loader_enabled:
-            return False
-    except Exception:
-        logger.error(
-            f"Error checking permissions for runner {runner} and module loader {module_loader}"
-        )
+            raise ValueError(
+                f"Module loader {module_loader} is not enabled in the config file."
+            )
+
+        # VENV: Check if the venv is in a safe root path
+        if module_loader.lower() == ModuleLoaderType.VENV.value:
+            venv_config: Dict[str, Any] = runner_config.get("MODULE_LOADERS", {}).get(
+                ModuleLoaderType.VENV.value.upper(), {}
+            )
+            safe_root_path: str = venv_config.get("SAFE_ROOT_PATH", "/")
+
+            if isinstance(modules, str):
+                if not modules.startswith(safe_root_path):
+                    raise ValueError(
+                        f"Module {modules} is not in the safe root path {safe_root_path}"
+                    )
+            elif isinstance(modules, list):
+                for module in modules:
+                    if not module.startswith(safe_root_path):
+                        raise ValueError(
+                            f"Module {module} is not in the safe root path {safe_root_path}"
+                        )
+            else:
+                raise ValueError(
+                    f"Modules should be a string or a list of strings, got {type(modules)}"
+                )
+
+    except Exception as exc:
+        logger.error(f"Runner configuration unauthorized or invalid: {exc}")
         return False
 
     return True
@@ -60,7 +86,9 @@ async def get_runner_detail(query_params: Annotated[GetRunnerBody, Query()]):
     """
     # Check if the runner and module loader are enabled
     if not check_runner_permissions(
-        query_params.runner.value, query_params.module_loader.value
+        query_params.runner.value,
+        query_params.module_loader.value,
+        query_params.modules,
     ):
         raise HTTPException(
             status_code=403,
@@ -94,7 +122,11 @@ async def run_experiment(expid: str, body: GetRunnerBody):
     Run an experiment with the specified ID and module.
     """
     # Check if the runner and module loader are enabled
-    if not check_runner_permissions(body.runner.value, body.module_loader.value):
+    if not check_runner_permissions(
+        body.runner.value,
+        body.module_loader.value,
+        body.modules,
+    ):
         raise HTTPException(
             status_code=403,
             detail="Runner or module loader is not enabled in the config file",
