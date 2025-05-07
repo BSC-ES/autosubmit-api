@@ -33,6 +33,14 @@ class RunnerProcessesRepository(ABC):
         """
 
     @abstractmethod
+    def get_last_process_by_expid(
+        self, expid: str
+    ) -> RunnerProcessesDataModel:
+        """
+        Gets the last process of a specific experiment id
+        """
+
+    @abstractmethod
     def insert_process(
         self,
         expid: str,
@@ -81,11 +89,39 @@ class RunnerProcessesSQLRepository(RunnerProcessesRepository):
                 expid=row.expid,
                 pid=row.pid,
                 status=row.status,
+                runner=row.runner,
+                module_loader=row.module_loader,
+                modules=row.modules,
                 created=row.created,
                 modified=row.modified,
             )
             for row in result
         ]
+    
+    def get_last_process_by_expid(
+        self, expid: str
+    ) -> RunnerProcessesDataModel:
+        with self.engine.connect() as conn:
+            statement = (
+                self.table.select()
+                .where(self.table.c.expid == expid)
+                .order_by(self.table.c.created.desc())
+                .limit(1)
+            )
+            result = conn.execute(statement).first()
+            if result is None:
+                raise ValueError(f"No process found for expid {expid}")
+        return RunnerProcessesDataModel(
+            id=result.id,
+            expid=result.expid,
+            pid=result.pid,
+            status=result.status,
+            runner=result.runner,
+            module_loader=result.module_loader,
+            modules=result.modules,
+            created=result.created,
+            modified=result.modified,
+        )
 
     def insert_process(
         self,
@@ -144,6 +180,9 @@ class RunnerProcessesSQLRepository(RunnerProcessesRepository):
             expid=result.expid,
             pid=result.pid,
             status=result.status,
+            runner=result.runner,
+            module_loader=result.module_loader,
+            modules=result.modules,
             created=result.created,
             modified=_now,
         )

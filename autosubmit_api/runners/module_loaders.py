@@ -100,13 +100,13 @@ class VenvModuleLoader(ModuleLoader):
 
     def __init__(self, venv_path: Union[str, List[str], None]):
         if isinstance(venv_path, str):
-            self.modules = [venv_path]
+            self.modules = [os.path.expanduser(venv_path)]
         elif (
             isinstance(venv_path, list)
             and len(venv_path) == 1
             and isinstance(venv_path[0], str)
         ):
-            self.modules = venv_path
+            self.modules = [os.path.expanduser(venv_path[0])]
         else:
             raise ValueError(
                 "Venv path must be a string or a list containing a single string"

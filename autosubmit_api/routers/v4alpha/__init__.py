@@ -5,7 +5,7 @@ from pydantic import BaseModel
 from autosubmit_api.config.config_file import read_config_file
 from autosubmit_api.runners import module_loaders
 from autosubmit_api.runners.module_loaders import ModuleLoaderType
-from autosubmit_api.runners.runner_factory import get_runner
+from autosubmit_api.runners.runner_factory import get_runner, get_runner_from_expid
 from autosubmit_api.runners.base import RunnerAlreadyRunningError, RunnerType
 from autosubmit_api.logger import logger
 
@@ -121,3 +121,20 @@ async def run_experiment(expid: str, body: GetRunnerBody):
         "runner_id": runner_data.id,
         "pid": runner_data.pid,
     }
+
+
+@router.post("/experiments/{expid}/stop-experiment", name="Stop experiment")
+async def stop_experiment(expid: str):
+    """
+    Stop an experiment with the specified ID and module.
+    """
+    try:
+        runner = get_runner_from_expid(expid)
+        await runner.stop(expid)
+    except Exception as exc:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to stop experiment {expid}: {exc}",
+        )
+
+    return {"message": f"Experiment {expid} stopped successfully."}

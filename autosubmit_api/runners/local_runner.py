@@ -1,8 +1,7 @@
+import signal
 import psutil
 import asyncio
 import asyncio.subprocess
-import os
-import signal
 import subprocess
 
 from autosubmit_api.logger import logger
@@ -119,7 +118,7 @@ class LocalRunner(Runner):
             status="ACTIVE",
             runner=self.runner_type.value,
             module_loader=self.module_loader.module_loader_type.value,
-            modules=str(self.module_loader.modules),
+            modules="\n".join(self.module_loader.modules),
         )
 
         # Run the wait_run on the background
@@ -179,27 +178,33 @@ class LocalRunner(Runner):
         pid = active_procs[0].pid
 
         try:
-            if force:
-                # Force kill the process
-                logger.debug(f"Force stopping process {pid} of experiment {expid}...")
-                os.kill(pid, signal.SIGTERM)
-            else:
-                # Kill the process by using the ctrl+c signal
-                logger.debug(
-                    f"Stopping process {pid} of the experiment {expid} gracefully..."
-                )
-                os.kill(pid, signal.SIGINT)
-            logger.debug(f"Process {pid} of experiment {expid} killed successfully.")
-
-            # Wait for the process to finish
+            # Build the process list in DFS order
             process = psutil.Process(pid)
-            process.wait(timeout=5)
+            proc_list = [process] + process.children(recursive=True)
+
+            # Kill the processes that starts with "autosubmit"
+            for proc in proc_list:
+                if proc.name().strip().startswith("autosubmit"):
+                    logger.debug(
+                        f"Found process {proc.pid} with name {proc.name()}. Killing..."
+                    )
+                    if force:
+                        proc.kill()
+                    else:
+                        proc.terminate()
+                        proc.send_signal(signal.SIGINT)
+                        # TODO: check if this is the right signal to end the process
+                    proc.wait(timeout=10)
+
+            logger.debug(f"Process {pid} of experiment {expid} killed successfully.")
 
             # Update the status of the subprocess in the DB
             self.runners_repo.update_process_status(
                 id=active_procs[0].id,
                 status="STOPPED",
             )
+
+            # TODO: Check race condition with the wait_run method
 
         except OSError as e:
             logger.error(f"Failed to kill process {pid} of experiment {expid}: {e}")
