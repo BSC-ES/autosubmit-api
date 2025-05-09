@@ -1,7 +1,8 @@
 import pytest
 from unittest.mock import patch
+from autosubmit_api.repositories.runner_processes import RunnerProcessesDataModel
 from autosubmit_api.routers.v4alpha import check_runner_permissions
-from autosubmit_api.runners.runner_factory import get_runner
+from autosubmit_api.runners.runner_factory import get_runner, get_runner_from_expid
 from autosubmit_api.runners.local_runner import LocalRunner
 from autosubmit_api.runners.base import RunnerType
 
@@ -9,6 +10,28 @@ from autosubmit_api.runners.base import RunnerType
 def test_get_runner():
     runner = get_runner(RunnerType.LOCAL, None)
     assert isinstance(runner, LocalRunner)
+
+
+def test_get_runner_from_expid():
+    with patch(
+        "autosubmit_api.runners.runner_factory.create_runner_processes_repository"
+    ) as mock_repo:
+        mock_repo.return_value.get_last_process_by_expid.return_value = (
+            RunnerProcessesDataModel(
+                id=1,
+                expid="test_expid",
+                pid=1234,
+                status="ACTIVE",
+                runner=RunnerType.LOCAL.value,
+                module_loader="no_module",
+                modules="",
+                created="2025-04-01T00:00:00Z",
+                modified="2025-04-01T00:00:00Z",
+            )
+        )
+        runner = get_runner_from_expid("test_expid")
+        assert isinstance(runner, LocalRunner)
+        assert runner.module_loader is not None
 
 
 @pytest.mark.parametrize(
