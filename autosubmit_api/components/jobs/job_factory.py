@@ -239,6 +239,8 @@ class Job(metaclass=ABCMeta):
     job.err_path_local = pkl_item.err_path_local
     job.out_path_remote = pkl_item.out_path_remote
     job.err_path_remote = pkl_item.err_path_remote
+    job.split = pkl_item.split
+    job.splits = pkl_item.splits
     return job
 
   @classmethod
