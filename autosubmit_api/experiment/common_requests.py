@@ -741,6 +741,7 @@ def _retrieve_pkl_data(expid: str, out_format: str = "tree"):
                     job.chunk,
                     job.run_time,
                     job.status,
+                    job.splits,
                 )
 
             formatted_job_data = {
