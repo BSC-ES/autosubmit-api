@@ -43,3 +43,5 @@ class PklJobModel(BaseJobModel):
     out_path_remote: Optional[str]
     err_path_remote: Optional[str]
     wrapper_type: Optional[str]
+    split: Optional[int] = None
+    splits: Optional[int] = None
