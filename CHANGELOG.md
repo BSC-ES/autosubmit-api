@@ -1,5 +1,10 @@
 # CHANGELOG
 
+### Release v4.0.1 - Release date: 2025-05-19
+
+* Last version before Flask to FastAPI migration
+* Includes all the changes until v4.0.1b3
+
 ### Pre-release v4.0.1b3 - Release date: 2024-10-01
 
 * Added more CLI options related to gunicorn workers
