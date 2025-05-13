@@ -197,3 +197,17 @@ JobDataTable = Table(
 # Copy JobDataTable to an alternative version which has an additional column
 JobDataTableV18 = table_copy(JobDataTable)
 JobDataTableV18.append_column(Column("workflow_commit", Text, nullable=True))
+
+RunnerProcessesTable = Table(
+    "runner_processes",
+    metadata_obj,
+    Column("id", Integer, primary_key=True),
+    Column("expid", Text, nullable=False),
+    Column("pid", Integer, nullable=False),
+    Column("status", String(50), nullable=False),
+    Column("runner", String(50), nullable=False),
+    Column("module_loader", String(50), nullable=False),
+    Column("modules", Text, nullable=False),
+    Column("created", Text, nullable=False),
+    Column("modified", Text, nullable=False),
+)
