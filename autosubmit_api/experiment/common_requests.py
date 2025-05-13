@@ -21,6 +21,8 @@
 Module containing functions to manage autosubmit's experiments.
 """
 import os
+from pathlib import Path
+import re
 import time
 import traceback
 import datetime
@@ -588,6 +590,71 @@ def get_experiment_log_last_lines(expid):
         'error': error,
         'error_message': error_message,
         'logcontent': logcontent}
+
+
+def get_experiment_recovery_log_last_lines(expid: str) -> Dict[str, Any]:
+    """
+    Gets last lines of the last recovery log for each platform.
+    """
+    platform_files = {}
+    error = False
+    error_message = ""
+
+    try:
+        APIBasicConfig.read()
+        exp_paths = ExperimentPaths(expid)
+
+        # List all the files under the tmp_as_logs_dir directory
+        files = [
+            str(f.name)
+            for f in Path(exp_paths.tmp_as_logs_dir).iterdir()
+            if f.is_file()
+        ]
+
+        pattern = r"^(\d{8})_(\d{6})_(.*?)_log_recovery\.log$"
+
+        for file in files:
+            # Extract the date and time from the filename
+            match = re.search(pattern, file)
+            if match:
+                # Get the date and time components
+                date_str = match.group(1)
+                time_str = match.group(2)
+                platform = match.group(3)
+
+                # Convert to datetime object
+                dt = datetime.datetime.strptime(date_str + time_str, "%Y%m%d%H%M%S")
+
+                # Check if the platform is already in the dictionary
+                if platform not in platform_files:
+                    platform_files[platform] = {"datetime": dt, "filename": file}
+                else:
+                    # Compare the datetime objects and keep the one with the latest date
+                    if dt > platform_files[platform]["datetime"]:
+                        platform_files[platform] = {"datetime": dt, "filename": file}
+
+        # Get the last lines of each platform's log file
+        for platform_name, log_data in platform_files.items():
+            full_path = str(
+                Path(exp_paths.tmp_as_logs_dir).joinpath(log_data["filename"])
+            )
+            log_data["platform"] = platform_name
+            log_data["modified_date"] = common_utils.timestamp_to_datetime_format(
+                int(os.stat(full_path).st_mtime)
+            )
+            log_data["content"] = read_tail(full_path, 150)
+
+    except Exception as exc:
+        error = True
+        error_message = str(exc)
+        logger.error(traceback.format_exc())
+        logger.error(exc)
+
+    return {
+        "platform_recovery_logs": list(platform_files.values()),
+        "error": error,
+        "error_message": error_message,
+    }
 
 
 def get_job_log(expid, logfile, nlines=150):

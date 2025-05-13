@@ -1,0 +1,5 @@
+2025-05-13 12:44:58,704 local(log_recovery): Starting...
+2025-05-13 12:44:58,704 local(log_recovery): successfully connected.
+2025-05-13 12:45:20,735 a1vx_SIM_STAT_-1 file have been transferred
+2025-05-13 12:45:20,776 local(log_recovery) Successfully recovered log for job 'a1vx_SIM' and retry '0'.
+2025-05-13 12:45:20,776 local(log_recovery): Exiting.
