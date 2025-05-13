@@ -6,9 +6,6 @@ project = "Autosubmit API"
 copyright = "2024, Barcelona Supercomputing Center, BSC"
 author = "Barcelona Supercomputing Center"
 
-release = "4.0.0"
-version = "4.0.0"
-
 # -- General configuration
 
 extensions = ["sphinxcontrib.redoc"]
