@@ -12,6 +12,7 @@ General variables
 
 * ``SECRET_KEY``: The secret key to encode the JWT tokens from the Authorization Module.
 * ``AS_API_ROOT_PATH``: The root path of the API. This is useful if you are serving it with a reverse proxy. Default is an empty string. 
+* ``AS_API_CONFIG_FILE``: The path to the API configuration file. Default is ``~/.autosubmit_api.yaml``. See the `API configuration file`_ section for more information.
 
 .. important:: Always set ``SECRET_KEY`` when deploying the API on production.
 
@@ -38,3 +39,23 @@ Authentication variables
 * ``OIDC_USERNAME_SOURCE``: Method to use to get the username. Possible values: ``userinfo`` and ``id_token``. Default is ``id_token``.
 * ``OIDC_USERNAME_CLAIM``: Claim to use as username. e.g. ``preferred_username``. Default is ``sub``.
 * ``OIDC_USERINFO_URL``: OpenID Connect userinfo URL.
+
+
+API configuration file
+**************************
+
+The API configuration file is a YAML file that contains more structured configuration options. It can be used to set the following options:
+
+.. code-block:: yaml
+
+    BACKGROUND_TASKS: # Background tasks configuration
+      TASK_STTSUPDTR: # Status update task
+        ENABLED: True # Enable or disable the task. Default is True.
+        INTERVAL: 5 # in minutes. Default is 5 minutes.
+      TASK_POPDET: # Populate details database task
+        ENABLED: True # Enable or disable the task. Default is True.
+        INTERVAL: 240 # in minutes. Default is 240 minutes.
+      TASK_POPGRPH: # Populate graph layout cache task
+        ENABLED: True # Enable or disable the task. Default is True.
+        INTERVAL: 1440 # in minutes. Default is 1440 minutes.
+      
