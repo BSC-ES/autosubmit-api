@@ -4,7 +4,7 @@ from autosubmit_api.components.jobs import utils as JUtils
 from autosubmit_api.common.utils import Status
 from autosubmit_api.monitor.monitor import Monitor
 from autosubmit_api.history.data_classes.job_data import JobData
-from typing import TYPE_CHECKING, Tuple, List, Dict, Set
+from typing import TYPE_CHECKING, Optional, Tuple, List, Dict, Set
 # from autosubmitAPIwu.database.db_jobdata import JobData
 from abc import ABCMeta, abstractmethod
 
@@ -62,6 +62,8 @@ class Job(metaclass=ABCMeta):
     self.horizontal_order: int = 1
     self.barycentric_value: float = 0.0
     self.workflow_commit: str = None
+    self.split: Optional[int] = None
+    self.splits: Optional[int] = None
 
   def has_parents(self):
     return len(self.parents_names) > 0
@@ -234,6 +236,8 @@ class Job(metaclass=ABCMeta):
     job.err_path_local = pkl_item.err_path_local
     job.out_path_remote = pkl_item.out_path_remote
     job.err_path_remote = pkl_item.err_path_remote
+    job.split = pkl_item.split
+    job.splits = pkl_item.splits
     return job
 
   @classmethod
