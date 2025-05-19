@@ -1,5 +1,15 @@
 # CHANGELOG
 
+### Pre-release v4.1.0b1 - Release date: 2025-05-21
+
+* Added OpenID Connect Authentication support
+* Added Sustainability and sum of simulated years metrics in `/v3/performance/{expid}`
+* Added `workflow_commit` detail in job and experiment level
+* Background tasks can be enabled and change their intervals using a configuration file
+* Added an endpoint to retrieve log recovery logs
+* Populate details background task have been updated to not remove stored fields when they are not reacheable anymore due to `autosubmit archive`
+* User-defined metrics related endpoints have been added
+
 ### Pre-release v4.0.1b7 - Release date: 2025-03-12
 
 * **Important:** Added support to new job list pkl format introduced in Autosubmit version 4.1.12
@@ -30,6 +40,11 @@
 * Now is possible to check the OpenAPI documentation at `/docs` or `/openapi.json`
 * Bearer tokens now are returned with its prefix (e.g. `Bearer <token>`) in all the login endpoints
 * Now you can define the root path in which you are serving the API by setting `AS_API_ROOT_PATH` environment variable (see more about how it works [here](https://fastapi.tiangolo.com/advanced/behind-a-proxy/))
+
+### Release v4.0.1 - Release date: 2025-05-19
+
+* Last version before Flask to FastAPI migration
+* Includes all the changes until v4.0.1b3
 
 ### Pre-release v4.0.1b3 - Release date: 2024-10-01
 
