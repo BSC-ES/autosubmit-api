@@ -326,6 +326,17 @@ async def get_experiment_run_log(
     return result
 
 
+@router.get("/exp-recovery-logs/{expid}", name="Get Experiment Recovery Logs")
+async def get_experiment_recovery_log(
+    expid: str, user_id: Optional[str] = Depends(auth_token_dependency())
+) -> dict:
+    """
+    Finds the last recovery log for each platform and gets the last 150 lines
+    """
+    result = CommonRequests.get_experiment_recovery_log_last_lines(expid)
+    return result
+
+
 @router.get("/joblog/{logfile}", name="Get Job Log from Path")
 async def get_job_log_from_path(
     logfile: str, user_id: Optional[str] = Depends(auth_token_dependency())

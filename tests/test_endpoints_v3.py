@@ -621,3 +621,19 @@ class TestRunningExps:
         resp_obj: dict = response.json()
 
         assert isinstance(resp_obj["experiment"], list)
+
+
+class TestExpRecoveryLogs:
+    endpoint = "/v3/exp-recovery-logs/{expid}"
+
+    def test_search_by_expid(self, fixture_fastapi_client: TestClient):
+        expid = "a1vx"
+        response = fixture_fastapi_client.get(self.endpoint.format(expid=expid))
+        resp_obj: dict = response.json()
+
+        assert resp_obj["error"] is False
+        assert isinstance(resp_obj["platform_recovery_logs"], list)
+        assert len(resp_obj["platform_recovery_logs"]) == 2
+        assert set(
+            [log_info["platform"] for log_info in resp_obj["platform_recovery_logs"]]
+        ) == set(["mn5", "local"])
