@@ -39,6 +39,7 @@ from autosubmit_api.persistance.pkl_reader import PklReader
 from bscearth.utils.config_parser import ConfigParserFactory
 from autosubmit_api.config.basicConfig import APIBasicConfig
 from autosubmit_api.config.confConfigStrategy import confConfigStrategy
+from autosubmit_api.repositories.user_metric import create_user_metric_repository
 
 router = APIRouter()
 
@@ -344,3 +345,56 @@ async def get_run_config(
         "config": _format_config_response(metadata),
     }
     return response
+
+
+@router.get(
+    "/{expid}/runs/{run_id}/user-metrics", name="Get the user-defined metrics of a run"
+)
+async def get_run_user_metrics(
+    expid: str,
+    run_id: int,
+    user_id: Optional[str] = Depends(auth_token_dependency()),
+):
+    """
+    Get the user-defined metrics of a specific run of an experiment
+    """
+    user_metric_repo = create_user_metric_repository(expid)
+
+    metrics = [
+        {
+            "job_name": metric.job_name,
+            "metric_name": metric.metric_name,
+            "metric_value": metric.metric_value,
+            "modified": metric.modified,
+        }
+        for metric in user_metric_repo.get_by_run_id(run_id)
+    ]
+
+    return {"run_id": run_id, "metrics": metrics}
+
+
+@router.get("/{expid}/user-metrics-runs", name="Get the runs with user-defined metrics")
+async def get_runs_with_user_metrics(
+    expid: str,
+    user_id: Optional[str] = Depends(auth_token_dependency()),
+):
+    """
+    Get the runs with user-defined metrics of an experiment
+    """
+    user_metric_repo = create_user_metric_repository(expid)
+
+    try:
+        run_ids = user_metric_repo.get_runs_with_user_metrics()
+    except Exception:
+        run_ids = []
+        logger.error("Error while getting the runs with user-defined metrics")
+        logger.error(traceback.format_exc())
+
+    return {
+        "runs": [
+            {
+                "run_id": run_id,
+            }
+            for run_id in run_ids
+        ]
+    }

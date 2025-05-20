@@ -1,6 +1,7 @@
 from datetime import datetime, timedelta, timezone
 from http import HTTPStatus
 import random
+from typing import Any
 from uuid import uuid4
 from fastapi.testclient import TestClient
 import jwt
@@ -351,3 +352,71 @@ class TestExperimentRunConfig:
         for key in ALLOWED_CONFIG_KEYS:
             assert key in resp_obj["config"]
             assert isinstance(resp_obj["config"][key], dict)
+
+
+class TestUserMetrics:
+    endpoint = "/v4/experiments/{expid}/runs/{run_id}/user-metrics"
+
+    @pytest.mark.parametrize(
+        "expid, run_id, metrics_len, first_metric",
+        [
+            (
+                "a6zj",
+                1,
+                1,
+                {
+                    "job_name": "a6zj_LOCAL_SETUP",
+                    "metric_name": "metric1",
+                    "metric_value": "123.45",
+                },
+            ),
+            (
+                "a6zj",
+                3,
+                2,
+                {
+                    "job_name": "a6zj_LOCAL_SETUP",
+                    "metric_name": "metric1",
+                    "metric_value": "234.56",
+                },
+            ),
+        ],
+    )
+    def test_user_metrics(
+        self,
+        fixture_fastapi_client: TestClient,
+        expid: str,
+        run_id: int,
+        metrics_len: int,
+        first_metric: dict[str, Any],
+    ):
+        response = fixture_fastapi_client.get(
+            self.endpoint.format(expid=expid, run_id=run_id)
+        )
+        resp_obj: dict = response.json()
+
+        assert isinstance(resp_obj, dict)
+        assert resp_obj["run_id"] == run_id
+
+        assert isinstance(resp_obj["metrics"], list)
+        assert len(resp_obj["metrics"]) == metrics_len
+        assert isinstance(resp_obj["metrics"][0], dict)
+        assert resp_obj["metrics"][0]["job_name"] == first_metric["job_name"]
+        assert resp_obj["metrics"][0]["metric_name"] == first_metric["metric_name"]
+        assert resp_obj["metrics"][0]["metric_value"] == first_metric["metric_value"]
+
+
+class TestUserMetricsRuns:
+    endpoint = "/v4/experiments/{expid}/user-metrics-runs"
+
+    def test_user_metrics_runs(self, fixture_fastapi_client: TestClient):
+        expid = "a6zj"
+        response = fixture_fastapi_client.get(
+            self.endpoint.format(expid=expid),
+        )
+        resp_obj: dict = response.json()
+
+        assert isinstance(resp_obj, dict)
+        assert isinstance(resp_obj["runs"], list)
+        assert len(resp_obj["runs"]) == 2
+        assert [obj["run_id"] for obj in resp_obj["runs"]] == [3, 1]
