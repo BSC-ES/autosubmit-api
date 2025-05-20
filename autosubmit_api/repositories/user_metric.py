@@ -73,7 +73,7 @@ class UserMetricSQLRepository(UserMetricRepository):
         with self.engine.connect() as conn:
             query = select(self.table.c.run_id).distinct()
             result = conn.execute(query).all()
-            return [row.run_id for row in result]
+            return sorted([row.run_id for row in result], reverse=True)
 
 
 def create_user_metric_repository(expid: str) -> UserMetricRepository:

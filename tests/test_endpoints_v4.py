@@ -419,4 +419,4 @@ class TestUserMetricsRuns:
         assert isinstance(resp_obj, dict)
         assert isinstance(resp_obj["runs"], list)
         assert len(resp_obj["runs"]) == 2
-        assert set([obj["run_id"] for obj in resp_obj["runs"]]) == set([1, 3])
+        assert [obj["run_id"] for obj in resp_obj["runs"]] == [3, 1]
