@@ -383,7 +383,12 @@ async def get_runs_with_user_metrics(
     """
     user_metric_repo = create_user_metric_repository(expid)
 
-    run_ids = user_metric_repo.get_runs_with_user_metrics()
+    try:
+        run_ids = user_metric_repo.get_runs_with_user_metrics()
+    except Exception:
+        run_ids = []
+        logger.error("Error while getting the runs with user-defined metrics")
+        logger.error(traceback.format_exc())
 
     return {
         "runs": [
