@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import List
 from pydantic import BaseModel
-from sqlalchemy import Engine, Table
+from sqlalchemy import Engine, Table, select
 from autosubmit_api.database import tables
 from autosubmit_api.database.common import (
     create_sqlite_db_engine,
@@ -26,6 +26,14 @@ class UserMetricRepository(ABC):
 
         :param run_id: The run id
         :return user_metrics: The list of user metrics
+        """
+
+    @abstractmethod
+    def get_runs_with_user_metrics(self) -> List[int]:
+        """
+        Get the list of run ids with user metrics
+
+        :return run_ids: The list of run ids
         """
 
 
@@ -55,6 +63,17 @@ class UserMetricSQLRepository(UserMetricRepository):
                 )
                 for row in result
             ]
+
+    def get_runs_with_user_metrics(self) -> List[int]:
+        """
+        Get the list of run ids with user metrics
+
+        :return run_ids: The list of run ids
+        """
+        with self.engine.connect() as conn:
+            query = select(self.table.c.run_id).distinct()
+            result = conn.execute(query).all()
+            return [row.run_id for row in result]
 
 
 def create_user_metric_repository(expid: str) -> UserMetricRepository:

@@ -371,3 +371,25 @@ async def get_run_user_metrics(
     ]
 
     return {"run_id": run_id, "metrics": metrics}
+
+
+@router.get("/{expid}/user-metrics-runs", name="Get the runs with user-defined metrics")
+async def get_runs_with_user_metrics(
+    expid: str,
+    user_id: Optional[str] = Depends(auth_token_dependency()),
+):
+    """
+    Get the runs with user-defined metrics of an experiment
+    """
+    user_metric_repo = create_user_metric_repository(expid)
+
+    run_ids = user_metric_repo.get_runs_with_user_metrics()
+
+    return {
+        "runs": [
+            {
+                "run_id": run_id,
+            }
+            for run_id in run_ids
+        ]
+    }
