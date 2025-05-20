@@ -44,7 +44,7 @@ class ExperimentStatusRepository(ABC):
         """
         Gets list of running experiments expids
         """
-    
+
     @abstractmethod
     def delete_all(self) -> int:
         """
@@ -99,18 +99,17 @@ class ExperimentStatusSQLRepository(ExperimentStatusRepository):
                     conn.execute(del_stmnt)
                     result = conn.execute(ins_stmnt)
                     conn.commit()
+                    return result.rowcount
                 except Exception as exc:
                     conn.rollback()
                     raise exc
-
-        return result.rowcount
 
     def get_only_running_expids(self):
         with self.engine.connect() as conn:
             statement = self.table.select().where(self.table.c.status == "RUNNING")
             result = conn.execute(statement).all()
         return [row.name for row in result]
-    
+
     def delete_all(self):
         with self.engine.connect() as conn:
             statement = delete(self.table)

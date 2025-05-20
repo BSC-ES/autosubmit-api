@@ -1,4 +1,4 @@
-from autosubmit_api.bgtasks.bgtask import PopulateDetailsDB
+from autosubmit_api.bgtasks.tasks.details_updater import PopulateDetailsDB
 
 def main():
   PopulateDetailsDB.run()
