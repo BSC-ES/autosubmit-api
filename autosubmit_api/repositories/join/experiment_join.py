@@ -1,6 +1,9 @@
 from abc import ABC, abstractmethod
-from typing import Dict, List, Optional, Tuple, Any
-from sqlalchemy import Column, Select, or_, select
+from typing import Any, Dict, List, Optional, Tuple
+
+from sqlalchemy import Column, Select, create_engine, or_, select
+
+from autosubmit_api.config.basicConfig import APIBasicConfig
 from autosubmit_api.database import tables
 from autosubmit_api.database.common import (
     create_main_db_conn,
@@ -36,19 +39,19 @@ def generate_query_listexp_extended(
 
     statement = (
         select(
-            tables.experiment_table,
-            tables.details_table,
-            tables.experiment_status_table.c.exp_id,
-            tables.experiment_status_table.c.status,
+            tables.ExperimentTable,
+            tables.DetailsTable,
+            tables.ExperimentStatusTable.c.exp_id,
+            tables.ExperimentStatusTable.c.status,
         )
         .join(
-            tables.details_table,
-            tables.experiment_table.c.id == tables.details_table.c.exp_id,
+            tables.DetailsTable,
+            tables.ExperimentTable.c.id == tables.DetailsTable.c.exp_id,
             isouter=True,
         )
         .join(
-            tables.experiment_status_table,
-            tables.experiment_table.c.id == tables.experiment_status_table.c.exp_id,
+            tables.ExperimentStatusTable,
+            tables.ExperimentTable.c.id == tables.ExperimentStatusTable.c.exp_id,
             isouter=True,
         )
     )
@@ -59,43 +62,43 @@ def generate_query_listexp_extended(
     if query:
         filter_stmts.append(
             or_(
-                tables.experiment_table.c.name.like(f"%{query}%"),
-                tables.experiment_table.c.description.like(f"%{query}%"),
-                tables.details_table.c.user.like(f"%{query}%"),
+                tables.ExperimentTable.c.name.like(f"%{query}%"),
+                tables.ExperimentTable.c.description.like(f"%{query}%"),
+                tables.DetailsTable.c.user.like(f"%{query}%"),
             )
         )
 
     if only_active:
-        filter_stmts.append(tables.experiment_status_table.c.status == "RUNNING")
+        filter_stmts.append(tables.ExperimentStatusTable.c.status == "RUNNING")
 
     if owner:
-        filter_stmts.append(wildcard_search(owner, tables.details_table.c.user))
+        filter_stmts.append(wildcard_search(owner, tables.DetailsTable.c.user))
 
     if exp_type == "test":
-        filter_stmts.append(tables.experiment_table.c.name.like("t%"))
+        filter_stmts.append(tables.ExperimentTable.c.name.like("t%"))
     elif exp_type == "operational":
-        filter_stmts.append(tables.experiment_table.c.name.like("o%"))
+        filter_stmts.append(tables.ExperimentTable.c.name.like("o%"))
     elif exp_type == "experiment":
-        filter_stmts.append(tables.experiment_table.c.name.not_like("t%"))
-        filter_stmts.append(tables.experiment_table.c.name.not_like("o%"))
+        filter_stmts.append(tables.ExperimentTable.c.name.not_like("t%"))
+        filter_stmts.append(tables.ExperimentTable.c.name.not_like("o%"))
 
     if autosubmit_version:
         filter_stmts.append(
             wildcard_search(
-                autosubmit_version, tables.experiment_table.c.autosubmit_version
+                autosubmit_version, tables.ExperimentTable.c.autosubmit_version
             )
         )
 
     if hpc:
-        filter_stmts.append(wildcard_search(hpc, tables.details_table.c.hpc))
+        filter_stmts.append(wildcard_search(hpc, tables.DetailsTable.c.hpc))
 
     statement = statement.where(*filter_stmts)
 
     # Order by
     ORDER_OPTIONS = {
-        "expid": tables.experiment_table.c.name,
-        "created": tables.details_table.c.created,
-        "description": tables.experiment_table.c.description,
+        "expid": tables.ExperimentTable.c.name,
+        "created": tables.DetailsTable.c.created,
+        "description": tables.ExperimentTable.c.description,
     }
     order_col: Optional[Column[Any]] = None
     if order_by:
@@ -138,6 +141,10 @@ class ExperimentJoinRepository(ABC):
 
 class ExperimentJoinSQLRepository(ExperimentJoinRepository):
     def _get_connection(self):
+        if APIBasicConfig.DATABASE_BACKEND == "postgres":
+            # PostgreSQL
+            return create_engine(APIBasicConfig.DATABASE_CONN_URL).connect()
+        # SQLite
         return create_main_db_conn(read_only=True)
 
     def search(
@@ -173,9 +180,9 @@ class ExperimentJoinSQLRepository(ExperimentJoinRepository):
 
     def drop_status_from_deleted_experiments(self) -> int:
         with self._get_connection() as conn:
-            del_stmnt = tables.experiment_status_table.delete().where(
-                tables.experiment_status_table.c.exp_id.not_in(
-                    select(tables.experiment_table.c.id)
+            del_stmnt = tables.ExperimentStatusTable.delete().where(
+                tables.ExperimentStatusTable.c.exp_id.not_in(
+                    select(tables.ExperimentTable.c.id)
                 )
             )
             result = conn.execute(del_stmnt)
