@@ -1,14 +1,13 @@
-import os
 import time
 from typing import Dict, List
 
 from autosubmit_api.bgtasks.bgtask import BackgroundTaskTemplate
 from autosubmit_api.experiment.common_requests import _is_exp_running
 from autosubmit_api.history.database_managers.database_models import RunningStatus
-from autosubmit_api.persistance.experiment import ExperimentPaths
+from autosubmit_api.persistance.pkl_reader import PklReader
 from autosubmit_api.repositories.experiment import (
-    create_experiment_repository,
     ExperimentModel,
+    create_experiment_repository,
 )
 from autosubmit_api.repositories.experiment_status import (
     create_experiment_status_repository,
@@ -62,8 +61,8 @@ class StatusUpdater(BackgroundTaskTemplate):
 
         is_running = False
         try:
-            pkl_path = ExperimentPaths(expid).job_list_pkl
-            pkl_age = int(time.time()) - int(os.stat(pkl_path).st_mtime)
+            pkl_reader = PklReader(expid)
+            pkl_age = int(time.time()) - pkl_reader.get_modified_time()
 
             if pkl_age < MAX_PKL_AGE:  # First running check
                 is_running = True

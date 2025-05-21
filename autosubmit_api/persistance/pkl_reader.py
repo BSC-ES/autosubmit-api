@@ -1,10 +1,14 @@
 import os
-from typing import List, Union, Dict
 import pickle
+from io import BytesIO
+from typing import Dict, List, Union
+
 from networkx import DiGraph
+
 from autosubmit_api.config.basicConfig import APIBasicConfig
 from autosubmit_api.database.models import PklJobModel
 from autosubmit_api.persistance.experiment import ExperimentPaths
+from autosubmit_api.repositories.job_pkl import create_job_pkl_repository
 
 
 class CustomAutosubmitUnpickler(pickle.Unpickler):
@@ -20,12 +24,22 @@ class PklReader:
         self.expid = expid
         APIBasicConfig.read()
         self.pkl_path = ExperimentPaths(expid).job_list_pkl
+        self.pkl_repo = None
+        if APIBasicConfig.DATABASE_BACKEND == "postgres":
+            self.pkl_repo = create_job_pkl_repository(self.expid)
 
     def read_pkl(self) -> Union[List, DiGraph, Dict]:
+        if APIBasicConfig.DATABASE_BACKEND == "postgres":
+            pkl_bin = self.pkl_repo.get_pkl()
+            return pickle.load(BytesIO(pkl_bin), encoding="latin1")
+
         with open(self.pkl_path, "rb") as f:
             return CustomAutosubmitUnpickler(f, encoding="latin1").load()
 
     def get_modified_time(self) -> int:
+        if APIBasicConfig.DATABASE_BACKEND == "postgres":
+            return self.pkl_repo.get_modified_timestamp()
+
         return int(os.stat(self.pkl_path).st_mtime)
 
     def parse_job_list(self) -> List[PklJobModel]:

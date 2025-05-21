@@ -1,7 +1,11 @@
 from abc import ABC, abstractmethod
 from typing import List, Optional
+
 from pydantic import BaseModel
-from sqlalchemy import Engine, Table
+from sqlalchemy import Engine, Table, create_engine
+from sqlalchemy.schema import CreateTable
+
+from autosubmit_api.config.basicConfig import APIBasicConfig
 from autosubmit_api.database import tables
 from autosubmit_api.database.common import create_autosubmit_db_engine
 
@@ -40,6 +44,10 @@ class ExperimentSQLRepository(ExperimentRepository):
         self.engine = engine
         self.table = table
 
+        with self.engine.connect() as conn:
+            conn.execute(CreateTable(self.table, if_not_exists=True))
+            conn.commit()
+
     def get_all(self):
         with self.engine.connect() as conn:
             statement = self.table.select()
@@ -69,5 +77,11 @@ class ExperimentSQLRepository(ExperimentRepository):
 
 
 def create_experiment_repository() -> ExperimentRepository:
-    engine = create_autosubmit_db_engine()
-    return ExperimentSQLRepository(engine, tables.experiment_table)
+    if APIBasicConfig.DATABASE_BACKEND == "postgres":
+        # PostgreSQL
+        _engine = create_engine(APIBasicConfig.DATABASE_CONN_URL)
+    else:
+        # SQLite
+        _engine = create_autosubmit_db_engine()
+    _table = tables.ExperimentTable
+    return ExperimentSQLRepository(_engine, _table)

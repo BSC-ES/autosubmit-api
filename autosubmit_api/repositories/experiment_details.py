@@ -1,7 +1,11 @@
 from abc import ABC, abstractmethod
-from typing import Dict, List, Any
+from typing import Any, Dict, List
+
 from pydantic import BaseModel
-from sqlalchemy import Engine, Table
+from sqlalchemy import Engine, Table, create_engine
+from sqlalchemy.schema import CreateTable
+
+from autosubmit_api.config.basicConfig import APIBasicConfig
 from autosubmit_api.database import tables
 from autosubmit_api.database.common import create_autosubmit_db_engine
 
@@ -16,6 +20,12 @@ class ExperimentDetailsModel(BaseModel):
 
 
 class ExperimentDetailsRepository(ABC):
+    @abstractmethod
+    def get_all(self) -> List[ExperimentDetailsModel]:
+        """
+        Select all rows from the details table.
+        """
+
     @abstractmethod
     def insert_many(self, values: List[Dict[str, Any]]) -> int:
         """
@@ -59,6 +69,26 @@ class ExperimentDetailsSQLRepository(ExperimentDetailsRepository):
     def __init__(self, engine: Engine, table: Table):
         self.engine = engine
         self.table = table
+
+        with self.engine.connect() as conn:
+            conn.execute(CreateTable(self.table, if_not_exists=True))
+            conn.commit()
+
+    def get_all(self) -> List[ExperimentDetailsModel]:
+        with self.engine.connect() as conn:
+            statement = self.table.select()
+            result = conn.execute(statement).all()
+        return [
+            ExperimentDetailsModel(
+                exp_id=row.exp_id,
+                user=row.user,
+                created=row.created,
+                model=row.model,
+                branch=row.branch,
+                hpc=row.hpc,
+            )
+            for row in result
+        ]
 
     def insert_many(self, values: List[Dict[str, Any]]) -> int:
         with self.engine.connect() as conn:
@@ -112,5 +142,10 @@ class ExperimentDetailsSQLRepository(ExperimentDetailsRepository):
 
 
 def create_experiment_details_repository() -> ExperimentDetailsRepository:
-    engine = create_autosubmit_db_engine()
-    return ExperimentDetailsSQLRepository(engine, tables.details_table)
+    if APIBasicConfig.DATABASE_BACKEND == "postgres":
+        # PostgreSQL
+        _engine = create_engine(APIBasicConfig.DATABASE_CONN_URL)
+    else:
+        _engine = create_autosubmit_db_engine()
+    _table = tables.DetailsTable
+    return ExperimentDetailsSQLRepository(_engine, _table)

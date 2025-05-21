@@ -1,9 +1,12 @@
 from abc import ABC, abstractmethod
 from datetime import datetime
 from typing import Any, List
+
 from pydantic import BaseModel
-from sqlalchemy import Engine, Table, delete, insert
+from sqlalchemy import Engine, Table, create_engine, delete, insert
 from sqlalchemy.schema import CreateTable
+
+from autosubmit_api.config.basicConfig import APIBasicConfig
 from autosubmit_api.database import tables
 from autosubmit_api.database.common import create_as_times_db_engine
 
@@ -119,5 +122,11 @@ class ExperimentStatusSQLRepository(ExperimentStatusRepository):
 
 
 def create_experiment_status_repository() -> ExperimentStatusRepository:
-    engine = create_as_times_db_engine()
-    return ExperimentStatusSQLRepository(engine, tables.experiment_status_table)
+    if APIBasicConfig.DATABASE_BACKEND == "postgres":
+        # PostgreSQL
+        _engine = create_engine(APIBasicConfig.DATABASE_CONN_URL)
+    else:
+        # SQLite
+        _engine = create_as_times_db_engine()
+    _table = tables.ExperimentStatusTable
+    return ExperimentStatusSQLRepository(_engine, _table)

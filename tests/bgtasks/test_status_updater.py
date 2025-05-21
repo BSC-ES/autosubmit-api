@@ -1,5 +1,4 @@
 from autosubmit_api.bgtasks.tasks.status_updater import StatusUpdater
-from autosubmit_api.database import prepare_db
 from autosubmit_api.history.database_managers.database_models import RunningStatus
 from autosubmit_api.repositories.experiment import create_experiment_repository
 from autosubmit_api.repositories.experiment_status import create_experiment_status_repository
@@ -7,9 +6,6 @@ from autosubmit_api.repositories.experiment_status import create_experiment_stat
 
 class TestStatusUpdater:
     def test_same_tables(self, fixture_mock_basic_config):
-        # Prepare the repository
-        prepare_db()
-
         experiment_repo = create_experiment_repository()
         experiment_status_repo = create_experiment_status_repository()
 
