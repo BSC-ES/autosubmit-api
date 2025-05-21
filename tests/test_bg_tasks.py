@@ -13,12 +13,12 @@ class TestDetailsPopulate:
         details_repo.delete_all()
 
         with create_autosubmit_db_engine().connect() as conn:
-            rows = conn.execute(tables.details_table.select()).all()
+            rows = conn.execute(tables.DetailsTable.select()).all()
             assert len(rows) == 0
 
             count = PopulateDetailsDB.procedure()
 
-            rows = conn.execute(tables.details_table.select()).all()
+            rows = conn.execute(tables.DetailsTable.select()).all()
 
         assert len(rows) > 0
         assert len(rows) == count

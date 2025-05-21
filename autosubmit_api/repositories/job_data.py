@@ -1,8 +1,11 @@
 from abc import ABC, abstractmethod
 from typing import Any, List, Union
+
 from pydantic import BaseModel
-from sqlalchemy import Engine, Table, inspect, or_, Index
+from sqlalchemy import Engine, Index, Table, create_engine, inspect, or_
 from sqlalchemy.schema import CreateTable
+
+from autosubmit_api.config.basicConfig import APIBasicConfig
 from autosubmit_api.database import tables
 from autosubmit_api.database.common import create_sqlite_db_engine
 from autosubmit_api.persistance.experiment import ExperimentPaths
@@ -219,7 +222,16 @@ class ExperimentJobDataSQLRepository(ExperimentJobDataRepository):
 
 
 def create_experiment_job_data_repository(expid: str):
-    engine = create_sqlite_db_engine(ExperimentPaths(expid).job_data_db)
-    return ExperimentJobDataSQLRepository(
-        expid, engine, [tables.JobDataTableV18, tables.JobDataTable]
-    )
+    if APIBasicConfig.DATABASE_BACKEND == "postgres":
+        _engine = create_engine(APIBasicConfig.DATABASE_CONN_URL)
+        _tables = [
+            tables.table_change_schema(expid, tables.JobDataTableV18),
+            tables.table_change_schema(expid, tables.JobDataTable),
+        ]
+    else:
+        _engine = create_sqlite_db_engine(ExperimentPaths(expid).job_data_db)
+        _tables = [
+            tables.JobDataTableV18,
+            tables.JobDataTable,
+        ]
+    return ExperimentJobDataSQLRepository(expid, _engine, _tables)
