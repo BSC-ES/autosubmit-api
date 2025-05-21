@@ -1,7 +1,10 @@
 from abc import ABC, abstractmethod
-from typing import List, Any
+from typing import Any, List
+
 from pydantic import BaseModel
-from sqlalchemy import Engine, Table
+from sqlalchemy import Engine, Table, create_engine
+
+from autosubmit_api.config.basicConfig import APIBasicConfig
 from autosubmit_api.database import tables
 from autosubmit_api.database.common import (
     create_sqlite_db_engine,
@@ -48,8 +51,18 @@ def create_job_packages_repository(expid: str, wrapper=False) -> JobPackagesRepo
 
     :param wrapper: Whether to use the alternative wrapper job packages table.
     """
-    engine = create_sqlite_db_engine(
-        ExperimentPaths(expid).job_packages_db, read_only=True
-    )
-    table = tables.wrapper_job_package_table if wrapper else tables.job_package_table
-    return JobPackagesSQLRepository(engine, table)
+    if APIBasicConfig.DATABASE_BACKEND == "postgres":
+        # Postgres
+        _engine = create_engine(APIBasicConfig.DATABASE_CONN_URL)
+        _table = (
+            tables.table_change_schema(expid, tables.WrapperJobPackageTable)
+            if wrapper
+            else tables.table_change_schema(expid, tables.JobPackageTable)
+        )
+    else:
+        # SQLite
+        _engine = create_sqlite_db_engine(
+            ExperimentPaths(expid).job_packages_db, read_only=True
+        )
+        _table = tables.WrapperJobPackageTable if wrapper else tables.JobPackageTable
+    return JobPackagesSQLRepository(_engine, _table)
