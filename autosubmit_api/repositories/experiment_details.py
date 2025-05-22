@@ -3,7 +3,7 @@ from typing import Any, Dict, List
 
 from pydantic import BaseModel
 from sqlalchemy import Engine, Table, create_engine
-from sqlalchemy.schema import CreateTable
+from sqlalchemy.schema import CreateSchema, CreateTable
 
 from autosubmit_api.config.basicConfig import APIBasicConfig
 from autosubmit_api.database import tables
@@ -20,6 +20,12 @@ class ExperimentDetailsModel(BaseModel):
 
 
 class ExperimentDetailsRepository(ABC):
+    @abstractmethod
+    def get_all(self) -> List[ExperimentDetailsModel]:
+        """
+        Select all rows from the details table.
+        """
+
     @abstractmethod
     def insert_many(self, values: List[Dict[str, Any]]) -> int:
         """
@@ -65,8 +71,26 @@ class ExperimentDetailsSQLRepository(ExperimentDetailsRepository):
         self.table = table
 
         with self.engine.connect() as conn:
+            if self.table.schema:
+                conn.execute(CreateSchema(self.table.schema, if_not_exists=True))
             conn.execute(CreateTable(self.table, if_not_exists=True))
             conn.commit()
+
+    def get_all(self) -> List[ExperimentDetailsModel]:
+        with self.engine.connect() as conn:
+            statement = self.table.select()
+            result = conn.execute(statement).all()
+        return [
+            ExperimentDetailsModel(
+                exp_id=row.exp_id,
+                user=row.user,
+                created=row.created,
+                model=row.model,
+                branch=row.branch,
+                hpc=row.hpc,
+            )
+            for row in result
+        ]
 
     def insert_many(self, values: List[Dict[str, Any]]) -> int:
         with self.engine.connect() as conn:

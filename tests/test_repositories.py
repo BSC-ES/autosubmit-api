@@ -213,7 +213,9 @@ class TestExperimentJobDataRepository:
 
         # Check if index exists and is correct
         inspector = inspect(exp_run_repository.engine)
-        indexes = inspector.get_indexes(exp_run_repository.table.name)
+        indexes = inspector.get_indexes(
+            exp_run_repository.table.name, schema=exp_run_repository.table.schema
+        )
         assert len(indexes) == 1
         assert indexes[0]["name"] == "ID_JOB_NAME"
         assert indexes[0]["column_names"] == ["job_name"]

@@ -8,6 +8,7 @@ from typing import Tuple
 import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import Engine, create_engine
+from testcontainers.postgres import PostgresContainer
 
 from autosubmit_api import config
 from autosubmit_api.config.basicConfig import APIBasicConfig
@@ -33,6 +34,7 @@ def fixture_disable_protection(monkeypatch: pytest.MonkeyPatch):
 @pytest.fixture(
     params=[
         pytest.param("fixture_sqlite", marks=pytest.mark.sqlite),
+        pytest.param("fixture_postgres", marks=pytest.mark.postgres),
     ]
 )
 def fixture_mock_basic_config(request: pytest.FixtureRequest):
@@ -122,12 +124,40 @@ def fixture_temp_dir_copy_exclude_db():
 
 
 @pytest.fixture(scope="session")
-def fixture_gen_rc_pg(fixture_temp_dir_copy_exclude_db: str):
+def fixture_setup_pg_db():
+    """
+    Fixture that sets up a PostgreSQL database container for testing purposes.
+    """
+    IMAGE = "postgres:17"
+    _PG_PORT = 25432
+    _PG_USER = "postgres"
+    _PG_PASSWORD = "mysecretpassword"
+    _PG_DB = "autosubmit_test"
+    with PostgresContainer(
+        image=IMAGE,
+        port=5432,
+        username=_PG_USER,
+        password=_PG_PASSWORD,
+        dbname=_PG_DB,
+    ).with_bind_ports(5432, _PG_PORT) as postgres:
+        conn_url = f"postgresql://{_PG_USER}:{_PG_PASSWORD}@{postgres.get_container_host_ip()}:{_PG_PORT}/{_PG_DB}"
+
+        engine = create_engine(conn_url)
+
+        with engine.connect() as conn:
+            utils.setup_pg_db(conn)
+            conn.commit()
+
+        yield conn_url
+
+
+@pytest.fixture(scope="session")
+def fixture_gen_rc_pg(fixture_temp_dir_copy_exclude_db: str, fixture_setup_pg_db: str):
     """
     Fixture that generates a .autosubmitrc file in the temporary directory
     """
     rc_file = os.path.join(fixture_temp_dir_copy_exclude_db, ".autosubmitrc")
-    conn_url = os.environ.get("PYTEST_DATABASE_CONN_URL", DEFAULT_DATABASE_CONN_URL)
+    conn_url = fixture_setup_pg_db
     with open(rc_file, "w") as f:
         f.write(
             "\n".join(
@@ -151,41 +181,26 @@ def fixture_gen_rc_pg(fixture_temp_dir_copy_exclude_db: str):
                 ]
             )
         )
-    yield fixture_temp_dir_copy_exclude_db
+    yield (fixture_temp_dir_copy_exclude_db, conn_url)
 
 
 @pytest.fixture(scope="session")
-def fixture_pg_db(fixture_gen_rc_pg: str):
-    """
-    This fixture cleans and setup a PostgreSQL database for testing purposes.
-    """
-    conn_url = os.environ.get("PYTEST_DATABASE_CONN_URL", DEFAULT_DATABASE_CONN_URL)
-    engine = create_engine(conn_url)
-
-    with engine.connect() as conn:
-        utils.setup_pg_db(conn)
-        conn.commit()
-
-    yield (fixture_gen_rc_pg, engine)
-
-    # with engine.connect() as conn:
-    #     utils.setup_pg_db(conn)
-    #     conn.commit()
-
-
-@pytest.fixture(scope="session")
-def fixture_pg_db_copy_all(fixture_pg_db: Tuple[str, Engine]):
+def fixture_pg_db_copy_all(fixture_gen_rc_pg: Tuple[str, str]):
     """
     This fixture recursively search all the .db files in the FAKE_EXP_DIR and copies them to the test database
     """
-    engine = fixture_pg_db[1]
+    engine = create_engine(fixture_gen_rc_pg[1])
     # Get .db files absolute paths from the FAKE_EXP_DIR recursively
     all_files = []
+    all_pkl_files = []
     for root, dirs, files in os.walk(FAKE_EXP_DIR):
         for filepath in files:
             if filepath.endswith(".db"):
                 all_files.append(os.path.join(root, filepath))
+            if filepath.endswith(".pkl"):
+                all_pkl_files.append(os.path.join(root, filepath))
 
+    # Copy all the .db files to the test database
     for filepath in all_files:
         # Infer which type of DB is this
         if "metadata/structures" in filepath:
@@ -200,12 +215,17 @@ def fixture_pg_db_copy_all(fixture_pg_db: Tuple[str, Engine]):
             utils.copy_as_times_db(filepath, engine)
         elif "pkl/job_packages" in filepath:
             utils.copy_job_packages_db(filepath, engine)
+        elif "tmp/metrics_" in filepath:
+            utils.copy_user_metrics_db(filepath, engine)
 
-    yield fixture_pg_db
+    # Copy all the .pkl files to the test database
+    utils.copy_pkls(all_pkl_files, engine)
+
+    yield fixture_gen_rc_pg
 
 
 @pytest.fixture
-def fixture_pg(
+def fixture_postgres(
     fixture_pg_db_copy_all: Tuple[str, Engine], monkeypatch: pytest.MonkeyPatch
 ):
     """
