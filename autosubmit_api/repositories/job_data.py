@@ -91,7 +91,7 @@ class ExperimentJobDataSQLRepository(ExperimentJobDataRepository):
     def __init__(self, expid: str, engine: Engine, valid_tables: List[Table]):
         self.expid = expid
         self.engine = engine
-        self.table = self._check_table_schema(valid_tables)
+        self.table = tables.check_table_schema(self.engine, valid_tables)
         if self.table is None:
             if len(valid_tables) == 0:
                 raise ValueError("No valid tables provided.")
@@ -223,7 +223,9 @@ def create_experiment_job_data_repository(expid: str):
             tables.table_change_schema(expid, tables.JobDataTable),
         ]
     else:
-        _engine = create_sqlite_db_engine(ExperimentPaths(expid).job_data_db, read_only=True)
+        _engine = create_sqlite_db_engine(
+            ExperimentPaths(expid).job_data_db, read_only=True
+        )
         _tables = [
             tables.JobDataTableV18,
             tables.JobDataTable,

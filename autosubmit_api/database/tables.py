@@ -1,7 +1,8 @@
-from typing import Optional, Type, Union
+from typing import List, Optional, Type, Union
 
 from sqlalchemy import (
     Column,
+    Engine,
     Float,
     Integer,
     LargeBinary,
@@ -10,6 +11,7 @@ from sqlalchemy import (
     Table,
     Text,
     UniqueConstraint,
+    inspect,
 )
 from sqlalchemy.orm import DeclarativeBase
 
@@ -44,6 +46,31 @@ def table_change_schema(
 
     metadata = MetaData(schema=schema)
     return table_copy(_source_table, metadata)
+
+
+def check_table_schema(engine: Engine, valid_tables: List[Table]) -> Union[Table, None]:
+    """
+    Check if one of the valid table schemas matches the current table schema.
+    Returns the first matching table schema or None if no match is found.
+    ORDER MATTERS!!! Table with more columns (more restrictive) should be first
+    """
+    for valid_table in valid_tables:
+        try:
+            # Get the current columns of the table
+            current_columns = inspect(engine).get_columns(
+                valid_table.name, valid_table.schema
+            )
+            column_names = [column["name"] for column in current_columns]
+
+            # Get the columns of the valid table
+            valid_columns = valid_table.columns.keys()
+            # Check if all the valid table columns are present in the current table
+            if all(column in column_names for column in valid_columns):
+                return valid_table
+        except Exception as exc:
+            print(f"Error inspecting table {valid_table.name}: {exc}")
+            continue
+    return None
 
 
 metadata_obj = MetaData()

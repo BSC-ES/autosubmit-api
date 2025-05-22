@@ -3,7 +3,7 @@ from typing import List, Optional
 
 from pydantic import BaseModel
 from sqlalchemy import Engine, Table, create_engine
-from sqlalchemy.schema import CreateTable
+from sqlalchemy.schema import CreateSchema, CreateTable
 
 from autosubmit_api.config.basicConfig import APIBasicConfig
 from autosubmit_api.database import tables
@@ -45,6 +45,8 @@ class ExperimentSQLRepository(ExperimentRepository):
         self.table = table
 
         with self.engine.connect() as conn:
+            if self.table.schema:
+                conn.execute(CreateSchema(self.table.schema, if_not_exists=True))
             conn.execute(CreateTable(self.table, if_not_exists=True))
             conn.commit()
 

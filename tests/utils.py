@@ -1,4 +1,6 @@
+import os
 import re
+from datetime import datetime
 from http import HTTPStatus
 from typing import List
 
@@ -87,7 +89,10 @@ def copy_job_data_db(filepath: str, engine: Engine):
     expid = _get_expid_from_filename(r"job_data_(\w+)\.db", filepath)
     source_as_db = create_engine(f"sqlite:///{filepath}")
     with source_as_db.connect() as source_conn, engine.connect() as conn:
-        _copy_table_data(source_conn, conn, expid, tables.JobDataTable)
+        job_data_table = tables.check_table_schema(
+            source_as_db, [tables.JobDataTableV18, tables.JobDataTable]
+        )
+        _copy_table_data(source_conn, conn, expid, job_data_table)
         _copy_table_data(source_conn, conn, expid, tables.ExperimentRunTable)
         conn.commit()
 
@@ -127,4 +132,48 @@ def copy_job_packages_db(filepath: str, engine: Engine):
     with source_as_db.connect() as source_conn, engine.connect() as conn:
         _copy_table_data(source_conn, conn, expid, tables.JobPackageTable)
         _copy_table_data(source_conn, conn, expid, tables.WrapperJobPackageTable)
+        conn.commit()
+
+def copy_user_metrics_db(filepath: str, engine: Engine):
+    expid = _get_expid_from_filename(r"metrics_(\w+)\.db", filepath)
+    source_as_db = create_engine(f"sqlite:///{filepath}")
+    with source_as_db.connect() as source_conn, engine.connect() as conn:
+        _copy_table_data(source_conn, conn, expid, tables.UserMetricTable)
+        conn.commit()
+
+
+def copy_pkls(filepaths: list[str], engine: Engine):
+    """
+    Copy all the .pkl files to the test database
+    """
+    with engine.connect() as conn:
+        # Create the table if it doesn't exist
+        conn.execute(
+            CreateTable(
+                tables.JobPklTable,
+                if_not_exists=True,
+            )
+        )
+
+        for filepath in filepaths:
+            expid = _get_expid_from_filename(r"job_list_(\w+)\.pkl", filepath)
+            with open(filepath, "rb") as f:
+                data = f.read()
+                modified_timestamp = int(os.stat(filepath).st_mtime)
+                modified_datetime = datetime.fromtimestamp(
+                    modified_timestamp
+                ).isoformat()
+
+            # Insert the data into the database
+            conn.execute(
+                insert(tables.JobPklTable),
+                [
+                    {
+                        "expid": expid,
+                        "pkl": data,
+                        "modified": modified_datetime,
+                    }
+                ],
+            )
+
         conn.commit()
