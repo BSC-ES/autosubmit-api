@@ -10,8 +10,8 @@ CHSY = 18968.50
 TJPSY =  727363533
 # Real Joules per simulated year 
 RJPSY = 
-# Actual simulated years per day
-ASYPD = .45
+# Post simulated years per day
+PSYPD = .45
 # Real simulated years per day
 RSYPD = .25
 # Memory bloat

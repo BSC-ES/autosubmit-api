@@ -103,7 +103,7 @@ class ExperimentRun(object):
                 return round((years_per_sim * number_SIM * seconds_per_day) / total_run_time, 2)
         return None
 
-    def getASYPD(self, job_sim_list: List[JobData], job_post_list: List[JobData], run_id_wrapper_code_to_job_dcs: Dict[Tuple[int, int], List[JobData]]) -> float:
+    def getPSYPD(self, job_sim_list: List[JobData], job_post_list: List[JobData], run_id_wrapper_code_to_job_dcs: Dict[Tuple[int, int], List[JobData]]) -> float:
         try:
             SIM_no_outlier_list = []
             if job_sim_list and len(job_sim_list) > 0:
