@@ -1,8 +1,11 @@
 from abc import ABC, abstractmethod
 from typing import List
+
 from pydantic import BaseModel
-from sqlalchemy.schema import CreateTable
-from sqlalchemy import Engine, Table
+from sqlalchemy import Engine, Table, create_engine
+from sqlalchemy.schema import CreateSchema, CreateTable
+
+from autosubmit_api.config.basicConfig import APIBasicConfig
 from autosubmit_api.database import tables
 from autosubmit_api.database.common import (
     create_sqlite_db_engine,
@@ -33,6 +36,8 @@ class ExperimentStructureSQLRepository(ExperimentStructureRepository):
 
         # Initialize the table
         with self.engine.connect() as conn:
+            if self.table.schema:
+                conn.execute(CreateSchema(self.table.schema, if_not_exists=True))
             conn.execute(CreateTable(self.table, if_not_exists=True))
             conn.commit()
 
@@ -46,6 +51,12 @@ class ExperimentStructureSQLRepository(ExperimentStructureRepository):
 
 
 def create_experiment_structure_repository(expid: str) -> ExperimentStructureRepository:
-    engine = create_sqlite_db_engine(ExperimentPaths(expid).structure_db)
-    table = tables.ExperimentStructureTable
-    return ExperimentStructureSQLRepository(expid, engine, table)
+    if APIBasicConfig.DATABASE_BACKEND == "postgres":
+        # Postgres
+        _engine = create_engine(APIBasicConfig.DATABASE_CONN_URL)
+        _table = tables.table_change_schema(expid, tables.ExperimentStructureTable)
+    else:
+        # SQLite
+        _engine = create_sqlite_db_engine(ExperimentPaths(expid).structure_db)
+        _table = tables.ExperimentStructureTable
+    return ExperimentStructureSQLRepository(expid, _engine, _table)
