@@ -23,43 +23,49 @@ class AttachedDatabaseConnBuilder(BaseBuilder):
     def __init__(self) -> None:
         super().__init__(False)
         APIBasicConfig.read()
-        self.engine = create_engine("sqlite://", poolclass=NullPool)
+        self.engine = create_engine("sqlite:///:memory:?uri=true", poolclass=NullPool)
         self._product = self.engine.connect()
 
-    def attach_db(self, path: str, name: str):
+    def attach_db(self, path: str, name: str, read_only: bool = False):
+        path = os.path.abspath(path)
+        if read_only:
+            path = f"file:{path}?mode=ro&uri=true"
         self._product.execute(text(f"attach database '{path}' as {name};"))
 
-    def attach_autosubmit_db(self):
+    def attach_autosubmit_db(self, read_only: bool = False):
         autosubmit_db_path = os.path.abspath(APIBasicConfig.DB_PATH)
-        self.attach_db(autosubmit_db_path, "autosubmit")
+        self.attach_db(autosubmit_db_path, "autosubmit", read_only=read_only)
 
-    def attach_as_times_db(self):
+    def attach_as_times_db(self, read_only: bool = False):
         as_times_db_path = os.path.join(
             APIBasicConfig.DB_DIR, APIBasicConfig.AS_TIMES_DB
         )
-        self.attach_db(as_times_db_path, "as_times")
+        self.attach_db(as_times_db_path, "as_times", read_only=read_only)
 
     @property
     def product(self) -> Connection:
         return super().product
 
 
-def create_main_db_conn() -> Connection:
+def create_main_db_conn(read_only: bool = False) -> Connection:
     """
     Connection with the autosubmit and as_times DDBB.
     """
     builder = AttachedDatabaseConnBuilder()
-    builder.attach_autosubmit_db()
-    builder.attach_as_times_db()
+    builder.attach_autosubmit_db(read_only=read_only)
+    builder.attach_as_times_db(read_only=read_only)
 
     return builder.product
 
 
-def create_sqlite_db_engine(db_path: str) -> Engine:
+def create_sqlite_db_engine(db_path: str, read_only: bool = False) -> Engine:
     """
     Create an engine for a SQLite DDBB.
     """
-    return create_engine(f"sqlite:///{ os.path.abspath(db_path)}", poolclass=NullPool)
+    _db_path = os.path.abspath(db_path)
+    if read_only:
+        _db_path = f"file:{_db_path}?mode=ro&uri=true"
+    return create_engine(f"sqlite:///{_db_path}", poolclass=NullPool)
 
 
 def create_autosubmit_db_engine() -> Engine:

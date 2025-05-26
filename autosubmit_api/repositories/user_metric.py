@@ -83,6 +83,8 @@ def create_user_metric_repository(expid: str) -> UserMetricRepository:
     :param expid: The experiment id
     :return: The user metric repository
     """
-    engine = create_sqlite_db_engine(ExperimentPaths(expid).user_metric_db)
+    engine = create_sqlite_db_engine(
+        ExperimentPaths(expid).user_metric_db, read_only=True
+    )
     table = tables.UserMetricTable
     return UserMetricSQLRepository(engine, table)

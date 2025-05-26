@@ -48,6 +48,8 @@ def create_job_packages_repository(expid: str, wrapper=False) -> JobPackagesRepo
 
     :param wrapper: Whether to use the alternative wrapper job packages table.
     """
-    engine = create_sqlite_db_engine(ExperimentPaths(expid).job_packages_db)
+    engine = create_sqlite_db_engine(
+        ExperimentPaths(expid).job_packages_db, read_only=True
+    )
     table = tables.wrapper_job_package_table if wrapper else tables.job_package_table
     return JobPackagesSQLRepository(engine, table)
