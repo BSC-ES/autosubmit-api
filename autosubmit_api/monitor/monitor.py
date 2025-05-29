@@ -18,12 +18,12 @@
 # along with Autosubmit.  If not, see <http://www.gnu.org/licenses/>.
 
 
-import pydotplus as pydotplus
 import copy
 
+import pydotplus as pydotplus
 
 from autosubmit_api.common.utils import Status
-from bscearth.utils.log import Log
+from autosubmit_api.logger import logger
 
 # from diagram import create_bar_diagram
 
@@ -97,13 +97,13 @@ class Monitor:
         :return: created graph
         :rtype: pydotplus.Dot
         """
-        Log.debug('Creating workflow graph...')
+        logger.debug('Creating workflow graph...')
         graph = pydotplus.Dot(graph_type='digraph')
 
         exp = pydotplus.Subgraph(
             graph_name='Experiment', label=expid, name="maingroup")
         self.nodes_ploted = set()
-        Log.debug('Creating job graph...')
+        logger.debug('Creating job graph...')
 
         jobs_packages_dict = dict()
         if packages is not None and packages:
@@ -186,7 +186,7 @@ class Monitor:
 
         graph.add_subgraph(exp)
 
-        Log.debug('Graph definition finalized')
+        logger.debug('Graph definition finalized')
         return graph
 
     def _add_children(self, job, exp, node_job, groups, hide_groups, job_dictionary=None):
