@@ -1,8 +1,9 @@
 from abc import ABC, abstractmethod
 from typing import Any, List
+
 from pydantic import BaseModel
 from sqlalchemy import Engine, Table
-from sqlalchemy.schema import CreateTable
+
 from autosubmit_api.database import tables
 from autosubmit_api.database.common import create_sqlite_db_engine
 from autosubmit_api.persistance.experiment import ExperimentPaths
@@ -52,10 +53,6 @@ class ExperimentRunSQLRepository(ExperimentRunRepository):
         self.table = table
         self.expid = expid
 
-        with self.engine.connect() as conn:
-            conn.execute(CreateTable(self.table, if_not_exists=True))
-            conn.commit()
-
     def get_all(self):
         with self.engine.connect() as conn:
             statement = self.table.select()
@@ -88,5 +85,5 @@ class ExperimentRunSQLRepository(ExperimentRunRepository):
 
 
 def create_experiment_run_repository(expid: str):
-    engine = create_sqlite_db_engine(ExperimentPaths(expid).job_data_db)
+    engine = create_sqlite_db_engine(ExperimentPaths(expid).job_data_db, read_only=True)
     return ExperimentRunSQLRepository(expid, engine, tables.ExperimentRunTable)

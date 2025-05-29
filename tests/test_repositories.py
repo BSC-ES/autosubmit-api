@@ -1,13 +1,12 @@
-from sqlalchemy import inspect
-import pytest
 from typing import Any, Dict, List
+
+import pytest
+
 from autosubmit_api.repositories.experiment import create_experiment_repository
 from autosubmit_api.repositories.experiment_status import (
     create_experiment_status_repository,
 )
-from autosubmit_api.repositories.job_data import create_experiment_job_data_repository
 from autosubmit_api.repositories.graph_layout import create_exp_graph_layout_repository
-
 from autosubmit_api.repositories.join.experiment_join import (
     generate_query_listexp_extended,
 )
@@ -205,15 +204,3 @@ class TestExpGraphLayoutRepository:
         # Table is empty
         graph_data = [x.model_dump() for x in graph_draw_db.get_all()]
         assert graph_data == []
-
-
-class TestExperimentJobDataRepository:
-    def test_sql_init(self, fixture_mock_basic_config):
-        exp_run_repository = create_experiment_job_data_repository("any")
-
-        # Check if index exists and is correct
-        inspector = inspect(exp_run_repository.engine)
-        indexes = inspector.get_indexes(exp_run_repository.table.name)
-        assert len(indexes) == 1
-        assert indexes[0]["name"] == "ID_JOB_NAME"
-        assert indexes[0]["column_names"] == ["job_name"]

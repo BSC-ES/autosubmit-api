@@ -138,7 +138,7 @@ class ExperimentJoinRepository(ABC):
 
 class ExperimentJoinSQLRepository(ExperimentJoinRepository):
     def _get_connection(self):
-        return create_main_db_conn()
+        return create_main_db_conn(read_only=True)
 
     def search(
         self,

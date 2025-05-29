@@ -1,8 +1,9 @@
 from abc import ABC, abstractmethod
 from typing import Any, List, Union
+
 from pydantic import BaseModel
-from sqlalchemy import Engine, Table, inspect, or_, Index
-from sqlalchemy.schema import CreateTable
+from sqlalchemy import Engine, Table, inspect, or_
+
 from autosubmit_api.database import tables
 from autosubmit_api.database.common import create_sqlite_db_engine
 from autosubmit_api.persistance.experiment import ExperimentPaths
@@ -94,11 +95,6 @@ class ExperimentJobDataSQLRepository(ExperimentJobDataRepository):
             if len(valid_tables) == 0:
                 raise ValueError("No valid tables provided.")
             self.table = valid_tables[0]
-
-        with self.engine.connect() as conn:
-            conn.execute(CreateTable(self.table, if_not_exists=True))
-            Index("ID_JOB_NAME", self.table.c.job_name).create(conn, checkfirst=True)
-            conn.commit()
 
     def _check_table_schema(self, valid_tables: List[Table]) -> Union[Table, None]:
         """
@@ -219,7 +215,7 @@ class ExperimentJobDataSQLRepository(ExperimentJobDataRepository):
 
 
 def create_experiment_job_data_repository(expid: str):
-    engine = create_sqlite_db_engine(ExperimentPaths(expid).job_data_db)
+    engine = create_sqlite_db_engine(ExperimentPaths(expid).job_data_db, read_only=True)
     return ExperimentJobDataSQLRepository(
         expid, engine, [tables.JobDataTableV18, tables.JobDataTable]
     )
