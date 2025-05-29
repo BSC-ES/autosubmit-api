@@ -17,36 +17,35 @@
 # You should have received a copy of the GNU General Public License
 # along with Autosubmit.  If not, see <http://www.gnu.org/licenses/>.
 
+import collections
 import os
 import time
 import traceback
-import collections
-from typing import List, Optional, Tuple
-import portalocker
 from datetime import datetime, timedelta
 from json import loads
-from autosubmit_api.logger import logger
+from typing import List, Optional, Tuple
+
+import portalocker
+
+from autosubmit_api.common.utils import (
+    Status,
+    datechunk_to_year,
+    get_jobs_with_no_outliers,
+)
+from autosubmit_api.components.jobs.job_factory import SimJob
 from autosubmit_api.components.jobs.utils import generate_job_html_title
 
 # from networkx import DiGraph
 from autosubmit_api.config.basicConfig import APIBasicConfig
+from autosubmit_api.logger import logger
 from autosubmit_api.monitor.monitor import Monitor
 from autosubmit_api.performance.utils import calculate_ASYPD_perjob
-from autosubmit_api.components.jobs.job_factory import SimJob
-from autosubmit_api.common.utils import (
-    get_jobs_with_no_outliers,
-    Status,
-    datechunk_to_year,
-)
 
 # from autosubmitAPIwu.job.job_list
 # import autosubmitAPIwu.experiment.common_db_requests as DbRequests
-from bscearth.utils.date import Log
-
 from autosubmit_api.repositories.experiment_run import create_experiment_run_repository
 from autosubmit_api.repositories.graph_layout import create_exp_graph_layout_repository
 from autosubmit_api.repositories.job_data import create_experiment_job_data_repository
-
 
 # Version 15 includes out err MaxRSS AveRSS and rowstatus
 CURRENT_DB_VERSION = 15  # Used to be 10 or 0
@@ -602,7 +601,7 @@ class ExperimentGraphDrawing:
             return self.graph_data_repository.insert_many(_vals)
         except Exception as exp:
             print((traceback.format_exc()))
-            Log.warning(
+            logger.warning(
                 "Error on Insert many graph drawing : {}".format(str(exp)))
             return None
 
@@ -691,9 +690,9 @@ class JobDataStructure:
             )
         except Exception as exc:
             if _debug is True:
-                Log.info(traceback.format_exc())
-            Log.debug(traceback.format_exc())
-            Log.warning(
+                logger.info(traceback.format_exc())
+            logger.debug(traceback.format_exc())
+            logger.warning(
                 "Autosubmit couldn't retrieve experiment run. get_experiment_run_by_id. Exception {0}".format(
                     str(exc)
                 )

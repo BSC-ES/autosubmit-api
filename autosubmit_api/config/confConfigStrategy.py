@@ -18,24 +18,24 @@
 # You should have received a copy of the GNU General Public License
 # along with Autosubmit.  If not, see <http://www.gnu.org/licenses/>.
 
-from configparser import ConfigParser as PyConfigParser
-from typing import Union
-from autosubmitconfigparser.config.configcommon import AutosubmitConfig as Autosubmit4Config
-
+import json
 import os
 import re
 import subprocess
-import json
-import logging
+from configparser import ConfigParser as PyConfigParser
+from typing import Union
 
-from pyparsing import nestedExpr
-from bscearth.utils.config_parser import ConfigParserFactory, ConfigParser
+from autosubmitconfigparser.config.configcommon import (
+    AutosubmitConfig as Autosubmit4Config,
+)
+from bscearth.utils.config_parser import ConfigParser, ConfigParserFactory
 from bscearth.utils.date import parse_date
-from bscearth.utils.log import Log
+from pyparsing import nestedExpr
+
 from autosubmit_api.config.basicConfig import APIBasicConfig
 from autosubmit_api.config.IConfigStrategy import IConfigStrategy
+from autosubmit_api.logger import logger
 
-logger = logging.getLogger('gunicorn.error')
 
 class confConfigStrategy(IConfigStrategy):
     """
@@ -161,7 +161,7 @@ class confConfigStrategy(IConfigStrategy):
         try:
             return json.dumps(self.get_full_config_as_dict())
         except Exception:
-            Log.warning(
+            logger.warning(
                 "Autosubmit was not able to retrieve and save the configuration into the historical database.")
             return ""
 
@@ -398,7 +398,7 @@ class confConfigStrategy(IConfigStrategy):
         :return: True if everything is correct, False if it finds any error
         :rtype: bool
         """
-        Log.debug('\nChecking configuration files...')
+        logger.debug('\nChecking configuration files...')
         self.reload()
         # result = self.check_platforms_conf()
         result = True
@@ -406,9 +406,9 @@ class confConfigStrategy(IConfigStrategy):
         result = result and self.check_autosubmit_conf()
         result = result and self.check_expdef_conf()
         if result:
-            Log.debug("Configuration files OK\n")
+            logger.debug("Configuration files OK\n")
         else:
-            Log.error("Configuration files invalid\n")
+            logger.error("Configuration files invalid\n")
         return result
 
     def check_autosubmit_conf(self):
@@ -451,7 +451,7 @@ class confConfigStrategy(IConfigStrategy):
             raise Exception("Permission denied for " +
                             str(os.path.basename(self._conf_parser_file)))
         else:
-            Log.debug('{0} OK'.format(
+            logger.debug('{0} OK'.format(
                 os.path.basename(self._conf_parser_file)))
         return result
 
@@ -464,10 +464,10 @@ class confConfigStrategy(IConfigStrategy):
         """
         result = True
         if len(self._platforms_parser.sections()) == 0:
-            Log.warning("No remote platforms configured")
+            logger.warning("No remote platforms configured")
 
         if len(self._platforms_parser.sections()) != len(set(self._platforms_parser.sections())):
-            Log.error('There are repeated platforms names')
+            logger.error('There are repeated platforms names')
 
         for section in self._platforms_parser.sections():
             result = result and self._platforms_parser.check_exists(
@@ -494,12 +494,12 @@ class confConfigStrategy(IConfigStrategy):
                 section, 'TOTAL_JOBS', False)
 
         if not result:
-            Log.critical("{0} is not a valid config file".format(
+            logger.critical("{0} is not a valid config file".format(
                 os.path.basename(self._platforms_parser_file)))
             raise Exception("Permission denied for " +
                             str(os.path.basename(self._platforms_parser_file)))
         else:
-            Log.info('{0} OK'.format(
+            logger.info('{0} OK'.format(
                 os.path.basename(self._platforms_parser_file)))
         return result
 
@@ -565,7 +565,7 @@ class confConfigStrategy(IConfigStrategy):
             raise Exception("Exception while checking jobs_expid.conf " +
                             str(os.path.basename(self._jobs_parser_file)) + possible_exception)
         else:
-            Log.debug('{0} OK'.format(
+            logger.debug('{0} OK'.format(
                 os.path.basename(self._jobs_parser_file)))
 
         return result
@@ -626,7 +626,7 @@ class confConfigStrategy(IConfigStrategy):
             raise Exception("Permission denied for " +
                             str(os.path.basename(self._exp_parser_file)))
         else:
-            Log.debug('{0}  OK'.format(
+            logger.debug('{0}  OK'.format(
                 os.path.basename(self._exp_parser_file)))
         return result
 
@@ -645,14 +645,14 @@ class confConfigStrategy(IConfigStrategy):
                     self.parser_factory, self._proj_parser_file)
             return True
         except Exception as e:
-            Log.error('Project conf file error: {0}', e)
+            logger.error('Project conf file error: {0}', e)
             return False
 
     def check_wrapper_conf(self):
         result = True
         result = result and self.is_valid_jobs_in_wrapper()
         if not result:
-            Log.error(
+            logger.error(
                 "There are sections in JOBS_IN_WRAPPER that are not defined in your jobs.conf file")
 
         if 'horizontal' in self.get_wrapper_type():
@@ -843,19 +843,19 @@ class confConfigStrategy(IConfigStrategy):
                 "cd {0}; git rev-parse --abbrev-ref HEAD".format(full_project_path),
                 shell=True)
         except subprocess.CalledProcessError:
-            Log.critical("Failed to retrieve project branch...")
+            logger.critical("Failed to retrieve project branch...")
             return False
 
         project_branch = output
-        Log.debug("Project branch is: " + project_branch)
+        logger.debug("Project branch is: " + project_branch)
         try:
             output = subprocess.check_output(
                 "cd {0}; git rev-parse HEAD".format(full_project_path), shell=True)
         except subprocess.CalledProcessError:
-            Log.critical("Failed to retrieve project commit SHA...")
+            logger.critical("Failed to retrieve project commit SHA...")
             return False
         project_sha = output
-        Log.debug("Project commit SHA is: " + project_sha)
+        logger.debug("Project commit SHA is: " + project_sha)
 
         # register changes
         content = open(self._exp_parser_file).read()
@@ -866,7 +866,7 @@ class confConfigStrategy(IConfigStrategy):
             content = content.replace(re.search('PROJECT_COMMIT =.*', content).group(0),
                                       "PROJECT_COMMIT = " + project_sha)
         open(self._exp_parser_file, 'w').write(content)
-        Log.debug(
+        logger.debug(
             "Project commit SHA succesfully registered to the configuration file.")
         return True
 
