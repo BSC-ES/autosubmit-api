@@ -1,5 +1,11 @@
 # CHANGELOG
 
+### Release v4.1.0 - Release date: 2025-06-04
+
+* Includes all the changes until v4.1.0b1
+* Fixed unintended file creation while querying using SQLite
+* Minor bug fixes
+
 ### Pre-release v4.1.0b1 - Release date: 2025-05-21
 
 * Added OpenID Connect Authentication support
