@@ -1,5 +1,9 @@
 # CHANGELOG
 
+### Release v4.1.1 - Release date: 2025-06-05
+
+* Fixed major bug that didn't allowed using the graph endpoint
+
 ### Release v4.1.0 - Release date: 2025-06-04
 
 * Includes all the changes until v4.1.0b1
