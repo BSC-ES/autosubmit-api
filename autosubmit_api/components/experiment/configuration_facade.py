@@ -31,14 +31,12 @@ class ConfigurationFacade(metaclass=ABCMeta):
     self.pkl_path: str = ""
     self.tmp_path: str = ""
     self.log_path: str = ""
-    self.pkl_filename: str = ""
     self.structures_path: str = ""
     self.warnings: List[str] = []
     self._process_basic_config()
 
   def _process_basic_config(self):
     exp_paths = ExperimentPaths(self.expid)
-    self.pkl_filename = os.path.basename(exp_paths.job_list_pkl)
     self.experiment_path = exp_paths.exp_dir
     self.pkl_path = exp_paths.job_list_pkl
     self.tmp_path = exp_paths.tmp_dir
@@ -46,7 +44,7 @@ class ConfigurationFacade(metaclass=ABCMeta):
     self.structures_path = self.basic_configuration.STRUCTURES_DIR
     if not os.path.exists(self.experiment_path):
       raise IOError("Experiment folder {0} not found".format(self.experiment_path))
-    if not os.path.exists(self.pkl_path):
+    if APIBasicConfig.DATABASE_BACKEND != "postgres" and not os.path.exists(self.pkl_path):
       raise IOError("Required file {0} not found.".format(self.pkl_path))
     if not os.path.exists(self.tmp_path):
       raise IOError("Required folder {0} not found.".format(self.tmp_path))

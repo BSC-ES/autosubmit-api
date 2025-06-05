@@ -13,7 +13,7 @@ def count_pid_lsof(pid):
 
 class TestDatabase:
 
-    def test_open_files(self, fixture_mock_basic_config):
+    def test_open_files(self, fixture_sqlite):
         current_pid = os.getpid()
 
         counter = count_pid_lsof(current_pid)

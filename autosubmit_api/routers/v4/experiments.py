@@ -160,7 +160,7 @@ async def get_experiment_detail(
     """
     exp_builder = ExperimentBuilder()
     exp_builder.produce_base(expid)
-    return exp_builder.product.model_dump(include=tables.experiment_table.c.keys())
+    return exp_builder.product.model_dump(include=tables.ExperimentTable.c.keys())
 
 
 @router.get("/{expid}/jobs", name="List experiment jobs")
