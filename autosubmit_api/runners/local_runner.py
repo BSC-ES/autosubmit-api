@@ -1,8 +1,9 @@
-import signal
-import psutil
 import asyncio
 import asyncio.subprocess
+import signal
 import subprocess
+
+import psutil
 
 from autosubmit_api.logger import logger
 from autosubmit_api.repositories.runner_processes import (
@@ -10,6 +11,9 @@ from autosubmit_api.repositories.runner_processes import (
 )
 from autosubmit_api.runners import module_loaders
 from autosubmit_api.runners.base import Runner, RunnerAlreadyRunningError, RunnerType
+
+# Garbage collection prevention: https://docs.python.org/3/library/asyncio-task.html#asyncio.create_task
+background_task = set()
 
 
 class LocalRunner(Runner):
@@ -87,7 +91,7 @@ class LocalRunner(Runner):
         """
         Run an Autosubmit experiment using the local runner in a subprocess asynchronously.
         This method will use a module loader to prepare the environment and run the command.
-        Once the subprocess is launched, the pid is catched and stored in the DB.
+        Once the subprocess is launched, the pid is caught and stored in the DB.
         Then, when the subprocess is finished, the status of the subprocess is updated in the DB.
 
         :param expid: The experiment ID to run.
@@ -122,7 +126,10 @@ class LocalRunner(Runner):
         )
 
         # Run the wait_run on the background
-        asyncio.create_task(self.wait_run(runner_proc.id, process))
+        task = asyncio.create_task(self.wait_run(runner_proc.id, process))
+        # Add the task to the background task set to prevent garbage collection
+        background_task.add(task)
+        task.add_done_callback(background_task.discard)
 
         # Return the runner data
         return runner_proc
@@ -193,18 +200,17 @@ class LocalRunner(Runner):
                     else:
                         proc.terminate()
                         proc.send_signal(signal.SIGINT)
-                        # TODO: check if this is the right signal to end the process
                     proc.wait(timeout=10)
 
             logger.debug(f"Process {pid} of experiment {expid} killed successfully.")
 
             # Update the status of the subprocess in the DB
+            # NOTE: The final status can be either "STOPPED" or "FAILED" 
+            # because of a race condition with the wait_run method.
             self.runners_repo.update_process_status(
                 id=active_procs[0].id,
                 status="STOPPED",
             )
-
-            # TODO: Check race condition with the wait_run method
 
         except OSError as e:
             logger.error(f"Failed to kill process {pid} of experiment {expid}: {e}")
