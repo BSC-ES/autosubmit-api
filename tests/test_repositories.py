@@ -1,4 +1,5 @@
 from typing import Any, Dict, List
+from uuid import uuid4
 
 import pytest
 
@@ -9,6 +10,9 @@ from autosubmit_api.repositories.experiment_status import (
 from autosubmit_api.repositories.graph_layout import create_exp_graph_layout_repository
 from autosubmit_api.repositories.join.experiment_join import (
     generate_query_listexp_extended,
+)
+from autosubmit_api.repositories.runner_processes import (
+    create_runner_processes_repository,
 )
 
 BASE_FROM = (
@@ -204,3 +208,40 @@ class TestExpGraphLayoutRepository:
         # Table is empty
         graph_data = [x.model_dump() for x in graph_draw_db.get_all()]
         assert graph_data == []
+
+
+class TestExperimentRunnerRepository:
+    def test_runner_repository(self, fixture_mock_basic_config):
+        runner_repo = create_runner_processes_repository()
+
+        TEST_EXPID = str(uuid4())
+
+        # Insert a new process
+        inserted_runner = runner_repo.insert_process(
+            expid=TEST_EXPID,
+            pid=1234,
+            status="ACTIVE",
+            runner="LOCAL",
+            module_loader="no_module",
+            modules="",
+        )
+
+        # Check if the process was inserted correctly
+        active_runners = runner_repo.get_active_processes_by_expid(TEST_EXPID)
+        assert len(active_runners) == 1
+        assert active_runners[0].id == inserted_runner.id
+        assert active_runners[0].expid == TEST_EXPID
+        assert active_runners[0].status == "ACTIVE"
+
+        # Update the process status
+        runner_repo.update_process_status(id=inserted_runner.id, status="COMPLETED")
+
+        # Check if there is no active process
+        active_runners = runner_repo.get_active_processes_by_expid(TEST_EXPID)
+        assert len(active_runners) == 0
+
+        # Check if is the last process
+        last_process = runner_repo.get_last_process_by_expid(TEST_EXPID)
+        assert last_process.id == inserted_runner.id
+        assert last_process.expid == TEST_EXPID
+        assert last_process.status == "COMPLETED"
