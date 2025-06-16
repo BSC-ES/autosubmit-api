@@ -154,12 +154,14 @@ class LocalRunner(Runner):
 
             # Check if the command was successful
             if process.returncode != 0:
-                logger.error(f"Command failed with error: {stderr}")
+                logger.error(
+                    "Command failed with error. Check the logs for more details."
+                )
                 raise RuntimeError("Command failed with error")
             logger.debug(
                 f"Runner {runner_process_id} with pid {process.pid} completed successfully."
             )
-            return stdout
+            return stdout, stderr
         except Exception as exc:
             logger.error(
                 f"Error while waiting runner {runner_process_id} for process {process.pid}: {exc}"
@@ -184,33 +186,29 @@ class LocalRunner(Runner):
         # Get the pid of the process
         pid = active_procs[0].pid
 
-        try:
-            # Build the process list in DFS order
-            process = psutil.Process(pid)
-            proc_list = [process] + process.children(recursive=True)
+        # Build the process list in DFS order
+        process = psutil.Process(pid)
+        proc_list = [process] + process.children(recursive=True)
 
-            # Kill the processes that starts with "autosubmit"
-            for proc in proc_list:
-                if proc.name().strip().startswith("autosubmit"):
-                    logger.debug(
-                        f"Found process {proc.pid} with name {proc.name()}. Killing..."
-                    )
-                    if force:
-                        proc.kill()
-                    else:
-                        proc.terminate()
-                        proc.send_signal(signal.SIGINT)
-                    proc.wait(timeout=10)
+        # Kill the processes that starts with "autosubmit"
+        for proc in proc_list:
+            if proc.name().strip().startswith("autosubmit"):
+                logger.debug(
+                    f"Found process {proc.pid} with name {proc.name()}. Killing..."
+                )
+                if force:
+                    proc.kill()
+                else:
+                    proc.terminate()
+                    proc.send_signal(signal.SIGINT)
+                proc.wait(timeout=10)
 
-            logger.debug(f"Process {pid} of experiment {expid} killed successfully.")
+        logger.debug(f"Process {pid} of experiment {expid} killed successfully.")
 
-            # Update the status of the subprocess in the DB
-            # NOTE: The final status can be either "STOPPED" or "FAILED" 
-            # because of a race condition with the wait_run method.
-            self.runners_repo.update_process_status(
-                id=active_procs[0].id,
-                status="STOPPED",
-            )
-
-        except OSError as e:
-            logger.error(f"Failed to kill process {pid} of experiment {expid}: {e}")
+        # Update the status of the subprocess in the DB
+        # NOTE: The final status can be either "STOPPED" or "FAILED"
+        # because of a race condition with the wait_run method.
+        self.runners_repo.update_process_status(
+            id=active_procs[0].id,
+            status="STOPPED",
+        )
