@@ -1,14 +1,16 @@
 from abc import ABC, abstractmethod
 from datetime import datetime
+from pathlib import Path
 from typing import List
+
 from pydantic import BaseModel
-from sqlalchemy import Engine, Table
+from sqlalchemy import Engine, Table, create_engine
 from sqlalchemy.schema import CreateTable
+
 from autosubmit_api.common.utils import LOCAL_TZ
+from autosubmit_api.config.basicConfig import APIBasicConfig
 from autosubmit_api.database import tables
 from autosubmit_api.database.common import create_sqlite_db_engine
-from autosubmit_api.config.basicConfig import APIBasicConfig
-from pathlib import Path
 
 
 class RunnerProcessesDataModel(BaseModel):
@@ -33,9 +35,7 @@ class RunnerProcessesRepository(ABC):
         """
 
     @abstractmethod
-    def get_last_process_by_expid(
-        self, expid: str
-    ) -> RunnerProcessesDataModel:
+    def get_last_process_by_expid(self, expid: str) -> RunnerProcessesDataModel:
         """
         Gets the last process of a specific experiment id
         """
@@ -97,10 +97,8 @@ class RunnerProcessesSQLRepository(RunnerProcessesRepository):
             )
             for row in result
         ]
-    
-    def get_last_process_by_expid(
-        self, expid: str
-    ) -> RunnerProcessesDataModel:
+
+    def get_last_process_by_expid(self, expid: str) -> RunnerProcessesDataModel:
         with self.engine.connect() as conn:
             statement = (
                 self.table.select()
@@ -192,7 +190,11 @@ def create_runner_processes_repository() -> RunnerProcessesRepository:
     """
     Create a new RunnerProcessesRepository instance
     """
-    engine = create_sqlite_db_engine(
-        str(Path(APIBasicConfig.LOCAL_ROOT_DIR).joinpath("api_runners.db"))
-    )
-    return RunnerProcessesSQLRepository(engine, tables.RunnerProcessesTable)
+    if APIBasicConfig.DATABASE_BACKEND == "postgres":
+        _engine = create_engine(APIBasicConfig.DATABASE_CONN_URL)
+    else:
+        _engine = create_sqlite_db_engine(
+            str(Path(APIBasicConfig.LOCAL_ROOT_DIR).joinpath("api_runners.db"))
+        )
+    _table = tables.RunnerProcessesTable
+    return RunnerProcessesSQLRepository(_engine, _table)
