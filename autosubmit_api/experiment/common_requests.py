@@ -20,53 +20,63 @@
 """
 Module containing functions to manage autosubmit's experiments.
 """
-import os
-from pathlib import Path
-import re
-import time
-import traceback
 import datetime
 import json
+import locale
+import os
+import re
 import subprocess
-
+import time
+import traceback
 from collections import deque
-from autosubmit_api.components.experiment.file_metadata import FileMetadata
-from autosubmit_api.components.experiment.pkl_organizer import PklOrganizer
-from autosubmit_api.components.jobs.job_factory import SimpleJob
-from autosubmit_api.config.confConfigStrategy import confConfigStrategy
-from autosubmit_api.database import db_common as db_common
-from autosubmit_api.experiment import common_db_requests as DbRequests
-from autosubmit_api.database import db_jobdata as JobData
-from autosubmit_api.common import utils as common_utils
-from autosubmit_api.components.jobs import utils as JUtils
+from pathlib import Path
+from typing import Any, Dict, Optional, Tuple
+
+from autosubmitconfigparser.config.configcommon import (
+    AutosubmitConfig as Autosubmit4Config,
+)
+from bscearth.utils.config_parser import ConfigParserFactory
 
 from autosubmit_api.autosubmit_legacy.job.job_list import JobList
+from autosubmit_api.builders.configuration_facade_builder import (
+    AutosubmitConfigurationFacadeBuilder,
+    ConfigurationFacadeDirector,
+)
+from autosubmit_api.builders.experiment_history_builder import (
+    ExperimentHistoryBuilder,
+    ExperimentHistoryDirector,
+)
+from autosubmit_api.builders.joblist_loader_builder import (
+    JobListLoaderBuilder,
+    JobListLoaderDirector,
+)
+from autosubmit_api.common import utils as common_utils
+from autosubmit_api.components.experiment.file_metadata import FileMetadata
+from autosubmit_api.components.experiment.pkl_organizer import PklOrganizer
+from autosubmit_api.components.jobs import utils as JUtils
+from autosubmit_api.components.jobs.job_factory import SimpleJob
+from autosubmit_api.components.jobs.job_support import JobSupport
+from autosubmit_api.components.representations.graph.graph import (
+    GraphRepresentation,
+    GroupedBy,
+    Layout,
+)
+from autosubmit_api.components.representations.tree.tree import TreeRepresentation
+from autosubmit_api.config.basicConfig import APIBasicConfig
+from autosubmit_api.config.confConfigStrategy import confConfigStrategy
+from autosubmit_api.config.config_common import AutosubmitConfigResolver
+from autosubmit_api.database import db_common as db_common
+from autosubmit_api.database import db_jobdata as JobData
+from autosubmit_api.experiment import common_db_requests as DbRequests
 from autosubmit_api.experiment.utils import get_files_from_dir_with_pattern, read_tail
 from autosubmit_api.logger import logger
-
-from autosubmit_api.performance.utils import calculate_SYPD_perjob
 from autosubmit_api.monitor.monitor import Monitor
+from autosubmit_api.performance.utils import calculate_SYPD_perjob
 from autosubmit_api.persistance.experiment import ExperimentPaths
-
 from autosubmit_api.persistance.job_package_reader import JobPackageReader
 from autosubmit_api.persistance.pkl_reader import PklReader
 from autosubmit_api.repositories.experiment import create_experiment_repository
 from autosubmit_api.statistics.statistics import Statistics
-
-from autosubmit_api.config.basicConfig import APIBasicConfig
-from autosubmit_api.config.config_common import AutosubmitConfigResolver
-from bscearth.utils.config_parser import ConfigParserFactory
-
-from autosubmit_api.components.representations.tree.tree import TreeRepresentation
-from autosubmit_api.components.representations.graph.graph import GraphRepresentation, GroupedBy, Layout
-
-from autosubmit_api.builders.experiment_history_builder import ExperimentHistoryDirector, ExperimentHistoryBuilder
-from autosubmit_api.builders.configuration_facade_builder import ConfigurationFacadeDirector, AutosubmitConfigurationFacadeBuilder
-from autosubmit_api.builders.joblist_loader_builder import JobListLoaderBuilder, JobListLoaderDirector
-from autosubmit_api.components.jobs.job_support import JobSupport
-from typing import Dict, Any, Optional, Tuple
-import locale
-from autosubmitconfigparser.config.configcommon import AutosubmitConfig as Autosubmit4Config
 
 APIBasicConfig.read()
 
@@ -94,7 +104,9 @@ def get_experiment_stats(expid: str, filter_period: int, filter_type: str) -> Di
         if filter_type and filter_type != 'Any':
             considered_jobs = [job for job in job_list_loader.jobs if job.section == filter_type]
 
-        period_fi = datetime.datetime.now().replace(second=0, microsecond=0)
+        period_fi = datetime.datetime.now(tz=common_utils.LOCAL_TZ).replace(
+            second=0, microsecond=0
+        )
         if filter_period and filter_period > 0:
             period_ini = period_fi - datetime.timedelta(hours=filter_period)
             filtered_jobs = []

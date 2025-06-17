@@ -1,10 +1,14 @@
 import os
-from autosubmit_api.config.basicConfig import APIBasicConfig
-from autosubmit_api.components.jobs.job_factory import Job
-from bscearth.utils.date import parse_date
-from autosubmit_api.components.jobs.utils import is_a_completed_retrial
 from datetime import datetime
 from typing import List
+
+from bscearth.utils.date import parse_date
+
+from autosubmit_api.common.utils import LOCAL_TZ
+from autosubmit_api.components.jobs.job_factory import Job
+from autosubmit_api.components.jobs.utils import is_a_completed_retrial
+from autosubmit_api.config.basicConfig import APIBasicConfig
+
 
 class TotalStatsPosition:
   SUBMIT = 0
@@ -34,7 +38,7 @@ class JobSupport:
                 if already_completed:
                     break
                 already_completed = True
-            retrial_dates = [parse_date(y) if y != 'COMPLETED' and y != 'FAILED' else y for y in retrial_fields]
+            retrial_dates = [parse_date(y).replace(tzinfo=LOCAL_TZ) if y != 'COMPLETED' and y != 'FAILED' else y for y in retrial_fields]
             retrials_list.insert(0, retrial_dates)
     return retrials_list
 
@@ -42,7 +46,7 @@ class JobSupport:
     """
     Checks if the job started after the given date
     """
-    if any(parse_date(str(date_retrial)) > start_datetime for date_retrial in self.check_retrials_start_time()):
+    if any(date_retrial > start_datetime for date_retrial in self.check_retrials_start_time()):
         return True
     else:
         return False
@@ -51,7 +55,7 @@ class JobSupport:
     """
     Checks if the job was running after the given date
     """
-    if any(parse_date(str(date_end)) > finish_datetime for date_end in self.check_retrials_end_time()):
+    if any(date_end > finish_datetime for date_end in self.check_retrials_end_time()):
         return True
     else:
         return False
@@ -79,5 +83,6 @@ class JobSupport:
         for line in lines:
             fields = line.split()
             if len(fields) >= index + 1:
-                result.append(parse_date(fields[index]))
+                formatted_date = parse_date(fields[index]).replace(tzinfo=LOCAL_TZ)
+                result.append(formatted_date)
     return result
