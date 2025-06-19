@@ -411,6 +411,25 @@ class TestStatistics:
         assert resp_obj["error_message"] == ""
         assert resp_obj["error"] is False
         assert resp_obj["Statistics"]["Period"]["From"] == "None"
+        assert (
+            isinstance(resp_obj["Statistics"]["JobStatistics"], list)
+            and len(resp_obj["Statistics"]["JobStatistics"]) == 8
+        )
+
+        # Query with long period
+        LONG_PERIOD = 1000 * 365 * 24  # 1000 years in hours
+        aux_response = fixture_fastapi_client.get(
+            self.endpoint.format(expid=expid, period=LONG_PERIOD, section="Any")
+        )
+        aux_resp_obj: dict = aux_response.json()
+
+        assert aux_resp_obj["error_message"] == ""
+        assert aux_resp_obj["error"] is False
+        assert aux_resp_obj["Statistics"]["Period"]["From"] != "None"
+        assert (
+            aux_resp_obj["Statistics"]["JobStatistics"]
+            == resp_obj["Statistics"]["JobStatistics"]
+        )
 
 
 class TestCurrentConfig:
