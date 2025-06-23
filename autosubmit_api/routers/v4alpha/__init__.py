@@ -1,16 +1,17 @@
-from typing import Annotated, Any, Dict, List, Union
+from typing import Annotated, Any, Dict, List, Optional, Union
+
 from fastapi import APIRouter, HTTPException, Query
 from pydantic import BaseModel
 
 from autosubmit_api.config.config_file import read_config_file
+from autosubmit_api.logger import logger
 from autosubmit_api.repositories.runner_processes import (
     create_runner_processes_repository,
 )
 from autosubmit_api.runners import module_loaders
+from autosubmit_api.runners.base import RunnerAlreadyRunningError, RunnerType
 from autosubmit_api.runners.module_loaders import ModuleLoaderType
 from autosubmit_api.runners.runner_factory import get_runner, get_runner_from_expid
-from autosubmit_api.runners.base import RunnerAlreadyRunningError, RunnerType
-from autosubmit_api.logger import logger
 
 router = APIRouter()
 
@@ -204,4 +205,41 @@ async def get_experiment_runner_status(expid: str):
         "pid": last_process.pid,
         "created": last_process.created,
         "modified": last_process.modified,
+    }
+
+
+class CreateJobListBody(GetRunnerBody):
+    check_wrapper: Optional[bool] = None
+
+
+@router.post("/experiments/{expid}/create-job-list", name="Create job list")
+async def create_job_list(expid: str, body: CreateJobListBody):
+    """
+    Create a job list for the given experiment ID using the specified runner and module loader.
+    """
+    # Check if the runner and module loader are enabled
+    if not check_runner_permissions(
+        body.runner.value,
+        body.module_loader.value,
+        body.modules,
+    ):
+        raise HTTPException(
+            status_code=403,
+            detail="Runner or module loader is not enabled in the config file",
+        )
+
+    try:
+        module_loader = module_loaders.get_module_loader(
+            body.module_loader, body.modules
+        )
+        runner = get_runner(body.runner, module_loader)
+        await runner.create_job_list(expid, bool(body.check_wrapper))
+    except Exception as exc:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to create job list for experiment {expid}: {exc}",
+        )
+
+    return {
+        "message": f"Job list for experiment {expid} created successfully.",
     }
