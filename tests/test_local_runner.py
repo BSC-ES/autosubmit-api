@@ -128,3 +128,38 @@ async def test_stop_experiment_success(fixture_mock_basic_config, force_stop: bo
 
         # Verify the repository status update
         mock_update_process_status.assert_called_once()
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize(
+    "check_wrapper",
+    [
+        pytest.param(True, id="check_wrapper_true"),
+        pytest.param(False, id="check_wrapper_false"),
+    ],
+)
+async def test_create_job_list(fixture_mock_basic_config, check_wrapper: bool):
+    module_loader = NoModuleLoader()
+    runner = LocalRunner(module_loader)
+
+    TEST_EXPID = "test_expid"
+
+    # Mock the command generation
+    with patch(
+        "autosubmit_api.runners.local_runner.subprocess.check_output"
+    ) as mock_check_output:
+        # Call the method
+        await runner.create_job_list(TEST_EXPID, check_wrapper=check_wrapper)
+
+        # Verify the command was called once
+        mock_check_output.assert_called_once()
+
+        # Verifiy that the command contains the experiment ID
+        command = mock_check_output.call_args[0][0]
+        assert "autosubmit create" in command
+        assert TEST_EXPID in command
+        if check_wrapper:
+            assert "--check-wrapper" in command
+        else:
+            assert "--check-wrapper" not in command
+
