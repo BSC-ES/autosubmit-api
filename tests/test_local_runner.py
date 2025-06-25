@@ -194,3 +194,27 @@ async def test_create_job_list_cmd_fail(fixture_mock_basic_config):
 
         # Verify the command was called once
         mock_check_output.assert_called_once()
+
+
+@pytest.mark.asyncio
+async def test_create_experiment(fixture_mock_basic_config):
+    module_loader = NoModuleLoader()
+    runner = LocalRunner(module_loader)
+
+    TEST_EXPID = "test_expid"
+
+    # Mock the command generation
+    with patch(
+        "autosubmit_api.runners.local_runner.subprocess.check_output"
+    ) as mock_check_output:
+        mock_check_output.return_value = f"Experiment {TEST_EXPID} created successfully"
+
+        # Call the method
+        expid = await runner.create_experiment(description="Test Experiment")
+
+        assert expid == TEST_EXPID
+
+        command = mock_check_output.call_args[0][0]
+
+        assert "autosubmit expid" in command
+        assert '--description="Test Experiment"' in command

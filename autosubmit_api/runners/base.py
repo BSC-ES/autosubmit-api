@@ -64,3 +64,9 @@ class Runner(ABC):
 
         :param expid: The expid of the experiment to create a job list for.
         """
+
+    @abstractmethod
+    async def create_experiment(self):
+        """
+        Create an Autosubmit experiment.
+        """
