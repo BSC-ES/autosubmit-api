@@ -56,3 +56,9 @@ class Runner(ABC):
         :param expid: The experiment ID to stop.
         :param force: Whether to force stop the experiment.
         """
+
+    @abstractmethod
+    async def create_experiment(self):
+        """
+        Create an Autosubmit experiment.
+        """
