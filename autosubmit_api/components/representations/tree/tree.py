@@ -298,6 +298,7 @@ class TreeRepresentation(object):
         "date_plus": end_date,
         "SYPD": SYPD,
         "ASYPD": ASYPD,
+        "minutes_queue": job.queue_time,
         "minutes": job.run_time,
         "submit": job.submit_datetime,
         "start": job.start_datetime,
