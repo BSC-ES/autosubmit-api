@@ -32,7 +32,10 @@ def verify_secret_token(token: str) -> bool:
     Verify the single secret token against the configured value.
     Only do the verification if the token is set in the configuration.
     """
-    if config.AS_API_SECRET_TOKEN and isinstance(config.AS_API_SECRET_TOKEN, str):
+    if (
+        isinstance(config.AS_API_SECRET_TOKEN, str)
+        and len(config.AS_API_SECRET_TOKEN) > 0
+    ):
         return token == config.AS_API_SECRET_TOKEN
     return False
 
