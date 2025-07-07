@@ -61,3 +61,5 @@ def get_disable_background_tasks():
 
 
 AS_API_ROOT_PATH = os.environ.get("AS_API_ROOT_PATH", "")
+
+AS_API_SECRET_TOKEN = os.environ.get("AS_API_SECRET_TOKEN", "")

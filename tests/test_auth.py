@@ -223,3 +223,27 @@ class TestOIDC:
                 }
 
                 assert username == expected_username
+
+
+@pytest.mark.parametrize(
+    "secret_token, input_token, expected_result",
+    [
+        ("my_secret", "my_secret", True),
+        ("my_secret", "wrong_secret", False),
+        ("wrong_secret", "my_secret", False),
+        ("", "", False),  # Empty secret_token
+        (None, "my_secret", False),
+        (12345, "my_secret", False),  # Non-string secret_token
+        ("my_secret", None, False),  # None input_token
+        ("my_secret", 12345, False),  # Non-string input_token
+        (12345, 12345, False),  # Both non-string
+    ],
+)
+def test_verify_secret_token(
+    secret_token: Any,
+    input_token: Any,
+    expected_result: bool,
+    monkeypatch: pytest.MonkeyPatch,
+):
+    monkeypatch.setattr("autosubmit_api.config.AS_API_SECRET_TOKEN", secret_token)
+    assert auth.verify_secret_token(input_token) is expected_result

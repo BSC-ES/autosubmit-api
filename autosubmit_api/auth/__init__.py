@@ -27,6 +27,19 @@ def _parse_protection_level_env(_var):
     return ProtectionLevels.ALL
 
 
+def verify_secret_token(token: str) -> bool:
+    """
+    Verify the single secret token against the configured value.
+    Only do the verification if the token is set in the configuration.
+    """
+    if (
+        isinstance(config.AS_API_SECRET_TOKEN, str)
+        and len(config.AS_API_SECRET_TOKEN) > 0
+    ):
+        return token == config.AS_API_SECRET_TOKEN
+    return False
+
+
 security = HTTPBearer(auto_error=False)
 
 
@@ -45,6 +58,12 @@ def auth_token_dependency(threshold=ProtectionLevels.ALL, raise_on_fail=True):
     ):
         try:
             current_token = credentials.credentials
+
+            # Check if the token is the single secret token
+            if verify_secret_token(current_token):
+                return "User"
+
+            # If not, decode the JWT token
             jwt_token = jwt.decode(
                 current_token, config.JWT_SECRET, config.JWT_ALGORITHM
             )
