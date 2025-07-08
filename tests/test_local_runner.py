@@ -265,7 +265,7 @@ async def test_create_experiment(
 
 
 @pytest.mark.asyncio
-async def test_create_experiment_fail(fixture_mock_basic_config):
+async def test_create_experiment_cmd_fail(fixture_mock_basic_config):
     module_loader = NoModuleLoader()
     runner = LocalRunner(module_loader)
 
@@ -275,4 +275,26 @@ async def test_create_experiment_fail(fixture_mock_basic_config):
         side_effect=subprocess.CalledProcessError(1, "command", "error message"),
     ):
         with pytest.raises(subprocess.CalledProcessError):
+            await runner.create_experiment(description="Test Experiment")
+
+
+@pytest.mark.asyncio
+async def test_create_experiment_autosubmit_fail(fixture_mock_basic_config):
+    """
+    Test when autosubmit doesn't return a valid experiment ID in the output.
+    """
+
+    module_loader = NoModuleLoader()
+    runner = LocalRunner(module_loader)
+
+    # Mock the command generation
+    with patch(
+        "autosubmit_api.runners.local_runner.subprocess.check_output"
+    ) as mock_check_output:
+        mock_check_output.return_value = (
+            "[CRITICAL] Autosubmit failed to create experiment"
+        )
+        with pytest.raises(
+            RuntimeError, match="Failed to extract experiment ID from output"
+        ):
             await runner.create_experiment(description="Test Experiment")
