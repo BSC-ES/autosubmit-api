@@ -7,6 +7,10 @@ from autosubmit_api.repositories.runner_processes import RunnerProcessesDataMode
 class RunnerType(str, Enum):
     LOCAL = "local"
 
+class RunnerProcessStatus(str, Enum):
+    ACTIVE = "ACTIVE"
+    COMPLETED = "COMPLETED"
+    TERMINATED = "TERMINATED"
 
 # Runner Exceptions
 class RunnerAlreadyRunningError(Exception):
