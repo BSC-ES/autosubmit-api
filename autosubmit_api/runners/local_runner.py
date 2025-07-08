@@ -219,6 +219,8 @@ class LocalRunner(Runner):
         This method will use a module loader to prepare the environment and run the command.
 
         :param expid: The experiment ID to create the job list for.
+        :param check_wrapper: If True, the command will check the wrapper script. Default is False.
+        :return: The output of the command.
         """
         flags = "--check-wrapper" if check_wrapper else ""
         autosubmit_command = f"autosubmit create -np {flags} {expid}"

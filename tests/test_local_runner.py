@@ -1,6 +1,8 @@
-from unittest.mock import patch, AsyncMock, MagicMock
-import pytest
 import subprocess
+from unittest.mock import AsyncMock, MagicMock, patch
+
+import pytest
+
 from autosubmit_api.runners.local_runner import LocalRunner
 from autosubmit_api.runners.module_loaders import NoModuleLoader
 
@@ -154,7 +156,7 @@ async def test_create_job_list(fixture_mock_basic_config, check_wrapper: bool):
         # Verify the command was called once
         mock_check_output.assert_called_once()
 
-        # Verifiy that the command contains the experiment ID
+        # Verify that the command contains the experiment ID
         command = mock_check_output.call_args[0][0]
         assert "autosubmit create" in command
         assert TEST_EXPID in command
