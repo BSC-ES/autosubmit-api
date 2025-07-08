@@ -118,15 +118,16 @@ async def test_stop_experiment_success(fixture_mock_basic_config, force_stop: bo
     mock_process.send_signal = MagicMock()
     mock_process.wait = MagicMock()
 
-    with patch("psutil.Process", return_value=mock_process):
+    with patch("subprocess.check_output") as mock_check_output:
         await runner.stop(TEST_EXPID, force=force_stop)
 
-        # Verify the process methods were called
+        mock_check_output.assert_called_once()
+
+        called_args = mock_check_output.call_args[0]
+        assert "autosubmit stop" in called_args[0]
+        assert TEST_EXPID in called_args[0]
         if force_stop:
-            mock_process.kill.assert_called_once()
-        else:
-            mock_process.send_signal.assert_called_once()
-        mock_process.wait.assert_called_once_with(timeout=10)
+            assert "--force" in called_args[0]
 
         # Verify the repository status update
         mock_update_process_status.assert_called_once()
