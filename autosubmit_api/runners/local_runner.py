@@ -299,6 +299,6 @@ class LocalRunner(Runner):
             expid = match.group(1)
             logger.info(f"Experiment {expid} created successfully.")
             return expid
-        except subprocess.CalledProcessError as exc:
+        except Exception as exc:
             logger.error(f"Command failed with error: {exc}")
             raise exc
