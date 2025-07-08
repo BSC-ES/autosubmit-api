@@ -231,6 +231,6 @@ class LocalRunner(Runner):
             ).strip()
             logger.debug(f"Command output: {output}")
             return output
-        except subprocess.CalledProcessError as exc:
+        except Exception as exc:
             logger.error(f"Command failed with error: {exc}")
             raise exc

@@ -163,3 +163,25 @@ async def test_create_job_list(fixture_mock_basic_config, check_wrapper: bool):
         else:
             assert "--check-wrapper" not in command
 
+
+@pytest.mark.asyncio
+async def test_create_job_list_cmd_fail(fixture_mock_basic_config):
+    module_loader = NoModuleLoader()
+    runner = LocalRunner(module_loader)
+
+    TEST_EXPID = "test_expid"
+
+    # Mock the command generation
+    with patch(
+        "autosubmit_api.runners.local_runner.subprocess.check_output"
+    ) as mock_check_output:
+        mock_check_output.side_effect = subprocess.CalledProcessError(
+            returncode=1, cmd="autosubmit create"
+        )
+
+        # Call the method and expect an exception
+        with pytest.raises(subprocess.CalledProcessError):
+            await runner.create_job_list(TEST_EXPID, check_wrapper=False)
+
+        # Verify the command was called once
+        mock_check_output.assert_called_once()
