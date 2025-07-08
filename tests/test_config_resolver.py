@@ -68,6 +68,16 @@ def test_as3_conf(fixture_mock_basic_config):
     assert as_conf.get_member_list() == ["fc01"]
     assert as_conf.get_chunk_list() == ""
 
+    assert as_conf.is_valid_communications_library() is True
+    assert as_conf.is_valid_storage_type() is True
+    assert as_conf.is_valid_jobs_in_wrapper() is True
+    assert as_conf.is_valid_git_repository() is True
+
+    assert isinstance(as_conf.load_parameters(), dict)
+
+    assert as_conf.is_valid_mail_address("autosubmit-support@bsc.es") is True
+    assert as_conf.is_valid_mail_address("autosubmit@bsc") is False
+
 
 def test_as4_yml_conf(fixture_mock_basic_config):
     as_conf = AutosubmitConfigResolver(
@@ -93,3 +103,11 @@ def test_as4_yml_conf(fixture_mock_basic_config):
     assert as_conf.get_date_list() == [datetime(2000, 1, 1, 0, 0)]
     assert as_conf.get_member_list() == ["fc0"]
     # assert as_conf.get_chunk_list() == "" # Not implemented
+
+    assert as_conf.is_valid_communications_library() is True
+    assert as_conf.is_valid_storage_type() is True
+
+    assert isinstance(as_conf.load_parameters(), dict)
+
+    assert as_conf.is_valid_mail_address("autosubmit-support@bsc.es") is True
+    assert as_conf.is_valid_mail_address("autosubmit@bsc") is False
