@@ -38,7 +38,6 @@ class ymlConfigStrategy(IConfigStrategy):
 
     def jobs_parser(self):
         logger.error("Not yet implemented")
-        pass
 
     #TODO: at the end of the implementation, check which methods can be moved to the top class for avoid code duplication
     @property
@@ -50,7 +49,6 @@ class ymlConfigStrategy(IConfigStrategy):
 
     def platforms_parser(self):
         logger.error("OBSOLOTED - Not yet implemented")
-        pass
 
     @property
     def platforms_file(self):
@@ -311,7 +309,6 @@ class ymlConfigStrategy(IConfigStrategy):
         except Exception as exp:
             print(exp)
             chunk_size = ''
-            pass
         if chunk_size == '':
             return default
         return int(chunk_size)

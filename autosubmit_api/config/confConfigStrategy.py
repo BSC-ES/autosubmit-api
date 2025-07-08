@@ -719,7 +719,6 @@ class confConfigStrategy(IConfigStrategy):
         :return: dictionary containing tuples [parameter_name, parameter_value]
         :rtype: dict
         """
-        pass
         # projdef = []
         # for section in self._proj_parser.sections():
         #     print("SEction" + section)
@@ -980,7 +979,6 @@ class confConfigStrategy(IConfigStrategy):
         except Exception as exp:
             print(exp)
             chunk_size = ''
-            pass
         if chunk_size == '':
             return default
         return int(chunk_size)

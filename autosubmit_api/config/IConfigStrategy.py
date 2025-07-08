@@ -17,13 +17,14 @@
 # You should have received a copy of the GNU General Public License
 # along with Autosubmit.  If not, see <http://www.gnu.org/licenses/>.
 
+from abc import ABC, abstractmethod
 from configparser import ConfigParser as PyConfigParser
 from typing import Union
-from autosubmitconfigparser.config.configcommon import AutosubmitConfig as Autosubmit4Config
-import re
 
-from bscearth.utils.config_parser import ConfigParserFactory, ConfigParser
-from abc import ABC, abstractmethod
+from autosubmitconfigparser.config.configcommon import (
+    AutosubmitConfig as Autosubmit4Config,
+)
+from bscearth.utils.config_parser import ConfigParser, ConfigParserFactory
 
 
 class IConfigStrategy(ABC):
@@ -36,14 +37,13 @@ class IConfigStrategy(ABC):
 
     @abstractmethod
     def jobs_parser(self):
-        raise NotImplementedError
+        """"""
 
     @abstractmethod
     def experiment_file(self):
         """
         Returns experiment's config file name
         """
-        return self._exp_parser_file
 
     @abstractmethod
     def platforms_parser(self) -> PyConfigParser:
@@ -52,7 +52,6 @@ class IConfigStrategy(ABC):
 
         :return: platforms config parser object
         """
-        pass
 
     @abstractmethod
     def platforms_file(self):
@@ -62,28 +61,24 @@ class IConfigStrategy(ABC):
         :return: platforms config file's name
         :rtype: str
         """
-        pass
 
     @abstractmethod
     def project_file(self):
         """
         Returns project's config file name
         """
-        pass
 
     @abstractmethod
     def jobs_file(self):
         """
         Returns project's jobs file name
         """
-        pass
 
     @abstractmethod
     def get_full_config_as_dict(self):
         """
         Returns full configuration as json object
         """
-        pass
 
     @abstractmethod
     def get_project_dir(self):
@@ -93,7 +88,6 @@ class IConfigStrategy(ABC):
         :return: experiment's project directory
         :rtype: str
         """
-        pass
 
     @abstractmethod
     def get_queue(self, section):
@@ -104,7 +98,6 @@ class IConfigStrategy(ABC):
         :return: queue
         :rtype: str
         """
-        pass
 
     @abstractmethod
     def get_job_platform(self, section: str) -> str:
@@ -113,27 +106,26 @@ class IConfigStrategy(ABC):
         :param section: job type
         :return: wallclock time
         """
-        pass
 
     @abstractmethod
     def get_platform_queue(self, platform):
-        pass
+        """"""
 
     @abstractmethod
     def get_platform_serial_queue(self, platform):
-        pass
+        """"""
 
     @abstractmethod
     def get_platform_project(self, platform):
-        pass
+        """"""
 
     @abstractmethod
     def get_platform_wallclock(self, platform):
-        pass
+        """"""
 
     @abstractmethod
     def get_platform_conf_footprint(self, platform):
-        pass
+        """"""
 
     def get_wallclock(self, section):
         """
@@ -143,7 +135,6 @@ class IConfigStrategy(ABC):
         :return: wallclock time
         :rtype: str
         """
-        pass
 
     def get_synchronize(self, section):
         """
@@ -153,7 +144,6 @@ class IConfigStrategy(ABC):
         :return: wallclock time
         :rtype: str
         """
-        pass
 
     def get_processors(self, section: str) -> str:
         """
@@ -161,7 +151,6 @@ class IConfigStrategy(ABC):
         :param section: job type
         :return: wallclock time
         """
-        pass
 
     def get_threads(self, section):
         """
@@ -171,7 +160,6 @@ class IConfigStrategy(ABC):
         :return: threads needed
         :rtype: str
         """
-        pass
 
     def get_tasks(self, section):
         """
@@ -181,7 +169,6 @@ class IConfigStrategy(ABC):
         :return: tasks (processes) per host
         :rtype: str
         """
-        pass
 
     def get_scratch_free_space(self, section):
         """
@@ -191,7 +178,6 @@ class IConfigStrategy(ABC):
         :return: percentage of scratch free space needed
         :rtype: int
         """
-        pass
 
     def get_memory(self, section):
         """
@@ -201,7 +187,6 @@ class IConfigStrategy(ABC):
         :return: memory needed
         :rtype: str
         """
-        pass
 
     def get_memory_per_task(self, section):
         """
@@ -211,7 +196,6 @@ class IConfigStrategy(ABC):
         :return: memory per task needed
         :rtype: str
         """
-        pass
 
     def get_migrate_user_to(self, section):
         """
@@ -220,8 +204,7 @@ class IConfigStrategy(ABC):
         :return: migrate user to
         :rtype: str
         """
-        #return self._platforms_parser.get_option(section, 'USER_TO', '').lower()
-        pass
+        # return self._platforms_parser.get_option(section, 'USER_TO', '').lower()
 
     def get_current_user(self, section):
         """
@@ -230,7 +213,6 @@ class IConfigStrategy(ABC):
         :return: migrate user to
         :rtype: str
         """
-        pass
 
     def get_current_project(self, section):
         """
@@ -239,7 +221,6 @@ class IConfigStrategy(ABC):
         :return: migrate user to
         :rtype: str
         """
-        return str(self._platforms_data[section]["USER"]).lower()
 
     def set_new_user(self, section, new_user):
         """
@@ -248,7 +229,6 @@ class IConfigStrategy(ABC):
         :param section: platform name
         :type: str
         """
-        pass
 
     def get_migrate_project_to(self, section):
         """
@@ -257,9 +237,6 @@ class IConfigStrategy(ABC):
         :return: migrate project to
         :rtype: str
         """
-        pass
-
-
 
     def set_new_project(self, section, new_project):
         """
@@ -268,8 +245,6 @@ class IConfigStrategy(ABC):
         :param section: platform name
         :type: str
         """
-        pass
-
 
     def get_custom_directives(self, section):
         """
@@ -279,8 +254,6 @@ class IConfigStrategy(ABC):
         :return: custom directives needed
         :rtype: str
         """
-        pass
-
 
     def check_conf_files(self):
         """
@@ -290,7 +263,6 @@ class IConfigStrategy(ABC):
         :return: True if everything is correct, False if it finds any error
         :rtype: bool
         """
-        pass
 
     def check_autosubmit_conf(self):
         """
@@ -299,7 +271,6 @@ class IConfigStrategy(ABC):
         :return: True if everything is correct, False if it founds any error
         :rtype: bool
         """
-        pass
 
     def check_platforms_conf(self):
         """
@@ -309,7 +280,6 @@ class IConfigStrategy(ABC):
         :rtype: bool
         """
 
-
     def check_jobs_conf(self):
         """
         Checks experiment's jobs configuration file.
@@ -317,8 +287,6 @@ class IConfigStrategy(ABC):
         :return: True if everything is correct, False if it founds any error
         :rtype: bool
         """
-        pass
-
 
     def check_expdef_conf(self):
         """
@@ -327,8 +295,6 @@ class IConfigStrategy(ABC):
         :return: True if everything is correct, False if it founds any error
         :rtype: bool
         """
-        pass
-
 
     def check_proj(self):
         """
@@ -337,18 +303,14 @@ class IConfigStrategy(ABC):
         :return: True if everything is correct, False if it founds any error
         :rtype: bool
         """
-        pass
-
 
     def check_wrapper_conf(self):
-        pass
-
+        """"""
 
     def reload(self):
         """
         Creates parser objects for configuration files
         """
-        pass
 
     def load_parameters(self):
         """
@@ -359,7 +321,6 @@ class IConfigStrategy(ABC):
         :rtype: dict
         """
 
-
     def load_project_parameters(self):
         """
         Loads parameters from model config file
@@ -367,8 +328,6 @@ class IConfigStrategy(ABC):
         :return: dictionary containing tuples [parameter_name, parameter_value]
         :rtype: dict
         """
-        pass
-
 
     def set_expid(self, exp_id):
         """
@@ -378,7 +337,6 @@ class IConfigStrategy(ABC):
         :type exp_id: str
         """
 
-
     def get_project_type(self):
         """
         Returns project type from experiment config file
@@ -386,7 +344,6 @@ class IConfigStrategy(ABC):
         :return: project type
         :rtype: str
         """
-        pass
 
     def get_file_project_conf(self):
         """
@@ -395,7 +352,6 @@ class IConfigStrategy(ABC):
         :return: path to project config file
         :rtype: str
         """
-        pass
 
     def get_file_jobs_conf(self):
         """
@@ -404,7 +360,6 @@ class IConfigStrategy(ABC):
         :return: path to project config file
         :rtype: str
         """
-
 
     def get_git_project_origin(self):
         """
@@ -446,7 +401,6 @@ class IConfigStrategy(ABC):
         :rtype: str
         """
 
-
     def set_git_project_commit(self, as_conf: Autosubmit4Config):
         """
         Function to register in the configuration the commit SHA of the git project version.
@@ -485,7 +439,6 @@ class IConfigStrategy(ABC):
         :rtype: list
         """
 
-
     def get_num_chunks(self):
         """
         Returns number of chunks to run for each member
@@ -503,7 +456,6 @@ class IConfigStrategy(ABC):
         :rtype: int
         """
 
-
     def get_chunk_size_unit(self) -> str:
         """
         Unit for the chunk length
@@ -512,8 +464,6 @@ class IConfigStrategy(ABC):
         :rtype: str
         """
 
-        pass
-
     def get_chunk_size(self, default: int = 1) -> int:
         """
         Chunk Size as defined in the expdef file.
@@ -521,7 +471,6 @@ class IConfigStrategy(ABC):
         :return: Chunksize, 1 as default.
         :rtype: int
         """
-        pass
 
     def get_member_list(self, run_only=False):
         """
@@ -530,7 +479,6 @@ class IConfigStrategy(ABC):
         :return: experiment's members
         :rtype: list
         """
-        pass
 
     def get_rerun(self):
         """
@@ -540,8 +488,6 @@ class IConfigStrategy(ABC):
         :rtype: list
         """
 
-        pass
-
     def get_chunk_list(self):
         """
         Returns chunk list from experiment's config file
@@ -549,7 +495,6 @@ class IConfigStrategy(ABC):
         :return: experiment's chunks
         :rtype: list
         """
-        pass
 
     def get_platform(self):
         """
@@ -558,7 +503,6 @@ class IConfigStrategy(ABC):
         :return: main platforms
         :rtype: str
         """
-        pass
 
     def set_platform(self, hpc):
         """
@@ -567,7 +511,6 @@ class IConfigStrategy(ABC):
         :param hpc: main platforms
         :type: str
         """
-        pass
 
     def set_version(self, autosubmit_version):
         """
@@ -576,7 +519,6 @@ class IConfigStrategy(ABC):
         :param autosubmit_version: autosubmit's version
         :type autosubmit_version: str
         """
-        pass
 
     def get_version(self):
         """
@@ -585,7 +527,6 @@ class IConfigStrategy(ABC):
         :return: version
         :rtype: str
         """
-        pass
 
     def get_total_jobs(self):
         """
@@ -594,7 +535,6 @@ class IConfigStrategy(ABC):
         :return: max number of running jobs
         :rtype: int
         """
-        pass
 
     def get_max_wallclock(self):
         """
@@ -602,7 +542,6 @@ class IConfigStrategy(ABC):
 
         :rtype: str
         """
-        pass
 
     def get_max_processors(self):
         """
@@ -610,7 +549,6 @@ class IConfigStrategy(ABC):
 
         :rtype: str
         """
-        pass
 
     def get_max_waiting_jobs(self):
         """
@@ -619,7 +557,6 @@ class IConfigStrategy(ABC):
         :return: main platforms
         :rtype: int
         """
-        pass
 
     def get_default_job_type(self):
         """
@@ -628,7 +565,6 @@ class IConfigStrategy(ABC):
         :return: default type such as bash, python, r..
         :rtype: str
         """
-        pass
 
     def get_safetysleeptime(self):
         """
@@ -637,7 +573,6 @@ class IConfigStrategy(ABC):
         :return: safety sleep time
         :rtype: int
         """
-        pass
 
     def set_safetysleeptime(self, sleep_time):
         """
@@ -646,7 +581,6 @@ class IConfigStrategy(ABC):
         :param sleep_time: value to set
         :type sleep_time: int
         """
-        pass
 
     def get_retrials(self):
         """
@@ -655,7 +589,6 @@ class IConfigStrategy(ABC):
         :return: safety sleep time
         :rtype: int
         """
-        pass
 
     def get_notifications(self):
         """
@@ -664,7 +597,6 @@ class IConfigStrategy(ABC):
         :return: if notifications
         :rtype: string
         """
-        pass
 
     def get_remote_dependencies(self):
         """
@@ -673,7 +605,6 @@ class IConfigStrategy(ABC):
         :return: if remote dependencies
         :rtype: bool
         """
-        pass
 
     def get_wrapper_type(self):
         """
@@ -682,7 +613,6 @@ class IConfigStrategy(ABC):
         :return: wrapper type (or none)
         :rtype: string
         """
-        pass
 
     def get_wrapper_jobs(self):
         """
@@ -691,27 +621,23 @@ class IConfigStrategy(ABC):
         :return: expression (or none)
         :rtype: string
         """
-        pass
 
     def get_max_wrapped_jobs(self):
         """
-         Returns the maximum number of jobs that can be wrapped together as configured in autosubmit's config file
+        Returns the maximum number of jobs that can be wrapped together as configured in autosubmit's config file
 
-         :return: maximum number of jobs (or total jobs)
-         :rtype: string
-         """
+        :return: maximum number of jobs (or total jobs)
+        :rtype: string
+        """
         # return int(self._conf_parser.get_option('wrapper', 'MAXWRAPPEDJOBS', self.get_total_jobs()))
 
-        pass
-
     def get_wrapper_check_time(self):
-         """
-         Returns time to check the status of jobs in the wrapper
+        """
+        Returns time to check the status of jobs in the wrapper
 
-         :return: wrapper check time
-         :rtype: int
-         """
-         pass
+        :return: wrapper check time
+        :rtype: int
+        """
 
     def get_wrapper_machinefiles(self):
         """
@@ -720,7 +646,6 @@ class IConfigStrategy(ABC):
         :return: machinefiles function to use
         :rtype: string
         """
-        pass
 
     def get_wrapper_queue(self):
         """
@@ -729,7 +654,6 @@ class IConfigStrategy(ABC):
         :return: expression (or none)
         :rtype: string
         """
-        pass
 
     def get_jobs_sections(self):
         """
@@ -738,7 +662,6 @@ class IConfigStrategy(ABC):
         :return: sections
         :rtype: list
         """
-        return self._jobs_parser.sections()
 
     def get_copy_remote_logs(self):
         """
@@ -747,7 +670,6 @@ class IConfigStrategy(ABC):
         :return: if logs local copy
         :rtype: bool
         """
-        pass
 
     def get_mails_to(self):
         """
@@ -756,7 +678,6 @@ class IConfigStrategy(ABC):
         :return: mail address
         :rtype: [str]
         """
-        pass
 
     def get_communications_library(self):
         """
@@ -765,7 +686,6 @@ class IConfigStrategy(ABC):
         :return: communications library
         :rtype: str
         """
-        pass
 
     def get_storage_type(self):
         """
@@ -774,7 +694,6 @@ class IConfigStrategy(ABC):
         :return: communications library
         :rtype: str
         """
-        pass
 
     def get_workflow_commit(self) -> Union[str, None]:
         """
@@ -784,27 +703,21 @@ class IConfigStrategy(ABC):
         """
 
     @staticmethod
-    def is_valid_mail_address(mail_address):
-        if re.match('^[_a-z0-9-]+(\.[_a-z0-9-]+)*@[a-z0-9-]+(\.[a-z0-9-]+)*(\.[a-z]{2,4})$', mail_address):
-            return True
-        else:
-            return False
-    
+    def is_valid_mail_address(mail_address: str) -> bool:
+        """"""
+
     def is_valid_communications_library(self):
-        library = self.get_communications_library()
-        return library in ['paramiko', 'saga']
+        """"""
 
     def is_valid_storage_type(self):
-        storage_type = self.get_storage_type()
-        return storage_type in ['pkl', 'db']
-
+        """"""
 
     def is_valid_jobs_in_wrapper(self):
-        pass
+        """"""
 
     def is_valid_git_repository(self):
-       pass
+        """"""
 
     @staticmethod
     def get_parser(parser_factory: ConfigParserFactory, file_path: str) -> ConfigParser:
-        pass
+        """"""
