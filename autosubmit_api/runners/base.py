@@ -56,3 +56,11 @@ class Runner(ABC):
         :param expid: The experiment ID to stop.
         :param force: Whether to force stop the experiment.
         """
+
+    @abstractmethod
+    async def create_job_list(self, expid: str):
+        """
+        Create a job list for the given expid using `autosubmit create` command.
+
+        :param expid: The expid of the experiment to create a job list for.
+        """
