@@ -17,7 +17,6 @@
 # You should have received a copy of the GNU General Public License
 # along with Autosubmit.  If not, see <http://www.gnu.org/licenses/>.
 
-import re
 from abc import ABC, abstractmethod
 from configparser import ConfigParser as PyConfigParser
 from typing import Union
@@ -38,14 +37,13 @@ class IConfigStrategy(ABC):
 
     @abstractmethod
     def jobs_parser(self):
-        raise NotImplementedError
+        """"""
 
     @abstractmethod
     def experiment_file(self):
         """
         Returns experiment's config file name
         """
-        return self._exp_parser_file
 
     @abstractmethod
     def platforms_parser(self) -> PyConfigParser:
@@ -223,7 +221,6 @@ class IConfigStrategy(ABC):
         :return: migrate user to
         :rtype: str
         """
-        return str(self._platforms_data[section]["USER"]).lower()
 
     def set_new_user(self, section, new_user):
         """
@@ -665,7 +662,6 @@ class IConfigStrategy(ABC):
         :return: sections
         :rtype: list
         """
-        return self._jobs_parser.sections()
 
     def get_copy_remote_logs(self):
         """
@@ -707,22 +703,14 @@ class IConfigStrategy(ABC):
         """
 
     @staticmethod
-    def is_valid_mail_address(mail_address):
-        if re.match(
-            "^[_a-z0-9-]+(\.[_a-z0-9-]+)*@[a-z0-9-]+(\.[a-z0-9-]+)*(\.[a-z]{2,4})$",
-            mail_address,
-        ):
-            return True
-        else:
-            return False
+    def is_valid_mail_address(mail_address: str) -> bool:
+        """"""
 
     def is_valid_communications_library(self):
-        library = self.get_communications_library()
-        return library in ["paramiko", "saga"]
+        """"""
 
     def is_valid_storage_type(self):
-        storage_type = self.get_storage_type()
-        return storage_type in ["pkl", "db"]
+        """"""
 
     def is_valid_jobs_in_wrapper(self):
         """"""
