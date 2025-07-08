@@ -4,7 +4,8 @@ from mock import MagicMock, AsyncMock
 import pytest
 
 
-class TestCASV2Login:
+class TestCreateJobList:
+    """Test suite for the create job list endpoint in v4alpha."""
     endpoint = "/v4alpha/experiments/{expid}/create-job-list"
 
     def test_disabled_runner(self, fixture_fastapi_client: TestClient):
