@@ -1,5 +1,12 @@
 # CHANGELOG
 
+### Pre-release v4.1.2b1 - Release date: 2025-07-10
+
+* Added API runners alpha feature. This mechanism allows the API to run Autosubmit commands in a flexible way.
+* A single secret token now can be used to access a protected API by adding it in the Authorization headers
+* Fixed bug where job queue time is not included in the `/v3/tree/{expid}` endpoint
+* Minor bug fixes and increased test coverage
+
 ### Release v4.1.1 - Release date: 2025-06-05
 
 * Fixed major bug that didn't allowed using the graph endpoint
