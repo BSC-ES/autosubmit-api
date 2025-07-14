@@ -1,7 +1,9 @@
 import asyncio
 import asyncio.subprocess
+import re
 import signal
 import subprocess
+from typing import Optional
 
 import psutil
 
@@ -246,6 +248,57 @@ class LocalRunner(Runner):
             ).strip()
             logger.debug(f"Command output: {output}")
             return output
+        except Exception as exc:
+            logger.error(f"Command failed with error: {exc}")
+            raise exc
+
+    async def create_experiment(
+        self,
+        description: str,
+        git_repo: Optional[str] = None,
+        git_branch: Optional[str] = None,
+        minimal: bool = False,
+        config_path: Optional[str] = None,
+        hpc: Optional[str] = None,
+        use_local_minimal: bool = False,
+        operational: bool = False,
+        testcase: bool = False,
+    ) -> str:
+        flags = [f'--description="{description}"']
+        if git_repo:
+            flags.append(f'--git_repo="{git_repo}"')
+        if git_branch:
+            flags.append(f'--git_branch="{git_branch}"')
+        if minimal:
+            flags.append("--minimal_configuration")
+        if config_path:
+            flags.append(f'-conf="{config_path}"')
+        if hpc:
+            flags.append(f'--HPC="{hpc}"')
+        if use_local_minimal:
+            flags.append("--use_local_minimal")
+        if operational:
+            flags.append("--operational")
+        if testcase:
+            flags.append("--testcase")
+
+        autosubmit_command = f"autosubmit expid {' '.join(flags)}"
+        wrapped_command = self.module_loader.generate_command(autosubmit_command)
+
+        try:
+            logger.debug(f"Running command: {wrapped_command}")
+            output = subprocess.check_output(
+                wrapped_command, shell=True, text=True, executable="/bin/bash"
+            ).strip()
+            logger.debug(f"Command output: {output}")
+
+            # Extract the experiment ID from the output
+            match = re.search(r"Experiment (\w+) created", output)
+            if not match:
+                raise RuntimeError("Failed to extract experiment ID from output.")
+            expid = match.group(1)
+            logger.info(f"Experiment {expid} created successfully.")
+            return expid
         except Exception as exc:
             logger.error(f"Command failed with error: {exc}")
             raise exc

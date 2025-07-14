@@ -194,3 +194,107 @@ async def test_create_job_list_cmd_fail(fixture_mock_basic_config):
 
         # Verify the command was called once
         mock_check_output.assert_called_once()
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize(
+    "params, expected_flags",
+    [
+        (
+            {"description": "Test Experiment"},
+            ['--description="Test Experiment"'],
+        ),
+        (
+            {
+                "description": "Minimal experiment",
+                "minimal": True,
+                "git_repo": "https://example.com/repo.git",
+                "git_branch": "foobar",
+                "testcase": True,
+                "config_path": "git_config",
+            },
+            [
+                '--description="Minimal experiment"',
+                "--minimal_configuration",
+                '--git_repo="https://example.com/repo.git"',
+                '--git_branch="foobar"',
+                "--testcase",
+                '-conf="git_config"',
+            ],
+        ),
+        (
+            {
+                "description": "Operational experiment with HPC",
+                "operational": True,
+                "hpc": "LUMI",
+                "use_local_minimal": True,
+            },
+            [
+                '--description="Operational experiment with HPC"',
+                "--operational",
+                '--HPC="LUMI"',
+                "--use_local_minimal",
+            ],
+        ),
+    ],
+)
+async def test_create_experiment(
+    fixture_mock_basic_config, params: dict, expected_flags: list[str]
+):
+    module_loader = NoModuleLoader()
+    runner = LocalRunner(module_loader)
+
+    TEST_EXPID = "test_expid"
+
+    # Mock the command generation
+    with patch(
+        "autosubmit_api.runners.local_runner.subprocess.check_output"
+    ) as mock_check_output:
+        mock_check_output.return_value = f"Experiment {TEST_EXPID} created successfully"
+
+        # Call the method
+        expid = await runner.create_experiment(**params)
+
+        assert expid == TEST_EXPID
+
+        command = mock_check_output.call_args[0][0]
+
+        assert "autosubmit expid" in command
+        for flag in expected_flags:
+            assert flag in command
+
+
+@pytest.mark.asyncio
+async def test_create_experiment_cmd_fail(fixture_mock_basic_config):
+    module_loader = NoModuleLoader()
+    runner = LocalRunner(module_loader)
+
+    # Mock the command to raise an error
+    with patch(
+        "autosubmit_api.runners.local_runner.subprocess.check_output",
+        side_effect=subprocess.CalledProcessError(1, "command", "error message"),
+    ):
+        with pytest.raises(subprocess.CalledProcessError):
+            await runner.create_experiment(description="Test Experiment")
+
+
+@pytest.mark.asyncio
+async def test_create_experiment_autosubmit_fail(fixture_mock_basic_config):
+    """
+    Test when autosubmit doesn't return a valid experiment ID in the output.
+    """
+
+    module_loader = NoModuleLoader()
+    runner = LocalRunner(module_loader)
+
+    # Mock the command generation
+    with patch(
+        "autosubmit_api.runners.local_runner.subprocess.check_output"
+    ) as mock_check_output:
+        mock_check_output.return_value = (
+            "[CRITICAL] Autosubmit failed to create experiment"
+        )
+        with pytest.raises(
+            RuntimeError, match="Failed to extract experiment ID from output"
+        ):
+            await runner.create_experiment(description="Test Experiment")

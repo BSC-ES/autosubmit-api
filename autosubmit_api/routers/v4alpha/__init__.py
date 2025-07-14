@@ -250,3 +250,62 @@ async def create_job_list(expid: str, body: CreateJobListBody):
     return {
         "message": f"Job list for experiment {expid} created successfully.",
     }
+
+
+class CreateExperimentBody(GetRunnerBody):
+    description: str
+    git_repo: Optional[str] = None
+    git_branch: Optional[str] = None
+    minimal: bool = False
+    config_path: Optional[str] = None
+    hpc: Optional[str] = None
+    use_local_minimal: bool = False
+    operational: bool = False
+    testcase: bool = False
+
+
+@router.post("/runner-create-experiment", name="Create experiment")
+async def create_experiment(body: CreateExperimentBody):
+    """
+    Create an Autosubmit experiment with the specified parameters.
+    """
+    # Check if the runner and module loader are enabled
+    if not check_runner_permissions(
+        body.runner.value,
+        body.module_loader.value,
+        body.modules,
+    ):
+        raise HTTPException(
+            status_code=403,
+            detail="Runner or module loader is not enabled in the config file",
+        )
+
+    try:
+        module_loader = module_loaders.get_module_loader(
+            body.module_loader, body.modules
+        )
+        runner = get_runner(body.runner, module_loader)
+        expid = await runner.create_experiment(
+            description=body.description,
+            git_repo=body.git_repo,
+            git_branch=body.git_branch,
+            minimal=body.minimal,
+            config_path=body.config_path,
+            hpc=body.hpc,
+            use_local_minimal=body.use_local_minimal,
+            operational=body.operational,
+            testcase=body.testcase,
+        )
+    except Exception as exc:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to create experiment: {exc}",
+        )
+
+    return {
+        "message": "Experiment created successfully.",
+        "expid": expid,
+        "runner": runner.runner_type,
+        "module_loader": module_loader.module_loader_type,
+        "modules": module_loader.modules,
+    }
