@@ -6,6 +6,7 @@ import pytest
 
 class TestCreateJobList:
     """Test suite for the create job list endpoint in v4alpha."""
+
     endpoint = "/v4alpha/experiments/{expid}/create-job-list"
 
     def test_disabled_runner(self, fixture_fastapi_client: TestClient):
@@ -54,12 +55,14 @@ class TestCreateJobList:
             assert response.status_code == 500
 
     @pytest.mark.parametrize(
-        "check_wrapper",
-        [True, False],
+        "params",
+        [
+            {"check_wrapper": True},
+            {"check_wrapper": False, "update_version": True},
+            {"check_wrapper": False, "force": True},
+        ],
     )
-    def test_enabled_runner(
-        self, fixture_fastapi_client: TestClient, check_wrapper: bool
-    ):
+    def test_enabled_runner(self, fixture_fastapi_client: TestClient, params: dict):
         RANDOM_EXPID = "foobar1234567890"
 
         with (
@@ -81,10 +84,15 @@ class TestCreateJobList:
                     "runner": "local",
                     "module_loader": "no_module",
                     "modules": None,
-                    "check_wrapper": check_wrapper,
+                    **params,
                 },
             )
 
             assert response.status_code == 200
 
-            mock_create_job_list.assert_awaited_once_with(RANDOM_EXPID, check_wrapper)
+            mock_create_job_list.assert_awaited_once_with(
+                RANDOM_EXPID,
+                check_wrapper=params.get("check_wrapper"),
+                update_version=params.get("update_version"),
+                force=params.get("force"),
+            )

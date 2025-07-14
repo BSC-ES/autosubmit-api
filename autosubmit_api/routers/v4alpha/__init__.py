@@ -210,6 +210,8 @@ async def get_experiment_runner_status(expid: str):
 
 class CreateJobListBody(GetRunnerBody):
     check_wrapper: Optional[bool] = None
+    update_version: Optional[bool] = None
+    force: Optional[bool] = None
 
 
 @router.post("/experiments/{expid}/create-job-list", name="Create job list")
@@ -233,7 +235,12 @@ async def create_job_list(expid: str, body: CreateJobListBody):
             body.module_loader, body.modules
         )
         runner = get_runner(body.runner, module_loader)
-        await runner.create_job_list(expid, bool(body.check_wrapper))
+        await runner.create_job_list(
+            expid,
+            check_wrapper=body.check_wrapper,
+            update_version=body.update_version,
+            force=body.force,
+        )
     except Exception as exc:
         raise HTTPException(
             status_code=500,

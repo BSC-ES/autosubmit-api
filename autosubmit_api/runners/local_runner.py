@@ -213,7 +213,13 @@ class LocalRunner(Runner):
             status="STOPPED",
         )
 
-    async def create_job_list(self, expid: str, check_wrapper: bool = False):
+    async def create_job_list(
+        self,
+        expid: str,
+        check_wrapper: bool = False,
+        update_version: bool = False,
+        force: bool = False,
+    ) -> str:
         """
         Create a job list for the given expid using `autosubmit create` command.
         This method will use a module loader to prepare the environment and run the command.
@@ -222,8 +228,15 @@ class LocalRunner(Runner):
         :param check_wrapper: If True, the command will check the wrapper script. Default is False.
         :return: The output of the command.
         """
-        flags = "--check-wrapper" if check_wrapper else ""
-        autosubmit_command = f"autosubmit create -np {flags} {expid}"
+        flags = []
+        if check_wrapper:
+            flags.append("--check-wrapper")
+        if update_version:
+            flags.append("--update_version")
+        if force:
+            flags.append("--force")
+
+        autosubmit_command = f"autosubmit create -np {' '.join(flags)} {expid}"
         wrapped_command = self.module_loader.generate_command(autosubmit_command)
 
         try:
