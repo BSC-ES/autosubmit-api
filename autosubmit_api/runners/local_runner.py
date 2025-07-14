@@ -212,3 +212,40 @@ class LocalRunner(Runner):
             id=active_procs[0].id,
             status="STOPPED",
         )
+
+    async def create_job_list(
+        self,
+        expid: str,
+        check_wrapper: bool = False,
+        update_version: bool = False,
+        force: bool = False,
+    ) -> str:
+        """
+        Create a job list for the given expid using `autosubmit create` command.
+        This method will use a module loader to prepare the environment and run the command.
+
+        :param expid: The experiment ID to create the job list for.
+        :param check_wrapper: If True, the command will check the wrapper script. Default is False.
+        :return: The output of the command.
+        """
+        flags = []
+        if check_wrapper:
+            flags.append("--check-wrapper")
+        if update_version:
+            flags.append("--update_version")
+        if force:
+            flags.append("--force")
+
+        autosubmit_command = f"autosubmit create -np {' '.join(flags)} {expid}"
+        wrapped_command = self.module_loader.generate_command(autosubmit_command)
+
+        try:
+            logger.debug(f"Running command: {wrapped_command}")
+            output = subprocess.check_output(
+                wrapped_command, shell=True, text=True, executable="/bin/bash"
+            ).strip()
+            logger.debug(f"Command output: {output}")
+            return output
+        except Exception as exc:
+            logger.error(f"Command failed with error: {exc}")
+            raise exc

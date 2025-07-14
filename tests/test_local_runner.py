@@ -1,6 +1,8 @@
-from unittest.mock import patch, AsyncMock, MagicMock
-import pytest
 import subprocess
+from unittest.mock import AsyncMock, MagicMock, patch
+
+import pytest
+
 from autosubmit_api.runners.local_runner import LocalRunner
 from autosubmit_api.runners.module_loaders import NoModuleLoader
 
@@ -128,3 +130,67 @@ async def test_stop_experiment_success(fixture_mock_basic_config, force_stop: bo
 
         # Verify the repository status update
         mock_update_process_status.assert_called_once()
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize(
+    "params, expected_flags",
+    [
+        (
+            {"check_wrapper": True, "update_version": True},
+            ["--check-wrapper", "--update_version"],
+        ),
+        (
+            {"check_wrapper": False, "force": True},
+            ["--force"],
+        ),
+    ],
+)
+async def test_create_job_list(
+    fixture_mock_basic_config, params: dict, expected_flags: list
+):
+    module_loader = NoModuleLoader()
+    runner = LocalRunner(module_loader)
+
+    TEST_EXPID = "test_expid"
+
+    # Mock the command generation
+    with patch(
+        "autosubmit_api.runners.local_runner.subprocess.check_output"
+    ) as mock_check_output:
+        # Call the method
+        await runner.create_job_list(TEST_EXPID, **params)
+
+        # Verify the command was called once
+        mock_check_output.assert_called_once()
+
+        # Verify that the command contains the experiment ID
+        command = mock_check_output.call_args[0][0]
+        assert "autosubmit create" in command
+        assert TEST_EXPID in command
+
+        for flag in expected_flags:
+            assert flag in command
+
+
+@pytest.mark.asyncio
+async def test_create_job_list_cmd_fail(fixture_mock_basic_config):
+    module_loader = NoModuleLoader()
+    runner = LocalRunner(module_loader)
+
+    TEST_EXPID = "test_expid"
+
+    # Mock the command generation
+    with patch(
+        "autosubmit_api.runners.local_runner.subprocess.check_output"
+    ) as mock_check_output:
+        mock_check_output.side_effect = subprocess.CalledProcessError(
+            returncode=1, cmd="autosubmit create"
+        )
+
+        # Call the method and expect an exception
+        with pytest.raises(subprocess.CalledProcessError):
+            await runner.create_job_list(TEST_EXPID, check_wrapper=False)
+
+        # Verify the command was called once
+        mock_check_output.assert_called_once()
