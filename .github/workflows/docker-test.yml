@@ -1,0 +1,57 @@
+name: SSH API Runner Node Tests
+
+permissions:
+  contents: read
+
+on:
+  pull_request:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+jobs:
+  test-ssh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    services:
+      ssh-api-runner-node:
+        image: autosubmit/testing-images:ssh-api-runner-node
+        ports:
+          - 2222:22
+        options: --name ssh-api-runner-node
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Generate SSH keys
+        run: |
+          mkdir -p ~/.ssh
+          ssh-keygen -t rsa -b 4096 -f ~/.ssh/id_rsa -N ""
+          echo "SSH key generated."
+
+      - name: Append the public key to the container's authorized_keys
+        run: |
+            docker exec ssh-api-runner-node sh -c "echo $(cat ~/.ssh/id_rsa.pub) >> /root/.ssh/authorized_keys"
+            docker exec ssh-api-runner-node chmod 600 /root/.ssh/authorized_keys
+            echo "Public key added to authorized_keys in the container."
+
+      - name: Wait for SSH service to be ready
+        run: |
+            for i in {1..30}; do
+                if ssh -o StrictHostKeyChecking=no -p 2222 root@localhost true; then
+                    echo "SSH is ready!"
+                    break
+                fi
+                echo "Waiting for SSH service..."
+                sleep 1
+                done
+
+      - name: Run tests
+        run: |
+          ssh -o StrictHostKeyChecking=no -p 2222 root@localhost "echo 'SSH connection successful!'"
