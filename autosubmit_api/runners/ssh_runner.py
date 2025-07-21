@@ -26,6 +26,7 @@ class SSHRunner(Runner):
         module_loader: module_loaders.ModuleLoader,
         ssh_host: str,
         ssh_user: str = None,
+        ssh_port: int = 22,
     ):
         if not ssh_host:
             raise ValueError("SSH host must be provided for SSHRunner.")
@@ -33,13 +34,23 @@ class SSHRunner(Runner):
         self.module_loader = module_loader
         self.ssh_host = ssh_host
         self.ssh_user = ssh_user
+        self.ssh_port = ssh_port
         self.runners_repo = create_runner_processes_repository()
 
     def _ssh_prefix(self):
         user_host = (
             f"{self.ssh_user}@{self.ssh_host}" if self.ssh_user else self.ssh_host
         )
-        return f"ssh {user_host}"
+        return f"ssh -o StrictHostKeyChecking=no -p {self.ssh_port} {user_host}"
+
+    def _ssh_command(self, command: str) -> str:
+        """
+        Prepare the SSH command to run on the remote host.
+        """
+        if isinstance(self.module_loader, module_loaders.CondaModuleLoader):
+            # Use interactive shell for Conda module loading
+            return f"{self._ssh_prefix()} 'bash -ic \"{command}\"'"
+        return f"{self._ssh_prefix()} '{command}'"
 
     async def version(self) -> str:
         """
@@ -47,7 +58,7 @@ class SSHRunner(Runner):
         """
         autosubmit_command = "autosubmit -v"
         wrapped_command = self.module_loader.generate_command(autosubmit_command)
-        ssh_command = f"{self._ssh_prefix()} '{wrapped_command}'"
+        ssh_command = self._ssh_command(wrapped_command)
 
         try:
             logger.debug(f"Running SSH command: {ssh_command}")
@@ -109,7 +120,7 @@ class SSHRunner(Runner):
 
         autosubmit_command = f"autosubmit run {expid}"
         wrapped_command = self.module_loader.generate_command(autosubmit_command)
-        ssh_command = f"{self._ssh_prefix()} '{wrapped_command}'"
+        ssh_command = self._ssh_command(wrapped_command)
 
         logger.debug(f"Running SSH command: {ssh_command}")
 
@@ -212,7 +223,7 @@ class SSHRunner(Runner):
 
         autosubmit_command = f"autosubmit create -np {' '.join(flags)} {expid}"
         wrapped_command = self.module_loader.generate_command(autosubmit_command)
-        ssh_command = f"{self._ssh_prefix()} '{wrapped_command}'"
+        ssh_command = self._ssh_command(wrapped_command)
 
         try:
             logger.debug(f"Running SSH command: {ssh_command}")
@@ -257,7 +268,7 @@ class SSHRunner(Runner):
 
         autosubmit_command = f"autosubmit expid {' '.join(flags)}"
         wrapped_command = self.module_loader.generate_command(autosubmit_command)
-        ssh_command = f"{self._ssh_prefix()} '{wrapped_command}'"
+        ssh_command = self._ssh_command(wrapped_command)
 
         try:
             logger.debug(f"Running SSH command: {ssh_command}")

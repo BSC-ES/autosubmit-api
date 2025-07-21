@@ -22,6 +22,9 @@ RUN chmod +x /usr/local/bin/setup-venv.sh && /usr/local/bin/setup-venv.sh
 COPY scripts/entrypoint.sh /usr/local/bin/entrypoint.sh
 RUN chmod +x /usr/local/bin/entrypoint.sh
 
+# Make /bin/bash the default shell
+RUN chsh -s /bin/bash root
+
 # Expose SSH port
 EXPOSE 22
 
