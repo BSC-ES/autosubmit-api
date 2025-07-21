@@ -77,6 +77,7 @@ def check_runner_permissions(
 class GetRunnerExtraParamsBody(BaseModel):
     ssh_host: Optional[str] = None
     ssh_user: Optional[str] = None
+    ssh_port: Optional[int] = 22
 
 
 class GetRunnerBody(BaseModel):

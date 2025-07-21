@@ -24,8 +24,11 @@ def get_runner(
     elif runner_type == RunnerType.SSH:
         ssh_host = kwargs.get("ssh_host")
         ssh_user = kwargs.get("ssh_user")
+        ssh_port = kwargs.get("ssh_port", 22)
+        if not isinstance(ssh_port, int):
+            ssh_port = 22
 
-        return SSHRunner(module_loader, ssh_host=ssh_host, ssh_user=ssh_user)
+        return SSHRunner(module_loader, ssh_host=ssh_host, ssh_user=ssh_user, ssh_port=ssh_port)
     else:
         raise ValueError(f"Unknown runner type: {runner_type}")
 
