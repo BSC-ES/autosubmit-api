@@ -5,25 +5,35 @@ RUN apt-get update && apt-get install -y \
     openssh-server \
     wget \
     python3-venv \
+    sudo \
     && apt-get clean
 
-# Create authorized_keys directory with an empty authorized_keys file
-RUN mkdir -p /root/.ssh && chmod 700 /root/.ssh && touch /root/.ssh/authorized_keys && chmod 600 /root/.ssh/authorized_keys
+# Create a non-root user
+RUN useradd -m -s /bin/bash autosubmit_user && \
+    echo 'autosubmit_user ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
 
-# Create conda environment and install autosubmit
-COPY scripts/setup-conda.sh /usr/local/bin/setup-conda.sh
-RUN chmod +x /usr/local/bin/setup-conda.sh && /usr/local/bin/setup-conda.sh
+# Make /bin/bash the default shell for autosubmit_user
+RUN chsh -s /bin/bash autosubmit_user
 
-# Create Python virtual environment and install autosubmit
-COPY scripts/setup-venv.sh /usr/local/bin/setup-venv.sh
-RUN chmod +x /usr/local/bin/setup-venv.sh && /usr/local/bin/setup-venv.sh
+# Copy script files to the container
+COPY scripts/ /usr/local/bin/
 
-# Copy entrypoint script
-COPY scripts/entrypoint.sh /usr/local/bin/entrypoint.sh
-RUN chmod +x /usr/local/bin/entrypoint.sh
+# Make scripts executable and set ownership
+RUN chmod +x /usr/local/bin/*.sh && \
+    chown -R autosubmit_user:autosubmit_user /usr/local/bin/*.sh
 
-# Make /bin/bash the default shell
-RUN chsh -s /bin/bash root
+# Change to autosubmit_user for the rest of the Dockerfile
+USER autosubmit_user
+
+# Create authorized_keys directory with an empty authorized_keys file for the autosubmit_user user
+RUN mkdir -p /home/autosubmit_user/.ssh && \
+    chmod 700 /home/autosubmit_user/.ssh && \
+    touch /home/autosubmit_user/.ssh/authorized_keys && \
+    chmod 600 /home/autosubmit_user/.ssh/authorized_keys
+
+# Run installation scripts
+RUN /usr/local/bin/setup-conda.sh && \
+    /usr/local/bin/setup-venv.sh
 
 # Expose SSH port
 EXPOSE 22
