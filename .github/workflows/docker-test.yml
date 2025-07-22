@@ -37,14 +37,14 @@ jobs:
 
       - name: Append the public key to the container's authorized_keys
         run: |
-          docker exec ssh-api-runner-node sh -c "echo $(cat ~/.ssh/id_rsa.pub) >> /root/.ssh/authorized_keys"
-          docker exec ssh-api-runner-node chmod 600 /root/.ssh/authorized_keys
+          docker exec ssh-api-runner-node sh -c "echo $(cat ~/.ssh/id_rsa.pub) >> /home/autosubmit_user/.ssh/authorized_keys"
+          docker exec ssh-api-runner-node chmod 600 /home/autosubmit_user/.ssh/authorized_keys
           echo "Public key added to authorized_keys in the container."
 
       - name: Wait for SSH service to be ready
         run: |
           for i in {1..30}; do
-              if ssh -o StrictHostKeyChecking=no -p 2222 root@localhost true; then
+              if ssh -o StrictHostKeyChecking=no -p 2222 autosubmit_user@localhost true; then
                   echo "SSH is ready!"
                   break
               fi
@@ -54,12 +54,12 @@ jobs:
 
       - name: Run tests
         run: |
-          ssh -o StrictHostKeyChecking=no -p 2222 root@localhost "echo 'SSH connection successful!'"
+          ssh -o StrictHostKeyChecking=no -p 2222 autosubmit_user@localhost "echo 'SSH connection successful!'"
 
       - name: Setup autosubmit
         run: |
-          ssh -o StrictHostKeyChecking=no -p 2222 root@localhost "bash -ic 'conda run -n autosubmit_env autosubmit configure'"
-          ssh -o StrictHostKeyChecking=no -p 2222 root@localhost "bash -ic 'conda run -n autosubmit_env autosubmit install'"
+          ssh -o StrictHostKeyChecking=no -p 2222 autosubmit_user@localhost "bash -ic 'conda run -n autosubmit_env autosubmit configure'"
+          ssh -o StrictHostKeyChecking=no -p 2222 autosubmit_user@localhost "bash -ic 'conda run -n autosubmit_env autosubmit install'"
 
       - name: Set up Python
         uses: actions/setup-python@v5

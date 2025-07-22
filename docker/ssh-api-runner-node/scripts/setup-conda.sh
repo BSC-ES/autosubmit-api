@@ -1,10 +1,11 @@
 #!/bin/bash
 
-# Install Miniconda
+# Install Miniconda in user home directory
+cd /home/autosubmit_user
 wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh
-bash miniconda.sh -b -p /opt/miniconda
+bash miniconda.sh -b -u -p /home/autosubmit_user/miniconda3
 rm miniconda.sh
-export PATH="/opt/miniconda/bin:$PATH"
+export PATH="/home/autosubmit_user/miniconda3/bin:$PATH"
 conda init --all
 conda tos accept
 
