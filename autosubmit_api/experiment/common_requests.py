@@ -26,6 +26,7 @@ import locale
 import os
 import re
 import subprocess
+import tempfile
 import time
 import traceback
 from collections import deque
@@ -68,7 +69,7 @@ from autosubmit_api.config.config_common import AutosubmitConfigResolver
 from autosubmit_api.database import db_common as db_common
 from autosubmit_api.database import db_jobdata
 from autosubmit_api.experiment import common_db_requests as DbRequests
-from autosubmit_api.experiment.utils import get_files_from_dir_with_pattern, read_tail
+from autosubmit_api.experiment.utils import get_files_from_dir_with_pattern, is_xz_file, read_tail
 from autosubmit_api.logger import logger
 from autosubmit_api.monitor.monitor import Monitor
 from autosubmit_api.performance.utils import calculate_SYPD_perjob
@@ -322,6 +323,9 @@ def _is_exp_running(expid: str, time_condition=300) -> Tuple[bool, str, bool, in
         dir_files = []
         if os.path.exists(pathlog_first):
             dir_files = get_files_from_dir_with_pattern(pathlog_first, "_run.log")
+            dir_files.extend(
+                get_files_from_dir_with_pattern(pathlog_first, "_run.log.xz")
+            )
 
         #print("Length {0}".format(len(reading)))
         if dir_files:
@@ -343,6 +347,9 @@ def _is_exp_running(expid: str, time_condition=300) -> Tuple[bool, str, bool, in
         dir_files = []
         if os.path.exists(pathlog_second):
             dir_files = get_files_from_dir_with_pattern(pathlog_second, "_run.log")
+            dir_files.extend(
+                get_files_from_dir_with_pattern(pathlog_second, "_run.log.xz")
+            )
 
         #print("Second reading {0}".format(reading))
         if dir_files:
@@ -578,11 +585,17 @@ def get_experiment_log_last_lines(expid):
         # Try to read from the tmp_as_logs folder
         if os.path.exists(exp_paths.tmp_as_logs_dir):
             dir_files = get_files_from_dir_with_pattern(exp_paths.tmp_as_logs_dir, 'run.log')
+            dir_files.extend(
+                get_files_from_dir_with_pattern(exp_paths.tmp_as_logs_dir, "run.log.xz")
+            )
             path = exp_paths.tmp_as_logs_dir
 
         # Try to read from the tmp folder
         if len(dir_files) == 0 and os.path.exists(exp_paths.tmp_dir):
             dir_files = get_files_from_dir_with_pattern(exp_paths.tmp_dir, 'run.log')
+            dir_files.extend(
+                get_files_from_dir_with_pattern(exp_paths.tmp_dir, "run.log.xz")
+            )
             path = exp_paths.tmp_dir
 
         if len(dir_files) > 0:
@@ -593,7 +606,20 @@ def get_experiment_log_last_lines(expid):
             log_file_lastmodified = common_utils.timestamp_to_datetime_format(timest)
             found = True
 
-            logcontent = read_tail(log_file_path, 150)
+            if is_xz_file(log_file_path):
+                # If it's an xz file (compressed using xz -9 -T4 -e -k)
+                # decompress it in a temporary file
+                with tempfile.NamedTemporaryFile() as temp_file:
+                    subprocess.run(
+                        ["xz", "-d", "-k", "-c", log_file_path],
+                        stdout=temp_file,
+                        check=True,
+                        text=True,
+                    )
+
+                    logcontent = read_tail(temp_file.name, 150)
+            else:
+                logcontent = read_tail(log_file_path, 150)
     except Exception as e:
         error = True
         error_message = str(e)
@@ -627,7 +653,7 @@ def get_experiment_recovery_log_last_lines(expid: str) -> Dict[str, Any]:
             if f.is_file()
         ]
 
-        pattern = r"^(\d{8})_(\d{6})_(.*?)_log_recovery\.log$"
+        pattern = r"^(\d{8})_(\d{6})_(.*?)_log_recovery\.log(\.xz)?$"
 
         for file in files:
             # Extract the date and time from the filename
@@ -658,7 +684,21 @@ def get_experiment_recovery_log_last_lines(expid: str) -> Dict[str, Any]:
             log_data["modified_date"] = common_utils.timestamp_to_datetime_format(
                 int(os.stat(full_path).st_mtime)
             )
-            log_data["content"] = read_tail(full_path, 150)
+            
+            if is_xz_file(full_path):
+                # If it's an xz file (compressed using xz -9 -T4 -e -k)
+                # decompress it in a temporary file
+                with tempfile.NamedTemporaryFile() as temp_file:
+                    subprocess.run(
+                        ["xz", "-d", "-k", "-c", full_path],
+                        stdout=temp_file,
+                        check=True,
+                        text=True,
+                    )
+
+                    log_data["content"] = read_tail(temp_file.name, 150)
+            else:
+                log_data["content"] = read_tail(full_path, 150)
 
     except Exception as exc:
         error = True
