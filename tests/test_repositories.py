@@ -9,6 +9,7 @@ from autosubmit_api.repositories.experiment_status import (
 )
 from autosubmit_api.repositories.graph_layout import create_exp_graph_layout_repository
 from autosubmit_api.repositories.jobs import create_jobs_repository
+from autosubmit_api.repositories.jobs import JobsPklRepository
 from autosubmit_api.repositories.join.experiment_join import (
     create_experiment_join_repository,
     generate_query_listexp_extended,
@@ -296,3 +297,36 @@ class TestJobsRepository:
         for job in all_jobs:
             assert isinstance(job.name, str) and job.name.startswith(expid)
             assert isinstance(job.status, int)
+
+            
+@pytest.mark.parametrize(
+    "expression,value,expected",
+    [
+        # No expression matches everything
+        (None, "foobar", True),
+        ("", "foobar", True),
+        # Simple match
+        ("foo", "foo", True),
+        ("foo", "foobar", True),
+        # Wildcard at end
+        ("foo*", "foobar", True),
+        ("foo*", "fo", False),
+        # Wildcard at start
+        ("*bar", "foobar", True),
+        ("*bar", "barfoo", True),
+        # Wildcard at both ends
+        ("*foo*", "barfoo", True),
+        ("*foo*", "bar", False),
+        # Negation
+        ("!foo*", "foobar", False),
+        ("!foo*", "barfoo", False),
+        # Edge cases
+        ("*", "foobar", True),
+        ("!*", "foobar", False),
+        # Wildcard in the middle
+        ("foo*bar", "foobazbar", True),
+        ("foo*bar", "foobaz", False),
+    ],
+)
+def test_wildcard_compare(expression: str, value: str, expected: bool):
+    assert JobsPklRepository._wildcard_compare(expression, value) == expected
