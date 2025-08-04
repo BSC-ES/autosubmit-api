@@ -47,7 +47,7 @@ def start_app_gunicorn(
     options = {  # Options to always have
         "preload_app": True,
         "capture_output": True,
-        "worker_class": "uvicorn.workers.UvicornWorker",
+        "worker_class": "uvicorn_worker.UvicornWorker",
         "timeout": 600, # Change the default timeout to 10 minutes
         **kwargs,
     }
