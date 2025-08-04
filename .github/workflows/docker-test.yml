@@ -76,7 +76,7 @@ jobs:
 
       - name: Run tests
         run: |
-          pytest -m ssh_runner
+          pytest -vv -m ssh_runner
 
       - name: Coverage report
         run: |

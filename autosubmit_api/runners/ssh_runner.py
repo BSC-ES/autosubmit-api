@@ -196,7 +196,39 @@ class SSHRunner(Runner):
         """
         Stop the remote Autosubmit experiment by killing the process.
         """
-        raise NotImplementedError()
+        # Get the process from the DB
+        active_procs = self.runners_repo.get_active_processes_by_expid(expid)
+        if not active_procs:
+            logger.error(f"Experiment {expid} is not running.")
+            raise RuntimeError(f"Experiment {expid} is not running.")
+
+        # Generate the command to stop the experiment
+        flags = "--force" if force else ""
+        autosubmit_command = f"autosubmit stop {flags} {expid}"
+
+        wrapped_command = self.module_loader.generate_command(autosubmit_command)
+        ssh_command = self._ssh_command(wrapped_command)
+
+        # Run the command to stop the experiment
+        logger.debug(f"Stopping experiment {expid} with command: {wrapped_command}")
+        try:
+            output = subprocess.check_output(
+                ssh_command, shell=True, text=True, executable="/bin/bash"
+            ).strip()
+            logger.debug(f"SSH command output: {output}")
+        except Exception as exc:
+            logger.error(f"Failed to stop experiment {expid}: {exc}")
+            raise exc
+
+        logger.debug(f"Experiment {expid} stopped successfully.")
+
+        # Update the status of the subprocess in the DB
+        # NOTE: The final status can be either "STOPPED" or "FAILED"
+        # because of a race condition with the wait_run method.
+        self.runners_repo.update_process_status(
+            id=active_procs[0].id,
+            status="STOPPED",
+        )
 
     async def create_job_list(
         self,
