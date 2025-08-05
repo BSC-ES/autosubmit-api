@@ -279,8 +279,23 @@ class TreeRepresentation(object):
       ini_date, end_date = job.get_date_ini_end(chunk_size, chunk_unit)
 
       # Calculate performance metrics
-      SYPD = PUtils.calculate_SYPD_perjob(chunk_unit, chunk_size, job.chunk, job.run_time, job.status)
-      ASYPD = PUtils.calculate_ASYPD_perjob(chunk_unit, chunk_size, job.chunk, job.total_time, self.average_post_time, job.status)
+      SYPD = PUtils.calculate_SYPD_perjob(
+        chunk_unit,
+        chunk_size,
+        job.chunk,
+        job.run_time,
+        job.status,
+        job.splits,
+      )
+      ASYPD = PUtils.calculate_ASYPD_perjob(
+        chunk_unit,
+        chunk_size,
+        job.chunk,
+        job.total_time,
+        self.average_post_time,
+        job.status,
+        job.splits
+      )
 
       self.nodes.append({
         "id": job.name,
@@ -296,6 +311,8 @@ class TreeRepresentation(object):
         "title" : job.tree_title,
         "date": ini_date,
         "date_plus": end_date,
+        "split": job.split,
+        "splits": job.splits,
         "SYPD": SYPD,
         "ASYPD": ASYPD,
         "minutes_queue": job.queue_time,
