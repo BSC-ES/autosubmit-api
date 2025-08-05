@@ -6,6 +6,7 @@ from autosubmit_api.repositories.runner_processes import RunnerProcessesDataMode
 
 class RunnerType(str, Enum):
     LOCAL = "local"
+    SSH = "ssh"
 
 
 # Runner Exceptions
