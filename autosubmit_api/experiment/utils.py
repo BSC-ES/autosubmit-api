@@ -55,3 +55,8 @@ def get_files_from_dir_with_pattern(dir_path: str, pattern: str) -> List[str]:
   )
   files = [file.name for file in files]
   return files
+
+def is_xz_file(filepath: str):
+    with open(filepath, 'rb') as f:
+        magic = f.read(6)
+    return magic == bytes.fromhex("FD 37 7A 58 5A 00")
