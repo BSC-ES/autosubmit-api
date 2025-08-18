@@ -118,7 +118,8 @@ async def test_stop_experiment_success(fixture_mock_basic_config, force_stop: bo
     mock_process.send_signal = MagicMock()
     mock_process.wait = MagicMock()
 
-    with patch("subprocess.check_output") as mock_check_output:
+    with patch("subprocess.run") as mock_check_output, patch("psutil.Process") as mock_psutil:
+        mock_psutil.return_value = mock_process
         await runner.stop(TEST_EXPID, force=force_stop)
 
         mock_check_output.assert_called_once()

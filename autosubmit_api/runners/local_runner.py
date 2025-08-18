@@ -193,19 +193,29 @@ class LocalRunner(Runner):
 
         # Generate the command to stop the experiment
         flags = "--force" if force else ""
-        autosubmit_command = f"autosubmit stop {flags} {expid}"
+        autosubmit_command = f"echo y | autosubmit stop {flags} {expid}"
 
         wrapped_command = self.module_loader.generate_command(autosubmit_command)
 
         # Run the command to stop the experiment
         logger.debug(f"Stopping experiment {expid} with command: {wrapped_command}")
         try:
-            subprocess.check_output(
+            result = subprocess.run(
                 wrapped_command,
                 shell=True,
                 text=True,
                 executable="/bin/bash",
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
             )
+            logger.debug(f"Stop stdout: {result.stdout}")
+            logger.debug(f"Stop stderr: {result.stderr}")
+            
+            # Command will return non-zero code because it will think process is zombie
+            # However it only matters that the process is no longer running.
+            pid = active_procs[0].pid
+            process = psutil.Process(pid)
+            process.wait(timeout=5)
         except Exception as exc:
             logger.error(f"Failed to stop experiment {expid}: {exc}")
             raise exc
