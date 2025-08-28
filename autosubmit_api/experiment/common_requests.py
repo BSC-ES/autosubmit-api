@@ -82,8 +82,8 @@ from autosubmit_api.monitor.monitor import Monitor
 from autosubmit_api.performance.utils import calculate_SYPD_perjob
 from autosubmit_api.persistance.experiment import ExperimentPaths
 from autosubmit_api.persistance.job_package_reader import JobPackageReader
-from autosubmit_api.persistance.pkl_reader import PklReader
 from autosubmit_api.repositories.experiment import create_experiment_repository
+from autosubmit_api.repositories.jobs import create_jobs_repository
 from autosubmit_api.statistics.statistics import Statistics
 
 if TYPE_CHECKING:
@@ -754,7 +754,6 @@ def _retrieve_pkl_data(expid: str, out_format: str = "tree"):
     """
     Retrieves pkl data for the experiment.
     """
-    pkl_file_path = ""
     error = False
     error_message = ""
     pkl_content = list()
@@ -762,9 +761,8 @@ def _retrieve_pkl_data(expid: str, out_format: str = "tree"):
     pkl_timestamp = 0
 
     try:
-        pkl_reader = PklReader(expid)
-        pkl_file_path = pkl_reader.pkl_path
-        pkl_timestamp = pkl_reader.get_modified_time()
+        job_list_repo = create_jobs_repository(expid)
+        pkl_timestamp = job_list_repo.get_last_modified_timestamp()
 
         # Get last run data for each job
         try:
@@ -839,7 +837,7 @@ def _retrieve_pkl_data(expid: str, out_format: str = "tree"):
         error_message = str(exc)
 
     result = {
-        "pkl_file_name": pkl_file_path,
+        "pkl_file_name": "", # DEPRECATED: Will be removed soon
         "error": error,
         "error_message": error_message,
         "has_changed": True,
@@ -1047,8 +1045,8 @@ def get_quick_view(expid: str):
                 job_name = job_item.name
                 priority = job_item.priority
                 id_number = job_item.id
-                out = job_item.out_path_local
-                err = job_item.err_path_local
+                out = job_item.out_path_local or ""
+                err = job_item.err_path_local or ""
                 status_color = Monitor.color_status(status_code)
                 status_text = str(common_utils.Status.VALUE_TO_KEY[status_code])
                 jobs_in_pkl[job_name] = (
