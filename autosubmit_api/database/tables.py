@@ -1,9 +1,11 @@
 from typing import List, Optional, Type, Union
 
 from sqlalchemy import (
+    Boolean,
     Column,
     Engine,
     Float,
+    ForeignKey,
     Integer,
     LargeBinary,
     MetaData,
@@ -121,7 +123,7 @@ ExperimentStructureTable = Table(
     Column("e_from", Text, nullable=False, primary_key=True),
     Column("e_to", Text, nullable=False, primary_key=True),
 )
-"""Table that holds the structure of the experiment jobs."""
+"""Table that holds the structure of the experiment jobs. Before autosubmit 4.1.16"""
 
 GraphDataTable = Table(
     "experiment_graph_draw",
@@ -262,3 +264,120 @@ UserPreferencesTable = Table(
     Column("modified", Text, nullable=False),
 )
 """Table that holds user preferences, including preferred Linux username."""
+
+JobsTable = Table(
+    "jobs",
+    metadata_obj,
+    Column("name", String, nullable=False, primary_key=True),
+    Column("id", Integer),
+    Column("script_name", String),
+    Column("priority", Integer),
+    Column("status", String, nullable=False),  # Should be job_status_enum
+    Column("frequency", String),  # TODO move to Section table ?
+    Column("synchronize", Boolean),  # TODO move to Section table ?
+    Column("section", String, ForeignKey("sections.name")),
+    Column("chunk", Integer),
+    Column("member", Text),
+    Column("splits", Integer),
+    Column("split", Integer),
+    Column("date", String),
+    Column("date_split", String),
+    Column("max_checkpoint_step", Integer, nullable=False, default=0),
+    Column("start_time", String),
+    Column("start_time_timestamp", Float),
+    Column("submit_time_timestamp", Float),
+    Column("finish_time_timestamp", Float),
+    Column("ready_date", String),
+    Column("local_logs_out", String),  # tuple, to modify double value in two
+    Column("local_logs_err", String),  # tuple, to modify double value in two
+    Column("remote_logs_out", String),
+    Column("remote_logs_err", String),
+    Column("updated_log", Boolean),
+    Column("packed", Boolean),
+    Column("current_checkpoint_step", Integer, nullable=False, default=0),
+    Column("platform_name", String),
+)
+
+ExperimentStructureDBTable = Table(
+    "experiment_structure",
+    MetaData(),
+    Column(
+        "e_from", String, ForeignKey("jobs.job_name"), nullable=False, primary_key=True
+    ),
+    Column(
+        "e_to", String, ForeignKey("jobs.job_name"), nullable=False, primary_key=True
+    ),
+    Column("min_trigger_status", String),
+    Column("completion_status", String),
+    Column("from_step", Integer),
+    Column("fail_ok", Boolean),
+    UniqueConstraint("e_from", "e_to", name="unique_e_from_and_e_to"),
+)
+"""Table that holds the structure of the experiment jobs. After autosubmit 4.1.16"""
+
+
+def create_wrapper_tables(name, metadata_obj_):
+    """Create a wrapper table for the given name."""
+    table_package_info = Table(
+        f"{name}_info",
+        metadata_obj_,
+        Column("name", String, nullable=False, primary_key=True),
+        Column("id", Integer),
+        Column("script_name", String),
+        Column("status", String, nullable=False),  # Should be job_status_enum
+        Column(
+            "local_logs_out", String
+        ),  # TODO: We should recover the log from the remote at some point
+        Column(
+            "local_logs_err", String
+        ),  # TODO: We should recover the log from the remote at some point
+        Column(
+            "remote_logs_out", String
+        ),  # TODO: We should recover the log from the remote at some point
+        Column(
+            "remote_logs_err", String
+        ),  # TODO: We should recover the log from the remote at some point
+        Column(
+            "updated_log", Boolean
+        ),  # TODO: We should recover the log from the remote at some point
+        Column("platform_name", String),
+        Column("wallclock", String),
+        Column("num_processors", Integer),
+        Column("type", Text),
+        Column("sections", Text),
+        Column("method", Text),
+    )
+
+    table_jobs_inside_wrapper = Table(
+        f"{name}_jobs",
+        metadata_obj_,
+        Column(
+            "package_id",
+            Integer,
+            ForeignKey("{name}_info.id"),
+            nullable=False,
+            primary_key=True,
+        ),
+        Column(
+            "package_name",
+            String,
+            ForeignKey(f"{name}_info.name"),
+            nullable=False,
+            primary_key=True,
+        ),
+        Column(
+            "job_name",
+            String,
+            ForeignKey("jobs.name"),
+            nullable=False,
+            primary_key=True,
+        ),
+        Column("timestamp", String, nullable=True),
+    )
+    return table_package_info, table_jobs_inside_wrapper
+
+
+WrapperInfoTable, WrapperJobsTable = create_wrapper_tables("wrappers", metadata_obj)
+PreviewWrapperInfoTable, PreviewWrapperJobsTable = create_wrapper_tables(
+    "preview_wrappers", metadata_obj
+)

@@ -1,8 +1,9 @@
 from abc import ABC, abstractmethod
+from pathlib import Path
 from typing import List
 
 from pydantic import BaseModel
-from sqlalchemy import Engine, Table, create_engine
+from sqlalchemy import Engine, Table, create_engine, select
 
 from autosubmit_api.config.basicConfig import APIBasicConfig
 from autosubmit_api.database import tables
@@ -35,7 +36,7 @@ class ExperimentStructureSQLRepository(ExperimentStructureRepository):
 
     def get_all(self):
         with self.engine.connect() as conn:
-            statement = self.table.select()
+            statement = select(self.table.c.e_from, self.table.c.e_to)
             result = conn.execute(statement).all()
         return [
             ExperimentStructureModel(e_from=row.e_from, e_to=row.e_to) for row in result
@@ -46,11 +47,15 @@ def create_experiment_structure_repository(expid: str) -> ExperimentStructureRep
     if APIBasicConfig.DATABASE_BACKEND == "postgres":
         # Postgres
         _engine = create_engine(APIBasicConfig.DATABASE_CONN_URL)
+        # Critical TODO: Handle newer schema tables.ExperimentStructureDBTable
         _table = tables.table_change_schema(expid, tables.ExperimentStructureTable)
     else:
         # SQLite
-        _engine = create_sqlite_db_engine(
-            ExperimentPaths(expid).structure_db, read_only=True
-        )
-        _table = tables.ExperimentStructureTable
+        exp_paths = ExperimentPaths(expid)
+        if Path(exp_paths.db_dir).exists() and Path(exp_paths.job_list_db).exists():
+            _engine = create_sqlite_db_engine(exp_paths.job_list_db, read_only=True)
+            _table = tables.ExperimentStructureDBTable
+        else:
+            _engine = create_sqlite_db_engine(exp_paths.structure_db, read_only=True)
+            _table = tables.ExperimentStructureTable
     return ExperimentStructureSQLRepository(expid, _engine, _table)

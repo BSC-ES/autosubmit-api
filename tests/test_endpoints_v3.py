@@ -86,25 +86,32 @@ class TestVerifyToken:
 class TestExpInfo:
     endpoint = "/v3/expinfo/{expid}"
 
-    def test_info(self, fixture_fastapi_client: TestClient):
-        expid = "a003"
+    @pytest.mark.parametrize(
+        "expid,expected_total_jobs,expected_completed_jobs,expected_pkl_timestamp",
+        [
+            ("a003", 8, 8, None),
+            ("a3tb", 55, 28, None),
+            ("a1x4", 8, 0, 0),
+        ],
+    )
+    def test_exp_info(
+        self,
+        fixture_fastapi_client: TestClient,
+        expid,
+        expected_total_jobs,
+        expected_completed_jobs,
+        expected_pkl_timestamp,
+    ):
         response = fixture_fastapi_client.get(self.endpoint.format(expid=expid))
         resp_obj: dict = response.json()
         assert response.status_code == HTTPStatus.OK
         assert resp_obj["error_message"] == ""
         assert resp_obj["error"] is False
         assert resp_obj["expid"] == expid
-        assert resp_obj["total_jobs"] == 8
-
-    def test_retro3_info(self, fixture_fastapi_client: TestClient):
-        expid = "a3tb"
-        response = fixture_fastapi_client.get(self.endpoint.format(expid=expid))
-        resp_obj: dict = response.json()
-        assert resp_obj["error_message"] == ""
-        assert resp_obj["error"] is False
-        assert resp_obj["expid"] == expid
-        assert resp_obj["total_jobs"] == 55
-        assert resp_obj["completed_jobs"] == 28
+        assert resp_obj["total_jobs"] == expected_total_jobs
+        assert resp_obj["completed_jobs"] == expected_completed_jobs
+        if expected_pkl_timestamp is not None:
+            assert resp_obj["pkl_timestamp"] == expected_pkl_timestamp
 
 
 class TestPerformance:
@@ -264,13 +271,18 @@ class TestRunDetail:
 class TestQuick:
     endpoint = "/v3/quick/{expid}"
 
-    def test_quick(self, fixture_fastapi_client: TestClient):
-        expid = "a007"
+    @pytest.mark.parametrize(
+        "expid, expected_total", [("a007", 8), ("a6zj", 10), ("a1x4", 8)]
+    )
+    def test_quick(
+        self, fixture_fastapi_client: TestClient, expid: str, expected_total: int
+    ):
         response = fixture_fastapi_client.get(self.endpoint.format(expid=expid))
         resp_obj: dict = response.json()
 
         assert resp_obj["error_message"] == ""
         assert resp_obj["error"] is False
+        assert resp_obj["total"] == expected_total
         assert resp_obj["total"] == len(resp_obj["tree_view"])
         assert resp_obj["total"] == len(resp_obj["view_data"])
 
@@ -278,87 +290,28 @@ class TestQuick:
 class TestGraph:
     endpoint = "/v3/graph/{expid}/{graph_type}/{grouped}"
 
-    def test_graph_standard_none(self, fixture_fastapi_client: TestClient):
-        expid = "a003"
+    @pytest.mark.parametrize(
+        "expid,graph_type,grouped",
+        [
+            ("a003", "standard", "none"),
+            ("a003", "standard", "date-member"),
+            ("a003", "standard", "status"),
+            ("a003", "laplacian", "none"),
+            ("a3tb", "standard", "none"),
+            ("a3tb", "standard", "date-member"),
+            ("a3tb", "standard", "status"),
+        ],
+    )
+    def test_graph_variants(
+        self,
+        fixture_fastapi_client: TestClient,
+        expid: str,
+        graph_type: str,
+        grouped: str,
+    ):
         random_user = str(uuid4())
         response = fixture_fastapi_client.get(
-            self.endpoint.format(expid=expid, graph_type="standard", grouped="none"),
-            params={"loggedUser": random_user},
-        )
-        resp_obj: dict = response.json()
-        assert resp_obj["error_message"] == ""
-        assert resp_obj["error"] is False
-        assert resp_obj["total_jobs"] == len(resp_obj["nodes"])
-
-    def test_graph_standard_datemember(self, fixture_fastapi_client: TestClient):
-        expid = "a003"
-        random_user = str(uuid4())
-        response = fixture_fastapi_client.get(
-            self.endpoint.format(
-                expid=expid, graph_type="standard", grouped="date-member"
-            ),
-            params={"loggedUser": random_user},
-        )
-        resp_obj: dict = response.json()
-        assert resp_obj["error_message"] == ""
-        assert resp_obj["error"] is False
-        assert resp_obj["total_jobs"] == len(resp_obj["nodes"])
-
-    def test_graph_standard_status(self, fixture_fastapi_client: TestClient):
-        expid = "a003"
-        random_user = str(uuid4())
-        response = fixture_fastapi_client.get(
-            self.endpoint.format(expid=expid, graph_type="standard", grouped="status"),
-            params={"loggedUser": random_user},
-        )
-        resp_obj: dict = response.json()
-        assert resp_obj["error_message"] == ""
-        assert resp_obj["error"] is False
-        assert resp_obj["total_jobs"] == len(resp_obj["nodes"])
-
-    def test_graph_laplacian_none(self, fixture_fastapi_client: TestClient):
-        expid = "a003"
-        random_user = str(uuid4())
-        response = fixture_fastapi_client.get(
-            self.endpoint.format(expid=expid, graph_type="laplacian", grouped="none"),
-            params={"loggedUser": random_user},
-        )
-        resp_obj: dict = response.json()
-        assert resp_obj["error_message"] == ""
-        assert resp_obj["error"] is False
-        assert resp_obj["total_jobs"] == len(resp_obj["nodes"])
-
-    def test_graph_standard_none_retro3(self, fixture_fastapi_client: TestClient):
-        expid = "a3tb"
-        random_user = str(uuid4())
-        response = fixture_fastapi_client.get(
-            self.endpoint.format(expid=expid, graph_type="standard", grouped="none"),
-            params={"loggedUser": random_user},
-        )
-        resp_obj: dict = response.json()
-        assert resp_obj["error_message"] == ""
-        assert resp_obj["error"] is False
-        assert resp_obj["total_jobs"] == len(resp_obj["nodes"])
-
-    def test_graph_standard_datemember_retro3(self, fixture_fastapi_client: TestClient):
-        expid = "a3tb"
-        random_user = str(uuid4())
-        response = fixture_fastapi_client.get(
-            self.endpoint.format(
-                expid=expid, graph_type="standard", grouped="date-member"
-            ),
-            params={"loggedUser": random_user},
-        )
-        resp_obj: dict = response.json()
-        assert resp_obj["error_message"] == ""
-        assert resp_obj["error"] is False
-        assert resp_obj["total_jobs"] == len(resp_obj["nodes"])
-
-    def test_graph_standard_status_retro3(self, fixture_fastapi_client: TestClient):
-        expid = "a3tb"
-        random_user = str(uuid4())
-        response = fixture_fastapi_client.get(
-            self.endpoint.format(expid=expid, graph_type="standard", grouped="status"),
+            self.endpoint.format(expid=expid, graph_type=graph_type, grouped=grouped),
             params={"loggedUser": random_user},
         )
         resp_obj: dict = response.json()
@@ -386,47 +339,82 @@ class TestGraph:
         assert "packages" in list(resp_obj.keys())
         assert len(resp_obj["packages"].keys()) > 0
 
+    def test_structure(self, fixture_fastapi_client: TestClient):
+        expid = "a1x4"
+        response = fixture_fastapi_client.get(
+            self.endpoint.format(expid=expid, graph_type="standard", grouped="none")
+        )
+        resp_obj: dict = response.json()
+
+        assert resp_obj["error_message"] == ""
+        assert resp_obj["error"] is False
+        assert resp_obj["total_jobs"] == len(resp_obj["nodes"])
+        assert resp_obj["total_jobs"] == 8
+        assert len(resp_obj["edges"]) == 7
+
 
 class TestExpCount:
     endpoint = "/v3/expcount/{expid}"
 
-    def test_exp_count(self, fixture_fastapi_client: TestClient):
-        expid = "a003"
+    @pytest.mark.parametrize(
+        "expid,expected_counters",
+        [
+            (
+                "a003",
+                {
+                    "READY": 1,
+                    "COMPLETED": 0,
+                    "RUNNING": 0,
+                    "QUEUING": 0,
+                    "SUSPENDED": 0,
+                    "WAITING": 7,
+                },
+            ),
+            (
+                "a3tb",
+                {
+                    "READY": 0,
+                    "COMPLETED": 24,
+                    "RUNNING": 1,
+                    "QUEUING": 4,
+                    "SUSPENDED": 2,
+                    "WAITING": 24,
+                },
+            ),
+            (
+                "a1x4",
+                {
+                    "READY": 1,
+                    "COMPLETED": 0,
+                    "RUNNING": 0,
+                    "QUEUING": 0,
+                    "SUSPENDED": 0,
+                    "WAITING": 7,
+                },
+            ),
+        ],
+    )
+    def test_exp_count(
+        self, fixture_fastapi_client: TestClient, expid, expected_counters
+    ):
         response = fixture_fastapi_client.get(self.endpoint.format(expid=expid))
         resp_obj: dict = response.json()
 
         assert resp_obj["error_message"] == ""
         assert resp_obj["error"] is False
-        assert resp_obj["total"] == sum(
-            [resp_obj["counters"][key] for key in resp_obj["counters"]]
-        )
+        assert resp_obj["total"] == sum(resp_obj["counters"].values())
         assert resp_obj["expid"] == expid
-        assert resp_obj["counters"]["READY"] == 1
-        assert resp_obj["counters"]["WAITING"] == 7
-
-    def test_retro3(self, fixture_fastapi_client: TestClient):
-        expid = "a3tb"
-        response = fixture_fastapi_client.get(self.endpoint.format(expid=expid))
-        resp_obj: dict = response.json()
-
-        assert resp_obj["error_message"] == ""
-        assert resp_obj["error"] is False
-        assert resp_obj["total"] == sum(
-            [resp_obj["counters"][key] for key in resp_obj["counters"]]
-        )
-        assert resp_obj["expid"] == expid
-        assert resp_obj["counters"]["COMPLETED"] == 24
-        assert resp_obj["counters"]["RUNNING"] == 1
-        assert resp_obj["counters"]["QUEUING"] == 4
-        assert resp_obj["counters"]["SUSPENDED"] == 2
-        assert resp_obj["counters"]["WAITING"] == 24
+        for key, expected_value in expected_counters.items():
+            assert resp_obj["counters"][key] == expected_value, (
+                f"Expected {expected_value} for {key}, got {resp_obj['counters'][key]}"
+            )
 
 
 class TestSummary:
     endpoint = "/v3/summary/{expid}"
 
-    def test_summary(self, fixture_fastapi_client: TestClient):
-        expid = "a007"
+    @pytest.mark.parametrize("expid, n_sim", [("a007", 2), ("a6zj", 4), ("a1x4", 2)])
+    def test_summary(self, fixture_fastapi_client: TestClient, expid: str, n_sim: int):
         random_user = str(uuid4())
         response = fixture_fastapi_client.get(
             self.endpoint.format(expid=expid),
@@ -436,7 +424,7 @@ class TestSummary:
 
         assert resp_obj["error_message"] == ""
         assert resp_obj["error"] is False
-        assert resp_obj["n_sim"] > 0
+        assert resp_obj["n_sim"] == n_sim
 
 
 class TestStatistics:

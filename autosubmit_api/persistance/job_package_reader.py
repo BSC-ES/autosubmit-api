@@ -1,4 +1,5 @@
 from typing import Dict, List
+
 from autosubmit_api.logger import logger
 from autosubmit_api.repositories.job_packages import create_job_packages_repository
 
@@ -22,7 +23,7 @@ class JobPackageReader:
         except Exception as exc:
             logger.warning(exc)
             raw_content = create_job_packages_repository(
-                self.expid, wrapper=True
+                self.expid, preview=True
             ).get_all()
             self._content = [x.model_dump() for x in raw_content]
 
