@@ -1,6 +1,8 @@
 from sqlalchemy import (
+    Boolean,
     Column,
     Float,
+    ForeignKey,
     MetaData,
     Integer,
     String,
@@ -221,4 +223,37 @@ RunnerProcessesTable = Table(
     Column("modules", Text, nullable=False),
     Column("created", Text, nullable=False),
     Column("modified", Text, nullable=False),
+)
+
+JobsTable = Table(
+    "jobs",
+    metadata_obj,
+    Column("name", String, nullable=False, primary_key=True),
+    Column("id", Integer),
+    Column("script_name", String),
+    Column("priority", Integer),
+    Column("status", String, nullable=False),  # Should be job_status_enum
+    Column("frequency", String),  # TODO move to Section table ?
+    Column("synchronize", Boolean),  # TODO move to Section table ?
+    Column("section", String, ForeignKey("sections.name")),
+    Column("chunk", Integer),
+    Column("member", Text),
+    Column("splits", Integer),
+    Column("split", Integer),
+    Column("date", String),
+    Column("date_split", String),
+    Column("max_checkpoint_step", Integer, nullable=False, default=0),
+    Column("start_time", String),
+    Column("start_time_timestamp", Float),
+    Column("submit_time_timestamp", Float),
+    Column("finish_time_timestamp", Float),
+    Column("ready_date", String),
+    Column("local_logs_out", String),  # tuple, to modify double value in two
+    Column("local_logs_err", String),  # tuple, to modify double value in two
+    Column("remote_logs_out", String),
+    Column("remote_logs_err", String),
+    Column("updated_log", Boolean),
+    Column("packed", Boolean),
+    Column("current_checkpoint_step", Integer, nullable=False, default=0),
+    Column("platform_name", String),
 )

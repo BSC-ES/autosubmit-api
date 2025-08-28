@@ -1,11 +1,11 @@
 #!/usr/bin/env python
 
-from autosubmit_api.components.jobs import job_factory as factory
-from autosubmit_api.common.utils import JobSection, PklJob, PklJob14, Status
-from autosubmit_api.components.jobs.job_factory import Job, SimpleJob
-from typing import List, Dict, Set, Union
+from typing import Dict, List, Set, Union
 
-from autosubmit_api.persistance.pkl_reader import PklReader
+from autosubmit_api.common.utils import JobSection, PklJob, PklJob14, Status
+from autosubmit_api.components.jobs import job_factory as factory
+from autosubmit_api.components.jobs.job_factory import Job, SimpleJob
+from autosubmit_api.repositories.jobs import create_jobs_repository
 
 
 class PklOrganizer(object):
@@ -48,7 +48,8 @@ class PklOrganizer(object):
 
   def _process_pkl(self):
     try:
-      self.current_content = PklReader(self.expid).parse_job_list()
+      job_list_repo = create_jobs_repository(self.expid)
+      self.current_content = job_list_repo.get_all()
     except Exception as exc:
       raise Exception("Exception while reading the pkl content: {}".format(str(exc)))
 
