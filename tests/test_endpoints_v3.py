@@ -223,13 +223,18 @@ class TestRunDetail:
 class TestQuick:
     endpoint = "/v3/quick/{expid}"
 
-    def test_quick(self, fixture_fastapi_client: TestClient):
-        expid = "a007"
+    @pytest.mark.parametrize(
+        "expid, expected_total", [("a007", 8), ("a6zj", 10), ("a1x4", 8)]
+    )
+    def test_quick(
+        self, fixture_fastapi_client: TestClient, expid: str, expected_total: int
+    ):
         response = fixture_fastapi_client.get(self.endpoint.format(expid=expid))
         resp_obj: dict = response.json()
 
         assert resp_obj["error_message"] == ""
         assert resp_obj["error"] is False
+        assert resp_obj["total"] == expected_total
         assert resp_obj["total"] == len(resp_obj["tree_view"])
         assert resp_obj["total"] == len(resp_obj["view_data"])
 
@@ -349,43 +354,65 @@ class TestGraph:
 class TestExpCount:
     endpoint = "/v3/expcount/{expid}"
 
-    def test_exp_count(self, fixture_fastapi_client: TestClient):
-        expid = "a003"
+    @pytest.mark.parametrize(
+        "expid,expected_counters",
+        [
+            (
+                "a003",
+                {
+                    "READY": 1,
+                    "COMPLETED": 0,
+                    "RUNNING": 0,
+                    "QUEUING": 0,
+                    "SUSPENDED": 0,
+                    "WAITING": 7,
+                },
+            ),
+            (
+                "a3tb",
+                {
+                    "READY": 0,
+                    "COMPLETED": 24,
+                    "RUNNING": 1,
+                    "QUEUING": 4,
+                    "SUSPENDED": 2,
+                    "WAITING": 24,
+                },
+            ),
+            (
+                "a1x4",
+                {
+                    "READY": 1,
+                    "COMPLETED": 0,
+                    "RUNNING": 0,
+                    "QUEUING": 0,
+                    "SUSPENDED": 0,
+                    "WAITING": 7,
+                },
+            ),
+        ],
+    )
+    def test_exp_count(
+        self, fixture_fastapi_client: TestClient, expid, expected_counters
+    ):
         response = fixture_fastapi_client.get(self.endpoint.format(expid=expid))
         resp_obj: dict = response.json()
 
         assert resp_obj["error_message"] == ""
         assert resp_obj["error"] is False
-        assert resp_obj["total"] == sum(
-            [resp_obj["counters"][key] for key in resp_obj["counters"]]
-        )
+        assert resp_obj["total"] == sum(resp_obj["counters"].values())
         assert resp_obj["expid"] == expid
-        assert resp_obj["counters"]["READY"] == 1
-        assert resp_obj["counters"]["WAITING"] == 7
-
-    def test_retro3(self, fixture_fastapi_client: TestClient):
-        expid = "a3tb"
-        response = fixture_fastapi_client.get(self.endpoint.format(expid=expid))
-        resp_obj: dict = response.json()
-
-        assert resp_obj["error_message"] == ""
-        assert resp_obj["error"] is False
-        assert resp_obj["total"] == sum(
-            [resp_obj["counters"][key] for key in resp_obj["counters"]]
-        )
-        assert resp_obj["expid"] == expid
-        assert resp_obj["counters"]["COMPLETED"] == 24
-        assert resp_obj["counters"]["RUNNING"] == 1
-        assert resp_obj["counters"]["QUEUING"] == 4
-        assert resp_obj["counters"]["SUSPENDED"] == 2
-        assert resp_obj["counters"]["WAITING"] == 24
+        for key, expected_value in expected_counters.items():
+            assert resp_obj["counters"][key] == expected_value, (
+                f"Expected {expected_value} for {key}, got {resp_obj['counters'][key]}"
+            )
 
 
 class TestSummary:
     endpoint = "/v3/summary/{expid}"
 
-    def test_summary(self, fixture_fastapi_client: TestClient):
-        expid = "a007"
+    @pytest.mark.parametrize("expid, n_sim", [("a007", 2), ("a6zj", 4), ("a1x4", 2)])
+    def test_summary(self, fixture_fastapi_client: TestClient, expid: str, n_sim: int):
         random_user = str(uuid4())
         response = fixture_fastapi_client.get(
             self.endpoint.format(expid=expid),
@@ -395,7 +422,7 @@ class TestSummary:
 
         assert resp_obj["error_message"] == ""
         assert resp_obj["error"] is False
-        assert resp_obj["n_sim"] > 0
+        assert resp_obj["n_sim"] == n_sim
 
 
 class TestStatistics:
@@ -427,8 +454,8 @@ class TestStatistics:
         assert aux_resp_obj["error"] is False
         assert aux_resp_obj["Statistics"]["Period"]["From"] != "None"
         assert (
-            aux_resp_obj["Statistics"]["JobStatistics"]
-            == resp_obj["Statistics"]["JobStatistics"]
+            sorted(aux_resp_obj["Statistics"]["JobStatistics"], key=lambda x: x["name"])
+            == sorted(resp_obj["Statistics"]["JobStatistics"], key=lambda x: x["name"])
         )
 
 

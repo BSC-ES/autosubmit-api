@@ -1009,8 +1009,8 @@ def get_quick_view(expid: str):
                 job_name = job_item.name
                 priority = job_item.priority
                 id_number = job_item.id
-                out = job_item.out_path_local
-                err = job_item.err_path_local
+                out = job_item.out_path_local or ""
+                err = job_item.err_path_local or ""
                 status_color = Monitor.color_status(status_code)
                 status_text = str(common_utils.Status.VALUE_TO_KEY[status_code])
                 jobs_in_pkl[job_name] = (
