@@ -82,7 +82,7 @@ ExperimentStructureTable = Table(
     Column("e_from", Text, nullable=False, primary_key=True),
     Column("e_to", Text, nullable=False, primary_key=True),
 )
-"""Table that holds the structure of the experiment jobs."""
+"""Table that holds the structure of the experiment jobs. Before autosubmit 4.1.16"""
 
 GraphDataTable = Table(
     "experiment_graph_draw",
@@ -257,3 +257,22 @@ JobsTable = Table(
     Column("current_checkpoint_step", Integer, nullable=False, default=0),
     Column("platform_name", String),
 )
+
+ExperimentStructureDBTable = Table(
+    "experiment_structure",
+    MetaData(),
+    Column(
+        "e_from", String, ForeignKey("jobs.job_name"), nullable=False, primary_key=True
+    ),
+    Column(
+        "e_to", String, ForeignKey("jobs.job_name"), nullable=False, primary_key=True
+    ),
+    Column("status", String),  # TODO To rename to target_status
+    Column(
+        "completed", String
+    ),  # TODO to rename to edge_is_completed? (WAITING | RUNNING | COMPLETED)
+    Column("from_step", Integer),
+    Column("optional", Boolean),
+    UniqueConstraint("e_from", "e_to", name="unique_e_from_and_e_to"),
+)
+"""Table that holds the structure of the experiment jobs. After autosubmit 4.1.16"""

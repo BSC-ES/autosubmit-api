@@ -124,7 +124,7 @@ def create_jobs_repository(expid: str) -> JobsRepository:
     exp_paths = ExperimentPaths(expid)
 
     if Path(exp_paths.db_dir).exists():
-        engine = create_sqlite_db_engine(exp_paths.job_list_db)
+        engine = create_sqlite_db_engine(exp_paths.job_list_db, read_only=True)
         table = tables.JobsTable
         return JobsSQLRepository(expid, engine, table)
 
