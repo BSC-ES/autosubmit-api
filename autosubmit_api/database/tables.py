@@ -3,14 +3,14 @@ from sqlalchemy import (
     Column,
     Float,
     ForeignKey,
-    MetaData,
     Integer,
+    MetaData,
     String,
-    Text,
     Table,
+    Text,
     UniqueConstraint,
 )
-from sqlalchemy.orm import DeclarativeBase, mapped_column, Mapped
+from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
 ## Table utils
 
@@ -276,3 +276,70 @@ ExperimentStructureDBTable = Table(
     UniqueConstraint("e_from", "e_to", name="unique_e_from_and_e_to"),
 )
 """Table that holds the structure of the experiment jobs. After autosubmit 4.1.16"""
+
+
+def create_wrapper_tables(name, metadata_obj_):
+    """Create a wrapper table for the given name."""
+    table_package_info = Table(
+        f"{name}_info",
+        metadata_obj_,
+        Column("name", String, nullable=False, primary_key=True),
+        Column("id", Integer),
+        Column("script_name", String),
+        Column("status", String, nullable=False),  # Should be job_status_enum
+        Column(
+            "local_logs_out", String
+        ),  # TODO: We should recover the log from the remote at some point
+        Column(
+            "local_logs_err", String
+        ),  # TODO: We should recover the log from the remote at some point
+        Column(
+            "remote_logs_out", String
+        ),  # TODO: We should recover the log from the remote at some point
+        Column(
+            "remote_logs_err", String
+        ),  # TODO: We should recover the log from the remote at some point
+        Column(
+            "updated_log", Boolean
+        ),  # TODO: We should recover the log from the remote at some point
+        Column("platform_name", String),
+        Column("wallclock", String),
+        Column("num_processors", Integer),
+        Column("type", Text),
+        Column("sections", Text),
+        Column("method", Text),
+    )
+
+    table_jobs_inside_wrapper = Table(
+        f"{name}_jobs",
+        metadata_obj_,
+        Column(
+            "package_id",
+            Integer,
+            ForeignKey("{name}_info.id"),
+            nullable=False,
+            primary_key=True,
+        ),
+        Column(
+            "package_name",
+            String,
+            ForeignKey(f"{name}_info.name"),
+            nullable=False,
+            primary_key=True,
+        ),
+        Column(
+            "job_name",
+            String,
+            ForeignKey("jobs.name"),
+            nullable=False,
+            primary_key=True,
+        ),
+        Column("timestamp", String, nullable=True),
+    )
+    return table_package_info, table_jobs_inside_wrapper
+
+
+WrapperInfoTable, WrapperJobsTable = create_wrapper_tables("wrappers", metadata_obj)
+PreviewWrapperInfoTable, PreviewWrapperJobsTable = create_wrapper_tables(
+    "preview_wrappers", metadata_obj
+)
