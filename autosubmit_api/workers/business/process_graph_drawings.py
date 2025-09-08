@@ -1,7 +1,7 @@
 import time
 import traceback
 from autosubmit_api.common import utils as common_utils
-from autosubmit_api.database.db_jobdata import ExperimentGraphDrawing
+from autosubmit_api.components.representations.graph.graph_drawing import ExperimentGraphDrawing
 from autosubmit_api.builders.configuration_facade_builder import (
     ConfigurationFacadeDirector,
     AutosubmitConfigurationFacadeBuilder,
