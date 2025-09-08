@@ -6,7 +6,7 @@ from autosubmit_api.builders.joblist_loader_builder import (
     JobListLoaderBuilder,
     JobListLoaderDirector,
 )
-from autosubmit_api.database.db_jobdata import ExperimentGraphDrawing
+from autosubmit_api.components.representations.graph.graph_drawing import ExperimentGraphDrawing
 from autosubmit_api.monitor.monitor import Monitor
 from autosubmit_api.repositories.graph_layout import create_exp_graph_layout_repository
 
