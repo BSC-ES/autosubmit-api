@@ -8,6 +8,7 @@ from autosubmit_api.repositories.experiment_status import (
     create_experiment_status_repository,
 )
 from autosubmit_api.repositories.graph_layout import create_exp_graph_layout_repository
+from autosubmit_api.repositories.jobs import create_jobs_repository
 from autosubmit_api.repositories.join.experiment_join import (
     generate_query_listexp_extended,
 )
@@ -245,3 +246,18 @@ class TestExperimentRunnerRepository:
         assert last_process.id == inserted_runner.id
         assert last_process.expid == TEST_EXPID
         assert last_process.status == "COMPLETED"
+
+
+class TestJobsRepository:
+    @pytest.mark.parametrize("expid, jobs_len", [("a1x4", 8), ("a007", 8)])
+    def test_job_from_db(self, fixture_mock_basic_config, expid: str, jobs_len: int):
+        job_list_repo = create_jobs_repository(expid)
+
+        # Get all jobs
+        all_jobs = job_list_repo.get_all()
+        assert len(all_jobs) == jobs_len
+
+        # Check if each job has the required fields
+        for job in all_jobs:
+            assert isinstance(job.name, str) and job.name.startswith(expid)
+            assert isinstance(job.status, int)
