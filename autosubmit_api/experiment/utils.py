@@ -1,9 +1,16 @@
-
+import os
 import subprocess
-from typing import List
-import xml.etree.ElementTree as ET
 import traceback
+import xml.etree.ElementTree as ET
 from pathlib import Path
+from typing import List
+import lzma
+import gzip
+
+
+XZ_MAGIC = "FD 37 7A 58 5A 00"
+GZIP_MAGIC = "1F 8B"
+
 
 def get_cas_user_from_xml(xmlstring):    
     """
@@ -24,6 +31,17 @@ def get_cas_user_from_xml(xmlstring):
       print(exp)
       print((traceback.format_exc))
     return user
+
+
+def is_safe_normpath(basedir: str, path: str) -> bool:
+    """
+    Check if a path is inside a basedir after normalization.
+    Basedir and path as absolute, normalized.
+    """
+    basedir = os.path.abspath(basedir)
+    path = os.path.abspath(os.path.normpath(path))
+    return os.path.commonpath([basedir, path]) == basedir
+
 
 def read_tail(file_path: str, num_lines: int =150) -> List[dict]:
     """
@@ -55,3 +73,67 @@ def get_files_from_dir_with_pattern(dir_path: str, pattern: str) -> List[str]:
   )
   files = [file.name for file in files]
   return files
+
+
+def is_xz_file(filepath: str) -> bool:
+    with open(filepath, "rb") as f:
+        magic = f.read(6)
+    return magic == bytes.fromhex(XZ_MAGIC)
+
+
+def is_gzip_file(filepath: str) -> bool:
+    with open(filepath, "rb") as f:
+        magic = f.read(2)
+    return magic == bytes.fromhex(GZIP_MAGIC)
+
+
+def decompress_lzma_tailed(input_path: str, tail_lines: int = 150) -> List[dict]:
+    """
+    Decompresses the last tail_lines of a lzma compressed file.
+    It buffers the lines in memory to avoid decompressing the entire file.
+
+    :param input_path: path to the compressed file
+    :param tail_lines: number of lines to read from the end of the file
+    """
+    buff_lines: list[str] = []
+
+    with lzma.open(input_path, "rt") as f:
+        while True:
+            line = f.readline()
+            if not line:
+                break
+            buff_lines.append(line)
+
+            if len(buff_lines) > tail_lines:
+                buff_lines.pop(0)
+
+    tail_content = [
+        {"index": i, "content": item.rstrip()} for i, item in enumerate(buff_lines)
+    ]
+    return tail_content
+
+
+def decompress_gzip_tailed(input_path: str, tail_lines: int = 150) -> List[dict]:
+    """
+    Decompresses the last tail_lines of a gzip compressed file.
+    It buffers the lines in memory to avoid decompressing the entire file.
+
+    :param input_path: path to the compressed file
+    :param tail_lines: number of lines to read from the end of the file
+    """
+    buff_lines: list[str] = []
+
+    with gzip.open(input_path, "rt") as f:
+        while True:
+            line = f.readline()
+            if not line:
+                break
+            buff_lines.append(line)
+
+            if len(buff_lines) > tail_lines:
+                buff_lines.pop(0)
+
+    tail_content = [
+        {"index": i, "content": item.rstrip()} for i, item in enumerate(buff_lines)
+    ]
+    return tail_content
