@@ -1,3 +1,4 @@
+import os
 import subprocess
 import traceback
 import xml.etree.ElementTree as ET
@@ -30,6 +31,17 @@ def get_cas_user_from_xml(xmlstring):
       print(exp)
       print((traceback.format_exc))
     return user
+
+
+def is_safe_normpath(basedir: str, path: str) -> bool:
+    """
+    Check if a path is inside a basedir after normalization.
+    Basedir and path as absolute, normalized.
+    """
+    basedir = os.path.abspath(basedir)
+    path = os.path.abspath(os.path.normpath(path))
+    return os.path.commonpath([basedir, path]) == basedir
+
 
 def read_tail(file_path: str, num_lines: int =150) -> List[dict]:
     """
