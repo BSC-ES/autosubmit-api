@@ -73,6 +73,7 @@ from autosubmit_api.experiment.utils import (
     decompress_lzma_tailed,
     get_files_from_dir_with_pattern,
     is_gzip_file,
+    is_safe_normpath,
     is_xz_file,
     read_tail,
 )
@@ -716,7 +717,12 @@ def get_job_log(expid, logfile, nlines=150):
     APIBasicConfig.read()
     exp_paths = ExperimentPaths(expid)
     logfilepath = os.path.join(exp_paths.tmp_log_dir, logfile)
+
     try:
+        # Security check
+        if not is_safe_normpath(exp_paths.tmp_log_dir, logfilepath):
+            raise Exception("Unsafe log file path")
+
         if os.path.exists(logfilepath):
             current_stat = os.stat(logfilepath)
             timest = int(current_stat.st_mtime)
