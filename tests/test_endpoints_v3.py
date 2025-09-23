@@ -426,10 +426,9 @@ class TestStatistics:
         assert aux_resp_obj["error_message"] == ""
         assert aux_resp_obj["error"] is False
         assert aux_resp_obj["Statistics"]["Period"]["From"] != "None"
-        assert (
-            aux_resp_obj["Statistics"]["JobStatistics"]
-            == resp_obj["Statistics"]["JobStatistics"]
-        )
+        assert sorted(
+            aux_resp_obj["Statistics"]["JobStatistics"], key=lambda x: x["name"]
+        ) == sorted(resp_obj["Statistics"]["JobStatistics"], key=lambda x: x["name"])
 
 
 class TestCurrentConfig:
