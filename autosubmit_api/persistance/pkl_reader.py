@@ -1,3 +1,4 @@
+from dataclasses import dataclass
 import os
 from typing import List, Union, Dict
 import pickle
@@ -5,6 +6,43 @@ from networkx import DiGraph
 from autosubmit_api.config.basicConfig import APIBasicConfig
 from autosubmit_api.database.models import PklJobModel
 from autosubmit_api.persistance.experiment import ExperimentPaths
+
+
+@dataclass
+class CompatibleJob:
+    @property
+    def name(self):
+        return self._name
+
+    @property
+    def section(self):
+        return self._section
+
+    @property
+    def member(self):
+        return self._member
+
+    @property
+    def chunk(self):
+        return self._chunk
+
+    @property
+    def local_logs(self):
+        return self._local_logs
+
+    @property
+    def remote_logs(self):
+        return self._remote_logs
+
+
+class CustomAutosubmitUnpickler(pickle.Unpickler):
+    # Hacky patch for Autosubmit 4.1.16
+    def find_class(self, module, name):
+        if module == "autosubmit.job.job" and name == "Job":
+            return CompatibleJob
+        elif module.startswith("autosubmit"):
+            return lambda *args: None
+        return super().find_class(module, name)
 
 
 class PklReader:
@@ -15,7 +53,7 @@ class PklReader:
 
     def read_pkl(self) -> Union[List, DiGraph, Dict]:
         with open(self.pkl_path, "rb") as f:
-            return pickle.load(f, encoding="latin1")
+            return CustomAutosubmitUnpickler(f, encoding="latin1").load()
 
     def get_modified_time(self) -> int:
         return int(os.stat(self.pkl_path).st_mtime)
