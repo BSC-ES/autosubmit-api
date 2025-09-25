@@ -30,7 +30,7 @@ import time
 import traceback
 from collections import deque
 from pathlib import Path
-from typing import Any, Dict, Optional, Tuple
+from typing import TYPE_CHECKING, Any, Dict, Optional, Tuple
 
 from autosubmitconfigparser.config.configcommon import (
     AutosubmitConfig as Autosubmit4Config,
@@ -54,7 +54,7 @@ from autosubmit_api.common import utils as common_utils
 from autosubmit_api.components.experiment.file_metadata import FileMetadata
 from autosubmit_api.components.experiment.pkl_organizer import PklOrganizer
 from autosubmit_api.components.jobs import utils as JUtils
-from autosubmit_api.components.jobs.job_factory import SimpleJob
+from autosubmit_api.components.jobs.job_factory import Job, SimpleJob
 from autosubmit_api.components.jobs.job_support import JobSupport
 from autosubmit_api.components.representations.graph.graph import (
     GraphRepresentation,
@@ -66,7 +66,7 @@ from autosubmit_api.config.basicConfig import APIBasicConfig
 from autosubmit_api.config.confConfigStrategy import confConfigStrategy
 from autosubmit_api.config.config_common import AutosubmitConfigResolver
 from autosubmit_api.database import db_common as db_common
-from autosubmit_api.database import db_jobdata as JobData
+from autosubmit_api.database import db_jobdata
 from autosubmit_api.experiment import common_db_requests as DbRequests
 from autosubmit_api.experiment.utils import get_files_from_dir_with_pattern, read_tail
 from autosubmit_api.logger import logger
@@ -77,6 +77,10 @@ from autosubmit_api.persistance.job_package_reader import JobPackageReader
 from autosubmit_api.persistance.pkl_reader import PklReader
 from autosubmit_api.repositories.experiment import create_experiment_repository
 from autosubmit_api.statistics.statistics import Statistics
+
+if TYPE_CHECKING:
+    from autosubmit_api.history.data_classes.job_data import JobData
+
 
 APIBasicConfig.read()
 
@@ -1127,7 +1131,7 @@ def get_current_configuration_by_expid(expid: str, user_id: Optional[str]):
             expid, APIBasicConfig, ConfigParserFactory())
         is_as3 = isinstance(autosubmitConfig._configWrapper, confConfigStrategy)
         
-        historicalDatabase = JobData.JobDataStructure(expid, APIBasicConfig)
+        historicalDatabase = db_jobdata.JobDataStructure(expid, APIBasicConfig)
         experimentRun = historicalDatabase.get_max_id_experiment_run()
         currentMetadata = json.loads(
             experimentRun.metadata) if experimentRun and experimentRun.metadata else None
@@ -1201,13 +1205,12 @@ def get_experiment_runs(expid):
     error_message = ""
     result = []
 
-    def assign_current(job_dictionary, job_data_list, exp_history):
+    def assign_current(job_dictionary: dict[str, "Job"], job_data_list: list["JobData"]) -> None:
         for job_data in job_data_list:
             if job_data._finish == 0:
                 job_current_info = job_dictionary.get(job_data.job_name, None)
                 if job_current_info and job_current_info.finish_ts > 0:
                     job_data._finish = job_current_info.finish_ts
-                    exp_history.update_job_finish_time_if_zero(job_data.job_name, job_data._finish)
 
 
     try:
@@ -1219,20 +1222,20 @@ def get_experiment_runs(expid):
         experiment_runs = experiment_history.manager.get_experiment_runs_dcs() # job_data_structure.get_experiment_runs()
         sim_jobs = experiment_history.manager.get_job_data_dcs_COMPLETED_by_section("SIM")
         post_jobs = experiment_history.manager.get_job_data_dcs_COMPLETED_by_section("POST")
-        run_id_job_name_to_job_data_dc_COMPLETED = {}
+        run_id_job_name_to_job_data_dc_COMPLETED: dict[tuple[int, str], "JobData"] = {}
         for job_dc in experiment_history.manager.get_job_data_dcs_all():
             if job_dc.status_code == common_utils.Status.COMPLETED:
                 run_id_job_name_to_job_data_dc_COMPLETED[(job_dc.run_id, job_dc.job_name)] = job_dc
-        run_id_wrapper_code_to_job_dcs = {}
+        run_id_wrapper_code_to_job_dcs: dict[tuple[int, int], list["JobData"]] = {}
         for key, job_dc in list(run_id_job_name_to_job_data_dc_COMPLETED.items()):
             if job_dc.wrapper_code:
                 run_id, _ = key
                 run_id_wrapper_code_to_job_dcs.setdefault((run_id, job_dc.wrapper_code), []).append(job_dc)
 
-        run_dict_SIM = {}
+        run_dict_SIM: dict[int, list["JobData"]] = {}
         for job_data_dc in sim_jobs:
             run_dict_SIM.setdefault(job_data_dc.run_id, []).append(job_data_dc)
-        run_dict_POST = {}
+        run_dict_POST: dict[int, list["JobData"]] = {}
         for job_data_dc in post_jobs:
             run_dict_POST.setdefault(job_data_dc.run_id, []).append(job_data_dc)
         max_run_id = 0
@@ -1245,8 +1248,8 @@ def get_experiment_runs(expid):
                 # The content of the if block try to correct lack of finish time information in the Historical database
                 # It may not be necessary in the future.
                 if max_run_id == experiment_run.run_id:
-                   assign_current(joblist_loader.job_dictionary, valid_SIM_in_run, experiment_history)
-                   assign_current(joblist_loader.job_dictionary, valid_POST_in_run, experiment_history)
+                   assign_current(joblist_loader.job_dictionary, valid_SIM_in_run)
+                   assign_current(joblist_loader.job_dictionary, valid_POST_in_run)
                 result.append({"run_id": experiment_run.run_id,
                                 "created": experiment_run.created,
                                 "finish": common_utils.timestamp_to_datetime_format(experiment_run.finish),
