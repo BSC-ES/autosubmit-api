@@ -1205,7 +1205,7 @@ def get_experiment_runs(expid):
     error_message = ""
     result = []
 
-    def assign_current(job_dictionary: dict[str, "Job"], job_data_list: list["JobData"]) -> None:
+    def assign_current(job_dictionary: dict[str, Job], job_data_list: list["JobData"]) -> None:
         for job_data in job_data_list:
             if job_data._finish == 0:
                 job_current_info = job_dictionary.get(job_data.job_name, None)
