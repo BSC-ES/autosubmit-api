@@ -1,6 +1,6 @@
 from typing import Annotated, Any, Dict, List, Optional, Union
 
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter, Body, HTTPException, Query
 from pydantic import BaseModel
 
 from autosubmit_api.config.config_file import read_config_file
@@ -74,14 +74,24 @@ def check_runner_permissions(
     return True
 
 
+class GetRunnerExtraParamsBody(BaseModel):
+    ssh_host: Optional[str] = None
+    ssh_user: Optional[str] = None
+    ssh_port: Optional[int] = 22
+
+
 class GetRunnerBody(BaseModel):
     runner: RunnerType
     module_loader: ModuleLoaderType
     modules: Union[str, List[str], None] = None
+    runner_extra_params: Optional[GetRunnerExtraParamsBody] = None
 
 
 @router.get("/runner-detail", name="Get runner detail")
-async def get_runner_detail(query_params: Annotated[GetRunnerBody, Query()]):
+async def get_runner_detail(
+    query_params: Annotated[GetRunnerBody, Query()],
+    body: Annotated[GetRunnerExtraParamsBody, Body()] = None,
+):
     """
     Get the details of the runner for a given experiment ID.
     """
@@ -99,7 +109,9 @@ async def get_runner_detail(query_params: Annotated[GetRunnerBody, Query()]):
     module_loader = module_loaders.get_module_loader(
         query_params.module_loader, query_params.modules
     )
-    runner = get_runner(query_params.runner, module_loader)
+    runner_extra_params = body.model_dump() if body else {}
+    logger.debug(f"Extra runner params: {runner_extra_params}")
+    runner = get_runner(query_params.runner, module_loader, **runner_extra_params)
 
     try:
         version = await runner.version()
@@ -134,7 +146,10 @@ async def run_experiment(expid: str, body: GetRunnerBody):
         )
 
     module_loader = module_loaders.get_module_loader(body.module_loader, body.modules)
-    runner = get_runner(body.runner, module_loader)
+    runner_extra_params = (
+        body.runner_extra_params.model_dump() if body.runner_extra_params else {}
+    )
+    runner = get_runner(body.runner, module_loader, **runner_extra_params)
 
     try:
         runner_data = await runner.run(expid)
@@ -234,7 +249,10 @@ async def create_job_list(expid: str, body: CreateJobListBody):
         module_loader = module_loaders.get_module_loader(
             body.module_loader, body.modules
         )
-        runner = get_runner(body.runner, module_loader)
+        runner_extra_params = (
+            body.runner_extra_params.model_dump() if body.runner_extra_params else {}
+        )
+        runner = get_runner(body.runner, module_loader, **runner_extra_params)
         await runner.create_job_list(
             expid,
             check_wrapper=body.check_wrapper,
@@ -284,7 +302,10 @@ async def create_experiment(body: CreateExperimentBody):
         module_loader = module_loaders.get_module_loader(
             body.module_loader, body.modules
         )
-        runner = get_runner(body.runner, module_loader)
+        runner_extra_params = (
+            body.runner_extra_params.model_dump() if body.runner_extra_params else {}
+        )
+        runner = get_runner(body.runner, module_loader, **runner_extra_params)
         expid = await runner.create_experiment(
             description=body.description,
             git_repo=body.git_repo,

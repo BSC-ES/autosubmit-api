@@ -1,0 +1,113 @@
+name: SSH API Runner Node Tests
+
+permissions:
+  contents: read
+
+on:
+  pull_request:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+jobs:
+  test-ssh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    services:
+      ssh-api-runner-node:
+        image: autosubmit/testing-images:ssh-api-runner-node
+        ports:
+          - 2222:22
+        options: --name ssh-api-runner-node
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Generate SSH keys
+        run: |
+          mkdir -p ~/.ssh
+          ssh-keygen -t rsa -b 4096 -f ~/.ssh/id_rsa -N ""
+          echo "SSH key generated."
+
+      - name: Append the public key to the container's authorized_keys
+        run: |
+          docker exec ssh-api-runner-node sh -c "echo $(cat ~/.ssh/id_rsa.pub) >> /home/autosubmit_user/.ssh/authorized_keys"
+          docker exec ssh-api-runner-node chmod 600 /home/autosubmit_user/.ssh/authorized_keys
+          echo "Public key added to authorized_keys in the container."
+
+      - name: Wait for SSH service to be ready
+        run: |
+          for i in {1..30}; do
+              if ssh -o StrictHostKeyChecking=no -p 2222 autosubmit_user@localhost true; then
+                  echo "SSH is ready!"
+                  break
+              fi
+              echo "Waiting for SSH service..."
+              sleep 1
+              done
+
+      - name: Run tests
+        run: |
+          ssh -o StrictHostKeyChecking=no -p 2222 autosubmit_user@localhost "echo 'SSH connection successful!'"
+
+      - name: Setup autosubmit
+        run: |
+          ssh -o StrictHostKeyChecking=no -p 2222 autosubmit_user@localhost "bash -ic 'conda run -n autosubmit_env autosubmit configure'"
+          ssh -o StrictHostKeyChecking=no -p 2222 autosubmit_user@localhost "bash -ic 'conda run -n autosubmit_env autosubmit install'"
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+
+      - name: Install system dependencies
+        run: sudo apt-get install -y graphviz
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e .[all]
+
+      - name: Run tests
+        run: |
+          pytest -vv -m ssh_runner
+
+      - name: Coverage report
+        run: |
+          coverage xml
+          coverage report
+
+      - name: Upload coverage artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage_ssh_runner
+          path: coverage.xml
+          retention-days: 7
+
+  coverage:
+    needs: test-ssh
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Download coverage artifacts
+        uses: actions/download-artifact@v4
+
+      - name: Codecov upload
+        uses: codecov/codecov-action@v5
+        with:
+          name: ${{ github.workflow }}
+          flags: fast-tests
+          fail_ci_if_error: true
+          verbose: true
+          # Token not required for public repos, but avoids upload failure due
+          # to rate-limiting (but not for PRs opened from forks)
+          token: ${{ secrets.CODECOV_TOKEN }}
