@@ -94,7 +94,7 @@ class ExperimentRun(object):
             years_per_sim = common_utils.datechunk_to_year(self.chunk_unit, self.chunk_size)
             # print(self.run_id)
             # print(years_per_sim)
-            seconds_per_day = 86400
+            seconds_per_day = common_utils.SECONDS_IN_A_DAY
             number_SIM = len(outlier_free_list)
             # print(len(job_list))
             total_run_time = sum(job.run_time for job in outlier_free_list)
@@ -114,7 +114,7 @@ class ExperimentRun(object):
 
             if job_sim_list and len(job_sim_list) > 0 and job_post_list and len(job_post_list) > 0:
                 years_per_sim = common_utils.datechunk_to_year(self.chunk_unit, self.chunk_size)
-                seconds_per_day = 86400
+                seconds_per_day = common_utils.SECONDS_IN_A_DAY
                 number_SIM = len(job_sim_list)
                 number_POST = len(job_post_list)
                 average_POST = round(sum(job.queuing_time_considering_package(
@@ -131,6 +131,24 @@ class ExperimentRun(object):
         except Exception as exp:
             dbexception = DatabaseCorruptedException("job_list_XXX.db", "experiment_run", exp)
             raise dbexception
+
+    def getCHSY(self, job_list: List[JobData]) -> float:
+        if job_list:
+            performance_jobs = [
+                SimJob.from_job_data_dc(job_data_dc) for job_data_dc in job_list
+            ]
+            outlier_free_list = common_utils.get_jobs_with_no_outliers(performance_jobs)
+            if len(outlier_free_list) > 0:
+                years_per_sim = common_utils.datechunk_to_year(
+                    self.chunk_unit, self.chunk_size
+                )
+
+                if years_per_sim > 0:
+                    core_hours = sum(job.ncpus * job.run_time for job in outlier_free_list)
+                    return round(
+                        core_hours / (years_per_sim * common_utils.SECONDS_IN_ONE_HOUR), 2
+                    )
+        return None
 
     @classmethod
     def from_model(cls, row):

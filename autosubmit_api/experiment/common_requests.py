@@ -1262,8 +1262,11 @@ def get_experiment_runs(expid):
                                 "failed": experiment_run.failed,
                                 "total": experiment_run.total,
                                 "suspended": experiment_run.suspended,
+                                "Parallelization": joblist_loader.joblist_helper.configuration_facade.sim_processing_elements,
                                 "SYPD": experiment_run.getSYPD(valid_SIM_in_run),
-                                "ASYPD": experiment_run.getASYPD(valid_SIM_in_run, valid_POST_in_run, run_id_wrapper_code_to_job_dcs)})
+                                "ASYPD": experiment_run.getASYPD(valid_SIM_in_run, valid_POST_in_run, run_id_wrapper_code_to_job_dcs),
+                                "CHSY": experiment_run.getCHSY(valid_SIM_in_run),
+                })
             result.sort(key=lambda x: x["run_id"], reverse=True)
         else:
             error = True
