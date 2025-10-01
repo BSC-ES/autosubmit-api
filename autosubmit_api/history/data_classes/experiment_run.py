@@ -142,11 +142,12 @@ class ExperimentRun(object):
                 years_per_sim = common_utils.datechunk_to_year(
                     self.chunk_unit, self.chunk_size
                 )
+                number_SIM = len(outlier_free_list)
 
                 if years_per_sim > 0:
                     core_hours = sum(job.ncpus * job.run_time for job in outlier_free_list)
                     return round(
-                        core_hours / (years_per_sim * common_utils.SECONDS_IN_ONE_HOUR), 2
+                        core_hours / (years_per_sim * common_utils.SECONDS_IN_ONE_HOUR * number_SIM), 2
                     )
         return None
 
