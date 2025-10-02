@@ -7,6 +7,14 @@ from autosubmit_api.database.models import PklJobModel
 from autosubmit_api.persistance.experiment import ExperimentPaths
 
 
+class CustomAutosubmitUnpickler(pickle.Unpickler):
+    # Hacky patch for Autosubmit 4.1.16
+    def find_class(self, module, name):
+        if module == "autosubmit.job.template":
+            return lambda *args: None
+        return super().find_class(module, name)
+
+
 class PklReader:
     def __init__(self, expid: str) -> None:
         self.expid = expid
@@ -15,7 +23,7 @@ class PklReader:
 
     def read_pkl(self) -> Union[List, DiGraph, Dict]:
         with open(self.pkl_path, "rb") as f:
-            return pickle.load(f, encoding="latin1")
+            return CustomAutosubmitUnpickler(f, encoding="latin1").load()
 
     def get_modified_time(self) -> int:
         return int(os.stat(self.pkl_path).st_mtime)
