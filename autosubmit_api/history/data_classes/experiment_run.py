@@ -146,8 +146,9 @@ class ExperimentRun(object):
 
                 if years_per_sim > 0:
                     core_hours = sum(job.ncpus * job.run_time for job in outlier_free_list)
+                    average_core_hours = core_hours / number_SIM
                     return round(
-                        core_hours / (years_per_sim * common_utils.SECONDS_IN_ONE_HOUR * number_SIM), 2
+                        average_core_hours / (years_per_sim * common_utils.SECONDS_IN_ONE_HOUR), 2
                     )
         return None
 
