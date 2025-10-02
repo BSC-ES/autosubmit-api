@@ -31,7 +31,7 @@ class PklReader:
     def read_pkl(self) -> Union[List, DiGraph, Dict]:
         if APIBasicConfig.DATABASE_BACKEND == "postgres":
             pkl_bin = self.pkl_repo.get_pkl()
-            return pickle.load(BytesIO(pkl_bin), encoding="latin1")
+            return CustomAutosubmitUnpickler(BytesIO(pkl_bin), encoding="latin1").load()
 
         with open(self.pkl_path, "rb") as f:
             return CustomAutosubmitUnpickler(f, encoding="latin1").load()
