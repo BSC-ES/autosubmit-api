@@ -1,7 +1,6 @@
 import asyncio
 import asyncio.subprocess
 import re
-import signal
 import subprocess
 from typing import Optional
 
@@ -12,7 +11,12 @@ from autosubmit_api.repositories.runner_processes import (
     create_runner_processes_repository,
 )
 from autosubmit_api.runners import module_loaders
-from autosubmit_api.runners.base import Runner, RunnerAlreadyRunningError, RunnerType
+from autosubmit_api.runners.base import (
+    Runner,
+    RunnerAlreadyRunningError,
+    RunnerProcessStatus,
+    RunnerType,
+)
 
 # Garbage collection prevention: https://docs.python.org/3/library/asyncio-task.html#asyncio.create_task
 background_task = set()
@@ -83,7 +87,7 @@ class LocalRunner(Runner):
         if not is_pid_running:
             # Update the status of the subprocess in the DB
             updated_proc = self.runners_repo.update_process_status(
-                id=active_procs[0].id, status="FAILED"
+                id=active_procs[0].id, status=RunnerProcessStatus.TERMINATED.value
             )
             return updated_proc.status
         else:
@@ -100,7 +104,7 @@ class LocalRunner(Runner):
         """
         # Check if other runner with the same expid is active
         runner_status = self.get_runner_status(expid)
-        if runner_status == "ACTIVE":
+        if runner_status == RunnerProcessStatus.ACTIVE.value:
             logger.error(f"Experiment {expid} is already running.")
             raise RunnerAlreadyRunningError(expid)
 
@@ -121,7 +125,7 @@ class LocalRunner(Runner):
         runner_proc = self.runners_repo.insert_process(
             expid=expid,
             pid=process.pid,
-            status="ACTIVE",
+            status=RunnerProcessStatus.ACTIVE.value,
             runner=self.runner_type.value,
             module_loader=self.module_loader.module_loader_type.value,
             modules="\n".join(self.module_loader.modules),
@@ -151,7 +155,9 @@ class LocalRunner(Runner):
             # Update the status of the subprocess in the DB
             self.runners_repo.update_process_status(
                 id=runner_process_id,
-                status="COMPLETED" if process.returncode == 0 else "FAILED",
+                status=RunnerProcessStatus.COMPLETED.value
+                if process.returncode == 0
+                else RunnerProcessStatus.TERMINATED.value,
             )
 
             # Check if the command was successful
@@ -185,34 +191,43 @@ class LocalRunner(Runner):
             logger.error(f"Experiment {expid} is not running.")
             raise RuntimeError(f"Experiment {expid} is not running.")
 
-        # Get the pid of the process
-        pid = active_procs[0].pid
+        # Generate the command to stop the experiment
+        flags = "--force" if force else ""
+        autosubmit_command = f"echo y | autosubmit stop {flags} {expid}"
 
-        # Build the process list in DFS order
-        process = psutil.Process(pid)
-        proc_list = [process] + process.children(recursive=True)
+        wrapped_command = self.module_loader.generate_command(autosubmit_command)
 
-        # Kill the processes that starts with "autosubmit"
-        for proc in proc_list:
-            if proc.name().strip().startswith("autosubmit"):
-                logger.debug(
-                    f"Found process {proc.pid} with name {proc.name()}. Killing..."
-                )
-                if force:
-                    proc.kill()
-                else:
-                    proc.terminate()
-                    proc.send_signal(signal.SIGINT)
-                proc.wait(timeout=10)
+        # Run the command to stop the experiment
+        logger.debug(f"Stopping experiment {expid} with command: {wrapped_command}")
+        try:
+            result = subprocess.run(
+                wrapped_command,
+                shell=True,
+                text=True,
+                executable="/bin/bash",
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+            )
+            logger.debug(f"Stop stdout: {result.stdout}")
+            logger.debug(f"Stop stderr: {result.stderr}")
+            
+            # Command will return non-zero code because it will think process is zombie
+            # However it only matters that the process is no longer running.
+            pid = active_procs[0].pid
+            process = psutil.Process(pid)
+            process.wait(timeout=5)
+        except Exception as exc:
+            logger.error(f"Failed to stop experiment {expid}: {exc}")
+            raise exc
 
-        logger.debug(f"Process {pid} of experiment {expid} killed successfully.")
+        logger.debug(f"Experiment {expid} stopped successfully.")
 
         # Update the status of the subprocess in the DB
         # NOTE: The final status can be either "STOPPED" or "FAILED"
         # because of a race condition with the wait_run method.
         self.runners_repo.update_process_status(
             id=active_procs[0].id,
-            status="STOPPED",
+            status=RunnerProcessStatus.TERMINATED.value,
         )
 
     async def create_job_list(
