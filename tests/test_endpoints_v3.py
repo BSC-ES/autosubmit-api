@@ -193,15 +193,56 @@ class TestTree:
 class TestRunsList:
     endpoint = "/v3/runs/{expid}"
 
-    def test_runs_list(self, fixture_fastapi_client: TestClient):
-        expid = "a003"
-
+    @pytest.mark.parametrize(
+        "expid, expected_total_runs, expected_last_run_data",
+        [
+            ("a003", 3, {}),
+            (
+                "a3tb",
+                51,
+                {
+                    "SYPD": 15.7895,
+                    "CHSY": 1167.36,
+                },
+            ),
+            (
+                "a007",
+                52,
+                {
+                    "SYPD": 5760.0,
+                    "ASYPD": 3840.0,
+                    "CHSY": 0.03,
+                },
+            ),
+        ],
+    )
+    def test_runs_list(
+        self,
+        fixture_fastapi_client: TestClient,
+        expid: str,
+        expected_total_runs: int,
+        expected_last_run_data: dict,
+    ):
         response = fixture_fastapi_client.get(self.endpoint.format(expid=expid))
         resp_obj: dict = response.json()
 
         assert resp_obj["error_message"] == ""
         assert resp_obj["error"] is False
-        assert isinstance(resp_obj["runs"], list)
+        assert (
+            isinstance(resp_obj["runs"], list)
+            and len(resp_obj["runs"]) == expected_total_runs
+        )
+
+        # Get run with highest run_id
+        latest_run = sorted(resp_obj["runs"], key=lambda x: x["run_id"], reverse=True)[
+            0
+        ]
+
+        # Check last run data
+        for key, value in expected_last_run_data.items():
+            assert pytest.approx(latest_run[key], rel=1e-2) == value, (
+                "Key {} does not match".format(key)
+            )
 
 
 class TestRunDetail:
