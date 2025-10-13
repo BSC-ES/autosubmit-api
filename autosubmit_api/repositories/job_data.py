@@ -1,8 +1,8 @@
 from abc import ABC, abstractmethod
-from typing import Any, List, Union
+from typing import Any, List
 
 from pydantic import BaseModel
-from sqlalchemy import Engine, Table, create_engine, inspect, or_
+from sqlalchemy import Engine, Table, create_engine, or_
 
 from autosubmit_api.config.basicConfig import APIBasicConfig
 from autosubmit_api.database import tables
@@ -96,29 +96,6 @@ class ExperimentJobDataSQLRepository(ExperimentJobDataRepository):
             if len(valid_tables) == 0:
                 raise ValueError("No valid tables provided.")
             self.table = valid_tables[0]
-
-    def _check_table_schema(self, valid_tables: List[Table]) -> Union[Table, None]:
-        """
-        Check if one of the valid table schemas matches the current table schema.
-        Returns the first matching table schema or None if no match is found.
-        """
-        for valid_table in valid_tables:
-            try:
-                # Get the current columns of the table
-                current_columns = inspect(self.engine).get_columns(
-                    valid_table.name, valid_table.schema
-                )
-                column_names = [column["name"] for column in current_columns]
-
-                # Get the columns of the valid table
-                valid_columns = valid_table.columns.keys()
-                # Check if all the valid table columns are present in the current table
-                if all(column in column_names for column in valid_columns):
-                    return valid_table
-            except Exception as exc:
-                print(f"Error inspecting table {valid_table.name}: {exc}")
-                continue
-        return None
 
     def get_last_job_data_by_run_id(self, run_id: int):
         with self.engine.connect() as conn:
