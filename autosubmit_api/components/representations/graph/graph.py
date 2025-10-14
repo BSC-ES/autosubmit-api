@@ -8,7 +8,7 @@ from autosubmit_api.common.utils import Status, get_average_total_time
 from autosubmit_api.components.jobs.job_factory import Job
 from autosubmit_api.components.jobs.joblist_loader import JobListLoader
 from autosubmit_api.monitor.monitor import Monitor
-from autosubmit_api.database.db_jobdata import ExperimentGraphDrawing
+from autosubmit_api.components.representations.graph.graph_drawing import ExperimentGraphDrawing
 
 from autosubmit_api.components.representations.graph.edge import Edge, RealEdge
 from typing import List, Dict, Optional, Tuple, Any
