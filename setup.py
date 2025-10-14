@@ -37,6 +37,8 @@ install_requires = [
     "python-cas~=1.6.0",
     "autosubmit==4.1.11",
     "uvicorn-worker~=0.3.0",
+    "psycopg2",
+    "testcontainers",
 ]
 
 # Test dependencies

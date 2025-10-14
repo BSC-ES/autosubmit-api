@@ -2,8 +2,9 @@ from abc import ABC, abstractmethod
 from typing import Any, List
 
 from pydantic import BaseModel
-from sqlalchemy import Engine, Table
+from sqlalchemy import Engine, Table, create_engine
 
+from autosubmit_api.config.basicConfig import APIBasicConfig
 from autosubmit_api.database import tables
 from autosubmit_api.database.common import create_sqlite_db_engine
 from autosubmit_api.persistance.experiment import ExperimentPaths
@@ -65,9 +66,7 @@ class ExperimentRunSQLRepository(ExperimentRunRepository):
 
     def get_last_run(self):
         with self.engine.connect() as conn:
-            statement = (
-                self.table.select().order_by(self.table.c.run_id.desc())
-            )
+            statement = self.table.select().order_by(self.table.c.run_id.desc())
             result = conn.execute(statement).first()
         if result is None:
             raise ValueError(f"No runs found for experiment {self.expid}")
@@ -85,5 +84,12 @@ class ExperimentRunSQLRepository(ExperimentRunRepository):
 
 
 def create_experiment_run_repository(expid: str):
-    engine = create_sqlite_db_engine(ExperimentPaths(expid).job_data_db, read_only=True)
-    return ExperimentRunSQLRepository(expid, engine, tables.ExperimentRunTable)
+    if APIBasicConfig.DATABASE_BACKEND == "postgres":
+        # Postgres
+        _engine = create_engine(APIBasicConfig.DATABASE_CONN_URL)
+        _table = tables.table_change_schema(expid, tables.ExperimentRunTable)
+    else:
+        # SQLite
+        _engine = create_sqlite_db_engine(ExperimentPaths(expid).job_data_db, read_only=True)
+        _table = tables.ExperimentRunTable
+    return ExperimentRunSQLRepository(expid, _engine, _table)
