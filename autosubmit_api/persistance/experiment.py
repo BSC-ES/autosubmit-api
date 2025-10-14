@@ -68,3 +68,11 @@ class ExperimentPaths:
     @property
     def graph_data_db(self):
         return os.path.join(APIBasicConfig.GRAPHDATA_DIR, f"graph_data_{self.expid}.db")
+
+    @property
+    def db_dir(self):
+        return os.path.join(self.exp_dir, "db")
+
+    @property
+    def job_list_db(self):
+        return os.path.join(self.db_dir, "job_list.db")
