@@ -39,6 +39,7 @@ install_requires = [
     "uvicorn-worker~=0.3.0",
     "psycopg2",
     "testcontainers",
+    "paramiko",
 ]
 
 # Test dependencies
