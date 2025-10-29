@@ -49,7 +49,7 @@ def test_get_module_loader(module_loader_name, modules, expected):
     "module_loader_name, modules, expected_cmd",
     [
         (ModuleLoaderType.CONDA.value, "foo", "conda run -n"),
-        (ModuleLoaderType.VENV, "/foo", "source /foo/bin/activate"),
+        (ModuleLoaderType.VENV, "/foo", "/foo/bin/"),
         (ModuleLoaderType.LMOD.value, "foo", "module load foo"),
         (ModuleLoaderType.LMOD.value, ["foo", "bar"], "module load foo bar"),
         (ModuleLoaderType.NO_MODULE.value, None, ""),
