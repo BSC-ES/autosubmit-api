@@ -68,7 +68,15 @@ from autosubmit_api.config.config_common import AutosubmitConfigResolver
 from autosubmit_api.database import db_common as db_common
 from autosubmit_api.database import db_jobdata
 from autosubmit_api.experiment import common_db_requests as DbRequests
-from autosubmit_api.experiment.utils import get_files_from_dir_with_pattern, read_tail
+from autosubmit_api.experiment.utils import (
+    decompress_gzip_tailed,
+    decompress_lzma_tailed,
+    get_files_from_dir_with_pattern,
+    is_gzip_file,
+    is_safe_normpath,
+    is_xz_file,
+    read_tail,
+)
 from autosubmit_api.logger import logger
 from autosubmit_api.monitor.monitor import Monitor
 from autosubmit_api.performance.utils import calculate_SYPD_perjob
@@ -291,6 +299,8 @@ def _is_exp_running(expid: str, time_condition=300) -> Tuple[bool, str, bool, in
     :param time_condition: Time constraint, 120 by default. Represents max seconds before an experiment is considered as NOT RUNNING
     :return: (error (true if error is found, false otherwise), error_message, is_running (true if running, false otherwise), timediff, path_to_log)
     """
+    patterns = ["_run.log", "_run.log.xz", "_run.log.gz"]
+
     is_running = False
     error = False
     error_message = ""
@@ -321,7 +331,8 @@ def _is_exp_running(expid: str, time_condition=300) -> Tuple[bool, str, bool, in
         # print(pathlog)
         dir_files = []
         if os.path.exists(pathlog_first):
-            dir_files = get_files_from_dir_with_pattern(pathlog_first, "_run.log")
+            for pattern in patterns:
+                dir_files.extend(get_files_from_dir_with_pattern(pathlog_first, pattern))
 
         #print("Length {0}".format(len(reading)))
         if dir_files:
@@ -342,7 +353,8 @@ def _is_exp_running(expid: str, time_condition=300) -> Tuple[bool, str, bool, in
         # print(pathlog)
         dir_files = []
         if os.path.exists(pathlog_second):
-            dir_files = get_files_from_dir_with_pattern(pathlog_second, "_run.log")
+            for pattern in patterns:
+                dir_files.extend(get_files_from_dir_with_pattern(pathlog_second, pattern))
 
         #print("Second reading {0}".format(reading))
         if dir_files:
@@ -559,6 +571,8 @@ def get_experiment_log_last_lines(expid):
     """
     Gets last 150 lines of the log content
     """
+    patterns = ["run.log", "run.log.xz", "run.log.gz"]
+
     # Initializing results:
     log_file_name = ""
     found = False
@@ -571,18 +585,19 @@ def get_experiment_log_last_lines(expid):
     try:
         APIBasicConfig.read()
         exp_paths = ExperimentPaths(expid)
-
-        dir_files = []
         path = None
 
         # Try to read from the tmp_as_logs folder
+        dir_files = []
         if os.path.exists(exp_paths.tmp_as_logs_dir):
-            dir_files = get_files_from_dir_with_pattern(exp_paths.tmp_as_logs_dir, 'run.log')
+            for pattern in patterns:
+                dir_files.extend(get_files_from_dir_with_pattern(exp_paths.tmp_as_logs_dir, pattern))
             path = exp_paths.tmp_as_logs_dir
 
         # Try to read from the tmp folder
         if len(dir_files) == 0 and os.path.exists(exp_paths.tmp_dir):
-            dir_files = get_files_from_dir_with_pattern(exp_paths.tmp_dir, 'run.log')
+            for pattern in patterns:
+                dir_files.extend(get_files_from_dir_with_pattern(exp_paths.tmp_dir, pattern))
             path = exp_paths.tmp_dir
 
         if len(dir_files) > 0:
@@ -593,7 +608,12 @@ def get_experiment_log_last_lines(expid):
             log_file_lastmodified = common_utils.timestamp_to_datetime_format(timest)
             found = True
 
-            logcontent = read_tail(log_file_path, 150)
+            if is_xz_file(log_file_path):
+                logcontent = decompress_lzma_tailed(log_file_path, 150)
+            elif is_gzip_file(log_file_path):
+                logcontent = decompress_gzip_tailed(log_file_path, 150)
+            else:
+                logcontent = read_tail(log_file_path, 150)
     except Exception as e:
         error = True
         error_message = str(e)
@@ -627,7 +647,7 @@ def get_experiment_recovery_log_last_lines(expid: str) -> Dict[str, Any]:
             if f.is_file()
         ]
 
-        pattern = r"^(\d{8})_(\d{6})_(.*?)_log_recovery\.log$"
+        pattern = r"^(\d{8})_(\d{6})_(.*?)_log_recovery\.log(\.xz|\.gz)?$"
 
         for file in files:
             # Extract the date and time from the filename
@@ -658,7 +678,13 @@ def get_experiment_recovery_log_last_lines(expid: str) -> Dict[str, Any]:
             log_data["modified_date"] = common_utils.timestamp_to_datetime_format(
                 int(os.stat(full_path).st_mtime)
             )
-            log_data["content"] = read_tail(full_path, 150)
+            
+            if is_xz_file(full_path):
+                log_data["content"] = decompress_lzma_tailed(full_path, 150)
+            elif is_gzip_file(full_path):
+                log_data["content"] = decompress_gzip_tailed(full_path, 150)
+            else:
+                log_data["content"] = read_tail(full_path, 150)
 
     except Exception as exc:
         error = True
@@ -691,26 +717,37 @@ def get_job_log(expid, logfile, nlines=150):
     APIBasicConfig.read()
     exp_paths = ExperimentPaths(expid)
     logfilepath = os.path.join(exp_paths.tmp_log_dir, logfile)
+
     try:
+        # Security check
+        if not is_safe_normpath(exp_paths.tmp_log_dir, logfilepath):
+            raise Exception("Unsafe log file path")
+
         if os.path.exists(logfilepath):
             current_stat = os.stat(logfilepath)
             timest = int(current_stat.st_mtime)
             log_file_lastmodified = common_utils.timestamp_to_datetime_format(timest)
             found = True
 
-            logcontent = read_tail(logfilepath, nlines)
+            if is_xz_file(logfilepath):
+                logcontent = decompress_lzma_tailed(logfilepath, nlines)
+            elif is_gzip_file(logfilepath):
+                logcontent = decompress_gzip_tailed(logfilepath, nlines)
+            else:
+                logcontent = read_tail(logfilepath, nlines)
     except Exception as e:
         error = True
         error_message = str(e)
 
     return {
-        'logfile': logfilepath,
-        'found': found,
-        'lastModified': log_file_lastmodified,
-        'timeStamp': timest,
-        'error': error,
-        'error_message': error_message,
-        'logcontent': logcontent}
+        "logfile": logfilepath,
+        "found": found,
+        "lastModified": log_file_lastmodified,
+        "timeStamp": timest,
+        "error": error,
+        "error_message": error_message,
+        "logcontent": logcontent,
+    }
 
 
 def _retrieve_pkl_data(expid: str, out_format: str = "tree"):
