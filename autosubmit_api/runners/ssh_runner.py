@@ -211,7 +211,10 @@ class SSHRunner(Runner):
             raise RunnerAlreadyRunningError(expid)
 
         autosubmit_command = f"autosubmit run {expid}"
-        prepared_command = "nohup " + self._prepare_command(autosubmit_command)
+        if self.module_loader.module_loader_type == module_loaders.ModuleLoaderType.LMOD:
+            prepared_command = self._prepare_command("nohup " + autosubmit_command)
+        else:
+            prepared_command = "nohup " + self._prepare_command(autosubmit_command)
 
         # Execute the command asynchronously and get a channel to track PID
         self._ensure_connection()
