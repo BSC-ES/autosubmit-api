@@ -5,6 +5,8 @@ from autosubmit_api.experiment.common_requests import (
     get_experiment_graph,
     get_experiment_tree_structured,
 )
+from autosubmit_api.experiment.common_requests import get_job_log
+import pytest
 
 
 class TestGetExperimentData:
@@ -141,3 +143,19 @@ class TestGetGraph:
         assert len(workflow_commits) == 1
 
         assert workflow_commits[0] == "947903ff8b5859ac623abeae4cbc3cf40d36a013"
+
+
+class TestLogDecompress:
+    @pytest.mark.parametrize(
+        "expid, logfile",
+        [
+            ("a8qc", "a8qc_20220630_000_1_CLEAN.20250312185154.err.gz"),
+            ("a8qc", "a8qc_20220630_000_1_CLEAN.20250312185154.out.xz"),
+        ],
+    )
+    def test_log_decompress(self, fixture_mock_basic_config, expid, logfile):
+        log_content = get_job_log(expid, logfile, nlines=150)
+
+        assert log_content["error"] is False
+        assert isinstance(log_content["logcontent"], list)
+        assert len(log_content["logcontent"]) == 150
