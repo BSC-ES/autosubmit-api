@@ -1,7 +1,7 @@
 import pytest
 from unittest.mock import patch
 from autosubmit_api.repositories.runner_processes import RunnerProcessesDataModel
-from autosubmit_api.routers.v4alpha import check_runner_permissions
+from autosubmit_api.runners.runner_config import check_runner_permissions
 from autosubmit_api.runners.runner_factory import get_runner, get_runner_from_expid
 from autosubmit_api.runners.local_runner import LocalRunner
 from autosubmit_api.runners.base import RunnerType
@@ -160,7 +160,9 @@ def test_get_runner_from_expid():
 def test_check_runner_permissions(
     runner, module_loader, config_content, modules, expected
 ):
-    with patch("autosubmit_api.routers.v4alpha.read_config_file") as mock_read_config:
+    with patch(
+        "autosubmit_api.runners.runner_config.read_config_file"
+    ) as mock_read_config:
         mock_read_config.return_value = config_content
 
         result = check_runner_permissions(runner, module_loader, modules)
