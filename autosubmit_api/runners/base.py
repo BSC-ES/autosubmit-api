@@ -75,3 +75,11 @@ class Runner(ABC):
         """
         Create an Autosubmit experiment.
         """
+
+    @abstractmethod
+    async def set_job_status(self, expid: str):
+        """
+        Set the status of a job.
+
+        :param expid: The experiment ID.
+        """

@@ -210,7 +210,7 @@ class LocalRunner(Runner):
             )
             logger.debug(f"Stop stdout: {result.stdout}")
             logger.debug(f"Stop stderr: {result.stderr}")
-            
+
             # Command will return non-zero code because it will think process is zombie
             # However it only matters that the process is no longer running.
             pid = active_procs[0].pid
@@ -314,6 +314,54 @@ class LocalRunner(Runner):
             expid = match.group(1)
             logger.info(f"Experiment {expid} created successfully.")
             return expid
+        except Exception as exc:
+            logger.error(f"Command failed with error: {exc}")
+            raise exc
+
+    async def set_job_status(
+        self,
+        expid: str,
+        job_names_list: list[str] = None,
+        final_status: str = None,
+        filter_chunks: str = None,
+        filter_status: str = None,
+        filter_type: str = None,
+        filter_type_chunk: str = None,
+        filter_type_chunk_split: str = None,
+        check_wrapper: bool = False,
+        update_version: bool = False,
+    ) -> str:
+        flags = ["-np", "-nt", "-s"]
+        if job_names_list:
+            job_names = " ".join(job_names_list)
+            flags.append(f'--list="{job_names}"')
+        if final_status:
+            flags.append(f'--status_final="{final_status}"')
+        if filter_chunks:
+            flags.append(f'--filter_chunks="{filter_chunks}"')
+        if filter_status:
+            flags.append(f'--filter_status="{filter_status}"')
+        if filter_type:
+            flags.append(f'--filter_type="{filter_type}"')
+        if filter_type_chunk:
+            flags.append(f'--filter_type_chunk="{filter_type_chunk}"')
+        if filter_type_chunk_split:
+            flags.append(f'--filter_type_chunk_split="{filter_type_chunk_split}"')
+        if check_wrapper:
+            flags.append("--check_wrapper")
+        if update_version:
+            flags.append("--update_version")
+
+        autosubmit_command = f"autosubmit setstatus {expid} {' '.join(flags)}"
+        wrapped_command = self.module_loader.generate_command(autosubmit_command)
+
+        try:
+            logger.debug(f"Running command: {wrapped_command}")
+            output = subprocess.check_output(
+                wrapped_command, shell=True, text=True, executable="/bin/bash"
+            ).strip()
+            logger.debug(f"Command output: {output}")
+            return output
         except Exception as exc:
             logger.error(f"Command failed with error: {exc}")
             raise exc

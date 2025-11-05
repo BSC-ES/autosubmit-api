@@ -330,3 +330,59 @@ async def create_experiment(body: CreateExperimentBody):
         "module_loader": module_loader.module_loader_type,
         "modules": module_loader.modules,
     }
+
+
+class SetJobStatusBody(GetRunnerBody):
+    job_names_list: list[str] = None
+    final_status: str = None
+    filter_chunks: str = None
+    filter_status: str = None
+    filter_type: str = None
+    filter_type_chunk: str = None
+    filter_type_chunk_split: str = None
+    check_wrapper: bool = False
+    update_version: bool = False
+
+
+@router.post("/experiments/{expid}/set-job-status", name="Set job status")
+async def set_job_status(expid: str, body: SetJobStatusBody):
+    """
+    Set the status of a job for the given experiment ID using the specified runner and module loader.
+    """
+    # Check if the runner and module loader are enabled
+    if not check_runner_permissions(
+        body.runner.value,
+        body.module_loader.value,
+        body.modules,
+    ):
+        raise HTTPException(
+            status_code=403,
+            detail="Runner or module loader is not enabled in the config file",
+        )
+
+    try:
+        module_loader = module_loaders.get_module_loader(
+            body.module_loader, body.modules
+        )
+        runner = get_runner(body.runner, module_loader)
+        await runner.set_job_status(
+            expid,
+            job_names_list=body.job_names_list,
+            final_status=body.final_status,
+            filter_chunks=body.filter_chunks,
+            filter_status=body.filter_status,
+            filter_type=body.filter_type,
+            filter_type_chunk=body.filter_type_chunk,
+            filter_type_chunk_split=body.filter_type_chunk_split,
+            check_wrapper=body.check_wrapper,
+            update_version=body.update_version,
+        )
+    except Exception as exc:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to set job status for experiment {expid}: {exc}",
+        )
+
+    return {
+        "message": f"Job status for experiment {expid} set successfully.",
+    }
