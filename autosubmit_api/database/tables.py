@@ -251,3 +251,13 @@ JobPklTable = Table(
     Column("pkl", LargeBinary),
     Column("modified", String),
 )
+
+UserPreferencesTable = Table(
+    "user_preferences",
+    metadata_obj,
+    Column("user_id", Text, primary_key=True),
+    Column("preferred_username", Text, nullable=False),
+    Column("created", Text, nullable=False),
+    Column("modified", Text, nullable=False),
+)
+"""Table that holds user preferences, including preferred Linux username."""

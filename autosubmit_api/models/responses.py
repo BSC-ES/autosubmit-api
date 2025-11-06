@@ -48,3 +48,10 @@ class ExperimentRunConfigResponse(BaseModel):
 
 class ExperimentWrappersResponse(BaseModel):
     wrappers: List[BaseExperimentWrapper]
+
+
+class PreferredUsernameResponse(BaseModel):
+    user_id: str
+    preferred_username: str
+    created: str
+    modified: str
