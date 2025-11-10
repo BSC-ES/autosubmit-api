@@ -3,10 +3,11 @@ from datetime import datetime
 from typing import Optional
 
 from pydantic import BaseModel
-from sqlalchemy import Engine, Table, insert, update
+from sqlalchemy import Engine, Table, create_engine, insert, update
 from sqlalchemy.schema import CreateTable
 
 from autosubmit_api.common.utils import LOCAL_TZ
+from autosubmit_api.config.basicConfig import APIBasicConfig
 from autosubmit_api.database import tables
 from autosubmit_api.database.common import create_as_api_db_engine
 
@@ -112,5 +113,10 @@ class UserPreferencesSQLRepository(UserPreferencesRepository):
 
 
 def create_user_preferences_repository() -> UserPreferencesRepository:
-    engine = create_as_api_db_engine()
-    return UserPreferencesSQLRepository(engine, tables.UserPreferencesTable)
+    if APIBasicConfig.DATABASE_BACKEND == "postgres":
+        # PostgreSQL
+        _engine = create_engine(APIBasicConfig.DATABASE_CONN_URL)
+    else:
+        _engine = create_as_api_db_engine()
+    _table = tables.UserPreferencesTable
+    return UserPreferencesSQLRepository(_engine, _table)
