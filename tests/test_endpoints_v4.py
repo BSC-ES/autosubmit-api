@@ -423,8 +423,8 @@ class TestUserMetricsRuns:
 
 
 class TestUserPreferences:
-    register_endpoint = "/v4/users/preferred-username"
-    get_endpoint = "/v4/users/preferred-username"
+    register_endpoint = "/v4/user-settings/preferred-username"
+    get_endpoint = "/v4/user-settings/preferred-username"
 
     def _create_jwt_token(self, user_id: str) -> str:
         """Helper method to create a valid JWT token for testing"""

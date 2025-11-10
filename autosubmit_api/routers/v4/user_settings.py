@@ -14,7 +14,7 @@ from autosubmit_api.repositories.user_preferences import (
 router = APIRouter()
 
 
-@router.post("/preferred-username", name="Register preferred username")
+@router.post("/preferred-username", name="Register preferred username from authenticated user")
 async def register_preferred_username(
     request: PreferredUsernameRequest,
     user_id: Optional[str] = Depends(
@@ -44,7 +44,7 @@ async def register_preferred_username(
     )
 
 
-@router.get("/preferred-username", name="Get preferred username")
+@router.get("/preferred-username", name="Get preferred username for authenticated user")
 async def get_preferred_username(
     user_id: Optional[str] = Depends(
         auth_token_dependency(threshold=ProtectionLevels.NONE, raise_on_fail=True)
