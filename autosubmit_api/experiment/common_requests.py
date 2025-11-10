@@ -766,9 +766,6 @@ def _retrieve_pkl_data(expid: str, out_format: str = "tree"):
         pkl_file_path = pkl_reader.pkl_path
         pkl_timestamp = pkl_reader.get_modified_time()
 
-        if not os.path.exists(pkl_file_path):
-            raise Exception("Pkl file {} not found.".format(pkl_file_path))
-
         # Get last run data for each job
         try:
             experiment_history = ExperimentHistoryDirector(

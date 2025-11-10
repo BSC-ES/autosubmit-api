@@ -1,8 +1,11 @@
 from abc import ABC, abstractmethod
 from typing import Any, Dict, List, Union
+
 from pydantic import BaseModel
-from sqlalchemy import Engine, Table
-from sqlalchemy.schema import CreateTable
+from sqlalchemy import Engine, Table, create_engine
+from sqlalchemy.schema import CreateSchema, CreateTable
+
+from autosubmit_api.config.basicConfig import APIBasicConfig
 from autosubmit_api.database import tables
 from autosubmit_api.database.common import create_sqlite_db_engine
 from autosubmit_api.persistance.experiment import ExperimentPaths
@@ -40,6 +43,8 @@ class ExpGraphLayoutSQLRepository(ExpGraphLayoutRepository):
         self.table = table
 
         with self.engine.connect() as conn:
+            if self.table.schema:
+                conn.execute(CreateSchema(self.table.schema, if_not_exists=True))
             conn.execute(CreateTable(self.table, if_not_exists=True))
             conn.commit()
 
@@ -68,5 +73,10 @@ class ExpGraphLayoutSQLRepository(ExpGraphLayoutRepository):
 
 
 def create_exp_graph_layout_repository(expid: str) -> ExpGraphLayoutRepository:
-    engine = create_sqlite_db_engine(ExperimentPaths(expid).graph_data_db)
-    return ExpGraphLayoutSQLRepository(expid, engine, tables.GraphDataTable)
+    if APIBasicConfig.DATABASE_BACKEND == "postgres":
+        _engine = create_engine(APIBasicConfig.DATABASE_CONN_URL)
+        _table = tables.table_change_schema(expid, tables.GraphDataTable)
+    else:
+        _engine = create_sqlite_db_engine(ExperimentPaths(expid).graph_data_db)
+        _table = tables.GraphDataTable
+    return ExpGraphLayoutSQLRepository(expid, _engine, _table)

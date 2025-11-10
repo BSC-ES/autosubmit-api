@@ -1,7 +1,10 @@
 from abc import ABC, abstractmethod
 from typing import List
+
 from pydantic import BaseModel
-from sqlalchemy import Engine, Table, select
+from sqlalchemy import Engine, Table, create_engine, select
+
+from autosubmit_api.config.basicConfig import APIBasicConfig
 from autosubmit_api.database import tables
 from autosubmit_api.database.common import (
     create_sqlite_db_engine,
@@ -83,8 +86,13 @@ def create_user_metric_repository(expid: str) -> UserMetricRepository:
     :param expid: The experiment id
     :return: The user metric repository
     """
-    engine = create_sqlite_db_engine(
-        ExperimentPaths(expid).user_metric_db, read_only=True
-    )
-    table = tables.UserMetricTable
-    return UserMetricSQLRepository(engine, table)
+    if APIBasicConfig.DATABASE_BACKEND == "postgres":
+        # Postgres
+        _engine = create_engine(APIBasicConfig.DATABASE_CONN_URL)
+        _table = tables.table_change_schema(expid, tables.UserMetricTable)
+    else:
+        _engine = create_sqlite_db_engine(
+            ExperimentPaths(expid).user_metric_db, read_only=True
+        )
+        _table = tables.UserMetricTable
+    return UserMetricSQLRepository(_engine, _table)

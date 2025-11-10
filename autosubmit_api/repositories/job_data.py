@@ -1,9 +1,10 @@
 from abc import ABC, abstractmethod
-from typing import Any, List, Union
+from typing import Any, List
 
 from pydantic import BaseModel
-from sqlalchemy import Engine, Table, inspect, or_
+from sqlalchemy import Engine, Table, create_engine, or_
 
+from autosubmit_api.config.basicConfig import APIBasicConfig
 from autosubmit_api.database import tables
 from autosubmit_api.database.common import create_sqlite_db_engine
 from autosubmit_api.persistance.experiment import ExperimentPaths
@@ -90,34 +91,11 @@ class ExperimentJobDataSQLRepository(ExperimentJobDataRepository):
     def __init__(self, expid: str, engine: Engine, valid_tables: List[Table]):
         self.expid = expid
         self.engine = engine
-        self.table = self._check_table_schema(valid_tables)
+        self.table = tables.check_table_schema(self.engine, valid_tables)
         if self.table is None:
             if len(valid_tables) == 0:
                 raise ValueError("No valid tables provided.")
             self.table = valid_tables[0]
-
-    def _check_table_schema(self, valid_tables: List[Table]) -> Union[Table, None]:
-        """
-        Check if one of the valid table schemas matches the current table schema.
-        Returns the first matching table schema or None if no match is found.
-        """
-        for valid_table in valid_tables:
-            try:
-                # Get the current columns of the table
-                current_columns = inspect(self.engine).get_columns(
-                    valid_table.name, valid_table.schema
-                )
-                column_names = [column["name"] for column in current_columns]
-
-                # Get the columns of the valid table
-                valid_columns = valid_table.columns.keys()
-                # Check if all the valid table columns are present in the current table
-                if all(column in column_names for column in valid_columns):
-                    return valid_table
-            except Exception as exc:
-                print(f"Error inspecting table {valid_table.name}: {exc}")
-                continue
-        return None
 
     def get_last_job_data_by_run_id(self, run_id: int):
         with self.engine.connect() as conn:
@@ -215,7 +193,18 @@ class ExperimentJobDataSQLRepository(ExperimentJobDataRepository):
 
 
 def create_experiment_job_data_repository(expid: str):
-    engine = create_sqlite_db_engine(ExperimentPaths(expid).job_data_db, read_only=True)
-    return ExperimentJobDataSQLRepository(
-        expid, engine, [tables.JobDataTableV18, tables.JobDataTable]
-    )
+    if APIBasicConfig.DATABASE_BACKEND == "postgres":
+        _engine = create_engine(APIBasicConfig.DATABASE_CONN_URL)
+        _tables = [
+            tables.table_change_schema(expid, tables.JobDataTableV18),
+            tables.table_change_schema(expid, tables.JobDataTable),
+        ]
+    else:
+        _engine = create_sqlite_db_engine(
+            ExperimentPaths(expid).job_data_db, read_only=True
+        )
+        _tables = [
+            tables.JobDataTableV18,
+            tables.JobDataTable,
+        ]
+    return ExperimentJobDataSQLRepository(expid, _engine, _tables)
