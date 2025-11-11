@@ -17,3 +17,9 @@ class ExperimentsSearchRequest(BaseModel):
 
     page: Annotated[int, Field(ge=1, description="Page number", example=1)] = 1
     page_size: int = PAGINATION_LIMIT_DEFAULT
+
+
+class PreferredUsernameRequest(BaseModel):
+    preferred_username: str = Field(
+        ..., min_length=1, description="Preferred Linux username"
+    )

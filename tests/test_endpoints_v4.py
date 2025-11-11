@@ -420,3 +420,79 @@ class TestUserMetricsRuns:
         assert isinstance(resp_obj["runs"], list)
         assert len(resp_obj["runs"]) == 2
         assert [obj["run_id"] for obj in resp_obj["runs"]] == [3, 1]
+
+
+class TestUserPreferences:
+    register_endpoint = "/v4/user-settings/preferred-username"
+    get_endpoint = "/v4/user-settings/preferred-username"
+
+    def _create_jwt_token(self, user_id: str) -> str:
+        """Helper method to create a valid JWT token for testing"""
+        payload = {
+            "user_id": user_id,
+            "sub": user_id,
+            "iat": int(datetime.now().timestamp()),
+            "exp": (
+                datetime.now(timezone.utc)
+                + timedelta(seconds=config.JWT_EXP_DELTA_SECONDS)
+            ),
+        }
+        return jwt.encode(payload, config.JWT_SECRET, config.JWT_ALGORITHM)
+
+    def test_register_preferred_username_unauthorized(
+        self, fixture_fastapi_client: TestClient
+    ):
+        """Test that registering a username without authentication fails"""
+        response = fixture_fastapi_client.post(
+            self.register_endpoint,
+            json={"preferred_username": "test_user"},
+        )
+
+        assert response.status_code == HTTPStatus.UNAUTHORIZED
+
+    def test_register_preferred_username_invalid_token(
+        self, fixture_fastapi_client: TestClient
+    ):
+        """Test that registering with an invalid token fails"""
+        response = fixture_fastapi_client.post(
+            self.register_endpoint,
+            json={"preferred_username": "test_user"},
+            headers={"Authorization": "Bearer invalid_token"},
+        )
+
+        assert response.status_code == HTTPStatus.UNAUTHORIZED
+
+    def test_register_preferred_username_success(
+        self, fixture_fastapi_client: TestClient
+    ):
+        """Test successfully registering a preferred username"""
+        user_id = str(uuid4())
+        preferred_username = f"linux_user_{uuid4().hex[:8]}"
+        jwt_token = self._create_jwt_token(user_id)
+
+        # Test registration
+        response = fixture_fastapi_client.post(
+            self.register_endpoint,
+            json={"preferred_username": preferred_username},
+            headers={"Authorization": f"Bearer {jwt_token}"},
+        )
+
+        assert response.status_code == HTTPStatus.OK
+        resp_obj: dict = response.json()
+
+        assert resp_obj["user_id"] == user_id
+        assert resp_obj["preferred_username"] == preferred_username
+        assert isinstance(resp_obj["created"], str)
+        assert isinstance(resp_obj["modified"], str)
+
+        # Test retrieval
+        get_response = fixture_fastapi_client.get(
+            self.get_endpoint,
+            headers={"Authorization": f"Bearer {jwt_token}"},
+        )
+        assert get_response.status_code == HTTPStatus.OK
+        get_resp_obj: dict = get_response.json()
+        assert get_resp_obj["user_id"] == user_id
+        assert get_resp_obj["preferred_username"] == preferred_username
+        assert isinstance(get_resp_obj["created"], str)
+        assert isinstance(get_resp_obj["modified"], str)

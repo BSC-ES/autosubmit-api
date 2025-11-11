@@ -85,6 +85,15 @@ def create_as_times_db_engine() -> Engine:
     return create_sqlite_db_engine(db_path)
 
 
+def create_as_api_db_engine() -> Engine:
+    """
+    Create an engine for the AS_API DDBB. Usually named as_api.db
+    """
+    APIBasicConfig.read()
+    db_path = os.path.join(APIBasicConfig.DB_DIR, "autosubmit_api.db")
+    return create_sqlite_db_engine(db_path)
+
+
 def execute_with_limit_offset(
     statement: Select[Any], conn: Connection, limit: int = None, offset: int = None
 ):
