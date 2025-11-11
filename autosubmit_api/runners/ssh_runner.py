@@ -413,7 +413,7 @@ class SSHRunner(Runner):
         """
         flags = []
         if check_wrapper:
-            flags.append("--check-wrapper")
+            flags.append("--check_wrapper")
         if update_version:
             flags.append("--update_version")
         if force:

@@ -140,7 +140,7 @@ async def test_stop_experiment_success(fixture_mock_basic_config, force_stop: bo
     [
         (
             {"check_wrapper": True, "update_version": True},
-            ["--check-wrapper", "--update_version"],
+            ["--check_wrapper", "--update_version"],
         ),
         (
             {"check_wrapper": False, "force": True},
