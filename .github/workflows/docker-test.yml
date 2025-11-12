@@ -62,7 +62,7 @@ jobs:
           ssh -o StrictHostKeyChecking=no -p 2222 autosubmit_user@localhost "bash -ic 'conda run -n autosubmit_env autosubmit install'"
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: "3.10"
 
