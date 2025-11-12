@@ -242,6 +242,7 @@ RunnerProcessesTable = Table(
     Column("modules", Text, nullable=False),
     Column("created", Text, nullable=False),
     Column("modified", Text, nullable=False),
+    Column("runner_extra_params", Text, nullable=True),
 )
 
 JobPklTable = Table(

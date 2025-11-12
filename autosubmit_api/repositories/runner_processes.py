@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from datetime import datetime
 from pathlib import Path
-from typing import List
+from typing import List, Optional
 
 from pydantic import BaseModel
 from sqlalchemy import Engine, Table, create_engine
@@ -23,6 +23,7 @@ class RunnerProcessesDataModel(BaseModel):
     modules: str
     created: str
     modified: str
+    runner_extra_params: Optional[str] = None
 
 
 class RunnerProcessesRepository(ABC):
@@ -49,6 +50,7 @@ class RunnerProcessesRepository(ABC):
         runner: str,
         module_loader: str,
         modules: str,
+        runner_extra_params: str = None,
     ) -> RunnerProcessesDataModel:
         """
         Inserts a new process status
@@ -70,8 +72,8 @@ class RunnerProcessesSQLRepository(RunnerProcessesRepository):
         self.engine = engine
         self.table = table
 
-        # Create the table if it doesn't exist
         with self.engine.connect() as conn:
+            # Create the table if it doesn't exist
             conn.execute(CreateTable(self.table, if_not_exists=True))
             conn.commit()
 
@@ -94,6 +96,7 @@ class RunnerProcessesSQLRepository(RunnerProcessesRepository):
                 modules=row.modules,
                 created=row.created,
                 modified=row.modified,
+                runner_extra_params=row.runner_extra_params,
             )
             for row in result
         ]
@@ -119,6 +122,7 @@ class RunnerProcessesSQLRepository(RunnerProcessesRepository):
             modules=result.modules,
             created=result.created,
             modified=result.modified,
+            runner_extra_params=result.runner_extra_params,
         )
 
     def insert_process(
@@ -129,6 +133,7 @@ class RunnerProcessesSQLRepository(RunnerProcessesRepository):
         runner: str,
         module_loader: str,
         modules: str,
+        runner_extra_params: str = None,
     ) -> RunnerProcessesDataModel:
         with self.engine.connect() as conn:
             _now = datetime.now(tz=LOCAL_TZ).isoformat(timespec="seconds")
@@ -141,6 +146,7 @@ class RunnerProcessesSQLRepository(RunnerProcessesRepository):
                 modules=modules,
                 created=_now,
                 modified=_now,
+                runner_extra_params=runner_extra_params,
             )
             result = conn.execute(statement)
             conn.commit()
@@ -154,6 +160,7 @@ class RunnerProcessesSQLRepository(RunnerProcessesRepository):
             modules=modules,
             created=_now,
             modified=_now,
+            runner_extra_params=runner_extra_params,
         )
 
     def update_process_status(self, id: int, status: str) -> RunnerProcessesDataModel:
@@ -183,6 +190,7 @@ class RunnerProcessesSQLRepository(RunnerProcessesRepository):
             modules=result.modules,
             created=result.created,
             modified=_now,
+            runner_extra_params=result.runner_extra_params,
         )
 
 

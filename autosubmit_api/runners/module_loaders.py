@@ -91,7 +91,7 @@ class LmodModuleLoader(ModuleLoader):
 
     @property
     def base_command(self):
-        return f"module load {' '.join(self.modules)} && "
+        return f"module load {' '.join(self.modules)}; "
 
     def generate_command(self, command: str, *args, **kwargs):
         """
@@ -132,7 +132,7 @@ class VenvModuleLoader(ModuleLoader):
 
     @property
     def base_command(self):
-        return f"source {self.modules[0].strip()}/bin/activate && "
+        return f"{self.modules[0].strip()}/bin/"
 
     def generate_command(self, command: str, *args, **kwargs):
         """
