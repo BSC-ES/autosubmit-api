@@ -36,6 +36,7 @@ install_requires = [
     "SQLAlchemy~=2.0.23",
     "python-cas~=1.6.0",
     "autosubmit==4.1.11",
+    "uvicorn~=0.34.0,<0.36.0",
     "uvicorn-worker~=0.3.0",
     "psycopg2",
     "testcontainers",
