@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 from enum import Enum
+from typing import Optional
 
 from autosubmit_api.repositories.runner_processes import RunnerProcessesDataModel
 
@@ -8,10 +9,12 @@ class RunnerType(str, Enum):
     LOCAL = "local"
     SSH = "ssh"
 
+
 class RunnerProcessStatus(str, Enum):
     ACTIVE = "ACTIVE"
     COMPLETED = "COMPLETED"
     TERMINATED = "TERMINATED"
+
 
 # Runner Exceptions
 class RunnerAlreadyRunningError(Exception):
@@ -77,9 +80,30 @@ class Runner(ABC):
         """
 
     @abstractmethod
-    async def set_job_status(self, expid: str):
+    async def set_job_status(
+        self,
+        expid: str,
+        job_names_list: Optional[list[str]] = None,
+        final_status: Optional[str] = None,
+        filter_chunks: Optional[str] = None,
+        filter_status: Optional[str] = None,
+        filter_type: Optional[str] = None,
+        filter_type_chunk: Optional[str] = None,
+        filter_type_chunk_split: Optional[str] = None,
+        check_wrapper: bool = False,
+        update_version: bool = False,
+    ):
         """
-        Set the status of a job.
+        Set the status of a job for a given experiment.
 
         :param expid: The experiment ID.
+        :param job_names_list: List of job names to update.
+        :param final_status: The target status to set for the jobs.
+        :param filter_chunks: Filter jobs by chunk.
+        :param filter_status: Filter jobs by their status.
+        :param filter_type: Filter jobs by section.
+        :param filter_type_chunk: Filter by section and chunk.
+        :param filter_type_chunk_split: Filter by section, chunk, and split.
+        :param check_wrapper: Whether to check the wrapper script.
+        :param update_version: Whether to update the version.
         """

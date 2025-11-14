@@ -333,13 +333,13 @@ async def create_experiment(body: CreateExperimentBody):
 
 
 class SetJobStatusBody(GetRunnerBody):
-    job_names_list: list[str] = None
-    final_status: str = None
-    filter_chunks: str = None
-    filter_status: str = None
-    filter_type: str = None
-    filter_type_chunk: str = None
-    filter_type_chunk_split: str = None
+    job_names_list: Optional[list[str]] = None
+    final_status: Optional[str] = None
+    filter_chunks: Optional[str] = None
+    filter_status: Optional[str] = None
+    filter_type: Optional[str] = None
+    filter_type_chunk: Optional[str] = None
+    filter_type_chunk_split: Optional[str] = None
     check_wrapper: bool = False
     update_version: bool = False
 
