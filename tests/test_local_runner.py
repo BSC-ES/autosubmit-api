@@ -118,7 +118,10 @@ async def test_stop_experiment_success(fixture_mock_basic_config, force_stop: bo
     mock_process.send_signal = MagicMock()
     mock_process.wait = MagicMock()
 
-    with patch("subprocess.run") as mock_check_output, patch("psutil.Process") as mock_psutil:
+    with (
+        patch("subprocess.run") as mock_check_output,
+        patch("psutil.Process") as mock_psutil,
+    ):
         mock_psutil.return_value = mock_process
         await runner.stop(TEST_EXPID, force=force_stop)
 
@@ -300,3 +303,61 @@ async def test_create_experiment_autosubmit_fail(fixture_mock_basic_config):
             RuntimeError, match="Failed to extract experiment ID from output"
         ):
             await runner.create_experiment(description="Test Experiment")
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize(
+    "params, expected_flags",
+    [
+        (
+            {
+                "check_wrapper": True,
+                "update_version": True,
+                "final_status": "FAILED",
+                "filter_type": "SIM",
+            },
+            [
+                "--check_wrapper",
+                "--update_version",
+                '--status_final="FAILED"',
+                '--filter_type="SIM"',
+            ],
+        ),
+        (
+            {
+                "check_wrapper": False,
+                "final_status": "WAITING",
+                "job_names_list": [
+                    "job1",
+                    "job2",
+                ],
+            },
+            ['--status_final="WAITING"', '--list="job1 job2"'],
+        ),
+    ],
+)
+async def test_set_job_status(
+    fixture_mock_basic_config, params: dict, expected_flags: list
+):
+    module_loader = NoModuleLoader()
+    runner = LocalRunner(module_loader)
+
+    TEST_EXPID = "test_expid"
+
+    # Mock the command generation
+    with patch(
+        "autosubmit_api.runners.local_runner.subprocess.check_output"
+    ) as mock_check_output:
+        # Call the method
+        await runner.set_job_status(TEST_EXPID, **params)
+
+        # Verify the command was called once
+        mock_check_output.assert_called_once()
+
+        # Verify that the command contains the experiment ID
+        command = mock_check_output.call_args[0][0]
+        assert "autosubmit setstatus" in command
+        assert TEST_EXPID in command
+
+        for flag in expected_flags:
+            assert flag in command
