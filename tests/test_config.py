@@ -5,7 +5,8 @@ from unittest.mock import patch
 import pytest
 
 from autosubmit_api.config.config_file import DEFAULT_CONFIG_PATH, read_config_file_path
-from autosubmit_api.routers.v4alpha import check_runner_permissions
+from autosubmit_api.runners.runner_config import check_runner_permissions
+from autosubmit_api.runners.runner_config import parse_runners_config
 
 
 class TestAPIConfigFile:
@@ -15,6 +16,136 @@ class TestAPIConfigFile:
 
         monkeypatch.setenv("AS_API_CONFIG_FILE", "test_config.yaml")
         assert read_config_file_path() == "test_config.yaml"
+
+    @pytest.mark.parametrize(
+        "config_content, expected_parsed_config",
+        [
+            pytest.param(
+                {},
+                {
+                    "LOCAL": {
+                        "ENABLED": False,
+                        "MODULE_LOADERS": {
+                            "CONDA": {"ENABLED": False, "MODULES_WHITELIST": []},
+                            "VENV": {"ENABLED": False, "MODULES_WHITELIST": []},
+                            "LMOD": {"ENABLED": False, "MODULES_WHITELIST": []},
+                            "NO_MODULE": {"ENABLED": False},
+                        },
+                    },
+                    "SSH": {
+                        "ENABLED": False,
+                        "MODULE_LOADERS": {
+                            "CONDA": {"ENABLED": False, "MODULES_WHITELIST": []},
+                            "VENV": {"ENABLED": False, "MODULES_WHITELIST": []},
+                            "LMOD": {"ENABLED": False, "MODULES_WHITELIST": []},
+                            "NO_MODULE": {"ENABLED": False},
+                        },
+                    },
+                },
+                id="empty_config",
+            ),
+            pytest.param(
+                {
+                    "RUNNERS": {
+                        "LOCAL": {
+                            "ENABLED": True,
+                            "MODULE_LOADERS": {
+                                "CONDA": {
+                                    "ENABLED": True,
+                                    "MODULES_WHITELIST": ["python3_8"],
+                                },
+                                "VENV": {"ENABLED": False},
+                            },
+                        },
+                        "SSH": {"ENABLED": True},
+                    }
+                },
+                {
+                    "LOCAL": {
+                        "ENABLED": True,
+                        "MODULE_LOADERS": {
+                            "CONDA": {
+                                "ENABLED": True,
+                                "MODULES_WHITELIST": ["python3_8"],
+                            },
+                            "VENV": {"ENABLED": False, "MODULES_WHITELIST": []},
+                            "LMOD": {"ENABLED": False, "MODULES_WHITELIST": []},
+                            "NO_MODULE": {"ENABLED": False},
+                        },
+                    },
+                    "SSH": {
+                        "ENABLED": True,
+                        "MODULE_LOADERS": {
+                            "CONDA": {"ENABLED": False, "MODULES_WHITELIST": []},
+                            "VENV": {"ENABLED": False, "MODULES_WHITELIST": []},
+                            "LMOD": {"ENABLED": False, "MODULES_WHITELIST": []},
+                            "NO_MODULE": {"ENABLED": False},
+                        },
+                    },
+                },
+                id="partial_config",
+            ),
+            pytest.param(
+                {
+                    "RUNNERS": {
+                        "LOCAL": {
+                            "ENABLED": True,
+                            "MODULE_LOADERS": {
+                                "CONDA": {
+                                    "ENABLED": True,
+                                    "MODULES_WHITELIST": ["python3_8"],
+                                    "FOO": "BAR",
+                                },
+                                "NO_MODULE": {
+                                    "ENABLED": True,
+                                    "MODULES_WHITELIST": ["python_3_9"],
+                                    "EXTRA": 123,
+                                },
+                            },
+                        }
+                    }
+                },
+                {
+                    "LOCAL": {
+                        "ENABLED": True,
+                        "MODULE_LOADERS": {
+                            "CONDA": {
+                                "ENABLED": True,
+                                "MODULES_WHITELIST": ["python3_8"],
+                            },
+                            "VENV": {"ENABLED": False, "MODULES_WHITELIST": []},
+                            "LMOD": {"ENABLED": False, "MODULES_WHITELIST": []},
+                            "NO_MODULE": {"ENABLED": True},
+                        },
+                    },
+                    "SSH": {
+                        "ENABLED": False,
+                        "MODULE_LOADERS": {
+                            "CONDA": {"ENABLED": False, "MODULES_WHITELIST": []},
+                            "VENV": {"ENABLED": False, "MODULES_WHITELIST": []},
+                            "LMOD": {"ENABLED": False, "MODULES_WHITELIST": []},
+                            "NO_MODULE": {"ENABLED": False},
+                        },
+                    },
+                },
+                id="with_invalid_options",
+            ),
+        ],
+    )
+    def test_parse_runners_config(
+        self, config_content: Dict, expected_parsed_config: Dict
+    ):
+        """
+        Test the parse_runners_config function with different configurations.
+        """
+        with patch(
+            "autosubmit_api.runners.runner_config.read_config_file"
+        ) as mock_read_config:
+            mock_read_config.return_value = config_content
+
+            parsed_config = parse_runners_config()
+
+            assert parsed_config == expected_parsed_config
 
     @pytest.mark.parametrize(
         "runner, module_loader, config_content, expected",
@@ -64,7 +195,7 @@ class TestAPIConfigFile:
         Test the check_runner_permissions function with different configurations.
         """
         with patch(
-            "autosubmit_api.routers.v4alpha.read_config_file"
+            "autosubmit_api.runners.runner_config.read_config_file"
         ) as mock_read_config:
             mock_read_config.return_value = config_content
 
