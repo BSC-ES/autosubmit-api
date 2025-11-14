@@ -364,7 +364,10 @@ async def set_job_status(expid: str, body: SetJobStatusBody):
         module_loader = module_loaders.get_module_loader(
             body.module_loader, body.modules
         )
-        runner = get_runner(body.runner, module_loader)
+        runner_extra_params = (
+            body.runner_extra_params.model_dump() if body.runner_extra_params else {}
+        )
+        runner = get_runner(body.runner, module_loader, **runner_extra_params)
         await runner.set_job_status(
             expid,
             job_names_list=body.job_names_list,

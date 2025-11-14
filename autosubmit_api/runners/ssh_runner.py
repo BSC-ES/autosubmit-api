@@ -211,7 +211,10 @@ class SSHRunner(Runner):
             raise RunnerAlreadyRunningError(expid)
 
         autosubmit_command = f"autosubmit run {expid}"
-        if self.module_loader.module_loader_type == module_loaders.ModuleLoaderType.LMOD:
+        if (
+            self.module_loader.module_loader_type
+            == module_loaders.ModuleLoaderType.LMOD
+        ):
             prepared_command = self._prepare_command("nohup " + autosubmit_command)
         else:
             prepared_command = "nohup " + self._prepare_command(autosubmit_command)
@@ -486,6 +489,57 @@ class SSHRunner(Runner):
             expid = match.group(1)
             logger.info(f"Experiment {expid} created successfully.")
             return expid
+        except Exception as exc:
+            logger.error(f"Command failed with error: {exc}")
+            raise exc
+
+    async def set_job_status(
+        self,
+        expid: str,
+        job_names_list: list[str] = None,
+        final_status: str = None,
+        filter_chunks: str = None,
+        filter_status: str = None,
+        filter_type: str = None,
+        filter_type_chunk: str = None,
+        filter_type_chunk_split: str = None,
+        check_wrapper: bool = False,
+        update_version: bool = False,
+    ):
+        flags = ["-np", "-nt", "-s"]
+        if job_names_list:
+            job_names = " ".join(job_names_list)
+            flags.append(f'--list="{job_names}"')
+        if final_status:
+            flags.append(f'--status_final="{final_status}"')
+        if filter_chunks:
+            flags.append(f'--filter_chunks="{filter_chunks}"')
+        if filter_status:
+            flags.append(f'--filter_status="{filter_status}"')
+        if filter_type:
+            flags.append(f'--filter_type="{filter_type}"')
+        if filter_type_chunk:
+            flags.append(f'--filter_type_chunk="{filter_type_chunk}"')
+        if filter_type_chunk_split:
+            flags.append(f'--filter_type_chunk_split="{filter_type_chunk_split}"')
+        if check_wrapper:
+            flags.append("--check_wrapper")
+        if update_version:
+            flags.append("--update_version")
+
+        autosubmit_command = f"autosubmit setstatus {expid} {' '.join(flags)}"
+        prepared_command = self._prepare_command(autosubmit_command)
+
+        try:
+            logger.debug(f"Running set job status command: {prepared_command}")
+            stdout, stderr, exit_code = self._execute_command(prepared_command)
+
+            if exit_code != 0:
+                logger.error(f"Command failed with exit code {exit_code}: {stderr}")
+                raise RuntimeError(f"Failed to set job status: {stderr}")
+
+            logger.debug(f"Set job status output: {stdout}")
+            return stdout
         except Exception as exc:
             logger.error(f"Command failed with error: {exc}")
             raise exc
