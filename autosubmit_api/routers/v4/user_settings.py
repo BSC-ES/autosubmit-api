@@ -64,7 +64,7 @@ async def get_preferred_username(
 
     if preferences is None:
         raise HTTPException(
-            status_code=HTTPStatus.NOT_FOUND,
+            status_code=HTTPStatus.BAD_REQUEST,
             detail="Preferred username not found for this user",
         )
 
