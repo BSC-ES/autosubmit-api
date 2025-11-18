@@ -2,6 +2,7 @@ from datetime import datetime, timedelta, timezone
 from http import HTTPStatus
 import random
 from typing import Any
+from unittest.mock import AsyncMock, MagicMock, patch
 from uuid import uuid4
 from fastapi.testclient import TestClient
 import jwt
@@ -496,3 +497,67 @@ class TestUserPreferences:
         assert get_resp_obj["preferred_username"] == preferred_username
         assert isinstance(get_resp_obj["created"], str)
         assert isinstance(get_resp_obj["modified"], str)
+
+
+class TestRunnerSetJobStatus:
+    endpoint = "/v4/runners/command/set-job-status"
+
+    def test_invalid_profile(self, fixture_fastapi_client: TestClient):
+        response = fixture_fastapi_client.post(
+            self.endpoint,
+            json={
+                "expid": "test_expid",
+                "profile_name": "NON_EXISTENT_PROFILE",
+                "command_params": {"final_status": "COMPLETED"},
+            },
+        )
+
+        assert response.status_code != 200
+
+    def test_valid_ssh_request(self, fixture_fastapi_client: TestClient):
+        # Mock read_config_file to include SSH_AUTOSUBMIT_DEV profile
+        # and get_runner to return a mock runner
+        with (
+            patch(
+                "autosubmit_api.runners.runner_config.read_config_file"
+            ) as mock_read_config,
+            patch("autosubmit_api.routers.v4.runners.get_runner") as mock_get_runner,
+        ):
+            mock_read_config.return_value = {
+                "RUNNER_CONFIGURATION": {
+                    "PROFILES": {
+                        "SSH_AUTOSUBMIT_DEV": {
+                            "RUNNER_TYPE": "SSH",
+                            "MODULE_LOADER_TYPE": "CONDA",
+                            "MODULES": ["autosubmit"],
+                            "SSH": {
+                                "HOST": "bscesautosubmit03.bsc.es",
+                                "PORT": 22,
+                            },
+                        }
+                    }
+                }
+            }
+
+            mock_runner = MagicMock()
+            mock_runner.set_job_status = AsyncMock(return_value="None")
+            mock_get_runner.return_value = mock_runner
+
+            response = fixture_fastapi_client.post(
+                self.endpoint,
+                json={
+                    "expid": "test_expid",
+                    "profile_name": "SSH_AUTOSUBMIT_DEV",
+                    "profile_params": {
+                        "SSH": {
+                            "USERNAME": "test_user",
+                        }
+                    },
+                    "command_params": {
+                        "final_status": "COMPLETED",
+                        "job_names_list": ["JOB1", "JOB2"],
+                    },
+                },
+            )
+
+            assert response.status_code == 200
