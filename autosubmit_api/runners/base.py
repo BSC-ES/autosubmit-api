@@ -6,8 +6,8 @@ from autosubmit_api.repositories.runner_processes import RunnerProcessesDataMode
 
 
 class RunnerType(str, Enum):
-    LOCAL = "local"
-    SSH = "ssh"
+    LOCAL = "LOCAL"
+    SSH = "SSH"
 
 
 class RunnerProcessStatus(str, Enum):

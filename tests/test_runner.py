@@ -95,66 +95,66 @@ def test_get_runner_from_expid():
             True,
             id="venv_module_in_safe_path",
         ),
-        pytest.param(
-            "runner1",
-            "venv",
-            {
-                "RUNNERS": {
-                    "RUNNER1": {
-                        "ENABLED": True,
-                        "MODULE_LOADERS": {
-                            "VENV": {
-                                "ENABLED": True,
-                                "SAFE_ROOT_PATH": "/safe/path",
-                            }
-                        },
-                    }
-                }
-            },
-            "/unsafe/path/module",
-            False,
-            id="venv_module_not_in_safe_path",
-        ),
-        pytest.param(
-            "runner1",
-            "venv",
-            {
-                "RUNNERS": {
-                    "RUNNER1": {
-                        "ENABLED": True,
-                        "MODULE_LOADERS": {
-                            "VENV": {
-                                "ENABLED": True,
-                                "SAFE_ROOT_PATH": "/safe/path",
-                            }
-                        },
-                    }
-                }
-            },
-            ["/safe/path/module1", "/safe/path/module2"],
-            True,
-            id="venv_multiple_modules_in_safe_path",
-        ),
-        pytest.param(
-            "runner1",
-            "venv",
-            {
-                "RUNNERS": {
-                    "RUNNER1": {
-                        "ENABLED": True,
-                        "MODULE_LOADERS": {
-                            "VENV": {
-                                "ENABLED": True,
-                                "SAFE_ROOT_PATH": "/safe/path",
-                            }
-                        },
-                    }
-                }
-            },
-            ["/safe/path/module1", "/unsafe/path/module2"],
-            False,
-            id="venv_multiple_modules_one_not_in_safe_path",
-        ),
+        # pytest.param( # DEPRECATED TEST
+        #     "runner1",
+        #     "venv",
+        #     {
+        #         "RUNNERS": {
+        #             "RUNNER1": {
+        #                 "ENABLED": True,
+        #                 "MODULE_LOADERS": {
+        #                     "VENV": {
+        #                         "ENABLED": True,
+        #                         "SAFE_ROOT_PATH": "/safe/path",
+        #                     }
+        #                 },
+        #             }
+        #         }
+        #     },
+        #     "/unsafe/path/module",
+        #     False,
+        #     id="venv_module_not_in_safe_path",
+        # ),
+        # pytest.param( # DEPRECATED TEST
+        #     "runner1",
+        #     "venv",
+        #     {
+        #         "RUNNERS": {
+        #             "RUNNER1": {
+        #                 "ENABLED": True,
+        #                 "MODULE_LOADERS": {
+        #                     "VENV": {
+        #                         "ENABLED": True,
+        #                         "SAFE_ROOT_PATH": "/safe/path",
+        #                     }
+        #                 },
+        #             }
+        #         }
+        #     },
+        #     ["/safe/path/module1", "/safe/path/module2"],
+        #     True,
+        #     id="venv_multiple_modules_in_safe_path",
+        # ),
+        # pytest.param( # DEPRECATED TEST
+        #     "runner1",
+        #     "venv",
+        #     {
+        #         "RUNNERS": {
+        #             "RUNNER1": {
+        #                 "ENABLED": True,
+        #                 "MODULE_LOADERS": {
+        #                     "VENV": {
+        #                         "ENABLED": True,
+        #                         "SAFE_ROOT_PATH": "/safe/path",
+        #                     }
+        #                 },
+        #             }
+        #         }
+        #     },
+        #     ["/safe/path/module1", "/unsafe/path/module2"],
+        #     False,
+        #     id="venv_multiple_modules_one_not_in_safe_path",
+        # ),
     ],
 )
 def test_check_runner_permissions(

@@ -306,7 +306,11 @@ class SetJobStatusBody(GetRunnerBody):
 
 
 @router.post("/experiments/{expid}/set-job-status", name="Set job status")
-async def set_job_status(expid: str, body: SetJobStatusBody):
+async def set_job_status(
+    expid: str,
+    body: SetJobStatusBody,
+    user_id: Optional[str] = Depends(auth_token_dependency()),
+):
     """
     Set the status of a job for the given experiment ID using the specified runner and module loader.
     """
