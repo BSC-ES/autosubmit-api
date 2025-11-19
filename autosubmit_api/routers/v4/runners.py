@@ -42,6 +42,9 @@ def get_runner_configuration_profiles(
     config = read_config_file()
     profiles = config.get("RUNNER_CONFIGURATION", {}).get("PROFILES", {})
 
+    if not isinstance(profiles, dict):
+        profiles = {}
+
     return profiles
 
 
