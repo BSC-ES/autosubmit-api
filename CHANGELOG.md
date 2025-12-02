@@ -1,5 +1,18 @@
 # CHANGELOG
 
+### Pre-release v4.1.2b2 - Release date: 2025-12-xx
+
+* **Added support to Autosubmit >= 4.1.16**
+* Support read of compressed logs in xz and gzip format
+* Fixed a bug that didn't allow getting the full runs list from `/v3/runs/{expid}.`
+* Added CHSY & Parallelization metrics in `/v3/runs/{expid}`
+* Updated uvicorn and uvicorn worker dependencies
+* Add username preferences endpoints
+* Added new alpha SSH Runner 
+* Updated Runner stop strategy to use `autosubmit stop.`
+* Added more operations (create experiment, create job list, set job status) to the alpha API runners 
+* Minor bug fixes and refactors
+
 ### Pre-release v4.1.2b1 - Release date: 2025-07-10
 
 * Added API runners alpha feature. This mechanism allows the API to run Autosubmit commands in a flexible way.
