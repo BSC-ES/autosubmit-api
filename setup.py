@@ -38,15 +38,19 @@ install_requires = [
     "autosubmit==4.1.11",
     "uvicorn~=0.34.0,<0.36.0",
     "uvicorn-worker~=0.3.0",
-    "psycopg2",
-    "testcontainers",
     "paramiko",
 ]
 
 # Test dependencies
-test_requires = ["pytest", "pytest-cov", "pytest-asyncio", "ruff"]
+test_requires = ["pytest", "pytest-cov", "pytest-asyncio", "ruff", "testcontainers"]
 
-extras_require = {"test": test_requires, "all": install_requires + test_requires}
+postgres_requires = ["psycopg2"]
+
+extras_require = {
+    "test": test_requires,
+    "postgres": postgres_requires,
+    "all": install_requires + test_requires + postgres_requires,
+}
 
 setup(
     name="autosubmit_api",
