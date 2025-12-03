@@ -6,10 +6,10 @@ import os
 
 # Enum for module types
 class ModuleLoaderType(str, Enum):
-    CONDA = "conda"
-    LMOD = "lmod"
-    VENV = "venv"
-    NO_MODULE = "no_module"
+    CONDA = "CONDA"
+    LMOD = "LMOD"
+    VENV = "VENV"
+    NO_MODULE = "NO_MODULE"
 
 
 class ModuleLoader(ABC):
@@ -166,13 +166,13 @@ def get_module_loader(
     """
     Factory function to get the appropriate module loader based on the module type.
     """
-    if module_loader == ModuleLoaderType.CONDA:
+    if module_loader.upper() == ModuleLoaderType.CONDA:
         return CondaModuleLoader(modules)
-    elif module_loader == ModuleLoaderType.LMOD:
+    elif module_loader.upper() == ModuleLoaderType.LMOD:
         return LmodModuleLoader(modules)
-    elif module_loader == ModuleLoaderType.VENV:
+    elif module_loader.upper() == ModuleLoaderType.VENV:
         return VenvModuleLoader(modules)
-    elif module_loader == ModuleLoaderType.NO_MODULE:
+    elif module_loader.upper() == ModuleLoaderType.NO_MODULE:
         return NoModuleLoader()
     else:
         raise ValueError(f"Unknown module type: {module_loader}")
