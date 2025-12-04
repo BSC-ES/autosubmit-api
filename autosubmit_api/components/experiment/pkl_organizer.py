@@ -1,10 +1,11 @@
 #!/usr/bin/env python
 
-from autosubmit_api.components.jobs import job_factory as factory
-from autosubmit_api.common.utils import JobSection, PklJob, PklJob14, Status
-from autosubmit_api.components.jobs.job_factory import Job, SimpleJob
-from typing import List, Dict, Set, Union
+from typing import Dict, List, Set
 
+from autosubmit_api.common.utils import JobSection, Status
+from autosubmit_api.components.jobs import job_factory as factory
+from autosubmit_api.components.jobs.job_factory import Job, SimpleJob
+from autosubmit_api.database.models import PklJobModel
 from autosubmit_api.persistance.pkl_reader import PklReader
 
 
@@ -16,7 +17,7 @@ class PklOrganizer(object):
   """
 
   def __init__(self, expid: str):
-    self.current_content: List[Union[PklJob,PklJob14]] = []
+    self.current_content: List[PklJobModel] = []
     self.expid = expid
     self.sim_jobs: List[Job] = [] 
     self.post_jobs: List[Job] = [] 
