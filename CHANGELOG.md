@@ -1,6 +1,6 @@
 # CHANGELOG
 
-### Pre-release v4.1.2b2 - Release date: 2025-12-xx
+### Pre-release v4.1.2b2 - Release date: 2025-12-15
 
 * **Added support to Autosubmit >= 4.1.16**
 * Support read of compressed logs in xz and gzip format
