@@ -3,5 +3,5 @@ pydata-sphinx-theme==0.16.*
 sphinx==7.*
 sphinx-autobuild==2024.10.*
 sphinx_rtd_theme
-sphinx-reredirects==0.1.*
+sphinx-reredirects==1.1.*
 sphinxcontrib-redoc==1.6.0
