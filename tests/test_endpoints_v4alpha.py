@@ -20,8 +20,8 @@ class TestCreateJobList:
             response = fixture_fastapi_client.post(
                 self.endpoint.format(expid=RANDOM_EXPID),
                 json={
-                    "runner": "local",
-                    "module_loader": "no_module",
+                    "runner": "LOCAL",
+                    "module_loader": "NO_MODULE",
                     "modules": None,
                 },
             )
@@ -47,8 +47,8 @@ class TestCreateJobList:
             response = fixture_fastapi_client.post(
                 self.endpoint.format(expid=RANDOM_EXPID),
                 json={
-                    "runner": "local",
-                    "module_loader": "no_module",
+                    "runner": "LOCAL",
+                    "module_loader": "NO_MODULE",
                     "modules": None,
                 },
             )
@@ -82,8 +82,8 @@ class TestCreateJobList:
             response = fixture_fastapi_client.post(
                 self.endpoint.format(expid=RANDOM_EXPID),
                 json={
-                    "runner": "local",
-                    "module_loader": "no_module",
+                    "runner": "LOCAL",
+                    "module_loader": "NO_MODULE",
                     "modules": None,
                     **params,
                 },
@@ -110,8 +110,8 @@ class TestRunnerCreateExperiment:
             response = fixture_fastapi_client.post(
                 self.endpoint,
                 json={
-                    "runner": "local",
-                    "module_loader": "no_module",
+                    "runner": "LOCAL",
+                    "module_loader": "NO_MODULE",
                     "modules": None,
                     "description": "Test experiment",
                 },
@@ -138,8 +138,8 @@ class TestRunnerCreateExperiment:
             response = fixture_fastapi_client.post(
                 self.endpoint,
                 json={
-                    "runner": "local",
-                    "module_loader": "no_module",
+                    "runner": "LOCAL",
+                    "module_loader": "NO_MODULE",
                     "modules": None,
                     "description": "Test experiment",
                 },
@@ -165,8 +165,8 @@ class TestRunnerCreateExperiment:
             response = fixture_fastapi_client.post(
                 self.endpoint,
                 json={
-                    "runner": "local",
-                    "module_loader": "no_module",
+                    "runner": "LOCAL",
+                    "module_loader": "NO_MODULE",
                     "modules": None,
                     "description": "Test experiment",
                 },

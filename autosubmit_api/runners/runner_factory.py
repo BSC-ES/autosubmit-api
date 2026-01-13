@@ -19,9 +19,9 @@ def get_runner(
     :param module_loader: The module loader to use.
     :return: The runner for the specified type and module loader.
     """
-    if runner_type == RunnerType.LOCAL:
+    if runner_type.upper() == RunnerType.LOCAL:
         return LocalRunner(module_loader)
-    elif runner_type == RunnerType.SSH:
+    elif runner_type.upper() == RunnerType.SSH:
         ssh_host = kwargs.get("ssh_host")
         ssh_user = kwargs.get("ssh_user")
         ssh_port = kwargs.get("ssh_port", 22)
