@@ -84,7 +84,7 @@ jobs:
           coverage report
 
       - name: Upload coverage artifact
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: coverage_ssh_runner
           path: coverage.xml
