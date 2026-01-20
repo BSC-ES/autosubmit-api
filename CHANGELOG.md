@@ -1,5 +1,11 @@
 # CHANGELOG
 
+### Pre-release v4.1.2b3 - Release date: 2026-01-20
+
+* Redefined the runner permissions system to favor the use of profiles (details can be inspected in the new `/v4/runners/configuration/profiles` endpoint)
+* Added an endpoint to share public SSH keys to facilitate API access via SSH in `/v4/runners/configuration/ssh-public-keys`
+* Released supported runner endpoint `/v4/runners/command/set-job-status"` to change the job status of the experiments 
+
 ### Pre-release v4.1.2b2 - Release date: 2025-12-15
 
 * **Added support to Autosubmit >= 4.1.16**
