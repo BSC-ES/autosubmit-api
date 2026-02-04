@@ -11,6 +11,7 @@ from autosubmit_api.repositories.runner_processes import (
 )
 from autosubmit_api.runners import module_loaders
 from autosubmit_api.runners.base import (
+    STOP_WAIT_TIMEOUT,
     Runner,
     RunnerAlreadyRunningError,
     RunnerProcessStatus,
@@ -19,8 +20,6 @@ from autosubmit_api.runners.base import (
 
 # Garbage collection prevention: https://docs.python.org/3/library/asyncio-task.html#asyncio.create_task
 background_task = set()
-
-STOP_WAIT_TIMEOUT = 10  # seconds
 
 
 class SSHRunner(Runner):

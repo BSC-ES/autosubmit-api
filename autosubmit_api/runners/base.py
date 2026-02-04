@@ -4,6 +4,8 @@ from typing import Optional
 
 from autosubmit_api.repositories.runner_processes import RunnerProcessesDataModel
 
+STOP_WAIT_TIMEOUT = 10  # seconds
+
 
 class RunnerType(str, Enum):
     LOCAL = "LOCAL"
