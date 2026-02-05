@@ -449,6 +449,7 @@ class SSHRunner(Runner):
         use_local_minimal: bool = False,
         operational: bool = False,
         testcase: bool = False,
+        copy: Optional[str] = None,
     ) -> str:
         flags = [f'--description="{description}"']
         if git_repo:
@@ -467,6 +468,8 @@ class SSHRunner(Runner):
             flags.append("--operational")
         if testcase:
             flags.append("--testcase")
+        if copy:
+            flags.append(f'--copy="{copy}"')
 
         autosubmit_command = f"autosubmit expid {' '.join(flags)}"
         prepared_command = self._prepare_command(autosubmit_command)
