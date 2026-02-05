@@ -281,6 +281,7 @@ class LocalRunner(Runner):
         use_local_minimal: bool = False,
         operational: bool = False,
         testcase: bool = False,
+        copy: Optional[str] = None,
     ) -> str:
         flags = [f'--description="{description}"']
         if git_repo:
@@ -299,6 +300,8 @@ class LocalRunner(Runner):
             flags.append("--operational")
         if testcase:
             flags.append("--testcase")
+        if copy:
+            flags.append(f'--copy="{copy}"')
 
         autosubmit_command = f"autosubmit expid {' '.join(flags)}"
         wrapped_command = self.module_loader.generate_command(autosubmit_command)
