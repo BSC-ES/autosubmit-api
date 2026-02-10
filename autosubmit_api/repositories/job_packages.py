@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from pathlib import Path
-from typing import Any, List
+from typing import Any, List, Union
 
 from pydantic import BaseModel
 from sqlalchemy import Engine, Table, create_engine
@@ -28,10 +28,20 @@ class JobPackagesRepository(ABC):
 
 
 class JobPackagesSQLRepository(JobPackagesRepository):
-    def __init__(self, expid: str, engine: Engine, table: Table):
+    def __init__(
+        self, expid: str, engine: Engine, valid_tables: Union[Table, List[Table]]
+    ):
         self.expid = expid
         self.engine = engine
-        self.table = table
+
+        if isinstance(valid_tables, list):
+            self.table = tables.check_table_schema(self.engine, valid_tables)
+            if self.table is None:
+                if len(valid_tables) == 0:
+                    raise ValueError("No valid tables provided.")
+                self.table = valid_tables[0]
+        else:
+            self.table = valid_tables
 
     def get_all(self):
         with self.engine.connect() as conn:
@@ -56,10 +66,17 @@ def create_job_packages_repository(expid: str, preview=False) -> JobPackagesRepo
     if APIBasicConfig.DATABASE_BACKEND == "postgres":
         # Postgres
         _engine = create_engine(APIBasicConfig.DATABASE_CONN_URL)
+        # Handle multiple schema versions by checking which one exists and using it
         _table = (
-            tables.table_change_schema(expid, tables.WrapperJobPackageTable)
+            [
+                tables.table_change_schema(expid, tables.PreviewWrapperJobsTable),
+                tables.table_change_schema(expid, tables.WrapperJobPackageTable),
+            ]
             if preview
-            else tables.table_change_schema(expid, tables.JobPackageTable)
+            else [
+                tables.table_change_schema(expid, tables.WrapperJobsTable),
+                tables.table_change_schema(expid, tables.JobPackageTable),
+            ]
         )
     else:
         # SQLite

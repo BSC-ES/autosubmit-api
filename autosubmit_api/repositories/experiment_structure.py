@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from pathlib import Path
-from typing import List
+from typing import List, Union
 
 from pydantic import BaseModel
 from sqlalchemy import Engine, Table, create_engine, select
@@ -29,10 +29,20 @@ class ExperimentStructureRepository(ABC):
 
 
 class ExperimentStructureSQLRepository(ExperimentStructureRepository):
-    def __init__(self, expid: str, engine: Engine, table: Table):
+    def __init__(
+        self, expid: str, engine: Engine, valid_tables: Union[Table, List[Table]]
+    ):
         self.expid = expid
         self.engine = engine
-        self.table = table
+
+        if isinstance(valid_tables, list):
+            self.table = tables.check_table_schema(self.engine, valid_tables)
+            if self.table is None:
+                if len(valid_tables) == 0:
+                    raise ValueError("No valid tables provided.")
+                self.table = valid_tables[0]
+        else:
+            self.table = valid_tables
 
     def get_all(self):
         with self.engine.connect() as conn:
@@ -47,14 +57,17 @@ def create_experiment_structure_repository(expid: str) -> ExperimentStructureRep
     if APIBasicConfig.DATABASE_BACKEND == "postgres":
         # Postgres
         _engine = create_engine(APIBasicConfig.DATABASE_CONN_URL)
-        # Critical TODO: Handle newer schema tables.ExperimentStructureDBTable
-        _table = tables.table_change_schema(expid, tables.ExperimentStructureTable)
+        # Handle multiple schema versions by checking which one exists and using it
+        _table = [
+            tables.table_change_schema(expid, tables.ExperimentStructureV4_2_0),
+            tables.table_change_schema(expid, tables.ExperimentStructureTable),
+        ]
     else:
         # SQLite
         exp_paths = ExperimentPaths(expid)
         if Path(exp_paths.db_dir).exists() and Path(exp_paths.job_list_db).exists():
             _engine = create_sqlite_db_engine(exp_paths.job_list_db, read_only=True)
-            _table = tables.ExperimentStructureDBTable
+            _table = tables.ExperimentStructureV4_2_0
         else:
             _engine = create_sqlite_db_engine(exp_paths.structure_db, read_only=True)
             _table = tables.ExperimentStructureTable

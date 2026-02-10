@@ -4,9 +4,10 @@ from pathlib import Path
 from typing import List, Optional
 
 from pydantic import BaseModel
-from sqlalchemy import Engine, Table
+from sqlalchemy import Engine, Table, create_engine
 
 from autosubmit_api.common import utils as common_utils
+from autosubmit_api.config.basicConfig import APIBasicConfig
 from autosubmit_api.database import tables
 from autosubmit_api.database.common import create_sqlite_db_engine
 from autosubmit_api.persistance.experiment import ExperimentPaths
@@ -117,15 +118,18 @@ def create_jobs_repository(expid: str) -> JobsRepository:
     Factory function to create a JobsRepository instance.
     It decides whether to use the SQL or PKL repository based on the
     existence of the SQLite database.
-
-    TODO: Decide to use postgres instead of SQLite in case of using
-    a structured database instead of a pkl file.
     """
-    exp_paths = ExperimentPaths(expid)
-
-    if Path(exp_paths.db_dir).exists():
-        engine = create_sqlite_db_engine(exp_paths.job_list_db, read_only=True)
-        table = tables.JobsTable
+    if APIBasicConfig.DATABASE_BACKEND == "postgres":
+        # Postgres
+        engine = create_engine(APIBasicConfig.DATABASE_CONN_URL)
+        table = tables.table_change_schema(expid, tables.JobsTable)
         return JobsSQLRepository(expid, engine, table)
+    else:
+        exp_paths = ExperimentPaths(expid)
 
-    return JobsPklRepository(expid)
+        if Path(exp_paths.db_dir).exists() and Path(exp_paths.job_list_db).exists():
+            engine = create_sqlite_db_engine(exp_paths.job_list_db, read_only=True)
+            table = tables.JobsTable
+            return JobsSQLRepository(expid, engine, table)
+
+        return JobsPklRepository(expid)
