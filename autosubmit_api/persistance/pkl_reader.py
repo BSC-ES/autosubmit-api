@@ -102,6 +102,12 @@ class PklReader:
                     err_path_remote=remote_logs[1] if len(remote_logs) > 1 else None,
                     wrapper_type=value.get("wrapper_type"),
                 )
+                # Check for split and splits attributes
+                for dict_key, key in [("_split", "split"), ("_splits", "splits")]:
+                    attr_value = value.get(dict_key)
+                    # Set if attr_value is a positive integer
+                    if isinstance(attr_value, int) and attr_value > 0:
+                        setattr(jobpkl, key, attr_value)
                 job_list.append(jobpkl)
         else:
             raise ValueError("Unknown type of object in the pkl file")

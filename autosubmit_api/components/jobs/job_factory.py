@@ -1,12 +1,13 @@
 #!/usr/bin/env python
-from autosubmit_api.common import utils as util
-from autosubmit_api.components.jobs import utils as JUtils
-from autosubmit_api.common.utils import Status
-from autosubmit_api.monitor.monitor import Monitor
-from autosubmit_api.history.data_classes.job_data import JobData
-from typing import TYPE_CHECKING, Tuple, List, Dict, Set
-# from autosubmitAPIwu.database.db_jobdata import JobData
 from abc import ABCMeta, abstractmethod
+from typing import TYPE_CHECKING, Dict, List, Optional, Set, Tuple
+
+from autosubmit_api.common import utils as util
+from autosubmit_api.common.utils import Status
+from autosubmit_api.components.jobs import utils as JUtils
+from autosubmit_api.database.models import PklJobModel
+from autosubmit_api.history.data_classes.job_data import JobData
+from autosubmit_api.monitor.monitor import Monitor
 
 if TYPE_CHECKING:
     # Avoid circular imports
@@ -62,6 +63,8 @@ class Job(metaclass=ABCMeta):
     self.horizontal_order: int = 1
     self.barycentric_value: float = 0.0
     self.workflow_commit: str = None
+    self.split: Optional[int] = None
+    self.splits: Optional[int] = None
 
   def has_parents(self):
     return len(self.parents_names) > 0
@@ -220,7 +223,7 @@ class Job(metaclass=ABCMeta):
 
 
   @classmethod
-  def from_pkl(cls, pkl_item: str) -> "Job":
+  def from_pkl(cls, pkl_item: PklJobModel) -> "Job":
     job = cls()
     job.name = pkl_item.name
     job._id = pkl_item.id
@@ -234,6 +237,8 @@ class Job(metaclass=ABCMeta):
     job.err_path_local = pkl_item.err_path_local
     job.out_path_remote = pkl_item.out_path_remote
     job.err_path_remote = pkl_item.err_path_remote
+    job.split = pkl_item.split
+    job.splits = pkl_item.splits
     return job
 
   @classmethod
