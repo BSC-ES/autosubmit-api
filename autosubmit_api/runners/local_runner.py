@@ -12,6 +12,7 @@ from autosubmit_api.repositories.runner_processes import (
 )
 from autosubmit_api.runners import module_loaders
 from autosubmit_api.runners.base import (
+    STOP_WAIT_TIMEOUT,
     Runner,
     RunnerAlreadyRunningError,
     RunnerProcessStatus,
@@ -193,9 +194,11 @@ class LocalRunner(Runner):
 
         # Generate the command to stop the experiment
         flags = "--force" if force else ""
-        autosubmit_command = f"echo y | autosubmit stop {flags} {expid}"
+        autosubmit_command = f"autosubmit stop {flags} {expid}"
 
-        wrapped_command = self.module_loader.generate_command(autosubmit_command)
+        wrapped_command = (
+            f"echo y | {self.module_loader.generate_command(autosubmit_command)}"
+        )
 
         # Run the command to stop the experiment
         logger.debug(f"Stopping experiment {expid} with command: {wrapped_command}")
@@ -215,7 +218,7 @@ class LocalRunner(Runner):
             # However it only matters that the process is no longer running.
             pid = active_procs[0].pid
             process = psutil.Process(pid)
-            process.wait(timeout=5)
+            process.wait(timeout=STOP_WAIT_TIMEOUT)
         except Exception as exc:
             logger.error(f"Failed to stop experiment {expid}: {exc}")
             raise exc

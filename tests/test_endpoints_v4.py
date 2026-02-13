@@ -9,6 +9,7 @@ import jwt
 import pytest
 from autosubmit_api import config
 from autosubmit_api.models.requests import PAGINATION_LIMIT_DEFAULT
+from autosubmit_api.repositories.runner_processes import RunnerProcessesDataModel
 from tests.utils import custom_return_value
 
 
@@ -561,3 +562,139 @@ class TestRunnerSetJobStatus:
             )
 
             assert response.status_code == 200
+
+
+class TestRunnerRunExperiment:
+    endpoint = "/v4/runners/command/run-experiment"
+
+    def test_valid_ssh_request(self, fixture_fastapi_client: TestClient):
+        with (
+            patch(
+                "autosubmit_api.runners.runner_config.read_config_file"
+            ) as mock_read_config,
+            patch("autosubmit_api.routers.v4.runners.get_runner") as mock_get_runner,
+        ):
+            mock_read_config.return_value = {
+                "RUNNER_CONFIGURATION": {
+                    "PROFILES": {
+                        "SSH_AUTOSUBMIT_DEV": {
+                            "RUNNER_TYPE": "SSH",
+                            "MODULE_LOADER_TYPE": "CONDA",
+                            "MODULES": ["autosubmit"],
+                            "SSH": {
+                                "HOST": "bscesautosubmit03.bsc.es",
+                                "PORT": 22,
+                            },
+                        }
+                    }
+                }
+            }
+
+            mock_runner = MagicMock()
+            mock_runner.run = AsyncMock(return_value="None")
+            mock_get_runner.return_value = mock_runner
+
+            response = fixture_fastapi_client.post(
+                self.endpoint,
+                json={
+                    "expid": "test_expid",
+                    "profile_name": "SSH_AUTOSUBMIT_DEV",
+                    "profile_params": {
+                        "SSH": {
+                            "USERNAME": "test_user",
+                        }
+                    },
+                },
+            )
+            assert response.status_code == 200
+
+
+class TestRunnerGetRunnerRunStatus:
+    endpoint = "/v4/runners/command/get-runner-run-status"
+
+    def test_valid_request(self, fixture_fastapi_client: TestClient):
+        with patch(
+            "autosubmit_api.routers.v4.runners.create_runner_processes_repository"
+        ) as mock_create_repo:
+            mock_repo = MagicMock()
+            mock_process = RunnerProcessesDataModel(
+                id=1,
+                expid="test_expid",
+                pid=12345,
+                status="RUNNING",
+                runner="SSH",
+                module_loader="CONDA",
+                modules="autosubmit",
+                created="2026-02-09T10:00:00",
+                modified="2026-02-09T10:05:00",
+            )
+
+            mock_repo.get_last_process_by_expid.return_value = mock_process
+            mock_create_repo.return_value = mock_repo
+
+            response = fixture_fastapi_client.post(
+                self.endpoint,
+                json={"expid": "test_expid"},
+            )
+
+            assert response.status_code == 200
+            resp_obj: dict = response.json()
+
+            assert resp_obj["expid"] == mock_process.expid
+            assert resp_obj["runner_id"] == mock_process.id
+            assert resp_obj["runner"] == mock_process.runner
+            assert resp_obj["module_loader"] == mock_process.module_loader
+            assert resp_obj["modules"] == mock_process.modules
+            assert resp_obj["status"] == mock_process.status
+            assert resp_obj["pid"] == mock_process.pid
+            assert resp_obj["created"] == mock_process.created
+            assert resp_obj["modified"] == mock_process.modified
+
+    def test_no_process_found(self, fixture_fastapi_client: TestClient):
+        with patch(
+            "autosubmit_api.routers.v4.runners.create_runner_processes_repository"
+        ) as mock_create_repo:
+            mock_repo = MagicMock()
+            mock_repo.get_last_process_by_expid.return_value = None
+            mock_create_repo.return_value = mock_repo
+
+            response = fixture_fastapi_client.post(
+                self.endpoint,
+                json={"expid": "test_expid"},
+            )
+
+            assert response.status_code == 500
+
+
+class TestRunnerStopExperiment:
+    endpoint = "/v4/runners/command/stop-experiment"
+
+    def test_valid_ssh_request(self, fixture_fastapi_client: TestClient):
+        with patch(
+            "autosubmit_api.routers.v4.runners.get_runner_from_expid"
+        ) as mock_get_runner_from_expid:
+            mock_runner = MagicMock()
+            mock_runner.stop = AsyncMock(return_value="None")
+            mock_get_runner_from_expid.return_value = mock_runner
+
+            response = fixture_fastapi_client.post(
+                self.endpoint,
+                json={"expid": "test_expid"},
+            )
+
+            assert response.status_code == 200
+            resp_obj: dict = response.json()
+            assert resp_obj["message"] == "Experiment test_expid stopped successfully."
+
+    def test_stop_failure(self, fixture_fastapi_client: TestClient):
+        with patch(
+            "autosubmit_api.routers.v4.runners.get_runner_from_expid"
+        ) as mock_get_runner_from_expid:
+            mock_get_runner_from_expid.side_effect = Exception("Runner not found")
+
+            response = fixture_fastapi_client.post(
+                self.endpoint,
+                json={"expid": "test_expid"},
+            )
+
+            assert response.status_code == 500
