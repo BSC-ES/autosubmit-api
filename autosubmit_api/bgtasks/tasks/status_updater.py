@@ -4,7 +4,6 @@ from typing import Dict, List
 from autosubmit_api.bgtasks.bgtask import BackgroundTaskTemplate
 from autosubmit_api.experiment.common_requests import _is_exp_running
 from autosubmit_api.history.database_managers.database_models import RunningStatus
-from autosubmit_api.persistance.pkl_reader import PklReader
 from autosubmit_api.repositories.experiment import (
     ExperimentModel,
     create_experiment_repository,
@@ -12,6 +11,7 @@ from autosubmit_api.repositories.experiment import (
 from autosubmit_api.repositories.experiment_status import (
     create_experiment_status_repository,
 )
+from autosubmit_api.repositories.jobs import create_jobs_repository
 from autosubmit_api.repositories.join.experiment_join import (
     create_experiment_join_repository,
 )
@@ -61,8 +61,8 @@ class StatusUpdater(BackgroundTaskTemplate):
 
         is_running = False
         try:
-            pkl_reader = PklReader(expid)
-            pkl_age = int(time.time()) - pkl_reader.get_modified_time()
+            job_list_repo = create_jobs_repository(expid)
+            pkl_age = int(time.time()) - job_list_repo.get_last_modified_timestamp()
 
             if pkl_age < MAX_PKL_AGE:  # First running check
                 is_running = True
