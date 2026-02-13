@@ -1,28 +1,30 @@
 import asyncio
-from collections import deque
-from datetime import datetime, timezone
-from http import HTTPStatus
 import json
 import math
 import traceback
+from collections import deque
+from datetime import datetime, timezone
+from http import HTTPStatus
 from typing import Annotated, Any, Dict, List, Literal, Optional
+
+from bscearth.utils.config_parser import ConfigParserFactory
 from fastapi import APIRouter, Depends, HTTPException, Query
 from fastapi.responses import JSONResponse
+
 from autosubmit_api.auth import auth_token_dependency
 from autosubmit_api.builders.experiment_builder import ExperimentBuilder
-from autosubmit_api.config.config_common import AutosubmitConfigResolver
-from autosubmit_api.database import tables
-from autosubmit_api.common.utils import Status
-from autosubmit_api.database.db_jobdata import JobDataStructure
-from autosubmit_api.database.models import BaseExperimentModel
-from autosubmit_api.repositories.join.experiment_join import (
-    create_experiment_join_repository,
-)
-from autosubmit_api.logger import logger
 from autosubmit_api.builders.experiment_history_builder import (
     ExperimentHistoryBuilder,
     ExperimentHistoryDirector,
 )
+from autosubmit_api.common.utils import Status
+from autosubmit_api.config.basicConfig import APIBasicConfig
+from autosubmit_api.config.confConfigStrategy import confConfigStrategy
+from autosubmit_api.config.config_common import AutosubmitConfigResolver
+from autosubmit_api.database import tables
+from autosubmit_api.database.db_jobdata import JobDataStructure
+from autosubmit_api.database.models import BaseExperimentModel
+from autosubmit_api.logger import logger
 from autosubmit_api.models.requests import (
     ExperimentsSearchRequest,
 )
@@ -31,14 +33,14 @@ from autosubmit_api.models.responses import (
     ExperimentJobsResponse,
     ExperimentRunConfigResponse,
     ExperimentRunsResponse,
-    ExperimentWrappersResponse,
     ExperimentsSearchResponse,
+    ExperimentWrappersResponse,
 )
 from autosubmit_api.persistance.job_package_reader import JobPackageReader
-from autosubmit_api.persistance.pkl_reader import PklReader
-from bscearth.utils.config_parser import ConfigParserFactory
-from autosubmit_api.config.basicConfig import APIBasicConfig
-from autosubmit_api.config.confConfigStrategy import confConfigStrategy
+from autosubmit_api.repositories.jobs import create_jobs_repository
+from autosubmit_api.repositories.join.experiment_join import (
+    create_experiment_join_repository,
+)
 from autosubmit_api.repositories.user_metric import create_user_metric_repository
 
 router = APIRouter()
@@ -167,16 +169,20 @@ async def get_experiment_detail(
 async def get_experiment_jobs(
     expid: str,
     view: Annotated[Literal["quick", "base"], Query()] = "base",
+    page: Annotated[Optional[int], Query()] = None,
+    page_size: Annotated[Optional[int], Query()] = None,
     user_id: Optional[str] = Depends(auth_token_dependency()),
 ) -> ExperimentJobsResponse:
     """
     Get the experiment jobs from pickle file.
     BASE view returns base content of the pkl file.
     QUICK view returns a reduced payload with just the name and status of the jobs.
+    Supports pagination if page_size is provided.
     """
     # Read the pkl
     try:
-        current_content = PklReader(expid).parse_job_list()
+        jobs_repo = create_jobs_repository(expid)
+        current_content = jobs_repo.get_all()
     except Exception as exc:
         error_message = "Error while reading the job list"
         logger.error(error_message + f": {exc}")
@@ -215,9 +221,38 @@ async def get_experiment_jobs(
         else:
             pkl_jobs.appendleft(resp_job)
 
-    return JSONResponse(
-        {"jobs": list(pkl_jobs)}
-    )  # TODO Use Validation. Not respond directly.
+    jobs_list = list(pkl_jobs)
+    total_items = len(jobs_list)
+
+    if page_size is not None and page_size > 0:
+        page = page or 1
+        start = (page - 1) * page_size
+        end = start + page_size
+        paginated_jobs = jobs_list[start:end]
+        total_pages = math.ceil(total_items / page_size)
+        response = {
+            "jobs": paginated_jobs,
+            "pagination": {
+                "page": page,
+                "page_size": page_size,
+                "total_pages": total_pages,
+                "page_items": len(paginated_jobs),
+                "total_items": total_items,
+            },
+        }
+    else:
+        response = {
+            "jobs": jobs_list,
+            "pagination": {
+                "page": 1,
+                "page_size": None,
+                "total_pages": 1,
+                "page_items": None,
+                "total_items": total_items,
+            },
+        }
+
+    return JSONResponse(response)  # TODO Use Validation. Not respond directly.
 
 
 @router.get("/{expid}/wrappers", name="Get experiment wrappers")
