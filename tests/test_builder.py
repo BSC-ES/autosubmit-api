@@ -14,10 +14,10 @@ class TestExperimentBuilder:
     def test_produce_pkl_modified_time(self):
         experiment_builder = ExperimentBuilder()
         with patch(
-            "autosubmit_api.builders.experiment_builder.PklReader"
+            "autosubmit_api.builders.experiment_builder.create_jobs_repository"
         ) as MockPklReader:
             mock_pkl_reader = MockPklReader.return_value
-            mock_pkl_reader.get_modified_time.return_value = (
+            mock_pkl_reader.get_last_modified_timestamp.return_value = (
                 1609459200  # Mock timestamp for 2021-01-01 00:00:00 UTC
             )
 
