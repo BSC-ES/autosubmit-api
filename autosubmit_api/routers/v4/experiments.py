@@ -169,17 +169,22 @@ async def get_experiment_detail(
 async def get_experiment_jobs(
     expid: str,
     view: Annotated[Literal["quick", "base"], Query()] = "base",
+    query: Annotated[Optional[str], Query()] = None,
+    status: Annotated[Optional[str], Query()] = None,
+    page: Annotated[Optional[int], Query()] = None,
+    page_size: Annotated[Optional[int], Query()] = None,
     user_id: Optional[str] = Depends(auth_token_dependency()),
 ) -> ExperimentJobsResponse:
     """
     Get the experiment jobs from pickle file.
     BASE view returns base content of the pkl file.
     QUICK view returns a reduced payload with just the name and status of the jobs.
+    Supports pagination if page_size is provided.
     """
     # Read the pkl
     try:
-        job_list_repo = create_jobs_repository(expid)
-        current_content = job_list_repo.get_all()
+        jobs_repo = create_jobs_repository(expid)
+        current_content = jobs_repo.search(query)
     except Exception as exc:
         error_message = "Error while reading the job list"
         logger.error(error_message + f": {exc}")
@@ -190,9 +195,14 @@ async def get_experiment_jobs(
 
     pkl_jobs = deque()
     for job_item in current_content:
+        status_value = Status.VALUE_TO_KEY.get(job_item.status, Status.UNKNOWN)
+
+        if status and status_value != status:
+            continue
+
         resp_job = {
             "name": job_item.name,
-            "status": Status.VALUE_TO_KEY.get(job_item.status, Status.UNKNOWN),
+            "status": status_value,
         }
 
         if view == "base":
@@ -218,9 +228,38 @@ async def get_experiment_jobs(
         else:
             pkl_jobs.appendleft(resp_job)
 
-    return JSONResponse(
-        {"jobs": list(pkl_jobs)}
-    )  # TODO Use Validation. Not respond directly.
+    jobs_list = list(pkl_jobs)
+    total_items = len(jobs_list)
+
+    if page_size is not None and page_size > 0:
+        page = page or 1
+        start = (page - 1) * page_size
+        end = start + page_size
+        paginated_jobs = jobs_list[start:end]
+        total_pages = math.ceil(total_items / page_size)
+        response = {
+            "jobs": paginated_jobs,
+            "pagination": {
+                "page": page,
+                "page_size": page_size,
+                "total_pages": total_pages,
+                "page_items": len(paginated_jobs),
+                "total_items": total_items,
+            },
+        }
+    else:
+        response = {
+            "jobs": jobs_list,
+            "pagination": {
+                "page": 1,
+                "page_size": None,
+                "total_pages": 1,
+                "page_items": None,
+                "total_items": total_items,
+            },
+        }
+
+    return JSONResponse(response)  # TODO Use Validation. Not respond directly.
 
 
 @router.get("/{expid}/wrappers", name="Get experiment wrappers")
