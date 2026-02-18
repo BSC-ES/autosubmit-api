@@ -1,12 +1,13 @@
 import datetime
-from autosubmit_api.logger import logger
+
 from autosubmit_api.builders import BaseBuilder
 from autosubmit_api.database.models import ExperimentModel
-from autosubmit_api.persistance.pkl_reader import PklReader
+from autosubmit_api.logger import logger
 from autosubmit_api.repositories.experiment import create_experiment_repository
 from autosubmit_api.repositories.experiment_details import (
     create_experiment_details_repository,
 )
+from autosubmit_api.repositories.jobs import create_jobs_repository
 
 
 class ExperimentBuilder(BaseBuilder):
@@ -15,9 +16,9 @@ class ExperimentBuilder(BaseBuilder):
         Get the modified time of the pkl file.
         """
         try:
+            job_list_repo = create_jobs_repository(self._product.name)
             self._product.modified = datetime.datetime.fromtimestamp(
-                PklReader(self._product.name).get_modified_time(),
-                tz=datetime.timezone.utc
+                job_list_repo.get_last_modified_timestamp(), tz=datetime.timezone.utc
             ).isoformat()
         except Exception:
             self._product.modified = None

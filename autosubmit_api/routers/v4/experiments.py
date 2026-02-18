@@ -1,28 +1,30 @@
 import asyncio
-from collections import deque
-from datetime import datetime, timezone
-from http import HTTPStatus
 import json
 import math
 import traceback
+from collections import deque
+from datetime import datetime, timezone
+from http import HTTPStatus
 from typing import Annotated, Any, Dict, List, Literal, Optional
+
+from bscearth.utils.config_parser import ConfigParserFactory
 from fastapi import APIRouter, Depends, HTTPException, Query
 from fastapi.responses import JSONResponse
+
 from autosubmit_api.auth import auth_token_dependency
 from autosubmit_api.builders.experiment_builder import ExperimentBuilder
-from autosubmit_api.config.config_common import AutosubmitConfigResolver
-from autosubmit_api.database import tables
-from autosubmit_api.common.utils import Status
-from autosubmit_api.database.db_jobdata import JobDataStructure
-from autosubmit_api.database.models import BaseExperimentModel
-from autosubmit_api.repositories.join.experiment_join import (
-    create_experiment_join_repository,
-)
-from autosubmit_api.logger import logger
 from autosubmit_api.builders.experiment_history_builder import (
     ExperimentHistoryBuilder,
     ExperimentHistoryDirector,
 )
+from autosubmit_api.common.utils import Status
+from autosubmit_api.config.basicConfig import APIBasicConfig
+from autosubmit_api.config.confConfigStrategy import confConfigStrategy
+from autosubmit_api.config.config_common import AutosubmitConfigResolver
+from autosubmit_api.database import tables
+from autosubmit_api.database.db_jobdata import JobDataStructure
+from autosubmit_api.database.models import BaseExperimentModel
+from autosubmit_api.logger import logger
 from autosubmit_api.models.requests import (
     ExperimentsSearchRequest,
 )
@@ -31,14 +33,14 @@ from autosubmit_api.models.responses import (
     ExperimentJobsResponse,
     ExperimentRunConfigResponse,
     ExperimentRunsResponse,
-    ExperimentWrappersResponse,
     ExperimentsSearchResponse,
+    ExperimentWrappersResponse,
 )
 from autosubmit_api.persistance.job_package_reader import JobPackageReader
-from autosubmit_api.persistance.pkl_reader import PklReader
-from bscearth.utils.config_parser import ConfigParserFactory
-from autosubmit_api.config.basicConfig import APIBasicConfig
-from autosubmit_api.config.confConfigStrategy import confConfigStrategy
+from autosubmit_api.repositories.jobs import create_jobs_repository
+from autosubmit_api.repositories.join.experiment_join import (
+    create_experiment_join_repository,
+)
 from autosubmit_api.repositories.user_metric import create_user_metric_repository
 
 router = APIRouter()
@@ -176,7 +178,8 @@ async def get_experiment_jobs(
     """
     # Read the pkl
     try:
-        current_content = PklReader(expid).parse_job_list()
+        job_list_repo = create_jobs_repository(expid)
+        current_content = job_list_repo.get_all()
     except Exception as exc:
         error_message = "Error while reading the job list"
         logger.error(error_message + f": {exc}")

@@ -1,19 +1,25 @@
 #!/usr/bin/env python
 import math
 import os
-from autosubmit_api.components.experiment.file_metadata import FileMetadata
-from autosubmit_api.logger import logger
-from autosubmit_api.components.jobs.utils import convert_int_default
-from autosubmit_api.config.ymlConfigStrategy import ymlConfigStrategy
-from autosubmit_api.config.basicConfig import APIBasicConfig
-from autosubmit_api.components.jobs.job_factory import SimJob
-from autosubmit_api.config.config_common import AutosubmitConfigResolver
 from abc import ABCMeta, abstractmethod
-from autosubmit_api.common.utils import JobSection, parse_number_processors, timestamp_to_datetime_format, datechunk_to_year
 from typing import List, Optional
 
+from autosubmit_api.common.utils import (
+  JobSection,
+  datechunk_to_year,
+  parse_number_processors,
+  timestamp_to_datetime_format,
+)
+from autosubmit_api.components.experiment.file_metadata import FileMetadata
+from autosubmit_api.components.jobs.job_factory import SimJob
+from autosubmit_api.components.jobs.utils import convert_int_default
+from autosubmit_api.config.basicConfig import APIBasicConfig
+from autosubmit_api.config.config_common import AutosubmitConfigResolver
+from autosubmit_api.config.ymlConfigStrategy import ymlConfigStrategy
+from autosubmit_api.logger import logger
 from autosubmit_api.persistance.experiment import ExperimentPaths
-from autosubmit_api.persistance.pkl_reader import PklReader
+from autosubmit_api.repositories.jobs import create_jobs_repository
+
 
 class ProjectType:
   GIT = "git"
@@ -28,7 +34,6 @@ class ConfigurationFacade(metaclass=ABCMeta):
     self.basic_configuration: APIBasicConfig = basic_config
     self.expid: str = expid
     self.experiment_path: str = ""
-    self.pkl_path: str = ""
     self.tmp_path: str = ""
     self.log_path: str = ""
     self.structures_path: str = ""
@@ -38,14 +43,11 @@ class ConfigurationFacade(metaclass=ABCMeta):
   def _process_basic_config(self):
     exp_paths = ExperimentPaths(self.expid)
     self.experiment_path = exp_paths.exp_dir
-    self.pkl_path = exp_paths.job_list_pkl
     self.tmp_path = exp_paths.tmp_dir
     self.log_path = exp_paths.tmp_log_dir
     self.structures_path = self.basic_configuration.STRUCTURES_DIR
     if not os.path.exists(self.experiment_path):
       raise IOError("Experiment folder {0} not found".format(self.experiment_path))
-    if APIBasicConfig.DATABASE_BACKEND != "postgres" and not os.path.exists(self.pkl_path):
-      raise IOError("Required file {0} not found.".format(self.pkl_path))
     if not os.path.exists(self.tmp_path):
       raise IOError("Required folder {0} not found.".format(self.tmp_path))
 
@@ -108,7 +110,6 @@ class AutosubmitConfigurationFacade(ConfigurationFacade):
   def __init__(self, expid: str, basic_config: APIBasicConfig, autosubmit_config: AutosubmitConfigResolver):
     super(AutosubmitConfigurationFacade, self).__init__(expid, basic_config)
     self.autosubmit_conf = autosubmit_config
-    self.pkl_reader = PklReader(expid)
     self.file_metadata = FileMetadata(self.experiment_path)
     self._process_advanced_config()
 
@@ -219,7 +220,8 @@ class AutosubmitConfigurationFacade(ConfigurationFacade):
     self._sim_exclusive = value
 
   def get_pkl_last_modified_timestamp(self) -> int:
-    return self.pkl_reader.get_modified_time()
+    job_list_repo = create_jobs_repository(self.expid)
+    return job_list_repo.get_last_modified_timestamp()
 
   def get_pkl_last_modified_time_as_datetime(self) -> str:
     return timestamp_to_datetime_format(self.get_pkl_last_modified_timestamp())
