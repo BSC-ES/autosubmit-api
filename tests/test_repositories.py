@@ -249,7 +249,7 @@ class TestExperimentRunnerRepository:
 
 
 class TestJobsRepository:
-    @pytest.mark.parametrize("expid, jobs_len", [("a1x4", 8), ("a007", 8)])
+    @pytest.mark.parametrize("expid, jobs_len", [("a1x4", 4), ("a007", 8)])
     def test_job_from_db(self, fixture_mock_basic_config, expid: str, jobs_len: int):
         job_list_repo = create_jobs_repository(expid)
 

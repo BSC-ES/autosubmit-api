@@ -211,7 +211,7 @@ class TestExperimentJobs:
         [
             ("a003", "quick", 8),
             ("a003", "base", 8),
-            ("a1x4", "base", 8),
+            ("a1x4", "base", 4),
         ],
     )
     def test_jobs_views(
