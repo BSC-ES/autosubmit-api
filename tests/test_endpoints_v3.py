@@ -91,7 +91,7 @@ class TestExpInfo:
         [
             ("a003", 8, 8, None),
             ("a3tb", 55, 28, None),
-            ("a1x4", 8, 0, 0),
+            ("a1x4", 4, 0, 0),
         ],
     )
     def test_exp_info(
@@ -280,7 +280,7 @@ class TestQuick:
     endpoint = "/v3/quick/{expid}"
 
     @pytest.mark.parametrize(
-        "expid, expected_total", [("a007", 8), ("a6zj", 10), ("a1x4", 8)]
+        "expid, expected_total", [("a007", 8), ("a6zj", 10), ("a1x4", 4)]
     )
     def test_quick(
         self, fixture_fastapi_client: TestClient, expid: str, expected_total: int
@@ -357,8 +357,8 @@ class TestGraph:
         assert resp_obj["error_message"] == ""
         assert resp_obj["error"] is False
         assert resp_obj["total_jobs"] == len(resp_obj["nodes"])
-        assert resp_obj["total_jobs"] == 8
-        assert len(resp_obj["edges"]) == 7
+        assert resp_obj["total_jobs"] == 4
+        assert len(resp_obj["edges"]) == 3
 
 
 class TestExpCount:
@@ -397,7 +397,7 @@ class TestExpCount:
                     "RUNNING": 0,
                     "QUEUING": 0,
                     "SUSPENDED": 0,
-                    "WAITING": 7,
+                    "WAITING": 3,
                 },
             ),
         ],
