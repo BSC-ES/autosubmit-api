@@ -76,7 +76,19 @@ class Runner(ABC):
         """
 
     @abstractmethod
-    async def create_experiment(self):
+    async def create_experiment(
+        self,
+        description: str,
+        git_repo: Optional[str] = None,
+        git_branch: Optional[str] = None,
+        minimal: bool = False,
+        config_path: Optional[str] = None,
+        hpc: Optional[str] = None,
+        use_local_minimal: bool = False,
+        operational: bool = False,
+        testcase: bool = False,
+        copy: Optional[str] = None,
+    ):
         """
         Create an Autosubmit experiment.
         """

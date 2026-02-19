@@ -229,3 +229,65 @@ async def stop_experiment(
         )
 
     return {"message": f"Experiment {expid} stopped successfully."}
+
+
+class CreateExperimentCmdParams(BaseModel):
+    description: str = None
+    git_repo: Optional[str] = None
+    git_branch: Optional[str] = None
+    minimal: bool = False
+    config_path: Optional[str] = None
+    hpc: Optional[str] = None
+    use_local_minimal: bool = False
+    operational: bool = False
+    testcase: bool = False
+    copy: Optional[str] = None
+
+
+class CreateExperimentBody(RunnerEndpointBody):
+    command_params: CreateExperimentCmdParams
+
+
+@router.post("/command/create-experiment", name="Create an experiment")
+async def create_experiment(
+    body: CreateExperimentBody,
+    user_id: Optional[str] = Depends(auth_token_dependency()),
+) -> Dict[str, Any]:
+    """
+    Create an experiment using the specified runner profile.
+    """
+    command_params = body.command_params
+
+    logger.info(f"Creating experiment using profile {body.profile_name}")
+
+    try:
+        # Check mandatory parameters
+        if not command_params.description:
+            raise ValueError("Description is required to create an experiment.")
+
+        profile = process_profile(body.profile_name, body.profile_params)
+        logger.debug(
+            f"Processing profile: {body.profile_name}. Profile data: {profile}"
+        )
+
+        runner_type, module_loader_type, modules = (
+            profile.get("RUNNER_TYPE"),
+            profile.get("MODULE_LOADER_TYPE"),
+            profile.get("MODULES"),
+        )
+
+        runner_extra_params = get_runner_extra_params(profile)
+
+        module_loader = get_module_loader(module_loader_type, modules)
+        runner = get_runner(runner_type, module_loader, **runner_extra_params)
+        expid = await runner.create_experiment(**command_params.__dict__)
+    except ValueError as exc:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to create experiment: {exc}",
+        )
+
+    return {
+        "expid": expid,
+        "message": f"Experiment {expid} created successfully.",
+    }

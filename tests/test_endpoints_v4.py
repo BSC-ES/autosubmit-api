@@ -698,3 +698,55 @@ class TestRunnerStopExperiment:
             )
 
             assert response.status_code == 500
+
+
+class TestRunnerCreateExperiment:
+    endpoint = "/v4/runners/command/create-experiment"
+
+    def test_valid_local_request(self, fixture_fastapi_client: TestClient):
+        with (
+            patch(
+                "autosubmit_api.runners.runner_config.read_config_file"
+            ) as mock_read_config,
+            patch("autosubmit_api.routers.v4.runners.get_runner") as mock_get_runner,
+        ):
+            mock_read_config.return_value = {
+                "RUNNER_CONFIGURATION": {
+                    "PROFILES": {
+                        "LOCAL_AUTOSUBMIT_DEV": {
+                            "RUNNER_TYPE": "LOCAL",
+                            "MODULE_LOADER_TYPE": "CONDA",
+                            "MODULES": ["autosubmit"],
+                        }
+                    }
+                }
+            }
+
+            mock_runner = MagicMock()
+            mock_runner.create_experiment = AsyncMock(return_value="a123")
+            mock_get_runner.return_value = mock_runner
+
+            response = fixture_fastapi_client.post(
+                self.endpoint,
+                json={
+                    "profile_name": "LOCAL_AUTOSUBMIT_DEV",
+                    "command_params": {
+                        "description": "Test experiment",
+                    },
+                },
+            )
+
+            assert response.status_code == 200
+
+    def test_no_description(self, fixture_fastapi_client: TestClient):
+        response = fixture_fastapi_client.post(
+            self.endpoint,
+            json={
+                "profile_name": "LOCAL_AUTOSUBMIT_DEV",
+                "command_params": {
+                    # No description provided
+                },
+            },
+        )
+
+        assert response.status_code != 200
