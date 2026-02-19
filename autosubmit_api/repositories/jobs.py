@@ -12,6 +12,7 @@ from autosubmit_api.database import tables
 from autosubmit_api.database.common import create_sqlite_db_engine
 from autosubmit_api.persistance.experiment import ExperimentPaths
 from autosubmit_api.persistance.pkl_reader import PklReader
+from autosubmit_api.repositories.experiment import create_experiment_repository
 
 
 class JobData(BaseModel):
@@ -121,9 +122,11 @@ def create_jobs_repository(expid: str) -> JobsRepository:
     """
     if APIBasicConfig.DATABASE_BACKEND == "postgres":
         # Postgres
-        engine = create_engine(APIBasicConfig.DATABASE_CONN_URL)
-        table = tables.table_change_schema(expid, tables.JobsTable)
-        return JobsSQLRepository(expid, engine, table)
+        experiment = create_experiment_repository().get_by_expid(expid)
+        if common_utils.is_db_version_4_2_0_or_higher(experiment.autosubmit_version):
+            engine = create_engine(APIBasicConfig.DATABASE_CONN_URL)
+            table = tables.table_change_schema(expid, tables.JobsTable)
+            return JobsSQLRepository(expid, engine, table)
     else:
         exp_paths = ExperimentPaths(expid)
 
@@ -132,4 +135,4 @@ def create_jobs_repository(expid: str) -> JobsRepository:
             table = tables.JobsTable
             return JobsSQLRepository(expid, engine, table)
 
-        return JobsPklRepository(expid)
+    return JobsPklRepository(expid)

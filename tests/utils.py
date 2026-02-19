@@ -90,7 +90,8 @@ def copy_job_data_db(filepath: str, engine: Engine):
     source_as_db = create_engine(f"sqlite:///{filepath}")
     with source_as_db.connect() as source_conn, engine.connect() as conn:
         job_data_table = tables.check_table_schema(
-            source_as_db, [tables.JobDataTableV18, tables.JobDataTable]
+            source_as_db,
+            [tables.JobDataTableV4_2_0, tables.JobDataTableV18, tables.JobDataTable],
         )
         _copy_table_data(source_conn, conn, expid, job_data_table)
         _copy_table_data(source_conn, conn, expid, tables.ExperimentRunTable)
@@ -134,6 +135,7 @@ def copy_job_packages_db(filepath: str, engine: Engine):
         _copy_table_data(source_conn, conn, expid, tables.WrapperJobPackageTable)
         conn.commit()
 
+
 def copy_user_metrics_db(filepath: str, engine: Engine):
     expid = _get_expid_from_filename(r"metrics_(\w+)\.db", filepath)
     source_as_db = create_engine(f"sqlite:///{filepath}")
@@ -176,4 +178,18 @@ def copy_pkls(filepaths: list[str], engine: Engine):
                 ],
             )
 
+        conn.commit()
+
+
+def copy_job_list_db(filepath: str, engine: Engine):
+    expid = _get_expid_from_filename(r"(\w+)\/db\/job_list\.db", filepath)
+    source_as_db = create_engine(f"sqlite:///{filepath}")
+    with source_as_db.connect() as source_conn, engine.connect() as conn:
+        # Jobs Table
+        _copy_table_data(source_conn, conn, expid, tables.JobsTable)
+        # Job Wrappers Tables
+        _copy_table_data(source_conn, conn, expid, tables.PreviewWrapperInfoTable)
+        _copy_table_data(source_conn, conn, expid, tables.PreviewWrapperJobsTable)
+        # Experiment Structure Table
+        _copy_table_data(source_conn, conn, expid, tables.ExperimentStructureV4_2_0)
         conn.commit()
