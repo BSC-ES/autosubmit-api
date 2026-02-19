@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
-from typing import Any, List
+from pathlib import Path
+from typing import Any, List, Union
 
 from pydantic import BaseModel
 from sqlalchemy import Engine, Table, create_engine
@@ -27,9 +28,20 @@ class JobPackagesRepository(ABC):
 
 
 class JobPackagesSQLRepository(JobPackagesRepository):
-    def __init__(self, engine: Engine, table: Table):
+    def __init__(
+        self, expid: str, engine: Engine, valid_tables: Union[Table, List[Table]]
+    ):
+        self.expid = expid
         self.engine = engine
-        self.table = table
+
+        if isinstance(valid_tables, list):
+            self.table = tables.check_table_schema(self.engine, valid_tables)
+            if self.table is None:
+                if len(valid_tables) == 0:
+                    raise ValueError("No valid tables provided.")
+                self.table = valid_tables[0]
+        else:
+            self.table = valid_tables
 
     def get_all(self):
         with self.engine.connect() as conn:
@@ -37,7 +49,7 @@ class JobPackagesSQLRepository(JobPackagesRepository):
             result = conn.execute(statement).all()
         return [
             JobPackageModel(
-                exp_id=row.exp_id,
+                exp_id=row.exp_id if hasattr(row, "exp_id") else self.expid,
                 package_name=row.package_name,
                 job_name=row.job_name,
             )
@@ -45,24 +57,39 @@ class JobPackagesSQLRepository(JobPackagesRepository):
         ]
 
 
-def create_job_packages_repository(expid: str, wrapper=False) -> JobPackagesRepository:
+def create_job_packages_repository(expid: str, preview=False) -> JobPackagesRepository:
     """
     Create a job packages repository.
 
-    :param wrapper: Whether to use the alternative wrapper job packages table.
+    :param preview: Whether to use the alternative preview table.
     """
     if APIBasicConfig.DATABASE_BACKEND == "postgres":
         # Postgres
         _engine = create_engine(APIBasicConfig.DATABASE_CONN_URL)
+        # Handle multiple schema versions by checking which one exists and using it
         _table = (
-            tables.table_change_schema(expid, tables.WrapperJobPackageTable)
-            if wrapper
-            else tables.table_change_schema(expid, tables.JobPackageTable)
+            [
+                tables.table_change_schema(expid, tables.PreviewWrapperJobsTable),
+                tables.table_change_schema(expid, tables.WrapperJobPackageTable),
+            ]
+            if preview
+            else [
+                tables.table_change_schema(expid, tables.WrapperJobsTable),
+                tables.table_change_schema(expid, tables.JobPackageTable),
+            ]
         )
     else:
         # SQLite
-        _engine = create_sqlite_db_engine(
-            ExperimentPaths(expid).job_packages_db, read_only=True
-        )
-        _table = tables.WrapperJobPackageTable if wrapper else tables.JobPackageTable
-    return JobPackagesSQLRepository(_engine, _table)
+        exp_paths = ExperimentPaths(expid)
+
+        if Path(exp_paths.db_dir).exists() and Path(exp_paths.job_list_db).exists():
+            _engine = create_sqlite_db_engine(exp_paths.job_list_db, read_only=True)
+            _table = (
+                tables.PreviewWrapperJobsTable if preview else tables.WrapperJobsTable
+            )
+        else:
+            _engine = create_sqlite_db_engine(exp_paths.job_packages_db, read_only=True)
+            _table = (
+                tables.WrapperJobPackageTable if preview else tables.JobPackageTable
+            )
+    return JobPackagesSQLRepository(expid, _engine, _table)

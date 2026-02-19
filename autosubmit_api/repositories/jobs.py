@@ -1,11 +1,18 @@
 import datetime
 from abc import ABC, abstractmethod
+from pathlib import Path
 from typing import List, Optional
 
 from pydantic import BaseModel
+from sqlalchemy import Engine, Table, create_engine
 
 from autosubmit_api.common import utils as common_utils
+from autosubmit_api.config.basicConfig import APIBasicConfig
+from autosubmit_api.database import tables
+from autosubmit_api.database.common import create_sqlite_db_engine
+from autosubmit_api.persistance.experiment import ExperimentPaths
 from autosubmit_api.persistance.pkl_reader import PklReader
+from autosubmit_api.repositories.experiment import create_experiment_repository
 
 
 class JobData(BaseModel):
@@ -69,10 +76,63 @@ class JobsPklRepository(JobsRepository):
         return self.pkl_reader.get_modified_time()
 
 
+class JobsSQLRepository(JobsRepository):
+    def __init__(self, expid: str, engine: Engine, table: Table) -> None:
+        self.expid = expid
+        self.engine = engine
+        self.table = table
+
+    def get_all(self) -> List[JobData]:
+        """
+        Gets all jobs from SQL database
+        """
+        status_str_to_code = common_utils.Status.STRING_TO_CODE
+        with self.engine.connect() as conn:
+            result = conn.execute(self.table.select())
+            return [
+                JobData(
+                    id=row.id,
+                    name=row.name,
+                    status=status_str_to_code.get(
+                        row.status, common_utils.Status.UNKNOWN
+                    ),
+                    priority=row.priority,
+                    section=row.section,
+                    date=row.date,
+                    member=row.member,
+                    chunk=row.chunk,
+                    out_path_local=row.local_logs_out,
+                    err_path_local=row.local_logs_err,
+                    out_path_remote=row.remote_logs_out,
+                    err_path_remote=row.remote_logs_err,
+                )
+                for row in result
+            ]
+
+    def get_last_modified_timestamp(self) -> int:
+        # TODO: Implement this method once is available in Autosubmit
+        return 0
+
+
 def create_jobs_repository(expid: str) -> JobsRepository:
     """
     Factory function to create a JobsRepository instance.
-    TODO: For future Autosubmit versions, this should verify
-    the version to decide using SQL or PKL repository.
+    It decides whether to use the SQL or PKL repository based on the
+    existence of the SQLite database.
     """
+    if APIBasicConfig.DATABASE_BACKEND == "postgres":
+        # Postgres
+        experiment = create_experiment_repository().get_by_expid(expid)
+        if common_utils.is_db_version_4_2_0_or_higher(experiment.autosubmit_version):
+            engine = create_engine(APIBasicConfig.DATABASE_CONN_URL)
+            table = tables.table_change_schema(expid, tables.JobsTable)
+            return JobsSQLRepository(expid, engine, table)
+    else:
+        exp_paths = ExperimentPaths(expid)
+
+        if Path(exp_paths.db_dir).exists() and Path(exp_paths.job_list_db).exists():
+            engine = create_sqlite_db_engine(exp_paths.job_list_db, read_only=True)
+            table = tables.JobsTable
+            return JobsSQLRepository(expid, engine, table)
+
     return JobsPklRepository(expid)

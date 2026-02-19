@@ -206,33 +206,35 @@ class TestExperimentDetail:
 class TestExperimentJobs:
     endpoint = "/v4/experiments/{expid}/jobs"
 
-    def test_quick(self, fixture_fastapi_client: TestClient):
-        expid = "a003"
+    @pytest.mark.parametrize(
+        "expid, view, expected_len",
+        [
+            ("a003", "quick", 8),
+            ("a003", "base", 8),
+            ("a1x4", "base", 4),
+        ],
+    )
+    def test_jobs_views(
+        self,
+        fixture_fastapi_client: TestClient,
+        expid: str,
+        view: str,
+        expected_len: int,
+    ):
         response = fixture_fastapi_client.get(
             self.endpoint.format(expid=expid),
-            params={"view": "quick"},
+            params={"view": view},
         )
+        assert response.status_code == HTTPStatus.OK
         resp_obj: dict = response.json()
 
-        assert len(resp_obj["jobs"]) == 8
+        assert len(resp_obj["jobs"]) == expected_len
 
         for job in resp_obj["jobs"]:
-            assert isinstance(job, dict) and len(job.keys()) == 2
-            assert isinstance(job["name"], str) and job["name"].startswith(expid)
-            assert isinstance(job["status"], str)
-
-    def test_base(self, fixture_fastapi_client: TestClient):
-        expid = "a003"
-        response = fixture_fastapi_client.get(
-            self.endpoint.format(expid=expid),
-            params={"view": "base"},
-        )
-        resp_obj: dict = response.json()
-
-        assert len(resp_obj["jobs"]) == 8
-
-        for job in resp_obj["jobs"]:
-            assert isinstance(job, dict) and len(job.keys()) > 2
+            if view == "quick":
+                assert isinstance(job, dict) and len(job.keys()) == 2
+            else:
+                assert isinstance(job, dict) and len(job.keys()) > 2
             assert isinstance(job["name"], str) and job["name"].startswith(expid)
             assert isinstance(job["status"], str)
 
