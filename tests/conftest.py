@@ -217,6 +217,8 @@ def fixture_pg_db_copy_all(fixture_gen_rc_pg: Tuple[str, str]):
             utils.copy_job_packages_db(filepath, engine)
         elif "tmp/metrics_" in filepath:
             utils.copy_user_metrics_db(filepath, engine)
+        elif "db/job_list.db" in filepath:
+            utils.copy_job_list_db(filepath, engine)
 
     # Copy all the .pkl files to the test database
     utils.copy_pkls(all_pkl_files, engine)
