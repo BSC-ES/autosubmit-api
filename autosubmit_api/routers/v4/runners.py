@@ -51,6 +51,29 @@ def get_runner_configuration_profiles(
     return profiles
 
 
+@router.get("/configuration/endpoints", name="Get runner configuration endpoints")
+def get_runner_configuration_endpoints(
+    user_id: Optional[str] = Depends(auth_token_dependency()),
+) -> Dict[str, Any]:
+    """
+    Get the runner configuration endpoints from the configuration file.
+    """
+    config = read_config_file()
+    endpoints = config.get("RUNNER_CONFIGURATION", {}).get("ENDPOINTS", {})
+    if not isinstance(endpoints, dict):
+        endpoints = {}
+
+    default_endpoints = {
+        "SET_JOB_STATUS": {"ENABLED": True},
+        "CREATE_EXPERIMENT": {"ENABLED": True},
+        "RUNNER_RUN": {"ENABLED": True},
+    }
+
+    # Merge default endpoints with the ones from the config, giving priority to the config values
+    merged_endpoints = {**default_endpoints, **endpoints}
+    return merged_endpoints
+
+
 class RunnerEndpointBody(BaseModel):
     profile_name: str
     profile_params: Optional[Dict[str, Any]] = None
@@ -74,6 +97,13 @@ class SetJobStatusBody(RunnerEndpointBody):
     command_params: SetJobStatusCmdParams
 
 
+def _endpoint_enabled(endpoint_name: str) -> bool:
+    config = read_config_file()
+    endpoints = config.get("RUNNER_CONFIGURATION", {}).get("ENDPOINTS", {})
+    endpoint_config = endpoints.get(endpoint_name, {})
+    return endpoint_config.get("ENABLED", True)
+
+
 @router.post("/command/set-job-status", name="Set job status for an experiment")
 async def set_job_status(
     body: SetJobStatusBody,
@@ -82,6 +112,12 @@ async def set_job_status(
     """
     Set the job status for an experiment using the specified runner profile.
     """
+    if not _endpoint_enabled("SET_JOB_STATUS"):
+        raise HTTPException(
+            status_code=403,
+            detail="The set-job-status endpoint is currently disabled.",
+        )
+
     expid = body.expid
     command_params = body.command_params
 
@@ -128,6 +164,12 @@ async def run_experiment(
     """
     Run an experiment using the specified runner profile.
     """
+    if not _endpoint_enabled("RUNNER_RUN"):
+        raise HTTPException(
+            status_code=403,
+            detail="The run-experiment endpoint is currently disabled.",
+        )
+
     expid = body.expid
 
     logger.info(f"Starting experiment {expid} using profile {body.profile_name}")
@@ -174,6 +216,12 @@ async def get_runner_run_status(
     """
     Get the status of the runner run for a given experiment ID.
     """
+    if not _endpoint_enabled("RUNNER_RUN"):
+        raise HTTPException(
+            status_code=403,
+            detail="The get-runner-run-status endpoint is currently disabled.",
+        )
+
     expid = body.expid
 
     logger.info(f"Getting runner run status for experiment {expid}")
@@ -215,6 +263,12 @@ async def stop_experiment(
     """
     Stop an experiment using the specified runner profile.
     """
+    if not _endpoint_enabled("RUNNER_RUN"):
+        raise HTTPException(
+            status_code=403,
+            detail="The stop-experiment endpoint is currently disabled.",
+        )
+
     expid = body.expid
 
     logger.info(f"Stopping experiment {expid}")
@@ -256,6 +310,12 @@ async def create_experiment(
     """
     Create an experiment using the specified runner profile.
     """
+    if not _endpoint_enabled("CREATE_EXPERIMENT"):
+        raise HTTPException(
+            status_code=403,
+            detail="The create-experiment endpoint is currently disabled.",
+        )
+
     command_params = body.command_params
 
     logger.info(f"Creating experiment using profile {body.profile_name}")
