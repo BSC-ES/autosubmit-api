@@ -8,6 +8,7 @@ from autosubmit_api.repositories.experiment_status import (
     create_experiment_status_repository,
 )
 from autosubmit_api.repositories.graph_layout import create_exp_graph_layout_repository
+from autosubmit_api.repositories.jobs import JobsPklRepository
 from autosubmit_api.repositories.join.experiment_join import (
     generate_query_listexp_extended,
 )
@@ -245,3 +246,36 @@ class TestExperimentRunnerRepository:
         assert last_process.id == inserted_runner.id
         assert last_process.expid == TEST_EXPID
         assert last_process.status == "COMPLETED"
+
+
+@pytest.mark.parametrize(
+    "expression,value,expected",
+    [
+        # No expression matches everything
+        (None, "foobar", True),
+        ("", "foobar", True),
+        # Simple match
+        ("foo", "foo", True),
+        ("foo", "foobar", True),
+        # Wildcard at end
+        ("foo*", "foobar", True),
+        ("foo*", "fo", False),
+        # Wildcard at start
+        ("*bar", "foobar", True),
+        ("*bar", "barfoo", True),
+        # Wildcard at both ends
+        ("*foo*", "barfoo", True),
+        ("*foo*", "bar", False),
+        # Negation
+        ("!foo*", "foobar", False),
+        ("!foo*", "barfoo", False),
+        # Edge cases
+        ("*", "foobar", True),
+        ("!*", "foobar", False),
+        # Wildcard in the middle
+        ("foo*bar", "foobazbar", True),
+        ("foo*bar", "foobaz", False),
+    ],
+)
+def test_wildcard_compare(expression: str, value: str, expected: bool):
+    assert JobsPklRepository._wildcard_compare(expression, value) == expected
