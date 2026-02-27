@@ -10,14 +10,20 @@ from typing import Annotated, Any, Dict, List, Literal, Optional
 from bscearth.utils.config_parser import ConfigParserFactory
 from fastapi import APIRouter, Depends, HTTPException, Query
 from fastapi.responses import JSONResponse
+from pydantic import BaseModel
 
 from autosubmit_api.auth import auth_token_dependency
+from autosubmit_api.builders.configuration_facade_builder import (
+    AutosubmitConfigurationFacadeBuilder,
+    ConfigurationFacadeDirector,
+)
 from autosubmit_api.builders.experiment_builder import ExperimentBuilder
 from autosubmit_api.builders.experiment_history_builder import (
     ExperimentHistoryBuilder,
     ExperimentHistoryDirector,
 )
-from autosubmit_api.common.utils import Status
+from autosubmit_api.common.utils import Status, timestamp_to_datetime_format
+from autosubmit_api.components.jobs.utils import get_fixed_experiment_times
 from autosubmit_api.config.basicConfig import APIBasicConfig
 from autosubmit_api.config.confConfigStrategy import confConfigStrategy
 from autosubmit_api.config.config_common import AutosubmitConfigResolver
@@ -37,6 +43,8 @@ from autosubmit_api.models.responses import (
     ExperimentWrappersResponse,
 )
 from autosubmit_api.persistance.job_package_reader import JobPackageReader
+from autosubmit_api.repositories.experiment_run import create_experiment_run_repository
+from autosubmit_api.repositories.job_data import create_experiment_job_data_repository
 from autosubmit_api.repositories.jobs import create_jobs_repository
 from autosubmit_api.repositories.join.experiment_join import (
     create_experiment_join_repository,
@@ -401,3 +409,132 @@ async def get_runs_with_user_metrics(
             for run_id in run_ids
         ]
     }
+
+
+class JobDetailResponse(BaseModel):
+    # From pkl
+    name: str
+    status: str
+    section: Optional[str] = None
+    date: Optional[str] = None
+    member: Optional[str] = None
+    chunk: Optional[int] = None
+    section: Optional[str] = None
+    # split: Optional[str] = None
+    out_path_local: Optional[str] = None
+    err_path_local: Optional[str] = None
+    # From config
+    platform: Optional[str] = None
+    chunk_size: Optional[int] = None
+    chunk_unit: Optional[str] = None
+    # From historical DB
+    remote_id: Optional[int] = None
+    qos: Optional[str] = None
+    workflow_commit: Optional[str] = None
+    processors: Optional[int] = None  # Requested ncpus
+    submit: Optional[str] = None
+    start: Optional[str] = None
+    finish: Optional[str] = None
+    wallclock: Optional[str] = None
+    # From structure DB
+    # parents: Optional[int] = None
+    # children: Optional[int] = None
+
+    # # Calculated fields
+    processing_elements: Optional[str] = None
+    # run_time: Optional[str] = None
+    # queue_time: Optional[str] = None
+    # SYPD: Optional[float] = None  # Simulated Years Per Day
+    # ASYPD: Optional[float] = None  # Average Simulated Years Per Day
+
+
+@router.get("/{expid}/jobs/{job_name}", name="Get experiment job detail")
+async def get_experiment_job_detail(
+    expid: str,
+    job_name: str,
+    user_id: Optional[str] = Depends(auth_token_dependency()),
+) -> JobDetailResponse:
+    """
+    Get the details of a specific job of an experiment
+    """
+    # Read the pkl
+    try:
+        job_list_repo = create_jobs_repository(expid)
+        current_job = job_list_repo.get_by_name(job_name)
+
+        response = JobDetailResponse(
+            name=current_job.name,
+            status=Status.VALUE_TO_KEY.get(current_job.status, Status.UNKNOWN),
+            section=current_job.section,
+            date=current_job.date.strftime("%Y%m%d") if current_job.date else None,
+            member=current_job.member,
+            chunk=current_job.chunk,
+            out_path_local=current_job.out_path_local,
+            err_path_local=current_job.err_path_local,
+        )
+    except Exception as exc:
+        error_message = "Error while reading the job list"
+        logger.error(error_message + f": {exc}")
+        logger.error(traceback.print_exc())
+        raise HTTPException(
+            status_code=HTTPStatus.INTERNAL_SERVER_ERROR, detail=error_message
+        )
+
+    if not current_job:
+        raise HTTPException(
+            status_code=HTTPStatus.NOT_FOUND,
+            detail=f"Job with name '{job_name}' not found in experiment '{expid}'",
+        )
+
+    # Get data from the historical DB
+    try:
+        run_repo = create_experiment_run_repository(expid)
+        latest_run = run_repo.get_last_run()
+
+        response.chunk_size = latest_run.chunk_size
+        response.chunk_unit = latest_run.chunk_unit
+    except Exception:
+        logger.warning("Error while getting the latest run from the historical DB")
+        logger.warning(traceback.format_exc())
+
+    # Get data from the historical DB
+    try:
+        job_data_repo = create_experiment_job_data_repository(expid)
+        job_last_data = job_data_repo.get_last_job_data_by_name(job_name)
+
+        response.platform = job_last_data.platform
+        response.remote_id = job_last_data.job_id
+        response.qos = job_last_data.qos
+        response.processors = job_last_data.ncpus # Requested PROCESSORS
+        response.wallclock = job_last_data.wallclock
+        response.workflow_commit = job_last_data.workflow_commit
+
+        logger.debug(f"Job last data from historical DB: {job_last_data}")
+
+        submit, start, finish = get_fixed_experiment_times(expid, current_job, job_last_data)
+        response.submit = timestamp_to_datetime_format(submit)
+        response.start = timestamp_to_datetime_format(start)
+        response.finish = timestamp_to_datetime_format(finish)
+    except Exception:
+        logger.warning("Error while getting the job data from the historical DB")
+        logger.warning(traceback.format_exc())
+
+    # Get data from config, to correct data
+    try:
+        autosubmit_config_facade = ConfigurationFacadeDirector(
+                    AutosubmitConfigurationFacadeBuilder(expid)
+                ).build_autosubmit_configuration_facade()
+        
+        response.platform = autosubmit_config_facade.get_section_platform(current_job.section)
+        response.chunk_size = autosubmit_config_facade.chunk_size
+        response.chunk_unit = autosubmit_config_facade.chunk_unit
+        response.workflow_commit = autosubmit_config_facade.get_workflow_commit()
+        response.qos = autosubmit_config_facade.get_section_qos(current_job.section)
+        response.processors = autosubmit_config_facade.get_section_processors(current_job.section)
+        response.wallclock = autosubmit_config_facade.get_section_wallclock(current_job.section)
+    except Exception:
+        logger.warning("Error while building the configuration facade")
+        logger.warning(traceback.format_exc())
+    
+
+    return response
