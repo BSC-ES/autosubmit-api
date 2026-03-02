@@ -17,34 +17,46 @@
 # You should have received a copy of the GNU General Public License
 # along with Autosubmit.  If not, see <http://www.gnu.org/licenses/>.
 
-import os
-import traceback
 import datetime
 import math
+import os
+import traceback
 
 # Spectral imports
 # End Spectral imports
+from time import mktime, time
+from typing import TYPE_CHECKING, Dict, List, Optional, Tuple
 
-from time import time, mktime
+from bscearth.utils.date import date2str
 from dateutil.relativedelta import relativedelta
 
-from autosubmit_api.autosubmit_legacy.job.job_utils import SubJob
-from autosubmit_api.autosubmit_legacy.job.job_utils import SubJobManager, job_times_to_text
-from autosubmit_api.config.basicConfig import APIBasicConfig
-from autosubmit_api.performance.utils import calculate_ASYPD_perjob, calculate_SYPD_perjob
-from autosubmit_api.components.jobs import utils as JUtils
-from autosubmit_api.monitor.monitor import Monitor
+from autosubmit_api.autosubmit_legacy.job.job_utils import (
+    SubJob,
+    SubJobManager,
+    job_times_to_text,
+)
+from autosubmit_api.builders.experiment_history_builder import (
+    ExperimentHistoryBuilder,
+    ExperimentHistoryDirector,
+)
 from autosubmit_api.common.utils import Status
-from bscearth.utils.date import date2str
+from autosubmit_api.components.jobs import utils as JUtils
+from autosubmit_api.config.basicConfig import APIBasicConfig
+
 # from autosubmit_legacy.job.tree import Tree
 from autosubmit_api.database import db_structure as DbStructure
 from autosubmit_api.database.db_jobdata import JobDataStructure, JobRow
-from autosubmit_api.builders.experiment_history_builder import ExperimentHistoryDirector, ExperimentHistoryBuilder
 from autosubmit_api.history.data_classes.job_data import JobData
-
-from typing import List, Dict, Optional, Tuple
-
+from autosubmit_api.monitor.monitor import Monitor
+from autosubmit_api.performance.utils import (
+    calculate_ASYPD_perjob,
+    calculate_SYPD_perjob,
+)
 from autosubmit_api.persistance.experiment import ExperimentPaths
+
+if TYPE_CHECKING:
+    # Avoid circular imports
+    from autosubmit_api.components.jobs.job_factory import SimpleJob
 
 
 class JobList:
@@ -576,17 +588,31 @@ class JobList:
             return ""
 
     @staticmethod
-    def get_job_times_collection(basic_config: APIBasicConfig, allJobs, expid, job_to_package=None, package_to_jobs=None, timeseconds=True):
+    def get_job_times_collection(
+        basic_config: APIBasicConfig,
+        allJobs: List["SimpleJob"],
+        expid: str,
+        job_to_package: Optional[Dict[str, str]] = None,
+        package_to_jobs: Optional[Dict[str, List[str]]] = None,
+        timeseconds: bool = True,
+    ):
         """
         Gets queuing and running time for the collection of jobs
 
         :return: job running to min (queue, run, status), job running to text (text)
         """
         # Getting information
-        job_data = None
+        last_jobs_data = None
         try:
-            experiment_history = ExperimentHistoryDirector(ExperimentHistoryBuilder(expid)).build_reader_experiment_history()
-            job_data = experiment_history.manager.get_all_last_job_data_dcs()
+            experiment_history = ExperimentHistoryDirector(
+                ExperimentHistoryBuilder(expid)
+            ).build_reader_experiment_history()
+            last_jobs_data = experiment_history.manager.get_all_last_job_data_dcs()
+            map_job_name_to_job_data = (
+                {job_data.job_name: job_data for job_data in last_jobs_data}
+                if last_jobs_data
+                else {}
+            )
         except Exception:
             print(traceback.print_exc())
         # Result variables
@@ -604,8 +630,20 @@ class JobList:
         # Main loop
         # print("Start main loop")
         for job in allJobs:
+            job_data = (
+                map_job_name_to_job_data.get(job.name, None)
+                if map_job_name_to_job_data
+                else None
+            )
             job_info = JobList.retrieve_times(
-                job.status, job.name, job._tmp_path, make_exception=False, job_times=None, seconds=timeseconds, job_data_collection=job_data)
+                job.status,
+                job.name,
+                job._tmp_path,
+                make_exception=False,
+                job_times=None,
+                seconds=timeseconds,
+                job_data=job_data,
+            )
             # if job_info:
             job_name_to_job_info[job.name] = job_info
             time_total = (job_info.queue_time +
@@ -660,7 +698,7 @@ class JobList:
         make_exception: bool = False,
         job_times: Optional[Dict[str, Tuple[int, int, int, int, int]]] = None,
         seconds: bool = False,
-        job_data_collection: Optional[List[JobData]] = None,
+        job_data: Optional[JobData] = None,
     ) -> JobRow:
         """
         Retrieve job timestamps from database.
@@ -690,60 +728,63 @@ class JobList:
 
         try:
             # Getting data from new job database
-            if job_data_collection is not None:
-                # for job in job_data_collection:
-                #     print(job.job_name)
-                job_data = next(
-                    (job for job in job_data_collection if job.job_name == name), None)
-                if job_data:
-                    status = Status.VALUE_TO_KEY[status_code]
-                    if status == job_data.status:
-                        energy = job_data.energy
-                        if job_times:
-                            t_submit, t_start, t_finish, _, _ = job_times.get(name, (0, 0, 0, 0, 0))
-                            if t_finish - t_start > job_data.running_time:
-                                t_submit = t_submit if t_submit > 0 else job_data.submit
-                                t_start = t_start if t_start > 0 else job_data.start
-                                t_finish = t_finish if t_finish > 0 else job_data.finish
-                            else:
-                                t_submit = job_data.submit if job_data.submit > 0 else t_submit
-                                t_start = job_data.start if job_data.start > 0 else t_start
-                                t_finish = job_data.finish if job_data.finish > 0 else t_finish
-                            job_data.submit = t_submit
-                            job_data.start = t_start
-                            job_data.finish = t_finish
-                        else:
-                            t_submit = job_data.submit
-                            t_start = job_data.start
-                            t_finish = job_data.finish
-                        # Test if start time does not make sense
-                        if t_start >= t_finish:
-                            if job_times:
-                                _, c_start, _, _, _ = job_times.get(name, (0, t_start, t_finish, 0, 0))
-                                job_data.start = c_start if t_start > c_start else t_start
-
-                        if seconds is False:
-                            queue_time = math.ceil(job_data.queuing_time / 60)
-                            running_time = math.ceil(job_data.running_time / 60)
-                        else:
-                            queue_time = job_data.queuing_time
-                            running_time = job_data.running_time
-
-                        if status_code in [Status.SUSPENDED]:
-                            t_submit = t_start = t_finish = 0
-                        return JobRow(
-                            job_data.job_name,
-                            int(queue_time),
-                            int(running_time),
-                            status,
-                            energy,
-                            t_submit,
-                            t_start,
-                            t_finish,
-                            job_data.ncpus,
-                            job_data.run_id,
-                            job_data.workflow_commit,
+            if job_data:
+                status = Status.VALUE_TO_KEY[status_code]
+                if status == job_data.status:
+                    energy = job_data.energy
+                    if job_times:
+                        t_submit, t_start, t_finish, _, _ = job_times.get(
+                            name, (0, 0, 0, 0, 0)
                         )
+                        if t_finish - t_start > job_data.running_time:
+                            t_submit = t_submit if t_submit > 0 else job_data.submit
+                            t_start = t_start if t_start > 0 else job_data.start
+                            t_finish = t_finish if t_finish > 0 else job_data.finish
+                        else:
+                            t_submit = (
+                                job_data.submit if job_data.submit > 0 else t_submit
+                            )
+                            t_start = job_data.start if job_data.start > 0 else t_start
+                            t_finish = (
+                                job_data.finish if job_data.finish > 0 else t_finish
+                            )
+                        job_data.submit = t_submit
+                        job_data.start = t_start
+                        job_data.finish = t_finish
+                    else:
+                        t_submit = job_data.submit
+                        t_start = job_data.start
+                        t_finish = job_data.finish
+                    # Test if start time does not make sense
+                    if t_start >= t_finish:
+                        if job_times:
+                            _, c_start, _, _, _ = job_times.get(
+                                name, (0, t_start, t_finish, 0, 0)
+                            )
+                            job_data.start = c_start if t_start > c_start else t_start
+
+                    if seconds is False:
+                        queue_time = math.ceil(job_data.queuing_time / 60)
+                        running_time = math.ceil(job_data.running_time / 60)
+                    else:
+                        queue_time = job_data.queuing_time
+                        running_time = job_data.running_time
+
+                    if status_code in [Status.SUSPENDED]:
+                        t_submit = t_start = t_finish = 0
+                    return JobRow(
+                        job_data.job_name,
+                        int(queue_time),
+                        int(running_time),
+                        status,
+                        energy,
+                        t_submit,
+                        t_start,
+                        t_finish,
+                        job_data.ncpus,
+                        job_data.run_id,
+                        job_data.workflow_commit,
+                    )
 
             # Using standard procedure
             if status_code in [Status.RUNNING, Status.SUBMITTED, Status.QUEUING, Status.FAILED] or make_exception is True:
