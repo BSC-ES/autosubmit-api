@@ -1,6 +1,7 @@
 import asyncio
 import json
 import math
+import os
 import traceback
 from collections import deque
 from datetime import datetime, timezone
@@ -42,6 +43,7 @@ from autosubmit_api.models.responses import (
     ExperimentsSearchResponse,
     ExperimentWrappersResponse,
 )
+from autosubmit_api.persistance.experiment import ExperimentPaths
 from autosubmit_api.persistance.job_package_reader import JobPackageReader
 from autosubmit_api.repositories.experiment_run import create_experiment_run_repository
 from autosubmit_api.repositories.job_data import create_experiment_job_data_repository
@@ -469,9 +471,34 @@ async def get_experiment_job_detail(
             date=current_job.date.strftime("%Y%m%d") if current_job.date else None,
             member=current_job.member,
             chunk=current_job.chunk,
-            out_path_local=current_job.out_path_local,
-            err_path_local=current_job.err_path_local,
         )
+        exp_paths = ExperimentPaths(expid)
+
+        job_logs_out = []
+        job_logs_err = []
+        if current_job.status in [Status.COMPLETED, Status.FAILED]:
+            for f in os.listdir(exp_paths.tmp_log_dir):
+                if f.startswith(current_job.name):
+                    if f.endswith(".out"):
+                        job_logs_out.append(f)
+                    elif f.endswith(".err"):
+                        job_logs_err.append(f)
+
+        # Sort logs by time in the name, assuming the format is <job_name>.<timestamp>.[out|err]
+        job_logs_out.sort()
+        job_logs_err.sort()
+
+        response.out_path_local = (
+            os.path.join(exp_paths.tmp_log_dir, job_logs_out[-1])
+            if job_logs_out
+            else None
+        )
+        response.err_path_local = (
+            os.path.join(exp_paths.tmp_log_dir, job_logs_err[-1])
+            if job_logs_err
+            else None
+        )
+
     except Exception as exc:
         error_message = "Error while reading the job list"
         logger.error(error_message + f": {exc}")
@@ -505,13 +532,15 @@ async def get_experiment_job_detail(
         response.platform = job_last_data.platform
         response.remote_id = job_last_data.job_id
         response.qos = job_last_data.qos
-        response.processors = job_last_data.ncpus # Requested PROCESSORS
+        response.processors = job_last_data.ncpus  # Requested PROCESSORS
         response.wallclock = job_last_data.wallclock
         response.workflow_commit = job_last_data.workflow_commit
 
         logger.debug(f"Job last data from historical DB: {job_last_data}")
 
-        submit, start, finish = get_fixed_experiment_times(expid, current_job, job_last_data)
+        submit, start, finish = get_fixed_experiment_times(
+            expid, current_job, job_last_data
+        )
         response.submit = timestamp_to_datetime_format(submit)
         response.start = timestamp_to_datetime_format(start)
         response.finish = timestamp_to_datetime_format(finish)
@@ -522,19 +551,36 @@ async def get_experiment_job_detail(
     # Get data from config, to correct data
     try:
         autosubmit_config_facade = ConfigurationFacadeDirector(
-                    AutosubmitConfigurationFacadeBuilder(expid)
-                ).build_autosubmit_configuration_facade()
-        
-        response.platform = autosubmit_config_facade.get_section_platform(current_job.section)
-        response.chunk_size = autosubmit_config_facade.chunk_size
-        response.chunk_unit = autosubmit_config_facade.chunk_unit
-        response.workflow_commit = autosubmit_config_facade.get_workflow_commit()
-        response.qos = autosubmit_config_facade.get_section_qos(current_job.section)
-        response.processors = autosubmit_config_facade.get_section_processors(current_job.section)
-        response.wallclock = autosubmit_config_facade.get_section_wallclock(current_job.section)
+            AutosubmitConfigurationFacadeBuilder(expid)
+        ).build_autosubmit_configuration_facade()
+
+        section_platform = autosubmit_config_facade.get_section_platform(
+            current_job.section
+        )
+        if section_platform:
+            response.platform = section_platform
+        if autosubmit_config_facade.chunk_size:
+            response.chunk_size = autosubmit_config_facade.chunk_size
+        if autosubmit_config_facade.chunk_unit:
+            response.chunk_unit = autosubmit_config_facade.chunk_unit
+        workflow_commit = autosubmit_config_facade.get_workflow_commit()
+        if workflow_commit:
+            response.workflow_commit = workflow_commit
+        section_qos = autosubmit_config_facade.get_section_qos(current_job.section)
+        if section_qos:
+            response.qos = section_qos
+        section_processors = autosubmit_config_facade.get_section_processors(
+            current_job.section
+        )
+        if section_processors:
+            response.processors = section_processors
+        section_wallclock = autosubmit_config_facade.get_section_wallclock(
+            current_job.section
+        )
+        if section_wallclock:
+            response.wallclock = section_wallclock
     except Exception:
         logger.warning("Error while building the configuration facade")
         logger.warning(traceback.format_exc())
-    
 
     return response
