@@ -65,6 +65,12 @@ class ExperimentJobDataRepository(ABC):
         """
 
     @abstractmethod
+    def get_last_job_data_by_name(self, job_name: str) -> ExperimentJobDataModel:
+        """
+        Gets last job data of a specific job name
+        """
+
+    @abstractmethod
     def get_all(self) -> List[ExperimentJobDataModel]:
         """
         Gets all job data
@@ -140,6 +146,24 @@ class ExperimentJobDataSQLRepository(ExperimentJobDataRepository):
             ExperimentJobDataModel.model_validate(row, from_attributes=True)
             for row in result
         ]
+
+    def get_last_job_data_by_name(self, job_name: str):
+        with self.engine.connect() as conn:
+            statement = (
+                self.table.select()
+                .where(
+                    (self.table.c.job_name == job_name),
+                    (self.table.c.rowtype >= 2),
+                    (self.table.c.last == 1),
+                )
+                .order_by(self.table.c.counter.desc())
+            )
+            result = conn.execute(statement).first()
+
+        if result:
+            return ExperimentJobDataModel.model_validate(result, from_attributes=True)
+        else:
+            raise ValueError(f"No job data found for job name: {job_name}")
 
     def get_all(self):
         with self.engine.connect() as conn:

@@ -36,6 +36,12 @@ class JobsRepository(ABC):
         Gets the last modified UNIX timestamp of the jobs
         """
 
+    @abstractmethod
+    def get_by_name(self, name: str) -> Optional[JobData]:
+        """
+        Gets a job by its name
+        """
+
 
 class JobsPklRepository(JobsRepository):
     def __init__(self, expid: str) -> None:
@@ -67,6 +73,29 @@ class JobsPklRepository(JobsRepository):
 
     def get_last_modified_timestamp(self) -> int:
         return self.pkl_reader.get_modified_time()
+
+    def get_by_name(self, name: str) -> Optional[JobData]:
+        """
+        Gets a job by its name from pkl file
+        """
+        pkl_content = self.pkl_reader.parse_job_list()
+        for job in pkl_content:
+            if job.name == name:
+                return JobData(
+                    id=job.id,
+                    name=job.name,
+                    status=job.status,
+                    priority=job.priority,
+                    section=job.section,
+                    date=job.date,
+                    member=job.member,
+                    chunk=job.chunk,
+                    out_path_local=job.out_path_local,
+                    err_path_local=job.err_path_local,
+                    out_path_remote=job.out_path_remote,
+                    err_path_remote=job.err_path_remote,
+                )
+        return None
 
 
 def create_jobs_repository(expid: str) -> JobsRepository:

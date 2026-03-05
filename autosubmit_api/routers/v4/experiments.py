@@ -1,6 +1,7 @@
 import asyncio
 import json
 import math
+import os
 import traceback
 from collections import deque
 from datetime import datetime, timezone
@@ -10,14 +11,20 @@ from typing import Annotated, Any, Dict, List, Literal, Optional
 from bscearth.utils.config_parser import ConfigParserFactory
 from fastapi import APIRouter, Depends, HTTPException, Query
 from fastapi.responses import JSONResponse
+from pydantic import BaseModel
 
 from autosubmit_api.auth import auth_token_dependency
+from autosubmit_api.builders.configuration_facade_builder import (
+    AutosubmitConfigurationFacadeBuilder,
+    ConfigurationFacadeDirector,
+)
 from autosubmit_api.builders.experiment_builder import ExperimentBuilder
 from autosubmit_api.builders.experiment_history_builder import (
     ExperimentHistoryBuilder,
     ExperimentHistoryDirector,
 )
-from autosubmit_api.common.utils import Status
+from autosubmit_api.common.utils import Status, timestamp_to_datetime_format
+from autosubmit_api.components.jobs.utils import get_fixed_experiment_times
 from autosubmit_api.config.basicConfig import APIBasicConfig
 from autosubmit_api.config.confConfigStrategy import confConfigStrategy
 from autosubmit_api.config.config_common import AutosubmitConfigResolver
@@ -36,7 +43,14 @@ from autosubmit_api.models.responses import (
     ExperimentsSearchResponse,
     ExperimentWrappersResponse,
 )
+from autosubmit_api.persistance.experiment import ExperimentPaths
 from autosubmit_api.persistance.job_package_reader import JobPackageReader
+from autosubmit_api.repositories.experiment_run import create_experiment_run_repository
+from autosubmit_api.repositories.experiment_structure import (
+    create_experiment_structure_repository,
+)
+from autosubmit_api.repositories.job_data import create_experiment_job_data_repository
+from autosubmit_api.repositories.job_packages import create_job_packages_repository
 from autosubmit_api.repositories.jobs import create_jobs_repository
 from autosubmit_api.repositories.join.experiment_join import (
     create_experiment_join_repository,
@@ -401,3 +415,246 @@ async def get_runs_with_user_metrics(
             for run_id in run_ids
         ]
     }
+
+
+class JobDetailResponse(BaseModel):
+    # From pkl
+    name: str
+    status: str
+    section: Optional[str] = None
+    date: Optional[str] = None
+    member: Optional[str] = None
+    chunk: Optional[int] = None
+    section: Optional[str] = None
+    # split: Optional[str] = None
+    out_path_local: Optional[str] = None
+    err_path_local: Optional[str] = None
+    # From config
+    platform: Optional[str] = None
+    chunk_size: Optional[int] = None
+    chunk_unit: Optional[str] = None
+    # From historical DB
+    remote_id: Optional[int] = None
+    qos: Optional[str] = None
+    workflow_commit: Optional[str] = None
+    processors: Optional[int] = None  # Requested ncpus
+    submit: Optional[str] = None
+    start: Optional[str] = None
+    finish: Optional[str] = None
+    wallclock: Optional[str] = None
+    # From structure DB
+    # parents: Optional[int] = None
+    # children: Optional[int] = None
+
+    # # Calculated fields
+    processing_elements: Optional[str] = None
+    # run_time: Optional[str] = None
+    # queue_time: Optional[str] = None
+    # SYPD: Optional[float] = None  # Simulated Years Per Day
+    # ASYPD: Optional[float] = None  # Average Simulated Years Per Day
+
+
+@router.get("/{expid}/jobs/{job_name}", name="Get experiment job detail")
+async def get_experiment_job_detail(
+    expid: str,
+    job_name: str,
+    user_id: Optional[str] = Depends(auth_token_dependency()),
+) -> JobDetailResponse:
+    """
+    Get the details of a specific job of an experiment
+    """
+    # Read the pkl
+    try:
+        job_list_repo = create_jobs_repository(expid)
+        current_job = job_list_repo.get_by_name(job_name)
+
+        response = JobDetailResponse(
+            name=current_job.name,
+            status=Status.VALUE_TO_KEY.get(current_job.status, Status.UNKNOWN),
+            section=current_job.section,
+            date=current_job.date.strftime("%Y%m%d") if current_job.date else None,
+            member=current_job.member,
+            chunk=current_job.chunk,
+        )
+        exp_paths = ExperimentPaths(expid)
+
+        job_logs_out = []
+        job_logs_err = []
+        if current_job.status in [Status.COMPLETED, Status.FAILED]:
+            for f in os.listdir(exp_paths.tmp_log_dir):
+                if f.startswith(current_job.name):
+                    if f.endswith(".out"):
+                        job_logs_out.append(f)
+                    elif f.endswith(".err"):
+                        job_logs_err.append(f)
+
+        # Sort logs by time in the name, assuming the format is <job_name>.<timestamp>.[out|err]
+        job_logs_out.sort()
+        job_logs_err.sort()
+
+        response.out_path_local = (
+            os.path.join(exp_paths.tmp_log_dir, job_logs_out[-1])
+            if job_logs_out
+            else None
+        )
+        response.err_path_local = (
+            os.path.join(exp_paths.tmp_log_dir, job_logs_err[-1])
+            if job_logs_err
+            else None
+        )
+
+    except Exception as exc:
+        error_message = "Error while reading the job list"
+        logger.error(error_message + f": {exc}")
+        logger.error(traceback.print_exc())
+        raise HTTPException(
+            status_code=HTTPStatus.INTERNAL_SERVER_ERROR, detail=error_message
+        )
+
+    if not current_job:
+        raise HTTPException(
+            status_code=HTTPStatus.NOT_FOUND,
+            detail=f"Job with name '{job_name}' not found in experiment '{expid}'",
+        )
+
+    # Get data from the historical DB
+    try:
+        run_repo = create_experiment_run_repository(expid)
+        latest_run = run_repo.get_last_run()
+
+        response.chunk_size = latest_run.chunk_size
+        response.chunk_unit = latest_run.chunk_unit
+    except Exception:
+        logger.warning("Error while getting the latest run from the historical DB")
+        logger.warning(traceback.format_exc())
+
+    # Get data from the historical DB
+    try:
+        job_data_repo = create_experiment_job_data_repository(expid)
+        job_last_data = job_data_repo.get_last_job_data_by_name(job_name)
+
+        response.platform = job_last_data.platform
+        response.remote_id = job_last_data.job_id
+        response.qos = job_last_data.qos
+        response.processors = job_last_data.ncpus  # Requested PROCESSORS
+        response.wallclock = job_last_data.wallclock
+        response.workflow_commit = job_last_data.workflow_commit
+
+        logger.debug(f"Job last data from historical DB: {job_last_data}")
+
+        submit, start, finish = get_fixed_experiment_times(
+            expid, current_job, job_last_data
+        )
+        response.submit = timestamp_to_datetime_format(submit)
+        response.start = timestamp_to_datetime_format(start)
+        response.finish = timestamp_to_datetime_format(finish)
+    except Exception:
+        logger.warning("Error while getting the job data from the historical DB")
+        logger.warning(traceback.format_exc())
+
+    # Get data from config, to correct data
+    try:
+        autosubmit_config_facade = ConfigurationFacadeDirector(
+            AutosubmitConfigurationFacadeBuilder(expid)
+        ).build_autosubmit_configuration_facade()
+
+        section_platform = autosubmit_config_facade.get_section_platform(
+            current_job.section
+        )
+        if section_platform:
+            response.platform = section_platform
+        if autosubmit_config_facade.chunk_size:
+            response.chunk_size = autosubmit_config_facade.chunk_size
+        if autosubmit_config_facade.chunk_unit:
+            response.chunk_unit = autosubmit_config_facade.chunk_unit
+        workflow_commit = autosubmit_config_facade.get_workflow_commit()
+        if workflow_commit:
+            response.workflow_commit = workflow_commit
+        section_qos = autosubmit_config_facade.get_section_qos(current_job.section)
+        if section_qos:
+            response.qos = section_qos
+        section_processors = autosubmit_config_facade.get_section_processors(
+            current_job.section
+        )
+        if section_processors:
+            response.processors = section_processors
+        section_wallclock = autosubmit_config_facade.get_section_wallclock(
+            current_job.section
+        )
+        if section_wallclock:
+            response.wallclock = section_wallclock
+    except Exception:
+        logger.warning("Error while building the configuration facade")
+        logger.warning(traceback.format_exc())
+
+    return response
+
+
+@router.get("/{expid}/jobs/{job_name}/parents", name="Get experiment job parents")
+async def get_experiment_job_parents(
+    expid: str,
+    job_name: str,
+    user_id: Optional[str] = Depends(auth_token_dependency()),
+) -> Dict:
+    """
+    Get the parents of a specific job of an experiment
+    """
+    try:
+        structure_repo = create_experiment_structure_repository(expid)
+        parents = structure_repo.get_parents(job_name)
+    except Exception as exc:
+        error_message = "Error while reading the experiment structure"
+        logger.error(error_message + f": {exc}")
+        logger.error(traceback.format_exc())
+        raise HTTPException(
+            status_code=HTTPStatus.INTERNAL_SERVER_ERROR, detail=error_message
+        )
+
+    return {"parents": [{"job_name": parent} for parent in parents]}
+
+
+@router.get("/{expid}/jobs/{job_name}/children", name="Get experiment job children")
+async def get_experiment_job_children(
+    expid: str,
+    job_name: str,
+    user_id: Optional[str] = Depends(auth_token_dependency()),
+) -> Dict:
+    """
+    Get the children of a specific job of an experiment
+    """
+    try:
+        structure_repo = create_experiment_structure_repository(expid)
+        children = structure_repo.get_children(job_name)
+    except Exception as exc:
+        error_message = "Error while reading the experiment structure"
+        logger.error(error_message + f": {exc}")
+        logger.error(traceback.format_exc())
+        raise HTTPException(
+            status_code=HTTPStatus.INTERNAL_SERVER_ERROR, detail=error_message
+        )
+
+    return {"children": [{"job_name": child} for child in children]}
+
+
+@router.get("/{expid}/jobs/{job_name}/wrappers", name="Get experiment job wrappers")
+async def get_experiment_job_wrappers(
+    expid: str,
+    job_name: str,
+    user_id: Optional[str] = Depends(auth_token_dependency()),
+) -> Dict:
+    """
+    Get the wrappers of a specific job of an experiment
+    """
+    try:
+        job_package_repo = create_job_packages_repository(expid)
+        job_packages = job_package_repo.get_by_job_name(job_name)
+        wrappers = [jp.package_name for jp in job_packages]
+    except Exception as exc:
+        error_message = "Error while reading the job packages"
+        logger.error(error_message + f": {exc}")
+        logger.error(traceback.format_exc())
+        raise HTTPException(
+            status_code=HTTPStatus.INTERNAL_SERVER_ERROR, detail=error_message
+        )
+
+    return {"wrappers": [{"wrapper_name": wrapper} for wrapper in wrappers]}
