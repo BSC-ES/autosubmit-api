@@ -46,7 +46,11 @@ from autosubmit_api.models.responses import (
 from autosubmit_api.persistance.experiment import ExperimentPaths
 from autosubmit_api.persistance.job_package_reader import JobPackageReader
 from autosubmit_api.repositories.experiment_run import create_experiment_run_repository
+from autosubmit_api.repositories.experiment_structure import (
+    create_experiment_structure_repository,
+)
 from autosubmit_api.repositories.job_data import create_experiment_job_data_repository
+from autosubmit_api.repositories.job_packages import create_job_packages_repository
 from autosubmit_api.repositories.jobs import create_jobs_repository
 from autosubmit_api.repositories.join.experiment_join import (
     create_experiment_join_repository,
@@ -584,3 +588,73 @@ async def get_experiment_job_detail(
         logger.warning(traceback.format_exc())
 
     return response
+
+
+@router.get("/{expid}/jobs/{job_name}/parents", name="Get experiment job parents")
+async def get_experiment_job_parents(
+    expid: str,
+    job_name: str,
+    user_id: Optional[str] = Depends(auth_token_dependency()),
+) -> Dict:
+    """
+    Get the parents of a specific job of an experiment
+    """
+    try:
+        structure_repo = create_experiment_structure_repository(expid)
+        parents = structure_repo.get_parents(job_name)
+    except Exception as exc:
+        error_message = "Error while reading the experiment structure"
+        logger.error(error_message + f": {exc}")
+        logger.error(traceback.format_exc())
+        raise HTTPException(
+            status_code=HTTPStatus.INTERNAL_SERVER_ERROR, detail=error_message
+        )
+
+    return {"parents": [{"job_name": parent} for parent in parents]}
+
+
+@router.get("/{expid}/jobs/{job_name}/children", name="Get experiment job children")
+async def get_experiment_job_children(
+    expid: str,
+    job_name: str,
+    user_id: Optional[str] = Depends(auth_token_dependency()),
+) -> Dict:
+    """
+    Get the children of a specific job of an experiment
+    """
+    try:
+        structure_repo = create_experiment_structure_repository(expid)
+        children = structure_repo.get_children(job_name)
+    except Exception as exc:
+        error_message = "Error while reading the experiment structure"
+        logger.error(error_message + f": {exc}")
+        logger.error(traceback.format_exc())
+        raise HTTPException(
+            status_code=HTTPStatus.INTERNAL_SERVER_ERROR, detail=error_message
+        )
+
+    return {"children": [{"job_name": child} for child in children]}
+
+
+@router.get("/{expid}/jobs/{job_name}/wrappers", name="Get experiment job wrappers")
+async def get_experiment_job_wrappers(
+    expid: str,
+    job_name: str,
+    user_id: Optional[str] = Depends(auth_token_dependency()),
+) -> Dict:
+    """
+    Get the wrappers of a specific job of an experiment
+    """
+    try:
+        job_package_repo = create_job_packages_repository(expid)
+        job_packages = job_package_repo.get_by_job_name(job_name)
+        wrappers = [jp.package_name for jp in job_packages]
+    except Exception as exc:
+        error_message = "Error while reading the job packages"
+        logger.error(error_message + f": {exc}")
+        logger.error(traceback.format_exc())
+        raise HTTPException(
+            status_code=HTTPStatus.INTERNAL_SERVER_ERROR, detail=error_message
+        )
+
+    return {"wrappers": [{"wrapper_name": wrapper} for wrapper in wrappers]}
