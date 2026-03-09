@@ -341,6 +341,8 @@ class SSHRunner(Runner):
         """
         Stop the remote Autosubmit experiment by killing the process.
         """
+        # Force update of the runner status in case the process is not running anymore but the status is still active in the DB.
+        self.get_runner_status(expid)
         # Get the process from the DB
         active_procs = self.runners_repo.get_active_processes_by_expid(expid)
         if not active_procs:
