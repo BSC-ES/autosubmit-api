@@ -515,6 +515,37 @@ class TestRunnerSetJobStatus:
 
         assert response.status_code != 200
 
+    def test_disabled_endpoint(self, fixture_fastapi_client: TestClient):
+        with patch(
+            "autosubmit_api.routers.v4.runners.read_config_file"
+        ) as mock_read_config:
+            mock_read_config.return_value = {
+                "RUNNER_CONFIGURATION": {
+                    "PROFILES": {
+                        "MY_PROFILE": {
+                            "RUNNER_TYPE": "LOCAL",
+                            "MODULE_LOADER_TYPE": "NO_MODULE",
+                        }
+                    },
+                    "ENDPOINTS": {"SET_JOB_STATUS": {"ENABLED": False}},
+                },
+            }
+
+            response = fixture_fastapi_client.post(
+                self.endpoint,
+                json={
+                    "expid": "test_expid",
+                    "profile_name": "MY_PROFILE",
+                    "command_params": {
+                        "final_status": "COMPLETED",
+                        "job_names_list": ["JOB1", "JOB2"],
+                    },
+                },
+            )
+
+            assert response.status_code == 403
+            assert "disabled" in response.json()["error_message"]
+
     def test_valid_ssh_request(self, fixture_fastapi_client: TestClient):
         # Mock read_config_file to include SSH_AUTOSUBMIT_DEV profile
         # and get_runner to return a mock runner
@@ -750,3 +781,19 @@ class TestRunnerCreateExperiment:
         )
 
         assert response.status_code != 200
+
+
+class TestRunnerConfigurations:
+    def test_endpoints_configuration(self, fixture_fastapi_client: TestClient):
+        endpoint = "/v4/runners/configuration/endpoints"
+
+        response = fixture_fastapi_client.get(
+            endpoint,
+        )
+
+        resp_obj: dict = response.json()
+
+        for endpoint_name in ["SET_JOB_STATUS", "RUNNER_RUN", "CREATE_EXPERIMENT"]:
+            assert endpoint_name in resp_obj
+            assert "ENABLED" in resp_obj[endpoint_name]
+            assert isinstance(resp_obj[endpoint_name]["ENABLED"], bool)
