@@ -598,6 +598,27 @@ class TestRunnerSetJobStatus:
 class TestRunnerRunExperiment:
     endpoint = "/v4/runners/command/run-experiment"
 
+    def test_disabled_endpoint(self, fixture_fastapi_client: TestClient):
+        with patch(
+            "autosubmit_api.routers.v4.runners.read_config_file"
+        ) as mock_read_config:
+            mock_read_config.return_value = {
+                "RUNNER_CONFIGURATION": {
+                    "ENDPOINTS": {"RUNNER_RUN": {"ENABLED": False}},
+                },
+            }
+
+            response = fixture_fastapi_client.post(
+                self.endpoint,
+                json={
+                    "expid": "test_expid",
+                    "profile_name": "ANY_PROFILE",
+                },
+            )
+
+            assert response.status_code == 403
+            assert "disabled" in response.json()["error_message"]
+
     def test_valid_ssh_request(self, fixture_fastapi_client: TestClient):
         with (
             patch(
@@ -642,6 +663,24 @@ class TestRunnerRunExperiment:
 
 class TestRunnerGetRunnerRunStatus:
     endpoint = "/v4/runners/command/get-runner-run-status"
+
+    def test_disabled_endpoint(self, fixture_fastapi_client: TestClient):
+        with patch(
+            "autosubmit_api.routers.v4.runners.read_config_file"
+        ) as mock_read_config:
+            mock_read_config.return_value = {
+                "RUNNER_CONFIGURATION": {
+                    "ENDPOINTS": {"RUNNER_RUN": {"ENABLED": False}},
+                },
+            }
+
+            response = fixture_fastapi_client.post(
+                self.endpoint,
+                json={"expid": "test_expid"},
+            )
+
+            assert response.status_code == 403
+            assert "disabled" in response.json()["error_message"]
 
     def test_valid_request(self, fixture_fastapi_client: TestClient):
         with patch(
@@ -700,6 +739,24 @@ class TestRunnerGetRunnerRunStatus:
 class TestRunnerStopExperiment:
     endpoint = "/v4/runners/command/stop-experiment"
 
+    def test_disabled_endpoint(self, fixture_fastapi_client: TestClient):
+        with patch(
+            "autosubmit_api.routers.v4.runners.read_config_file"
+        ) as mock_read_config:
+            mock_read_config.return_value = {
+                "RUNNER_CONFIGURATION": {
+                    "ENDPOINTS": {"RUNNER_RUN": {"ENABLED": False}},
+                },
+            }
+
+            response = fixture_fastapi_client.post(
+                self.endpoint,
+                json={"expid": "test_expid"},
+            )
+
+            assert response.status_code == 403
+            assert "disabled" in response.json()["error_message"]
+
     def test_valid_ssh_request(self, fixture_fastapi_client: TestClient):
         with patch(
             "autosubmit_api.routers.v4.runners.get_runner_from_expid"
@@ -733,6 +790,29 @@ class TestRunnerStopExperiment:
 
 class TestRunnerCreateExperiment:
     endpoint = "/v4/runners/command/create-experiment"
+
+    def test_disabled_endpoint(self, fixture_fastapi_client: TestClient):
+        with patch(
+            "autosubmit_api.routers.v4.runners.read_config_file"
+        ) as mock_read_config:
+            mock_read_config.return_value = {
+                "RUNNER_CONFIGURATION": {
+                    "ENDPOINTS": {"CREATE_EXPERIMENT": {"ENABLED": False}},
+                },
+            }
+
+            response = fixture_fastapi_client.post(
+                self.endpoint,
+                json={
+                    "profile_name": "ANY_PROFILE",
+                    "command_params": {
+                        "description": "Test experiment",
+                    },
+                },
+            )
+
+            assert response.status_code == 403
+            assert "disabled" in response.json()["error_message"]
 
     def test_valid_local_request(self, fixture_fastapi_client: TestClient):
         with (
@@ -784,16 +864,91 @@ class TestRunnerCreateExperiment:
 
 
 class TestRunnerConfigurations:
-    def test_endpoints_configuration(self, fixture_fastapi_client: TestClient):
+    @pytest.mark.parametrize(
+        "file_content, expected",
+        [
+            (
+                {},
+                {
+                    "SET_JOB_STATUS": {"ENABLED": True},
+                    "RUNNER_RUN": {"ENABLED": True},
+                    "CREATE_EXPERIMENT": {"ENABLED": True},
+                },
+            ),
+            (
+                {
+                    "RUNNER_CONFIGURATION": {
+                        "ENDPOINTS": {
+                            "SET_JOB_STATUS": {"ENABLED": False},
+                            "RUNNER_RUN": {"ENABLED": False},
+                            "CREATE_EXPERIMENT": {"ENABLED": False},
+                        }
+                    }
+                },
+                {
+                    "SET_JOB_STATUS": {"ENABLED": False},
+                    "RUNNER_RUN": {"ENABLED": False},
+                    "CREATE_EXPERIMENT": {"ENABLED": False},
+                },
+            ),
+            (
+                {
+                    "RUNNER_CONFIGURATION": {
+                        "ENDPOINTS": {
+                            "SET_JOB_STATUS": {
+                                "ENABLED": False,
+                                "EXTRA_KEY": "foo",
+                            },
+                            "CREATE_EXPERIMENT": {"ENABLED": True},
+                        }
+                    }
+                },
+                {
+                    "SET_JOB_STATUS": {"ENABLED": False, "EXTRA_KEY": "foo"},
+                    "RUNNER_RUN": {"ENABLED": True},
+                    "CREATE_EXPERIMENT": {"ENABLED": True},
+                },
+            ),
+            (
+                {
+                    "RUNNER_CONFIGURATION": {
+                        "ENDPOINTS": {
+                            "SET_JOB_STATUS": {
+                                "EXTRA_KEY": "foo",
+                            },
+                        }
+                    }
+                },
+                {
+                    "SET_JOB_STATUS": {"ENABLED": True, "EXTRA_KEY": "foo"},
+                    "RUNNER_RUN": {"ENABLED": True},
+                    "CREATE_EXPERIMENT": {"ENABLED": True},
+                },
+            ),
+        ],
+    )
+    def test_endpoints_configuration(
+        self, fixture_fastapi_client: TestClient, file_content: dict, expected: dict
+    ):
         endpoint = "/v4/runners/configuration/endpoints"
 
-        response = fixture_fastapi_client.get(
-            endpoint,
-        )
+        with patch(
+            "autosubmit_api.routers.v4.runners.read_config_file"
+        ) as mock_read_config:
+            mock_read_config.return_value = file_content
+
+            response = fixture_fastapi_client.get(
+                endpoint,
+            )
 
         resp_obj: dict = response.json()
 
-        for endpoint_name in ["SET_JOB_STATUS", "RUNNER_RUN", "CREATE_EXPERIMENT"]:
-            assert endpoint_name in resp_obj
-            assert "ENABLED" in resp_obj[endpoint_name]
-            assert isinstance(resp_obj[endpoint_name]["ENABLED"], bool)
+        assert resp_obj == expected
+
+        # for endpoint_name in ["SET_JOB_STATUS", "RUNNER_RUN", "CREATE_EXPERIMENT"]:
+        #     assert endpoint_name in resp_obj
+        #     assert "ENABLED" in resp_obj[endpoint_name]
+        #     assert (
+        #         isinstance(resp_obj[endpoint_name]["ENABLED"], bool)
+        #         and resp_obj[endpoint_name]["ENABLED"] is True
+        #     )

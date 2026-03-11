@@ -69,8 +69,10 @@ def get_runner_configuration_endpoints(
         "RUNNER_RUN": {"ENABLED": True},
     }
 
-    # Merge default endpoints with the ones from the config, giving priority to the config values
-    merged_endpoints = {**default_endpoints, **endpoints}
+    merged_endpoints = {}
+    for key in set(default_endpoints.keys()):
+        merged_endpoints[key] = {**default_endpoints[key], **endpoints.get(key, {})}
+
     return merged_endpoints
 
 
