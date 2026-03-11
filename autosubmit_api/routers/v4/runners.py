@@ -1,7 +1,7 @@
 from typing import Any, Dict, List, Optional
 
 from fastapi import APIRouter, Depends, HTTPException
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict, Field
 
 from autosubmit_api.auth import auth_token_dependency
 from autosubmit_api.config.config_file import read_config_file
@@ -9,6 +9,7 @@ from autosubmit_api.logger import logger
 from autosubmit_api.repositories.runner_processes import (
     create_runner_processes_repository,
 )
+from autosubmit_api.runners.base import RunnerAlreadyRunningError
 from autosubmit_api.runners.module_loaders import get_module_loader
 from autosubmit_api.runners.runner_config import (
     get_runner_extra_params,
@@ -193,7 +194,12 @@ async def run_experiment(
         module_loader = get_module_loader(module_loader_type, modules)
         runner = get_runner(runner_type, module_loader, **runner_extra_params)
         await runner.run(expid)
-    except ValueError as exc:
+    except RunnerAlreadyRunningError as exc:
+        raise HTTPException(
+            status_code=409,
+            detail=f"Experiment {expid} is already running: {exc}",
+        )
+    except Exception as exc:
         raise HTTPException(
             status_code=500,
             detail=f"Failed to run experiment {expid}: {exc}",
@@ -288,7 +294,9 @@ async def stop_experiment(
 
 
 class CreateExperimentCmdParams(BaseModel):
-    description: str = None
+    model_config = ConfigDict(populate_by_name=True)
+
+    description: Optional[str] = None
     git_repo: Optional[str] = None
     git_branch: Optional[str] = None
     minimal: bool = False
@@ -297,7 +305,7 @@ class CreateExperimentCmdParams(BaseModel):
     use_local_minimal: bool = False
     operational: bool = False
     testcase: bool = False
-    copy: Optional[str] = None
+    copy_expid: Optional[str] = Field(None, alias="copy")
 
 
 class CreateExperimentBody(RunnerEndpointBody):
@@ -342,8 +350,8 @@ async def create_experiment(
 
         module_loader = get_module_loader(module_loader_type, modules)
         runner = get_runner(runner_type, module_loader, **runner_extra_params)
-        expid = await runner.create_experiment(**command_params.__dict__)
-    except ValueError as exc:
+        expid = await runner.create_experiment(**command_params.model_dump(by_alias=True))
+    except Exception as exc:
         raise HTTPException(
             status_code=500,
             detail=f"Failed to create experiment: {exc}",

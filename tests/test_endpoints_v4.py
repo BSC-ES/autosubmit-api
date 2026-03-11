@@ -660,6 +660,51 @@ class TestRunnerRunExperiment:
             )
             assert response.status_code == 200
 
+    def test_already_running(self, fixture_fastapi_client: TestClient):
+        with (
+            patch(
+                "autosubmit_api.runners.runner_config.read_config_file"
+            ) as mock_read_config,
+            patch("autosubmit_api.routers.v4.runners.get_runner") as mock_get_runner,
+        ):
+            mock_read_config.return_value = {
+                "RUNNER_CONFIGURATION": {
+                    "PROFILES": {
+                        "SSH_AUTOSUBMIT_DEV": {
+                            "RUNNER_TYPE": "SSH",
+                            "MODULE_LOADER_TYPE": "CONDA",
+                            "MODULES": ["autosubmit"],
+                            "SSH": {
+                                "HOST": "bscesautosubmit03.bsc.es",
+                                "PORT": 22,
+                            },
+                        }
+                    }
+                }
+            }
+
+            from autosubmit_api.runners.base import RunnerAlreadyRunningError
+
+            mock_runner = MagicMock()
+            mock_runner.run = AsyncMock(
+                side_effect=RunnerAlreadyRunningError("test_expid")
+            )
+            mock_get_runner.return_value = mock_runner
+
+            response = fixture_fastapi_client.post(
+                self.endpoint,
+                json={
+                    "expid": "test_expid",
+                    "profile_name": "SSH_AUTOSUBMIT_DEV",
+                    "profile_params": {
+                        "SSH": {
+                            "USERNAME": "test_user",
+                        }
+                    },
+                },
+            )
+            assert response.status_code == 409
+
 
 class TestRunnerGetRunnerRunStatus:
     endpoint = "/v4/runners/command/get-runner-run-status"
