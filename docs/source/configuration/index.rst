@@ -58,4 +58,24 @@ The API configuration file is a YAML file that contains more structured configur
       TASK_POPGRPH: # Populate graph layout cache task
         ENABLED: True # Enable or disable the task. Default is True.
         INTERVAL: 1440 # in minutes. Default is 1440 minutes.
-      
+        
+    RUNNER_CONFIGURATION:
+      SSH_PUBLIC_KEYS:
+      - MY-SSH-PUBLIC-KEY-1
+      - MY-SSH-PUBLIC-KEY-2 
+      ENDPOINTS: # Enable or disable endpoints for the runner.
+        SET_JOB_STATUS:
+          ENABLED: True # Default is True.
+        CREATE_EXPERIMENT:
+          ENABLED: True # Default is True.
+        RUNNER_RUN:
+          ENABLED: True # Default is True.
+      PROFILES:
+        MY_RUNNER_PROFILE_1: #User defined profile name
+          RUNNER_TYPE: SSH # LOCAL or SSH
+          MODULE_LOADER_TYPE: LMOD # CONDA, VENV, LMOD, NO_MODULE
+          MODULES: autosubmit
+          SSH:
+            HOST: autosubmit.example.com
+            PORT: 22
+            USER: autosubmit_user

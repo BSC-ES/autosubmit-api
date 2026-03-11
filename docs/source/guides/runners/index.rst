@@ -1,6 +1,6 @@
 .. _runnersGuide:
 
-Runners Guide (Alpha)
+Runners Guide
 =======================================
 
 Runners
@@ -24,74 +24,74 @@ The API supports the following module loaders:
 
 - **Venv Loader**: Loads dependencies from a virtual environment.
 - **Conda Loader**: Loads dependencies from a Conda environment.
+- **LMod Loader**: Loads dependencies using LMod modules.
 - **No Loader**: Does not load any dependencies, useful for commands that do not require any specific environment.
 
 
-How to enable runners?
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+How to enable runners? (Runner profiles)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Runners are disabled by default. To enable them, you need to update the API configuration file (see more in :ref:`configuration`) to include the following section:
+Runners need to use a valid **Runner profile** to run them. These profiles defines a template with the allowed
+configuration of the runner to be used when calling a runner.
+This gives more flexibility to the users to define different runner profiles with different configurations and
+use them when calling a runner without needing to specify all the configuration options every time.
+
+To define them, you need to update the API configuration file (see more in :ref:`configuration`) to include
+the ``RUNNER_CONFIGURATION.PROFILES`` section:
 
 .. code-block:: yaml
 
-    RUNNERS:
-        LOCAL:
-            ENABLED: True # Boolean to enable the local runner. Default is False.
-            MODULE_LOADERS:
-                CONDA:
-                    ENABLED: True # Boolean to enable the Conda loader. Default is False.
-                VENV:
-                    ENABLED: True # Boolean to enable the venv loader. Default is False.
-                    SAFE_ROOT_PATH: / # Optional, specify a safe root path for the venv loader
-                NO_MODULE:
-                    ENABLED: True # Boolean to enable the no module loader. Default is False.
+    RUNNER_CONFIGURATION:
+      PROFILES:
+        MY_RUNNER_PROFILE_1: #User defined profile name
+          RUNNER_TYPE: SSH # LOCAL or SSH
+          MODULE_LOADER_TYPE: LMOD # CONDA, VENV, LMOD, NO_MODULE
+          MODULES: autosubmit
+          SSH:
+            HOST: autosubmit.example.com
+            PORT: 22
+            USER: autosubmit_user
+        MY_RUNNER_PROFILE_2_CUSTOM_USERNAME: #User defined profile name with custom username configuration for the SSH runner
+          RUNNER_TYPE: SSH # LOCAL or SSH
+          MODULE_LOADER_TYPE: LMOD # CONDA, VENV, LMOD, NO_MODULE
+          MODULES: autosubmit
+          SSH:
+            HOST: autosubmit.example.com
+            PORT: 22
+      SSH_PUBLIC_KEYS:
+      - MY-SSH-PUBLIC-KEY-1
+      - MY-SSH-PUBLIC-KEY-2 
+      ENDPOINTS: # Enable or disable endpoints for the runner.
+        SET_JOB_STATUS:
+          ENABLED: True # Default is True.
+        CREATE_EXPERIMENT:
+          ENABLED: True # Default is True.
+        RUNNER_RUN:
+          ENABLED: True # Default is True.
+
+If any parameter is missing in the runner profile, it can be specified inside the request body when calling the runner,
+giving even more flexibility to the users.
 
 
 
 Usage examples
 ^^^^^^^^^^^^^^^^^^^^
 
-
-Get the details of a runner
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-.. code-block:: bash
-
-    RUNNER = local
-    MODULE_LOADER = conda # or venv, no_module
-    MODULE = my_conda_env
-
-    curl -X GET "http://$AS_API_HOST/v4alpha/runner-detail?runner=$RUNNER&module_loader=$MODULE_LOADER&modules=$MODULE"
-
-**JSON response:**
-
-.. code-block:: json
-
-    {
-        "runner": "local",
-        "module_loader": "conda",
-        "modules": [
-            "my_conda_env"
-        ],
-        "version": "4.1.13"
-    }
-
 Run an experiment using a runner
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. code-block:: bash
 
-    EXPID = a001
-    RUNNER = local
-    MODULE_LOADER = conda # or venv, no_module
-    MODULE = my_conda_env
-
-    curl -X POST "http://$AS_API_HOST/v4alpha/experiments/$EXPID/run-experiment" \
+    curl -X POST "http://$AS_API_HOST/v4/runners/command/run-experiment" \
         -H "Content-Type: application/json" \
         --data-raw '{
-            "runner": "local",
-            "module_loader": "conda",
-            "modules": "my_conda_env"
+            "expid": "a001",
+            "profile_name": "MY_RUNNER_PROFILE_2_CUSTOM_USERNAME",
+            "profile_params": {
+                "SSH": {
+                    "USER": "custom_user"
+                }
+            }
         }'
 
 
@@ -100,10 +100,11 @@ Get the status of the runner of an experiment
 
 .. code-block:: bash
 
-    EXPID = a001
-
-    curl -X GET "http://$AS_API_HOST/v4alpha/experiments/$EXPID/get-runner-status"
-
+    curl -X POST "http://$AS_API_HOST/v4/runners/command/get-runner-run-status" \
+        -H "Content-Type: application/json" \
+        --data-raw '{
+            "expid": "a001"
+        }'
 
 **JSON response:**
 
@@ -111,15 +112,14 @@ Get the status of the runner of an experiment
 
     {
         "expid": "a001",
-        "runner_id": 4,
-        "runner": "local",
-        "module_loader": "conda",
-        "modules": "my_conda_env",
+        "runner_id": 101,
+        "runner": "SSH",
+        "module_loader": "LMOD",
+        "modules": "autosubmit",
         "status": "ACTIVE",
-        "pid": 1816960,
-        "created": "2025-06-16T14:03:31+02:00",
-        "modified": "2025-06-16T14:03:31+02:00"
-    }
+        "pid": 1234567,
+        "created": "2026-02-04T15:59:57+01:00",
+        "modified": "2026-03-09T14:55:40+01:00"
 
 
 Stop the runner of an experiment
@@ -127,6 +127,46 @@ Stop the runner of an experiment
 
 .. code-block:: bash
 
-    EXPID = a001
+    curl -X POST "http://$AS_API_HOST/v4/runners/command/stop-experiment" \
+        -H "Content-Type: application/json" \
+        --data-raw '{
+            "expid": "a001"
+        }'
 
-    curl -X POST "http://$AS_API_HOST/v4alpha/experiments/$EXPID/stop-experiment"
+
+Set job status of an experiment using the runner
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. code-block:: bash
+
+    curl -X POST "http://$AS_API_HOST/v4/runners/command/set-job-status" \
+        -H "Content-Type: application/json" \
+        --data-raw '{
+            "expid": "a001",
+            "profile_name": "MY_RUNNER_PROFILE_1",
+            "command_params": {
+                "job_names_list": ["a001_INI", "a001_POST"],
+                "final_status": "COMPLETED"
+            }
+        }'
+
+
+Create an experiment using the runner
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. code-block:: bash
+
+    curl -X POST "http://$AS_API_HOST/v4/runners/command/create-experiment" \
+        -H "Content-Type: application/json" \
+        --data-raw '{
+            "profile_name": "MY_RUNNER_PROFILE_2_CUSTOM_USERNAME",
+            "profile_params": {
+                "SSH": {
+                    "USER": "custom_user"
+                }
+            },
+            "command_params": {
+                "description": "Experiment created using the runner",
+                "hpc": "MN5"
+            }
+        }'
