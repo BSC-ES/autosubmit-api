@@ -120,6 +120,7 @@ Get the status of the runner of an experiment
         "pid": 1234567,
         "created": "2026-02-04T15:59:57+01:00",
         "modified": "2026-03-09T14:55:40+01:00"
+    }
 
 
 Stop the runner of an experiment
