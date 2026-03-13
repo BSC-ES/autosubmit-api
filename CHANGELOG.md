@@ -1,5 +1,16 @@
 # CHANGELOG
 
+### Pre-release v4.1.2b4 - Release date: 2026-03-30
+
+* Added new runner interactivity endpoints:
+    * Run experiment
+    * Stop experiment
+    * Get runner run status
+    * Create experiment
+* Added runner configuration options to enable and disable features
+* Optimized job list historical data load
+* Refactored and cleaned up code in preparation for future changes
+
 ### Pre-release v4.1.2b3 - Release date: 2026-01-20
 
 * Redefined the runner permissions system to favor the use of profiles (details can be inspected in the new `/v4/runners/configuration/profiles` endpoint)
