@@ -1,4 +1,5 @@
 import datetime
+import re
 from abc import ABC, abstractmethod
 from typing import List, Optional
 
@@ -36,6 +37,13 @@ class JobsRepository(ABC):
         Gets the last modified UNIX timestamp of the jobs
         """
 
+    def search(
+        self, job_name: Optional[str] = None, status: Optional[str] = None
+    ) -> List[JobData]:
+        """
+        Searches jobs by a query string
+        """
+
 
 class JobsPklRepository(JobsRepository):
     def __init__(self, expid: str) -> None:
@@ -67,6 +75,54 @@ class JobsPklRepository(JobsRepository):
 
     def get_last_modified_timestamp(self) -> int:
         return self.pkl_reader.get_modified_time()
+
+    @staticmethod
+    def _wildcard_compare(expression: Optional[str], value: str) -> bool:
+        """
+        Compares a value with a wildcard expression.
+        The expression can contain '*' as wildcard, and '!' as negation.
+        If the expression is empty, it matches everything.
+        Examples:
+        - 'test*' matches 'test123', 'test_abc', etc. Not matching '123test'.
+        - '!test*' does not match 'test123', 'test_abc', etc
+        """
+        if not expression:
+            return True
+        if expression.startswith("!"):
+            return not JobsPklRepository._wildcard_compare(expression[1:], value)
+
+        # Transform to regex style: escape metacharacters, then convert '*' wildcard to '.*'
+        escaped_expression = re.escape(expression)
+        pattern = escaped_expression.replace(r"\*", ".*")
+        return bool(re.search(pattern, value))
+
+    def search(
+        self, job_name: Optional[str] = None, status: Optional[str] = None
+    ) -> List[JobData]:
+        """
+        Searches jobs by a query string
+        """
+        pkl_content = self.pkl_reader.parse_job_list()
+
+        return [
+            JobData(
+                id=job.id,
+                name=job.name,
+                status=job.status,
+                priority=job.priority,
+                section=job.section,
+                date=job.date,
+                member=job.member,
+                chunk=job.chunk,
+                out_path_local=job.out_path_local,
+                err_path_local=job.err_path_local,
+                out_path_remote=job.out_path_remote,
+                err_path_remote=job.err_path_remote,
+            )
+            for job in pkl_content
+            if JobsPklRepository._wildcard_compare(job_name, job.name)
+            and (status is None or job.status == status)
+        ]
 
 
 def create_jobs_repository(expid: str) -> JobsRepository:
