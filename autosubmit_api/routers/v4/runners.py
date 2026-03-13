@@ -141,9 +141,9 @@ async def set_job_status(
         runner = get_runner(runner_type, module_loader, **runner_extra_params)
         await runner.set_job_status(
             expid,
-            **command_params.__dict__,
+            **command_params.model_dump(),
         )
-    except ValueError as exc:
+    except Exception as exc:
         raise HTTPException(
             status_code=500,
             detail=f"Failed to set job status for experiment {expid}: {exc}",
@@ -193,7 +193,7 @@ async def run_experiment(
         module_loader = get_module_loader(module_loader_type, modules)
         runner = get_runner(runner_type, module_loader, **runner_extra_params)
         await runner.run(expid)
-    except ValueError as exc:
+    except Exception as exc:
         raise HTTPException(
             status_code=500,
             detail=f"Failed to run experiment {expid}: {exc}",
@@ -230,7 +230,6 @@ async def get_runner_run_status(
 
     try:
         runner_repo = create_runner_processes_repository()
-
         last_process = runner_repo.get_last_process_by_expid(expid)
         if not last_process:
             raise ValueError(f"No runner process found for expid: {expid}")
@@ -274,7 +273,6 @@ async def stop_experiment(
     expid = body.expid
 
     logger.info(f"Stopping experiment {expid}")
-
     try:
         runner = get_runner_from_expid(expid)
         await runner.stop(expid)
@@ -288,7 +286,7 @@ async def stop_experiment(
 
 
 class CreateExperimentCmdParams(BaseModel):
-    description: str = None
+    description: Optional[str] = None
     git_repo: Optional[str] = None
     git_branch: Optional[str] = None
     minimal: bool = False
@@ -319,14 +317,15 @@ async def create_experiment(
         )
 
     command_params = body.command_params
+    # Check mandatory parameters
+    if not command_params.description:
+        raise HTTPException(
+            status_code=400,
+            detail="Description is required to create an experiment.",
+        )
 
     logger.info(f"Creating experiment using profile {body.profile_name}")
-
     try:
-        # Check mandatory parameters
-        if not command_params.description:
-            raise ValueError("Description is required to create an experiment.")
-
         profile = process_profile(body.profile_name, body.profile_params)
         logger.debug(
             f"Processing profile: {body.profile_name}. Profile data: {profile}"
@@ -342,8 +341,8 @@ async def create_experiment(
 
         module_loader = get_module_loader(module_loader_type, modules)
         runner = get_runner(runner_type, module_loader, **runner_extra_params)
-        expid = await runner.create_experiment(**command_params.__dict__)
-    except ValueError as exc:
+        expid = await runner.create_experiment(**command_params.model_dump())
+    except Exception as exc:
         raise HTTPException(
             status_code=500,
             detail=f"Failed to create experiment: {exc}",

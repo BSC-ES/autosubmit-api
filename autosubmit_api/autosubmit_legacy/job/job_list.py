@@ -603,6 +603,7 @@ class JobList:
         """
         # Getting information
         last_jobs_data = None
+        map_job_name_to_job_data = {}
         try:
             experiment_history = ExperimentHistoryDirector(
                 ExperimentHistoryBuilder(expid)
@@ -614,7 +615,7 @@ class JobList:
                 else {}
             )
         except Exception:
-            print(traceback.print_exc())
+            traceback.print_exc()
         # Result variables
         job_running_time_seconds = dict()
         job_running_to_runtext = dict()
