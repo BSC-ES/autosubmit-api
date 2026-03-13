@@ -141,7 +141,7 @@ async def set_job_status(
         runner = get_runner(runner_type, module_loader, **runner_extra_params)
         await runner.set_job_status(
             expid,
-            **command_params.__dict__,
+            **command_params.model_dump(),
         )
     except Exception as exc:
         raise HTTPException(
@@ -341,7 +341,7 @@ async def create_experiment(
 
         module_loader = get_module_loader(module_loader_type, modules)
         runner = get_runner(runner_type, module_loader, **runner_extra_params)
-        expid = await runner.create_experiment(**command_params.__dict__)
+        expid = await runner.create_experiment(**command_params.model_dump())
     except Exception as exc:
         raise HTTPException(
             status_code=500,
