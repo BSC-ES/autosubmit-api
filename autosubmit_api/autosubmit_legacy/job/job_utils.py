@@ -18,6 +18,7 @@
 # along with Autosubmit.  If not, see <http://www.gnu.org/licenses/>.
 
 import datetime
+from typing import Dict, List
 
 
 class SubJob(object):
@@ -42,14 +43,20 @@ class SubJobManager(object):
     Class to manage list of SubJobs
     """
 
-    def __init__(self, subjoblist, job_to_package=None, package_to_jobs=None, current_structure=None):
+    def __init__(
+        self,
+        subjoblist: List[SubJob],
+        job_to_package: Dict[str, str] = None,
+        package_to_jobs: Dict[str, List[str]] = None,
+        current_structure: Dict[str, List[str]] =None,
+    ):
         self.subjobList = subjoblist
         # print("Number of jobs in SubManager : {}".format(len(self.subjobList)))
         self.job_to_package = job_to_package
         self.package_to_jobs = package_to_jobs
         self.current_structure = current_structure
-        self.subjobindex = dict()
-        self.subjobfixes = dict()
+        self.subjobindex: Dict[str, SubJob] = dict()
+        self.subjobfixes: Dict[str, SubJob] = dict()
         self.process_index()
         self.process_times()
 
@@ -72,7 +79,7 @@ class SubJobManager(object):
                     # SubJobs in Package
                     local_structure = dict()
                     # SubJob Name -> SubJob Object
-                    local_index = dict()
+                    local_index: Dict[str, SubJob] = dict()
                     subjobs_in_package = [x for x in self.subjobList if x.package ==
                                                 package]
                     local_jobs_in_package = [job for job in subjobs_in_package]
