@@ -197,7 +197,7 @@ async def get_experiment_jobs(
     except Exception as exc:
         error_message = "Error while reading the job list"
         logger.error(error_message + f": {exc}")
-        logger.error(traceback.print_exc())
+        logger.error(traceback.format_exc())
         raise HTTPException(
             status_code=HTTPStatus.INTERNAL_SERVER_ERROR, detail=error_message
         )
@@ -425,7 +425,6 @@ class JobDetailResponse(BaseModel):
     date: Optional[str] = None
     member: Optional[str] = None
     chunk: Optional[int] = None
-    section: Optional[str] = None
     # split: Optional[str] = None
     out_path_local: Optional[str] = None
     err_path_local: Optional[str] = None
@@ -468,6 +467,12 @@ async def get_experiment_job_detail(
         job_list_repo = create_jobs_repository(expid)
         current_job = job_list_repo.get_by_name(job_name)
 
+        if not current_job:
+            raise HTTPException(
+                status_code=HTTPStatus.NOT_FOUND,
+                detail=f"Job with name '{job_name}' not found in experiment '{expid}'",
+            )
+
         response = JobDetailResponse(
             name=current_job.name,
             status=Status.VALUE_TO_KEY.get(current_job.status, Status.UNKNOWN),
@@ -503,18 +508,14 @@ async def get_experiment_job_detail(
             else None
         )
 
+    except HTTPException:
+        raise
     except Exception as exc:
         error_message = "Error while reading the job list"
         logger.error(error_message + f": {exc}")
-        logger.error(traceback.print_exc())
+        logger.error(traceback.format_exc())
         raise HTTPException(
             status_code=HTTPStatus.INTERNAL_SERVER_ERROR, detail=error_message
-        )
-
-    if not current_job:
-        raise HTTPException(
-            status_code=HTTPStatus.NOT_FOUND,
-            detail=f"Job with name '{job_name}' not found in experiment '{expid}'",
         )
 
     # Get data from the historical DB
