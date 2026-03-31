@@ -1,5 +1,9 @@
 # CHANGELOG
 
+### Pre-release v4.1.2b5 - Release date: 2026-03-31
+
+* Critical quickfix: Bypassed job id validation when reading the job list. It seems that some experiment's jobs might have missing ids due to a bug.
+
 ### Pre-release v4.1.2b4 - Release date: 2026-03-30
 
 * Added new runner interactivity endpoints:
