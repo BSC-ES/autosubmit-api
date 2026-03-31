@@ -1,6 +1,6 @@
 import datetime
 from abc import ABC, abstractmethod
-from typing import List, Optional
+from typing import Any, List, Optional
 
 from pydantic import BaseModel
 
@@ -9,7 +9,7 @@ from autosubmit_api.persistance.pkl_reader import PklReader
 
 
 class JobData(BaseModel):
-    id: int
+    id: Any
     name: str
     status: Optional[int] = common_utils.Status.UNKNOWN
     priority: int
