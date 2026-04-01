@@ -595,10 +595,12 @@ async def get_experiment_job_detail(
 async def get_experiment_job_parents(
     expid: str,
     job_name: str,
+    include_status: bool = False,
     user_id: Optional[str] = Depends(auth_token_dependency()),
 ) -> Dict:
     """
-    Get the parents of a specific job of an experiment
+    Get the parents of a specific job of an experiment.
+    Set include_status=true to also return the current status of each parent job.
     """
     try:
         structure_repo = create_experiment_structure_repository(expid)
@@ -611,17 +613,35 @@ async def get_experiment_job_parents(
             status_code=HTTPStatus.INTERNAL_SERVER_ERROR, detail=error_message
         )
 
-    return {"parents": [{"job_name": parent} for parent in parents]}
+    parent_items = [{"job_name": parent} for parent in parents]
+
+    if include_status and parents:
+        try:
+            job_list_repo = create_jobs_repository(expid)
+            jobs_data = job_list_repo.get_by_names(parents)
+            status_map = {
+                job.name: Status.VALUE_TO_KEY.get(job.status, Status.UNKNOWN)
+                for job in jobs_data
+            }
+            for item in parent_items:
+                item["status"] = status_map.get(item["job_name"])
+        except Exception as exc:
+            logger.warning(f"Error while fetching parent job statuses: {exc}")
+            logger.warning(traceback.format_exc())
+
+    return {"parents": parent_items}
 
 
 @router.get("/{expid}/jobs/{job_name}/children", name="Get experiment job children")
 async def get_experiment_job_children(
     expid: str,
     job_name: str,
+    include_status: bool = False,
     user_id: Optional[str] = Depends(auth_token_dependency()),
 ) -> Dict:
     """
     Get the children of a specific job of an experiment
+    Set include_status=true to also return the current status of each child job.
     """
     try:
         structure_repo = create_experiment_structure_repository(expid)
@@ -634,7 +654,23 @@ async def get_experiment_job_children(
             status_code=HTTPStatus.INTERNAL_SERVER_ERROR, detail=error_message
         )
 
-    return {"children": [{"job_name": child} for child in children]}
+    child_items = [{"job_name": child} for child in children]
+
+    if include_status and children:
+        try:
+            job_list_repo = create_jobs_repository(expid)
+            jobs_data = job_list_repo.get_by_names(children)
+            status_map = {
+                job.name: Status.VALUE_TO_KEY.get(job.status, Status.UNKNOWN)
+                for job in jobs_data
+            }
+            for item in child_items:
+                item["status"] = status_map.get(item["job_name"])
+        except Exception as exc:
+            logger.warning(f"Error while fetching child job statuses: {exc}")
+            logger.warning(traceback.format_exc())
+
+    return {"children": child_items}
 
 
 @router.get("/{expid}/jobs/{job_name}/wrappers", name="Get experiment job wrappers")

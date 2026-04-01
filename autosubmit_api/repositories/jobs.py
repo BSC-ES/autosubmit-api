@@ -42,6 +42,12 @@ class JobsRepository(ABC):
         Gets a job by its name
         """
 
+    @abstractmethod
+    def get_by_names(self, names: List[str]) -> List[JobData]:
+        """
+        Gets jobs matching any of the given names
+        """
+
 
 class JobsPklRepository(JobsRepository):
     def __init__(self, expid: str) -> None:
@@ -96,6 +102,31 @@ class JobsPklRepository(JobsRepository):
                     err_path_remote=job.err_path_remote,
                 )
         return None
+
+    def get_by_names(self, names: List[str]) -> List[JobData]:
+        """
+        Gets all jobs whose names are in the given list, reading the pkl once.
+        """
+        name_set = set(names)
+        pkl_content = self.pkl_reader.parse_job_list()
+        return [
+            JobData(
+                id=job.id,
+                name=job.name,
+                status=job.status,
+                priority=job.priority,
+                section=job.section,
+                date=job.date,
+                member=job.member,
+                chunk=job.chunk,
+                out_path_local=job.out_path_local,
+                err_path_local=job.err_path_local,
+                out_path_remote=job.out_path_remote,
+                err_path_remote=job.err_path_remote,
+            )
+            for job in pkl_content
+            if job.name in name_set
+        ]
 
 
 def create_jobs_repository(expid: str) -> JobsRepository:
