@@ -499,12 +499,12 @@ async def get_experiment_job_detail(
 
     # Build the response
     response = JobDetailResponse(
-        name=job_name, status=Status.VALUE_TO_KEY.get(Status.UNKNOWN)
+        name=job_name,
+        status=Status.VALUE_TO_KEY.get(
+            job_detail_retriever.status_code, Status.UNKNOWN
+        ),
     )
 
-    response.status = Status.VALUE_TO_KEY.get(
-        job_detail_retriever.status_code, Status.UNKNOWN
-    )
     response.section = job_detail_retriever.section
     response.date = (
         job_detail_retriever.date.strftime("%Y%m%d")

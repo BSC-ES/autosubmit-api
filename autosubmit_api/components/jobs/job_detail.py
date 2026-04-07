@@ -49,20 +49,19 @@ class JobDetailRetriever:
         self._load_wrapper_data()
 
     def _load_base_job_data(self):
-        try:
-            job_list_repo = create_jobs_repository(self.expid)
-            self._job_data = job_list_repo.get_by_name(self.job_name)
-            if not self._job_data:
-                raise JobNotFoundError()
-        except Exception:
+        job_list_repo = create_jobs_repository(self.expid)
+        self._job_data = job_list_repo.get_by_name(self.job_name)
+        if not self._job_data:
             raise JobNotFoundError()
 
     def _load_experiment_run_data(self):
         try:
             run_repo = create_experiment_run_repository(self.expid)
             self._run_data = run_repo.get_last_run()
-        except Exception:
-            self.warnings.append("Failed to load experiment run data")
+        except Exception as exc:
+            self.warnings.append(
+                {"message": "Failed to load experiment run data", "exception": str(exc)}
+            )
 
     def _load_historical_job_last_data(self):
         try:
@@ -70,8 +69,10 @@ class JobDetailRetriever:
             self._historical_data = job_data_repo.get_last_job_data_by_name(
                 self.job_name
             )
-        except Exception:
-            self.warnings.append("Failed to load historical job data")
+        except Exception as exc:
+            self.warnings.append(
+                {"message": "Failed to load historical job data", "exception": str(exc)}
+            )
 
     def _load_config_files_data(self):
         try:
@@ -79,16 +80,25 @@ class JobDetailRetriever:
                 AutosubmitConfigurationFacadeBuilder(self.expid)
             ).build_autosubmit_configuration_facade()
             self._config_facade = autosubmit_config_facade
-        except Exception:
-            self.warnings.append("Failed to load config files data")
+        except Exception as exc:
+            self.warnings.append(
+                {"message": "Failed to load config files data", "exception": str(exc)}
+            )
 
     def _load_wrapper_data(self):
         try:
             job_package_repo = create_job_packages_repository(self.expid)
             job_packages = job_package_repo.get_by_job_name(self.job_name)
-            self._wrapper_data = job_packages if job_packages else []
-        except Exception:
-            self.warnings.append("Failed to load job package data")
+            if not job_packages:
+                job_package_repo = create_job_packages_repository(
+                    self.expid, wrapper=True
+                )
+                job_packages = job_package_repo.get_by_job_name(self.job_name)
+            self._wrapper_data = job_packages
+        except Exception as exc:
+            self.warnings.append(
+                {"message": "Failed to load job package data", "exception": str(exc)}
+            )
 
     @property
     def name(self) -> str:
@@ -169,8 +179,8 @@ class JobDetailRetriever:
         )
         if section_processors is not None:
             return section_processors
-        elif self._historical_data and self._historical_data.nnodes is not None:
-            return self._historical_data.nnodes
+        elif self._historical_data and self._historical_data.ncpus is not None:
+            return self._historical_data.ncpus
         return None
 
     @property
