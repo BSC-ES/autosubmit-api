@@ -253,7 +253,7 @@ def get_job_total_stats(
 
 def job_times_to_text(minutes_queue: int, minutes_running: int, status: str):
     """
-    Return text correpsonding to queue and running time.
+    Return text corresponding to queue and running time.
     Function migrated from the legacy job.utils
     :param minutes_queue: seconds queuing (actually using seconds)
     :type minutes_queue: int

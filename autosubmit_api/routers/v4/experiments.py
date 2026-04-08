@@ -497,9 +497,7 @@ async def get_experiment_job_detail(
     # Build the response
     response = JobDetailResponse(
         name=job_name,
-        status=Status.VALUE_TO_KEY.get(
-            job_detail_retriever.status_code, Status.UNKNOWN
-        ),
+        status=Status.VALUE_TO_KEY.get(job_detail_retriever.status_code, "UNKNOWN"),
     )
 
     response = response.model_copy(
@@ -563,7 +561,7 @@ async def get_experiment_job_parents(
             job_list_repo = create_jobs_repository(expid)
             jobs_data = job_list_repo.get_by_names(parents)
             status_map = {
-                job.name: Status.VALUE_TO_KEY.get(job.status, Status.UNKNOWN)
+                job.name: Status.VALUE_TO_KEY.get(job.status, "UNKNOWN")
                 for job in jobs_data
             }
             for item in parent_items:
@@ -604,7 +602,7 @@ async def get_experiment_job_children(
             job_list_repo = create_jobs_repository(expid)
             jobs_data = job_list_repo.get_by_names(children)
             status_map = {
-                job.name: Status.VALUE_TO_KEY.get(job.status, Status.UNKNOWN)
+                job.name: Status.VALUE_TO_KEY.get(job.status, "UNKNOWN")
                 for job in jobs_data
             }
             for item in child_items:
