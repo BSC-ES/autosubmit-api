@@ -37,7 +37,7 @@ class JobPackagesSQLRepository(JobPackagesRepository):
         self.engine = engine
         self.table = table
 
-    def get_all(self):
+    def get_all(self) -> List[JobPackageModel]:
         with self.engine.connect() as conn:
             statement = self.table.select()
             result = conn.execute(statement).all()
@@ -50,7 +50,7 @@ class JobPackagesSQLRepository(JobPackagesRepository):
             for row in result
         ]
 
-    def get_by_job_name(self, job_name: str):
+    def get_by_job_name(self, job_name: str) -> List[JobPackageModel]:
         with self.engine.connect() as conn:
             statement = self.table.select().where(self.table.c.job_name == job_name)
             result = conn.execute(statement).all()
@@ -62,6 +62,7 @@ class JobPackagesSQLRepository(JobPackagesRepository):
             )
             for row in result
         ]
+
 
 def create_job_packages_repository(expid: str, wrapper=False) -> JobPackagesRepository:
     """

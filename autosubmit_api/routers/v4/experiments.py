@@ -2,6 +2,7 @@ import asyncio
 import json
 import math
 import os
+import re
 import traceback
 from collections import deque
 from datetime import datetime, timezone
@@ -24,7 +25,6 @@ from autosubmit_api.components.jobs.job_detail import (
     JobDetailRetriever,
     JobNotFoundError,
 )
-from autosubmit_api.components.jobs.utils import get_fixed_experiment_times
 from autosubmit_api.config.basicConfig import APIBasicConfig
 from autosubmit_api.config.confConfigStrategy import confConfigStrategy
 from autosubmit_api.config.config_common import AutosubmitConfigResolver
@@ -467,28 +467,25 @@ async def get_experiment_job_detail(
             detail="Error while retrieving job details",
         )
 
-    # Try to get fixed submit, start and finish times for the job
-    submit, start, finish = None, None, None
-    try:
-        submit, start, finish = get_fixed_experiment_times(
-            expid, job_detail_retriever._job_data, job_detail_retriever._historical_data
-        )
-    except Exception:
-        logger.warning("Error while getting fixed experiment times")
-        logger.warning(traceback.format_exc())
-
     # Get the latest logs for the job, if it has finished
     exp_paths = ExperimentPaths(expid)
     job_logs_out = []
     job_logs_err = []
     try:
         if job_detail_retriever.status_code in [Status.COMPLETED, Status.FAILED]:
-            for f in os.listdir(exp_paths.tmp_log_dir):
-                if f.startswith(job_detail_retriever.name):
-                    if f.endswith(".out"):
-                        job_logs_out.append(f)
-                    elif f.endswith(".err"):
-                        job_logs_err.append(f)
+            for f in os.scandir(exp_paths.tmp_log_dir):
+                if not f.is_file():
+                    continue
+                if re.match(
+                    rf"^{re.escape(job_detail_retriever.name)}.*\.out(\.xz|\.gz)?$",
+                    f.name,
+                ):
+                    job_logs_out.append(f.name)
+                elif re.match(
+                    rf"^{re.escape(job_detail_retriever.name)}.*\.err(\.xz|\.gz)?$",
+                    f.name,
+                ):
+                    job_logs_err.append(f.name)
 
         # Sort logs by time in the name, assuming the format is <job_name>.<timestamp>.[out|err]
         job_logs_out.sort()
@@ -505,32 +502,34 @@ async def get_experiment_job_detail(
         ),
     )
 
-    response.section = job_detail_retriever.section
-    response.date = (
-        job_detail_retriever.date.strftime("%Y%m%d")
-        if job_detail_retriever.date
-        else None
+    response = response.model_copy(
+        update={
+            "section": job_detail_retriever.section,
+            "date": job_detail_retriever.date.strftime("%Y%m%d")
+            if job_detail_retriever.date
+            else None,
+            "member": job_detail_retriever.member,
+            "chunk": job_detail_retriever.chunk,
+            "out_path_local": os.path.join(exp_paths.tmp_log_dir, job_logs_out[-1])
+            if job_logs_out
+            else None,
+            "err_path_local": os.path.join(exp_paths.tmp_log_dir, job_logs_err[-1])
+            if job_logs_err
+            else None,
+            "chunk_size": job_detail_retriever.chunk_size,
+            "chunk_unit": job_detail_retriever.chunk_unit,
+            "platform": job_detail_retriever.platform,
+            "remote_id": job_detail_retriever.remote_id,
+            "qos": job_detail_retriever.qos,
+            "processors": job_detail_retriever.processors,
+            "wallclock": job_detail_retriever.wallclock,
+            "workflow_commit": job_detail_retriever.workflow_commit,
+            "submit": timestamp_to_datetime_format(job_detail_retriever.submit),
+            "start": timestamp_to_datetime_format(job_detail_retriever.start),
+            "finish": timestamp_to_datetime_format(job_detail_retriever.finish),
+            "last_wrapper": job_detail_retriever.last_wrapper,
+        }
     )
-    response.member = job_detail_retriever.member
-    response.chunk = job_detail_retriever.chunk
-    response.out_path_local = (
-        os.path.join(exp_paths.tmp_log_dir, job_logs_out[-1]) if job_logs_out else None
-    )
-    response.err_path_local = (
-        os.path.join(exp_paths.tmp_log_dir, job_logs_err[-1]) if job_logs_err else None
-    )
-    response.chunk_size = job_detail_retriever.chunk_size
-    response.chunk_unit = job_detail_retriever.chunk_unit
-    response.platform = job_detail_retriever.platform
-    response.remote_id = job_detail_retriever.remote_id
-    response.qos = job_detail_retriever.qos
-    response.processors = job_detail_retriever.processors
-    response.wallclock = job_detail_retriever.wallclock
-    response.workflow_commit = job_detail_retriever.workflow_commit
-    response.submit = timestamp_to_datetime_format(submit)
-    response.start = timestamp_to_datetime_format(start)
-    response.finish = timestamp_to_datetime_format(finish)
-    response.last_wrapper = job_detail_retriever.last_wrapper
 
     return response
 

@@ -371,6 +371,44 @@ class TestExperimentJobDetail:
             assert key in resp_obj
             assert resp_obj[key] == value
 
+    @pytest.mark.parametrize(
+        "expid, job_name, out, err",
+        [
+            (
+                "a3tb",
+                "a3tb_19930101_fc01_1_SIM",
+                "a3tb/tmp/LOG_a3tb/a3tb_19930101_fc01_1_SIM.20220315153049.out",
+                "a3tb/tmp/LOG_a3tb/a3tb_19930101_fc01_1_SIM.20220315153049.err",
+            ),
+            (
+                "a8qc",
+                "a8qc_20220630_000_1_CLEAN",
+                "a8qc/tmp/LOG_a8qc/a8qc_20220630_000_1_CLEAN.20250312185154.out.xz",
+                "a8qc/tmp/LOG_a8qc/a8qc_20220630_000_1_CLEAN.20250312185154.err.gz",
+            ),
+        ],
+    )
+    def test_job_detail_paths_local(
+        self,
+        fixture_fastapi_client: TestClient,
+        expid: str,
+        job_name: str,
+        out: str,
+        err: str,
+    ):
+        response = fixture_fastapi_client.get(
+            self.endpoint.format(expid=expid, job_name=job_name)
+        )
+        resp_obj: dict = response.json()
+
+        assert response.status_code == HTTPStatus.OK
+        assert isinstance(resp_obj["out_path_local"], str) and resp_obj[
+            "out_path_local"
+        ].endswith(out)
+        assert isinstance(resp_obj["err_path_local"], str) and resp_obj[
+            "err_path_local"
+        ].endswith(err)
+
 
 class TestExperimentJobParents:
     endpoint = "/v4/experiments/{expid}/jobs/{job_name}/parents"

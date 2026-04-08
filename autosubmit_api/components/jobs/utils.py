@@ -3,7 +3,7 @@
 import datetime
 import os
 import subprocess
-from typing import TYPE_CHECKING, Dict, List, Tuple
+from typing import TYPE_CHECKING, Dict, List, Optional, Tuple
 
 from bscearth.utils.date import parse_date
 
@@ -294,21 +294,25 @@ def generate_job_html_title(job_name: str, status_color: str, status_text: str) 
 
 
 def get_fixed_experiment_times(
-    expid: str, current_job: "JobData", job_last_data: "ExperimentJobDataModel"
+    expid: str,
+    current_job: "JobData",
+    job_last_data: Optional["ExperimentJobDataModel"],
 ) -> Tuple[int, int, int]:
-    submit = 0
-    start = 0
-    finish = 0
-
-    # If status is SUSPENDED, set submit/start/finish to None
-    if current_job.status != Status.SUSPENDED:
+    # If status is SUSPENDED, set submit/start/finish to 0
+    if current_job.status == Status.SUSPENDED or job_last_data is None:
+        submit = 0
+        start = 0
+        finish = 0
+    else:
         submit = job_last_data.submit
         start = job_last_data.start
         finish = job_last_data.finish
 
     # If the status from the historical DB is different from the jobs repo, try other method to get the times
-
-    if job_last_data.status != Status.VALUE_TO_KEY[current_job.status]:
+    if not job_last_data or (
+        job_last_data
+        and job_last_data.status != Status.VALUE_TO_KEY.get(current_job.status)
+    ):
         # Try to get the times from the TOTAL_STATS file
         if current_job.status in [
             Status.RUNNING,

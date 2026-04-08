@@ -5,6 +5,7 @@ from autosubmit_api.builders.configuration_facade_builder import (
     AutosubmitConfigurationFacadeBuilder,
     ConfigurationFacadeDirector,
 )
+from autosubmit_api.components.jobs.utils import get_fixed_experiment_times
 from autosubmit_api.repositories.experiment_run import (
     ExperimentRunModel,
     create_experiment_run_repository,
@@ -33,12 +34,19 @@ class JobDetailRetriever:
         self.expid = expid
         self.job_name = job_name
 
+        # Initialize data stores to None
         self._job_data: Optional[JobData] = None
         self._run_data: Optional[ExperimentRunModel] = None
         self._historical_data: Optional[ExperimentJobDataModel] = None
         self._config_facade = None
         self._wrapper_data: List[JobPackageModel] = []
 
+        # Initialize times to None
+        self._submit = None
+        self._start = None
+        self._finish = None
+
+        # Initialize warnings list
         self.warnings = []
 
     def load_data(self):
@@ -47,6 +55,7 @@ class JobDetailRetriever:
         self._load_historical_job_last_data()
         self._load_config_files_data()
         self._load_wrapper_data()
+        self._load_times()
 
     def _load_base_job_data(self):
         job_list_repo = create_jobs_repository(self.expid)
@@ -99,6 +108,17 @@ class JobDetailRetriever:
             self.warnings.append(
                 {"message": "Failed to load job package data", "exception": str(exc)}
             )
+
+    def _load_times(self):
+        if self._job_data:
+            try:
+                self._submit, self._start, self._finish = get_fixed_experiment_times(
+                    self.expid, self._job_data, self._historical_data
+                )
+            except Exception as exc:
+                self.warnings.append(
+                    {"message": "Failed to load job times", "exception": str(exc)}
+                )
 
     @property
     def name(self) -> str:
@@ -154,7 +174,7 @@ class JobDetailRetriever:
         return None
 
     @property
-    def remote_id(self) -> Optional[str]:
+    def remote_id(self) -> Optional[int]:
         return self._historical_data.job_id if self._historical_data else None
 
     @property
@@ -214,3 +234,15 @@ class JobDetailRetriever:
         if self._wrapper_data:
             return self._wrapper_data[-1].package_name
         return None
+
+    @property
+    def submit(self) -> Optional[int]:
+        return self._submit
+    
+    @property
+    def start(self) -> Optional[int]:
+        return self._start
+    
+    @property
+    def finish(self) -> Optional[int]:
+        return self._finish
