@@ -1,6 +1,8 @@
 import asyncio
 import json
 import math
+import os
+import re
 import traceback
 from collections import deque
 from datetime import datetime, timezone
@@ -10,6 +12,7 @@ from typing import Annotated, Any, Dict, List, Literal, Optional
 from bscearth.utils.config_parser import ConfigParserFactory
 from fastapi import APIRouter, Depends, HTTPException, Query
 from fastapi.responses import JSONResponse
+from pydantic import BaseModel
 
 from autosubmit_api.auth import auth_token_dependency
 from autosubmit_api.builders.experiment_builder import ExperimentBuilder
@@ -17,7 +20,11 @@ from autosubmit_api.builders.experiment_history_builder import (
     ExperimentHistoryBuilder,
     ExperimentHistoryDirector,
 )
-from autosubmit_api.common.utils import Status
+from autosubmit_api.common.utils import Status, timestamp_to_datetime_format
+from autosubmit_api.components.jobs.job_detail import (
+    JobDetailRetriever,
+    JobNotFoundError,
+)
 from autosubmit_api.config.basicConfig import APIBasicConfig
 from autosubmit_api.config.confConfigStrategy import confConfigStrategy
 from autosubmit_api.config.config_common import AutosubmitConfigResolver
@@ -36,7 +43,11 @@ from autosubmit_api.models.responses import (
     ExperimentsSearchResponse,
     ExperimentWrappersResponse,
 )
+from autosubmit_api.persistance.experiment import ExperimentPaths
 from autosubmit_api.persistance.job_package_reader import JobPackageReader
+from autosubmit_api.repositories.experiment_structure import (
+    create_experiment_structure_repository,
+)
 from autosubmit_api.repositories.jobs import create_jobs_repository
 from autosubmit_api.repositories.join.experiment_join import (
     create_experiment_join_repository,
@@ -183,7 +194,7 @@ async def get_experiment_jobs(
     except Exception as exc:
         error_message = "Error while reading the job list"
         logger.error(error_message + f": {exc}")
-        logger.error(traceback.print_exc())
+        logger.error(traceback.format_exc())
         raise HTTPException(
             status_code=HTTPStatus.INTERNAL_SERVER_ERROR, detail=error_message
         )
@@ -401,3 +412,203 @@ async def get_runs_with_user_metrics(
             for run_id in run_ids
         ]
     }
+
+
+class JobDetailResponse(BaseModel):
+    # From pkl
+    name: str
+    status: str
+    section: Optional[str] = None
+    date: Optional[str] = None
+    member: Optional[str] = None
+    chunk: Optional[int] = None
+    # split: Optional[str] = None
+    out_path_local: Optional[str] = None
+    err_path_local: Optional[str] = None
+    # From config
+    chunk_size: Optional[int] = None
+    chunk_unit: Optional[str] = None
+    platform: Optional[str] = None
+    # From historical DB
+    remote_id: Optional[int] = None
+    qos: Optional[str] = None
+    workflow_commit: Optional[str] = None
+    processors: Optional[int] = None  # Requested ncpus
+    submit: Optional[str] = None
+    start: Optional[str] = None
+    finish: Optional[str] = None
+    wallclock: Optional[str] = None
+    # Wrapper data
+    last_wrapper: Optional[str] = None
+
+
+@router.get("/{expid}/jobs/{job_name}", name="Get experiment job detail")
+async def get_experiment_job_detail(
+    expid: str,
+    job_name: str,
+    user_id: Optional[str] = Depends(auth_token_dependency()),
+) -> JobDetailResponse:
+    """
+    Get the details of a specific job of an experiment
+    """
+    # Get the latest job details from the retriever
+    try:
+        job_detail_retriever = JobDetailRetriever(expid, job_name)
+        job_detail_retriever.load_data()
+    except JobNotFoundError:
+        raise HTTPException(
+            status_code=HTTPStatus.NOT_FOUND,
+            detail=f"Job with name '{job_name}' not found in experiment '{expid}'",
+        )
+    except Exception:
+        logger.error(traceback.format_exc())
+        raise HTTPException(
+            status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
+            detail="Error while retrieving job details",
+        )
+
+    # Get the latest logs for the job, if it has finished
+    exp_paths = ExperimentPaths(expid)
+    job_logs_out = []
+    job_logs_err = []
+    try:
+        if job_detail_retriever.status_code in [Status.COMPLETED, Status.FAILED]:
+            for f in os.scandir(exp_paths.tmp_log_dir):
+                if not f.is_file():
+                    continue
+                if re.match(
+                    rf"^{re.escape(job_detail_retriever.name)}.*\.out(\.xz|\.gz)?$",
+                    f.name,
+                ):
+                    job_logs_out.append(f.name)
+                elif re.match(
+                    rf"^{re.escape(job_detail_retriever.name)}.*\.err(\.xz|\.gz)?$",
+                    f.name,
+                ):
+                    job_logs_err.append(f.name)
+
+        # Sort logs by time in the name, assuming the format is <job_name>.<timestamp>.[out|err]
+        job_logs_out.sort()
+        job_logs_err.sort()
+    except Exception:
+        logger.warning("Error while retrieving job logs")
+        logger.warning(traceback.format_exc())
+
+    # Build the response
+    response = JobDetailResponse(
+        name=job_name,
+        status=Status.VALUE_TO_KEY.get(job_detail_retriever.status_code, "UNKNOWN"),
+    )
+
+    response = response.model_copy(
+        update={
+            "section": job_detail_retriever.section,
+            "date": job_detail_retriever.date.strftime("%Y%m%d")
+            if job_detail_retriever.date
+            else None,
+            "member": job_detail_retriever.member,
+            "chunk": job_detail_retriever.chunk,
+            "out_path_local": os.path.join(exp_paths.tmp_log_dir, job_logs_out[-1])
+            if job_logs_out
+            else None,
+            "err_path_local": os.path.join(exp_paths.tmp_log_dir, job_logs_err[-1])
+            if job_logs_err
+            else None,
+            "chunk_size": job_detail_retriever.chunk_size,
+            "chunk_unit": job_detail_retriever.chunk_unit,
+            "platform": job_detail_retriever.platform,
+            "remote_id": job_detail_retriever.remote_id,
+            "qos": job_detail_retriever.qos,
+            "processors": job_detail_retriever.processors,
+            "wallclock": job_detail_retriever.wallclock,
+            "workflow_commit": job_detail_retriever.workflow_commit,
+            "submit": timestamp_to_datetime_format(job_detail_retriever.submit),
+            "start": timestamp_to_datetime_format(job_detail_retriever.start),
+            "finish": timestamp_to_datetime_format(job_detail_retriever.finish),
+            "last_wrapper": job_detail_retriever.last_wrapper,
+        }
+    )
+
+    return response
+
+
+@router.get("/{expid}/jobs/{job_name}/parents", name="Get experiment job parents")
+async def get_experiment_job_parents(
+    expid: str,
+    job_name: str,
+    include_status: bool = False,
+    user_id: Optional[str] = Depends(auth_token_dependency()),
+) -> Dict:
+    """
+    Get the parents of a specific job of an experiment.
+    Set include_status=true to also return the current status of each parent job.
+    """
+    try:
+        structure_repo = create_experiment_structure_repository(expid)
+        parents = structure_repo.get_parents(job_name)
+    except Exception as exc:
+        error_message = "Error while reading the experiment structure"
+        logger.error(error_message + f": {exc}")
+        logger.error(traceback.format_exc())
+        raise HTTPException(
+            status_code=HTTPStatus.INTERNAL_SERVER_ERROR, detail=error_message
+        )
+
+    parent_items = [{"job_name": parent} for parent in parents]
+
+    if include_status and parents:
+        try:
+            job_list_repo = create_jobs_repository(expid)
+            jobs_data = job_list_repo.get_by_names(parents)
+            status_map = {
+                job.name: Status.VALUE_TO_KEY.get(job.status, "UNKNOWN")
+                for job in jobs_data
+            }
+            for item in parent_items:
+                item["status"] = status_map.get(item["job_name"])
+        except Exception as exc:
+            logger.warning(f"Error while fetching parent job statuses: {exc}")
+            logger.warning(traceback.format_exc())
+
+    return {"parents": parent_items}
+
+
+@router.get("/{expid}/jobs/{job_name}/children", name="Get experiment job children")
+async def get_experiment_job_children(
+    expid: str,
+    job_name: str,
+    include_status: bool = False,
+    user_id: Optional[str] = Depends(auth_token_dependency()),
+) -> Dict:
+    """
+    Get the children of a specific job of an experiment
+    Set include_status=true to also return the current status of each child job.
+    """
+    try:
+        structure_repo = create_experiment_structure_repository(expid)
+        children = structure_repo.get_children(job_name)
+    except Exception as exc:
+        error_message = "Error while reading the experiment structure"
+        logger.error(error_message + f": {exc}")
+        logger.error(traceback.format_exc())
+        raise HTTPException(
+            status_code=HTTPStatus.INTERNAL_SERVER_ERROR, detail=error_message
+        )
+
+    child_items = [{"job_name": child} for child in children]
+
+    if include_status and children:
+        try:
+            job_list_repo = create_jobs_repository(expid)
+            jobs_data = job_list_repo.get_by_names(children)
+            status_map = {
+                job.name: Status.VALUE_TO_KEY.get(job.status, "UNKNOWN")
+                for job in jobs_data
+            }
+            for item in child_items:
+                item["status"] = status_map.get(item["job_name"])
+        except Exception as exc:
+            logger.warning(f"Error while fetching child job statuses: {exc}")
+            logger.warning(traceback.format_exc())
+
+    return {"children": child_items}

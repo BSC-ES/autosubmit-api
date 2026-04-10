@@ -25,15 +25,34 @@ class JobPackagesRepository(ABC):
         Get all job packages.
         """
 
+    @abstractmethod
+    def get_by_job_name(self, job_name: str) -> List[JobPackageModel]:
+        """
+        Get the job packages for a given job name.
+        """
+
 
 class JobPackagesSQLRepository(JobPackagesRepository):
     def __init__(self, engine: Engine, table: Table):
         self.engine = engine
         self.table = table
 
-    def get_all(self):
+    def get_all(self) -> List[JobPackageModel]:
         with self.engine.connect() as conn:
             statement = self.table.select()
+            result = conn.execute(statement).all()
+        return [
+            JobPackageModel(
+                exp_id=row.exp_id,
+                package_name=row.package_name,
+                job_name=row.job_name,
+            )
+            for row in result
+        ]
+
+    def get_by_job_name(self, job_name: str) -> List[JobPackageModel]:
+        with self.engine.connect() as conn:
+            statement = self.table.select().where(self.table.c.job_name == job_name)
             result = conn.execute(statement).all()
         return [
             JobPackageModel(

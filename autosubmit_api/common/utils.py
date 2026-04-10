@@ -7,7 +7,7 @@ import math
 from collections import namedtuple
 from bscearth.utils.date import date2str
 from dateutil.relativedelta import relativedelta
-from typing import List, Tuple
+from typing import List, Optional, Tuple
 
 LOCAL_TZ = datetime.datetime.now(datetime.timezone.utc).astimezone().tzinfo
 
@@ -193,7 +193,7 @@ def get_experiments_from_folder(root_folder: str) -> List[str]:
   folders = stdOut.split()      
   return [expid for expid in folders if len(expid) == 4]
 
-def timestamp_to_datetime_format(timestamp: int) -> str:
+def timestamp_to_datetime_format(timestamp: Optional[int]) -> str:
   """
   Formats a timestamp to a iso format datetime string with timezone information.
   """

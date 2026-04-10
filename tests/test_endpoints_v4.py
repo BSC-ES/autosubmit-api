@@ -10,6 +10,7 @@ import pytest
 from autosubmit_api import config
 from autosubmit_api.models.requests import PAGINATION_LIMIT_DEFAULT
 from autosubmit_api.repositories.runner_processes import RunnerProcessesDataModel
+from autosubmit_api.routers.v4.experiments import JobDetailResponse
 from tests.utils import custom_return_value
 
 
@@ -235,6 +236,320 @@ class TestExperimentJobs:
             assert isinstance(job, dict) and len(job.keys()) > 2
             assert isinstance(job["name"], str) and job["name"].startswith(expid)
             assert isinstance(job["status"], str)
+
+
+class TestExperimentJobDetail:
+    endpoint = "/v4/experiments/{expid}/jobs/{job_name}"
+
+    def test_job_not_found(self, fixture_fastapi_client: TestClient):
+        expid = "a003"
+        job_name = "a003_NONEXISTENT_JOB"
+        response = fixture_fastapi_client.get(
+            self.endpoint.format(expid=expid, job_name=job_name)
+        )
+
+        assert response.status_code == HTTPStatus.NOT_FOUND
+
+    def test_job_detail(self, fixture_fastapi_client: TestClient):
+        expid = "a003"
+        job_name = "a003_LOCAL_SETUP"
+        response = fixture_fastapi_client.get(
+            self.endpoint.format(expid=expid, job_name=job_name)
+        )
+        resp_obj: dict = response.json()
+
+        assert response.status_code == HTTPStatus.OK
+        assert resp_obj["name"] == job_name
+        assert isinstance(resp_obj["status"], str)
+        for field in JobDetailResponse.model_fields:
+            assert field in resp_obj
+
+    @pytest.mark.parametrize(
+        "expid, job_name, expected",
+        [
+            (
+                "a003",
+                "a003_LOCAL_SETUP",
+                {
+                    "name": "a003_LOCAL_SETUP",
+                    "section": "LOCAL_SETUP",
+                    "status": "READY",
+                    "member": None,
+                    "chunk": None,
+                    "platform": "LOCAL",
+                    "chunk_size": 4,
+                    "chunk_unit": "month",
+                    "processors": 1,
+                    "last_wrapper": None,
+                },
+            ),
+            (
+                "a6zj",
+                "a6zj_LOCAL_SETUP",
+                {
+                    "name": "a6zj_LOCAL_SETUP",
+                    "section": "LOCAL_SETUP",
+                    "status": "READY",
+                    "member": None,
+                    "chunk": None,
+                    "platform": "LOCAL",
+                    "chunk_size": 4,
+                    "chunk_unit": "month",
+                    "processors": 1,
+                    "last_wrapper": None,
+                },
+            ),
+            (
+                "a6zj",
+                "a6zj_20000101_fc0_1_SIM",
+                {
+                    "name": "a6zj_20000101_fc0_1_SIM",
+                    "section": "SIM",
+                    "status": "WAITING",
+                    "member": "fc0",
+                    "chunk": 1,
+                    "date": "20000101",
+                    "platform": "MARENOSTRUM4",
+                    "wallclock": "00:05",
+                    "chunk_size": 4,
+                    "chunk_unit": "month",
+                    "processors": 1,
+                    "last_wrapper": "a6zj_ASThread_17128472368642_1_4",
+                },
+            ),
+            (
+                "a6zj",
+                "a6zj_20000101_fc0_INI",
+                {
+                    "name": "a6zj_20000101_fc0_INI",
+                    "section": "INI",
+                    "status": "WAITING",
+                    "member": "fc0",
+                    "chunk": None,
+                    "date": "20000101",
+                    "platform": "MARENOSTRUM4",
+                    "wallclock": "00:05",
+                    "chunk_size": 4,
+                    "chunk_unit": "month",
+                    "processors": 1,
+                    "last_wrapper": None,
+                },
+            ),
+            (
+                "a3tb",
+                "a3tb_19930101_fc01_1_SIM",
+                {
+                    "name": "a3tb_19930101_fc01_1_SIM",
+                    "section": "SIM",
+                    "status": "COMPLETED",
+                    "member": "fc01",
+                    "chunk": 1,
+                    "date": "19930101",
+                    "remote_id": 21131708,
+                    "qos": "debug",
+                    "processors": 768,
+                    "wallclock": "1:30",
+                    "last_wrapper": None,
+                },
+            ),
+        ],
+    )
+    def test_job_detail_fields(
+        self,
+        fixture_fastapi_client: TestClient,
+        expid: str,
+        job_name: str,
+        expected: dict,
+    ):
+        response = fixture_fastapi_client.get(
+            self.endpoint.format(expid=expid, job_name=job_name)
+        )
+        resp_obj: dict = response.json()
+
+        assert response.status_code == HTTPStatus.OK
+        for key, value in expected.items():
+            assert key in resp_obj
+            assert resp_obj[key] == value
+
+    @pytest.mark.parametrize(
+        "expid, job_name, out, err",
+        [
+            (
+                "a3tb",
+                "a3tb_19930101_fc01_1_SIM",
+                "a3tb/tmp/LOG_a3tb/a3tb_19930101_fc01_1_SIM.20220315153049.out",
+                "a3tb/tmp/LOG_a3tb/a3tb_19930101_fc01_1_SIM.20220315153049.err",
+            ),
+            (
+                "a8qc",
+                "a8qc_20220630_000_1_CLEAN",
+                "a8qc/tmp/LOG_a8qc/a8qc_20220630_000_1_CLEAN.20250312185154.out.xz",
+                "a8qc/tmp/LOG_a8qc/a8qc_20220630_000_1_CLEAN.20250312185154.err.gz",
+            ),
+        ],
+    )
+    def test_job_detail_paths_local(
+        self,
+        fixture_fastapi_client: TestClient,
+        expid: str,
+        job_name: str,
+        out: str,
+        err: str,
+    ):
+        response = fixture_fastapi_client.get(
+            self.endpoint.format(expid=expid, job_name=job_name)
+        )
+        resp_obj: dict = response.json()
+
+        assert response.status_code == HTTPStatus.OK
+        assert isinstance(resp_obj["out_path_local"], str) and resp_obj[
+            "out_path_local"
+        ].endswith(out)
+        assert isinstance(resp_obj["err_path_local"], str) and resp_obj[
+            "err_path_local"
+        ].endswith(err)
+
+
+class TestExperimentJobParents:
+    endpoint = "/v4/experiments/{expid}/jobs/{job_name}/parents"
+
+    def test_job_not_found(self, fixture_fastapi_client: TestClient):
+        response = fixture_fastapi_client.get(
+            self.endpoint.format(expid="a003", job_name="a003_NONEXISTENT_JOB")
+        )
+        resp_obj: dict = response.json()
+
+        assert response.status_code == HTTPStatus.OK
+        assert resp_obj["parents"] == []
+
+    def test_no_parents(self, fixture_fastapi_client: TestClient):
+        # LOCAL_SETUP is the root — it has no parents
+        response = fixture_fastapi_client.get(
+            self.endpoint.format(expid="a003", job_name="a003_LOCAL_SETUP")
+        )
+        resp_obj: dict = response.json()
+
+        assert response.status_code == HTTPStatus.OK
+        assert isinstance(resp_obj["parents"], list)
+        assert len(resp_obj["parents"]) == 0
+
+    @pytest.mark.parametrize(
+        "expid, job_name, expected_parents",
+        [
+            ("a003", "a003_REMOTE_SETUP", ["a003_LOCAL_SETUP"]),
+            ("a003", "a003_20220401_fc0_INI", ["a003_REMOTE_SETUP"]),
+            ("a003", "a003_20220401_fc0_1_SIM", ["a003_20220401_fc0_INI"]),
+            ("a6zj", "a6zj_REMOTE_SETUP", ["a6zj_LOCAL_SETUP"]),
+            ("a6zj", "a6zj_20000101_fc0_INI", ["a6zj_REMOTE_SETUP"]),
+            ("a6zj", "a6zj_20000101_fc0_1_SIM", ["a6zj_20000101_fc0_INI"]),
+        ],
+    )
+    def test_parents(
+        self,
+        fixture_fastapi_client: TestClient,
+        expid: str,
+        job_name: str,
+        expected_parents: list,
+    ):
+        response = fixture_fastapi_client.get(
+            self.endpoint.format(expid=expid, job_name=job_name)
+        )
+        resp_obj: dict = response.json()
+
+        assert response.status_code == HTTPStatus.OK
+        assert isinstance(resp_obj["parents"], list)
+        assert len(resp_obj["parents"]) == len(expected_parents)
+        parent_names = [p["job_name"] for p in resp_obj["parents"]]
+        assert sorted(parent_names) == sorted(expected_parents)
+        for parent in resp_obj["parents"]:
+            assert "status" not in parent
+
+    def test_parents_with_status(self, fixture_fastapi_client: TestClient):
+        expid = "a003"
+        job_name = "a003_REMOTE_SETUP"
+        response = fixture_fastapi_client.get(
+            self.endpoint.format(expid=expid, job_name=job_name),
+            params={"include_status": True},
+        )
+        resp_obj: dict = response.json()
+
+        assert response.status_code == HTTPStatus.OK
+        assert len(resp_obj["parents"]) == 1
+        parent = resp_obj["parents"][0]
+        assert parent["job_name"] == "a003_LOCAL_SETUP"
+        assert "status" in parent
+        assert isinstance(parent["status"], str)
+
+
+class TestExperimentJobChildren:
+    endpoint = "/v4/experiments/{expid}/jobs/{job_name}/children"
+
+    def test_job_not_found(self, fixture_fastapi_client: TestClient):
+        response = fixture_fastapi_client.get(
+            self.endpoint.format(expid="a003", job_name="a003_NONEXISTENT_JOB")
+        )
+        resp_obj: dict = response.json()
+
+        assert response.status_code == HTTPStatus.OK
+        assert resp_obj["children"] == []
+
+    def test_no_children(self, fixture_fastapi_client: TestClient):
+        # TRANSFER is a leaf — it has no children
+        response = fixture_fastapi_client.get(
+            self.endpoint.format(expid="a003", job_name="a003_20220401_fc0_TRANSFER")
+        )
+        resp_obj: dict = response.json()
+
+        assert response.status_code == HTTPStatus.OK
+        assert isinstance(resp_obj["children"], list)
+        assert len(resp_obj["children"]) == 0
+
+    @pytest.mark.parametrize(
+        "expid, job_name, expected_children",
+        [
+            ("a003", "a003_LOCAL_SETUP", ["a003_REMOTE_SETUP"]),
+            ("a003", "a003_REMOTE_SETUP", ["a003_20220401_fc0_INI"]),
+            ("a003", "a003_20220401_fc0_INI", ["a003_20220401_fc0_1_SIM"]),
+            ("a6zj", "a6zj_LOCAL_SETUP", ["a6zj_REMOTE_SETUP"]),
+            ("a6zj", "a6zj_20000101_fc0_INI", ["a6zj_20000101_fc0_1_SIM"]),
+            ("a6zj", "a6zj_20000101_fc0_1_SIM", ["a6zj_20000101_fc0_2_SIM"]),
+        ],
+    )
+    def test_children(
+        self,
+        fixture_fastapi_client: TestClient,
+        expid: str,
+        job_name: str,
+        expected_children: list,
+    ):
+        response = fixture_fastapi_client.get(
+            self.endpoint.format(expid=expid, job_name=job_name)
+        )
+        resp_obj: dict = response.json()
+
+        assert response.status_code == HTTPStatus.OK
+        assert isinstance(resp_obj["children"], list)
+        assert len(resp_obj["children"]) == len(expected_children)
+        child_names = [c["job_name"] for c in resp_obj["children"]]
+        assert sorted(child_names) == sorted(expected_children)
+        for child in resp_obj["children"]:
+            assert "status" not in child
+
+    def test_children_with_status(self, fixture_fastapi_client: TestClient):
+        expid = "a003"
+        job_name = "a003_LOCAL_SETUP"
+        response = fixture_fastapi_client.get(
+            self.endpoint.format(expid=expid, job_name=job_name),
+            params={"include_status": True},
+        )
+        resp_obj: dict = response.json()
+
+        assert response.status_code == HTTPStatus.OK
+        assert len(resp_obj["children"]) == 1
+        child = resp_obj["children"][0]
+        assert child["job_name"] == "a003_REMOTE_SETUP"
+        assert "status" in child
+        assert isinstance(child["status"], str)
 
 
 class TestExperimentWrappers:
