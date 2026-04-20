@@ -296,6 +296,8 @@ class TreeRepresentation(object):
         "title" : job.tree_title,
         "date": ini_date,
         "date_plus": end_date,
+        "split": job.split,
+        "splits": job.splits,
         "SYPD": SYPD,
         "ASYPD": ASYPD,
         "minutes_queue": job.queue_time,

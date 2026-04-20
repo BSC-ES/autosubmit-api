@@ -269,6 +269,8 @@ class GraphRepresentation(object):
         "member": job.member,
         "date": ini_date,
         "date_plus": end_date,
+        "split": job.split,
+        "splits": job.splits,
         "SYPD": SYPD,
         "ASYPD": ASYPD,
         "minutes_queue": job.queue_time,
