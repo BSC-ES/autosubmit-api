@@ -19,6 +19,12 @@ class CustomAutosubmitUnpickler(pickle.Unpickler):
         return super().find_class(module, name)
 
 
+def _handle_split_splits(split):
+    if isinstance(split, int) and split > 0:
+        return split
+    return None
+
+
 class PklReader:
     def __init__(self, expid: str) -> None:
         self.expid = expid
@@ -58,8 +64,12 @@ class PklReader:
                     date=job_content.date,
                     member=job_content.member,
                     chunk=job_content.chunk,
-                    split=job_content.split if hasattr(job_content, "split") else None,
-                    splits=job_content.splits if hasattr(job_content, "splits") else None,
+                    split=_handle_split_splits(job_content.split)
+                    if hasattr(job_content, "split")
+                    else None,
+                    splits=_handle_split_splits(job_content.splits)
+                    if hasattr(job_content, "splits")
+                    else None,
                     out_path_local=job_content.local_logs[0],
                     err_path_local=job_content.local_logs[1],
                     out_path_remote=job_content.remote_logs[0],
@@ -87,8 +97,12 @@ class PklReader:
                 job_list.append(jobpkl)
         elif isinstance(obj, dict):
             for job_name, value in obj.items():
-                local_logs = value.get("_local_logs") if value.get("_local_logs") else []
-                remote_logs = value.get("_remote_logs") if value.get("_remote_logs") else []
+                local_logs = (
+                    value.get("_local_logs") if value.get("_local_logs") else []
+                )
+                remote_logs = (
+                    value.get("_remote_logs") if value.get("_remote_logs") else []
+                )
                 jobpkl = PklJobModel(
                     name=job_name,
                     id=value.get("id"),
@@ -98,8 +112,8 @@ class PklReader:
                     date=value.get("date"),
                     member=value.get("_member"),
                     chunk=value.get("_chunk"),
-                    split=value.get("_split"),
-                    splits=value.get("_splits"),
+                    split=_handle_split_splits(value.get("_split")),
+                    splits=_handle_split_splits(value.get("_splits")),
                     out_path_local=local_logs[0] if len(local_logs) > 0 else None,
                     err_path_local=local_logs[1] if len(local_logs) > 1 else None,
                     out_path_remote=remote_logs[0] if len(remote_logs) > 0 else None,
