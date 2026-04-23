@@ -1,11 +1,11 @@
 #!/usr/bin/env python
-# from autosubmitAPIwu.database.db_jobdata import JobData
 from abc import ABCMeta, abstractmethod
 from typing import TYPE_CHECKING, Dict, List, Optional, Set, Tuple
 
 from autosubmit_api.common import utils as util
 from autosubmit_api.common.utils import Status
 from autosubmit_api.components.jobs import utils as JUtils
+from autosubmit_api.database.models import PklJobModel
 from autosubmit_api.history.data_classes.job_data import JobData
 from autosubmit_api.monitor.monitor import Monitor
 
@@ -223,7 +223,7 @@ class Job(metaclass=ABCMeta):
 
 
   @classmethod
-  def from_pkl(cls, pkl_item: str) -> "Job":
+  def from_pkl(cls, pkl_item: PklJobModel) -> "Job":
     job = cls()
     job.name = pkl_item.name
     job._id = pkl_item.id
