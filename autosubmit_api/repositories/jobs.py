@@ -17,6 +17,8 @@ class JobData(BaseModel):
     date: Optional[datetime.datetime]
     member: Optional[str]
     chunk: Optional[int]
+    split: Optional[int]
+    splits: Optional[int]
     out_path_local: Optional[str]
     err_path_local: Optional[str]
     out_path_remote: Optional[str]
@@ -69,6 +71,8 @@ class JobsPklRepository(JobsRepository):
                 date=job.date,
                 member=job.member,
                 chunk=job.chunk,
+                split=job.split,
+                splits=job.splits,
                 out_path_local=job.out_path_local,
                 err_path_local=job.err_path_local,
                 out_path_remote=job.out_path_remote,
@@ -96,6 +100,8 @@ class JobsPklRepository(JobsRepository):
                     date=job.date,
                     member=job.member,
                     chunk=job.chunk,
+                    split=job.split,
+                    splits=job.splits,
                     out_path_local=job.out_path_local,
                     err_path_local=job.err_path_local,
                     out_path_remote=job.out_path_remote,
@@ -119,6 +125,8 @@ class JobsPklRepository(JobsRepository):
                 date=job.date,
                 member=job.member,
                 chunk=job.chunk,
+                split=job.split,
+                splits=job.splits,
                 out_path_local=job.out_path_local,
                 err_path_local=job.err_path_local,
                 out_path_remote=job.out_path_remote,

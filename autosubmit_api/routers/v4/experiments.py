@@ -218,6 +218,8 @@ async def get_experiment_jobs(
                 ),
                 "member": job_item.member,
                 "chunk": job_item.chunk,
+                "split": job_item.split,
+                "splits": job_item.splits,
                 "out_path_local": job_item.out_path_local,
                 "err_path_local": job_item.err_path_local,
                 "out_path_remote": job_item.out_path_remote,
@@ -422,7 +424,8 @@ class JobDetailResponse(BaseModel):
     date: Optional[str] = None
     member: Optional[str] = None
     chunk: Optional[int] = None
-    # split: Optional[str] = None
+    split: Optional[int] = None
+    splits: Optional[int] = None
     out_path_local: Optional[str] = None
     err_path_local: Optional[str] = None
     # From config
@@ -508,6 +511,8 @@ async def get_experiment_job_detail(
             else None,
             "member": job_detail_retriever.member,
             "chunk": job_detail_retriever.chunk,
+            "split": job_detail_retriever.split,
+            "splits": job_detail_retriever.splits,
             "out_path_local": os.path.join(exp_paths.tmp_log_dir, job_logs_out[-1])
             if job_logs_out
             else None,

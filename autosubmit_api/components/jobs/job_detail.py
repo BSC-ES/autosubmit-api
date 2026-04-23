@@ -145,6 +145,14 @@ class JobDetailRetriever:
         return self._job_data.chunk
 
     @property
+    def split(self) -> Optional[int]:
+        return self._job_data.split
+
+    @property
+    def splits(self) -> Optional[int]:
+        return self._job_data.splits
+
+    @property
     def chunk_size(self) -> Optional[int]:
         if self._config_facade and self._config_facade.chunk_size is not None:
             return self._config_facade.chunk_size
