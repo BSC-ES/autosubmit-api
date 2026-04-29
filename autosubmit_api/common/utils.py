@@ -71,6 +71,16 @@ def parse_number_processors(processors_str: str) -> int:
     except Exception:
       return 1
 
+def get_processors_number(conf_job_processors: str) -> int:
+  num_processors = 0
+  try:
+    if str(conf_job_processors).find(":") >= 0:
+      num_processors = parse_number_processors(conf_job_processors)
+    else:
+      num_processors = int(conf_job_processors)
+  except Exception:
+    """ In case of error, nothing is done and num_processors will be 0"""
+  return num_processors
 
 def separate_job_outliers(jobs: List) -> Tuple[List, List]:
   """

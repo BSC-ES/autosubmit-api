@@ -1,26 +1,53 @@
 #!/bin/env/python
 from datetime import datetime, timedelta
+from typing import Optional
+
+from autosubmit_api.components.experiment.utils import calculate_processing_elements
 from .utils import timedelta2hours
 
+
 class JobStat(object):
-    def __init__(self, name: str, processors: int, wallclock: float, section: str, date: str, member: str, chunk: str):
-      self._name = name
-      self._processors = processors
-      self._wallclock = wallclock
-      self.submit_time: datetime = None
-      self.start_time: datetime = None
-      self.finish_time: datetime = None
-      self.completed_queue_time = timedelta()
-      self.completed_run_time = timedelta()
-      self.failed_queue_time = timedelta()
-      self.failed_run_time = timedelta()
-      self.retrial_count = 0
-      self.completed_retrial_count = 0
-      self.failed_retrial_count = 0
-      self.section = section
-      self.date = date
-      self.member = member
-      self.chunk = chunk
+    def __init__(
+        self,
+        name: str,
+        processors: int,
+        wallclock: float,
+        section: str,
+        date: str,
+        member: str,
+        chunk: str,
+        processors_per_node: Optional[str] = None,
+        tasks: Optional[str] = None,
+        nodes: Optional[str] = None,
+        exclusive: Optional[str] = None,
+    ):
+        self._name = name
+        self._processors = calculate_processing_elements(
+            nodes=nodes,
+            processors=processors,
+            tasks=tasks,
+            processors_per_node=processors_per_node,
+            exclusive=exclusive,
+        )
+        self._wallclock = wallclock
+        self.submit_time: datetime = None
+        self.start_time: datetime = None
+        self.finish_time: datetime = None
+        self.completed_queue_time = timedelta()
+        self.completed_run_time = timedelta()
+        self.failed_queue_time = timedelta()
+        self.failed_run_time = timedelta()
+        self.retrial_count = 0
+        self.completed_retrial_count = 0
+        self.failed_retrial_count = 0
+        self.section = section
+        self.date = date
+        self.member = member
+        self.chunk = chunk
+        self.processors_per_node = processors_per_node
+        self.tasks = tasks
+        self.nodes = nodes
+        self.exclusive = exclusive
 
     def inc_retrial_count(self):
         self.retrial_count += 1
@@ -33,7 +60,9 @@ class JobStat(object):
 
     @property
     def cpu_consumption(self):
-        return timedelta2hours(self._processors * self.completed_run_time) + timedelta2hours(self._processors * self.failed_run_time)
+        return timedelta2hours(
+            self._processors * self.completed_run_time
+        ) + timedelta2hours(self._processors * self.failed_run_time)
 
     @property
     def failed_cpu_consumption(self):
@@ -69,5 +98,5 @@ class JobStat(object):
             "retrialCount": self.retrial_count,
             "submittedCount": self.retrial_count,
             "completedCount": self.completed_retrial_count,
-            "failedCount": self.failed_retrial_count
+            "failedCount": self.failed_retrial_count,
         }

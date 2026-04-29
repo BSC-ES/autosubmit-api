@@ -1,6 +1,7 @@
 #!/bin/env/python
 from autosubmit_api.components.jobs import utils as JobUtils
 from datetime import datetime, timedelta
+from autosubmit_api.components.jobs.job_section_config import JobSectionConfiguration
 from autosubmit_api.config.basicConfig import APIBasicConfig
 from autosubmit_api.components.jobs.job_factory import Job
 from autosubmit_api.statistics.job_stat import JobStat
@@ -41,12 +42,39 @@ class Statistics(object):
         self.failed_jobs_dict: Dict[str, int] = {}
         self.summary = StatsSummary()
         self.totals = [" Description text \n", "Line 1"]
+        self._job_section_config_cache: Dict[str, JobSectionConfiguration] = {}
 
     def calculate_statistics(self) -> List[JobStat]:
       for index, job in enumerate(self._jobs):
           retrials = JobSupport(self.expid, job, self.basic_config).get_last_retrials()
           for retrial in retrials:
-              job_stat = self._name_to_jobstat_dict.setdefault(job.name, JobStat(job.name, job.total_processors, job.total_wallclock, job.section, job.date, job.member, job.chunk))
+              # Get section configuration
+              job_section = job.section
+              if job_section not in self._job_section_config_cache:
+                  self._job_section_config_cache[job_section] = JobSectionConfiguration(self.expid, job_section, self.basic_config)
+                  section_processors = self._job_section_config_cache[job_section].processors
+                  section_processors_per_node = self._job_section_config_cache[job_section].processors_per_node
+                  section_tasks = self._job_section_config_cache[job_section].tasks
+                  section_nodes = self._job_section_config_cache[job_section].nodes
+                  section_exclusive = self._job_section_config_cache[job_section].exclusive
+              
+              job_stat = self._name_to_jobstat_dict.setdefault(
+                 job.name, 
+                 JobStat(
+                    name=job.name,
+                    processors=job.total_processors if job.total_processors is not None else section_processors,
+                    wallclock=job.total_wallclock,
+                    section=job.section,
+                    date=job.date,
+                    member=job.member,
+                    chunk=job.chunk,
+                    processors_per_node=section_processors_per_node,
+                    tasks=section_tasks,
+                    nodes=section_nodes,
+                    exclusive=section_exclusive
+                )
+              )
+
               job_stat.inc_retrial_count()
               if JobUtils.is_a_completed_retrial(retrial):
                   job_stat.inc_completed_retrial_count()

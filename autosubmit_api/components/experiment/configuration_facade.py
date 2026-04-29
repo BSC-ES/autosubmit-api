@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-import math
 import os
 from abc import ABCMeta, abstractmethod
 from typing import List, Optional
@@ -7,16 +6,17 @@ from typing import List, Optional
 from autosubmit_api.common.utils import (
   JobSection,
   datechunk_to_year,
-  parse_number_processors,
+  get_processors_number,
   timestamp_to_datetime_format,
 )
 from autosubmit_api.components.experiment.file_metadata import FileMetadata
+from autosubmit_api.components.experiment.utils import (
+  calculate_processing_elements,
+)
 from autosubmit_api.components.jobs.job_factory import SimJob
-from autosubmit_api.components.jobs.utils import convert_int_default
+from autosubmit_api.components.jobs.job_section_config import JobSectionConfiguration
 from autosubmit_api.config.basicConfig import APIBasicConfig
 from autosubmit_api.config.config_common import AutosubmitConfigResolver
-from autosubmit_api.config.ymlConfigStrategy import ymlConfigStrategy
-from autosubmit_api.logger import logger
 from autosubmit_api.persistance.experiment import ExperimentPaths
 from autosubmit_api.repositories.jobs import create_jobs_repository
 
@@ -60,10 +60,6 @@ class ConfigurationFacade(metaclass=ABCMeta):
     pass
 
   @abstractmethod
-  def _get_processors_number(self, conf_sim_processors: str) -> int:
-    pass
-
-  @abstractmethod
   def get_model(self) -> str:
     pass
 
@@ -90,9 +86,6 @@ class BasicConfigurationFacade(ConfigurationFacade):
   def get_autosubmit_version(self):
     raise NotImplementedError
 
-  def _get_processors_number(self, conf_sim_processors):
-    raise NotImplementedError
-
   def get_model(self):
     raise NotImplementedError
 
@@ -111,6 +104,7 @@ class AutosubmitConfigurationFacade(ConfigurationFacade):
     super(AutosubmitConfigurationFacade, self).__init__(expid, basic_config)
     self.autosubmit_conf = autosubmit_config
     self.file_metadata = FileMetadata(self.experiment_path)
+    self.sim_section_config = JobSectionConfiguration(expid, JobSection.SIM, basic_config, autosubmit_config)
     self._process_advanced_config()
 
   def _process_advanced_config(self):
@@ -150,7 +144,7 @@ class AutosubmitConfigurationFacade(ConfigurationFacade):
   @property
   def sim_processors(self) -> int:
     if not hasattr(self, '_sim_processors'):
-      self._sim_processors = self._get_processors_number(self.autosubmit_conf.get_processors(JobSection.SIM))
+      self._sim_processors = self.sim_section_config.processors
     return self._sim_processors
 
   @sim_processors.setter
@@ -170,10 +164,7 @@ class AutosubmitConfigurationFacade(ConfigurationFacade):
   @property
   def sim_tasks(self) -> Optional[int]:
     if not hasattr(self, '_sim_tasks'):
-      if isinstance(self.autosubmit_conf._configWrapper, ymlConfigStrategy):
-        self._sim_tasks = convert_int_default(self.autosubmit_conf._configWrapper.get_tasks(JobSection.SIM))
-      else:
-        self._sim_tasks = None
+      self._sim_tasks = self.sim_section_config.tasks
     return self._sim_tasks
 
   @sim_tasks.setter
@@ -183,10 +174,7 @@ class AutosubmitConfigurationFacade(ConfigurationFacade):
   @property
   def sim_nodes(self) -> Optional[int]:
     if not hasattr(self, '_sim_nodes'):
-      if isinstance(self.autosubmit_conf._configWrapper, ymlConfigStrategy):
-        self._sim_nodes = convert_int_default(self.autosubmit_conf._configWrapper.get_nodes(JobSection.SIM))
-      else:
-        self._sim_nodes = None
+      self._sim_nodes = self.sim_section_config.nodes
     return self._sim_nodes
 
   @sim_nodes.setter
@@ -196,10 +184,7 @@ class AutosubmitConfigurationFacade(ConfigurationFacade):
   @property
   def sim_processors_per_node(self) -> Optional[int]:
     if not hasattr(self, '_sim_processors_per_node'):
-      if isinstance(self.autosubmit_conf._configWrapper, ymlConfigStrategy):
-        self._sim_processors_per_node = convert_int_default(self.autosubmit_conf._configWrapper.get_processors_per_node(JobSection.SIM))
-      else:
-        self._sim_processors_per_node = None
+      self._sim_processors_per_node = self.sim_section_config.processors_per_node
     return self._sim_processors_per_node
 
   @sim_processors_per_node.setter
@@ -209,10 +194,7 @@ class AutosubmitConfigurationFacade(ConfigurationFacade):
   @property
   def sim_exclusive(self) -> bool:
     if not hasattr(self, '_sim_exclusive'):
-      if isinstance(self.autosubmit_conf._configWrapper, ymlConfigStrategy):
-        self._sim_exclusive = self.autosubmit_conf._configWrapper.get_exclusive(JobSection.SIM)
-      else:
-        self._sim_exclusive = False
+      self._sim_exclusive = self.sim_section_config.exclusive
     return self._sim_exclusive
 
   @sim_exclusive.setter
@@ -252,7 +234,7 @@ class AutosubmitConfigurationFacade(ConfigurationFacade):
     return str(self.autosubmit_conf.get_platform())
 
   def get_section_processors(self, section_name: str) -> int:
-    return self._get_processors_number(str(self.autosubmit_conf.get_processors(section_name)))
+    return get_processors_number(str(self.autosubmit_conf.get_processors(section_name)))
 
   def get_section_qos(self, section_name):
     return str(self.autosubmit_conf.get_queue(section_name))
@@ -324,42 +306,14 @@ class AutosubmitConfigurationFacade(ConfigurationFacade):
       job.set_ncpus(self.sim_processing_elements)
       job.set_years_per_sim(self.current_years_per_sim)
 
-  def _get_processors_number(self, conf_job_processors: str) -> int:
-    num_processors = 0
-    try:
-        if str(conf_job_processors).find(":") >= 0:
-            num_processors = parse_number_processors(conf_job_processors)
-            self._add_warning("Parallelization parsing | {0} was interpreted as {1} cores.".format(
-                conf_job_processors, num_processors))
-        else:
-            num_processors = int(conf_job_processors)
-    except Exception:
-        self._add_warning(
-            "CHSY Critical | Autosubmit API could not parse the number of processors for the SIM job.")
-        pass
-    return num_processors
-
   def _add_warning(self, message: str):
     self.warnings.append(message)
 
-  def _estimate_requested_nodes(self) -> int:
-    if self.sim_nodes:
-      return self.sim_nodes
-    elif self.sim_tasks:
-      return math.ceil(self.sim_processors / self.sim_tasks)
-    elif self.sim_processors_per_node and self.sim_processors > self.sim_processors_per_node:
-      return math.ceil(self.sim_processors / self.sim_processors_per_node)
-    else:
-      return 1
-
   def _calculate_processing_elements(self) -> int:
-    if self.sim_processors_per_node:
-      estimated_nodes = self._estimate_requested_nodes()
-      if not self.sim_nodes and not self.sim_exclusive and estimated_nodes <= 1 and self.sim_processors <= self.sim_processors_per_node:
-        return self.sim_processors
-      return estimated_nodes * self.sim_processors_per_node
-    elif self.sim_tasks or self.sim_nodes:
-      warn_msg = 'Missing PROCESSORS_PER_NODE. Should be set if TASKS or NODES are defined. The SIM PROCESSORS will used instead.'
-      self._add_warning(warn_msg)
-      logger.warning(warn_msg)
-    return self.sim_processors
+    return calculate_processing_elements(
+      nodes=self.sim_nodes,
+      processors=self.sim_processors,
+      tasks=self.sim_tasks,
+      processors_per_node=self.sim_processors_per_node,
+      exclusive=self.sim_exclusive
+    )

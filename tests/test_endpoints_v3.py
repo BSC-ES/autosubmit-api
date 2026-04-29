@@ -471,6 +471,23 @@ class TestStatistics:
             aux_resp_obj["Statistics"]["JobStatistics"], key=lambda x: x["name"]
         ) == sorted(resp_obj["Statistics"]["JobStatistics"], key=lambda x: x["name"])
 
+    def test_processors(self, fixture_fastapi_client: TestClient):
+        expid = "a003"
+        response = fixture_fastapi_client.get(
+            self.endpoint.format(expid=expid, period=0, section="SIM")
+        )
+        resp_obj: dict = response.json()
+
+        assert resp_obj["error_message"] == ""
+        assert resp_obj["error"] is False
+        assert (
+            isinstance(resp_obj["Statistics"]["JobStatistics"], list)
+            and len(resp_obj["Statistics"]["JobStatistics"]) > 0
+        )
+
+        for job_stat in resp_obj["Statistics"]["JobStatistics"]:
+            assert job_stat["processors"] == 16 # Parallelization that comes from default platform
+
 
 class TestCurrentConfig:
     endpoint = "/v3/cconfig/{expid}"
