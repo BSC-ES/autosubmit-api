@@ -6,6 +6,7 @@ from pydantic import BaseModel
 from sqlalchemy import Engine, Table, create_engine, delete, insert
 from sqlalchemy.schema import CreateTable
 
+from autosubmit_api.common.utils import LOCAL_TZ
 from autosubmit_api.config.basicConfig import APIBasicConfig
 from autosubmit_api.database import tables
 from autosubmit_api.database.common import create_as_times_db_engine
@@ -97,7 +98,9 @@ class ExperimentStatusSQLRepository(ExperimentStatusRepository):
                         name=expid,
                         status=status,
                         seconds_diff=0,
-                        modified=datetime.now().isoformat(sep="-", timespec="seconds"),
+                        modified=datetime.now(tz=LOCAL_TZ).isoformat(
+                            sep="-", timespec="seconds"
+                        ),
                     )
                     conn.execute(del_stmnt)
                     result = conn.execute(ins_stmnt)
