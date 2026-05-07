@@ -14,7 +14,7 @@ class JobSectionConfiguration:
         self,
         expid: str,
         section: str,
-        basic_config: Optional[type[APIBasicConfig]] = None,
+        basic_config: Optional[Union[APIBasicConfig, type[APIBasicConfig]]] = None,
         as_conf: Optional[AutosubmitConfigResolver] = None,
     ):
         self.expid = expid

@@ -16,10 +16,10 @@ class JobStat(object):
         date: str,
         member: str,
         chunk: str,
-        processors_per_node: Optional[str] = None,
-        tasks: Optional[str] = None,
-        nodes: Optional[str] = None,
-        exclusive: Optional[str] = None,
+        processors_per_node: Optional[int] = None,
+        tasks: Optional[int] = None,
+        nodes: Optional[int] = None,
+        exclusive: Optional[int] = None,
     ):
         self._name = name
         self._processors = calculate_processing_elements(

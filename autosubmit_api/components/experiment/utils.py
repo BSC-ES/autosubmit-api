@@ -57,6 +57,6 @@ def calculate_processing_elements(
     elif str(tasks).isdigit() or str(nodes).isdigit():
         logger.warning(
             "Missing PROCESSORS_PER_NODE. Should be set if TASKS or NODES are defined. "
-            "The PROCESSORS will used instead."
+            "The PROCESSORS will be used instead."
         )
     return int(processors)

@@ -50,13 +50,15 @@ class Statistics(object):
           for retrial in retrials:
               # Get section configuration
               job_section = job.section
+
               if job_section not in self._job_section_config_cache:
                   self._job_section_config_cache[job_section] = JobSectionConfiguration(self.expid, job_section, self.basic_config)
-                  section_processors = self._job_section_config_cache[job_section].processors
-                  section_processors_per_node = self._job_section_config_cache[job_section].processors_per_node
-                  section_tasks = self._job_section_config_cache[job_section].tasks
-                  section_nodes = self._job_section_config_cache[job_section].nodes
-                  section_exclusive = self._job_section_config_cache[job_section].exclusive
+                  
+              section_processors = self._job_section_config_cache[job_section].processors
+              section_processors_per_node = self._job_section_config_cache[job_section].processors_per_node
+              section_tasks = self._job_section_config_cache[job_section].tasks
+              section_nodes = self._job_section_config_cache[job_section].nodes
+              section_exclusive = self._job_section_config_cache[job_section].exclusive
               
               job_stat = self._name_to_jobstat_dict.setdefault(
                  job.name, 
