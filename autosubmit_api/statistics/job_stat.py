@@ -19,7 +19,7 @@ class JobStat(object):
         processors_per_node: Optional[int] = None,
         tasks: Optional[int] = None,
         nodes: Optional[int] = None,
-        exclusive: Optional[int] = None,
+        exclusive: bool = False,
     ):
         self._name = name
         self._processors = calculate_processing_elements(

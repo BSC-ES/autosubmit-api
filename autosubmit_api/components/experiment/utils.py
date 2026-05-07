@@ -24,16 +24,23 @@ def estimate_requested_nodes(
 
     Else, we return ``1``.
     """
+    _estimated_nodes = 1
     if str(nodes).isdigit():
-        return int(nodes)
+        _estimated_nodes = int(nodes)
     elif str(tasks).isdigit() and int(tasks) > 0:
-        return ceil(int(processors) / int(tasks))
+        _estimated_nodes = ceil(int(processors) / int(tasks))
     elif str(processors_per_node).isdigit() and 0 < int(processors_per_node) < int(
         processors
     ):
-        return ceil(int(processors) / int(processors_per_node))
-    else:
-        return 1
+        _estimated_nodes = ceil(int(processors) / int(processors_per_node))
+
+    if _estimated_nodes < 1:
+        logger.warning(
+            f"Estimated nodes is less than 1. This should not happen. Defaulting to 1. "
+            f"Estimated nodes: {_estimated_nodes}, processors: {processors}, tasks: {tasks}, processors_per_node: {processors_per_node}"
+        )
+        _estimated_nodes = 1
+    return _estimated_nodes
 
 
 def calculate_processing_elements(
