@@ -19,7 +19,8 @@ from autosubmit_api.repositories.join.experiment_join import (
 
 class StatusUpdater(BackgroundTaskTemplate):
     id = "TASK_STTSUPDTR"
-    trigger_options = {"trigger": "interval", "minutes": 5}
+    # TODO: the minute timer will need to change to 5. Just for testing
+    trigger_options = {"trigger": "interval", "minutes": 2}
 
     @classmethod
     def _clear_missing_experiments(cls):
@@ -45,11 +46,27 @@ class StatusUpdater(BackgroundTaskTemplate):
     @classmethod
     def _get_current_status(cls) -> Dict[str, str]:
         """
-        Get the current status of the experiments
+        Get the current status of the experiments filtering out ARCHIVED/DELETED/NOT RUNNING ones.
         """
         status_repository = create_experiment_status_repository()
         experiment_statuses = status_repository.get_all()
-        return {row.name: row.status for row in experiment_statuses}
+
+        # Filter out terminal statuses: only reconcile RUNNING experiments
+        terminal_statuses = {
+            RunningStatus.NOT_RUNNING,
+            RunningStatus.ARCHIVED,
+            RunningStatus.DELETED,
+        }
+        mutable_statuses = {
+            row.name: row
+            for row in experiment_statuses
+            if row.status not in terminal_statuses
+        }
+        cls.logger.debug(
+            f"[{cls.id}] Loaded {len(mutable_statuses)} mutable experiments "
+            f"(filtered {len(experiment_statuses) - len(mutable_statuses)} terminal statuses)"
+        )
+        return mutable_statuses
 
     @classmethod
     def _check_exp_running(cls, expid: str) -> bool:

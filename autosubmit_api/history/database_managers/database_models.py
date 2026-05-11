@@ -79,6 +79,8 @@ MaxCounterRow = collections.namedtuple('MaxCounter', ['maxcounter'])
 class RunningStatus:
   RUNNING = "RUNNING"
   NOT_RUNNING = "NOT RUNNING"
+  ARCHIVED = "ARCHIVED"
+  DELETED = "DELETED"
 
 class RowType:
     NORMAL = 2
