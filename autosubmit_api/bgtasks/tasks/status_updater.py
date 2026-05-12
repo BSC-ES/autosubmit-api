@@ -191,15 +191,6 @@ class StatusUpdater(BackgroundTaskTemplate):
             )
             return
 
-        # Read experiments table
-        try:
-            exp_list = cls._get_experiments()
-        except Exception as exc:
-            cls.logger.error(
-                f"[{cls.id}] Error loading experiments: {exc}"
-            )
-            return
-
         # Read current status of RUNNING experiments
         try:
             current_status_dict = cls._get_current_status()
