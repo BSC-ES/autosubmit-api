@@ -20,7 +20,7 @@ from autosubmit_api.repositories.join.experiment_join import (
 
 class StatusUpdater(BackgroundTaskTemplate):
     id = "TASK_STTSUPDTR"
-    trigger_options = {"trigger": "interval", "minutes": 1}
+    trigger_options = {"trigger": "interval", "minutes": 5}
 
     @classmethod
     def _clear_missing_experiments(cls):
