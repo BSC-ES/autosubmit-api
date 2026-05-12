@@ -58,9 +58,13 @@ class ExperimentStatusRepository(ABC):
 
 
 class ExperimentStatusSQLRepository(ExperimentStatusRepository):
-    def __init__(self, engine: Engine, table: Table):
+    def __init__(self, engine: Engine, valid_tables: List[Table]):
         self.engine = engine
-        self.table = table
+        self.table = tables.check_table_schema(self.engine, valid_tables)
+        if self.table is None:
+            if len(valid_tables) == 0:
+                raise ValueError("No valid tables provided.")
+            self.table = valid_tables[0]
 
         with self.engine.connect() as conn:
             conn.execute(CreateTable(self.table, if_not_exists=True))
@@ -132,8 +136,12 @@ def create_experiment_status_repository() -> ExperimentStatusRepository:
     if APIBasicConfig.DATABASE_BACKEND == "postgres":
         # PostgreSQL
         _engine = create_engine(APIBasicConfig.DATABASE_CONN_URL)
+        _tables = [
+            tables.table_change_schema(tables.ExperimentStatusTableV18),
+            tables.table_change_schema(tables.ExperimentStatusTable),
+        ]
     else:
         # SQLite
         _engine = create_as_times_db_engine()
-    _table = tables.ExperimentStatusTable
-    return ExperimentStatusSQLRepository(_engine, _table)
+        _tables = [tables.ExperimentStatusTableV18, tables.ExperimentStatusTable]
+    return ExperimentStatusSQLRepository(_engine, _tables)
