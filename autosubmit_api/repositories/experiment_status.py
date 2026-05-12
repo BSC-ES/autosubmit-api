@@ -137,8 +137,8 @@ def create_experiment_status_repository() -> ExperimentStatusRepository:
         # PostgreSQL
         _engine = create_engine(APIBasicConfig.DATABASE_CONN_URL)
         _tables = [
-            tables.table_change_schema(tables.ExperimentStatusTableV18),
-            tables.table_change_schema(tables.ExperimentStatusTable),
+            tables.table_change_schema(source=tables.ExperimentStatusTableV18),
+            tables.table_change_schema(source=tables.ExperimentStatusTable),
         ]
     else:
         # SQLite
