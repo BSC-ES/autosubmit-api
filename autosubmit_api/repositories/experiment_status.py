@@ -18,6 +18,7 @@ class ExperimentStatusModel(BaseModel):
     status: str
     seconds_diff: Any
     modified: Any
+    last_heartbeat: Any = None
 
 
 class ExperimentStatusRepository(ABC):
@@ -38,7 +39,7 @@ class ExperimentStatusRepository(ABC):
         """
 
     @abstractmethod
-    def upsert_status(self, exp_id: int, expid: str, status: str) -> int:
+    def upsert_status(self, exp_id: int, expid: str, status: str, last_heartbeat: str = None) -> int:
         """
         Delete and insert experiment status by expid
         """
@@ -86,12 +87,14 @@ class ExperimentStatusSQLRepository(ExperimentStatusRepository):
             status=result.status,
             seconds_diff=result.seconds_diff,
             modified=result.modified,
+            last_heartbeat=result.last_heartbeat,
         )
 
-    def upsert_status(self, exp_id: int, expid: str, status: str):
+    def upsert_status(self, exp_id: int, expid: str, status: str, last_heartbeat: str = None) -> int:
         with self.engine.connect() as conn:
             with conn.begin():
                 try:
+                    # TODO: optimize with a single update
                     del_stmnt = delete(self.table).where(self.table.c.exp_id == exp_id)
                     ins_stmnt = insert(self.table).values(
                         exp_id=exp_id,
@@ -101,6 +104,7 @@ class ExperimentStatusSQLRepository(ExperimentStatusRepository):
                         modified=datetime.now(tz=LOCAL_TZ).isoformat(
                             sep="-", timespec="seconds"
                         ),
+                        last_heartbeat=last_heartbeat,
                     )
                     conn.execute(del_stmnt)
                     result = conn.execute(ins_stmnt)

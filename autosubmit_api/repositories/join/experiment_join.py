@@ -179,6 +179,7 @@ class ExperimentJoinSQLRepository(ExperimentJoinRepository):
         return result, total_rows
 
     def drop_status_from_deleted_experiments(self) -> int:
+        # TODO: Change permissions for deletion
         with self._get_connection() as conn:
             del_stmnt = tables.ExperimentStatusTable.delete().where(
                 tables.ExperimentStatusTable.c.exp_id.not_in(
