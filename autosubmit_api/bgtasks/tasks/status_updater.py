@@ -44,12 +44,16 @@ class StatusUpdater(BackgroundTaskTemplate):
         return experiment_repository.get_all()
 
     @classmethod
-    def _get_current_status(cls) -> Dict[str, ExperimentStatusModel]:
+    def _get_mutable_statuses(
+        cls, experiment_statuses: Optional[List[ExperimentStatusModel]] = None
+    ) -> Dict[str, ExperimentStatusModel]:
         """
-        Get the current status of the experiments.
+        Return only mutable experiment statuses.
         """
-        status_repository = create_experiment_status_repository()
-        experiment_statuses = status_repository.get_all()
+        if experiment_statuses is None:
+            status_repository = create_experiment_status_repository()
+            experiment_statuses = status_repository.get_all()
+
         # Filter out terminal statuses
         terminal_statuses = [
             RunningStatus.ARCHIVED,
@@ -61,11 +65,6 @@ class StatusUpdater(BackgroundTaskTemplate):
             for row in experiment_statuses
             if row.status not in terminal_statuses
         }
-
-        cls.logger.debug(
-            f"[{cls.id}] Loaded {len(mutable_statuses)} mutable experiments "
-            f"(filtered out {len(experiment_statuses) - len(mutable_statuses)} terminal statuses)"
-        )
 
         return mutable_statuses
 
@@ -113,7 +112,7 @@ class StatusUpdater(BackgroundTaskTemplate):
                         is_running = True
                         return is_running
 
-                    # Priority 3: Exhaustive check using filesystem
+                    # Priority 3: Check using filesystem
                     elif pkl_age < MAX_PKL_AGE_EXHAUSTIVE:  # Exhaustive check
                         _, _, _flag, _, _ = _is_exp_running(expid)  # Exhaustive validation
                         if _flag:
@@ -138,7 +137,12 @@ class StatusUpdater(BackgroundTaskTemplate):
         return is_running
 
     @classmethod
-    def _update_experiment_status(cls, experiment: ExperimentStatusModel, is_running: bool, status_row: Optional[ExperimentStatusModel] = None):
+    def _update_experiment_status(
+        cls,
+        experiment: ExperimentModel,
+        is_running: bool,
+        status_row: Optional[ExperimentStatusModel] = None,
+    ):
         """
         Update experiment status using guarded conditional update.
 
@@ -151,9 +155,8 @@ class StatusUpdater(BackgroundTaskTemplate):
         last_heartbeat = status_row.last_heartbeat if status_row else None
 
         try:
-            # Use guarded upsert to protect terminal states
             success = status_repository.upsert_status(
-                exp_id=experiment.exp_id,
+                exp_id=experiment.id,
                 expid=experiment.name,
                 status=new_status,
                 last_heartbeat=last_heartbeat,
@@ -180,7 +183,8 @@ class StatusUpdater(BackgroundTaskTemplate):
         """
         Updates STATUS of RUNNING experiments (RUNNING -> NOT RUNNING).
 
-        Skipts ARCHIVED, DELETED and NOT RUNNING experiments.
+        Skips ARCHIVED, DELETED and NOT_RUNNING experiments (terminal statuses).
+        Checks RUNNING status and empty status experiments.
         Uses last_heartbeat as the main signal for RUNNING detection.
         """
         try:
@@ -191,38 +195,51 @@ class StatusUpdater(BackgroundTaskTemplate):
             )
             return
 
-        # Read current status of RUNNING experiments
+        status_repository = create_experiment_status_repository()
+
+        # Read current status snapshots once.
         try:
-            current_status_dict = cls._get_current_status()
+            all_status_rows = status_repository.get_all()
         except Exception as exc:
             cls.logger.error(
                 f"[{cls.id}] Error loading current experiment statuses: {exc}"
             )
             return
 
-        # Check every experiment status & update (skip terminal statuses)
-        for experiment in current_status_dict.values():
-            cls.logger.error(
-                f"[{cls.id}] Processing experiment {experiment.name} with current status {experiment.status}"
-            )
-            exp_name = experiment.name
-            status_row = current_status_dict.get(exp_name)
+        all_status_dict = {row.name: row for row in all_status_rows}
+        current_status_dict = cls._get_mutable_statuses(all_status_rows)
+        all_experiments = {
+            experiment.name: experiment for experiment in cls._get_experiments()
+        }
 
-            if status_row is None:
-                # New experiment or no status yet: create with NOT RUNNING for retro-compatibility
-                try:
-                    cls.logger.info(
-                        f"[{cls.id}] Initializing new experiment {exp_name} status"
-                    )
-                    # Set missing experiments as NOT RUNNING by default
-                    cls._update_experiment_status(experiment, is_running=False, status_row=None)
-                except Exception as exc:
-                    cls.logger.error(
-                        f"[{cls.id}] Error initializing status for experiment {exp_name}: {exc}"
-                    )
+        # Initialize experiments that are not yet present in the status table.
+        for exp_name, experiment in all_experiments.items():
+            if exp_name in all_status_dict:
                 continue
 
-            # Check if experiment is running
+            try:
+                cls.logger.debug(
+                    f"[{cls.id}] Initializing new experiment {exp_name} status"
+                )
+                cls._update_experiment_status(
+                    experiment,
+                    is_running=False,
+                    status_row=None,
+                )
+            except Exception as exc:
+                cls.logger.error(
+                    f"[{cls.id}] Error initializing status for experiment {exp_name}: {exc}"
+                )
+
+        # Evaluate only mutable experiments (RUNNING and empty status)
+        for exp_name, status_row in current_status_dict.items():
+            experiment = all_experiments.get(exp_name)
+            if experiment is None:
+                cls.logger.warning(
+                    f"[{cls.id}] Experiment {exp_name} found in status table but not in experiments table"
+                )
+                continue
+
             is_running = cls._check_exp_running(exp_name, status_row)
             new_status = (
                 RunningStatus.RUNNING if is_running else RunningStatus.NOT_RUNNING
@@ -230,11 +247,9 @@ class StatusUpdater(BackgroundTaskTemplate):
 
             # Only update if status changed
             if status_row.status != new_status:
-                cls.logger.info(
+                cls.logger.debug(
                     f"[{cls.id}] Updating status of {experiment.name} to {new_status}"
                 )
                 cls._update_experiment_status(experiment, is_running, status_row)
 
-            cls.logger.info(
-                f"[{cls.id}] Status updater completed"
-            )
+        cls.logger.debug(f"[{cls.id}] Status updater completed")

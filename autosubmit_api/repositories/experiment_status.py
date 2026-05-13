@@ -91,7 +91,7 @@ class ExperimentStatusSQLRepository(ExperimentStatusRepository):
             status=result.status,
             seconds_diff=result.seconds_diff,
             modified=result.modified,
-            last_heartbeat=result.last_heartbeat,
+            last_heartbeat=getattr(result, "last_heartbeat", None),
         )
 
     def upsert_status(self, exp_id: int, expid: str, status: str, last_heartbeat: str = None) -> int:
@@ -100,7 +100,7 @@ class ExperimentStatusSQLRepository(ExperimentStatusRepository):
                 try:
                     # TODO: optimize with a single update
                     del_stmnt = delete(self.table).where(self.table.c.exp_id == exp_id)
-                    ins_stmnt = insert(self.table).values(
+                    ins_values = dict(
                         exp_id=exp_id,
                         name=expid,
                         status=status,
@@ -108,8 +108,11 @@ class ExperimentStatusSQLRepository(ExperimentStatusRepository):
                         modified=datetime.now(tz=LOCAL_TZ).isoformat(
                             sep="-", timespec="seconds"
                         ),
-                        last_heartbeat=last_heartbeat,
                     )
+                    if "last_heartbeat" in self.table.c:
+                        ins_values["last_heartbeat"] = last_heartbeat
+
+                    ins_stmnt = insert(self.table).values(**ins_values)
                     conn.execute(del_stmnt)
                     result = conn.execute(ins_stmnt)
                     conn.commit()
@@ -137,8 +140,8 @@ def create_experiment_status_repository() -> ExperimentStatusRepository:
         # PostgreSQL
         _engine = create_engine(APIBasicConfig.DATABASE_CONN_URL)
         _tables = [
-            tables.table_change_schema(source=tables.ExperimentStatusTableV18),
-            tables.table_change_schema(source=tables.ExperimentStatusTable),
+            tables.table_change_schema("as_times", tables.ExperimentStatusTableV18),
+            tables.table_change_schema("as_times", tables.ExperimentStatusTable),
         ]
     else:
         # SQLite
