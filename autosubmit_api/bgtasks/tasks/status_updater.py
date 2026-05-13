@@ -83,6 +83,7 @@ class StatusUpdater(BackgroundTaskTemplate):
         MAX_PKL_AGE_EXHAUSTIVE = 3600  # 1 hour
 
         is_running = False
+        check_pickle = True
 
         try:
             current_time = int(time.time())
@@ -98,11 +99,17 @@ class StatusUpdater(BackgroundTaskTemplate):
                     if heartbeat_age < MAX_HEARTBEAT_AGE:
                         is_running = True
                         return is_running
+                    # Heartbeat is stale, don't fall back to pickle
+                    check_pickle = False
                 except Exception as exc:
                     cls.logger.warning(
                         f"[{cls.id}] Could not parse heartbeat for {expid}: {exc}"
                     )
-            else:
+                    # Unparsable heartbeat, fall back to pickle check
+                    check_pickle = True
+            
+            # Priority 2 and 3: Check pickle file if no valid heartbeat
+            if check_pickle:
                 try:
                     job_list_repo = create_jobs_repository(expid)
                     pkl_age = current_time - job_list_repo.get_last_modified_timestamp()
@@ -125,9 +132,7 @@ class StatusUpdater(BackgroundTaskTemplate):
                     )
 
             cls.logger.debug(
-                f"[{cls.id}] Experiment {expid} is not running: "
-                f"heartbeat_age={heartbeat_age if status_row and status_row.last_heartbeat else 'N/A'}s, "
-                f"pkl_age={pkl_age if 'pkl_age' in locals() else 'N/A'}s"
+                f"[{cls.id}] Experiment {expid} is not running"
             )
         except Exception as exc:
             cls.logger.error(

@@ -1,5 +1,7 @@
 from datetime import datetime, timedelta
 
+import pytest
+
 from autosubmit_api.common.utils import LOCAL_TZ
 from autosubmit_api.bgtasks.tasks.status_updater import StatusUpdater
 from autosubmit_api.history.database_managers.database_models import RunningStatus
@@ -46,8 +48,10 @@ class TestStatusUpdater:
         experiment_status_repo.upsert_status(4, "a3t2", RunningStatus.DELETED)
         experiment_status_repo.upsert_status(5, "a5xx", "")
 
+        # Act
         statuses = StatusUpdater._get_mutable_statuses()
 
+        # Assert
         assert set(statuses.keys()) == {"a003", "a5xx"}
         assert statuses["a003"].status == RunningStatus.RUNNING
         assert statuses["a5xx"].status == ""
@@ -75,10 +79,11 @@ class TestStatusUpdater:
         assert set(x.name for x in experiments) == set(x.name for x in exps_status)
         assert all(x.status == RunningStatus.NOT_RUNNING for x in exps_status)
 
-    def test_only_mutable_experiments_are_re_evaluated(
+    def test_only_mutable_experiments_are_evaluated(
         self, fixture_mock_basic_config, monkeypatch
     ):
-        """Test that experiments with mutable statuses are re-evaluated and updated and experiments with terminal statuses are not re-evaluated.
+        """Test that experiments with mutable statuses are evaluated
+        and experiments with terminal statuses are not evaluated.
         RUNNING and "" statuses are mutable, while NOT_RUNNING, ARCHIVED and DELETED are terminal.
         """
         experiment_repo = create_experiment_repository()
@@ -110,7 +115,7 @@ class TestStatusUpdater:
 
         checked_experiments = []
 
-        def fake_check_exp_running(expid, status_row=None):
+        def _mock_check_exp_running(expid, status_row=None):
             checked_experiments.append(expid)
             if expid == running_exp.name:
                 return True
@@ -122,7 +127,7 @@ class TestStatusUpdater:
         monkeypatch.setattr(
             StatusUpdater,
             "_check_exp_running",
-            fake_check_exp_running,
+            _mock_check_exp_running,
         )
 
         StatusUpdater.run()
@@ -156,7 +161,7 @@ class TestStatusUpdater:
             == RunningStatus.NOT_RUNNING
         )
 
-    def test_check_exp_running_prioritizes_heartbeat_order(
+    def test_check_exp_running_prioritizes_heartbeat_over_pkl(
         self, fixture_mock_basic_config, monkeypatch
     ):
         """Test that _check_exp_running prioritizes heartbeat age over pkl age."""
@@ -228,3 +233,46 @@ class TestStatusUpdater:
 
         status = experiment_status_repo.get_by_expid(exp.name)
         assert status.status == RunningStatus.NOT_RUNNING
+
+
+    def test_unparsable_heartbeat_falls_back_to_pickle(
+        self, fixture_mock_basic_config, monkeypatch
+    ):
+        """Test that if last_heartbeat is unparsable, it falls back to checking the pickle file."""
+        experiment_repo = create_experiment_repository()
+        experiment_status_repo = create_experiment_status_repository()
+
+        experiments = experiment_repo.get_all()
+        assert len(experiments) >= 1
+        exp = experiments[0]
+
+        now = datetime.now(tz=LOCAL_TZ)
+        unparsable_heartbeat = "not-a-timestamp"
+
+        experiment_status_repo.delete_all()
+        experiment_status_repo.upsert_status(
+            exp.id, exp.name, RunningStatus.RUNNING, last_heartbeat=unparsable_heartbeat
+        )
+
+        monkeypatch.setattr(
+            "autosubmit_api.bgtasks.tasks.status_updater.time.time",
+            lambda: int(now.timestamp()),
+        )
+
+        # Mock create_jobs_repository to return fresh pickle
+        # 1 min old < 10 min threshold
+        class MockJobsRepo:
+            def get_last_modified_timestamp(self):
+                return int((now - timedelta(minutes=1)).timestamp())
+        
+        monkeypatch.setattr(
+            "autosubmit_api.bgtasks.tasks.status_updater.create_jobs_repository",
+            lambda expid: MockJobsRepo(),
+        )
+
+        StatusUpdater.run()
+
+        status = experiment_status_repo.get_by_expid(exp.name)
+        # Unparsable heartbeat should fall back to pickle check, which is fresh, so stay as RUNNING
+        assert status.status == RunningStatus.RUNNING
+
