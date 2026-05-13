@@ -1,5 +1,4 @@
 from datetime import datetime, timedelta
-import pytest
 
 from autosubmit_api.common.utils import LOCAL_TZ
 from autosubmit_api.bgtasks.tasks.status_updater import StatusUpdater
@@ -45,17 +44,20 @@ class TestStatusUpdater:
         experiment_status_repo.upsert_status(2, "a007", RunningStatus.NOT_RUNNING)
         experiment_status_repo.upsert_status(3, "a3tb", RunningStatus.ARCHIVED)
         experiment_status_repo.upsert_status(4, "a3t2", RunningStatus.DELETED)
+        experiment_status_repo.upsert_status(5, "a5xx", "")
 
         statuses = StatusUpdater._get_mutable_statuses()
 
-        assert set(statuses.keys()) == {"a003"}
+        assert set(statuses.keys()) == {"a003", "a5xx"}
         assert statuses["a003"].status == RunningStatus.RUNNING
+        assert statuses["a5xx"].status == ""
 
     def test_missing_experiments_are_initialized_as_not_running(
         self, fixture_mock_basic_config, monkeypatch
     ):
         """Test that experiments missing from the status table are initialized with NOT_RUNNING status."""
         # TODO: This tests needs to be changed for issue #287
+        # In future implmementations, not all missing statuses will be initialized as NOT_RUNNING
         experiment_repo = create_experiment_repository()
         experiment_status_repo = create_experiment_status_repository()
 
@@ -73,7 +75,7 @@ class TestStatusUpdater:
         assert set(x.name for x in experiments) == set(x.name for x in exps_status)
         assert all(x.status == RunningStatus.NOT_RUNNING for x in exps_status)
 
-    def test_mutable_experiments_are_re_evaluated(
+    def test_only_mutable_experiments_are_re_evaluated(
         self, fixture_mock_basic_config, monkeypatch
     ):
         """Test that experiments with mutable statuses are re-evaluated and updated and experiments with terminal statuses are not re-evaluated.
@@ -120,11 +122,7 @@ class TestStatusUpdater:
         monkeypatch.setattr(
             StatusUpdater,
             "_check_exp_running",
-            classmethod(
-                lambda cls, expid, status_row=None: fake_check_exp_running(
-                    expid, status_row
-                )
-            ),
+            fake_check_exp_running,
         )
 
         StatusUpdater.run()
