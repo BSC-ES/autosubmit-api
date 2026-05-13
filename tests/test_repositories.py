@@ -3,11 +3,13 @@ from typing import Any, Dict, List
 from uuid import uuid4
 
 import pytest
+from sqlalchemy import create_engine
 from autosubmit_api.common.utils import LOCAL_TZ
 
 from autosubmit_api.repositories.experiment import create_experiment_repository
 from autosubmit_api.repositories.experiment_status import (
     create_experiment_status_repository,
+    ExperimentStatusSQLRepository,
 )
 from autosubmit_api.repositories.graph_layout import create_exp_graph_layout_repository
 from autosubmit_api.repositories.join.experiment_join import (
@@ -206,6 +208,12 @@ class TestExperimentStatusRepository:
             assert row.last_heartbeat == heartbeat
         else:
             assert row.last_heartbeat is None
+
+    def test_init_no_tables_raises(self):
+        """Tests that ExperimentStatusSQLRepository raises ValueERror if no valid tables are provided."""
+        engine = create_engine("sqlite:///:memory:")
+        with pytest.raises(ValueError):
+            ExperimentStatusSQLRepository(engine, [])
 
 
 class TestExpGraphLayoutRepository:
