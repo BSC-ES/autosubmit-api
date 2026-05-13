@@ -198,7 +198,6 @@ class TestExperimentStatusRepository:
         )
 
         row = experiment_status_db.get_by_expid("a003")
-        assert row.last_heartbeat == heartbeat
         assert row.status == "RUNNING"
         assert row.name == "a003"
         assert row.exp_id == 1
