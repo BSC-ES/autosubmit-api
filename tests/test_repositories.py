@@ -1,7 +1,9 @@
+from datetime import datetime
 from typing import Any, Dict, List
 from uuid import uuid4
 
 import pytest
+from autosubmit_api.common.utils import LOCAL_TZ
 
 from autosubmit_api.repositories.experiment import create_experiment_repository
 from autosubmit_api.repositories.experiment_status import (
@@ -182,6 +184,29 @@ class TestExperimentStatusRepository:
         # Assert only_running
         only_running = experiment_status_db.get_only_running_expids()
         assert set(only_running) == {"a3tb"}
+
+    def test_last_heartbeat_traceability(self, fixture_mock_basic_config):
+        """Test that last_heartbeat can be stored and retrieved correctly 
+        and that it is None if the column does not exist."""
+        experiment_status_db = create_experiment_status_repository()
+
+        experiment_status_db.delete_all()
+
+        heartbeat = datetime.now(tz=LOCAL_TZ).isoformat(sep="-", timespec="seconds")
+        experiment_status_db.upsert_status(
+            1, "a003", "RUNNING", last_heartbeat=heartbeat
+        )
+
+        row = experiment_status_db.get_by_expid("a003")
+        assert row.last_heartbeat == heartbeat
+        assert row.status == "RUNNING"
+        assert row.name == "a003"
+        assert row.exp_id == 1
+
+        if "last_heartbeat" in experiment_status_db.table.c:
+            assert row.last_heartbeat == heartbeat
+        else:
+            assert row.last_heartbeat is None
 
 
 class TestExpGraphLayoutRepository:
