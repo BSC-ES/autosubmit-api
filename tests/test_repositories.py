@@ -9,6 +9,7 @@ from autosubmit_api.repositories.experiment_status import (
 )
 from autosubmit_api.repositories.graph_layout import create_exp_graph_layout_repository
 from autosubmit_api.repositories.join.experiment_join import (
+    create_experiment_join_repository,
     generate_query_listexp_extended,
 )
 from autosubmit_api.repositories.runner_processes import (
@@ -245,3 +246,37 @@ class TestExperimentRunnerRepository:
         assert last_process.id == inserted_runner.id
         assert last_process.expid == TEST_EXPID
         assert last_process.status == "COMPLETED"
+
+
+class TestExperimentJoinRepository:
+    def test_drop_status_from_deleted_experiments(self, fixture_mock_basic_config):
+        experiment_join_repo = create_experiment_join_repository()
+        experiment_status_repo = create_experiment_status_repository()
+
+        # Get initial count of status records
+        initial_statuses = experiment_status_repo.get_all()
+        initial_count = len(initial_statuses)
+
+        # Insert some status records, some with existing exp_id and some with non-existing exp_id
+        EXP_TO_ADD = [
+            {"exp_id": 9999, "name": "non_existing_exp", "status": "RUNNING"},
+            {"exp_id": 10000, "name": "another_non_existing_exp", "status": "RUNNING"},
+        ]
+        for record in EXP_TO_ADD:
+            experiment_status_repo.upsert_status(
+                record["exp_id"], record["name"], record["status"]
+            )
+
+        # Assert that the records were added
+        statuses_after_insert = experiment_status_repo.get_all()
+        assert len(statuses_after_insert) == initial_count + len(EXP_TO_ADD)
+
+        # Call the method to drop status from deleted experiments
+        deleted_count = experiment_join_repo.drop_status_from_deleted_experiments()
+
+        # Assert that the correct number of records were deleted
+        assert deleted_count == len(EXP_TO_ADD)
+
+        # Assert that there are no status records left
+        remaining_statuses = experiment_status_repo.get_all()
+        assert len(remaining_statuses) == initial_count

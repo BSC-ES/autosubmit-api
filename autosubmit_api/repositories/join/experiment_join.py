@@ -145,7 +145,7 @@ class ExperimentJoinSQLRepository(ExperimentJoinRepository):
             # PostgreSQL
             return create_engine(APIBasicConfig.DATABASE_CONN_URL).connect()
         # SQLite
-        return create_main_db_conn(read_only=True)
+        return create_main_db_conn(read_only=False)
 
     def search(
         self,
