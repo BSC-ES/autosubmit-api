@@ -3,13 +3,13 @@ from datetime import datetime
 from typing import Optional
 
 from pydantic import BaseModel
-from sqlalchemy import Engine, Table, create_engine, insert, update
+from sqlalchemy import Engine, Table, create_engine
 from sqlalchemy.schema import CreateTable
 
 from autosubmit_api.common.utils import LOCAL_TZ
 from autosubmit_api.config.basicConfig import APIBasicConfig
 from autosubmit_api.database import tables
-from autosubmit_api.database.common import create_as_api_db_engine
+from autosubmit_api.database.common import create_as_api_db_engine, execute_upsert
 
 
 class UserPreferencesModel(BaseModel):
@@ -69,34 +69,26 @@ class UserPreferencesSQLRepository(UserPreferencesRepository):
         with self.engine.connect() as conn:
             with conn.begin():
                 try:
-                    # Check if record exists
+                    execute_upsert(
+                        conn,
+                        self.table,
+                        {
+                            "user_id": user_id,
+                            "preferred_username": preferred_username,
+                            "created": timestamp,
+                            "modified": timestamp,
+                        },
+                        index_elements=["user_id"],
+                        set_={
+                            "preferred_username": preferred_username,
+                            "modified": timestamp,
+                        },
+                    )
+
+                    # Fetch and return the updated record (before transaction ends)
                     select_stmnt = self.table.select().where(
                         self.table.c.user_id == user_id
                     )
-                    existing = conn.execute(select_stmnt).first()
-
-                    if existing:
-                        # Update existing record
-                        update_stmnt = (
-                            update(self.table)
-                            .where(self.table.c.user_id == user_id)
-                            .values(
-                                preferred_username=preferred_username,
-                                modified=timestamp,
-                            )
-                        )
-                        conn.execute(update_stmnt)
-                    else:
-                        # Insert new record
-                        insert_stmnt = insert(self.table).values(
-                            user_id=user_id,
-                            preferred_username=preferred_username,
-                            created=timestamp,
-                            modified=timestamp,
-                        )
-                        conn.execute(insert_stmnt)
-
-                    # Fetch and return the updated record (before transaction ends)
                     result = conn.execute(select_stmnt).first()
                     conn.commit()
                 except Exception as exc:

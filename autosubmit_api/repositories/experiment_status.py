@@ -3,13 +3,13 @@ from datetime import datetime
 from typing import Any, List
 
 from pydantic import BaseModel
-from sqlalchemy import Engine, Table, create_engine, delete, insert
+from sqlalchemy import Engine, Table, create_engine, delete
 from sqlalchemy.schema import CreateTable
 
 from autosubmit_api.common.utils import LOCAL_TZ
 from autosubmit_api.config.basicConfig import APIBasicConfig
 from autosubmit_api.database import tables
-from autosubmit_api.database.common import create_as_times_db_engine
+from autosubmit_api.database.common import create_as_times_db_engine, execute_upsert
 
 
 class ExperimentStatusModel(BaseModel):
@@ -89,26 +89,25 @@ class ExperimentStatusSQLRepository(ExperimentStatusRepository):
         )
 
     def upsert_status(self, exp_id: int, expid: str, status: str):
+        values = {
+            "exp_id": exp_id,
+            "name": expid,
+            "status": status,
+            "seconds_diff": 0,
+            "modified": datetime.now(tz=LOCAL_TZ).isoformat(
+                sep="-", timespec="seconds"
+            ),
+        }
         with self.engine.connect() as conn:
-            with conn.begin():
-                try:
-                    del_stmnt = delete(self.table).where(self.table.c.exp_id == exp_id)
-                    ins_stmnt = insert(self.table).values(
-                        exp_id=exp_id,
-                        name=expid,
-                        status=status,
-                        seconds_diff=0,
-                        modified=datetime.now(tz=LOCAL_TZ).isoformat(
-                            sep="-", timespec="seconds"
-                        ),
-                    )
-                    conn.execute(del_stmnt)
-                    result = conn.execute(ins_stmnt)
-                    conn.commit()
-                    return result.rowcount
-                except Exception as exc:
-                    conn.rollback()
-                    raise exc
+            try:
+                rowcount = execute_upsert(
+                    conn, self.table, values, index_elements=["exp_id"]
+                )
+                conn.commit()
+            except Exception as exc:
+                conn.rollback()
+                raise exc
+        return rowcount
 
     def get_only_running_expids(self):
         with self.engine.connect() as conn:
