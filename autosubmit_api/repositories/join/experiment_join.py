@@ -1,11 +1,12 @@
 from abc import ABC, abstractmethod
 from typing import Any, Dict, List, Optional, Tuple
 
-from sqlalchemy import Column, Select, create_engine, or_, select
+from sqlalchemy import Column, Engine, Select, Table, create_engine, or_, select
 
 from autosubmit_api.config.basicConfig import APIBasicConfig
 from autosubmit_api.database import tables
 from autosubmit_api.database.common import (
+    create_as_times_db_engine,
     create_main_db_conn,
     execute_with_limit_offset,
 )
@@ -32,17 +33,21 @@ def generate_query_listexp_extended(
     hpc: str = None,
     order_by: str = None,
     order_desc: bool = False,
+    status_table: Optional[Table] = None,
 ) -> Select:
     """
     Query listexp without accessing the view with status and total/completed jobs.
     """
 
+    if status_table is None:
+        status_table = tables.ExperimentStatusTable
+
     statement = (
         select(
             tables.ExperimentTable,
             tables.DetailsTable,
-            tables.ExperimentStatusTable.c.exp_id,
-            tables.ExperimentStatusTable.c.status,
+            status_table.c.exp_id,
+            status_table.c.status,
         )
         .join(
             tables.DetailsTable,
@@ -50,8 +55,8 @@ def generate_query_listexp_extended(
             isouter=True,
         )
         .join(
-            tables.ExperimentStatusTable,
-            tables.ExperimentTable.c.id == tables.ExperimentStatusTable.c.exp_id,
+            status_table,
+            tables.ExperimentTable.c.id == status_table.c.exp_id,
             isouter=True,
         )
     )
@@ -69,7 +74,7 @@ def generate_query_listexp_extended(
         )
 
     if only_active:
-        filter_stmts.append(tables.ExperimentStatusTable.c.status == "RUNNING")
+        filter_stmts.append(status_table.c.status == "RUNNING")
 
     if owner:
         filter_stmts.append(wildcard_search(owner, tables.DetailsTable.c.user))
@@ -140,10 +145,19 @@ class ExperimentJoinRepository(ABC):
 
 
 class ExperimentJoinSQLRepository(ExperimentJoinRepository):
+    def __init__(self, engine: Engine, valid_tables: List[Table]):
+        self.engine = engine
+        self.status_table = tables.check_table_schema(self.engine, valid_tables)
+        if self.status_table is None:
+            if len(valid_tables) == 0:
+                raise ValueError("No valid tables provided.")
+            # Fallback to the newest table
+            self.table = valid_tables[0]
+
     def _get_connection(self):
         if APIBasicConfig.DATABASE_BACKEND == "postgres":
             # PostgreSQL
-            return create_engine(APIBasicConfig.DATABASE_CONN_URL).connect()
+            return self.engine.connect()
         # SQLite
         return create_main_db_conn(read_only=False)
 
@@ -169,6 +183,7 @@ class ExperimentJoinSQLRepository(ExperimentJoinRepository):
             hpc=hpc,
             order_by=order_by,
             order_desc=order_desc,
+            status_table=self.status_table,
         )
         with self._get_connection() as conn:
             query_result, total_rows = execute_with_limit_offset(
@@ -179,11 +194,9 @@ class ExperimentJoinSQLRepository(ExperimentJoinRepository):
         return result, total_rows
 
     def drop_status_from_deleted_experiments(self) -> int:
-        from autosubmit_api.repositories.experiment_status import create_experiment_status_repository
-        status_table = create_experiment_status_repository().table
         with self._get_connection() as conn:
-            del_stmnt = status_table.delete().where(
-                status_table.c.exp_id.not_in(
+            del_stmnt = self.status_table.delete().where(
+                self.status_table.c.exp_id.not_in(
                     select(tables.ExperimentTable.c.id)
                 )
             )
@@ -194,4 +207,19 @@ class ExperimentJoinSQLRepository(ExperimentJoinRepository):
 
 
 def create_experiment_join_repository() -> ExperimentJoinRepository:
-    return ExperimentJoinSQLRepository()
+    if APIBasicConfig.DATABASE_BACKEND == "postgres":
+        # PostgreSQL
+        _engine = create_engine(APIBasicConfig.DATABASE_CONN_URL)
+        _tables = [
+            tables.table_change_schema("as_times", tables.ExperimentStatusTableV18),
+            tables.table_change_schema("as_times", tables.ExperimentStatusTable),
+        ]
+    else:
+        # SQLite
+        _engine = create_as_times_db_engine()
+        _tables = [
+            tables.ExperimentStatusTableV18,
+            tables.ExperimentStatusTable,
+        ]
+
+    return ExperimentJoinSQLRepository(engine=_engine, valid_tables=_tables)
