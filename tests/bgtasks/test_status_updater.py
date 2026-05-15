@@ -1,7 +1,5 @@
 from datetime import datetime, timedelta
 
-import pytest
-
 from autosubmit_api.common.utils import LOCAL_TZ
 from autosubmit_api.bgtasks.tasks.status_updater import StatusUpdater
 from autosubmit_api.history.database_managers.database_models import RunningStatus
