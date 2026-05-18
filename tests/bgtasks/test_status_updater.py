@@ -331,3 +331,33 @@ class TestStatusUpdater:
                 rec.levelname == "WARNING" and "Status update rejected" in rec.message
                 for rec in caplog.records
             )
+
+    def test_clear_missing_experiments_logs_warning_when_raises_exception(
+        self, fixture_mock_basic_config, monkeypatch, caplog
+    ):
+        """Test that if _clear_missing_experiments raises an exception, it's logged as a warning and exits early."""
+        experiment_status_repo = create_experiment_status_repository()
+        experiment_status_repo.delete_all()
+
+        # Mock _clear_missing_experiments to raise an exception
+        def mock_clear_missing_experiments():
+            raise Exception("Database error during clear")
+
+        monkeypatch.setattr(
+            StatusUpdater, "_clear_missing_experiments", mock_clear_missing_experiments
+        )
+
+        # Run the updater with caplog to catch logs
+        # Act
+        caplog.clear()
+        StatusUpdater.run()
+
+        # Assert
+        assert any(
+            rec.levelname == "ERROR" and "Database error during clear" in rec.message
+            for rec in caplog.records
+        )
+
+        # Assert that it returns early: status table should still be empty
+        statuses = experiment_status_repo.get_all()
+        assert len(statuses) == 0
