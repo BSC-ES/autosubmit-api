@@ -114,7 +114,7 @@ ExperimentStatusTable = Table(
     Column("modified", Text, nullable=False),
 )
 
-# Copy ExperimentStatusTable to an alternative version which has an additional column
+# Copy ExperimentStatusTable to an alternative version which has last_heartbeat column
 ExperimentStatusTableV18 = table_copy(ExperimentStatusTable)
 ExperimentStatusTableV18.append_column(Column("last_heartbeat", Text, nullable=True))
 

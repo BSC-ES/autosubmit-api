@@ -48,7 +48,7 @@ class StatusUpdater(BackgroundTaskTemplate):
         cls, experiment_statuses: Optional[List[ExperimentStatusModel]] = None
     ) -> Dict[str, ExperimentStatusModel]:
         """
-        Return only mutable experiment statuses.
+        Return only mutable experiment statuses: RUNNING and empty status experiments.
         """
         if experiment_statuses is None:
             status_repository = create_experiment_status_repository()
@@ -74,7 +74,7 @@ class StatusUpdater(BackgroundTaskTemplate):
         Decide if the experiment is running using last_heartbeat as the main signal.
 
         Priority order:
-        1. Check as_times.db last_heartbeat column (most reliable, updated by backend every 2 min)
+        1. Check database last_heartbeat column (most reliable, updated by backend every 2 min)
         2. Check pickle file age (secondary, faster than filesystem exhaustive check)
         3. Check run.log file (last resort, most exhaustive and slow)
         """
@@ -87,7 +87,7 @@ class StatusUpdater(BackgroundTaskTemplate):
 
         try:
             current_time = int(time.time())
-            # Priority 1: Check last_heartbeat timestamp from as_times.db
+            # Priority 1: Check last_heartbeat timestamp from db
             if status_row and status_row.last_heartbeat:
                 try:
                     from datetime import datetime as dt
