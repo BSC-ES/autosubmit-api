@@ -1,5 +1,7 @@
 from datetime import datetime, timedelta
 
+import pytest
+
 from autosubmit_api.common.utils import LOCAL_TZ
 from autosubmit_api.bgtasks.tasks.status_updater import StatusUpdater
 from autosubmit_api.history.database_managers.database_models import RunningStatus
@@ -232,7 +234,6 @@ class TestStatusUpdater:
         status = experiment_status_repo.get_by_expid(exp.name)
         assert status.status == RunningStatus.NOT_RUNNING
 
-
     def test_unparsable_heartbeat_falls_back_to_pickle(
         self, fixture_mock_basic_config, monkeypatch
     ):
@@ -262,7 +263,7 @@ class TestStatusUpdater:
         class MockJobsRepo:
             def get_last_modified_timestamp(self):
                 return int((now - timedelta(minutes=1)).timestamp())
-        
+
         monkeypatch.setattr(
             "autosubmit_api.bgtasks.tasks.status_updater.create_jobs_repository",
             lambda expid: MockJobsRepo(),
@@ -274,3 +275,59 @@ class TestStatusUpdater:
         # Unparsable heartbeat should fall back to pickle check, which is fresh, so stay as RUNNING
         assert status.status == RunningStatus.RUNNING
 
+    @pytest.mark.parametrize(
+        "upsert_error",
+        [False, True],
+        ids=[
+            "experiment status not found returns 0",
+            "upsert failure raises exception",
+        ],
+    )
+    def test_unsuccessfull_upsert(
+        self, fixture_mock_basic_config, monkeypatch, upsert_error, caplog
+    ):
+        """Test that if upsert fails, it's logged and if experiment status not found upsert return 0 and log a warning."""
+        experiment_repo = create_experiment_repository()
+        experiment_status_repo = create_experiment_status_repository()
+
+        experiments = experiment_repo.get_all()
+        assert len(experiments) >= 1
+
+        now = datetime.now(tz=LOCAL_TZ)
+
+        experiment_status_repo.delete_all()
+
+        monkeypatch.setattr(
+            "autosubmit_api.bgtasks.tasks.status_updater.time.time",
+            lambda: int(now.timestamp()),
+        )
+
+        def mock_upsert_status(*args, **kwargs):
+            if upsert_error:
+                raise Exception("Upsert failed")
+            else:
+                return 0
+
+        monkeypatch.setattr(
+            "autosubmit_api.repositories.experiment_status.ExperimentStatusSQLRepository.upsert_status",
+            mock_upsert_status,
+        )
+
+        # Run the updater with caplog to catch logs
+        # Act
+        caplog.clear()
+        StatusUpdater.run()
+
+        # Assert
+        if upsert_error:
+            # Exception raised by repository should be caught and logged as error
+            assert any(
+                rec.levelname == "ERROR" and "Upsert failed" in rec.message
+                for rec in caplog.records
+            )
+        else:
+            # Upsert returning 0 should log a warning about rejected update
+            assert any(
+                rec.levelname == "WARNING" and "Status update rejected" in rec.message
+                for rec in caplog.records
+            )

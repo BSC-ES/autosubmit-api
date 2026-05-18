@@ -100,7 +100,6 @@ class ExperimentStatusSQLRepository(ExperimentStatusRepository):
         with self.engine.connect() as conn:
             with conn.begin():
                 try:
-                    # TODO: optimize with a single update
                     del_stmnt = delete(self.table).where(self.table.c.exp_id == exp_id)
                     ins_values = dict(
                         exp_id=exp_id,
