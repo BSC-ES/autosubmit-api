@@ -361,3 +361,38 @@ class TestStatusUpdater:
         # Assert that it returns early: status table should still be empty
         statuses = experiment_status_repo.get_all()
         assert len(statuses) == 0
+
+    def test_set_status_repository_get_all_logs_error_when_raises_exception(
+        self, fixture_mock_basic_config, monkeypatch, caplog
+    ):
+        """Test that if _get_all raises an exception, it is logged and the updater exists early."""
+        experiment_status_repo = create_experiment_status_repository()
+        experiment_status_repo.delete_all()
+
+        # Mock _get_all to raise an exception
+        def mock_create():
+            repo = create_experiment_status_repository()
+            def mock_get_all():
+                raise Exception("Database error during get_all")
+            repo.get_all = mock_get_all
+            return repo
+
+        monkeypatch.setattr(
+            "autosubmit_api.bgtasks.tasks.status_updater.create_experiment_status_repository",
+            mock_create
+        )
+
+        # Run the updater with caplog to catch logs
+        # Act
+        caplog.clear()
+        StatusUpdater.run()
+
+        # Assert
+        assert any(
+            rec.levelname == "ERROR" and "Database error during get_all" in rec.message
+            for rec in caplog.records
+        )
+
+        # Assert that it returns early: status table should still be empty
+        statuses = experiment_status_repo.get_all()
+        assert len(statuses) == 0
