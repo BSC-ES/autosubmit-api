@@ -100,7 +100,7 @@ class JobDetailRetriever:
             job_packages = job_package_repo.get_by_job_name(self.job_name)
             if not job_packages:
                 job_package_repo = create_job_packages_repository(
-                    self.expid, wrapper=True
+                    self.expid, preview=True
                 )
                 job_packages = job_package_repo.get_by_job_name(self.job_name)
             self._wrapper_data = job_packages
