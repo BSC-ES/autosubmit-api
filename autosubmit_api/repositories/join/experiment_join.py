@@ -152,7 +152,7 @@ class ExperimentJoinSQLRepository(ExperimentJoinRepository):
             if len(valid_tables) == 0:
                 raise ValueError("No valid tables provided.")
             # Fallback to the newest table
-            self.table = valid_tables[0]
+            self.status_table = valid_tables[0]
 
     def _get_connection(self):
         if APIBasicConfig.DATABASE_BACKEND == "postgres":

@@ -6,6 +6,7 @@ import pytest
 from sqlalchemy import create_engine
 from autosubmit_api.common.utils import LOCAL_TZ
 
+from autosubmit_api.database import tables
 from autosubmit_api.repositories.experiment import create_experiment_repository
 from autosubmit_api.repositories.experiment_status import (
     create_experiment_status_repository,
@@ -13,6 +14,7 @@ from autosubmit_api.repositories.experiment_status import (
 )
 from autosubmit_api.repositories.graph_layout import create_exp_graph_layout_repository
 from autosubmit_api.repositories.join.experiment_join import (
+    ExperimentJoinSQLRepository,
     create_experiment_join_repository,
     generate_query_listexp_extended,
 )
@@ -281,6 +283,32 @@ class TestExperimentRunnerRepository:
 
 
 class TestExperimentJoinRepository:
+    def test_init_no_tables_raises(self):
+        """Tests that ExperimentJoinSQLRepository raises ValueError if no valid tables are provided."""
+        engine = create_engine("sqlite:///:memory:")
+        
+        with pytest.raises(ValueError):
+            ExperimentJoinSQLRepository(engine, [])
+    
+    def test_init_falls_to_newest_table_when_schema_unknown(self, monkeypatch: pytest.MonkeyPatch):
+        """Tests that ExperimentJoinSQLRepository falls back to the newest table if no table has the expected schema."""
+        engine = create_engine("sqlite:///:memory:")
+        valid_tables = [tables.ExperimentStatusTableV18, tables.ExperimentStatusTable]
+        
+        # mock experiment_join_tables.check_table_schema to return None. 
+        # We want to simulate the case where the schema of the tables in the 
+        # database does not match any of the valid tables provided.
+        monkeypatch.setattr(
+            "autosubmit_api.repositories.join.experiment_join.tables.check_table_schema",
+            lambda _engine, _valid_tables: None,
+        )
+
+        # Act
+        experiment_join_repo = ExperimentJoinSQLRepository(engine, valid_tables)
+
+        # Assert
+        assert experiment_join_repo.status_table == valid_tables[0]
+
     def test_drop_status_from_deleted_experiments(self, fixture_mock_basic_config):
         experiment_join_repo = create_experiment_join_repository()
         experiment_status_repo = create_experiment_status_repository()
