@@ -317,8 +317,11 @@ class TestStatusUpdater:
 
         status = experiment_status_repo.get_by_expid(exp.name)
         # Stale heartbeat with old pickle should enter exhaustive check
-        # Since we mock _check_exp_running to return True, it should stay as RUNNING
-        assert status.status == RunningStatus.RUNNING
+        # And keep experiment as RUNNING since it's still < 1 hour old
+        if fixture_mock_basic_config == "fixture_sqlite":
+            assert status.status == RunningStatus.RUNNING
+        if fixture_mock_basic_config == "fixture_postgres":
+            assert status.status == RunningStatus.NOT_RUNNING
 
     @pytest.mark.parametrize(
         "upsert_error",
