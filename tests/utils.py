@@ -120,8 +120,15 @@ def copy_autosubmit_db(filepath: str, engine: Engine):
 def copy_as_times_db(filepath: str, engine: Engine):
     source_as_db = create_engine(f"sqlite:///{filepath}")
     with source_as_db.connect() as source_conn, engine.connect() as conn:
+        experiment_status_table = tables.check_table_schema(
+            source_as_db, [tables.ExperimentStatusTableV18, tables.ExperimentStatusTable]
+        )
         _copy_table_data(
-            source_conn, conn, None, tables.ExperimentStatusTable, schema_required=False
+            source_conn,
+            conn,
+            None,
+            experiment_status_table,
+            schema_required=False,
         )
         conn.commit()
 

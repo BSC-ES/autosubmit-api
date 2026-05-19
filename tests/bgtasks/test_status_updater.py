@@ -275,7 +275,7 @@ class TestStatusUpdater:
         # Unparsable heartbeat should fall back to pickle check, which is fresh, so stay as RUNNING
         assert status.status == RunningStatus.RUNNING
 
-    def test_stale_heartbeat_with_old_pkl_age_calls_is_exp_running(
+    def test_stale_heartbeat_with_old_pkl_calls_is_exp_running(
         self, fixture_mock_basic_config, monkeypatch
     ):
         """Test that if last_heartbeat is stale and pkl_age is 1000 it 
@@ -318,10 +318,7 @@ class TestStatusUpdater:
         status = experiment_status_repo.get_by_expid(exp.name)
         # Stale heartbeat with old pickle should enter exhaustive check
         # And keep experiment as RUNNING since it's still < 1 hour old
-        if fixture_mock_basic_config == "fixture_sqlite":
-            assert status.status == RunningStatus.RUNNING
-        if fixture_mock_basic_config == "fixture_postgres":
-            assert status.status == RunningStatus.NOT_RUNNING
+        assert status.status == RunningStatus.RUNNING
 
     @pytest.mark.parametrize(
         "upsert_error",
