@@ -286,15 +286,12 @@ class TestStatusUpdater:
         experiments = experiment_repo.get_all()
         assert len(experiments) >= 1
         exp = experiments[0]
-
         now = datetime.now(tz=LOCAL_TZ)
-        stale_heartbeat = (
-            now - timedelta(minutes=3)
-        ).isoformat()  # 3 min old > 150s threshold
+        empty_heartbeat = ""
 
         experiment_status_repo.delete_all()
         experiment_status_repo.upsert_status(
-            exp.id, exp.name, RunningStatus.RUNNING, last_heartbeat=stale_heartbeat
+            exp.id, exp.name, RunningStatus.RUNNING, last_heartbeat=empty_heartbeat
         )
 
         monkeypatch.setattr(
@@ -318,6 +315,7 @@ class TestStatusUpdater:
         status = experiment_status_repo.get_by_expid(exp.name)
         # Stale heartbeat with old pickle should enter exhaustive check
         # And keep experiment as RUNNING since it's still < 1 hour old
+
         assert status.status == RunningStatus.RUNNING
 
     @pytest.mark.parametrize(
