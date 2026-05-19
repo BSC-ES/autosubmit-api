@@ -275,6 +275,51 @@ class TestStatusUpdater:
         # Unparsable heartbeat should fall back to pickle check, which is fresh, so stay as RUNNING
         assert status.status == RunningStatus.RUNNING
 
+    def test_stale_heartbeat_with_old_pkl_age_calls_is_exp_running(
+        self, fixture_mock_basic_config, monkeypatch
+    ):
+        """Test that if last_heartbeat is stale and pkl_age is 1000 it 
+        enters the exhaustive check branch and keeps experiment as RUNNING."""
+        experiment_repo = create_experiment_repository()
+        experiment_status_repo = create_experiment_status_repository()
+
+        experiments = experiment_repo.get_all()
+        assert len(experiments) >= 1
+        exp = experiments[0]
+
+        now = datetime.now(tz=LOCAL_TZ)
+        stale_heartbeat = (
+            now - timedelta(minutes=3)
+        ).isoformat()  # 3 min old > 150s threshold
+
+        experiment_status_repo.delete_all()
+        experiment_status_repo.upsert_status(
+            exp.id, exp.name, RunningStatus.RUNNING, last_heartbeat=stale_heartbeat
+        )
+
+        monkeypatch.setattr(
+            "autosubmit_api.bgtasks.tasks.status_updater.time.time",
+            lambda: int(now.timestamp()),
+        )
+
+        # Mock create_jobs_repository to return an old pickle
+        # 11 minutes old > 10 min threshold, but < 1 hour exhaustive search
+        class MockJobsRepo:
+            def get_last_modified_timestamp(self):
+                return int((now - timedelta(minutes=11)).timestamp())
+
+        monkeypatch.setattr(
+            "autosubmit_api.bgtasks.tasks.status_updater.create_jobs_repository",
+            lambda expid: MockJobsRepo(),
+        )
+
+        StatusUpdater.run()
+
+        status = experiment_status_repo.get_by_expid(exp.name)
+        # Stale heartbeat with old pickle should enter exhaustive check
+        # Since we mock _check_exp_running to return True, it should stay as RUNNING
+        assert status.status == RunningStatus.RUNNING
+
     @pytest.mark.parametrize(
         "upsert_error",
         [False, True],
