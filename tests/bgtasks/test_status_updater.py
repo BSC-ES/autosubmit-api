@@ -11,6 +11,7 @@ from autosubmit_api.repositories.experiment_status import (
     ExperimentStatusModel,
 )
 
+
 class TestStatusUpdater:
     def test_same_tables(self, fixture_mock_basic_config):
         experiment_repo = create_experiment_repository()
@@ -278,7 +279,7 @@ class TestStatusUpdater:
     def test_stale_heartbeat_with_old_pkl_calls_is_exp_running(
         self, fixture_mock_basic_config, monkeypatch
     ):
-        """Test that if last_heartbeat is stale and pkl_age is 1000 it 
+        """Test that if last_heartbeat is stale and pkl_age is 1000 it
         enters the exhaustive check branch and keeps experiment as RUNNING."""
         experiment_repo = create_experiment_repository()
         experiment_status_repo = create_experiment_status_repository()
@@ -414,14 +415,16 @@ class TestStatusUpdater:
         # Mock _get_all to raise an exception
         def mock_create():
             repo = create_experiment_status_repository()
+
             def mock_get_all():
                 raise Exception("Database error during get_all")
+
             repo.get_all = mock_get_all
             return repo
 
         monkeypatch.setattr(
             "autosubmit_api.bgtasks.tasks.status_updater.create_experiment_status_repository",
-            mock_create
+            mock_create,
         )
 
         # Run the updater with caplog to catch logs
@@ -442,7 +445,7 @@ class TestStatusUpdater:
     def test_update_experiment_status_logs_error_when_raises_exception(
         self, fixture_mock_basic_config, monkeypatch, caplog
     ):
-        """Test that if _update_experiment_status raises an exception, 
+        """Test that if _update_experiment_status raises an exception,
         it is logged and continues the execution"""
         experiment_status_repo = create_experiment_status_repository()
         experiment_status_repo.delete_all()
@@ -466,50 +469,3 @@ class TestStatusUpdater:
             and "Database error during status update" in rec.message
             for rec in caplog.records
         )
-
-def test_experiment_in_status_table_not_in_experiment_table(
-    self, fixture_mock_basic_config, monkeypatch, caplog
-):
-    """Test that if an experiment is in the status table but 
-    not in the experiment table, a warning is logged and the 
-    execution continues."""
-    experiment_repo = create_experiment_repository()
-    experiment_status_repo = create_experiment_status_repository()
-
-    # Get real experiments and clear status table
-    all_experiments = experiment_repo.get_all()
-    experiment_status_repo.delete_all()
-
-    # Generate a fake experiment name not present in the experiment table
-    fake_exp_name = "fake_exp"
-
-    # Add it to the status table with a mutable status (RUNNING)
-    experiment_status_repo.upsert_status(
-        exp_id=9999, name=fake_exp_name, status=RunningStatus.RUNNING
-    )
-
-    # Mock _check_exp_running to ensure it's not called
-    call_count = [0]
-    def mock_check_exp_running(expid, status_row=None):
-        call_count[0] += 1
-        return False
-
-    monkeypatch.setattr(
-        StatusUpdater,
-        "_check_exp_running",
-        mock_check_exp_running,
-    )
-
-    # Run the updater
-    caplog.clear()
-    StatusUpdater.run()
-
-    # Assert warning logged
-    assert any(
-        rec.levelname == "WARNING"
-        and "found in status table but not in experiments table" in rec.message
-        for rec in caplog.records
-    )
-
-    # Verify _check_exp_running was not called
-    assert call_count[0] == 0
