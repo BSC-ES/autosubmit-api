@@ -85,59 +85,54 @@ class StatusUpdater(BackgroundTaskTemplate):
         is_running = False
         check_pickle = True
 
-        try:
-            current_time = int(time.time())
-            # Priority 1: Check last_heartbeat timestamp from db
-            if status_row and status_row.last_heartbeat:
-                try:
-                    from datetime import datetime as dt
-                    heartbeat_dt = dt.fromisoformat(status_row.last_heartbeat)
-                    heartbeat_timestamp = int(heartbeat_dt.timestamp())
-                    heartbeat_age = current_time - heartbeat_timestamp
+        current_time = int(time.time())
+        # Priority 1: Check last_heartbeat timestamp from db
+        if status_row and status_row.last_heartbeat:
+            try:
+                from datetime import datetime as dt
+                heartbeat_dt = dt.fromisoformat(status_row.last_heartbeat)
+                heartbeat_timestamp = int(heartbeat_dt.timestamp())
+                heartbeat_age = current_time - heartbeat_timestamp
 
-                    # Fresh heartbeat signal, experiment is still running
-                    if heartbeat_age < MAX_HEARTBEAT_AGE:
+                # Fresh heartbeat signal, experiment is still running
+                if heartbeat_age < MAX_HEARTBEAT_AGE:
+                    is_running = True
+                    return is_running
+                # Heartbeat is stale, don't fall back to pickle
+                check_pickle = False
+            except Exception as exc:
+                cls.logger.warning(
+                    f"[{cls.id}] Could not parse heartbeat for {expid}: {exc}"
+                )
+                # Unparsable heartbeat, fall back to pickle check
+                check_pickle = True
+        
+        # Priority 2 and 3: Check pickle file if no valid heartbeat
+        if check_pickle:
+            try:
+                job_list_repo = create_jobs_repository(expid)
+                pkl_age = current_time - job_list_repo.get_last_modified_timestamp()
+
+                # Priority 2: Check pickle file age
+                if pkl_age < MAX_PKL_AGE:  # First running check
+                    is_running = True
+                    return is_running
+
+                # Priority 3: Check using filesystem
+                elif pkl_age < MAX_PKL_AGE_EXHAUSTIVE:  # Exhaustive check
+                    _, _, _flag, _, _ = _is_exp_running(expid)  # Exhaustive validation
+                    if _flag:
                         is_running = True
                         return is_running
-                    # Heartbeat is stale, don't fall back to pickle
-                    check_pickle = False
-                except Exception as exc:
-                    cls.logger.warning(
-                        f"[{cls.id}] Could not parse heartbeat for {expid}: {exc}"
-                    )
-                    # Unparsable heartbeat, fall back to pickle check
-                    check_pickle = True
-            
-            # Priority 2 and 3: Check pickle file if no valid heartbeat
-            if check_pickle:
-                try:
-                    job_list_repo = create_jobs_repository(expid)
-                    pkl_age = current_time - job_list_repo.get_last_modified_timestamp()
 
-                    # Priority 2: Check pickle file age
-                    if pkl_age < MAX_PKL_AGE:  # First running check
-                        is_running = True
-                        return is_running
+            except Exception as exc:
+                cls.logger.warning(
+                    f"[{cls.id}] Could not check pickle file for {expid}: {exc}"
+                )
 
-                    # Priority 3: Check using filesystem
-                    elif pkl_age < MAX_PKL_AGE_EXHAUSTIVE:  # Exhaustive check
-                        _, _, _flag, _, _ = _is_exp_running(expid)  # Exhaustive validation
-                        if _flag:
-                            is_running = True
-                            return is_running
-
-                except Exception as exc:
-                    cls.logger.warning(
-                        f"[{cls.id}] Could not check pickle file for {expid}: {exc}"
-                    )
-
-            cls.logger.debug(
-                f"[{cls.id}] Experiment {expid} is not running"
-            )
-        except Exception as exc:
-            cls.logger.error(
-                f"[{cls.id}] Error while checking if experiment {expid} is running: {exc}"
-            )
+        cls.logger.debug(
+            f"[{cls.id}] Experiment {expid} is not running"
+        )
 
         return is_running
 

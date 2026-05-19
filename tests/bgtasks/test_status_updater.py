@@ -397,35 +397,20 @@ class TestStatusUpdater:
         statuses = experiment_status_repo.get_all()
         assert len(statuses) == 0
 
-    def test_update_experiment_status_logs_error_when_upsert_fails(
+    def test_update_experiment_status_logs_error_when_raises_exception(
         self, fixture_mock_basic_config, monkeypatch, caplog
     ):
-        """Test that if upsert_status raises an exception during status update, 
-        it is logged as an error and the updater continues updating other experiments."""
-        experiment_repo = create_experiment_repository()
+        """Test that if _update_experiment_status raises an exception, 
+        it is logged and continues the execution"""
         experiment_status_repo = create_experiment_status_repository()
-
-        experiments = experiment_repo.get_all()
-        assert len(experiments) >= 1
-        exp = experiments[0]
-
-        now = datetime.now(tz=LOCAL_TZ)
-
         experiment_status_repo.delete_all()
-        experiment_status_repo.upsert_status(
-            exp.id, exp.name, RunningStatus.RUNNING, last_heartbeat=now.isoformat()
-        )
 
-        # Mock upsert_status to raise an exception for a specific experiment
-        def mock_create():
-            repo = create_experiment_status_repository()
-            def mock_upsert_status(*args, **kwargs):
-                raise Exception("Database error during upsert")
-            repo.upsert_status = mock_upsert_status
-            return repo
+        # Mock _update_experiment_status to raise an exception
+        def mock_update_experiment_status(expid, is_running=False, status_row=None):
+            raise Exception("Database error during status update")
+
         monkeypatch.setattr(
-            "autosubmit_api.bgtasks.tasks.status_updater.create_experiment_status_repository",
-            mock_create
+            StatusUpdater, "_update_experiment_status", mock_update_experiment_status
         )
 
         # Run the updater with caplog to catch logs
@@ -435,6 +420,7 @@ class TestStatusUpdater:
 
         # Assert
         assert any(
-            rec.levelname == "ERROR" and "Database error during upsert" in rec.message
+            rec.levelname == "ERROR"
+            and "Database error during status update" in rec.message
             for rec in caplog.records
         )
