@@ -313,9 +313,8 @@ class TestStatusUpdater:
         StatusUpdater.run()
 
         status = experiment_status_repo.get_by_expid(exp.name)
-        # Stale heartbeat with old pickle should enter exhaustive check
+        # Empty heartbeat with old pickle should enter exhaustive check
         # And keep experiment as RUNNING since it's still < 1 hour old
-
         assert status.status == RunningStatus.RUNNING
 
     @pytest.mark.parametrize(
@@ -467,3 +466,50 @@ class TestStatusUpdater:
             and "Database error during status update" in rec.message
             for rec in caplog.records
         )
+
+def test_experiment_in_status_table_not_in_experiment_table(
+    self, fixture_mock_basic_config, monkeypatch, caplog
+):
+    """Test that if an experiment is in the status table but 
+    not in the experiment table, a warning is logged and the 
+    execution continues."""
+    experiment_repo = create_experiment_repository()
+    experiment_status_repo = create_experiment_status_repository()
+
+    # Get real experiments and clear status table
+    all_experiments = experiment_repo.get_all()
+    experiment_status_repo.delete_all()
+
+    # Generate a fake experiment name not present in the experiment table
+    fake_exp_name = "fake_exp"
+
+    # Add it to the status table with a mutable status (RUNNING)
+    experiment_status_repo.upsert_status(
+        exp_id=9999, name=fake_exp_name, status=RunningStatus.RUNNING
+    )
+
+    # Mock _check_exp_running to ensure it's not called
+    call_count = [0]
+    def mock_check_exp_running(expid, status_row=None):
+        call_count[0] += 1
+        return False
+
+    monkeypatch.setattr(
+        StatusUpdater,
+        "_check_exp_running",
+        mock_check_exp_running,
+    )
+
+    # Run the updater
+    caplog.clear()
+    StatusUpdater.run()
+
+    # Assert warning logged
+    assert any(
+        rec.levelname == "WARNING"
+        and "found in status table but not in experiments table" in rec.message
+        for rec in caplog.records
+    )
+
+    # Verify _check_exp_running was not called
+    assert call_count[0] == 0
