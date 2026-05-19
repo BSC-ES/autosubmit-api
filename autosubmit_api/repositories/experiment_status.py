@@ -4,7 +4,7 @@ from typing import Any, List
 
 from pydantic import BaseModel
 from sqlalchemy import Engine, Table, create_engine, delete, insert
-from sqlalchemy.schema import CreateTable
+from sqlalchemy.schema import CreateSchema, CreateTable
 
 from autosubmit_api.common.utils import LOCAL_TZ
 from autosubmit_api.config.basicConfig import APIBasicConfig
@@ -18,6 +18,7 @@ class ExperimentStatusModel(BaseModel):
     status: str
     seconds_diff: Any
     modified: Any
+    last_heartbeat: Any = None
 
 
 class ExperimentStatusRepository(ABC):
@@ -38,7 +39,7 @@ class ExperimentStatusRepository(ABC):
         """
 
     @abstractmethod
-    def upsert_status(self, exp_id: int, expid: str, status: str) -> int:
+    def upsert_status(self, exp_id: int, expid: str, status: str, last_heartbeat: str = None) -> int:
         """
         Delete and insert experiment status by expid
         """
@@ -57,11 +58,17 @@ class ExperimentStatusRepository(ABC):
 
 
 class ExperimentStatusSQLRepository(ExperimentStatusRepository):
-    def __init__(self, engine: Engine, table: Table):
+    def __init__(self, engine: Engine, valid_tables: List[Table]):
         self.engine = engine
-        self.table = table
+        self.table = tables.check_table_schema(self.engine, valid_tables)
+        if self.table is None:
+            if len(valid_tables) == 0:
+                raise ValueError("No valid tables provided.")
+            self.table = valid_tables[0]
 
         with self.engine.connect() as conn:
+            if self.table.schema:
+                conn.execute(CreateSchema(self.table.schema, if_not_exists=True))
             conn.execute(CreateTable(self.table, if_not_exists=True))
             conn.commit()
 
@@ -86,14 +93,15 @@ class ExperimentStatusSQLRepository(ExperimentStatusRepository):
             status=result.status,
             seconds_diff=result.seconds_diff,
             modified=result.modified,
+            last_heartbeat=getattr(result, "last_heartbeat", None),
         )
 
-    def upsert_status(self, exp_id: int, expid: str, status: str):
+    def upsert_status(self, exp_id: int, expid: str, status: str, last_heartbeat: str = None) -> int:
         with self.engine.connect() as conn:
             with conn.begin():
                 try:
                     del_stmnt = delete(self.table).where(self.table.c.exp_id == exp_id)
-                    ins_stmnt = insert(self.table).values(
+                    ins_values = dict(
                         exp_id=exp_id,
                         name=expid,
                         status=status,
@@ -102,6 +110,10 @@ class ExperimentStatusSQLRepository(ExperimentStatusRepository):
                             sep="-", timespec="seconds"
                         ),
                     )
+                    if "last_heartbeat" in self.table.c:
+                        ins_values["last_heartbeat"] = last_heartbeat
+
+                    ins_stmnt = insert(self.table).values(**ins_values)
                     conn.execute(del_stmnt)
                     result = conn.execute(ins_stmnt)
                     conn.commit()
@@ -128,8 +140,12 @@ def create_experiment_status_repository() -> ExperimentStatusRepository:
     if APIBasicConfig.DATABASE_BACKEND == "postgres":
         # PostgreSQL
         _engine = create_engine(APIBasicConfig.DATABASE_CONN_URL)
+        _tables = [
+            tables.table_change_schema("as_times", tables.ExperimentStatusTableV18),
+            tables.table_change_schema("as_times", tables.ExperimentStatusTable),
+        ]
     else:
         # SQLite
         _engine = create_as_times_db_engine()
-    _table = tables.ExperimentStatusTable
-    return ExperimentStatusSQLRepository(_engine, _table)
+        _tables = [tables.ExperimentStatusTableV18, tables.ExperimentStatusTable]
+    return ExperimentStatusSQLRepository(_engine, _tables)

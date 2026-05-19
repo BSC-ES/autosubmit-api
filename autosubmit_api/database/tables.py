@@ -113,6 +113,11 @@ ExperimentStatusTable = Table(
     Column("seconds_diff", Integer, nullable=False),
     Column("modified", Text, nullable=False),
 )
+
+# Copy ExperimentStatusTable to an alternative version which has last_heartbeat column
+ExperimentStatusTableV18 = table_copy(ExperimentStatusTable)
+ExperimentStatusTableV18.append_column(Column("last_heartbeat", Text, nullable=True))
+
 """Stores the status of the experiments."""
 
 ExperimentStructureTable = Table(

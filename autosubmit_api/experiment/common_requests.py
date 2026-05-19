@@ -296,7 +296,7 @@ def _is_exp_running(expid: str, time_condition=300) -> Tuple[bool, str, bool, in
     """
     Tests if experiment is running
     :param expid: Experiment name
-    :param time_condition: Time constraint, 120 by default. Represents max seconds before an experiment is considered as NOT RUNNING
+    :param time_condition: Time constraint, 300 by default. Represents max seconds before an experiment is considered as NOT RUNNING
     :return: (error (true if error is found, false otherwise), error_message, is_running (true if running, false otherwise), timediff, path_to_log)
     """
     patterns = ["_run.log", "_run.log.xz", "_run.log.gz"]
