@@ -130,9 +130,37 @@ def copy_job_packages_db(filepath: str, engine: Engine):
     expid = _get_expid_from_filename(r"job_packages_(\w+)\.db", filepath)
     source_as_db = create_engine(f"sqlite:///{filepath}")
     with source_as_db.connect() as source_conn, engine.connect() as conn:
-        _copy_table_data(source_conn, conn, expid, tables.JobPackageTable)
-        _copy_table_data(source_conn, conn, expid, tables.WrapperJobPackageTable)
-        conn.commit()
+        fail_counter = 0
+        # Try old schema first, if it fails, try new schema
+        try:
+            _copy_table_data(source_conn, conn, expid, tables.JobPackageTable)
+            _copy_table_data(source_conn, conn, expid, tables.WrapperJobPackageTable)
+            conn.commit()
+        except Exception:
+            print(
+                "Failed to copy job packages data with old schema, trying new schema..."
+            )
+            fail_counter += 1
+            conn.rollback()
+
+        # Try new schema from Autosubmit v4.1.17 onwards
+        try:
+            _copy_table_data(source_conn, conn, expid, tables.WrapperJobsTable)
+            _copy_table_data(source_conn, conn, expid, tables.PreviewWrapperJobsTable)
+            conn.commit()
+        except Exception:
+            print(
+                "Failed to copy job packages data with new schema, both attempts failed."
+            )
+            fail_counter += 1
+            conn.rollback()
+
+        if fail_counter >= 2:
+            raise ValueError(
+                f"Failed to copy job packages data of {expid}. "
+                + "The database schema is not compatible with either the old or new schema."
+            )
+
 
 def copy_user_metrics_db(filepath: str, engine: Engine):
     expid = _get_expid_from_filename(r"metrics_(\w+)\.db", filepath)

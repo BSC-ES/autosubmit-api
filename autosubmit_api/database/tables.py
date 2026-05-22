@@ -1,6 +1,7 @@
 from typing import List, Optional, Type, Union
 
 from sqlalchemy import (
+    BigInteger,
     Column,
     Engine,
     Float,
@@ -301,7 +302,7 @@ def create_wrapper_tables(name, metadata_obj_):
         metadata_obj_,
         Column(
             "package_id",
-            Integer,
+            BigInteger, # TODO: This is a workaround. It should be a normal integer.
             nullable=False,
             primary_key=True,
         ),
