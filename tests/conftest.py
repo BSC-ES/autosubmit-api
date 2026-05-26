@@ -7,7 +7,7 @@ from typing import Tuple
 
 import pytest
 from fastapi.testclient import TestClient
-from sqlalchemy import Engine, create_engine
+from sqlalchemy import Column, Engine, Integer, MetaData, String, Table, create_engine
 from testcontainers.postgres import PostgresContainer
 
 from autosubmit_api import config
@@ -236,3 +236,19 @@ def fixture_postgres(
         os.path.join(fixture_pg_db_copy_all[0], ".autosubmitrc"),
     )
     yield fixture_pg_db_copy_all[0]
+
+
+@pytest.fixture(scope="function")
+def fixture_dummy_db() -> Tuple[Engine, Table]:
+    """In-memory SQLite engine with a simple test table."""
+    engine = create_engine("sqlite:///:memory:")
+    meta = MetaData()
+    test_table = Table(
+        "test_upsert",
+        meta,
+        Column("id", Integer, primary_key=True),
+        Column("name", String, nullable=False),
+        Column("value", String),
+    )
+    meta.create_all(engine)
+    return engine, test_table
