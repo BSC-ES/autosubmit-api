@@ -497,43 +497,69 @@ class JobList:
             ini_date, end_date = JobList.date_plus(datetime.datetime.strptime(
                 job.date, '%Y-%m-%d %H:%M:%S'), chunk_unit, int(job.chunk), chunk_size) if job.date is not None and len(job.date) > 0 else (
                 date2str(None, dateformat), "")
-            nodes.append({'id': job.job_name,
-                          'internal_id': job.job_name,
-                          'label': job.job_name,
-                          'status': job.status,
-                          'status_code': Status.STRING_TO_CODE[job.status],
-                          'platform_name': job.platform,
-                          'chunk': job.chunk,
-                          'member': job.section,
-                          'sync': True if job.job_name in sync_jobs else False,
-                          # job_name_to_job_title[job.job_name] if job.job_name in job_name_to_job_title.keys() else "",
-                          'title': job_name_to_job_title.get(job.job_name, ""),
-                          'date': ini_date,
-                          'date_plus': end_date,
-                          'SYPD': calculate_SYPD_perjob(chunk_unit, chunk_size, job.chunk, job.running_time() if job else 0, Status.STRING_TO_CODE[job.status]),
-                          'ASYPD': calculate_ASYPD_perjob(chunk_unit, chunk_size, job.chunk, job.running_time() + job.queuing_time(package_to_jobs_for_normalization.get(job.rowtype, None)) if job else 0, average_post_time, Status.STRING_TO_CODE[job.status]),
-                          'minutes_queue': job.queuing_time(package_to_jobs_for_normalization.get(job.rowtype, None)),
-                          # job_running_to_min[job.job_name] if job.job_name in list(job_running_to_min.keys()) else -1,
-                          'minutes': job.running_time(),
-                          'submit': job.submit_datetime_str(),
-                          'start': job.start_datetime_str(),
-                          'finish': job.finish_datetime_str(),
-                          'section': job.member,
-                          'queue': job.qos,
-                          'processors': job.ncpus,
-                          'wallclock': job.wallclock,
-                          'wrapper': wrapper_name,
-                          'wrapper_code': wrapper_name,
-                          'children': None,
-                          'children_list': None,
-                          'parents': None,
-                          'out': out,
-                          'err': err,
-                          'tree_parents': job.tree_parent,
-                          'parent_list': None,
-                          'custom_directives': None,
-                          'rm_id': job.job_id,
-                          'status_color': Monitor.color_status(Status.STRING_TO_CODE[job.status])})
+            nodes.append(
+                {
+                    "id": job.job_name,
+                    "internal_id": job.job_name,
+                    "label": job.job_name,
+                    "status": job.status,
+                    "status_code": Status.STRING_TO_CODE[job.status],
+                    "platform_name": job.platform,
+                    "chunk": job.chunk,
+                    "member": job.section,
+                    "sync": True if job.job_name in sync_jobs else False,
+                    # job_name_to_job_title[job.job_name] if job.job_name in job_name_to_job_title.keys() else "",
+                    "title": job_name_to_job_title.get(job.job_name, ""),
+                    "date": ini_date,
+                    "date_plus": end_date,
+                    "SYPD": calculate_SYPD_perjob(
+                        job.running_time() if job else 0,
+                        chunk_unit,
+                        chunk_size,
+                        job.chunk,
+                        Status.STRING_TO_CODE[job.status],
+                    ),
+                    "ASYPD": calculate_ASYPD_perjob(
+                        job.running_time()
+                        + job.queuing_time(
+                            package_to_jobs_for_normalization.get(job.rowtype, None)
+                        )
+                        if job
+                        else 0,
+                        average_post_time,
+                        chunk_unit,
+                        chunk_size,
+                        job.chunk,
+                        Status.STRING_TO_CODE[job.status],
+                    ),
+                    "minutes_queue": job.queuing_time(
+                        package_to_jobs_for_normalization.get(job.rowtype, None)
+                    ),
+                    # job_running_to_min[job.job_name] if job.job_name in list(job_running_to_min.keys()) else -1,
+                    "minutes": job.running_time(),
+                    "submit": job.submit_datetime_str(),
+                    "start": job.start_datetime_str(),
+                    "finish": job.finish_datetime_str(),
+                    "section": job.member,
+                    "queue": job.qos,
+                    "processors": job.ncpus,
+                    "wallclock": job.wallclock,
+                    "wrapper": wrapper_name,
+                    "wrapper_code": wrapper_name,
+                    "children": None,
+                    "children_list": None,
+                    "parents": None,
+                    "out": out,
+                    "err": err,
+                    "tree_parents": job.tree_parent,
+                    "parent_list": None,
+                    "custom_directives": None,
+                    "rm_id": job.job_id,
+                    "status_color": Monitor.color_status(
+                        Status.STRING_TO_CODE[job.status]
+                    ),
+                }
+            )
 
         # sort and add these sorted elements to the result list
         result_exp_wrappers.sort(key=lambda x: x["title"])

@@ -289,6 +289,9 @@ class Job(metaclass=ABCMeta):
     job._finish = job_data_dc.finish
     job.ncpus = job_data_dc.ncpus
     job.run_id = job_data_dc.run_id
+    job.workflow_commit = job_data_dc.workflow_commit
+    job.split = job_data_dc.split
+    job.splits = job_data_dc.splits
     return job
 class StandardJob(Job):
   """ Straightforward implementation of Job """

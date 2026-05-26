@@ -784,10 +784,10 @@ def _retrieve_pkl_data(expid: str, out_format: str = "tree"):
             last_run = last_jobs_run.get(job.name)
             if last_run and last_run.chunk_unit and last_run.chunk_size:
                 SYPD = calculate_SYPD_perjob(
+                    job.run_time,
                     last_run.chunk_unit,
                     last_run.chunk_size,
                     job.chunk,
-                    job.run_time,
                     job.status,
                     job.splits,
                 )

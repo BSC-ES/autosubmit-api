@@ -17,11 +17,16 @@
 # along with Autosubmit.  If not, see <http://www.gnu.org/licenses/>.
 
 import json
+from typing import Dict, List, Tuple
+
 from autosubmit_api.common import utils as common_utils
-from autosubmit_api.history.utils import get_current_datetime_if_none
-from autosubmit_api.history.data_classes.job_data import JobData
 from autosubmit_api.components.jobs.job_factory import SimJob
-from typing import List, Dict, Tuple
+from autosubmit_api.history.data_classes.job_data import JobData
+from autosubmit_api.history.utils import get_current_datetime_if_none
+from autosubmit_api.performance.utils import (
+    calculate_ASYPD_perjob,
+    calculate_SYPD_perjob,
+)
 
 
 class DatabaseCorruptedException(Exception):
@@ -91,16 +96,22 @@ class ExperimentRun(object):
             outlier_free_list = common_utils.get_jobs_with_no_outliers(performance_jobs)
         # print("{} -> {}".format(self.run_id, len(outlier_free_list)))
         if len(outlier_free_list) > 0:
-            years_per_sim = common_utils.datechunk_to_year(self.chunk_unit, self.chunk_size)
-            # print(self.run_id)
-            # print(years_per_sim)
-            seconds_per_day = common_utils.SECONDS_IN_A_DAY
             number_SIM = len(outlier_free_list)
+            SIM_splits_size = outlier_free_list[0].splits
             # print(len(job_list))
             total_run_time = sum(job.run_time for job in outlier_free_list)
             # print("run {3} yps {0} n {1} run_time {2}".format(years_per_sim, number_SIM, total_run_time, self.run_id))
             if total_run_time > 0:
-                return round((years_per_sim * number_SIM * seconds_per_day) / total_run_time, 2)
+                return round(
+                    number_SIM
+                    * calculate_SYPD_perjob(
+                        run_time=total_run_time,
+                        chunk_unit=self.chunk_unit,
+                        chunk_size=self.chunk_size,
+                        splits=SIM_splits_size,
+                    ),
+                    2,
+                )
         return None
 
     def getASYPD(self, job_sim_list: List[JobData], job_post_list: List[JobData], run_id_wrapper_code_to_job_dcs: Dict[Tuple[int, int], List[JobData]]) -> float:
@@ -113,8 +124,6 @@ class ExperimentRun(object):
                 job_sim_list = [job for job in job_sim_list if job.job_name in valid_names]
 
             if job_sim_list and len(job_sim_list) > 0 and job_post_list and len(job_post_list) > 0:
-                years_per_sim = common_utils.datechunk_to_year(self.chunk_unit, self.chunk_size)
-                seconds_per_day = common_utils.SECONDS_IN_A_DAY
                 number_SIM = len(job_sim_list)
                 number_POST = len(job_post_list)
                 average_POST = round(sum(job.queuing_time_considering_package(
@@ -124,8 +133,20 @@ class ExperimentRun(object):
                 sum_SIM = round(sum(job.queuing_time_considering_package(
                     run_id_wrapper_code_to_job_dcs.get((job.run_id, job.rowtype), [])) + job.running_time for job in
                                     job_sim_list), 2)
+                SIM_splits_size = SIM_no_outlier_list[0].splits
+
                 if (sum_SIM + average_POST) > 0:
-                    return round((years_per_sim * number_SIM * seconds_per_day) / (sum_SIM + average_POST), 2)
+                    return round(
+                        number_SIM
+                        * calculate_ASYPD_perjob(
+                            queue_run_time=sum_SIM,
+                            average_post=average_POST,
+                            chunk_unit=self.chunk_unit,
+                            chunk_size=self.chunk_size,
+                            splits=SIM_splits_size,
+                        ),
+                        2,
+                    )
             return None
 
         except Exception as exp:
