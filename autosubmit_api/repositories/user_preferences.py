@@ -67,41 +67,39 @@ class UserPreferencesSQLRepository(UserPreferencesRepository):
     def upsert_preferred_username(self, user_id: str, preferred_username: str):
         timestamp = datetime.now(tz=LOCAL_TZ).isoformat(sep="-", timespec="seconds")
         with self.engine.connect() as conn:
-            with conn.begin():
-                try:
-                    execute_upsert(
-                        conn,
-                        self.table,
-                        {
-                            "user_id": user_id,
-                            "preferred_username": preferred_username,
-                            "created": timestamp,
-                            "modified": timestamp,
-                        },
-                        index_elements=["user_id"],
-                        set_={
-                            "preferred_username": preferred_username,
-                            "modified": timestamp,
-                        },
-                    )
+            try:
+                execute_upsert(
+                    conn,
+                    self.table,
+                    {
+                        "user_id": user_id,
+                        "preferred_username": preferred_username,
+                        "created": timestamp,
+                        "modified": timestamp,
+                    },
+                    index_elements=["user_id"],
+                    set_={
+                        "preferred_username": preferred_username,
+                        "modified": timestamp,
+                    },
+                )
+                conn.commit()
 
-                    # Fetch and return the updated record (before transaction ends)
-                    select_stmnt = self.table.select().where(
-                        self.table.c.user_id == user_id
-                    )
-                    result = conn.execute(select_stmnt).first()
-                    conn.commit()
-                except Exception as exc:
-                    conn.rollback()
-                    raise exc
+                # Fetch and return the updated record (before transaction ends)
+                select_stmnt = self.table.select().where(
+                    self.table.c.user_id == user_id
+                )
+                result = conn.execute(select_stmnt).first()
 
-            # Transaction is committed here automatically by conn.begin() context manager
-            return UserPreferencesModel(
-                user_id=result.user_id,
-                preferred_username=result.preferred_username,
-                created=result.created,
-                modified=result.modified,
-            )
+                return UserPreferencesModel(
+                    user_id=result.user_id,
+                    preferred_username=result.preferred_username,
+                    created=result.created,
+                    modified=result.modified,
+                )
+            except Exception as exc:
+                conn.rollback()
+                raise exc
 
 
 def create_user_preferences_repository() -> UserPreferencesRepository:

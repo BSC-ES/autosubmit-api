@@ -3,7 +3,7 @@
 
 import os
 import tempfile
-from typing import Tuple
+from typing import Generator, Tuple
 
 import pytest
 from fastapi.testclient import TestClient
@@ -238,17 +238,31 @@ def fixture_postgres(
     yield fixture_pg_db_copy_all[0]
 
 
-@pytest.fixture(scope="function")
-def fixture_dummy_db() -> Tuple[Engine, Table]:
-    """In-memory SQLite engine with a simple test table."""
-    engine = create_engine("sqlite:///:memory:")
+@pytest.fixture(
+    scope="function",
+    params=[
+        pytest.param("sqlite", marks=pytest.mark.sqlite),
+        pytest.param("postgres", marks=pytest.mark.postgres),
+    ],
+)
+def fixture_dummy_db(
+    request: pytest.FixtureRequest,
+) -> Generator[Tuple[Engine, Table], None, None]:
+    """SQLite (in-memory) or Postgres engine with a simple test table."""
+    if request.param == "sqlite":
+        engine = create_engine("sqlite:///:memory:")
+    else:
+        # Reuse session Postgres fixture
+        conn_url = request.getfixturevalue("fixture_setup_pg_db")
+        engine = create_engine(conn_url)
     meta = MetaData()
     test_table = Table(
-        "test_upsert",
+        "test_dummy_db",
         meta,
         Column("id", Integer, primary_key=True),
         Column("name", String, nullable=False),
         Column("value", String),
     )
     meta.create_all(engine)
-    return engine, test_table
+    yield engine, test_table
+    meta.drop_all(engine)
