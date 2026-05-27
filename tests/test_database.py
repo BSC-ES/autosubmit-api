@@ -147,3 +147,48 @@ class TestExecuteUpsert:
             row = conn.execute(select(table).where(table.c.id == 1)).first()
             assert row.name == "beta"
             assert row.value == "v2"
+
+    def test_rollback_on_exception(self, fixture_dummy_db: Tuple[Engine, Table]):
+        engine, table = fixture_dummy_db
+        with engine.connect() as conn:
+            # Attempt upsert with invalid data to trigger an exception
+            try:
+                common.execute_upsert(
+                    conn,
+                    table,
+                    {"id": None, "name": None, "value": "v1"},  # NULL invalid values
+                    ["id"],
+                )
+                raise AssertionError("Expected an exception due to NOT NULL constraint")
+            except Exception:
+                conn.rollback()
+
+            # Verify that no row was inserted
+            row = conn.execute(select(table)).first()
+            assert row is None
+
+    def test_fallback_dialect_rollback_on_exception(
+        self, fixture_dummy_db: Tuple[Engine, Table]
+    ):
+        engine, table = fixture_dummy_db
+        with engine.connect() as conn:
+            # Mock to not use the SQLite dialect and force fallback logic
+            mock_conn = MagicMock(wraps=conn)
+            mock_conn.dialect = MagicMock(name="unsupported")
+            mock_conn.dialect.name = "unsupported"
+
+            # Attempt upsert with invalid data to trigger an exception
+            try:
+                common.execute_upsert(
+                    mock_conn,
+                    table,
+                    {"id": None, "name": None, "value": "v1"},  # NULL invalid values
+                    ["id"],
+                )
+                raise AssertionError("Expected an exception due to NOT NULL constraint")
+            except Exception:
+                conn.rollback()
+
+            # Verify that no row was inserted
+            row = conn.execute(select(table)).first()
+            assert row is None
