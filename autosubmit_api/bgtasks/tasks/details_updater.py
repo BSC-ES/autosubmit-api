@@ -55,7 +55,7 @@ class PopulateDetailsDB(BackgroundTaskTemplate):
 
     @classmethod
     def _build_details_data_from_experiment(
-        self, exp_id: int, expid: str
+        cls, exp_id: int, expid: str
     ) -> ExperimentDetailsModel:
         """
         Build the details data from the experiment
