@@ -163,6 +163,9 @@ def execute_upsert(
         _insert = sqlite_insert
     else:
         # Fallback for unsupported dialects - this will not perform an atomic upsert, so use with caution.
+        logger.debug(
+            f"Dialect '{dialect}' native upsert not supported or not implemented. Performing non-atomic upsert as fallback."
+        )
         existing = conn.execute(
             select(table).where(
                 *[table.c[el] == values[el] for el in str_index_elements]
