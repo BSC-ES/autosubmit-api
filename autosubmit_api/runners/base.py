@@ -122,6 +122,7 @@ class Runner(ABC):
         :param update_version: Whether to update the version.
         """
 
+    @abstractmethod
     async def update_description(self, expid: str, description: str):
         """
         Update the description of an experiment.

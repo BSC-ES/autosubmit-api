@@ -1,6 +1,7 @@
 import asyncio
 import asyncio.subprocess
 import re
+import shlex
 import subprocess
 from typing import Optional
 
@@ -375,7 +376,9 @@ class LocalRunner(Runner):
             raise exc
 
     async def update_description(self, expid: str, description: str):
-        autosubmit_command = f'autosubmit updatedescrip {expid} "{description}"'
+        autosubmit_command = (
+            f"autosubmit updatedescrip {expid} {shlex.quote(description)}"
+        )
         wrapped_command = self.module_loader.generate_command(autosubmit_command)
 
         try:

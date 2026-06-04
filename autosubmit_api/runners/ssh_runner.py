@@ -1,6 +1,7 @@
 import asyncio
 import json
 import re
+from shlex import shlex
 from typing import Optional
 
 import paramiko
@@ -549,7 +550,9 @@ class SSHRunner(Runner):
             raise exc
 
     async def update_description(self, expid: str, description: str):
-        autosubmit_command = f'autosubmit updatedescrip {expid} "{description}"'
+        autosubmit_command = (
+            f"autosubmit updatedescrip {expid} {shlex.quote(description)}"
+        )
         prepared_command = self._prepare_command(autosubmit_command)
 
         try:
