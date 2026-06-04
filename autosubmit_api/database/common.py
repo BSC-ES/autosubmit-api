@@ -1,18 +1,25 @@
 import os
-from typing import Any
+from typing import Any, Dict, List, Union
+
 from sqlalchemy import (
+    Column,
     Connection,
     Engine,
     NullPool,
     Select,
+    Table,
     create_engine,
+    func,
+    insert,
     select,
     text,
-    func,
 )
+from sqlalchemy.dialects.postgresql import insert as pg_insert
+from sqlalchemy.dialects.sqlite import insert as sqlite_insert
+
 from autosubmit_api.builders import BaseBuilder
-from autosubmit_api.logger import logger
 from autosubmit_api.config.basicConfig import APIBasicConfig
+from autosubmit_api.logger import logger
 
 
 class AttachedDatabaseConnBuilder(BaseBuilder):
@@ -116,3 +123,70 @@ def execute_with_limit_offset(
     total = conn.scalar(count_stmnt)
 
     return query_result, total
+
+
+def execute_upsert(
+    conn: Connection,
+    table: Table,
+    values: Dict[str, Any],
+    index_elements: List[Union[str, Column]],
+    set_: Dict[str, Any] = None,
+) -> int:
+    """
+    Execute an atomic upsert (INSERT ... ON CONFLICT DO UPDATE) for SQLite and PostgreSQL.
+    This is extendable to other dialects like MySQL (ON DUPLICATE KEY UPDATE),
+    mssql (MERGE), or oracle (UPSERT), if needed in the future.
+
+    Notice that statements are executed without an explicit commit, so the caller can manage transactions as needed.
+
+    :param conn: An open SQLAlchemy Connection (caller manages the transaction).
+    :param table: The target SQLAlchemy Table.
+    :param values: Full row values dict (column name -> value) to insert or update.
+    :param index_elements: Conflict target. List of column names or Column objects.
+    :param set_: Columns to update on conflict. If None, all columns except index_elements will be updated.
+    :return: rowcount of the executed statement.
+    """
+    str_index_elements = [
+        el if isinstance(el, str) else el.name for el in index_elements
+    ]
+
+    if set_ is None:
+        set_ = {}
+        for col in values.keys():
+            if col not in str_index_elements:
+                set_[col] = values[col]
+
+    dialect = conn.dialect.name
+    if dialect == "postgresql":
+        _insert = pg_insert
+    elif dialect == "sqlite":
+        _insert = sqlite_insert
+    else:
+        # Fallback for unsupported dialects - this will not perform an atomic upsert, so use with caution.
+        logger.debug(
+            f"Dialect '{dialect}' native upsert not supported or not implemented. Performing non-atomic upsert as fallback."
+        )
+        existing = conn.execute(
+            select(table).where(
+                *[table.c[el] == values[el] for el in str_index_elements]
+            )
+        ).first()
+        if existing:
+            update_stmt = (
+                table.update()
+                .where(*[table.c[el] == values[el] for el in str_index_elements])
+                .values(**set_)
+            )
+            result = conn.execute(update_stmt)
+            return result.rowcount
+        else:
+            insert_stmt = insert(table).values(**values)
+            result = conn.execute(insert_stmt)
+            return result.rowcount
+
+    stmt = (
+        _insert(table)
+        .values(**values)
+        .on_conflict_do_update(index_elements=index_elements, set_=set_)
+    )
+    return conn.execute(stmt).rowcount
