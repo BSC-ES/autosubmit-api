@@ -142,3 +142,57 @@ async def test_set_job_status(
 
         for flag in expected_flags:
             assert flag in command
+
+
+@pytest.mark.asyncio
+@pytest.mark.ssh_runner
+async def test_update_description(fixture_mock_basic_config):
+    module_loader = NoModuleLoader()
+
+    with patch("autosubmit_api.runners.ssh_runner.SSHRunner._connect"):
+        runner = SSHRunner(
+            module_loader,
+            ssh_host="localhost",
+            ssh_user="autosubmit_user",
+            ssh_port=2222,
+        )
+
+    TEST_EXPID = "test_expid"
+    TEST_DESCRIPTION = "Updated description"
+
+    with patch(
+        "autosubmit_api.runners.ssh_runner.SSHRunner._execute_command"
+    ) as mock_exec_cmd:
+        mock_exec_cmd.return_value = ("Description updated successfully", "", 0)
+
+        result = await runner.update_description(TEST_EXPID, TEST_DESCRIPTION)
+
+        mock_exec_cmd.assert_called_once()
+
+        command = mock_exec_cmd.call_args[0][0]
+        assert "autosubmit updatedescrip" in command
+        assert TEST_EXPID in command
+        assert TEST_DESCRIPTION in command
+        assert result == "Description updated successfully"
+
+
+@pytest.mark.asyncio
+@pytest.mark.ssh_runner
+async def test_update_description_cmd_fail(fixture_mock_basic_config):
+    module_loader = NoModuleLoader()
+
+    with patch("autosubmit_api.runners.ssh_runner.SSHRunner._connect"):
+        runner = SSHRunner(
+            module_loader,
+            ssh_host="localhost",
+            ssh_user="autosubmit_user",
+            ssh_port=2222,
+        )
+
+    with patch(
+        "autosubmit_api.runners.ssh_runner.SSHRunner._execute_command"
+    ) as mock_exec_cmd:
+        mock_exec_cmd.return_value = ("", "Permission denied", 1)
+
+        with pytest.raises(RuntimeError, match="Failed to update description"):
+            await runner.update_description("test_expid", "New description")

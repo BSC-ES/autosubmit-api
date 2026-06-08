@@ -1,7 +1,7 @@
 import asyncio
 import json
 import re
-from shlex import shlex
+import shlex
 from typing import Optional
 
 import paramiko
