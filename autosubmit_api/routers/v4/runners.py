@@ -1,3 +1,4 @@
+from enum import Enum
 from typing import Any, Dict, List, Optional
 
 from fastapi import APIRouter, Depends, HTTPException
@@ -99,6 +100,13 @@ class SetJobStatusBody(RunnerEndpointBody):
     command_params: SetJobStatusCmdParams
 
 
+class RunnerEndpointsCategory(str, Enum):
+    SET_JOB_STATUS = "SET_JOB_STATUS"
+    CREATE_EXPERIMENT = "CREATE_EXPERIMENT"
+    RUNNER_RUN = "RUNNER_RUN"
+    UPDATE_EXPERIMENT_DETAILS = "UPDATE_EXPERIMENT_DETAILS"
+
+
 def _endpoint_enabled(endpoint_name: str) -> bool:
     config = read_config_file()
     endpoints = config.get("RUNNER_CONFIGURATION", {}).get("ENDPOINTS", {})
@@ -114,7 +122,7 @@ async def set_job_status(
     """
     Set the job status for an experiment using the specified runner profile.
     """
-    if not _endpoint_enabled("SET_JOB_STATUS"):
+    if not _endpoint_enabled(RunnerEndpointsCategory.SET_JOB_STATUS.value):
         raise HTTPException(
             status_code=403,
             detail="The set-job-status endpoint is currently disabled.",
@@ -166,7 +174,7 @@ async def run_experiment(
     """
     Run an experiment using the specified runner profile.
     """
-    if not _endpoint_enabled("RUNNER_RUN"):
+    if not _endpoint_enabled(RunnerEndpointsCategory.RUNNER_RUN.value):
         raise HTTPException(
             status_code=403,
             detail="The run-experiment endpoint is currently disabled.",
@@ -218,7 +226,7 @@ async def get_runner_run_status(
     """
     Get the status of the runner run for a given experiment ID.
     """
-    if not _endpoint_enabled("RUNNER_RUN"):
+    if not _endpoint_enabled(RunnerEndpointsCategory.RUNNER_RUN.value):
         raise HTTPException(
             status_code=403,
             detail="The get-runner-run-status endpoint is currently disabled.",
@@ -264,7 +272,7 @@ async def stop_experiment(
     """
     Stop an experiment using the specified runner profile.
     """
-    if not _endpoint_enabled("RUNNER_RUN"):
+    if not _endpoint_enabled(RunnerEndpointsCategory.RUNNER_RUN.value):
         raise HTTPException(
             status_code=403,
             detail="The stop-experiment endpoint is currently disabled.",
@@ -310,7 +318,7 @@ async def create_experiment(
     """
     Create an experiment using the specified runner profile.
     """
-    if not _endpoint_enabled("CREATE_EXPERIMENT"):
+    if not _endpoint_enabled(RunnerEndpointsCategory.CREATE_EXPERIMENT.value):
         raise HTTPException(
             status_code=403,
             detail="The create-experiment endpoint is currently disabled.",
@@ -351,4 +359,60 @@ async def create_experiment(
     return {
         "expid": expid,
         "message": f"Experiment {expid} created successfully.",
+    }
+
+
+class UpdateExperimentBody(RunnerEndpointBody):
+    expid: str
+    description: str
+
+
+@router.post(
+    "/command/update-experiment-description", name="Update experiment description"
+)
+async def update_experiment_description(
+    body: UpdateExperimentBody,
+    user_id: Optional[str] = Depends(auth_token_dependency()),
+) -> Dict[str, Any]:
+    """
+    Update the description of an experiment using the specified runner profile.
+    """
+    if not _endpoint_enabled(RunnerEndpointsCategory.UPDATE_EXPERIMENT_DETAILS.value):
+        raise HTTPException(
+            status_code=403,
+            detail="The update-experiment-description endpoint is currently disabled.",
+        )
+
+    expid = body.expid
+    description = body.description
+
+    logger.info(
+        f"Updating description for experiment {expid} using profile {body.profile_name}"
+    )
+
+    try:
+        profile = process_profile(body.profile_name, body.profile_params)
+        logger.debug(
+            f"Processing profile: {body.profile_name}. Profile data: {profile}"
+        )
+
+        runner_type, module_loader_type, modules = (
+            profile.get("RUNNER_TYPE"),
+            profile.get("MODULE_LOADER_TYPE"),
+            profile.get("MODULES"),
+        )
+
+        runner_extra_params = get_runner_extra_params(profile)
+
+        module_loader = get_module_loader(module_loader_type, modules)
+        runner = get_runner(runner_type, module_loader, **runner_extra_params)
+        await runner.update_description(expid, description)
+    except Exception as exc:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to update description for experiment {expid}: {exc}",
+        )
+
+    return {
+        "message": f"Description for experiment {expid} updated successfully.",
     }

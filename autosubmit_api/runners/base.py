@@ -121,3 +121,12 @@ class Runner(ABC):
         :param check_wrapper: Whether to check the wrapper script.
         :param update_version: Whether to update the version.
         """
+
+    @abstractmethod
+    async def update_description(self, expid: str, description: str):
+        """
+        Update the description of an experiment.
+
+        :param expid: The experiment ID.
+        :param description: The new description for the experiment.
+        """

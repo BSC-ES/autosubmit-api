@@ -1188,6 +1188,122 @@ class TestRunnerCreateExperiment:
         assert response.status_code != 200
 
 
+class TestRunnerUpdateExperimentDescription:
+    endpoint = "/v4/runners/command/update-experiment-description"
+
+    def test_disabled_endpoint(self, fixture_fastapi_client: TestClient):
+        with patch(
+            "autosubmit_api.routers.v4.runners.read_config_file"
+        ) as mock_read_config:
+            mock_read_config.return_value = {
+                "RUNNER_CONFIGURATION": {
+                    "ENDPOINTS": {"UPDATE_EXPERIMENT_DETAILS": {"ENABLED": False}},
+                },
+            }
+
+            response = fixture_fastapi_client.post(
+                self.endpoint,
+                json={
+                    "expid": "test_expid",
+                    "description": "New description",
+                    "profile_name": "ANY_PROFILE",
+                },
+            )
+
+            assert response.status_code == 403
+            assert "disabled" in response.json()["error_message"]
+
+    def test_valid_ssh_request(self, fixture_fastapi_client: TestClient):
+        with (
+            patch(
+                "autosubmit_api.runners.runner_config.read_config_file"
+            ) as mock_read_config,
+            patch("autosubmit_api.routers.v4.runners.get_runner") as mock_get_runner,
+        ):
+            mock_read_config.return_value = {
+                "RUNNER_CONFIGURATION": {
+                    "PROFILES": {
+                        "SSH_AUTOSUBMIT_DEV": {
+                            "RUNNER_TYPE": "SSH",
+                            "MODULE_LOADER_TYPE": "CONDA",
+                            "MODULES": ["autosubmit"],
+                            "SSH": {
+                                "HOST": "bscesautosubmit03.bsc.es",
+                                "PORT": 22,
+                            },
+                        }
+                    }
+                }
+            }
+
+            mock_runner = MagicMock()
+            mock_runner.update_description = AsyncMock(return_value=None)
+            mock_get_runner.return_value = mock_runner
+
+            response = fixture_fastapi_client.post(
+                self.endpoint,
+                json={
+                    "expid": "test_expid",
+                    "description": "New description",
+                    "profile_name": "SSH_AUTOSUBMIT_DEV",
+                    "profile_params": {
+                        "SSH": {
+                            "USERNAME": "test_user",
+                        }
+                    },
+                },
+            )
+
+            assert response.status_code == 200
+
+    def test_invalid_profile(self, fixture_fastapi_client: TestClient):
+        response = fixture_fastapi_client.post(
+            self.endpoint,
+            json={
+                "expid": "test_expid",
+                "description": "New description",
+                "profile_name": "NON_EXISTENT_PROFILE",
+            },
+        )
+
+        assert response.status_code != 200
+
+    def test_runner_failure(self, fixture_fastapi_client: TestClient):
+        with (
+            patch(
+                "autosubmit_api.runners.runner_config.read_config_file"
+            ) as mock_read_config,
+            patch("autosubmit_api.routers.v4.runners.get_runner") as mock_get_runner,
+        ):
+            mock_read_config.return_value = {
+                "RUNNER_CONFIGURATION": {
+                    "PROFILES": {
+                        "LOCAL_AUTOSUBMIT_DEV": {
+                            "RUNNER_TYPE": "LOCAL",
+                            "MODULE_LOADER_TYPE": "NO_MODULE",
+                        }
+                    }
+                }
+            }
+
+            mock_runner = MagicMock()
+            mock_runner.update_description = AsyncMock(
+                side_effect=RuntimeError("Update failed")
+            )
+            mock_get_runner.return_value = mock_runner
+
+            response = fixture_fastapi_client.post(
+                self.endpoint,
+                json={
+                    "expid": "test_expid",
+                    "description": "New description",
+                    "profile_name": "LOCAL_AUTOSUBMIT_DEV",
+                },
+            )
+
+            assert response.status_code == 500
+
+
 class TestRunnerConfigurations:
     @pytest.mark.parametrize(
         "file_content, expected",

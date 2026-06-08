@@ -306,6 +306,43 @@ async def test_create_experiment_autosubmit_fail(fixture_mock_basic_config):
 
 
 @pytest.mark.asyncio
+async def test_update_description(fixture_mock_basic_config):
+    module_loader = NoModuleLoader()
+    runner = LocalRunner(module_loader)
+
+    TEST_EXPID = "test_expid"
+    TEST_DESCRIPTION = "Updated description"
+
+    with patch(
+        "autosubmit_api.runners.local_runner.subprocess.check_output"
+    ) as mock_check_output:
+        mock_check_output.return_value = "Description updated successfully"
+
+        result = await runner.update_description(TEST_EXPID, TEST_DESCRIPTION)
+
+        mock_check_output.assert_called_once()
+
+        command = mock_check_output.call_args[0][0]
+        assert "autosubmit updatedescrip" in command
+        assert TEST_EXPID in command
+        assert TEST_DESCRIPTION in command
+        assert result == "Description updated successfully"
+
+
+@pytest.mark.asyncio
+async def test_update_description_cmd_fail(fixture_mock_basic_config):
+    module_loader = NoModuleLoader()
+    runner = LocalRunner(module_loader)
+
+    with patch(
+        "autosubmit_api.runners.local_runner.subprocess.check_output",
+        side_effect=subprocess.CalledProcessError(1, "command", "error message"),
+    ):
+        with pytest.raises(subprocess.CalledProcessError):
+            await runner.update_description("test_expid", "New description")
+
+
+@pytest.mark.asyncio
 @pytest.mark.parametrize(
     "params, expected_flags",
     [

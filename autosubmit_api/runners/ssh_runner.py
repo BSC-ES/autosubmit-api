@@ -1,6 +1,7 @@
 import asyncio
 import json
 import re
+import shlex
 from typing import Optional
 
 import paramiko
@@ -543,6 +544,26 @@ class SSHRunner(Runner):
                 raise RuntimeError(f"Failed to set job status: {stderr}")
 
             logger.debug(f"Set job status output: {stdout}")
+            return stdout
+        except Exception as exc:
+            logger.error(f"Command failed with error: {exc}")
+            raise exc
+
+    async def update_description(self, expid: str, description: str):
+        autosubmit_command = (
+            f"autosubmit updatedescrip {expid} {shlex.quote(description)}"
+        )
+        prepared_command = self._prepare_command(autosubmit_command)
+
+        try:
+            logger.debug(f"Running update description command: {prepared_command}")
+            stdout, stderr, exit_code = self._execute_command(prepared_command)
+
+            if exit_code != 0:
+                logger.error(f"Command failed with exit code {exit_code}: {stderr}")
+                raise RuntimeError(f"Failed to update description: {stderr}")
+
+            logger.debug(f"Update description output: {stdout}")
             return stdout
         except Exception as exc:
             logger.error(f"Command failed with error: {exc}")
