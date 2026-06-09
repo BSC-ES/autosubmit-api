@@ -20,7 +20,7 @@ class TestPklReader:
 class TestPackageReader:
     @pytest.mark.parametrize(
         "expid, size",
-        [("a6zj", 4), ("a003", 0), ("aa6f", 2)],
+        [("a6zj", 4), ("a003", 0), ("aa6f", 8)],
     )
     def test_reader(self, fixture_mock_basic_config, expid: str, size: int):
         reader = JobPackageReader(expid).read()

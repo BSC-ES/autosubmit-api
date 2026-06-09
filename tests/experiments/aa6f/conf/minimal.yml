@@ -56,6 +56,7 @@ JOBS:
     RUNNING: chunk
     PLATFORM: MN5
     WALLCLOCK: 00:05
+    SPLITS: 4
   POST:
     FILE: POST.sh
     DEPENDENCIES: SIM
