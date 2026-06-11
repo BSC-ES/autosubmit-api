@@ -16,18 +16,22 @@
 # You should have received a copy of the GNU General Public License
 # along with Autosubmit.  If not, see <http://www.gnu.org/licenses/>.
 import traceback
-from autosubmit_api.history.database_managers import database_models as Models
-from autosubmit_api.performance import utils as PUtils
-from autosubmit_api.history.database_managers.experiment_history_db_manager import ExperimentHistoryDbManager
-from autosubmit_api.history.data_classes.job_data import JobData
-from autosubmit_api.history.data_classes.experiment_run import ExperimentRun
-from autosubmit_api.history.internal_logging import Logging
+from typing import Any, Dict, List, Optional, Tuple
+
 from autosubmit_api.config.basicConfig import APIBasicConfig
-from typing import List, Dict, Optional, Tuple, Any
+from autosubmit_api.history.data_classes.experiment_run import ExperimentRun
+from autosubmit_api.history.data_classes.job_data import JobData
+from autosubmit_api.history.database_managers import database_models as Models
+from autosubmit_api.history.database_managers.experiment_history_db_manager import (
+    ExperimentHistoryDbManager,
+)
+from autosubmit_api.history.internal_logging import Logging
+from autosubmit_api.performance import utils as PUtils
 
 SECONDS_WAIT_PLATFORM = 60
 
-class ExperimentHistory():
+
+class ExperimentHistory:
     def __init__(
         self,
         expid: str,
