@@ -99,6 +99,28 @@ from autosubmit_api.performance.performance_metrics import PerformanceMetrics
             },
             {"considered_jobs_count": 7, "not_considered_jobs_count": 0},
         ),
+        (
+            "aa6f",
+            {
+                "SY": 2.6666666666666665,
+                "SYPD": 5760,
+                "ASYPD": 199.308,
+                "CHSY": 0.0,
+                "JPSY": 121770.0,
+                "RSYPD": 0.0,
+                "post_jobs_total_time_average": 5.0,
+                "processing_elements": 1,
+                "sim_processors": 1,
+                "total_sim_queue_time": 1111,
+                "total_sim_run_time": 40,
+                "total_energy": 81180,
+                "total_footprint": 0.0,
+                "sim_jobs_platform": "MN5",
+                "sim_jobs_platform_PUE": 0.0,
+                "sim_jobs_platform_CF": 0.0,
+            },
+            {"considered_jobs_count": 8, "not_considered_jobs_count": 0},
+        )
     ],
 )
 def test_performance_metrics(
