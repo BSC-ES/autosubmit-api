@@ -214,6 +214,14 @@ class TestRunsList:
                     "CHSY": 0.03,
                 },
             ),
+            (
+                "aa6f",
+                2,
+                {
+                    "SYPD": 5760,
+                    "ASYPD": 199.308,
+                },
+            ),
         ],
     )
     def test_runs_list(
@@ -486,7 +494,9 @@ class TestStatistics:
         )
 
         for job_stat in resp_obj["Statistics"]["JobStatistics"]:
-            assert job_stat["processors"] == 16 # Parallelization that comes from default platform
+            assert (
+                job_stat["processors"] == 16
+            )  # Parallelization that comes from default platform
 
 
 class TestCurrentConfig:
