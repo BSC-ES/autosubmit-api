@@ -141,22 +141,24 @@ class ExperimentHistory:
                     "energy": job_data_dc.energy,
                     "status": job_data_dc.status,
                     "ASYPD": PUtils.calculate_ASYPD_perjob(
-                        job_data_dc.queuing_time_considering_package(jobs_in_package)
+                        queue_run_time=job_data_dc.queuing_time_considering_package(
+                            jobs_in_package
+                        )
                         + job_data_dc.running_time,
-                        average_post_time,
-                        experiment_run.chunk_unit,
-                        experiment_run.chunk_size,
-                        job_data_dc.chunk,
-                        job_data_dc.status_code,
+                        average_post=average_post_time,
+                        chunk_unit=experiment_run.chunk_unit,
+                        chunk_size=experiment_run.chunk_size,
+                        job_chunk=job_data_dc.chunk,
+                        status=job_data_dc.status_code,
                     )
                     if experiment_run
                     else "NA",
                     "SYPD": PUtils.calculate_SYPD_perjob(
-                        job_data_dc.running_time,
-                        experiment_run.chunk_unit,
-                        experiment_run.chunk_size,
-                        job_data_dc.chunk,
-                        job_data_dc.status_code,
+                        run_time=job_data_dc.running_time,
+                        chunk_unit=experiment_run.chunk_unit,
+                        chunk_size=experiment_run.chunk_size,
+                        job_chunk=job_data_dc.chunk,
+                        status=job_data_dc.status_code,
                     )
                     if experiment_run
                     else "NA",

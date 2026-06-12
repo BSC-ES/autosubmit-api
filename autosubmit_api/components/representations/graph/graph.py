@@ -251,21 +251,21 @@ class GraphRepresentation(object):
 
       # Calculate performance metrics
       SYPD = PUtils.calculate_SYPD_perjob(
-        job.run_time,
-        chunk_unit,
-        chunk_size,
-        job.chunk,
-        job.status,
-        job.splits,
+        run_time=job.run_time,
+        chunk_unit=chunk_unit,
+        chunk_size=chunk_size,
+        job_chunk=job.chunk,
+        status=job.status,
+        splits=job.splits,
       )
       ASYPD = PUtils.calculate_ASYPD_perjob(
-        job.total_time,
-        self.average_post_time,
-        chunk_unit,
-        chunk_size,
-        job.chunk,
-        job.status,
-        job.splits
+        queue_run_time=job.total_time,
+        average_post=self.average_post_time,
+        chunk_unit=chunk_unit,
+        chunk_size=chunk_size,
+        job_chunk=job.chunk,
+        status=job.status,
+        splits=job.splits
       )
 
       self.nodes.append({

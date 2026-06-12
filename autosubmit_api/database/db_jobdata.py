@@ -268,7 +268,13 @@ class JobData(object):
         :rtype: void
         """
         result_ASYPD = calculate_ASYPD_perjob(
-            chunk_unit, chunk_size, self.chunk, self.queuing_time(job_package_data) + self.running_time(), average_post_time, Status.STRING_TO_CODE[self.status])
+            queue_run_time=self.queuing_time(job_package_data) + self.running_time(),
+            average_post=average_post_time,
+            chunk_unit=chunk_unit,
+            chunk_size=chunk_size,
+            job_chunk=self.chunk,
+            status=Status.STRING_TO_CODE[self.status],
+        )
         self.metric_ASYPD = result_ASYPD if result_ASYPD > 0 else None
 
     def delta_queue_time(self, job_data_in_package=None):

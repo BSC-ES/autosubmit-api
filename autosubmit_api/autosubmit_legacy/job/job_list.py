@@ -513,24 +513,24 @@ class JobList:
                     "date": ini_date,
                     "date_plus": end_date,
                     "SYPD": calculate_SYPD_perjob(
-                        job.running_time() if job else 0,
-                        chunk_unit,
-                        chunk_size,
-                        job.chunk,
-                        Status.STRING_TO_CODE[job.status],
+                        run_time=job.running_time() if job else 0,
+                        chunk_unit=chunk_unit,
+                        chunk_size=chunk_size,
+                        job_chunk=job.chunk,
+                        status=Status.STRING_TO_CODE[job.status],
                     ),
                     "ASYPD": calculate_ASYPD_perjob(
-                        job.running_time()
+                        queue_run_time=job.running_time()
                         + job.queuing_time(
                             package_to_jobs_for_normalization.get(job.rowtype, None)
                         )
                         if job
                         else 0,
-                        average_post_time,
-                        chunk_unit,
-                        chunk_size,
-                        job.chunk,
-                        Status.STRING_TO_CODE[job.status],
+                        average_post=average_post_time,
+                        chunk_unit=chunk_unit,
+                        chunk_size=chunk_size,
+                        job_chunk=job.chunk,
+                        status=Status.STRING_TO_CODE[job.status],
                     ),
                     "minutes_queue": job.queuing_time(
                         package_to_jobs_for_normalization.get(job.rowtype, None)
