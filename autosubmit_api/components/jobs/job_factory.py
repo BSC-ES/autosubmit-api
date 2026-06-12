@@ -1,11 +1,11 @@
 #!/usr/bin/env python
-# from autosubmitAPIwu.database.db_jobdata import JobData
 from abc import ABCMeta, abstractmethod
 from typing import TYPE_CHECKING, Dict, List, Optional, Set, Tuple
 
 from autosubmit_api.common import utils as util
 from autosubmit_api.common.utils import Status
 from autosubmit_api.components.jobs import utils as JUtils
+from autosubmit_api.database.models import PklJobModel
 from autosubmit_api.history.data_classes.job_data import JobData
 from autosubmit_api.monitor.monitor import Monitor
 
@@ -223,7 +223,7 @@ class Job(metaclass=ABCMeta):
 
 
   @classmethod
-  def from_pkl(cls, pkl_item: str) -> "Job":
+  def from_pkl(cls, pkl_item: PklJobModel) -> "Job":
     job = cls()
     job.name = pkl_item.name
     job._id = pkl_item.id
@@ -289,6 +289,9 @@ class Job(metaclass=ABCMeta):
     job._finish = job_data_dc.finish
     job.ncpus = job_data_dc.ncpus
     job.run_id = job_data_dc.run_id
+    job.workflow_commit = job_data_dc.workflow_commit
+    job.split = job_data_dc.split
+    job.splits = job_data_dc.splits
     return job
 class StandardJob(Job):
   """ Straightforward implementation of Job """
@@ -323,7 +326,10 @@ class SimJob(Job):
   @property
   def SYPD(self) -> float:
     if self.years_per_sim > 0 and self.run_time > 0:
-      return round((self.years_per_sim * util.SECONDS_IN_A_DAY) / self.run_time, 2)
+      _sypd = (self.years_per_sim * util.SECONDS_IN_A_DAY) / self.run_time
+      if isinstance(self.splits, int) and self.splits > 0:
+        _sypd = _sypd / self.splits
+      return round(_sypd, 2)
     return 0
 
   @property
@@ -331,7 +337,10 @@ class SimJob(Job):
     """ ASYPD calculation requires the average of the queue and run time of all post jobs """
     divisor = self.total_time + self.post_jobs_total_time_average
     if divisor > 0:
-      return round((self.years_per_sim * util.SECONDS_IN_A_DAY) / (divisor), 2)
+      _asypd = (self.years_per_sim * util.SECONDS_IN_A_DAY) / divisor
+      if isinstance(self.splits, int) and self.splits > 0:
+        _asypd = _asypd / self.splits
+      return round(_asypd, 2)
     return 0
 
 

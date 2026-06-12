@@ -218,6 +218,10 @@ JobDataTable = Table(
 # Copy JobDataTable to an alternative version which has an additional column
 JobDataTableV18 = table_copy(JobDataTable)
 JobDataTableV18.append_column(Column("workflow_commit", Text, nullable=True))
+JobDataTableV19 = table_copy(JobDataTableV18)
+JobDataTableV19.append_column(Column("split", Integer, nullable=True))
+JobDataTableV19.append_column(Column("splits", Integer, nullable=True))
+JobDataTableV19.append_column(Column("fail_count", Integer, nullable=False, default=0))
 
 UserMetricTable = Table(
     "user_metrics",

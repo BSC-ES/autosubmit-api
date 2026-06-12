@@ -1,11 +1,17 @@
 from typing import Any, Dict
+
 import pytest
 
 from autosubmit_api.builders.joblist_helper_builder import (
     JobListHelperBuilder,
     JobListHelperDirector,
 )
+from autosubmit_api.common.utils import Status
 from autosubmit_api.performance.performance_metrics import PerformanceMetrics
+from autosubmit_api.performance.utils import (
+    calculate_ASYPD_perjob,
+    calculate_SYPD_perjob,
+)
 
 
 @pytest.mark.parametrize(
@@ -99,6 +105,28 @@ from autosubmit_api.performance.performance_metrics import PerformanceMetrics
             },
             {"considered_jobs_count": 7, "not_considered_jobs_count": 0},
         ),
+        (
+            "aa6f",
+            {
+                "SY": 2.6666666666666665,
+                "SYPD": 5760,
+                "ASYPD": 199.308,
+                "CHSY": 0.0,
+                "JPSY": 121770.0,
+                "RSYPD": 0.0,
+                "post_jobs_total_time_average": 5.0,
+                "processing_elements": 1,
+                "sim_processors": 1,
+                "total_sim_queue_time": 1111,
+                "total_sim_run_time": 40,
+                "total_energy": 81180,
+                "total_footprint": 0.0,
+                "sim_jobs_platform": "MN5",
+                "sim_jobs_platform_PUE": 0.0,
+                "sim_jobs_platform_CF": 0.0,
+            },
+            {"considered_jobs_count": 8, "not_considered_jobs_count": 0},
+        ),
     ],
 )
 def test_performance_metrics(
@@ -149,3 +177,145 @@ def test_performance_metrics(
         len(performance_metrics._not_considered)
         == counters["not_considered_jobs_count"]
     )
+
+
+class TestCalculateSYPDPerjob:
+    CHUNK_UNIT = "month"
+    CHUNK_SIZE = 4
+
+    def test_no_splits_matches_baseline(self):
+        result_no_split = calculate_SYPD_perjob(
+            run_time=100,
+            chunk_unit=self.CHUNK_UNIT,
+            chunk_size=self.CHUNK_SIZE,
+            job_chunk=1,
+        )
+        result_split_1 = calculate_SYPD_perjob(
+            run_time=100,
+            chunk_unit=self.CHUNK_UNIT,
+            chunk_size=self.CHUNK_SIZE,
+            job_chunk=1,
+            splits=1,
+        )
+        assert result_no_split == result_split_1
+
+    def test_splits_2_halves_sypd(self):
+        base = calculate_SYPD_perjob(
+            run_time=100,
+            chunk_unit=self.CHUNK_UNIT,
+            chunk_size=self.CHUNK_SIZE,
+            job_chunk=1,
+            splits=1,
+        )
+        split = calculate_SYPD_perjob(
+            run_time=100,
+            chunk_unit=self.CHUNK_UNIT,
+            chunk_size=self.CHUNK_SIZE,
+            job_chunk=1,
+            splits=2,
+        )
+        assert split == pytest.approx(base / 2)
+
+    @pytest.mark.parametrize("bad_splits", [0, -1, None, "abc", 0.5])
+    def test_invalid_splits_falls_back_to_1(self, bad_splits):
+        base = calculate_SYPD_perjob(
+            run_time=100,
+            chunk_unit=self.CHUNK_UNIT,
+            chunk_size=self.CHUNK_SIZE,
+            job_chunk=1,
+            splits=1,
+        )
+        fallback = calculate_SYPD_perjob(
+            run_time=100,
+            chunk_unit=self.CHUNK_UNIT,
+            chunk_size=self.CHUNK_SIZE,
+            job_chunk=1,
+            splits=bad_splits,
+        )
+        assert fallback == pytest.approx(base)
+
+    def test_returns_none_for_non_completed_status(self):
+        result = calculate_SYPD_perjob(
+            run_time=100,
+            chunk_unit=self.CHUNK_UNIT,
+            chunk_size=self.CHUNK_SIZE,
+            job_chunk=1,
+            status=Status.RUNNING,
+            splits=3,
+        )
+        assert result is None
+
+    def test_returns_none_for_zero_run_time(self):
+        result = calculate_SYPD_perjob(
+            run_time=0,
+            chunk_unit=self.CHUNK_UNIT,
+            chunk_size=self.CHUNK_SIZE,
+            job_chunk=1,
+            splits=3,
+        )
+        assert result is None
+
+    def test_returns_none_for_zero_chunk(self):
+        result = calculate_SYPD_perjob(
+            run_time=100,
+            chunk_unit=self.CHUNK_UNIT,
+            chunk_size=self.CHUNK_SIZE,
+            job_chunk=0,
+            splits=3,
+        )
+        assert result is None
+
+
+class TestCalculateASYPDPerjob:
+    CHUNK_UNIT = "month"
+    CHUNK_SIZE = 4
+
+    def test_splits_2_halves_asypd(self):
+        base = calculate_ASYPD_perjob(
+            queue_run_time=100,
+            average_post=10.0,
+            chunk_unit=self.CHUNK_UNIT,
+            chunk_size=self.CHUNK_SIZE,
+            job_chunk=1,
+            splits=1,
+        )
+        split = calculate_ASYPD_perjob(
+            queue_run_time=100,
+            average_post=10.0,
+            chunk_unit=self.CHUNK_UNIT,
+            chunk_size=self.CHUNK_SIZE,
+            job_chunk=1,
+            splits=2,
+        )
+        assert split == pytest.approx(base / 2)
+
+    @pytest.mark.parametrize("bad_splits", [0, -1, None, "abc"])
+    def test_invalid_splits_falls_back_to_1(self, bad_splits):
+        base = calculate_ASYPD_perjob(
+            queue_run_time=100,
+            average_post=5.0,
+            chunk_unit=self.CHUNK_UNIT,
+            chunk_size=self.CHUNK_SIZE,
+            job_chunk=1,
+            splits=1,
+        )
+        fallback = calculate_ASYPD_perjob(
+            queue_run_time=100,
+            average_post=5.0,
+            chunk_unit=self.CHUNK_UNIT,
+            chunk_size=self.CHUNK_SIZE,
+            job_chunk=1,
+            splits=bad_splits,
+        )
+        assert fallback == pytest.approx(base)
+
+    def test_returns_none_when_divisor_zero(self):
+        result = calculate_ASYPD_perjob(
+            queue_run_time=0,
+            average_post=0.0,
+            chunk_unit=self.CHUNK_UNIT,
+            chunk_size=self.CHUNK_SIZE,
+            job_chunk=1,
+            splits=2,
+        )
+        assert result is None

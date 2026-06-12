@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
-from typing import Any, List
+from typing import Any, List, Optional
 
-from pydantic import BaseModel
+from pydantic import BaseModel, field_validator
 from sqlalchemy import Engine, Table, create_engine, or_
 
 from autosubmit_api.config.basicConfig import APIBasicConfig
@@ -43,6 +43,19 @@ class ExperimentJobDataModel(BaseModel):
     children: Any
     platform_output: Any
     workflow_commit: Any = None
+    split: Optional[int] = None
+    splits: Optional[int] = None
+    fail_count: Any = None
+
+    @field_validator("split", "splits", mode="before")
+    @classmethod
+    def parse_int_or_none(cls, v):
+        if v is None:
+            return None
+        try:
+            return int(v)
+        except (ValueError, TypeError):
+            return None
 
 
 class ExperimentJobDataRepository(ABC):
@@ -220,6 +233,7 @@ def create_experiment_job_data_repository(expid: str):
     if APIBasicConfig.DATABASE_BACKEND == "postgres":
         _engine = create_engine(APIBasicConfig.DATABASE_CONN_URL)
         _tables = [
+            tables.table_change_schema(expid, tables.JobDataTableV19),
             tables.table_change_schema(expid, tables.JobDataTableV18),
             tables.table_change_schema(expid, tables.JobDataTable),
         ]
@@ -228,6 +242,7 @@ def create_experiment_job_data_repository(expid: str):
             ExperimentPaths(expid).job_data_db, read_only=True
         )
         _tables = [
+            tables.JobDataTableV19,
             tables.JobDataTableV18,
             tables.JobDataTable,
         ]

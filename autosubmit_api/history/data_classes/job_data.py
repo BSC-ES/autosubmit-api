@@ -65,7 +65,10 @@ class JobData(object):
         rowstatus=Models.RowStatus.INITIAL,
         children="",
         platform_output="",
-        workflow_commit=None
+        workflow_commit=None,
+        split=None,
+        splits=None,
+        fail_count=None,
     ):
       """
       """
@@ -108,6 +111,9 @@ class JobData(object):
       self.children = children # DB 17
       self.platform_output = platform_output # DB 17
       self.workflow_commit = workflow_commit # DB 18
+      self.split = split # DB 19
+      self.splits = splits # DB 19
+      self.fail_count = fail_count # DB 19
 
     @classmethod
     def from_model(cls, row):
@@ -145,7 +151,10 @@ class JobData(object):
             row_dict.get("rowstatus", Models.RowStatus.INITIAL),
             row_dict.get("children", ""),
             row_dict.get("platform_output", ""),
-            row_dict.get("workflow_commit", None)
+            row_dict.get("workflow_commit", None),
+            row_dict.get("split", None),
+            row_dict.get("splits", None),
+            row_dict.get("fail_count", None),
         )
         return job_data
 

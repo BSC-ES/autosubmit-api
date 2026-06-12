@@ -7,7 +7,10 @@ import math
 from collections import namedtuple
 from bscearth.utils.date import date2str
 from dateutil.relativedelta import relativedelta
-from typing import List, Optional, Tuple
+from typing import List, Optional, Tuple, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from autosubmit_api.components.jobs.job_factory import Job
 
 LOCAL_TZ = datetime.datetime.now(datetime.timezone.utc).astimezone().tzinfo
 
@@ -82,7 +85,7 @@ def get_processors_number(conf_job_processors: str) -> int:
     """ In case of error, nothing is done and num_processors will be 0"""
   return num_processors
 
-def separate_job_outliers(jobs: List) -> Tuple[List, List]:
+def separate_job_outliers(jobs: List["Job"]) -> Tuple[List["Job"], List["Job"]]:
   """
   Detect job outliers and separate them from the job list. 
   Zero (and negative) run times are considered outliers.
@@ -128,7 +131,7 @@ def separate_job_outliers(jobs: List) -> Tuple[List, List]:
   return (new_list, outliers)
 
 
-def get_jobs_with_no_outliers(jobs: List) -> List:
+def get_jobs_with_no_outliers(jobs: List["Job"]) -> List["Job"]:
   """
   Returns a list of jobs without outliers
   """  
