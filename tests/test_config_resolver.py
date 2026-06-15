@@ -110,4 +110,4 @@ def test_as4_yml_conf(fixture_mock_basic_config):
     assert isinstance(as_conf.load_parameters(), dict)
 
     assert as_conf.is_valid_mail_address("autosubmit-support@bsc.es") is True
-    assert as_conf.is_valid_mail_address("autosubmit@bsc") is False
+    assert as_conf.is_valid_mail_address("autosubmitbsc") is False
