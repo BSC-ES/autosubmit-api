@@ -600,6 +600,24 @@ class TestExperimentFSConfig:
         assert isinstance(resp_obj["config"]["WRAPPERS"], dict)
         assert isinstance(resp_obj["config"]["WRAPPERS"]["WRAPPER_V"], dict)
 
+    def test_ruamel_yaml_objects(self, fixture_fastapi_client: TestClient):
+        expid = "aa6f"
+        response = fixture_fastapi_client.get(self.endpoint.format(expid=expid))
+        resp_obj: dict = response.json()
+
+        assert isinstance(resp_obj, dict)
+        assert isinstance(resp_obj["config"], dict)
+        assert (
+            isinstance(resp_obj["config"]["contains_nones"], bool)
+            and not resp_obj["config"]["contains_nones"]
+        )
+        assert isinstance(resp_obj["config"]["METADATA"], dict)
+        assert (
+            isinstance(resp_obj["config"]["METADATA"]["SCHEDULE"], str)
+            and resp_obj["config"]["METADATA"]["SCHEDULE"]
+            == "DTSTART:19900101 RRULE:FREQ=YEARLY;UNTIL=20000101\n"
+        )
+
     def test_fs_config_v3_retro(self, fixture_fastapi_client: TestClient):
         expid = "a3tb"
         response = fixture_fastapi_client.get(self.endpoint.format(expid=expid))

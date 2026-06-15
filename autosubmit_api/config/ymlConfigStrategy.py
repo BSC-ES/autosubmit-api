@@ -18,7 +18,7 @@
 # along with Autosubmit.  If not, see <http://www.gnu.org/licenses/>.
 
 from typing import Any, Union
-from autosubmitconfigparser.config.configcommon import AutosubmitConfig as Autosubmit4Config
+from autosubmit.config.configcommon import AutosubmitConfig as Autosubmit4Config
 from autosubmit_api.logger import logger
 from autosubmit_api.config.basicConfig import APIBasicConfig
 from autosubmit_api.config.IConfigStrategy import IConfigStrategy
