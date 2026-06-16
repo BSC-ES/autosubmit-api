@@ -57,6 +57,7 @@ class ExperimentEtaResponse(BaseModel):
     runtime_per_chunk_hours: Optional[float]
     current_chunk: Optional[int]
 
+
 class PreferredUsernameResponse(BaseModel):
     user_id: str
     preferred_username: str
