@@ -50,6 +50,13 @@ class ExperimentWrappersResponse(BaseModel):
     wrappers: List[BaseExperimentWrapper]
 
 
+class ExperimentEtaResponse(BaseModel):
+    eta_days: Optional[float]
+    chunks_total: Optional[int]
+    chunks_remaining: Optional[int]
+    runtime_per_chunk_hours: Optional[float]
+    current_chunk: Optional[int]
+
 class PreferredUsernameResponse(BaseModel):
     user_id: str
     preferred_username: str
