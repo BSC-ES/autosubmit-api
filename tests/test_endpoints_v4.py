@@ -204,6 +204,21 @@ class TestExperimentDetail:
         )
 
 
+class TestExperimentEta:
+    endpoint = "/v4/experiments/{expid}/eta"
+
+    def test_eta(self, fixture_fastapi_client: TestClient):
+        expid = "a003"
+        response = fixture_fastapi_client.get(self.endpoint.format(expid=expid))
+        resp_obj: dict = response.json()
+
+        assert isinstance(resp_obj, dict)
+        assert "eta_days" in resp_obj
+        assert "chunks_total" in resp_obj
+        assert "chunks_remaining" in resp_obj
+        assert "runtime_per_chunk_hours" in resp_obj
+        assert "current_chunk" in resp_obj
+
 class TestExperimentJobs:
     endpoint = "/v4/experiments/{expid}/jobs"
 

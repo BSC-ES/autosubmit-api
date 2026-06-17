@@ -25,6 +25,7 @@ from autosubmit_api.components.jobs.job_detail import (
     JobDetailRetriever,
     JobNotFoundError,
 )
+from autosubmit_api.components.eta.service import ExperimentEtaService
 from autosubmit_api.config.basicConfig import APIBasicConfig
 from autosubmit_api.config.confConfigStrategy import confConfigStrategy
 from autosubmit_api.config.config_common import AutosubmitConfigResolver
@@ -36,6 +37,7 @@ from autosubmit_api.models.requests import (
     ExperimentsSearchRequest,
 )
 from autosubmit_api.models.responses import (
+    ExperimentEtaResponse,
     ExperimentFSConfigResponse,
     ExperimentJobsResponse,
     ExperimentRunConfigResponse,
@@ -45,6 +47,7 @@ from autosubmit_api.models.responses import (
 )
 from autosubmit_api.persistance.experiment import ExperimentPaths
 from autosubmit_api.persistance.job_package_reader import JobPackageReader
+from autosubmit_api.repositories.experiment_run import create_experiment_run_repository
 from autosubmit_api.repositories.experiment_structure import (
     create_experiment_structure_repository,
 )
@@ -444,6 +447,30 @@ async def get_runs_with_user_metrics(
             for run_id in run_ids
         ]
     }
+
+
+@router.get("/{expid}/eta", name="Get experiment ETA")
+async def get_experiment_eta(
+    expid: str, user_id: Optional[str] = Depends(auth_token_dependency())
+) -> ExperimentEtaResponse:
+    """
+    Get the estimated time of arrival (remaining time) for an experiment.
+    """
+    try:
+        run_repo = create_experiment_run_repository(expid)
+        last_run = run_repo.get_last_run()
+        chunk_unit = last_run.chunk_unit if last_run else "month"
+        chunk_size = last_run.chunk_size if last_run else 1
+    except Exception:
+        chunk_unit = "month"
+        chunk_size = 1
+
+    # Compute ETA
+    eta_service = ExperimentEtaService(expid)
+    result = eta_service.get_eta(chunk_unit=chunk_unit, chunk_size=chunk_size)
+    # log info the result
+    logger.info(f"ETA result for experiment {expid}: {result}")
+    return ExperimentEtaResponse(**result)
 
 
 class JobDetailResponse(BaseModel):
