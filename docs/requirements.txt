@@ -1,6 +1,6 @@
 setuptools==80.10.2
 livereload
-pydata-sphinx-theme==0.16.*
+pydata-sphinx-theme==0.19.*
 sphinx==7.*
 sphinx-autobuild==2024.10.*
 sphinx_rtd_theme
