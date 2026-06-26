@@ -33,7 +33,7 @@ class ExperimentEtaCalculator:
 
         return total_chunks, current_chunk
 
-    @staticmethod
+    @classmethod
     def calculate_eta(
         cls, jobs_data: list, chunk_unit: str, chunk_size: int, strategy
     ) -> dict:
