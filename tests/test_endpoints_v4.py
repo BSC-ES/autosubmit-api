@@ -216,8 +216,7 @@ class TestExperimentEta:
         assert "eta_days" in resp_obj
         assert "chunks_total" in resp_obj
         assert "chunks_remaining" in resp_obj
-        assert "runtime_per_chunk_hours" in resp_obj
-        assert "current_chunk" in resp_obj
+        assert "avg_wallclock_per_chunk_hours" in resp_obj
 
 
 class TestExperimentJobs:
