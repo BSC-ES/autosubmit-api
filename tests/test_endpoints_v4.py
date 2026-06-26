@@ -219,6 +219,7 @@ class TestExperimentEta:
         assert "runtime_per_chunk_hours" in resp_obj
         assert "current_chunk" in resp_obj
 
+
 class TestExperimentJobs:
     endpoint = "/v4/experiments/{expid}/jobs"
 

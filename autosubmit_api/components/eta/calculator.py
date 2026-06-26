@@ -1,5 +1,6 @@
 from typing import Optional
-from autosubmit_api.common.utils import Status
+
+from autosubmit_api.components.eta.strategies import is_job_completed
 
 
 class ExperimentEtaCalculator:
@@ -22,18 +23,17 @@ class ExperimentEtaCalculator:
 
         total_chunks = max(chunks)
 
-        # Current chunk: highest chunk with at least one active job
-        # TODO: Not sure which should be the status of running chunks
+        # Current chunk: highest chunk with at least one non-completed job
         active_chunks = {
             job.chunk
             for job in jobs_data
-            if job.chunk is not None and job.status == Status.RUNNING
+            if job.chunk is not None and not is_job_completed(job)
         }
         current_chunk = max(active_chunks) if active_chunks else total_chunks
 
         return total_chunks, current_chunk
 
-    @classmethod
+    @staticmethod
     def calculate_eta(
         cls, jobs_data: list, chunk_unit: str, chunk_size: int, strategy
     ) -> dict:
@@ -56,34 +56,35 @@ class ExperimentEtaCalculator:
                 "eta_days": None,
                 "chunks_total": None,
                 "chunks_remaining": None,
-                "runtime_per_chunk_hours": None,
-                "current_chunk": None,
+                "avg_wallclock_per_chunk_hours": None,
             }
         # If the exp is completed
         if current_chunk >= total_chunks and all(
-            job.status == Status.COMPLETED for job in jobs_data
+            is_job_completed(job) for job in jobs_data
         ):
             return {
                 "eta_days": 0.0,
                 "chunks_total": total_chunks,
                 "chunks_remaining": 0,
-                "runtime_per_chunk_hours": 0.0,
-                "current_chunk": current_chunk,
+                "avg_wallclock_per_chunk_hours": 0.0,
             }
 
         chunks_remaining = total_chunks - current_chunk
 
-        runtime_per_chunk_hours = strategy.calculate(jobs_data, chunk_unit, chunk_size)
+        avg_wallclock_per_chunk_hours = strategy.calculate(
+            jobs_data, chunk_unit, chunk_size
+        )
 
-        if runtime_per_chunk_hours is None or chunks_remaining <= 0:
+        if avg_wallclock_per_chunk_hours is None or chunks_remaining <= 0:
             eta_days = None
         else:
-            eta_days = round((runtime_per_chunk_hours * chunks_remaining) / 24.0, 2)
+            eta_days = round(
+                (avg_wallclock_per_chunk_hours * chunks_remaining) / 24.0, 2
+            )
 
         return {
             "eta_days": eta_days,
             "chunks_total": total_chunks,
             "chunks_remaining": chunks_remaining,
-            "runtime_per_chunk_hours": runtime_per_chunk_hours,
-            "current_chunk": current_chunk,
+            "avg_wallclock_per_chunk_hours": avg_wallclock_per_chunk_hours,
         }

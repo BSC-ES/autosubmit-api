@@ -54,8 +54,7 @@ class ExperimentEtaResponse(BaseModel):
     eta_days: Optional[float]
     chunks_total: Optional[int]
     chunks_remaining: Optional[int]
-    runtime_per_chunk_hours: Optional[float]
-    current_chunk: Optional[int]
+    avg_wallclock_per_chunk_hours: Optional[float]
 
 
 class PreferredUsernameResponse(BaseModel):

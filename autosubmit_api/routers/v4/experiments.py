@@ -451,10 +451,13 @@ async def get_runs_with_user_metrics(
 
 @router.get("/{expid}/eta", name="Get experiment ETA")
 async def get_experiment_eta(
-    expid: str, user_id: Optional[str] = Depends(auth_token_dependency())
+    expid: str,
+    section: Annotated[str, Query(description="Job section to compute ETA for")] = "SIM",
+    user_id: Optional[str] = Depends(auth_token_dependency()),
 ) -> ExperimentEtaResponse:
     """
-    Get the estimated time of arrival (remaining time) for an experiment.
+    Get the estimated time of arrival (remaining time) for an experiment's
+    job section (e.g. SIM, APP, POST). Defaults to SIM.
     """
     try:
         run_repo = create_experiment_run_repository(expid)
@@ -467,9 +470,11 @@ async def get_experiment_eta(
 
     # Compute ETA
     eta_service = ExperimentEtaService(expid)
-    result = eta_service.get_eta(chunk_unit=chunk_unit, chunk_size=chunk_size)
+    result = eta_service.get_eta(
+        chunk_unit=chunk_unit, chunk_size=chunk_size, section=section
+    )
     # log info the result
-    logger.info(f"ETA result for experiment {expid}: {result}")
+    logger.info(f"ETA result for experiment {expid} (section={section}): {result}")
     return ExperimentEtaResponse(**result)
 
 
