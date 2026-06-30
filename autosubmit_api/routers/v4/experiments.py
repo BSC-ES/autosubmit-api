@@ -7,7 +7,7 @@ import traceback
 from collections import deque
 from datetime import datetime, timezone
 from http import HTTPStatus
-from typing import Annotated, Any, Dict, List, Literal, Optional
+from typing import Annotated, Any, Dict, List, Literal, Optional, Union
 
 from bscearth.utils.config_parser import ConfigParserFactory
 from fastapi import APIRouter, Depends, HTTPException, Query
@@ -180,6 +180,12 @@ async def get_experiment_detail(
 async def get_experiment_jobs(
     expid: str,
     view: Annotated[Literal["quick", "base"], Query()] = "base",
+    date: Optional[str] = Query(None, description="Filter by job date"),
+    member: Optional[str] = Query(None, description="Filter by job member"),
+    section: Optional[str] = Query(None, description="Filter by job section"),
+    chunk: Optional[Union[int, Literal["NA"]]] = Query(
+        None, description="Filter by job chunk"
+    ),
     user_id: Optional[str] = Depends(auth_token_dependency()),
 ) -> ExperimentJobsResponse:
     """
@@ -190,7 +196,9 @@ async def get_experiment_jobs(
     # Read the pkl
     try:
         job_list_repo = create_jobs_repository(expid)
-        current_content = job_list_repo.get_all()
+        current_content = job_list_repo.search(
+            date=date, member=member, section=section, chunk=chunk
+        )
     except Exception as exc:
         error_message = "Error while reading the job list"
         logger.error(error_message + f": {exc}")
@@ -617,3 +625,53 @@ async def get_experiment_job_children(
             logger.warning(traceback.format_exc())
 
     return {"children": child_items}
+
+
+@router.get("/{expid}/jobs-category-tree", name="Get experiment jobs category tree")
+async def get_experiment_jobs_category_tree(
+    expid: str,
+    include_status: bool = False,
+    user_id: Optional[str] = Depends(auth_token_dependency()),
+) -> Dict:
+    """
+    Get the jobs category tree of an experiment
+    It helps navigating the jobs in a hierarchical way,
+    based on their date, member, chunk, section, and status.
+    This doesn't return the jobs themselves, but a tree structure that can be used to filter them.
+    """
+    PROPS = ["date", "member", "section", "status"]
+    try:
+        job_list_repo = create_jobs_repository(expid)
+
+        counters = job_list_repo.get_properties_counts(PROPS)
+
+        tree = {}
+        # First level: date
+        for key, count in counters.items():
+            raw_date, member, section, status_code = key
+            # datetime to string in YYYY-MM-DD format
+            date = (
+                raw_date.strftime("%Y-%m-%d")
+                if isinstance(raw_date, datetime)
+                else "NA"
+            )
+            member = member if member else "NA"
+            status = Status.VALUE_TO_KEY.get(status_code, "UNKNOWN")
+
+            if date not in tree:
+                tree[date] = {}
+            if member not in tree[date]:
+                tree[date][member] = {}
+            if section not in tree[date][member]:
+                tree[date][member][section] = {}
+            tree[date][member][section][status] = count
+
+    except Exception as exc:
+        error_message = "Error while reading the experiment jobs category tree"
+        logger.error(error_message + f": {exc}")
+        logger.error(traceback.format_exc())
+        raise HTTPException(
+            status_code=HTTPStatus.INTERNAL_SERVER_ERROR, detail=error_message
+        )
+
+    return {"properties_hierarchy": PROPS, "category_tree": tree}
