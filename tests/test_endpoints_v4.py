@@ -1,6 +1,7 @@
 from datetime import datetime, timedelta, timezone
 from http import HTTPStatus
 import random
+import re
 from typing import Any
 from unittest.mock import AsyncMock, MagicMock, patch
 from uuid import uuid4
@@ -236,6 +237,159 @@ class TestExperimentJobs:
             assert isinstance(job, dict) and len(job.keys()) > 2
             assert isinstance(job["name"], str) and job["name"].startswith(expid)
             assert isinstance(job["status"], str)
+
+    @pytest.mark.parametrize(
+        "expid, params, expected_count, expected_names",
+        [
+            pytest.param(
+                "a003",
+                {"date": "2022-04-01"},
+                4,
+                [
+                    "a003_20220401_fc0_INI",
+                    "a003_20220401_fc0_1_SIM",
+                    "a003_20220401_fc0_2_SIM",
+                    "a003_20220401_fc0_TRANSFER",
+                ],
+                id="date filter with existing date",
+            ),
+            pytest.param(
+                "a003",
+                {"date": "NA"},
+                4,
+                ["a003_LOCAL_SETUP", "a003_REMOTE_SETUP", "a003_POST", "a003_CLEAN"],
+                id="date filter with NA date (all jobs without a date)",
+            ),
+            pytest.param(
+                "a003",
+                {"date": "1900-01-01"},
+                0,
+                [],
+                id="date filter with non-existent date",
+            ),
+            pytest.param(
+                "a003",
+                {"member": "fc0"},
+                4,
+                [
+                    "a003_20220401_fc0_INI",
+                    "a003_20220401_fc0_1_SIM",
+                    "a003_20220401_fc0_2_SIM",
+                    "a003_20220401_fc0_TRANSFER",
+                ],
+                id="member filter with existing member",
+            ),
+            pytest.param(
+                "a003",
+                {"member": "NA"},
+                4,
+                ["a003_LOCAL_SETUP", "a003_REMOTE_SETUP", "a003_POST", "a003_CLEAN"],
+                id="member filter with NA member (all jobs without a member)",
+            ),
+            pytest.param(
+                "a003",
+                {"section": "SIM"},
+                2,
+                ["a003_20220401_fc0_1_SIM", "a003_20220401_fc0_2_SIM"],
+                id="section filter with existing section",
+            ),
+            pytest.param(
+                "a003",
+                {"section": "INI"},
+                1,
+                ["a003_20220401_fc0_INI"],
+                id="section filter with INI section",
+            ),
+            pytest.param(
+                "a003",
+                {"chunk": 1},
+                1,
+                ["a003_20220401_fc0_1_SIM"],
+                id="chunk filter with existing chunk",
+            ),
+            pytest.param(
+                "a003",
+                {"chunk": 2},
+                1,
+                ["a003_20220401_fc0_2_SIM"],
+                id="chunk filter with existing chunk",
+            ),
+            pytest.param(
+                "a003",
+                {"chunk": "NA"},
+                6,
+                [
+                    "a003_LOCAL_SETUP",
+                    "a003_REMOTE_SETUP",
+                    "a003_20220401_fc0_INI",
+                    "a003_POST",
+                    "a003_CLEAN",
+                    "a003_20220401_fc0_TRANSFER",
+                ],
+                id="chunk filter with NA chunk (all jobs without a chunk)",
+            ),
+        ],
+    )
+    def test_filter(
+        self,
+        fixture_fastapi_client: TestClient,
+        expid: str,
+        params: dict,
+        expected_count: int,
+        expected_names: list,
+    ):
+        response = fixture_fastapi_client.get(
+            self.endpoint.format(expid=expid), params=params
+        )
+        resp_obj: dict = response.json()
+
+        assert response.status_code == HTTPStatus.OK
+        assert len(resp_obj["jobs"]) == expected_count
+        returned_names = [j["name"] for j in resp_obj["jobs"]]
+        assert sorted(returned_names) == sorted(expected_names)
+
+    def test_filter_combined(self, fixture_fastapi_client: TestClient):
+        """Multiple filters are ANDed together."""
+        response = fixture_fastapi_client.get(
+            self.endpoint.format(expid="a003"),
+            params={"date": "2022-04-01", "member": "fc0", "section": "SIM"},
+        )
+        resp_obj: dict = response.json()
+
+        assert response.status_code == HTTPStatus.OK
+        assert len(resp_obj["jobs"]) == 2
+        returned_names = [j["name"] for j in resp_obj["jobs"]]
+        assert sorted(returned_names) == sorted(
+            ["a003_20220401_fc0_1_SIM", "a003_20220401_fc0_2_SIM"]
+        )
+
+    def test_filter_returned_fields_match(self, fixture_fastapi_client: TestClient):
+        """Jobs returned by a section filter all have that section in the base view."""
+        response = fixture_fastapi_client.get(
+            self.endpoint.format(expid="a6zj"),
+            params={"section": "SIM", "view": "base"},
+        )
+        resp_obj: dict = response.json()
+
+        assert response.status_code == HTTPStatus.OK
+        assert len(resp_obj["jobs"]) == 4
+        for job in resp_obj["jobs"]:
+            assert job["section"] == "SIM"
+            assert job["member"] == "fc0"
+            assert job["date"] == "2000-01-01"
+
+    def test_filter_chunk_all_have_chunk(self, fixture_fastapi_client: TestClient):
+        """Jobs returned by chunk=1 all have chunk=1 in the base view."""
+        response = fixture_fastapi_client.get(
+            self.endpoint.format(expid="a6zj"),
+            params={"chunk": 1, "view": "base"},
+        )
+        resp_obj: dict = response.json()
+
+        assert response.status_code == HTTPStatus.OK
+        assert len(resp_obj["jobs"]) == 1
+        assert resp_obj["jobs"][0]["chunk"] == 1
+        assert resp_obj["jobs"][0]["name"] == "a6zj_20000101_fc0_1_SIM"
 
 
 class TestExperimentJobDetail:
@@ -560,6 +714,92 @@ class TestExperimentJobChildren:
         assert child["job_name"] == "a003_REMOTE_SETUP"
         assert "status" in child
         assert isinstance(child["status"], str)
+
+
+class TestExperimentJobsCategoryTree:
+    endpoint = "/v4/experiments/{expid}/jobs-category-tree"
+
+    @pytest.mark.parametrize("expid", ["a003", "a6zj"])
+    def test_tree_nested_structure(
+        self, fixture_fastapi_client: TestClient, expid: str
+    ):
+        """Tree should be date -> member -> section -> status -> int count."""
+        response = fixture_fastapi_client.get(self.endpoint.format(expid=expid))
+        resp_obj: dict = response.json()
+
+        assert response.status_code == HTTPStatus.OK
+
+        assert "properties_hierarchy" in resp_obj
+        assert resp_obj["properties_hierarchy"] == [
+            "date",
+            "member",
+            "section",
+            "status",
+        ]
+
+        tree = resp_obj["category_tree"]
+        assert isinstance(tree, dict)
+        assert len(tree) > 0
+
+        date_pattern = re.compile(r"^\d{4}-\d{2}-\d{2}$")
+        for date_val, members in tree.items():
+            assert isinstance(date_val, str)
+            assert date_val == "NA" or date_pattern.match(date_val), (
+                f"Unexpected date format: {date_val}"
+            )
+            assert isinstance(members, dict)
+            for member_val, sections in members.items():
+                assert isinstance(member_val, str)
+                assert isinstance(sections, dict)
+                for section_val, statuses in sections.items():
+                    assert isinstance(section_val, str)
+                    assert isinstance(statuses, dict)
+                    for status_val, count in statuses.items():
+                        assert isinstance(status_val, str)
+                        assert isinstance(count, int) and count > 0
+
+    def test_null_member_becomes_na(self, fixture_fastapi_client: TestClient):
+        """Jobs without a member (e.g. LOCAL_SETUP) should appear under 'NA'."""
+        response = fixture_fastapi_client.get(self.endpoint.format(expid="a003"))
+        resp_obj: dict = response.json()
+
+        assert response.status_code == HTTPStatus.OK
+        tree = resp_obj["category_tree"]
+        # a003 has no date/member
+        assert "NA" in tree
+        assert "NA" in tree["NA"]
+
+    def test_total_count_matches_jobs(self, fixture_fastapi_client: TestClient):
+        """Sum of all leaf counts must equal the total number of jobs."""
+        response = fixture_fastapi_client.get(self.endpoint.format(expid="a003"))
+        resp_obj: dict = response.json()
+
+        assert response.status_code == HTTPStatus.OK
+        tree = resp_obj["category_tree"]
+        total = sum(
+            count
+            for members in tree.values()
+            for sections in members.values()
+            for statuses in sections.values()
+            for count in statuses.values()
+        )
+        # a003 has 8 jobs in its pkl fixture
+        assert total == 8
+
+    def test_repo_error_returns_500(
+        self, fixture_fastapi_client: TestClient, monkeypatch: pytest.MonkeyPatch
+    ):
+        monkeypatch.setattr(
+            "autosubmit_api.routers.v4.experiments.create_jobs_repository",
+            custom_return_value(
+                MagicMock(
+                    get_properties_counts=MagicMock(side_effect=Exception("db error"))
+                )
+            ),
+        )
+        response = fixture_fastapi_client.get(self.endpoint.format(expid="a003"))
+
+        assert response.status_code == HTTPStatus.INTERNAL_SERVER_ERROR
 
 
 class TestExperimentWrappers:
