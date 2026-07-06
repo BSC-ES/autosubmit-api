@@ -1,6 +1,6 @@
 import datetime
 from abc import ABC, abstractmethod
-from typing import Any, List, Literal, Optional, Union
+from typing import Any, List, Optional
 
 from pydantic import BaseModel
 
@@ -156,40 +156,27 @@ class JobsPklRepository(JobsRepository):
 
     def search(
         self,
-        status: Optional[str] = None,
-        date: Optional[str] = None,
-        member: Optional[str] = None,
-        section: Optional[str] = None,
-        chunk: Optional[Union[int, Literal["NA"]]] = None,
+        status: Optional[str] = common_utils._UNSET,
+        date: Optional[str] = common_utils._UNSET,
+        member: Optional[str] = common_utils._UNSET,
+        section: Optional[str] = common_utils._UNSET,
+        chunk: Optional[int] = common_utils._UNSET,
     ) -> List[JobData]:
         """
         Searches jobs based on the given criteria, reading the pkl once.
         """
         pkl_content = self.pkl_reader.parse_job_list()
         results = []
-        print(f"Searching jobs with criteria - status: {status}, date: {date}, member: {member}, section: {section}, chunk: {chunk}")
         for job in pkl_content:
-            print(f"Checking job: {job.name}, status: {job.status}, date: {job.date}, member: {job.member}, section: {job.section}, chunk: {job.chunk}")
-            if date is not None:
-                if date == "NA" and job.date is not None:
-                    continue
-                if date != "NA" and (job.date is None or job.date.strftime("%Y-%m-%d") != date):
-                    continue
-            if member is not None:
-                if member == "NA" and job.member is not None:
-                    continue
-                if member != "NA" and job.member != member:
-                    continue
-            if section is not None:
-                if section == "NA" and job.section is not None:
-                    continue
-                if section != "NA" and job.section != section:
-                    continue
-            if chunk is not None:
-                if chunk == "NA" and job.chunk is not None:
-                    continue
-                if chunk != "NA" and job.chunk != chunk:
-                    continue
+            job_date = job.date.strftime("%Y-%m-%d") if job.date is not None else None
+            if date is not common_utils._UNSET and date != job_date:
+                continue
+            if member is not common_utils._UNSET and member != job.member:
+                continue
+            if section is not common_utils._UNSET and section != job.section:
+                continue
+            if chunk is not common_utils._UNSET and chunk != job.chunk:
+                continue
 
             results.append(
                 JobData(

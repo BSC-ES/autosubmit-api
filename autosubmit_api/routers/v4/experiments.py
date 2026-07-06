@@ -20,7 +20,7 @@ from autosubmit_api.builders.experiment_history_builder import (
     ExperimentHistoryBuilder,
     ExperimentHistoryDirector,
 )
-from autosubmit_api.common.utils import Status, timestamp_to_datetime_format
+from autosubmit_api.common.utils import Status, _UNSET, timestamp_to_datetime_format
 from autosubmit_api.components.jobs.job_detail import (
     JobDetailRetriever,
     JobNotFoundError,
@@ -193,11 +193,27 @@ async def get_experiment_jobs(
     BASE view returns base content of the pkl file.
     QUICK view returns a reduced payload with just the name and status of the jobs.
     """
+
+    def _to_filter(val):
+        """Translate HTTP query param to repository filter value.
+        None (not provided) -> _UNSET (skip filter)
+        "NA" -> None (filter for null)
+        value -> value (filter by value)
+        """
+        if val is None:
+            return _UNSET
+        if val == "NA":
+            return None
+        return val
+
     # Read the pkl
     try:
         job_list_repo = create_jobs_repository(expid)
         current_content = job_list_repo.search(
-            date=date, member=member, section=section, chunk=chunk
+            date=_to_filter(date),
+            member=_to_filter(member),
+            section=_to_filter(section),
+            chunk=_to_filter(chunk),
         )
     except Exception as exc:
         error_message = "Error while reading the job list"
