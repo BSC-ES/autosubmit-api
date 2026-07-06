@@ -1,4 +1,5 @@
 import random
+import re
 from datetime import datetime, timedelta, timezone
 from http import HTTPStatus
 from typing import Any
@@ -992,6 +993,92 @@ class TestExperimentJobChildren:
             assert child["job_name"] == expected_name
             assert "status" in child
             assert child["status"] == expected_status
+
+
+class TestExperimentJobsCategoryTree:
+    endpoint = "/v4/experiments/{expid}/jobs-category-tree"
+
+    @pytest.mark.parametrize("expid", ["a003", "a6zj"])
+    def test_tree_nested_structure(
+        self, fixture_fastapi_client: TestClient, expid: str
+    ):
+        """Tree should be date -> member -> section -> status -> int count."""
+        response = fixture_fastapi_client.get(self.endpoint.format(expid=expid))
+        resp_obj: dict = response.json()
+
+        assert response.status_code == HTTPStatus.OK
+
+        assert "properties_hierarchy" in resp_obj
+        assert resp_obj["properties_hierarchy"] == [
+            "date",
+            "member",
+            "section",
+            "status",
+        ]
+
+        tree = resp_obj["category_tree"]
+        assert isinstance(tree, dict)
+        assert len(tree) > 0
+
+        date_pattern = re.compile(r"^\d{4}-\d{2}-\d{2}$")
+        for date_val, members in tree.items():
+            assert isinstance(date_val, str)
+            assert date_val == "NA" or date_pattern.match(date_val), (
+                f"Unexpected date format: {date_val}"
+            )
+            assert isinstance(members, dict)
+            for member_val, sections in members.items():
+                assert isinstance(member_val, str)
+                assert isinstance(sections, dict)
+                for section_val, statuses in sections.items():
+                    assert isinstance(section_val, str)
+                    assert isinstance(statuses, dict)
+                    for status_val, count in statuses.items():
+                        assert isinstance(status_val, str)
+                        assert isinstance(count, int) and count > 0
+
+    def test_null_member_becomes_na(self, fixture_fastapi_client: TestClient):
+        """Jobs without a member (e.g. LOCAL_SETUP) should appear under 'NA'."""
+        response = fixture_fastapi_client.get(self.endpoint.format(expid="a003"))
+        resp_obj: dict = response.json()
+
+        assert response.status_code == HTTPStatus.OK
+        tree = resp_obj["category_tree"]
+        # a003 has no date/member
+        assert "NA" in tree
+        assert "NA" in tree["NA"]
+
+    def test_total_count_matches_jobs(self, fixture_fastapi_client: TestClient):
+        """Sum of all leaf counts must equal the total number of jobs."""
+        response = fixture_fastapi_client.get(self.endpoint.format(expid="a003"))
+        resp_obj: dict = response.json()
+
+        assert response.status_code == HTTPStatus.OK
+        tree = resp_obj["category_tree"]
+        total = sum(
+            count
+            for members in tree.values()
+            for sections in members.values()
+            for statuses in sections.values()
+            for count in statuses.values()
+        )
+        # a003 has 8 jobs in its pkl fixture
+        assert total == 8
+
+    def test_repo_error_returns_500(
+        self, fixture_fastapi_client: TestClient, monkeypatch: pytest.MonkeyPatch
+    ):
+        monkeypatch.setattr(
+            "autosubmit_api.routers.v4.experiments.create_jobs_repository",
+            custom_return_value(
+                MagicMock(
+                    get_properties_counts=MagicMock(side_effect=Exception("db error"))
+                )
+            ),
+        )
+        response = fixture_fastapi_client.get(self.endpoint.format(expid="a003"))
+
+        assert response.status_code == HTTPStatus.INTERNAL_SERVER_ERROR
 
 
 class TestExperimentWrappers:
