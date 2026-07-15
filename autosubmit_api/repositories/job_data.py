@@ -84,6 +84,14 @@ class ExperimentJobDataRepository(ABC):
         """
 
     @abstractmethod
+    def get_last_job_data_by_name_list(
+        self, job_names: List[str]
+    ) -> List[ExperimentJobDataModel]:
+        """
+        Gets last job data of a specific list of job names
+        """
+
+    @abstractmethod
     def get_all(self) -> List[ExperimentJobDataModel]:
         """
         Gets all job data
@@ -177,6 +185,30 @@ class ExperimentJobDataSQLRepository(ExperimentJobDataRepository):
             return ExperimentJobDataModel.model_validate(result, from_attributes=True)
         else:
             raise ValueError(f"No job data found for job name: {job_name}")
+
+    def get_last_job_data_by_name_list(self, job_names: List[str]):
+        # SQLite default SQLITE_MAX_VARIABLE_NUMBER is 999
+        # PostgreSQL default max number of parameters is 32767
+        _CHUNK_SIZE = 32767 if APIBasicConfig.DATABASE_BACKEND == "postgres" else 999
+        rows = []
+        with self.engine.connect() as conn:
+            for i in range(0, len(job_names), _CHUNK_SIZE):
+                chunk = job_names[i : i + _CHUNK_SIZE]
+                statement = (
+                    self.table.select()
+                    .where(
+                        (self.table.c.job_name.in_(chunk)),
+                        (self.table.c.rowtype >= 2),
+                        (self.table.c.last == 1),
+                    )
+                    .order_by(self.table.c.counter.desc())
+                )
+                rows.extend(conn.execute(statement).all())
+
+        return [
+            ExperimentJobDataModel.model_validate(row, from_attributes=True)
+            for row in rows
+        ]
 
     def get_all(self):
         with self.engine.connect() as conn:

@@ -25,6 +25,7 @@ from autosubmit_api.components.jobs.job_detail import (
     JobDetailRetriever,
     JobNotFoundError,
 )
+from autosubmit_api.components.jobs.utils import get_fixed_experiment_times
 from autosubmit_api.config.basicConfig import APIBasicConfig
 from autosubmit_api.config.confConfigStrategy import confConfigStrategy
 from autosubmit_api.config.config_common import AutosubmitConfigResolver
@@ -48,6 +49,7 @@ from autosubmit_api.persistance.job_package_reader import JobPackageReader
 from autosubmit_api.repositories.experiment_structure import (
     create_experiment_structure_repository,
 )
+from autosubmit_api.repositories.job_data import create_experiment_job_data_repository
 from autosubmit_api.repositories.jobs import create_jobs_repository
 from autosubmit_api.repositories.join.experiment_join import (
     create_experiment_join_repository,
@@ -179,7 +181,7 @@ async def get_experiment_detail(
 @router.get("/{expid}/jobs", name="List experiment jobs")
 async def get_experiment_jobs(
     expid: str,
-    view: Annotated[Literal["quick", "base"], Query()] = "base",
+    view: Annotated[Literal["quick", "base", "extended"], Query()] = "base",
     date: Optional[str] = Query(None, description="Filter by job date"),
     member: Optional[str] = Query(None, description="Filter by job member"),
     section: Optional[str] = Query(None, description="Filter by job section"),
@@ -223,6 +225,23 @@ async def get_experiment_jobs(
             status_code=HTTPStatus.INTERNAL_SERVER_ERROR, detail=error_message
         )
 
+    if view == "extended":
+        # Get the last job data for all jobs in the current content
+        job_names = [job_item.name for job_item in current_content]
+        try:
+            job_data_repo = create_experiment_job_data_repository(expid)
+            last_job_data_list = job_data_repo.get_last_job_data_by_name_list(job_names)
+            last_job_data_map = {
+                job_data.job_name: job_data for job_data in last_job_data_list
+            }
+        except Exception as exc:
+            error_message = "Error while reading the last job data"
+            logger.error(error_message + f": {exc}")
+            logger.error(traceback.format_exc())
+            raise HTTPException(
+                status_code=HTTPStatus.INTERNAL_SERVER_ERROR, detail=error_message
+            )
+
     pkl_jobs = deque()
     for job_item in current_content:
         resp_job = {
@@ -230,7 +249,7 @@ async def get_experiment_jobs(
             "status": Status.VALUE_TO_KEY.get(job_item.status, Status.UNKNOWN),
         }
 
-        if view == "base":
+        if view in ["base", "extended"]:
             resp_job = {
                 **resp_job,
                 "priority": job_item.priority,
@@ -249,6 +268,19 @@ async def get_experiment_jobs(
                 "out_path_remote": job_item.out_path_remote,
                 "err_path_remote": job_item.err_path_remote,
             }
+
+        if view == "extended":
+            last_job_data = last_job_data_map.get(job_item.name)
+            submit, start, finish = get_fixed_experiment_times(
+                expid, job_item, last_job_data
+            )
+            if last_job_data:
+                resp_job = {
+                    **resp_job,
+                    "submit": timestamp_to_datetime_format(submit),
+                    "start": timestamp_to_datetime_format(start),
+                    "finish": timestamp_to_datetime_format(finish),
+                }
 
         if job_item.status in [Status.COMPLETED, Status.WAITING, Status.READY]:
             pkl_jobs.append(resp_job)

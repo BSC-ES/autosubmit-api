@@ -246,11 +246,11 @@ class JobDetailRetriever:
     @property
     def submit(self) -> Optional[int]:
         return self._submit
-    
+
     @property
     def start(self) -> Optional[int]:
         return self._start
-    
+
     @property
     def finish(self) -> Optional[int]:
         return self._finish
