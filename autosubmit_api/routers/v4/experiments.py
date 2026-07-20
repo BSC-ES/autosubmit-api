@@ -468,12 +468,11 @@ async def get_experiment_eta(
         chunk_unit = "month"
         chunk_size = 1
 
-    # Compute ETA
     eta_service = ExperimentEtaService(expid)
     result = eta_service.get_eta(
         chunk_unit=chunk_unit, chunk_size=chunk_size, section=section
     )
-    # log info the result
+
     logger.info(f"ETA result for experiment {expid} (section={section}): {result}")
     return ExperimentEtaResponse(**result)
 

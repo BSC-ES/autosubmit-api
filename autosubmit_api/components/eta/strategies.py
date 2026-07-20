@@ -1,16 +1,11 @@
 from abc import ABC, abstractmethod
-from typing import Optional
+from typing import Dict, Optional
 
 from autosubmit_api.common.utils import Status
 
 
 def _get_status_code(job) -> int:
-    """Normalize job status to an integer code.
-
-    History JobData stores status as a string ("COMPLETED") but has a
-    ``status_code`` property that returns the int. Pkl JobData stores
-    status as an int directly.
-    """
+    """Normalize job status to an integer code."""
     raw = getattr(job, "status_code", job.status)
     if isinstance(raw, str):
         return Status.STRING_TO_CODE.get(raw, Status.UNKNOWN)
@@ -20,6 +15,34 @@ def _get_status_code(job) -> int:
 def is_job_completed(job) -> bool:
     """Check whether a job is completed, handling both string and integer status."""
     return _get_status_code(job) == Status.COMPLETED
+
+
+def group_jobs_by_chunk(jobs_data: list) -> Dict[Optional[int], list]:
+    """Group a list of jobs by their chunk."""
+    chunks: Dict[Optional[int], list] = {}
+    for job in jobs_data:
+        if job.chunk is None:
+            continue
+        chunks.setdefault(job.chunk, []).append(job)
+    return chunks
+
+
+def compute_chunk_wallclock_seconds(chunk_jobs: list) -> Optional[float]:
+    """Wallclock for a completed chunk = max(finish) - min(start) in seconds.
+
+    Returns None if timestamps are missing or inconsistent.
+    """
+    start = min(
+        (j.start for j in chunk_jobs if j.start is not None and j.start > 0),
+        default=None,
+    )
+    finish = max(
+        (j.finish for j in chunk_jobs if j.finish is not None and j.finish > 0),
+        default=None,
+    )
+    if start is not None and finish is not None and finish > start:
+        return finish - start
+    return None
 
 
 class RuntimePerChunkStrategy(ABC):
@@ -32,45 +55,29 @@ class RuntimePerChunkStrategy(ABC):
 
 
 class AvgByDirectTimeStrategy(RuntimePerChunkStrategy):
-    """Groups jobs by chunk, calculates wallclock = max(finish) - min(start)
-    for each fully-completed chunk, and then averages across them."""
+    """Averages the wallclock time of each completed chunk.
+
+    For each completed chunk computes max(finish) - min(start).
+    """
 
     def calculate(
         self, jobs_data: list, chunk_unit: str, chunk_size: int
     ) -> Optional[float]:
-        # Group by chunk
-        chunks = {}
-        for job in jobs_data:
-            if job.chunk is None:
-                continue
-            chunks.setdefault(job.chunk, []).append(job)
+        # Wallclock is measured per chunk, not per unit. 
+        # Keep chunk_unit and chunk_size for future strategies.
+        _ = chunk_unit, chunk_size
 
-        # For each fully completed chunk, compute wallclock
+        chunks = group_jobs_by_chunk(jobs_data)
+
         wallclocks = []
-        for chunk_id, jobs in chunks.items():
-            if all(is_job_completed(j) for j in jobs):
-                start = min(j.start for j in jobs if j.start is not None and j.start > 0)
-                finish = max(j.finish for j in jobs if j.finish is not None and j.finish > 0)
-                if start > 0 and finish > 0:
-                    wallclocks.append(finish - start)
+        for chunk_jobs in chunks.values():
+            if all(is_job_completed(j) for j in chunk_jobs):
+                wallclock = compute_chunk_wallclock_seconds(chunk_jobs)
+                if wallclock is not None:
+                    wallclocks.append(wallclock)
 
         if not wallclocks:
             return None
 
         avg_seconds = sum(wallclocks) / len(wallclocks)
-        avg_hours = avg_seconds / 3600.0
-
-        # Normalize by chunk size
-        if chunk_size and chunk_size > 0:
-            return avg_hours / chunk_size
-        return avg_hours
-
-
-class FallbackStrategy(RuntimePerChunkStrategy):
-    """Fallback strategy that returns None when there is not enough data
-    to calculate the average runtime per chunk unit."""
-
-    def calculate(
-        self, jobs_data: list, chunk_unit: str, chunk_size: int
-    ) -> Optional[float]:
-        return None
+        return round(avg_seconds / 3600.0, 4)

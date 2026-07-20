@@ -1,90 +1,82 @@
 from typing import Optional
 
-from autosubmit_api.components.eta.strategies import is_job_completed
+from autosubmit_api.components.eta.strategies import (
+    group_jobs_by_chunk,
+    is_job_completed,
+)
 
 
-class ExperimentEtaCalculator:
+EMPTY_RESPONSE = {
+    "eta_days": None,
+    "chunks_total": None,
+    "chunks_remaining": None,
+    "avg_wallclock_per_chunk_hours": None,
+}
 
-    @staticmethod
-    def _get_chunks_info(jobs_data: list) -> tuple[Optional[int], Optional[int]]:
-        """Get the total number of chunks and the number of remaining chunks for an experiment.
 
-        :param jobs_data: A list of job data for the experiment
-        :type jobs_data: list
-        :return: A tuple containing the total number of chunks and the number of remaining chunks for the experiment
-        :rtype: tuple[Optional[int], Optional[int]]
-        """
-        if not jobs_data:
-            return None, None
+def get_chunks_info(
+    jobs_data: list,
+) -> tuple[Optional[int], Optional[int]]:
+    """Returns (total_chunks, completed_chunks_count).
 
-        chunks = {job.chunk for job in jobs_data if job.chunk is not None}
-        if not chunks:
-            return None, None
+    Total_chunks is the count of unique chunks present in the data.
+    Completed_chunks_count is the number of chunks where all
+    jobs are completed.
+    """
+    if not jobs_data:
+        return None, None
 
-        total_chunks = max(chunks)
+    chunk_jobs = group_jobs_by_chunk(jobs_data)
+    if not chunk_jobs:
+        return None, None
 
-        # Current chunk: highest chunk with at least one non-completed job
-        active_chunks = {
-            job.chunk
-            for job in jobs_data
-            if job.chunk is not None and not is_job_completed(job)
-        }
-        current_chunk = max(active_chunks) if active_chunks else total_chunks
+    total_chunks = len(chunk_jobs)
+    completed_chunks_count = sum(
+        1
+        for jobs in chunk_jobs.values()
+        if all(is_job_completed(j) for j in jobs)
+    )
+    return total_chunks, completed_chunks_count
 
-        return total_chunks, current_chunk
 
-    @classmethod
-    def calculate_eta(
-        cls, jobs_data: list, chunk_unit: str, chunk_size: int, strategy
-    ) -> dict:
-        """Return a dict with the ETA response fields for an experiment.
+def calculate_eta(
+    jobs_data: list,
+    chunk_unit: str,
+    chunk_size: int,
+    strategy,
+) -> dict:
+    """Compute ETA dict from job data and a selected strategy.
 
-        :param jobs_data: A list of job data for the experiment
-        :type jobs_data: list
-        :param chunk_unit: The unit of the chunk e.g. "year", "month"...
-        :type chunk_unit: str
-        :param chunk_size: The size of the chunk e.g. 1, 2, 3...
-        :type chunk_size: int
-        :param strategy: The strategy to use for calculating the average runtime per chunk unit
-        :type strategy: RuntimePerChunkStrategy
-        :return: A dictionary containing the estimated time of arrival (remaining time) for the experiment
-        :rtype: dict
-        """
-        total_chunks, current_chunk = cls._get_chunks_info(jobs_data)
-        if total_chunks is None or current_chunk is None:
-            return {
-                "eta_days": None,
-                "chunks_total": None,
-                "chunks_remaining": None,
-                "avg_wallclock_per_chunk_hours": None,
-            }
-        # If the exp is completed
-        if current_chunk >= total_chunks and all(
-            is_job_completed(job) for job in jobs_data
-        ):
-            return {
-                "eta_days": 0.0,
-                "chunks_total": total_chunks,
-                "chunks_remaining": 0,
-                "avg_wallclock_per_chunk_hours": 0.0,
-            }
+    The dict contains the estimated time remaining in days,
+    the total number of chunks in the experiment, the remaining
+    chunks to complete and the average wallclock time per chunk in hours.
+    """
+    total_chunks, completed_chunks_count = get_chunks_info(jobs_data)
 
-        chunks_remaining = total_chunks - current_chunk
+    if total_chunks is None or completed_chunks_count is None:
+        return dict(EMPTY_RESPONSE)
 
-        avg_wallclock_per_chunk_hours = strategy.calculate(
-            jobs_data, chunk_unit, chunk_size
+    chunks_remaining = total_chunks - completed_chunks_count
+
+    avg_wallclock_per_chunk_hours = strategy.calculate(
+        jobs_data, chunk_unit, chunk_size
+    )
+
+    # All chunks completed
+    if chunks_remaining == 0 and all(
+        is_job_completed(job) for job in jobs_data
+    ):
+        eta_days = 0.0
+    elif avg_wallclock_per_chunk_hours is None:
+        eta_days = None
+    else:
+        eta_days = round(
+            (avg_wallclock_per_chunk_hours * chunks_remaining) / 24.0, 2
         )
 
-        if avg_wallclock_per_chunk_hours is None or chunks_remaining <= 0:
-            eta_days = None
-        else:
-            eta_days = round(
-                (avg_wallclock_per_chunk_hours * chunks_remaining) / 24.0, 2
-            )
-
-        return {
-            "eta_days": eta_days,
-            "chunks_total": total_chunks,
-            "chunks_remaining": chunks_remaining,
-            "avg_wallclock_per_chunk_hours": avg_wallclock_per_chunk_hours,
-        }
+    return {
+        "eta_days": eta_days,
+        "chunks_total": total_chunks,
+        "chunks_remaining": chunks_remaining,
+        "avg_wallclock_per_chunk_hours": avg_wallclock_per_chunk_hours,
+    }
