@@ -21,7 +21,7 @@ from abc import ABC, abstractmethod
 from configparser import ConfigParser as PyConfigParser
 from typing import Union
 
-from autosubmitconfigparser.config.configcommon import (
+from autosubmit.config.configcommon import (
     AutosubmitConfig as Autosubmit4Config,
 )
 from bscearth.utils.config_parser import ConfigParser, ConfigParserFactory

@@ -29,20 +29,19 @@ install_requires = [
     "networkx<=2.6.3",
     "scipy~=1.11.4",
     "python-dotenv~=1.0.1",
-    "autosubmitconfigparser>=1.0.72",
     "APScheduler~=3.10.4",
     "gunicorn~=22.0.0",
     "pydantic~=2.5.2",
     "SQLAlchemy~=2.0.23",
     "python-cas~=1.6.0",
-    "autosubmit==4.1.11",
+    "autosubmit~=4.1.17",
     "uvicorn~=0.34.0,<0.36.0",
     "uvicorn-worker~=0.3.0",
     "paramiko",
 ]
 
 # Test dependencies
-test_requires = ["pytest", "pytest-cov", "pytest-asyncio", "ruff", "testcontainers"]
+test_requires = ["pytest", "pytest-cov", "pytest-asyncio", "ruff", "testcontainers", "mock"]
 
 postgres_requires = ["psycopg2"]
 

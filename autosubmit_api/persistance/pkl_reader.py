@@ -1,3 +1,4 @@
+from dataclasses import dataclass
 import os
 import pickle
 from io import BytesIO
@@ -11,18 +12,47 @@ from autosubmit_api.persistance.experiment import ExperimentPaths
 from autosubmit_api.repositories.job_pkl import create_job_pkl_repository
 
 
-class CustomAutosubmitUnpickler(pickle.Unpickler):
-    # Hacky patch for Autosubmit 4.1.16
-    def find_class(self, module, name):
-        if module == "autosubmit.job.template":
-            return lambda *args: None
-        return super().find_class(module, name)
-
-
 def _handle_split_splits(split):
     if isinstance(split, int) and split > 0:
         return split
     return None
+
+
+@dataclass
+class CompatibleJob:
+    @property
+    def name(self):
+        return self._name
+
+    @property
+    def section(self):
+        return self._section
+
+    @property
+    def member(self):
+        return self._member
+
+    @property
+    def chunk(self):
+        return self._chunk
+
+    @property
+    def local_logs(self):
+        return self._local_logs
+
+    @property
+    def remote_logs(self):
+        return self._remote_logs
+
+
+class CustomAutosubmitUnpickler(pickle.Unpickler):
+    # Hacky patch for Autosubmit old pickle file
+    def find_class(self, module, name):
+        if module == "autosubmit.job.job" and name == "Job":
+            return CompatibleJob
+        elif module.startswith("autosubmit"):
+            return lambda *args: None
+        return super().find_class(module, name)
 
 
 class PklReader:

@@ -32,7 +32,7 @@ from collections import deque
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Dict, Optional, Tuple
 
-from autosubmitconfigparser.config.configcommon import (
+from autosubmit.config.configcommon import (
     AutosubmitConfig as Autosubmit4Config,
 )
 from bscearth.utils.config_parser import ConfigParserFactory

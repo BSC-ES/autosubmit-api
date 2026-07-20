@@ -256,6 +256,35 @@ async def get_experiment_wrappers(
     return {"wrappers": wrappers}
 
 
+def _to_plain_python(obj: Any) -> Any:
+    """
+    Recursively convert ruamel.yaml objects to plain Python types.
+    """
+    # First, check for basic types that don't need conversion
+    if isinstance(obj, (str, int, float, bool)) or obj is None:
+        return obj
+    if isinstance(obj, dict):
+        return {k: _to_plain_python(v) for k, v in obj.items()}
+    if isinstance(obj, list):
+        return [_to_plain_python(v) for v in obj]
+
+    # Now check for ruamel.yaml specific types
+    try:
+        from ruamel.yaml.comments import TaggedScalar
+
+        if isinstance(obj, TaggedScalar):
+            return obj.value
+    except Exception:
+        pass
+
+    # Finally, try to serialize to JSON to check if it's a valid type
+    try:
+        json.dumps(obj)
+        return obj
+    except Exception:
+        return None
+
+
 def _format_config_response(
     config: Dict[str, Any], is_as3: bool = False
 ) -> Dict[str, Any]:
@@ -265,12 +294,13 @@ def _format_config_response(
     :param config: The config to format
     :param is_as3: If the config is an AS3 config
     """
-    ALLOWED_CONFIG_KEYS = ["conf", "exp", "jobs", "platforms", "proj"]
-    formatted_config = {
-        key: config[key]
-        for key in config
-        if not is_as3 or (key.lower() in ALLOWED_CONFIG_KEYS)
-    }
+    if is_as3:
+        ALLOWED_CONFIG_KEYS = ["conf", "exp", "jobs", "platforms", "proj"]
+        formatted_config = {
+            key: config[key] for key in config if (key.lower() in ALLOWED_CONFIG_KEYS)
+        }
+    else:
+        formatted_config = _to_plain_python(config)
     formatted_config["contains_nones"] = not config or (None in list(config.values()))
     return formatted_config
 
