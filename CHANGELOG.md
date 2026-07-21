@@ -1,5 +1,23 @@
 # CHANGELOG
 
+### Pre-release v4.1.2b6 - Release date: 2026-07-21
+
+#### New features
+
+* Added new v4 endpoints to retrieve details for a single job without loading the full experiment, enabling fast data access for Quick View panels
+* The `split` (split index) and `splits` (total splits in group) fields are now included in the responses of `/v3/tree`, `/v3/graph`, `/v4/experiments/{expid}/jobs`, and `/v4/experiments/{expid}/jobs/{jobname}`
+* Added a new endpoint to update the description of a experiment with runners
+* Updated the API to handle the new wrapper schema structure introduced in Autosubmit 4.1.17
+* SYPD and ASYPD metrics now consider the splits of each chunk for individual jobs
+* Updated config parser dependency to enable `rt` mode and read special YAML tags
+* Minor code improvements and CI updates 
+
+#### Bug fixes
+
+* Fixed the modified timestamp in experiment_status that was not timezone-aware, which could cause comparison issues
+* Corrected the calculation of estimated core count in the statistics endpoint
+* Fixed join repository incorrectly set to read-only
+
 ### Pre-release v4.1.2b5 - Release date: 2026-03-31
 
 * Critical quickfix: Bypassed job id validation when reading the job list. It seems that some experiment's jobs might have missing ids due to a bug.
