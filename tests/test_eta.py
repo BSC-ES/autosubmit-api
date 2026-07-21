@@ -4,7 +4,7 @@ from autosubmit_api.common.utils import Status
 
 from autosubmit_api.components.eta.strategies import (
     _get_status_code,
-    compute_chunk_wallclock_seconds,
+    compute_chunk_runtime_seconds,
     group_jobs_by_chunk,
     is_job_completed,
 )
@@ -28,7 +28,7 @@ class MockJob:
         self.section = section
 
 
-# Helpers from strategies.py
+# Helpers
 
 class TestGetStatusCode:
     def test_int_status_completed(self):
@@ -100,20 +100,20 @@ class TestGroupJobsByChunk:
         assert group_jobs_by_chunk([]) == {}
 
 
-class TestComputeChunkWallclockSeconds:
+class TestComputeChunkRuntimeSeconds:
     def test_single_job(self):
         """Test that a single job returns the diff between finish and start."""
         jobs = [MockJob(chunk=1,start=1000, finish=2000)]
-        assert compute_chunk_wallclock_seconds(jobs) == 1000.0
+        assert compute_chunk_runtime_seconds(jobs) == 1000.0
     
     def test_multiple_jobs(self):
-        """Test that multiple jobs return the correct wallclock for the chunk."""
+        """Test that multiple jobs return the correct runtime for the chunk."""
         jobs = [
             MockJob(chunk=1, start=1000, finish=2000),
             MockJob(chunk=1, start=1500, finish=2500),
             MockJob(chunk=1, start=1200, finish=2200),
         ]
-        assert compute_chunk_wallclock_seconds(jobs) == 1500.0
+        assert compute_chunk_runtime_seconds(jobs) == 1500.0
     
 
     def test_missing_start(self):
@@ -121,29 +121,30 @@ class TestComputeChunkWallclockSeconds:
         jobs = [
             MockJob(chunk=1, start=None, finish=2000),
         ]
-        assert compute_chunk_wallclock_seconds(jobs) is None
+        assert compute_chunk_runtime_seconds(jobs) is None
     
     def test_missing_finish(self):
         """Test that jobs with missing start or finish return None."""
         jobs = [
             MockJob(chunk=1, start=1000, finish=None),
         ]
-        assert compute_chunk_wallclock_seconds(jobs) is None
+        assert compute_chunk_runtime_seconds(jobs) is None
     
     def test_finish_before_start(self):
         """Test that jobs with finish before start return None."""
         jobs = [
             MockJob(chunk=1, start=2000, finish=1000),
         ]
-        assert compute_chunk_wallclock_seconds(jobs) is None
+        assert compute_chunk_runtime_seconds(jobs) is None
     
     def test_all_missing(self):
         """Test that jobs with all missing timestamps return None."""
         jobs = [
             MockJob(chunk=1, start=None, finish=None),
         ]
-        assert compute_chunk_wallclock_seconds(jobs) is None
+        assert compute_chunk_runtime_seconds(jobs) is None
     
     def test_empty_list(self):
         """Test that an empty job list returns None."""
-        assert compute_chunk_wallclock_seconds([]) is None
+        assert compute_chunk_runtime_seconds([]) is None
+     

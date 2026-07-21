@@ -27,8 +27,8 @@ def group_jobs_by_chunk(jobs_data: list) -> Dict[Optional[int], list]:
     return chunks
 
 
-def compute_chunk_wallclock_seconds(chunk_jobs: list) -> Optional[float]:
-    """Wallclock for a completed chunk = max(finish) - min(start) in seconds.
+def compute_chunk_runtime_seconds(chunk_jobs: list) -> Optional[float]:
+    """Runtime for a completed chunk = max(finish) - min(start) in seconds.
 
     Returns None if timestamps are missing or inconsistent.
     """
@@ -55,7 +55,7 @@ class RuntimePerChunkStrategy(ABC):
 
 
 class AvgByDirectTimeStrategy(RuntimePerChunkStrategy):
-    """Averages the wallclock time of each completed chunk.
+    """Averages the runtime of each completed chunk.
 
     For each completed chunk computes max(finish) - min(start).
     """
@@ -63,21 +63,21 @@ class AvgByDirectTimeStrategy(RuntimePerChunkStrategy):
     def calculate(
         self, jobs_data: list, chunk_unit: str, chunk_size: int
     ) -> Optional[float]:
-        # Wallclock is measured per chunk, not per unit. 
+        # Runtime is measured per chunk, not per unit. 
         # Keep chunk_unit and chunk_size for future strategies.
         _ = chunk_unit, chunk_size
 
         chunks = group_jobs_by_chunk(jobs_data)
 
-        wallclocks = []
+        runtimes = []
         for chunk_jobs in chunks.values():
             if all(is_job_completed(j) for j in chunk_jobs):
-                wallclock = compute_chunk_wallclock_seconds(chunk_jobs)
-                if wallclock is not None:
-                    wallclocks.append(wallclock)
+                runtime = compute_chunk_runtime_seconds(chunk_jobs)
+                if runtime is not None:
+                    runtimes.append(runtime)
 
-        if not wallclocks:
+        if not runtimes:
             return None
 
-        avg_seconds = sum(wallclocks) / len(wallclocks)
-        return round(avg_seconds / 3600.0, 4)
+        avg_seconds = sum(runtimes) / len(runtimes)
+        return round(avg_seconds, 4)

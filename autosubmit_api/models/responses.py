@@ -51,10 +51,10 @@ class ExperimentWrappersResponse(BaseModel):
 
 
 class ExperimentEtaResponse(BaseModel):
-    eta_days: Optional[float]
+    eta_seconds: Optional[float]
     chunks_total: Optional[int]
     chunks_remaining: Optional[int]
-    avg_wallclock_per_chunk_hours: Optional[float]
+    avg_runtime_per_chunk_seconds: Optional[float]
 
 
 class PreferredUsernameResponse(BaseModel):

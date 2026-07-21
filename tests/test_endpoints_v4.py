@@ -213,10 +213,10 @@ class TestExperimentEta:
         resp_obj: dict = response.json()
 
         assert isinstance(resp_obj, dict)
-        assert "eta_days" in resp_obj
+        assert "eta_seconds" in resp_obj
         assert "chunks_total" in resp_obj
         assert "chunks_remaining" in resp_obj
-        assert "avg_wallclock_per_chunk_hours" in resp_obj
+        assert "avg_runtime_per_chunk_seconds" in resp_obj
 
 
 class TestExperimentJobs:

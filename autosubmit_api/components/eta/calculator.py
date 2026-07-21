@@ -7,10 +7,10 @@ from autosubmit_api.components.eta.strategies import (
 
 
 EMPTY_RESPONSE = {
-    "eta_days": None,
+    "eta_seconds": None,
     "chunks_total": None,
     "chunks_remaining": None,
-    "avg_wallclock_per_chunk_hours": None,
+    "avg_runtime_per_chunk_seconds": None,
 }
 
 
@@ -49,7 +49,7 @@ def calculate_eta(
 
     The dict contains the estimated time remaining in days,
     the total number of chunks in the experiment, the remaining
-    chunks to complete and the average wallclock time per chunk in hours.
+    chunks to complete and the average runtime time per chunk in seconds.
     """
     total_chunks, completed_chunks_count = get_chunks_info(jobs_data)
 
@@ -58,7 +58,7 @@ def calculate_eta(
 
     chunks_remaining = total_chunks - completed_chunks_count
 
-    avg_wallclock_per_chunk_hours = strategy.calculate(
+    avg_runtime_per_chunk_seconds = strategy.calculate(
         jobs_data, chunk_unit, chunk_size
     )
 
@@ -66,17 +66,17 @@ def calculate_eta(
     if chunks_remaining == 0 and all(
         is_job_completed(job) for job in jobs_data
     ):
-        eta_days = 0.0
-    elif avg_wallclock_per_chunk_hours is None:
-        eta_days = None
+        eta_seconds = 0.0
+    elif avg_runtime_per_chunk_seconds is None:
+        eta_seconds = None
     else:
-        eta_days = round(
-            (avg_wallclock_per_chunk_hours * chunks_remaining) / 24.0, 2
+        eta_seconds = round(
+            (avg_runtime_per_chunk_seconds * chunks_remaining), 4
         )
 
     return {
-        "eta_days": eta_days,
+        "eta_seconds": eta_seconds,
         "chunks_total": total_chunks,
         "chunks_remaining": chunks_remaining,
-        "avg_wallclock_per_chunk_hours": avg_wallclock_per_chunk_hours,
+        "avg_runtime_per_chunk_seconds": avg_runtime_per_chunk_seconds,
     }
