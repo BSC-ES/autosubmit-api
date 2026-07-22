@@ -25,7 +25,7 @@ from autosubmit_api.components.jobs.job_detail import (
     JobDetailRetriever,
     JobNotFoundError,
 )
-from autosubmit_api.components.eta.service import ExperimentEtaService
+from autosubmit_api.performance.eta import compute_experiment_eta
 from autosubmit_api.config.basicConfig import APIBasicConfig
 from autosubmit_api.config.confConfigStrategy import confConfigStrategy
 from autosubmit_api.config.config_common import AutosubmitConfigResolver
@@ -47,7 +47,6 @@ from autosubmit_api.models.responses import (
 )
 from autosubmit_api.persistance.experiment import ExperimentPaths
 from autosubmit_api.persistance.job_package_reader import JobPackageReader
-from autosubmit_api.repositories.experiment_run import create_experiment_run_repository
 from autosubmit_api.repositories.experiment_structure import (
     create_experiment_structure_repository,
 )
@@ -459,19 +458,7 @@ async def get_experiment_eta(
     Get the estimated time of arrival (remaining time) for an experiment's
     job section (e.g. SIM, APP, POST). Defaults to SIM.
     """
-    try:
-        run_repo = create_experiment_run_repository(expid)
-        last_run = run_repo.get_last_run()
-        chunk_unit = last_run.chunk_unit if last_run else "month"
-        chunk_size = last_run.chunk_size if last_run else 1
-    except Exception:
-        chunk_unit = "month"
-        chunk_size = 1
-
-    eta_service = ExperimentEtaService(expid)
-    result = eta_service.get_eta(
-        chunk_unit=chunk_unit, chunk_size=chunk_size, section=section
-    )
+    result = compute_experiment_eta(expid, section)
 
     logger.info(f"ETA result for experiment {expid} (section={section}): {result}")
     return ExperimentEtaResponse(**result)
