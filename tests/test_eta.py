@@ -102,6 +102,13 @@ class TestComputeChunkRuntimeSeconds:
     def test_empty_list(self):
         """Test that an empty job list returns None."""
         assert _compute_chunk_runtime_seconds([]) is None
+    
+    def test_finish_equals_start(self):
+        """Test that finish == start returns 0."""
+        jobs = [
+            MockJob(chunk=1, start=1000, finish=1000),
+        ]
+        assert _compute_chunk_runtime_seconds(jobs) == 0.0
      
 
 

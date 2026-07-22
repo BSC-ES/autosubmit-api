@@ -218,6 +218,24 @@ class TestExperimentEta:
         assert "chunks_remaining" in resp_obj
         assert "avg_runtime_per_chunk_seconds" in resp_obj
 
+    def test_eta_invalid_section(self, fixture_fastapi_client: TestClient):
+        """Test that an invalid section returns 400."""
+        expid = "a003"
+        response = fixture_fastapi_client.get(
+            self.endpoint.format(expid=expid),
+            params={"section": "__INVALID_SECTION__"},
+        )
+        assert response.status_code == HTTPStatus.BAD_REQUEST
+
+    def test_eta_invalid_experiment(self, fixture_fastapi_client: TestClient):
+        """Test that an invalid experiment returns 500."""
+        expid = "__INVALID_EXPERIMENT__"
+        response = fixture_fastapi_client.get(
+            self.endpoint.format(expid=expid),
+            params={"section": "SIM"},
+        )
+        assert response.status_code == HTTPStatus.INTERNAL_SERVER_ERROR
+
 
 class TestExperimentJobs:
     endpoint = "/v4/experiments/{expid}/jobs"

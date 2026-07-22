@@ -44,7 +44,7 @@ from autosubmit_api.models.responses import (
     ExperimentsSearchResponse,
     ExperimentWrappersResponse,
 )
-from autosubmit_api.performance.eta import compute_experiment_eta
+from autosubmit_api.performance.eta import SectionNotFoundError, compute_experiment_eta
 from autosubmit_api.persistance.experiment import ExperimentPaths
 from autosubmit_api.persistance.job_package_reader import JobPackageReader
 from autosubmit_api.repositories.experiment_structure import (
@@ -458,7 +458,17 @@ async def get_experiment_eta(
     Get the estimated time of arrival (remaining time) for an experiment's
     job section (e.g. SIM, APP, POST). Defaults to SIM.
     """
-    result = compute_experiment_eta(expid, section)
+    try:
+        result = compute_experiment_eta(expid, section)
+    except SectionNotFoundError as exc:
+        raise HTTPException(status_code=HTTPStatus.BAD_REQUEST, detail=str(exc))
+    except Exception:
+        logger.error(f"Failed to compute ETA for {expid}: {traceback.format_exc()}")
+        raise HTTPException(
+            status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
+            detail="Failed to compute ETA",
+        )
+
     return ExperimentEtaResponse(**result)
 
 
