@@ -18,7 +18,8 @@ _EMPTY_RESPONSE = {
 
 
 def _compute_chunk_runtime_seconds(chunk_jobs: list) -> Optional[float]:
-    """Runtime for a completed chunk = max(finish) - min(start) in seconds.
+    """
+    Runtime for a completed chunk = max(finish) - min(start) in seconds.
 
     Returns None if timestamps are missing, negative or inconsistent.
     """
@@ -36,7 +37,8 @@ def _compute_chunk_runtime_seconds(chunk_jobs: list) -> Optional[float]:
 
 
 def calculate_eta(jobs_data: list) -> dict:
-    """Compute ETA dict from job data.
+    """
+    Compute ETA dict from job data.
 
     Groups jobs by chunk, computes the average runtime of completed chunks,
     and estimates remaining time as avg_runtime * remaining_chunks.
@@ -80,7 +82,8 @@ def calculate_eta(jobs_data: list) -> dict:
 
 
 def compute_experiment_eta(expid: str, section: str = "SIM") -> dict:
-    """Load experiment history and compute ETA for the given section.
+    """
+    Load experiment history and compute ETA for the given section.
 
     When data loading fails or no matching jobs for section exist, 
     all fields are None.

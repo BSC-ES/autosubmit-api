@@ -459,8 +459,6 @@ async def get_experiment_eta(
     job section (e.g. SIM, APP, POST). Defaults to SIM.
     """
     result = compute_experiment_eta(expid, section)
-
-    logger.info(f"ETA result for experiment {expid} (section={section}): {result}")
     return ExperimentEtaResponse(**result)
 
 
