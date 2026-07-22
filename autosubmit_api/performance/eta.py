@@ -86,7 +86,7 @@ def compute_experiment_eta(expid: str, section: str = "SIM") -> dict:
     Load experiment history and compute ETA for the given section.
 
     When data loading fails or no matching jobs for section exist, 
-    all fields are None.
+    return empty response.
     """
     try:
         history = ExperimentHistoryDirector(

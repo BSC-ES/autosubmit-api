@@ -25,7 +25,6 @@ from autosubmit_api.components.jobs.job_detail import (
     JobDetailRetriever,
     JobNotFoundError,
 )
-from autosubmit_api.performance.eta import compute_experiment_eta
 from autosubmit_api.config.basicConfig import APIBasicConfig
 from autosubmit_api.config.confConfigStrategy import confConfigStrategy
 from autosubmit_api.config.config_common import AutosubmitConfigResolver
@@ -45,6 +44,7 @@ from autosubmit_api.models.responses import (
     ExperimentsSearchResponse,
     ExperimentWrappersResponse,
 )
+from autosubmit_api.performance.eta import compute_experiment_eta
 from autosubmit_api.persistance.experiment import ExperimentPaths
 from autosubmit_api.persistance.job_package_reader import JobPackageReader
 from autosubmit_api.repositories.experiment_structure import (
