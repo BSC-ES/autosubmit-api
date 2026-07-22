@@ -1,0 +1,64 @@
+CONFIG:
+  TOTALJOBS: 20
+  MAXWAITINGJOBS: 20
+DEFAULT:
+  EXPID: "a1x4"
+  HPCARCH: "local"
+  #hint: use %PROJDIR% to point to the project folder (where the project is cloned)
+  CUSTOM_CONFIG: "%PROJDIR%/"
+PROJECT:
+  PROJECT_TYPE: none
+  PROJECT_DESTINATION: ''
+GIT:
+  PROJECT_ORIGIN: ""
+  PROJECT_BRANCH: ""
+  PROJECT_COMMIT: ''
+  PROJECT_SUBMODULES: ''
+  FETCH_SINGLE_BRANCH: true
+EXPERIMENT:
+  DATELIST: '20000101'
+  MEMBERS: fc0
+  CHUNKSIZEUNIT: month
+  CHUNKSIZE: '4'
+  NUMCHUNKS: '2'
+  CHUNKINI: ''
+  CALENDAR: standard
+
+PLATFORMS:
+  MN5:
+    TYPE: slurm
+    HOST: ''
+    PROJECT: bsc32
+    USER: ''
+    QUEUE: gp_debug
+    SCRATCH_DIR: /gpfs/scratch
+    ADD_PROJECT_TO_HOST: false
+    MAX_WALLCLOCK: 01:00
+    TEMP_DIR: ''
+    COMPRESS_REMOTE_LOGS: true
+    REMOTE_LOGS_COMPRESS_TYPE: xz
+    PROCESSORS_PER_NODE: 1
+    MAX_PROCESSORS: 1
+  
+WRAPPERS:
+  WRAPPER_V:
+    TYPE: "vertical"
+    JOBS_IN_WRAPPER: "SIM"
+
+JOBS:
+  INI:
+    FILE: INI.sh
+    RUNNING: member
+    WALLCLOCK: 00:05
+  SIM:
+    FILE: SIM.sh
+    DEPENDENCIES: INI SIM-1
+    RUNNING: chunk
+    PLATFORM: MN5
+    WALLCLOCK: 00:05
+  POST:
+    FILE: POST.sh
+    DEPENDENCIES: SIM
+    RUNNING: once
+    WALLCLOCK: 00:05
+

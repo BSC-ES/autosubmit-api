@@ -1,9 +1,12 @@
+import datetime
 from typing import List, Optional, Type, Union
 
 from sqlalchemy import (
+    Boolean,
     Column,
     Engine,
     Float,
+    ForeignKey,
     Integer,
     LargeBinary,
     MetaData,
@@ -121,7 +124,7 @@ ExperimentStructureTable = Table(
     Column("e_from", Text, nullable=False, primary_key=True),
     Column("e_to", Text, nullable=False, primary_key=True),
 )
-"""Table that holds the structure of the experiment jobs."""
+"""Table that holds the structure of the experiment jobs. Before autosubmit 4.1.16"""
 
 GraphDataTable = Table(
     "experiment_graph_draw",
@@ -223,6 +226,11 @@ JobDataTableV19.append_column(Column("split", Integer, nullable=True))
 JobDataTableV19.append_column(Column("splits", Integer, nullable=True))
 JobDataTableV19.append_column(Column("fail_count", Integer, nullable=False, default=0))
 
+JobDataTableV4_2_0 = table_copy(JobDataTableV18)
+JobDataTableV4_2_0.append_column(
+    Column("split", Text, nullable=True), Column("splits", Text, nullable=True)
+)
+
 UserMetricTable = Table(
     "user_metrics",
     metadata_obj,
@@ -266,6 +274,82 @@ UserPreferencesTable = Table(
     Column("modified", Text, nullable=False),
 )
 """Table that holds user preferences, including preferred Linux username."""
+
+JobsTable = Table(
+    "jobs",
+    metadata_obj,
+    Column("name", String, nullable=False, primary_key=True),
+    Column("id", Integer),
+    Column("script_name", String),
+    Column("priority", Integer),
+    Column("status", Text, nullable=False, index=True),  # Should be job_status_enum
+    Column("frequency", String),  # TODO move to Section table ?
+    Column("synchronize", Boolean),  # TODO move to Section table ?
+    Column("section", String, ForeignKey("sections.name")),
+    Column("chunk", Integer),
+    Column("member", Text),
+    Column("splits", Integer),
+    Column("split", Integer),
+    Column("date", String),
+    Column("date_split", String),
+    Column("max_checkpoint_step", Integer, nullable=False, default=0),
+    Column("start_time", String),
+    Column("start_time_timestamp", Integer),
+    Column("submit_time_timestamp", Integer),
+    Column("finish_time_timestamp", Integer),
+    Column("ready_date", String),
+    Column("local_logs_out", String),  # tuple, to modify double value in two
+    Column("local_logs_err", String),  # tuple, to modify double value in two
+    Column("remote_logs_out", String),
+    Column("remote_logs_err", String),
+    Column("updated_log", Integer),
+    Column("packed", Boolean),
+    Column("current_checkpoint_step", Integer, nullable=False, default=0),
+    Column("platform_name", String),
+    Column(
+        "created",
+        Text,
+        nullable=False,
+        default=lambda: datetime.datetime.now(datetime.timezone.utc).strftime(
+            "%Y-%m-%d %H:%M:%S"
+        ),
+    ),
+    Column(
+        "modified",
+        Text,
+        nullable=False,
+        default=lambda: datetime.datetime.now(datetime.timezone.utc).strftime(
+            "%Y-%m-%d %H:%M:%S"
+        ),
+    ),
+)
+
+ExperimentStructureV4_2_0 = Table(
+    "experiment_structure",
+    MetaData(),
+    Column(
+        "e_from",
+        String,
+        ForeignKey("jobs.job_name"),
+        nullable=False,
+        primary_key=True,
+        index=True,
+    ),
+    Column(
+        "e_to",
+        String,
+        ForeignKey("jobs.job_name"),
+        nullable=False,
+        primary_key=True,
+        index=True,
+    ),
+    Column("min_trigger_status", String),
+    Column("completion_status", String),
+    Column("from_step", Integer),
+    Column("fail_ok", Boolean),
+    UniqueConstraint("e_from", "e_to", name="unique_e_from_and_e_to"),
+)
+"""Table that holds the structure of the experiment jobs. After autosubmit 4.1.16"""
 
 
 def create_wrapper_tables(name, metadata_obj_):
