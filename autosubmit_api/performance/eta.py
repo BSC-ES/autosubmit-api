@@ -1,3 +1,4 @@
+from types import SimpleNamespace
 from typing import Dict, Optional
 
 from autosubmit_api.builders.experiment_history_builder import (
@@ -5,6 +6,7 @@ from autosubmit_api.builders.experiment_history_builder import (
     ExperimentHistoryDirector,
 )
 from autosubmit_api.performance.utils import is_job_completed
+from autosubmit_api.repositories.jobs import create_jobs_repository
 
 
 class SectionNotFoundError(LookupError):
@@ -87,17 +89,33 @@ def compute_experiment_eta(expid: str, section: str = "SIM") -> dict:
     """
     Load experiment history and compute ETA for the given section.
 
+    Merge last run job data with historical database to
+    get the start and finish timestamps for each job, then compute ETA.
     Raises SectionNotFoundError if no jobs match the section.
     """
-    history = ExperimentHistoryDirector(
-        ExperimentHistoryBuilder(expid)
-    ).build_reader_experiment_history()
-    all_jobs = history.manager.get_all_last_job_data_dcs()
-    
-    section_jobs = [job for job in all_jobs if job.section == section]
+    current_jobs = create_jobs_repository(expid).get_all()
+    section_jobs = [job for job in current_jobs if job.section == section]
     if not section_jobs:
         raise SectionNotFoundError(
             f"No jobs found for section '{section}' in experiment '{expid}'"
         )
 
-    return calculate_eta(section_jobs)
+    history = ExperimentHistoryDirector(
+        ExperimentHistoryBuilder(expid)
+    ).build_reader_experiment_history()
+    history_jobs = history.manager.get_all_last_job_data_dcs()
+    history_by_name = {j.job_name: j for j in history_jobs}
+
+    merged = []
+    for job in section_jobs:
+        hist = history_by_name.get(job.name)
+        merged.append(
+            SimpleNamespace(
+                chunk=job.chunk,
+                status=job.status,
+                start=hist.start if hist else 0,
+                finish=hist.finish if hist else 0,
+            )
+        )
+
+    return calculate_eta(merged)
