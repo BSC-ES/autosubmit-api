@@ -2,25 +2,6 @@
 from autosubmit_api.common.utils import SECONDS_IN_A_DAY, Status, datechunk_to_year
 
 
-def _get_status_code(job) -> int:
-    """
-    Normalize job status to an integer code.
-    """
-    raw = getattr(job, "status_code", None)
-    if raw is None:
-        raw = getattr(job, "status", Status.UNKNOWN)
-    if isinstance(raw, str):
-        return Status.STRING_TO_CODE.get(raw, Status.UNKNOWN)
-    return raw
-
-
-def is_job_completed(job) -> bool:
-    """
-    Check whether a job is completed, handling both string and integer status.
-    """
-    return _get_status_code(job) == Status.COMPLETED
-
-
 def calculate_SYPD_perjob(
     run_time: int,
     chunk_unit: str,

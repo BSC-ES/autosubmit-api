@@ -44,7 +44,7 @@ from autosubmit_api.models.responses import (
     ExperimentsSearchResponse,
     ExperimentWrappersResponse,
 )
-from autosubmit_api.services.experiment_eta import SectionNotFoundError, ExperimentEtaService
+from autosubmit_api.services.experiment_eta import ExperimentEtaService, SectionNotFoundError
 from autosubmit_api.persistance.experiment import ExperimentPaths
 from autosubmit_api.persistance.job_package_reader import JobPackageReader
 from autosubmit_api.repositories.experiment_structure import (
@@ -459,7 +459,8 @@ async def get_experiment_eta(
     job section (e.g. SIM, APP, POST). Defaults to SIM.
     """
     try:
-        eta_service = ExperimentEtaService(expid)
+        repo = create_jobs_repository(expid)
+        eta_service = ExperimentEtaService(repo, expid)
         result = eta_service.compute_experiment_eta(section)
     except SectionNotFoundError as exc:
         raise HTTPException(status_code=HTTPStatus.BAD_REQUEST, detail=str(exc))

@@ -2,8 +2,7 @@ from typing import Optional
 
 from autosubmit_api.common.utils import Status
 
-from autosubmit_api.performance.eta import ExperimentEtaCalculator, _compute_chunk_runtime_seconds
-from autosubmit_api.performance.utils import is_job_completed
+from autosubmit_api.estimation.eta import _compute_chunk_runtime_seconds, calculate_eta, is_job_completed
 
 
 class MockJob:
@@ -119,7 +118,7 @@ class TestCalculateEta:
             MockJob(chunk=1, start=1000, finish=2000, status=Status.COMPLETED),
             MockJob(chunk=2, start=2000, finish=3000, status=Status.COMPLETED),
         ]
-        eta_dict = ExperimentEtaCalculator.calculate_eta(jobs)
+        eta_dict = calculate_eta(jobs)
         assert eta_dict["eta_seconds"] == 0.0
         assert eta_dict["chunks_total"] == 2
         assert eta_dict["chunks_remaining"] == 0
@@ -132,7 +131,7 @@ class TestCalculateEta:
             MockJob(chunk=2, start=2000, finish=None, status=Status.RUNNING),
             MockJob(chunk=3, start=None, finish=None, status=Status.WAITING),
         ]
-        eta_dict = ExperimentEtaCalculator.calculate_eta(jobs)
+        eta_dict = calculate_eta(jobs)
         assert eta_dict["eta_seconds"] == 2000.0
         assert eta_dict["chunks_total"] == 3
         assert eta_dict["chunks_remaining"] == 2
@@ -144,7 +143,7 @@ class TestCalculateEta:
             MockJob(chunk=1, start=None, finish=None, status=Status.RUNNING),
             MockJob(chunk=2, start=None, finish=None, status=Status.WAITING),
         ]
-        eta_dict = ExperimentEtaCalculator.calculate_eta(jobs)
+        eta_dict = calculate_eta(jobs)
         assert eta_dict["eta_seconds"] is None
         assert eta_dict["chunks_total"] == 2
         assert eta_dict["chunks_remaining"] == 2
@@ -152,7 +151,7 @@ class TestCalculateEta:
     
     def test_calculate_eta_empty_input(self):
         """Test that empty input returns empty response."""
-        eta_dict = ExperimentEtaCalculator.calculate_eta([])
+        eta_dict = calculate_eta([])
         assert eta_dict["eta_seconds"] is None
         assert eta_dict["chunks_total"] is None
         assert eta_dict["chunks_remaining"] is None
@@ -164,7 +163,7 @@ class TestCalculateEta:
             MockJob(chunk=None, status=Status.COMPLETED),
             MockJob(chunk=None, status=Status.RUNNING),
         ]
-        eta_dict = ExperimentEtaCalculator.calculate_eta(jobs)
+        eta_dict = calculate_eta(jobs)
         assert eta_dict["eta_seconds"] is None
         assert eta_dict["chunks_total"] is None
         assert eta_dict["chunks_remaining"] is None
@@ -175,7 +174,7 @@ class TestCalculateEta:
         jobs = [
             MockJob(chunk=1, start=1000, finish=2000, status=Status.COMPLETED),
         ]
-        eta_dict = ExperimentEtaCalculator.calculate_eta(jobs)
+        eta_dict = calculate_eta(jobs)
         assert eta_dict["eta_seconds"] == 0.0
         assert eta_dict["chunks_total"] == 1
         assert eta_dict["chunks_remaining"] == 0
