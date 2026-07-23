@@ -2,7 +2,7 @@ from typing import Optional
 
 from autosubmit_api.common.utils import Status
 
-from autosubmit_api.performance.eta.eta_calculator import ExperimentEtaCalculator, _compute_chunk_runtime_seconds
+from autosubmit_api.performance.eta import ExperimentEtaCalculator, _compute_chunk_runtime_seconds
 from autosubmit_api.performance.utils import is_job_completed
 
 

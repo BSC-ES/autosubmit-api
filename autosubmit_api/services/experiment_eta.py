@@ -4,7 +4,7 @@ from autosubmit_api.builders.experiment_history_builder import (
     ExperimentHistoryBuilder,
     ExperimentHistoryDirector,
 )
-from autosubmit_api.performance.eta.eta_calculator import ExperimentEtaCalculator
+from autosubmit_api.performance.eta import ExperimentEtaCalculator
 from autosubmit_api.repositories.jobs import create_jobs_repository
 
 

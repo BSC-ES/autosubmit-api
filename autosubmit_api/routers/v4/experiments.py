@@ -44,7 +44,7 @@ from autosubmit_api.models.responses import (
     ExperimentsSearchResponse,
     ExperimentWrappersResponse,
 )
-from autosubmit_api.performance.eta.eta_service import SectionNotFoundError, ExperimentEtaService
+from autosubmit_api.services.experiment_eta import SectionNotFoundError, ExperimentEtaService
 from autosubmit_api.persistance.experiment import ExperimentPaths
 from autosubmit_api.persistance.job_package_reader import JobPackageReader
 from autosubmit_api.repositories.experiment_structure import (
