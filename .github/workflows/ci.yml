@@ -40,7 +40,6 @@ jobs:
           ruff check ${{ steps.changed-py-files.outputs.all_changed_files }}
 
   test:
-    needs: lint
     runs-on: ubuntu-latest
     timeout-minutes: 5
 
