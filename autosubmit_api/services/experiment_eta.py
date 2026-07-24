@@ -34,6 +34,8 @@ class ExperimentEtaService:
         Raises SectionNotFoundError if no jobs match the section.
         Raises SectionNotChunkedError if the section has no chunked jobs.
         """
+        # FIXME: For AS4.2.0, replace this with a more efficient query that doesn't 
+        # require loading all jobs into memory.
         current_jobs = self.jobs_repo.get_all()
         section_jobs = [job for job in current_jobs if job.section == section]
         if not section_jobs:
