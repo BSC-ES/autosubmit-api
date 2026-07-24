@@ -1,7 +1,10 @@
 from autosubmit_api.common.utils import Status
 
-from autosubmit_api.estimation.eta import _compute_chunk_runtime_seconds, calculate_eta, is_job_completed
-
+from autosubmit_api.estimation.eta import (
+    _compute_chunk_runtime_seconds,
+    calculate_eta,
+    is_job_completed,
+)
 
 class MockJob:
     """Mock job object with the attributes needed for testing the ETA."""
@@ -106,7 +109,6 @@ class TestComputeChunkRuntimeSeconds:
             MockJob(chunk=1, start=1000, finish=1000),
         ]
         assert _compute_chunk_runtime_seconds(jobs) == 0.0
-     
 
 
 class TestCalculateEta:
