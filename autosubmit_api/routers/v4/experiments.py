@@ -36,12 +36,18 @@ from autosubmit_api.models.requests import (
     ExperimentsSearchRequest,
 )
 from autosubmit_api.models.responses import (
+    ExperimentEtaResponse,
     ExperimentFSConfigResponse,
     ExperimentJobsResponse,
     ExperimentRunConfigResponse,
     ExperimentRunsResponse,
     ExperimentsSearchResponse,
     ExperimentWrappersResponse,
+)
+from autosubmit_api.services.experiment_eta import (
+    ExperimentEtaService,
+    SectionNotFoundError,
+    SectionNotChunkedError,
 )
 from autosubmit_api.persistance.experiment import ExperimentPaths
 from autosubmit_api.persistance.job_package_reader import JobPackageReader
@@ -444,6 +450,32 @@ async def get_runs_with_user_metrics(
             for run_id in run_ids
         ]
     }
+
+
+@router.get("/{expid}/eta", name="Get experiment ETA")
+async def get_experiment_eta(
+    expid: str,
+    section: Annotated[str, Query(description="Job section to compute ETA for")] = "SIM",
+    user_id: Optional[str] = Depends(auth_token_dependency()),
+) -> ExperimentEtaResponse:
+    """
+    Get the estimated time of arrival (remaining time) for an experiment's
+    job section (e.g. SIM, APP, POST). Defaults to SIM.
+    """
+    try:
+        repo = create_jobs_repository(expid)
+        eta_service = ExperimentEtaService(repo, expid)
+        result = eta_service.compute_experiment_eta(section)
+    except (SectionNotChunkedError, SectionNotFoundError) as exc:
+        raise HTTPException(status_code=HTTPStatus.BAD_REQUEST, detail=str(exc))
+    except Exception:
+        logger.error(f"Failed to compute ETA for {expid}: {traceback.format_exc()}")
+        raise HTTPException(
+            status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
+            detail="Failed to compute ETA",
+        )
+
+    return result
 
 
 class JobDetailResponse(BaseModel):
