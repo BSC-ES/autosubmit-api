@@ -1,3 +1,5 @@
+from typing import Optional
+
 from autosubmit_api.common.utils import Status
 
 from autosubmit_api.estimation.eta import (
@@ -11,7 +13,7 @@ class MockJob:
 
     def __init__(
         self,
-        chunk: int | None = None,
+        chunk: Optional[int] = None,
         status: int = Status.UNKNOWN,
         start: int = 0,
         finish: int = 0,

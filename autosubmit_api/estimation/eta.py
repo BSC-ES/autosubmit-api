@@ -1,3 +1,5 @@
+from typing import Dict, Optional
+
 from autosubmit_api.common.utils import Status
 
 _EMPTY_RESPONSE = {
@@ -27,7 +29,7 @@ def is_job_completed(job) -> bool:
     return _get_status_code(job) == Status.COMPLETED
 
 
-def _compute_chunk_runtime_seconds(chunk_jobs: list) -> float | None:
+def _compute_chunk_runtime_seconds(chunk_jobs: list) -> Optional[float]:
     """
     Runtime for a completed chunk = max(finish) - min(start) in seconds.
 
@@ -53,7 +55,7 @@ def calculate_eta(jobs_data: list) -> dict:
     Groups jobs by chunk, computes the average runtime of completed chunks,
     and estimates remaining time as avg_runtime * remaining_chunks.
     """
-    chunks: dict[int | None, list] = {}
+    chunks: Dict[Optional[int], list] = {}
     for job in jobs_data:
         if job.chunk is not None:
             chunks.setdefault(job.chunk, []).append(job)
