@@ -1,5 +1,3 @@
-from typing import Optional
-
 from autosubmit_api.common.utils import Status
 
 from autosubmit_api.estimation.eta import _compute_chunk_runtime_seconds, calculate_eta, is_job_completed
@@ -10,7 +8,7 @@ class MockJob:
 
     def __init__(
         self,
-        chunk: Optional[int] = None,
+        chunk: int | None = None,
         status: int = Status.UNKNOWN,
         start: int = 0,
         finish: int = 0,
