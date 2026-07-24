@@ -475,7 +475,7 @@ async def get_experiment_eta(
             detail="Failed to compute ETA",
         )
 
-    return ExperimentEtaResponse(**result)
+    return result
 
 
 class JobDetailResponse(BaseModel):

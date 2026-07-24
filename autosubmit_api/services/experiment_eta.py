@@ -5,6 +5,7 @@ from autosubmit_api.builders.experiment_history_builder import (
     ExperimentHistoryDirector,
 )
 from autosubmit_api.estimation.eta import calculate_eta
+from autosubmit_api.models.responses import ExperimentEtaResponse
 from autosubmit_api.repositories.jobs import JobsRepository
 
 
@@ -22,7 +23,7 @@ class ExperimentEtaService:
         self.jobs_repo = jobs_repo
         self.expid = expid
 
-    def compute_experiment_eta(self, section: str = "SIM") -> dict:
+    def compute_experiment_eta(self, section: str = "SIM") -> ExperimentEtaResponse:
         """
         Get the estimated time of arrival (remaining time) for the given section.
 
@@ -63,4 +64,4 @@ class ExperimentEtaService:
                 )
             )
 
-        return calculate_eta(merged_jobs)
+        return ExperimentEtaResponse(**calculate_eta(merged_jobs))

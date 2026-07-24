@@ -78,7 +78,7 @@ def calculate_eta(jobs_data: list) -> dict:
     avg_runtime = sum(runtimes) / len(runtimes) if runtimes else None
     remaining = total_chunks - completed_count
 
-    if remaining == 0 and all(is_job_completed(j) for j in jobs_data):
+    if remaining == 0:
         eta_seconds = 0.0
     elif avg_runtime is None:
         eta_seconds = None
