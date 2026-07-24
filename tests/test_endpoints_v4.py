@@ -236,6 +236,15 @@ class TestExperimentEta:
         )
         assert response.status_code == HTTPStatus.INTERNAL_SERVER_ERROR
 
+    def test_eta_section_not_chunked(self, fixture_fastapi_client: TestClient):
+        """Test that a section without chunked jobs returns 400."""
+        expid = "a003"
+        response = fixture_fastapi_client.get(
+            self.endpoint.format(expid=expid),
+            params={"section": "POST"},
+        )
+        assert response.status_code == HTTPStatus.BAD_REQUEST
+
 
 class TestExperimentJobs:
     endpoint = "/v4/experiments/{expid}/jobs"

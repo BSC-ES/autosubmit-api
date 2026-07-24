@@ -12,6 +12,10 @@ class SectionNotFoundError(LookupError):
     """Raised when no jobs match the requested section for an experiment."""
 
 
+class SectionNotChunkedError(LookupError):
+    """Raised when the section exists but is not configured with RUNNING: chunk."""
+
+
 class ExperimentEtaService:
 
     def __init__(self, jobs_repo: JobsRepository, expid: str):
@@ -25,7 +29,9 @@ class ExperimentEtaService:
         Merges last job data with the historical database to get
         the actual jobs that last run and the start and finish timestamps for
         those jobs. Then computes the ETA.
+
         Raises SectionNotFoundError if no jobs match the section.
+        Raises SectionNotChunkedError if the section has no chunked jobs.
         """
         current_jobs = self.jobs_repo.get_all()
         section_jobs = [job for job in current_jobs if job.section == section]
@@ -33,6 +39,12 @@ class ExperimentEtaService:
             raise SectionNotFoundError(
                 f"No jobs found for section '{section}' in experiment '{self.expid}'"
             )
+
+        if not any(job.chunk is not None for job in section_jobs):
+            raise SectionNotChunkedError(
+                f"Section '{section}' in experiment '{self.expid}' has no chunked jobs"
+            )
+
         history = ExperimentHistoryDirector(
             ExperimentHistoryBuilder(self.expid)
         ).build_reader_experiment_history()

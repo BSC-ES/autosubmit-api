@@ -44,7 +44,11 @@ from autosubmit_api.models.responses import (
     ExperimentsSearchResponse,
     ExperimentWrappersResponse,
 )
-from autosubmit_api.services.experiment_eta import ExperimentEtaService, SectionNotFoundError
+from autosubmit_api.services.experiment_eta import (
+    ExperimentEtaService,
+    SectionNotFoundError,
+    SectionNotChunkedError,
+)
 from autosubmit_api.persistance.experiment import ExperimentPaths
 from autosubmit_api.persistance.job_package_reader import JobPackageReader
 from autosubmit_api.repositories.experiment_structure import (
@@ -462,7 +466,7 @@ async def get_experiment_eta(
         repo = create_jobs_repository(expid)
         eta_service = ExperimentEtaService(repo, expid)
         result = eta_service.compute_experiment_eta(section)
-    except SectionNotFoundError as exc:
+    except (SectionNotChunkedError, SectionNotFoundError) as exc:
         raise HTTPException(status_code=HTTPStatus.BAD_REQUEST, detail=str(exc))
     except Exception:
         logger.error(f"Failed to compute ETA for {expid}: {traceback.format_exc()}")
