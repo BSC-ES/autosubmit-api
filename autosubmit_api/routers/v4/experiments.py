@@ -456,7 +456,7 @@ async def get_runs_with_user_metrics(
 async def get_experiment_eta(
     expid: str,
     section: Annotated[str, Query(description="Job section to compute ETA for")] = "SIM",
-    user_id: str | None = Depends(auth_token_dependency()),
+    user_id: Optional[str] = Depends(auth_token_dependency()),
 ) -> ExperimentEtaResponse:
     """
     Get the estimated time of arrival (remaining time) for an experiment's
