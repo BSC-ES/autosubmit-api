@@ -7,7 +7,7 @@ import traceback
 from collections import deque
 from datetime import datetime, timezone
 from http import HTTPStatus
-from typing import Annotated, Any, Dict, List, Literal, Optional
+from typing import Annotated, Any, Dict, List, Literal, Optional, Union
 
 from bscearth.utils.config_parser import ConfigParserFactory
 from fastapi import APIRouter, Depends, HTTPException, Query
@@ -20,11 +20,12 @@ from autosubmit_api.builders.experiment_history_builder import (
     ExperimentHistoryBuilder,
     ExperimentHistoryDirector,
 )
-from autosubmit_api.common.utils import Status, timestamp_to_datetime_format
+from autosubmit_api.common.utils import Status, _UNSET, timestamp_to_datetime_format
 from autosubmit_api.components.jobs.job_detail import (
     JobDetailRetriever,
     JobNotFoundError,
 )
+from autosubmit_api.components.jobs.utils import get_fixed_experiment_times
 from autosubmit_api.config.basicConfig import APIBasicConfig
 from autosubmit_api.config.confConfigStrategy import confConfigStrategy
 from autosubmit_api.config.config_common import AutosubmitConfigResolver
@@ -48,6 +49,7 @@ from autosubmit_api.persistance.job_package_reader import JobPackageReader
 from autosubmit_api.repositories.experiment_structure import (
     create_experiment_structure_repository,
 )
+from autosubmit_api.repositories.job_data import create_experiment_job_data_repository
 from autosubmit_api.repositories.jobs import create_jobs_repository
 from autosubmit_api.repositories.join.experiment_join import (
     create_experiment_join_repository,
@@ -179,7 +181,13 @@ async def get_experiment_detail(
 @router.get("/{expid}/jobs", name="List experiment jobs")
 async def get_experiment_jobs(
     expid: str,
-    view: Annotated[Literal["quick", "base"], Query()] = "base",
+    view: Annotated[Literal["quick", "base", "extended"], Query()] = "base",
+    date: Optional[str] = Query(None, description="Filter by job date"),
+    member: Optional[str] = Query(None, description="Filter by job member"),
+    section: Optional[str] = Query(None, description="Filter by job section"),
+    chunk: Optional[Union[int, Literal["NA"]]] = Query(
+        None, description="Filter by job chunk"
+    ),
     user_id: Optional[str] = Depends(auth_token_dependency()),
 ) -> ExperimentJobsResponse:
     """
@@ -187,10 +195,28 @@ async def get_experiment_jobs(
     BASE view returns base content of the pkl file.
     QUICK view returns a reduced payload with just the name and status of the jobs.
     """
+
+    def _to_filter(val):
+        """Translate HTTP query param to repository filter value.
+        None (not provided) -> _UNSET (skip filter)
+        "NA" -> None (filter for null)
+        value -> value (filter by value)
+        """
+        if val is None:
+            return _UNSET
+        if val == "NA":
+            return None
+        return val
+
     # Read the pkl
     try:
         job_list_repo = create_jobs_repository(expid)
-        current_content = job_list_repo.get_all()
+        current_content = job_list_repo.search(
+            date=_to_filter(date),
+            member=_to_filter(member),
+            section=_to_filter(section),
+            chunk=_to_filter(chunk),
+        )
     except Exception as exc:
         error_message = "Error while reading the job list"
         logger.error(error_message + f": {exc}")
@@ -199,6 +225,23 @@ async def get_experiment_jobs(
             status_code=HTTPStatus.INTERNAL_SERVER_ERROR, detail=error_message
         )
 
+    if view == "extended":
+        # Get the last job data for all jobs in the current content
+        job_names = [job_item.name for job_item in current_content]
+        try:
+            job_data_repo = create_experiment_job_data_repository(expid)
+            last_job_data_list = job_data_repo.get_last_job_data_by_name_list(job_names)
+            last_job_data_map = {
+                job_data.job_name: job_data for job_data in last_job_data_list
+            }
+        except Exception as exc:
+            error_message = "Error while reading the last job data"
+            logger.error(error_message + f": {exc}")
+            logger.error(traceback.format_exc())
+            raise HTTPException(
+                status_code=HTTPStatus.INTERNAL_SERVER_ERROR, detail=error_message
+            )
+
     pkl_jobs = deque()
     for job_item in current_content:
         resp_job = {
@@ -206,7 +249,7 @@ async def get_experiment_jobs(
             "status": Status.VALUE_TO_KEY.get(job_item.status, Status.UNKNOWN),
         }
 
-        if view == "base":
+        if view in ["base", "extended"]:
             resp_job = {
                 **resp_job,
                 "priority": job_item.priority,
@@ -225,6 +268,19 @@ async def get_experiment_jobs(
                 "out_path_remote": job_item.out_path_remote,
                 "err_path_remote": job_item.err_path_remote,
             }
+
+        if view == "extended":
+            last_job_data = last_job_data_map.get(job_item.name)
+            submit, start, finish = get_fixed_experiment_times(
+                expid, job_item, last_job_data
+            )
+            if last_job_data:
+                resp_job = {
+                    **resp_job,
+                    "submit": timestamp_to_datetime_format(submit),
+                    "start": timestamp_to_datetime_format(start),
+                    "finish": timestamp_to_datetime_format(finish),
+                }
 
         if job_item.status in [Status.COMPLETED, Status.WAITING, Status.READY]:
             pkl_jobs.append(resp_job)
@@ -647,3 +703,53 @@ async def get_experiment_job_children(
             logger.warning(traceback.format_exc())
 
     return {"children": child_items}
+
+
+@router.get("/{expid}/jobs-category-tree", name="Get experiment jobs category tree")
+async def get_experiment_jobs_category_tree(
+    expid: str,
+    include_status: bool = False,
+    user_id: Optional[str] = Depends(auth_token_dependency()),
+) -> Dict:
+    """
+    Get the jobs category tree of an experiment
+    It helps navigating the jobs in a hierarchical way,
+    based on their date, member, chunk, section, and status.
+    This doesn't return the jobs themselves, but a tree structure that can be used to filter them.
+    """
+    PROPS = ["date", "member", "section", "status"]
+    try:
+        job_list_repo = create_jobs_repository(expid)
+
+        counters = job_list_repo.get_properties_counts(PROPS)
+
+        tree = {}
+        # First level: date
+        for key, count in counters.items():
+            raw_date, member, section, status_code = key
+            # datetime to string in YYYY-MM-DD format
+            date = (
+                raw_date.strftime("%Y-%m-%d")
+                if isinstance(raw_date, datetime)
+                else "NA"
+            )
+            member = member if member else "NA"
+            status = Status.VALUE_TO_KEY.get(status_code, "UNKNOWN")
+
+            if date not in tree:
+                tree[date] = {}
+            if member not in tree[date]:
+                tree[date][member] = {}
+            if section not in tree[date][member]:
+                tree[date][member][section] = {}
+            tree[date][member][section][status] = count
+
+    except Exception as exc:
+        error_message = "Error while reading the experiment jobs category tree"
+        logger.error(error_message + f": {exc}")
+        logger.error(traceback.format_exc())
+        raise HTTPException(
+            status_code=HTTPStatus.INTERNAL_SERVER_ERROR, detail=error_message
+        )
+
+    return {"properties_hierarchy": PROPS, "category_tree": tree}

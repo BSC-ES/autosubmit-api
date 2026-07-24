@@ -50,6 +50,24 @@ class JobsRepository(ABC):
         Gets jobs matching any of the given names
         """
 
+    def search(
+        self,
+        status: Optional[str] = None,
+        date: Optional[str] = None,
+        member: Optional[str] = None,
+        section: Optional[str] = None,
+    ) -> List[JobData]:
+        """
+        Searches jobs
+        """
+
+    @abstractmethod
+    def get_properties_counts(self, properties: List[str]) -> dict[tuple, int]:
+        """
+        Gets the counts of jobs in each set of properties (e.g., status, section, etc.)
+        Do similar to a group by query in SQL, but for the given properties.
+        """
+
 
 class JobsPklRepository(JobsRepository):
     def __init__(self, expid: str) -> None:
@@ -135,6 +153,58 @@ class JobsPklRepository(JobsRepository):
             for job in pkl_content
             if job.name in name_set
         ]
+
+    def search(
+        self,
+        status: Optional[str] = common_utils._UNSET,
+        date: Optional[str] = common_utils._UNSET,
+        member: Optional[str] = common_utils._UNSET,
+        section: Optional[str] = common_utils._UNSET,
+        chunk: Optional[int] = common_utils._UNSET,
+    ) -> List[JobData]:
+        """
+        Searches jobs based on the given criteria, reading the pkl once.
+        """
+        pkl_content = self.pkl_reader.parse_job_list()
+        results = []
+        for job in pkl_content:
+            job_date = job.date.strftime("%Y-%m-%d") if job.date is not None else None
+            if date is not common_utils._UNSET and date != job_date:
+                continue
+            if member is not common_utils._UNSET and member != job.member:
+                continue
+            if section is not common_utils._UNSET and section != job.section:
+                continue
+            if chunk is not common_utils._UNSET and chunk != job.chunk:
+                continue
+
+            results.append(
+                JobData(
+                    id=job.id,
+                    name=job.name,
+                    status=job.status,
+                    priority=job.priority,
+                    section=job.section,
+                    date=job.date,
+                    member=job.member,
+                    chunk=job.chunk,
+                    split=job.split,
+                    splits=job.splits,
+                    out_path_local=job.out_path_local,
+                    err_path_local=job.err_path_local,
+                    out_path_remote=job.out_path_remote,
+                    err_path_remote=job.err_path_remote,
+                )
+            )
+        return results
+
+    def get_properties_counts(self, properties: List[str]) -> dict[tuple, int]:
+        pkl_content = self.pkl_reader.parse_job_list()
+        counts = {}
+        for job in pkl_content:
+            key = tuple(getattr(job, prop) for prop in properties)
+            counts[key] = counts.get(key, 0) + 1
+        return counts
 
 
 def create_jobs_repository(expid: str) -> JobsRepository:
