@@ -26,9 +26,18 @@ jobs:
           python -m pip install --upgrade pip
           pip install -e .[all]
 
+      - name: Get changed Python files
+        id: changed-py-files
+        uses: tj-actions/changed-files@v47
+        with:
+          files: |
+            *.py
+            **/*.py
+
       - name: Lint code
+        if: steps.changed-py-files.outputs.any_changed == 'true'
         run: |
-          ruff check .
+          ruff check ${{ steps.changed-py-files.outputs.all_changed_files }}
 
   test:
     needs: lint
