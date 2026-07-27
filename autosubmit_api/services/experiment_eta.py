@@ -1,12 +1,9 @@
 from types import SimpleNamespace
 
-from autosubmit_api.builders.experiment_history_builder import (
-    ExperimentHistoryBuilder,
-    ExperimentHistoryDirector,
-)
 from autosubmit_api.estimation.eta import calculate_eta
 from autosubmit_api.models.responses import ExperimentEtaResponse
 from autosubmit_api.repositories.jobs import JobsRepository
+from autosubmit_api.repositories.job_data import ExperimentJobDataRepository
 
 
 class SectionNotFoundError(LookupError):
@@ -19,8 +16,9 @@ class SectionNotChunkedError(LookupError):
 
 class ExperimentEtaService:
 
-    def __init__(self, jobs_repo: JobsRepository, expid: str):
+    def __init__(self, jobs_repo: JobsRepository, job_data_repo: ExperimentJobDataRepository, expid: str):
         self.jobs_repo = jobs_repo
+        self.job_data_repo = job_data_repo
         self.expid = expid
 
     def compute_experiment_eta(self, section: str = "SIM") -> ExperimentEtaResponse:
@@ -48,10 +46,7 @@ class ExperimentEtaService:
                 f"Section '{section}' in experiment '{self.expid}' has no chunked jobs"
             )
 
-        history = ExperimentHistoryDirector(
-            ExperimentHistoryBuilder(self.expid)
-        ).build_reader_experiment_history()
-        history_jobs = history.manager.get_all_last_job_data_dcs()
+        history_jobs = self.job_data_repo.get_last_job_data()
         history_by_name = {j.job_name: j for j in history_jobs}
 
         merged_jobs = []

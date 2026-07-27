@@ -55,6 +55,7 @@ from autosubmit_api.repositories.experiment_structure import (
     create_experiment_structure_repository,
 )
 from autosubmit_api.repositories.jobs import create_jobs_repository
+from autosubmit_api.repositories.job_data import create_experiment_job_data_repository
 from autosubmit_api.repositories.join.experiment_join import (
     create_experiment_join_repository,
 )
@@ -464,7 +465,8 @@ async def get_experiment_eta(
     """
     try:
         repo = create_jobs_repository(expid)
-        eta_service = ExperimentEtaService(repo, expid)
+        job_data_repo = create_experiment_job_data_repository(expid)
+        eta_service = ExperimentEtaService(repo, job_data_repo, expid)
         result = eta_service.compute_experiment_eta(section)
     except (SectionNotChunkedError, SectionNotFoundError) as exc:
         raise HTTPException(status_code=HTTPStatus.BAD_REQUEST, detail=str(exc))

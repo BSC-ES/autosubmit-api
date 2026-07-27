@@ -1,4 +1,7 @@
+import pytest
+
 from typing import Optional
+
 
 from autosubmit_api.common.utils import Status
 
@@ -27,34 +30,39 @@ class MockJob:
 
 
 class TestIsJobCompleted:
-    def test_completed_int(self):
-        """Test that a job with a completed integer status is completed."""
-        assert is_job_completed(MockJob(status=Status.COMPLETED)) is True
-    
-    def test_running_int(self):
-        """Test that a job with a running integer status is not completed."""
-        assert is_job_completed(MockJob(status=Status.RUNNING)) is False
-    
-    def test_completed_str(self):
-        """Test that a job with a completed string status is completed."""
+    @pytest.mark.parametrize(
+        ("status_code", "status", "expected"),
+        [
+            (Status.COMPLETED, None, True),
+            (Status.RUNNING, None, False),
+            (Status.COMPLETED, "COMPLETED", True),
+            (Status.UNKNOWN, "UNKNOWN_STATUS", False),
+            (Status.RUNNING, "RUNNING", False),
+            (None, Status.COMPLETED, True),
+            (None, Status.RUNNING, False),
+            (None, "COMPLETED", True),
+            (None, "NO_STATUS", False),
+        ],
+        ids=[
+            "Int status code set as completed",
+            "Int status code set as running",
+            "Int status code completed with string status",
+            "Int status code unknown with string",
+            "Int status code running with string",
+            "Int status completed no code",
+            "Int status running no code",
+            "String status completed no code",
+            "String status no status no code",
+        ],
+    )
+    def test_is_job_completed(self, status_code, status, expected):
+        """Test is_job_completed with various status_code and status combinations."""
         job = MockJob()
-        job.status_code = Status.COMPLETED
-        job.status = "COMPLETED"
-        assert is_job_completed(job) is True
-    
-    def test_unknown_str_not_completed(self):
-        """Test that an unknown string status is not completed."""
-        job = MockJob()
-        job.status_code = Status.UNKNOWN
-        job.status = "UNKNOWN_STATUS"
-        assert is_job_completed(job) is False
-    
-    def test_running_str_not_completed(self):
-        """Test that a running string status is not completed."""
-        job = MockJob()
-        job.status_code = Status.RUNNING
-        job.status = "RUNNING"
-        assert is_job_completed(job) is False
+        if status_code is not None:
+            job.status_code = status_code
+        if status is not None:
+            job.status = status
+        assert is_job_completed(job) is expected
 
 
 class TestComputeChunkRuntimeSeconds:
