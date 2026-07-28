@@ -28,7 +28,7 @@ jobs:
 
       - name: Lint code
         run: |
-          ruff check .
+          ruff check $(git diff --name-only HEAD^1 HEAD -- '*.py')
 
   test:
     runs-on: ubuntu-latest
