@@ -9,7 +9,6 @@ from autosubmit_api.models.experiment import (
 )
 from autosubmit_api.models.misc import PaginationInfo, RouteInfo
 
-
 class AuthResponse(BaseModel):
     authenticated: bool
     user: Optional[str]
@@ -48,6 +47,13 @@ class ExperimentRunConfigResponse(BaseModel):
 
 class ExperimentWrappersResponse(BaseModel):
     wrappers: List[BaseExperimentWrapper]
+
+
+class ExperimentEtaResponse(BaseModel):
+    eta_seconds: Optional[float]
+    chunks_total: Optional[int]
+    chunks_remaining: Optional[int]
+    avg_runtime_per_chunk_seconds: Optional[float]
 
 
 class PreferredUsernameResponse(BaseModel):

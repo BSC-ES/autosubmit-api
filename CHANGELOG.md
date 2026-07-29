@@ -1,5 +1,11 @@
 # CHANGELOG
 
+### Pre-release v4.1.2b7
+
+#### New features
+
+* Added endpoint to get eta of remaining chunks based on a given section #297
+
 ### Pre-release v4.1.2b6 - Release date: 2026-07-21
 
 #### New features

@@ -204,6 +204,48 @@ class TestExperimentDetail:
         )
 
 
+class TestExperimentEta:
+    endpoint = "/v4/experiments/{expid}/eta"
+
+    def test_eta(self, fixture_fastapi_client: TestClient):
+        expid = "a003"
+        response = fixture_fastapi_client.get(self.endpoint.format(expid=expid))
+        resp_obj: dict = response.json()
+
+        assert isinstance(resp_obj, dict)
+        assert "eta_seconds" in resp_obj
+        assert "chunks_total" in resp_obj
+        assert "chunks_remaining" in resp_obj
+        assert "avg_runtime_per_chunk_seconds" in resp_obj
+
+    def test_eta_invalid_section(self, fixture_fastapi_client: TestClient):
+        """Test that an invalid section returns 400."""
+        expid = "a003"
+        response = fixture_fastapi_client.get(
+            self.endpoint.format(expid=expid),
+            params={"section": "__INVALID_SECTION__"},
+        )
+        assert response.status_code == HTTPStatus.BAD_REQUEST
+
+    def test_eta_invalid_experiment(self, fixture_fastapi_client: TestClient):
+        """Test that an invalid experiment returns 500."""
+        expid = "__INVALID_EXPERIMENT__"
+        response = fixture_fastapi_client.get(
+            self.endpoint.format(expid=expid),
+            params={"section": "SIM"},
+        )
+        assert response.status_code == HTTPStatus.INTERNAL_SERVER_ERROR
+
+    def test_eta_section_not_chunked(self, fixture_fastapi_client: TestClient):
+        """Test that a section without chunked jobs returns 400."""
+        expid = "a003"
+        response = fixture_fastapi_client.get(
+            self.endpoint.format(expid=expid),
+            params={"section": "POST"},
+        )
+        assert response.status_code == HTTPStatus.BAD_REQUEST
+
+
 class TestExperimentJobs:
     endpoint = "/v4/experiments/{expid}/jobs"
 

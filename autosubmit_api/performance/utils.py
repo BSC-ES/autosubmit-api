@@ -1,4 +1,4 @@
-#!/usr/bin/env pytthon
+#!/usr/bin/env python
 from autosubmit_api.common.utils import SECONDS_IN_A_DAY, Status, datechunk_to_year
 
 
