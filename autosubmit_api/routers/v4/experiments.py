@@ -7,7 +7,7 @@ import traceback
 from collections import deque
 from datetime import datetime, timezone
 from http import HTTPStatus
-from typing import Annotated, Any, Dict, List, Literal, Optional
+from typing import Annotated, Any, List, Literal, Optional
 
 from bscearth.utils.config_parser import ConfigParserFactory
 from fastapi import APIRouter, Depends, HTTPException, Query
@@ -95,7 +95,7 @@ async def search_experiments(
         offset=offset,
     )
 
-    async def _get_experiment(raw_exp: Dict[str, Any]) -> Dict[str, Any]:
+    async def _get_experiment(raw_exp: dict[str, Any]) -> dict[str, Any]:
         exp_builder = ExperimentBuilder()
         exp_builder.produce_base_from_dict(raw_exp)
         exp_builder.produce_pkl_modified_time()
@@ -126,7 +126,7 @@ async def search_experiments(
                 suspended = current_run.suspended
                 # last_modified_timestamp = current_run.modified_timestamp
         except Exception as exc:
-            logger.warning((f"Exception getting the current run on search: {exc}"))
+            logger.warning(f"Exception getting the current run on search: {exc}")
             logger.warning(traceback.format_exc())
 
         # Format data
@@ -253,7 +253,7 @@ async def get_experiment_wrappers(
     job_package_reader = JobPackageReader(expid)
     job_package_reader.read()
 
-    wrappers_dict: Dict[str, List[str]] = job_package_reader.package_to_jobs
+    wrappers_dict: dict[str, List[str]] = job_package_reader.package_to_jobs
 
     wrappers = []
     for key, val in wrappers_dict.items():
@@ -293,8 +293,8 @@ def _to_plain_python(obj: Any) -> Any:
 
 
 def _format_config_response(
-    config: Dict[str, Any], is_as3: bool = False
-) -> Dict[str, Any]:
+    config: dict[str, Any], is_as3: bool = False
+) -> dict[str, Any]:
     """
     Format the config response, removing some keys if it's an AS3 config
     Also, add a key to indicate if the config is empty
@@ -326,7 +326,7 @@ async def get_experiment_fs_config(
     as_config = AutosubmitConfigResolver(expid, APIBasicConfig, ConfigParserFactory())
     is_as3 = isinstance(as_config._configWrapper, confConfigStrategy)
     as_config.reload()
-    curr_fs_config: Dict[str, Any] = as_config.get_full_config_as_dict()
+    curr_fs_config: dict[str, Any] = as_config.get_full_config_as_dict()
 
     # Format the response
     response = {"config": _format_config_response(curr_fs_config, is_as3)}
@@ -607,7 +607,7 @@ async def get_experiment_job_parents(
     job_name: str,
     include_status: bool = False,
     user_id: Optional[str] = Depends(auth_token_dependency()),
-) -> Dict:
+) -> dict:
     """
     Get the parents of a specific job of an experiment.
     Set include_status=true to also return the current status of each parent job.
@@ -648,7 +648,7 @@ async def get_experiment_job_children(
     job_name: str,
     include_status: bool = False,
     user_id: Optional[str] = Depends(auth_token_dependency()),
-) -> Dict:
+) -> dict:
     """
     Get the children of a specific job of an experiment
     Set include_status=true to also return the current status of each child job.
