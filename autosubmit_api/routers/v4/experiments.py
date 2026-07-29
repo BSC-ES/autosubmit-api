@@ -44,11 +44,6 @@ from autosubmit_api.models.responses import (
     ExperimentsSearchResponse,
     ExperimentWrappersResponse,
 )
-from autosubmit_api.services.experiment_eta import (
-    ExperimentEtaService,
-    SectionNotFoundError,
-    SectionNotChunkedError,
-)
 from autosubmit_api.persistance.experiment import ExperimentPaths
 from autosubmit_api.persistance.job_package_reader import JobPackageReader
 from autosubmit_api.repositories.experiment_structure import (
@@ -60,6 +55,11 @@ from autosubmit_api.repositories.join.experiment_join import (
     create_experiment_join_repository,
 )
 from autosubmit_api.repositories.user_metric import create_user_metric_repository
+from autosubmit_api.services.experiment_eta import (
+    ExperimentEtaService,
+    SectionNotFoundError,
+    SectionNotChunkedError,
+)
 
 router = APIRouter()
 
