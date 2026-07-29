@@ -7,7 +7,7 @@ import traceback
 from collections import deque
 from datetime import datetime, timezone
 from http import HTTPStatus
-from typing import Annotated, Any, List, Literal, Optional
+from typing import Annotated, Any, Literal, Optional
 
 from bscearth.utils.config_parser import ConfigParserFactory
 from fastapi import APIRouter, Depends, HTTPException, Query
@@ -253,7 +253,7 @@ async def get_experiment_wrappers(
     job_package_reader = JobPackageReader(expid)
     job_package_reader.read()
 
-    wrappers_dict: dict[str, List[str]] = job_package_reader.package_to_jobs
+    wrappers_dict: dict[str, list[str]] = job_package_reader.package_to_jobs
 
     wrappers = []
     for key, val in wrappers_dict.items():
