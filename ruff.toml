@@ -4,4 +4,5 @@ target-version = "py39"
 ignore = [
     "BLE001", # Do not catch blind exception: `Exception`
     "FA100", # Add `from __future__ import annotations` to simplify `typing.Optional`
+    "S110", # `try`-`except`-`pass` detected, consider logging the exception
 ]
