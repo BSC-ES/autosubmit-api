@@ -1,0 +1,6 @@
+target-version = "py39"
+
+[lint]
+ignore = [
+    "BLE001", # Do not catch blind exception: `Exception`
+]
