@@ -28,23 +28,33 @@ jobs:
           python -m pip install --upgrade pip
           pip install -e .[all]
 
-      - name: Lint code
+      - name: Determine diff range
+        id: range
         run: |
           if [ "$GITHUB_EVENT_NAME" = "pull_request" ]; then
-            CHANGED_FILES=$(git diff --name-only "origin/$GITHUB_BASE_REF...HEAD" -- '*.py')
-            echo "Changed files: $CHANGED_FILES"
-            if [ -n "$CHANGED_FILES" ]; then
-              ruff check $CHANGED_FILES
-            fi
-          elif [ "$GITHUB_EVENT_NAME" = "push" ]; then
-            CHANGED_FILES=$(git diff --name-only "${{ github.event.before }}...$GITHUB_SHA" -- '*.py')
-            echo "Changed files: $CHANGED_FILES"
-            if [ -n "$CHANGED_FILES" ]; then
-              ruff check $CHANGED_FILES
-            fi
+            echo "range=origin/${GITHUB_BASE_REF}...HEAD" >> "$GITHUB_OUTPUT"
+          elif [ "$GITHUB_EVENT_NAME" = "push" ] && [ "${{github.event.before}}" != "0000000000000000000000000000000000000000" ]; then
+            RANGE="${{github.event.before}}...$GITHUB_SHA"
+            echo "range=${{github.event.before}}...${GITHUB_SHA}" >> "$GITHUB_OUTPUT"
           else
-            ruff check .
+            echo "range=" >> "$GITHUB_OUTPUT"
           fi
+      
+      - name: Lint changed files
+        run: |
+          RANGE="${{ steps.range.outputs.range }}"
+          if [ -n "$RANGE" ]; then
+            git diff -z --name-only --diff-filter=ACMRT "$RANGE" -- '*.py' > changed.txt
+          else
+            git ls-files -z -- '*.py' > changed.txt
+          fi
+
+          if [ -s changed.txt ]; then
+            xargs -0 -a changed.txt ruff check
+          else
+            echo "No Python files to lint."
+          fi
+            
   test:
     runs-on: ubuntu-latest
     timeout-minutes: 5
