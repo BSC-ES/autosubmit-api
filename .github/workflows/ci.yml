@@ -34,7 +34,6 @@ jobs:
           if [ "$GITHUB_EVENT_NAME" = "pull_request" ]; then
             echo "range=origin/${GITHUB_BASE_REF}...HEAD" >> "$GITHUB_OUTPUT"
           elif [ "$GITHUB_EVENT_NAME" = "push" ] && [ "${{github.event.before}}" != "0000000000000000000000000000000000000000" ]; then
-            RANGE="${{github.event.before}}...$GITHUB_SHA"
             echo "range=${{github.event.before}}...${GITHUB_SHA}" >> "$GITHUB_OUTPUT"
           else
             echo "range=" >> "$GITHUB_OUTPUT"
