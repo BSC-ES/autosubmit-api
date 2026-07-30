@@ -70,7 +70,7 @@ def check_table_schema(engine: Engine, valid_tables: List[Table]) -> Union[Table
             if all(column in column_names for column in valid_columns):
                 return valid_table
         except Exception as exc:
-            logger.error(f"Error inspecting table {valid_table.name}: {exc}")
+            logger.debug(f"Error inspecting table {valid_table.name}: {exc}")
             continue
     return None
 
