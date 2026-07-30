@@ -6,6 +6,7 @@ import re
 import traceback
 from datetime import datetime, timezone
 from http import HTTPStatus
+from pathlib import Path
 from typing import Annotated, Any, Optional
 
 from bscearth.utils.config_parser import ConfigParserFactory
@@ -104,24 +105,29 @@ async def search_experiments(
         running = 0
         failed = 0
         suspended = 0
-        try:
-            current_run = (
-                ExperimentHistoryDirector(ExperimentHistoryBuilder(exp.name))
-                .build_reader_experiment_history()
-                .manager.get_experiment_run_dc_with_max_id()
-            )
-            if current_run and current_run.total > 0:
-                completed = current_run.completed
-                total = current_run.total
-                submitted = current_run.submitted
-                queuing = current_run.queuing
-                running = current_run.running
-                failed = current_run.failed
-                suspended = current_run.suspended
-                # last_modified_timestamp = current_run.modified_timestamp
-        except Exception as exc:
-            logger.warning(f"Exception getting the current run on search: {exc}")
-            logger.warning(traceback.format_exc())
+
+        db_paths = ExperimentPaths(exp.name).job_data_db
+        if Path(db_paths).exists():
+            try:
+                current_run = (
+                    ExperimentHistoryDirector(ExperimentHistoryBuilder(exp.name))
+                    .build_reader_experiment_history()
+                    .manager.get_experiment_run_dc_with_max_id()
+                )
+                if current_run and current_run.total > 0:
+                    completed = current_run.completed
+                    total = current_run.total
+                    submitted = current_run.submitted
+                    queuing = current_run.queuing
+                    running = current_run.running
+                    failed = current_run.failed
+                    suspended = current_run.suspended
+                    # last_modified_timestamp = current_run.modified_timestamp
+            except Exception as exc:
+                logger.warning((f"Exception getting the current run on search: {exc}"))
+                logger.warning(traceback.format_exc())
+        else:
+            logger.debug(f"No job_data database found for experiment {exp.name}. Skipping it.")
 
         # Format data
         return {
