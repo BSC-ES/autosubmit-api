@@ -30,9 +30,20 @@ jobs:
 
       - name: Lint code
         run: |
-          CHANGED_FILES=$(git diff --name-only "origin/$GITHUB_BASE_REF...HEAD" -- '*.py')
-          if [ -n "$CHANGED_FILES" ]; then
-            ruff check $CHANGED_FILES
+          if [ "$GITHUB_EVENT_NAME" = "pull_request" ]; then
+            CHANGED_FILES=$(git diff --name-only "origin/$GITHUB_BASE_REF...HEAD" -- '*.py')
+            echo "Changed files: $CHANGED_FILES"
+            if [ -n "$CHANGED_FILES" ]; then
+              ruff check $CHANGED_FILES
+            fi
+          elif [ "$GITHUB_EVENT_NAME" = "push" ]; then
+            CHANGED_FILES=$(git diff --name-only "${{ github.event.before }}...$GITHUB_SHA" -- '*.py')
+            echo "Changed files: $CHANGED_FILES"
+            if [ -n "$CHANGED_FILES" ]; then
+              ruff check $CHANGED_FILES
+            fi
+          else
+            ruff check .
           fi
   test:
     runs-on: ubuntu-latest
