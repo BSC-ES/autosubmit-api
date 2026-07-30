@@ -30,7 +30,7 @@ jobs:
 
       - name: Lint code
         run: |
-          CHANGED_FILES=$(git diff --name-only "$GITHUB_BASE_REF...$GITHUB_SHA" -- '*.py')
+          CHANGED_FILES=$(git diff --name-only "origin/$GITHUB_BASE_REF...HEAD" -- '*.py')
           if [ -n "$CHANGED_FILES" ]; then
             ruff check $CHANGED_FILES
           fi
