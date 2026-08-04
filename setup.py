@@ -63,7 +63,7 @@ setup(
     license="GNU GPL",
     packages=find_packages(),
     keywords=["autosubmit", "API"],
-    python_requires=">=3.9",
+    python_requires=">=3.10",
     install_requires=install_requires,
     extras_require=extras_require,
     include_package_data=True,
@@ -73,7 +73,7 @@ setup(
         "Intended Audience :: Developers",
         "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
         "Operating System :: POSIX :: Linux",
-        "Programming Language :: Python :: 3.9",
+        "Programming Language :: Python :: 3.10",
     ],
     entry_points={
         "console_scripts": [
