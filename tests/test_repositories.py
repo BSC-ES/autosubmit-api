@@ -1,4 +1,4 @@
-from typing import Any, Dict, List
+from typing import Any
 from uuid import uuid4
 
 import pytest
@@ -27,10 +27,10 @@ BASE_FROM = (
     "query_args, expected_in_query, expected_params",
     [
         # Test the basic query generation
-        (dict(), [BASE_FROM], {}),
+        ({}, [BASE_FROM], {}),
         # Test the query generation with a search query
         (
-            dict(query="test"),
+            {"query": "test"},
             [
                 BASE_FROM,
                 "experiment.name LIKE :name_1",
@@ -41,29 +41,29 @@ BASE_FROM = (
         ),
         # Test the query generation with active filter
         (
-            dict(only_active=True),
+            {"only_active": True},
             [BASE_FROM, "experiment_status.status = :status_1"],
             {"status_1": "RUNNING"},
         ),
         # Test the query generation with owner filter
         (
-            dict(owner="test"),
+            {"owner": "test"},
             [BASE_FROM, 'details."user" LIKE :user_1'],
             {"user_1": "test"},
         ),
         # Test the query generation with experiment type filter
         (
-            dict(exp_type="test"),
+            {"exp_type": "test"},
             [BASE_FROM, "experiment.name LIKE :name_1"],
             {"name_1": "t%"},
         ),
         (
-            dict(exp_type="operational"),
+            {"exp_type": "operational"},
             [BASE_FROM, "experiment.name LIKE :name_1"],
             {"name_1": "o%"},
         ),
         (
-            dict(exp_type="experiment"),
+            {"exp_type": "experiment"},
             [
                 BASE_FROM,
                 "experiment.name NOT LIKE :name_1",
@@ -73,50 +73,50 @@ BASE_FROM = (
         ),
         # Test the query generation with autosubmit version filter
         (
-            dict(autosubmit_version="1.0"),
+            {"autosubmit_version": "1.0"},
             [BASE_FROM, "experiment.autosubmit_version LIKE :autosubmit_version_1"],
             {"autosubmit_version_1": "1.0"},
         ),
         # Test the query generation with hpc filter
         (
-            dict(hpc="MN5"),
+            {"hpc": "MN5"},
             [BASE_FROM, "details.hpc LIKE :hpc_1"],
             {"hpc_1": "MN5"},
         ),
         # Test the query generation with order by
         (
-            dict(order_by="expid"),
+            {"order_by": "expid"},
             [BASE_FROM, "ORDER BY experiment.name"],
             {},
         ),
         (
-            dict(order_by="expid", order_desc=True),
+            {"order_by": "expid", "order_desc": True},
             [BASE_FROM, "ORDER BY experiment.name DESC"],
             {},
         ),
         # Test wildcard search query
         (
-            dict(owner="foo*bar"),
+            {"owner": "foo*bar"},
             [BASE_FROM, 'details."user" LIKE :user_1'],
             {"user_1": "foo%bar"},
         ),
         (
-            dict(owner="!foo*bar*baz"),
+            {"owner": "!foo*bar*baz"},
             [BASE_FROM, 'details."user" NOT LIKE :user_1'],
             {"user_1": "foo%bar%baz"},
         ),
         (
-            dict(autosubmit_version="3.*.0"),
+            {"autosubmit_version": "3.*.0"},
             [BASE_FROM, "experiment.autosubmit_version LIKE :autosubmit_version_1"],
             {"autosubmit_version_1": "3.%.0"},
         ),
         (
-            dict(autosubmit_version="!3.*.0"),
+            {"autosubmit_version": "!3.*.0"},
             [BASE_FROM, "experiment.autosubmit_version NOT LIKE :autosubmit_version_1"],
             {"autosubmit_version_1": "3.%.0"},
         ),
         (
-            dict(owner="!foo*bar*baz", autosubmit_version="3.*.0", hpc="MN*"),
+            {"owner": "!foo*bar*baz", "autosubmit_version": "3.*.0", "hpc": "MN*"},
             [
                 BASE_FROM,
                 'details."user" NOT LIKE :user_1',
@@ -128,9 +128,9 @@ BASE_FROM = (
     ],
 )
 def test_experiment_search_query_generator(
-    query_args: Dict[str, Any],
-    expected_in_query: List[str],
-    expected_params: Dict[str, str],
+    query_args: dict[str, Any],
+    expected_in_query: list[str],
+    expected_params: dict[str, str],
 ):
     query = generate_query_listexp_extended(**query_args)
 
@@ -284,7 +284,7 @@ class TestExperimentJoinRepository:
 
 
 class TestJobsRepository:
-    @pytest.mark.parametrize("expid, jobs_len", [("a1x4", 4), ("a007", 8)])
+    @pytest.mark.parametrize("expid, jobs_len", [("a1x4", 10), ("a007", 8)])
     def test_job_from_db(self, fixture_mock_basic_config, expid: str, jobs_len: int):
         job_list_repo = create_jobs_repository(expid)
 

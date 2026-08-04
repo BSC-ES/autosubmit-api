@@ -1,6 +1,7 @@
+from __future__ import annotations
+
 from abc import ABC, abstractmethod
 from pathlib import Path
-from typing import List, Union
 
 from pydantic import BaseModel
 from sqlalchemy import Engine, Table, create_engine, select
@@ -20,7 +21,7 @@ class ExperimentStructureModel(BaseModel):
 
 class ExperimentStructureRepository(ABC):
     @abstractmethod
-    def get_all(self) -> List[ExperimentStructureModel]:
+    def get_all(self) -> list[ExperimentStructureModel]:
         """
         Get all dependency job edges of the experiments structure
 
@@ -28,7 +29,7 @@ class ExperimentStructureRepository(ABC):
         """
 
     @abstractmethod
-    def get_parents(self, job_name: str) -> List[str]:
+    def get_parents(self, job_name: str) -> list[str]:
         """
         Get the parent jobs of a given job
 
@@ -37,7 +38,7 @@ class ExperimentStructureRepository(ABC):
         """
 
     @abstractmethod
-    def get_children(self, job_name: str) -> List[str]:
+    def get_children(self, job_name: str) -> list[str]:
         """
         Get the child jobs of a given job
 
@@ -48,7 +49,7 @@ class ExperimentStructureRepository(ABC):
 
 class ExperimentStructureSQLRepository(ExperimentStructureRepository):
     def __init__(
-        self, expid: str, engine: Engine, valid_tables: Union[Table, List[Table]]
+        self, expid: str, engine: Engine, valid_tables: Table | list[Table]
     ):
         self.expid = expid
         self.engine = engine
@@ -70,13 +71,13 @@ class ExperimentStructureSQLRepository(ExperimentStructureRepository):
             ExperimentStructureModel(e_from=row.e_from, e_to=row.e_to) for row in result
         ]
 
-    def get_parents(self, job_name: str) -> List[str]:
+    def get_parents(self, job_name: str) -> list[str]:
         with self.engine.connect() as conn:
             statement = self.table.select().where(self.table.c.e_to == job_name)
             result = conn.execute(statement).all()
         return [row.e_from for row in result]
 
-    def get_children(self, job_name: str) -> List[str]:
+    def get_children(self, job_name: str) -> list[str]:
         with self.engine.connect() as conn:
             statement = self.table.select().where(self.table.c.e_from == job_name)
             result = conn.execute(statement).all()

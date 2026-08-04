@@ -1,8 +1,7 @@
 import os
 import re
-from datetime import datetime
+from datetime import datetime, timezone
 from http import HTTPStatus
-from typing import List
 
 from sqlalchemy import Connection, Engine, Table, create_engine, insert, select, text
 from sqlalchemy.schema import CreateSchema, CreateTable
@@ -21,7 +20,7 @@ def custom_return_value(value=None):
     return blank_func
 
 
-def get_schema_names(conn: Connection) -> List[str]:
+def get_schema_names(conn: Connection) -> list[str]:
     """
     Get all schema names that are not from the system
     """
@@ -91,7 +90,7 @@ def copy_job_data_db(filepath: str, engine: Engine):
     with source_as_db.connect() as source_conn, engine.connect() as conn:
         job_data_table = tables.check_table_schema(
             source_as_db,
-            [tables.JobDataTableV4_2_0, tables.JobDataTableV18, tables.JobDataTable],
+            [tables.JobDataTableV19, tables.JobDataTableV18, tables.JobDataTable],
         )
         _copy_table_data(source_conn, conn, expid, job_data_table)
         _copy_table_data(source_conn, conn, expid, tables.ExperimentRunTable)
@@ -163,7 +162,6 @@ def copy_job_packages_db(filepath: str, engine: Engine):
             )
 
 
-
 def copy_user_metrics_db(filepath: str, engine: Engine):
     expid = _get_expid_from_filename(r"metrics_(\w+)\.db", filepath)
     source_as_db = create_engine(f"sqlite:///{filepath}")
@@ -191,7 +189,8 @@ def copy_pkls(filepaths: list[str], engine: Engine):
                 data = f.read()
                 modified_timestamp = int(os.stat(filepath).st_mtime)
                 modified_datetime = datetime.fromtimestamp(
-                    modified_timestamp
+                    modified_timestamp,
+                    tz=timezone.utc,
                 ).isoformat()
 
             # Insert the data into the database
@@ -216,8 +215,8 @@ def copy_job_list_db(filepath: str, engine: Engine):
         # Jobs Table
         _copy_table_data(source_conn, conn, expid, tables.JobsTable)
         # Job Wrappers Tables
-        _copy_table_data(source_conn, conn, expid, tables.PreviewWrapperInfoTable)
-        _copy_table_data(source_conn, conn, expid, tables.PreviewWrapperJobsTable)
+        _copy_table_data(source_conn, conn, expid, tables.PreviewWrapperInfoTableV2)
+        _copy_table_data(source_conn, conn, expid, tables.PreviewWrapperJobsTableV2)
         # Experiment Structure Table
         _copy_table_data(source_conn, conn, expid, tables.ExperimentStructureV4_2_0)
         conn.commit()

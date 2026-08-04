@@ -3,7 +3,7 @@
 
 import os
 import tempfile
-from typing import Generator, Tuple
+from collections.abc import Generator
 
 import pytest
 from fastapi.testclient import TestClient
@@ -185,7 +185,7 @@ def fixture_gen_rc_pg(fixture_temp_dir_copy_exclude_db: str, fixture_setup_pg_db
 
 
 @pytest.fixture(scope="session")
-def fixture_pg_db_copy_all(fixture_gen_rc_pg: Tuple[str, str]):
+def fixture_pg_db_copy_all(fixture_gen_rc_pg: tuple[str, str]):
     """
     This fixture recursively search all the .db files in the FAKE_EXP_DIR and copies them to the test database
     """
@@ -228,7 +228,7 @@ def fixture_pg_db_copy_all(fixture_gen_rc_pg: Tuple[str, str]):
 
 @pytest.fixture
 def fixture_postgres(
-    fixture_pg_db_copy_all: Tuple[str, Engine], monkeypatch: pytest.MonkeyPatch
+    fixture_pg_db_copy_all: tuple[str, Engine], monkeypatch: pytest.MonkeyPatch
 ):
     """
     This fixture cleans and setup a PostgreSQL database for testing purposes.
@@ -249,7 +249,7 @@ def fixture_postgres(
 )
 def fixture_dummy_db(
     request: pytest.FixtureRequest,
-) -> Generator[Tuple[Engine, Table], None, None]:
+) -> Generator[tuple[Engine, Table], None, None]:
     """SQLite (in-memory) or Postgres engine with a simple test table."""
     if request.param == "sqlite":
         engine = create_engine("sqlite:///:memory:")

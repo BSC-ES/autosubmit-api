@@ -1,7 +1,9 @@
+from __future__ import annotations
+
 import datetime
 from abc import ABC, abstractmethod
-from typing import Any, List, Optional
 from pathlib import Path
+from typing import Any
 
 from pydantic import BaseModel
 from sqlalchemy import Engine, Table, create_engine
@@ -14,27 +16,29 @@ from autosubmit_api.persistance.experiment import ExperimentPaths
 from autosubmit_api.persistance.pkl_reader import PklReader
 from autosubmit_api.repositories.experiment import create_experiment_repository
 
+STRING_TO_CODE = common_utils.Status.STRING_TO_CODE
+
 
 class JobData(BaseModel):
     id: Any
     name: str
-    status: Optional[int] = common_utils.Status.UNKNOWN
+    status: int | None = common_utils.Status.UNKNOWN
     priority: int
     section: str
-    date: Optional[datetime.datetime]
-    member: Optional[str]
-    chunk: Optional[int]
-    split: Optional[int]
-    splits: Optional[int]
-    out_path_local: Optional[str]
-    err_path_local: Optional[str]
-    out_path_remote: Optional[str]
-    err_path_remote: Optional[str]
+    date: datetime.datetime | None
+    member: str | None
+    chunk: int | None
+    split: int | None
+    splits: int | None
+    out_path_local: str | None
+    err_path_local: str | None
+    out_path_remote: str | None
+    err_path_remote: str | None
 
 
 class JobsRepository(ABC):
     @abstractmethod
-    def get_all(self) -> List[JobData]:
+    def get_all(self) -> list[JobData]:
         """
         Gets all jobs
         """
@@ -46,13 +50,13 @@ class JobsRepository(ABC):
         """
 
     @abstractmethod
-    def get_by_name(self, name: str) -> Optional[JobData]:
+    def get_by_name(self, name: str) -> JobData | None:
         """
         Gets a job by its name
         """
 
     @abstractmethod
-    def get_by_names(self, names: List[str]) -> List[JobData]:
+    def get_by_names(self, names: list[str]) -> list[JobData]:
         """
         Gets jobs matching any of the given names
         """
@@ -63,7 +67,7 @@ class JobsPklRepository(JobsRepository):
         self.expid = expid
         self.pkl_reader = PklReader(expid)
 
-    def get_all(self) -> List[JobData]:
+    def get_all(self) -> list[JobData]:
         """
         Gets all jobs from pkl file
         """
@@ -91,7 +95,7 @@ class JobsPklRepository(JobsRepository):
     def get_last_modified_timestamp(self) -> int:
         return self.pkl_reader.get_modified_time()
 
-    def get_by_name(self, name: str) -> Optional[JobData]:
+    def get_by_name(self, name: str) -> JobData | None:
         """
         Gets a job by its name from pkl file
         """
@@ -116,7 +120,7 @@ class JobsPklRepository(JobsRepository):
                 )
         return None
 
-    def get_by_names(self, names: List[str]) -> List[JobData]:
+    def get_by_names(self, names: list[str]) -> list[JobData]:
         """
         Gets all jobs whose names are in the given list, reading the pkl once.
         """
@@ -150,25 +154,24 @@ class JobsSQLRepository(JobsRepository):
         self.engine = engine
         self.table = table
 
-    def get_all(self) -> List[JobData]:
+    def get_all(self) -> list[JobData]:
         """
         Gets all jobs from SQL database
         """
-        status_str_to_code = common_utils.Status.STRING_TO_CODE
         with self.engine.connect() as conn:
             result = conn.execute(self.table.select())
             return [
                 JobData(
                     id=row.id,
                     name=row.name,
-                    status=status_str_to_code.get(
-                        row.status, common_utils.Status.UNKNOWN
-                    ),
+                    status=STRING_TO_CODE.get(row.status, common_utils.Status.UNKNOWN),
                     priority=row.priority,
                     section=row.section,
                     date=row.date,
                     member=row.member,
                     chunk=row.chunk,
+                    split=row.split,
+                    splits=row.splits,
                     out_path_local=row.local_logs_out,
                     err_path_local=row.local_logs_err,
                     out_path_remote=row.remote_logs_out,
@@ -178,8 +181,78 @@ class JobsSQLRepository(JobsRepository):
             ]
 
     def get_last_modified_timestamp(self) -> int:
-        # TODO: Implement this method once is available in Autosubmit
-        return 0
+        with self.engine.connect() as conn:
+            statement = (
+                self.table.select().order_by(self.table.c.modified.desc()).limit(1)
+            )
+            result = conn.execute(statement).first()
+            if result is not None:
+                # Try to convert the modified timestamp iso string to int
+                try:
+                    _date = datetime.datetime.fromisoformat(result.modified)
+                    return int(_date.timestamp())
+                except Exception:
+                    return 0
+            else:
+                return 0
+
+    def get_by_name(self, name: str) -> JobData | None:
+        with self.engine.connect() as conn:
+            statement = self.table.select().where(self.table.c.name == name)
+            result = conn.execute(statement).first()
+            if result is not None:
+                return JobData(
+                    id=result.id,
+                    name=result.name,
+                    status=STRING_TO_CODE.get(
+                        result.status, common_utils.Status.UNKNOWN
+                    ),
+                    priority=result.priority,
+                    section=result.section,
+                    date=result.date,
+                    member=result.member,
+                    chunk=result.chunk,
+                    split=result.split,
+                    splits=result.splits,
+                    out_path_local=result.local_logs_out,
+                    err_path_local=result.local_logs_err,
+                    out_path_remote=result.remote_logs_out,
+                    err_path_remote=result.remote_logs_err,
+                )
+            else:
+                return None
+
+    def get_by_names(self, names: list[str]) -> list[JobData]:
+        chunk_size = 900  # Stay safely below SQLite's 999-parameter limit
+        rows = []
+        with self.engine.connect() as conn:
+            for i in range(0, len(names), chunk_size):
+                chunk = names[i : i + chunk_size]
+                statement = self.table.select().where(self.table.c.name.in_(chunk))
+                result = conn.execute(statement).all()
+
+                for row in result:
+                    rows.append(
+                        JobData(
+                            id=row.id,
+                            name=row.name,
+                            status=STRING_TO_CODE.get(
+                                row.status, common_utils.Status.UNKNOWN
+                            ),
+                            priority=row.priority,
+                            section=row.section,
+                            date=row.date,
+                            member=row.member,
+                            chunk=row.chunk,
+                            split=row.split,
+                            splits=row.splits,
+                            out_path_local=row.local_logs_out,
+                            err_path_local=row.local_logs_err,
+                            out_path_remote=row.remote_logs_out,
+                            err_path_remote=row.remote_logs_err,
+                        )
+                    )
+        return rows
 
 
 def create_jobs_repository(expid: str) -> JobsRepository:

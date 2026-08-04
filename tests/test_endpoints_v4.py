@@ -1,12 +1,14 @@
+import random
 from datetime import datetime, timedelta, timezone
 from http import HTTPStatus
-import random
 from typing import Any
 from unittest.mock import AsyncMock, MagicMock, patch
 from uuid import uuid4
-from fastapi.testclient import TestClient
+
 import jwt
 import pytest
+from fastapi.testclient import TestClient
+
 from autosubmit_api import config
 from autosubmit_api.models.requests import PAGINATION_LIMIT_DEFAULT
 from autosubmit_api.repositories.runner_processes import RunnerProcessesDataModel
@@ -20,7 +22,7 @@ class TestCASV2Login:
     def test_redirect(
         self, fixture_fastapi_client: TestClient, monkeypatch: pytest.MonkeyPatch
     ):
-        random_url = f"https://${str(uuid4())}/"
+        random_url = f"https://${uuid4()!s}/"
         monkeypatch.setattr(config, "CAS_SERVER_URL", random_url)
         assert random_url == config.CAS_SERVER_URL
 
@@ -137,7 +139,7 @@ class TestJWTVerify:
         payload = {
             "user_id": random_user,
             "sub": random_user,
-            "iat": int(datetime.now().timestamp()),
+            "iat": int(datetime.now(tz=timezone.utc).timestamp()),
             "exp": (
                 datetime.now(timezone.utc)
                 + timedelta(seconds=config.JWT_EXP_DELTA_SECONDS)
@@ -254,7 +256,7 @@ class TestExperimentJobs:
         [
             ("a003", "quick", 8),
             ("a003", "base", 8),
-            ("a1x4", "base", 4),
+            ("a1x4", "base", 10),
         ],
     )
     def test_jobs_views(
@@ -820,9 +822,9 @@ class TestUserPreferences:
         payload = {
             "user_id": user_id,
             "sub": user_id,
-            "iat": int(datetime.now().timestamp()),
+            "iat": int(datetime.now(tz=timezone.utc).timestamp()),
             "exp": (
-                datetime.now(timezone.utc)
+                datetime.now(tz=timezone.utc)
                 + timedelta(seconds=config.JWT_EXP_DELTA_SECONDS)
             ),
         }

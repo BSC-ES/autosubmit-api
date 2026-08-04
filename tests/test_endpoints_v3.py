@@ -1,10 +1,12 @@
 from datetime import datetime, timedelta, timezone
 from http import HTTPStatus
 from uuid import uuid4
-from fastapi.testclient import TestClient
+
 import jwt
-from autosubmit_api import config
 import pytest
+from fastapi.testclient import TestClient
+
+from autosubmit_api import config
 from autosubmit_api.config.basicConfig import APIBasicConfig
 
 
@@ -31,7 +33,7 @@ class TestLogin:
         fixture_mock_basic_config: APIBasicConfig,
         monkeypatch: pytest.MonkeyPatch,
     ):
-        random_referer = str(f"https://${str(uuid4())}/")
+        random_referer = str(f"https://${uuid4()!s}/")
         monkeypatch.setattr(APIBasicConfig, "ALLOWED_CLIENTS", [random_referer])
 
         response = fixture_fastapi_client.get(
@@ -91,7 +93,7 @@ class TestExpInfo:
         [
             ("a003", 8, 8, None),
             ("a3tb", 55, 28, None),
-            ("a1x4", 4, 0, 0),
+            ("a1x4", 10, 0, None),
         ],
     )
     def test_exp_info(
@@ -249,14 +251,12 @@ class TestRunsList:
         )
 
         # Get run with highest run_id
-        latest_run = sorted(resp_obj["runs"], key=lambda x: x["run_id"], reverse=True)[
-            0
-        ]
+        latest_run = max(resp_obj["runs"], key=lambda x: x["run_id"])
 
         # Check last run data
         for key, value in expected_last_run_data.items():
             assert pytest.approx(latest_run[key], rel=1e-2) == value, (
-                "Key {} does not match".format(key)
+                f"Key {key} does not match"
             )
 
 
@@ -280,7 +280,7 @@ class TestQuick:
     endpoint = "/v3/quick/{expid}"
 
     @pytest.mark.parametrize(
-        "expid, expected_total", [("a007", 8), ("a6zj", 10), ("a1x4", 4)]
+        "expid, expected_total", [("a007", 8), ("a6zj", 10), ("a1x4", 10)]
     )
     def test_quick(
         self, fixture_fastapi_client: TestClient, expid: str, expected_total: int
@@ -357,8 +357,8 @@ class TestGraph:
         assert resp_obj["error_message"] == ""
         assert resp_obj["error"] is False
         assert resp_obj["total_jobs"] == len(resp_obj["nodes"])
-        assert resp_obj["total_jobs"] == 4
-        assert len(resp_obj["edges"]) == 3
+        assert resp_obj["total_jobs"] == 10
+        assert len(resp_obj["edges"]) == 24
 
 
 class TestExpCount:
@@ -397,7 +397,7 @@ class TestExpCount:
                     "RUNNING": 0,
                     "QUEUING": 0,
                     "SUSPENDED": 0,
-                    "WAITING": 3,
+                    "WAITING": 9,
                 },
             ),
         ],
@@ -421,7 +421,7 @@ class TestExpCount:
 class TestSummary:
     endpoint = "/v3/summary/{expid}"
 
-    @pytest.mark.parametrize("expid, n_sim", [("a007", 2), ("a6zj", 4), ("a1x4", 2)])
+    @pytest.mark.parametrize("expid, n_sim", [("a007", 2), ("a6zj", 4), ("a1x4", 8)])
     def test_summary(self, fixture_fastapi_client: TestClient, expid: str, n_sim: int):
         random_user = str(uuid4())
         response = fixture_fastapi_client.get(
@@ -708,6 +708,6 @@ class TestExpRecoveryLogs:
         assert resp_obj["error"] is False
         assert isinstance(resp_obj["platform_recovery_logs"], list)
         assert len(resp_obj["platform_recovery_logs"]) == 2
-        assert set(
-            [log_info["platform"] for log_info in resp_obj["platform_recovery_logs"]]
-        ) == set(["mn5", "local"])
+        assert {
+            log_info["platform"] for log_info in resp_obj["platform_recovery_logs"]
+        } == {"mn5", "local"}
