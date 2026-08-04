@@ -41,7 +41,7 @@ install_requires = [
 ]
 
 # Test dependencies
-test_requires = ["pytest", "pytest-cov", "pytest-asyncio", "ruff", "testcontainers", "mock"]
+test_requires = ["pytest", "pytest-cov", "pytest-asyncio", "ruff==0.15.22", "testcontainers", "mock"]
 
 postgres_requires = ["psycopg2"]
 
