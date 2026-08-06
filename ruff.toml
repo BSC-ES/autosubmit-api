@@ -2,6 +2,12 @@ target-version = "py310"
 
 [lint]
 ignore = [
+    # flake8-bandit
+    "S",
+
+    # flake8-blind-except
+    "BLE",
+
     # flake8-bugbear
     "B",
 
@@ -10,6 +16,9 @@ ignore = [
 
     # flynt
     "FLY",
+
+    # isort
+    "I",
 
     # logging-format
     "G",
