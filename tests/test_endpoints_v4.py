@@ -498,6 +498,16 @@ class TestExperimentJobParents:
             ("a6zj", "a6zj_REMOTE_SETUP", ["a6zj_LOCAL_SETUP"]),
             ("a6zj", "a6zj_20000101_fc0_INI", ["a6zj_REMOTE_SETUP"]),
             ("a6zj", "a6zj_20000101_fc0_1_SIM", ["a6zj_20000101_fc0_INI"]),
+            (
+                "a1x4",
+                "a1x4_POST",
+                [
+                    "a1x4_20000101_fc0_2_1_SIM",
+                    "a1x4_20000101_fc0_2_2_SIM",
+                    "a1x4_20000101_fc0_2_3_SIM",
+                    "a1x4_20000101_fc0_2_4_SIM",
+                ],
+            ),
         ],
     )
     def test_parents(
@@ -520,9 +530,29 @@ class TestExperimentJobParents:
         for parent in resp_obj["parents"]:
             assert "status" not in parent
 
-    def test_parents_with_status(self, fixture_fastapi_client: TestClient):
-        expid = "a003"
-        job_name = "a003_REMOTE_SETUP"
+    @pytest.mark.parametrize(
+        "expid, job_name, expected_parents_with_status",
+        [
+            ("a003", "a003_REMOTE_SETUP", [("a003_LOCAL_SETUP", "READY")]),
+            (
+                "a1x4",
+                "a1x4_POST",
+                [
+                    ("a1x4_20000101_fc0_2_1_SIM", "WAITING"),
+                    ("a1x4_20000101_fc0_2_2_SIM", "WAITING"),
+                    ("a1x4_20000101_fc0_2_3_SIM", "WAITING"),
+                    ("a1x4_20000101_fc0_2_4_SIM", "WAITING"),
+                ],
+            ),
+        ],
+    )
+    def test_parents_with_status(
+        self,
+        fixture_fastapi_client: TestClient,
+        expid: str,
+        job_name: str,
+        expected_parents_with_status: list,
+    ):
         response = fixture_fastapi_client.get(
             self.endpoint.format(expid=expid, job_name=job_name),
             params={"include_status": True},
@@ -530,11 +560,15 @@ class TestExperimentJobParents:
         resp_obj: dict = response.json()
 
         assert response.status_code == HTTPStatus.OK
-        assert len(resp_obj["parents"]) == 1
-        parent = resp_obj["parents"][0]
-        assert parent["job_name"] == "a003_LOCAL_SETUP"
-        assert "status" in parent
-        assert isinstance(parent["status"], str)
+        assert len(resp_obj["parents"]) == len(expected_parents_with_status)
+
+        for parent in resp_obj["parents"]:
+            assert "status" in parent
+            expected_job_name, expected_status = expected_parents_with_status[
+                resp_obj["parents"].index(parent)
+            ]
+            assert parent["job_name"] == expected_job_name
+            assert parent["status"] == expected_status
 
 
 class TestExperimentJobChildren:
@@ -569,6 +603,16 @@ class TestExperimentJobChildren:
             ("a6zj", "a6zj_LOCAL_SETUP", ["a6zj_REMOTE_SETUP"]),
             ("a6zj", "a6zj_20000101_fc0_INI", ["a6zj_20000101_fc0_1_SIM"]),
             ("a6zj", "a6zj_20000101_fc0_1_SIM", ["a6zj_20000101_fc0_2_SIM"]),
+            (
+                "a1x4",
+                "a1x4_20000101_fc0_INI",
+                [
+                    "a1x4_20000101_fc0_1_1_SIM",
+                    "a1x4_20000101_fc0_1_2_SIM",
+                    "a1x4_20000101_fc0_1_3_SIM",
+                    "a1x4_20000101_fc0_1_4_SIM",
+                ],
+            ),
         ],
     )
     def test_children(
@@ -591,9 +635,29 @@ class TestExperimentJobChildren:
         for child in resp_obj["children"]:
             assert "status" not in child
 
-    def test_children_with_status(self, fixture_fastapi_client: TestClient):
-        expid = "a003"
-        job_name = "a003_LOCAL_SETUP"
+    @pytest.mark.parametrize(
+        "expid, job_name, expected_children_with_status",
+        [
+            ("a003", "a003_LOCAL_SETUP", [("a003_REMOTE_SETUP", "WAITING")]),
+            (
+                "a1x4",
+                "a1x4_20000101_fc0_INI",
+                [
+                    ("a1x4_20000101_fc0_1_1_SIM", "WAITING"),
+                    ("a1x4_20000101_fc0_1_2_SIM", "WAITING"),
+                    ("a1x4_20000101_fc0_1_3_SIM", "WAITING"),
+                    ("a1x4_20000101_fc0_1_4_SIM", "WAITING"),
+                ],
+            ),
+        ],
+    )
+    def test_children_with_status(
+        self,
+        fixture_fastapi_client: TestClient,
+        expid: str,
+        job_name: str,
+        expected_children_with_status: list,
+    ):
         response = fixture_fastapi_client.get(
             self.endpoint.format(expid=expid, job_name=job_name),
             params={"include_status": True},
@@ -601,11 +665,13 @@ class TestExperimentJobChildren:
         resp_obj: dict = response.json()
 
         assert response.status_code == HTTPStatus.OK
-        assert len(resp_obj["children"]) == 1
-        child = resp_obj["children"][0]
-        assert child["job_name"] == "a003_REMOTE_SETUP"
-        assert "status" in child
-        assert isinstance(child["status"], str)
+        assert len(resp_obj["children"]) == len(expected_children_with_status)
+        for child, (expected_name, expected_status) in zip(
+            resp_obj["children"], expected_children_with_status
+        ):
+            assert child["job_name"] == expected_name
+            assert "status" in child
+            assert child["status"] == expected_status
 
 
 class TestExperimentWrappers:

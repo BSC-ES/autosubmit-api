@@ -11,7 +11,11 @@ from sqlalchemy import Engine, Table, create_engine
 from autosubmit_api.common import utils as common_utils
 from autosubmit_api.config.basicConfig import APIBasicConfig
 from autosubmit_api.database import tables
-from autosubmit_api.database.common import create_sqlite_db_engine
+from autosubmit_api.database.common import (
+    POSTGRESQL_MAX_PARAMS,
+    SQLITE_MAX_PARAMS,
+    create_sqlite_db_engine,
+)
 from autosubmit_api.persistance.experiment import ExperimentPaths
 from autosubmit_api.persistance.pkl_reader import PklReader
 from autosubmit_api.repositories.experiment import create_experiment_repository
@@ -223,7 +227,11 @@ class JobsSQLRepository(JobsRepository):
                 return None
 
     def get_by_names(self, names: list[str]) -> list[JobData]:
-        chunk_size = 900  # Stay safely below SQLite's 999-parameter limit
+        chunk_size = (
+            SQLITE_MAX_PARAMS
+            if APIBasicConfig.DATABASE_BACKEND == "sqlite"
+            else POSTGRESQL_MAX_PARAMS
+        )
         rows = []
         with self.engine.connect() as conn:
             for i in range(0, len(names), chunk_size):
