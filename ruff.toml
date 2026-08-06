@@ -2,48 +2,9 @@ target-version = "py310"
 
 [lint]
 ignore = [
-    # flake8-bandit
-    "S",
-
-    # flake8-blind-except
-    "BLE",
-
-    # flake8-bugbear
-    "B",
-
-    # flake8-comprehensions
-    "C4",
-
-    # flynt
-    "FLY",
-
-    # isort
-    "I",
-
-    # logging-format
-    "G",
-
-    # import conventions
-    "ICN",
-
-    # logging
-    "LOG",
-
-    # perflint
-    "PERF",
-
-    # flake8-pie
-    "PIE",
-
-    # flake8-return
-    "RET",
-
-    # Ruff-specific rules
-    "RUF",
-
-    # flake8-simplify
-    "SIM",
-
-    # pyupgrade
-    "UP",
+    "DTZ005",
+    "E501",
+    "F401",
+    "FA102",
+    "RUF010"
 ]
