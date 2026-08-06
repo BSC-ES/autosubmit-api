@@ -12,7 +12,7 @@ Runners define the strategy to run Autosubmit commands in a specific environment
 The API currently supports the following runners:
 
 - **Local Runner**: Runs Autosubmit commands on the local machine where the API is running.
-- **SSH Runner**: *Coming soon*.
+- **SSH Runner**: Runs Autosubmit commands on a remote machine through SSH.
 
 
 Module Loaders
