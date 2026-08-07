@@ -198,7 +198,7 @@ def is_wrapper_type_in_pkl_version(str_version):
 
 def is_db_version_4_2_0_or_higher(str_version):
   main, secondary = parse_version_number(str_version)
-  if (main >= 4 and secondary >= 2) or (main > 4): # 4.2.0 onwards.
+  if (main > 4) or (main == 4 and secondary >= 2): # 4.2.0 onwards.
     return True
   return False
 

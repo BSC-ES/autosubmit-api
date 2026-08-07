@@ -1,17 +1,18 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from pathlib import Path
 
 from pydantic import BaseModel
 from sqlalchemy import Engine, Table, create_engine, select
 
+from autosubmit_api.common.utils import is_db_version_4_2_0_or_higher
 from autosubmit_api.config.basicConfig import APIBasicConfig
 from autosubmit_api.database import tables
 from autosubmit_api.database.common import (
     create_sqlite_db_engine,
 )
 from autosubmit_api.persistance.experiment import ExperimentPaths
+from autosubmit_api.repositories.experiment import create_experiment_repository
 
 
 class ExperimentStructureModel(BaseModel):
@@ -96,7 +97,8 @@ def create_experiment_structure_repository(expid: str) -> ExperimentStructureRep
     else:
         # SQLite
         exp_paths = ExperimentPaths(expid)
-        if Path(exp_paths.db_dir).exists() and Path(exp_paths.job_list_db).exists():
+        experiment = create_experiment_repository().get_by_expid(expid)
+        if is_db_version_4_2_0_or_higher(experiment.autosubmit_version):
             _engine = create_sqlite_db_engine(exp_paths.job_list_db, read_only=True)
             _table = tables.ExperimentStructureV4_2_0
         else:

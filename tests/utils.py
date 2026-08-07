@@ -214,9 +214,20 @@ def copy_job_list_db(filepath: str, engine: Engine):
     with source_as_db.connect() as source_conn, engine.connect() as conn:
         # Jobs Table
         _copy_table_data(source_conn, conn, expid, tables.JobsTable)
-        # Job Wrappers Tables
+        # Job Preview Wrappers Tables
         _copy_table_data(source_conn, conn, expid, tables.PreviewWrapperInfoTableV2)
         _copy_table_data(source_conn, conn, expid, tables.PreviewWrapperJobsTableV2)
         # Experiment Structure Table
         _copy_table_data(source_conn, conn, expid, tables.ExperimentStructureV4_2_0)
         conn.commit()
+        # Try to copy
+        try:
+            _copy_table_data(source_conn, conn, expid, tables.WrapperInfoTableV2)
+            _copy_table_data(source_conn, conn, expid, tables.WrapperJobsTableV2)
+        except Exception:
+            print(
+                "Failed to copy job packages data with new schema, trying old schema..."
+            )
+            conn.rollback()
+        conn.commit()
+        
