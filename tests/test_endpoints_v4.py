@@ -408,6 +408,26 @@ class TestExperimentJobDetail:
                     "last_wrapper": None,
                 },
             ),
+            (
+                "a1x4",
+                "a1x4_20000101_fc0_2_1_SIM",
+                {
+                    "name": "a1x4_20000101_fc0_2_1_SIM",
+                    "section": "SIM",
+                    "status": "WAITING",
+                    "member": "fc0",
+                    "chunk": 2,
+                    "split": 1,
+                    "splits": 4,
+                    "date": "20000101",
+                    "platform": "MN5",
+                    "wallclock": "00:05",
+                    "chunk_size": 4,
+                    "chunk_unit": "month",
+                    "processors": 1,
+                    "last_wrapper": None,
+                },
+            ),
         ],
     )
     def test_job_detail_fields(
@@ -677,21 +697,39 @@ class TestExperimentJobChildren:
 class TestExperimentWrappers:
     endpoint = "/v4/experiments/{expid}/wrappers"
 
-    def test_wrappers(self, fixture_fastapi_client: TestClient):
-        expid = "a6zj"
+    @pytest.mark.parametrize(
+        "expid, expected_num_wrappers, expected_num_wrapped_jobs",
+        [
+            ("a6zj", 1, 4),
+            ("a1x4", 1, 8),
+        ],
+    )
+    def test_wrappers(
+        self,
+        fixture_fastapi_client: TestClient,
+        expid: str,
+        expected_num_wrappers: int,
+        expected_num_wrapped_jobs: int,
+    ):
         response = fixture_fastapi_client.get(self.endpoint.format(expid=expid))
         resp_obj: dict = response.json()
 
         assert isinstance(resp_obj, dict)
         assert isinstance(resp_obj["wrappers"], list)
-        assert len(resp_obj["wrappers"]) == 1
+        assert len(resp_obj["wrappers"]) == expected_num_wrappers
+
+        wrapped_jobs = 0
 
         for wrapper in resp_obj["wrappers"]:
             assert isinstance(wrapper, dict)
             assert isinstance(wrapper["job_names"], list)
+
             assert isinstance(wrapper["wrapper_name"], str) and wrapper[
                 "wrapper_name"
             ].startswith(expid)
+            wrapped_jobs += len(wrapper["job_names"])
+
+        assert wrapped_jobs == expected_num_wrapped_jobs
 
 
 class TestExperimentFSConfig:
