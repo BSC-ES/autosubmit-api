@@ -19,6 +19,24 @@ class ExperimentsSearchRequest(BaseModel):
     page_size: int = PAGINATION_LIMIT_DEFAULT
 
 
+class JobsSearchRequest(BaseModel):
+    view: Annotated[
+        Literal["quick", "base"], Field(description="View type", example="base")
+    ] = "base"
+    job_name: Annotated[
+        str | None,
+        Field(description="Job name. Wildcard supported", example="example_job_*"),
+    ] = None
+    status: Annotated[
+        str | None, Field(description="Job status", example="COMPLETED")
+    ] = None
+
+    page: Annotated[int | None, Field(ge=1, description="Page number", example=1)] = (
+        None
+    )
+    page_size: int | None = None
+
+
 class PreferredUsernameRequest(BaseModel):
     preferred_username: str = Field(
         ..., min_length=1, description="Preferred Linux username"
