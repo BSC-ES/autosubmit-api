@@ -7,7 +7,6 @@ from sqlalchemy import (
     Column,
     Engine,
     Float,
-    ForeignKey,
     Integer,
     LargeBinary,
     MetaData,
@@ -123,7 +122,7 @@ ExperimentStructureTable = Table(
     Column("e_from", Text, nullable=False, primary_key=True),
     Column("e_to", Text, nullable=False, primary_key=True),
 )
-"""Table that holds the structure of the experiment jobs. Before autosubmit 4.1.16"""
+"""Table that holds the structure of the experiment jobs. Before autosubmit 4.2.0."""
 
 ExperimentStructureV4_2_0 = Table(
     "experiment_structure",
@@ -136,7 +135,7 @@ ExperimentStructureV4_2_0 = Table(
     Column("fail_ok", Boolean),
     UniqueConstraint("e_from", "e_to", name="unique_e_from_and_e_to"),
 )
-"""Table that holds the structure of the experiment jobs. After autosubmit 4.1.16"""
+"""Table that holds the structure of the experiment jobs. After autosubmit 4.2.0 (inclusive)."""
 
 
 GraphDataTable = Table(
@@ -291,10 +290,10 @@ JobsTable = Table(
     Column("id", Integer),
     Column("script_name", String),
     Column("priority", Integer),
-    Column("status", Text, nullable=False, index=True),  # Should be job_status_enum
-    Column("frequency", String),  # TODO move to Section table ?
-    Column("synchronize", Boolean),  # TODO move to Section table ?
-    Column("section", String, ForeignKey("sections.name")),
+    Column("status", Text, nullable=False, index=True),
+    Column("frequency", String),
+    Column("synchronize", Boolean),
+    Column("section", String),
     Column("chunk", Integer),
     Column("member", Text),
     Column("splits", Integer),
@@ -307,8 +306,8 @@ JobsTable = Table(
     Column("submit_time_timestamp", Integer),
     Column("finish_time_timestamp", Integer),
     Column("ready_date", String),
-    Column("local_logs_out", String),  # tuple, to modify double value in two
-    Column("local_logs_err", String),  # tuple, to modify double value in two
+    Column("local_logs_out", String),  # it was a tuple
+    Column("local_logs_err", String),
     Column("remote_logs_out", String),
     Column("remote_logs_err", String),
     Column("updated_log", Integer),

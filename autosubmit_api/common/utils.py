@@ -177,7 +177,7 @@ def get_average_total_time(jobs: List[object]) -> float:
   return 0.0
 
 def parse_version_number(str_version: str) -> Tuple[int, int]:
-  if len(str_version.strip()) > 0:
+  if isinstance(str_version, str) and len(str_version.strip()) > 0:
     version_split = str_version.split('.')
     main = int(version_split[0])
     secondary = int(version_split[1])

@@ -2,12 +2,12 @@ from __future__ import annotations
 
 import datetime
 from abc import ABC, abstractmethod
-from pathlib import Path
 from typing import Any
 
 from pydantic import BaseModel
 from sqlalchemy import Engine, Table, create_engine
 
+from autosubmit_api.logger import logger
 from autosubmit_api.common import utils as common_utils
 from autosubmit_api.config.basicConfig import APIBasicConfig
 from autosubmit_api.database import tables
@@ -158,6 +158,12 @@ class JobsSQLRepository(JobsRepository):
         self.engine = engine
         self.table = table
 
+        # Check table schema
+        if tables.check_table_schema(self.engine, [self.table]) is None:
+            raise ValueError(
+                f"Table schema for {self.table.name} does not match expected schema."
+            )
+
     def get_all(self) -> list[JobData]:
         """
         Gets all jobs from SQL database
@@ -196,8 +202,14 @@ class JobsSQLRepository(JobsRepository):
                     _date = datetime.datetime.fromisoformat(result.modified)
                     return int(_date.timestamp())
                 except Exception:
+                    logger.warning(
+                        f"Failed to convert modified timestamp '{result.modified}' to int for experiment {self.expid}."
+                    )
                     return 0
             else:
+                logger.warning(
+                    f"No jobs found in the database for experiment {self.expid} to get last modified timestamp."
+                )
                 return 0
 
     def get_by_name(self, name: str) -> JobData | None:
@@ -269,17 +281,22 @@ def create_jobs_repository(expid: str) -> JobsRepository:
     It decides whether to use the SQL or PKL repository based on the
     existence of the SQLite database.
     """
+    # Experiment should exist
+    experiment = create_experiment_repository().get_by_expid(expid)
+    is_gt_4_2_0 = common_utils.is_db_version_4_2_0_or_higher(
+        experiment.autosubmit_version
+    )
+
     if APIBasicConfig.DATABASE_BACKEND == "postgres":
         # Postgres
-        experiment = create_experiment_repository().get_by_expid(expid)
-        if common_utils.is_db_version_4_2_0_or_higher(experiment.autosubmit_version):
+        if is_gt_4_2_0:
             engine = create_engine(APIBasicConfig.DATABASE_CONN_URL)
             table = tables.table_change_schema(expid, tables.JobsTable)
             return JobsSQLRepository(expid, engine, table)
     else:
         exp_paths = ExperimentPaths(expid)
 
-        if Path(exp_paths.db_dir).exists() and Path(exp_paths.job_list_db).exists():
+        if is_gt_4_2_0:
             engine = create_sqlite_db_engine(exp_paths.job_list_db, read_only=True)
             table = tables.JobsTable
             return JobsSQLRepository(expid, engine, table)
