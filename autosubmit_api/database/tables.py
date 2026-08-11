@@ -1,6 +1,9 @@
-from typing import List, Optional, Type, Union
+from __future__ import annotations
+
+import datetime
 
 from sqlalchemy import (
+    Boolean,
     Column,
     Engine,
     Float,
@@ -20,7 +23,7 @@ from autosubmit_api.logger import logger
 ## Table utils
 
 
-def table_copy(table: Table, metadata: Optional[MetaData] = None) -> Table:
+def table_copy(table: Table, metadata: MetaData | None = None) -> Table:
     """
     Copy a table schema
     """
@@ -33,9 +36,7 @@ def table_copy(table: Table, metadata: Optional[MetaData] = None) -> Table:
     )
 
 
-def table_change_schema(
-    schema: str, source: Union[Type[DeclarativeBase], Table]
-) -> Table:
+def table_change_schema(schema: str, source: type[DeclarativeBase] | Table) -> Table:
     """
     Copy the source table and change the schema of that SQLAlchemy table into a new table instance
     """
@@ -50,7 +51,7 @@ def table_change_schema(
     return table_copy(_source_table, metadata)
 
 
-def check_table_schema(engine: Engine, valid_tables: List[Table]) -> Union[Table, None]:
+def check_table_schema(engine: Engine, valid_tables: list[Table]) -> Table | None:
     """
     Check if one of the valid table schemas matches the current table schema.
     Returns the first matching table schema or None if no match is found.
@@ -121,7 +122,21 @@ ExperimentStructureTable = Table(
     Column("e_from", Text, nullable=False, primary_key=True),
     Column("e_to", Text, nullable=False, primary_key=True),
 )
-"""Table that holds the structure of the experiment jobs."""
+"""Table that holds the structure of the experiment jobs. Before autosubmit 4.2.0."""
+
+ExperimentStructureV4_2_0 = Table(
+    "experiment_structure",
+    MetaData(),
+    Column("e_from", String, nullable=False, primary_key=True, index=True),
+    Column("e_to", String, nullable=False, primary_key=True, index=True),
+    Column("min_trigger_status", String),
+    Column("completion_status", String),
+    Column("from_step", Integer),
+    Column("fail_ok", Boolean),
+    UniqueConstraint("e_from", "e_to", name="unique_e_from_and_e_to"),
+)
+"""Table that holds the structure of the experiment jobs. After autosubmit 4.2.0 (inclusive)."""
+
 
 GraphDataTable = Table(
     "experiment_graph_draw",
@@ -223,6 +238,7 @@ JobDataTableV19.append_column(Column("split", Integer, nullable=True))
 JobDataTableV19.append_column(Column("splits", Integer, nullable=True))
 JobDataTableV19.append_column(Column("fail_count", Integer, nullable=False, default=0))
 
+
 UserMetricTable = Table(
     "user_metrics",
     metadata_obj,
@@ -267,8 +283,57 @@ UserPreferencesTable = Table(
 )
 """Table that holds user preferences, including preferred Linux username."""
 
+JobsTable = Table(
+    "jobs",
+    metadata_obj,
+    Column("name", String, nullable=False, primary_key=True),
+    Column("id", Integer),
+    Column("script_name", String),
+    Column("priority", Integer),
+    Column("status", Text, nullable=False, index=True),
+    Column("frequency", String),
+    Column("synchronize", Boolean),
+    Column("section", String),
+    Column("chunk", Integer),
+    Column("member", Text),
+    Column("splits", Integer),
+    Column("split", Integer),
+    Column("date", String),
+    Column("date_split", String),
+    Column("max_checkpoint_step", Integer, nullable=False, default=0),
+    Column("start_time", String),
+    Column("start_time_timestamp", Integer),
+    Column("submit_time_timestamp", Integer),
+    Column("finish_time_timestamp", Integer),
+    Column("ready_date", String),
+    Column("local_logs_out", String),  # it was a tuple
+    Column("local_logs_err", String),
+    Column("remote_logs_out", String),
+    Column("remote_logs_err", String),
+    Column("updated_log", Integer),
+    Column("packed", Boolean),
+    Column("current_checkpoint_step", Integer, nullable=False, default=0),
+    Column("platform_name", String),
+    Column(
+        "created",
+        Text,
+        nullable=False,
+        default=lambda: datetime.datetime.now(datetime.timezone.utc).strftime(
+            "%Y-%m-%d %H:%M:%S"
+        ),
+    ),
+    Column(
+        "modified",
+        Text,
+        nullable=False,
+        default=lambda: datetime.datetime.now(datetime.timezone.utc).strftime(
+            "%Y-%m-%d %H:%M:%S"
+        ),
+    ),
+)
 
-def create_wrapper_tables(name, metadata_obj_):
+
+def create_wrapper_tables(name, metadata_obj_, revision: int = 1):
     """Create a wrapper table for the given name."""
     table_package_info = Table(
         f"{name}_info",
@@ -305,12 +370,7 @@ def create_wrapper_tables(name, metadata_obj_):
         metadata_obj_,
         Column("package_id", Integer, nullable=False, primary_key=True),
         Column("package_name", String, nullable=False, primary_key=True),
-        Column(
-            "job_name",
-            String,
-            nullable=False,
-            primary_key=True,
-        ),
+        Column("job_name", String, nullable=False, primary_key=True),
         Column("timestamp", String, nullable=True),
         UniqueConstraint(
             "package_id",
@@ -319,10 +379,26 @@ def create_wrapper_tables(name, metadata_obj_):
             name=f"unique_{name}_jobs_package_id_package_name_job_name",
         ),
     )
+
+    if revision >= 2:
+        table_package_info.append_column(Column("updated_stats", Integer))
+        table_package_info.append_column(Column("run_id", Integer, nullable=True))
+
+        table_jobs_inside_wrapper.append_column(
+            Column("run_id", Integer, nullable=True)
+        )
+
     return table_package_info, table_jobs_inside_wrapper
 
 
 WrapperInfoTable, WrapperJobsTable = create_wrapper_tables("wrappers", metadata_obj)
 PreviewWrapperInfoTable, PreviewWrapperJobsTable = create_wrapper_tables(
     "preview_wrappers", metadata_obj
+)
+
+WrapperInfoTableV2, WrapperJobsTableV2 = create_wrapper_tables(
+    "wrappers", MetaData(), revision=2
+)
+PreviewWrapperInfoTableV2, PreviewWrapperJobsTableV2 = create_wrapper_tables(
+    "preview_wrappers", MetaData(), revision=2
 )

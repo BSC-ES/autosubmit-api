@@ -1,12 +1,14 @@
+import random
 from datetime import datetime, timedelta, timezone
 from http import HTTPStatus
-import random
 from typing import Any
 from unittest.mock import AsyncMock, MagicMock, patch
 from uuid import uuid4
-from fastapi.testclient import TestClient
+
 import jwt
 import pytest
+from fastapi.testclient import TestClient
+
 from autosubmit_api import config
 from autosubmit_api.models.requests import PAGINATION_LIMIT_DEFAULT
 from autosubmit_api.repositories.runner_processes import RunnerProcessesDataModel
@@ -20,7 +22,7 @@ class TestCASV2Login:
     def test_redirect(
         self, fixture_fastapi_client: TestClient, monkeypatch: pytest.MonkeyPatch
     ):
-        random_url = f"https://${str(uuid4())}/"
+        random_url = f"https://${uuid4()!s}/"
         monkeypatch.setattr(config, "CAS_SERVER_URL", random_url)
         assert random_url == config.CAS_SERVER_URL
 
@@ -137,7 +139,7 @@ class TestJWTVerify:
         payload = {
             "user_id": random_user,
             "sub": random_user,
-            "iat": int(datetime.now().timestamp()),
+            "iat": int(datetime.now(tz=timezone.utc).timestamp()),
             "exp": (
                 datetime.now(timezone.utc)
                 + timedelta(seconds=config.JWT_EXP_DELTA_SECONDS)
@@ -249,33 +251,35 @@ class TestExperimentEta:
 class TestExperimentJobs:
     endpoint = "/v4/experiments/{expid}/jobs"
 
-    def test_quick(self, fixture_fastapi_client: TestClient):
-        expid = "a003"
+    @pytest.mark.parametrize(
+        "expid, view, expected_len",
+        [
+            ("a003", "quick", 8),
+            ("a003", "base", 8),
+            ("a1x4", "base", 10),
+        ],
+    )
+    def test_jobs_views(
+        self,
+        fixture_fastapi_client: TestClient,
+        expid: str,
+        view: str,
+        expected_len: int,
+    ):
         response = fixture_fastapi_client.get(
             self.endpoint.format(expid=expid),
-            params={"view": "quick"},
+            params={"view": view},
         )
+        assert response.status_code == HTTPStatus.OK
         resp_obj: dict = response.json()
 
-        assert len(resp_obj["jobs"]) == 8
+        assert len(resp_obj["jobs"]) == expected_len
 
         for job in resp_obj["jobs"]:
-            assert isinstance(job, dict) and len(job.keys()) == 2
-            assert isinstance(job["name"], str) and job["name"].startswith(expid)
-            assert isinstance(job["status"], str)
-
-    def test_base(self, fixture_fastapi_client: TestClient):
-        expid = "a003"
-        response = fixture_fastapi_client.get(
-            self.endpoint.format(expid=expid),
-            params={"view": "base"},
-        )
-        resp_obj: dict = response.json()
-
-        assert len(resp_obj["jobs"]) == 8
-
-        for job in resp_obj["jobs"]:
-            assert isinstance(job, dict) and len(job.keys()) > 2
+            if view == "quick":
+                assert isinstance(job, dict) and len(job.keys()) == 2
+            else:
+                assert isinstance(job, dict) and len(job.keys()) > 2
             assert isinstance(job["name"], str) and job["name"].startswith(expid)
             assert isinstance(job["status"], str)
 
@@ -404,6 +408,26 @@ class TestExperimentJobDetail:
                     "last_wrapper": None,
                 },
             ),
+            (
+                "a1x4",
+                "a1x4_20000101_fc0_2_1_SIM",
+                {
+                    "name": "a1x4_20000101_fc0_2_1_SIM",
+                    "section": "SIM",
+                    "status": "WAITING",
+                    "member": "fc0",
+                    "chunk": 2,
+                    "split": 1,
+                    "splits": 4,
+                    "date": "20000101",
+                    "platform": "MN5",
+                    "wallclock": "00:05",
+                    "chunk_size": 4,
+                    "chunk_unit": "month",
+                    "processors": 1,
+                    "last_wrapper": None,
+                },
+            ),
         ],
     )
     def test_job_detail_fields(
@@ -494,6 +518,16 @@ class TestExperimentJobParents:
             ("a6zj", "a6zj_REMOTE_SETUP", ["a6zj_LOCAL_SETUP"]),
             ("a6zj", "a6zj_20000101_fc0_INI", ["a6zj_REMOTE_SETUP"]),
             ("a6zj", "a6zj_20000101_fc0_1_SIM", ["a6zj_20000101_fc0_INI"]),
+            (
+                "a1x4",
+                "a1x4_POST",
+                [
+                    "a1x4_20000101_fc0_2_1_SIM",
+                    "a1x4_20000101_fc0_2_2_SIM",
+                    "a1x4_20000101_fc0_2_3_SIM",
+                    "a1x4_20000101_fc0_2_4_SIM",
+                ],
+            ),
         ],
     )
     def test_parents(
@@ -516,9 +550,29 @@ class TestExperimentJobParents:
         for parent in resp_obj["parents"]:
             assert "status" not in parent
 
-    def test_parents_with_status(self, fixture_fastapi_client: TestClient):
-        expid = "a003"
-        job_name = "a003_REMOTE_SETUP"
+    @pytest.mark.parametrize(
+        "expid, job_name, expected_parents_with_status",
+        [
+            ("a003", "a003_REMOTE_SETUP", [("a003_LOCAL_SETUP", "READY")]),
+            (
+                "a1x4",
+                "a1x4_POST",
+                [
+                    ("a1x4_20000101_fc0_2_1_SIM", "WAITING"),
+                    ("a1x4_20000101_fc0_2_2_SIM", "WAITING"),
+                    ("a1x4_20000101_fc0_2_3_SIM", "WAITING"),
+                    ("a1x4_20000101_fc0_2_4_SIM", "WAITING"),
+                ],
+            ),
+        ],
+    )
+    def test_parents_with_status(
+        self,
+        fixture_fastapi_client: TestClient,
+        expid: str,
+        job_name: str,
+        expected_parents_with_status: list,
+    ):
         response = fixture_fastapi_client.get(
             self.endpoint.format(expid=expid, job_name=job_name),
             params={"include_status": True},
@@ -526,11 +580,15 @@ class TestExperimentJobParents:
         resp_obj: dict = response.json()
 
         assert response.status_code == HTTPStatus.OK
-        assert len(resp_obj["parents"]) == 1
-        parent = resp_obj["parents"][0]
-        assert parent["job_name"] == "a003_LOCAL_SETUP"
-        assert "status" in parent
-        assert isinstance(parent["status"], str)
+        assert len(resp_obj["parents"]) == len(expected_parents_with_status)
+
+        for parent in resp_obj["parents"]:
+            assert "status" in parent
+            expected_job_name, expected_status = expected_parents_with_status[
+                resp_obj["parents"].index(parent)
+            ]
+            assert parent["job_name"] == expected_job_name
+            assert parent["status"] == expected_status
 
 
 class TestExperimentJobChildren:
@@ -565,6 +623,16 @@ class TestExperimentJobChildren:
             ("a6zj", "a6zj_LOCAL_SETUP", ["a6zj_REMOTE_SETUP"]),
             ("a6zj", "a6zj_20000101_fc0_INI", ["a6zj_20000101_fc0_1_SIM"]),
             ("a6zj", "a6zj_20000101_fc0_1_SIM", ["a6zj_20000101_fc0_2_SIM"]),
+            (
+                "a1x4",
+                "a1x4_20000101_fc0_INI",
+                [
+                    "a1x4_20000101_fc0_1_1_SIM",
+                    "a1x4_20000101_fc0_1_2_SIM",
+                    "a1x4_20000101_fc0_1_3_SIM",
+                    "a1x4_20000101_fc0_1_4_SIM",
+                ],
+            ),
         ],
     )
     def test_children(
@@ -587,9 +655,29 @@ class TestExperimentJobChildren:
         for child in resp_obj["children"]:
             assert "status" not in child
 
-    def test_children_with_status(self, fixture_fastapi_client: TestClient):
-        expid = "a003"
-        job_name = "a003_LOCAL_SETUP"
+    @pytest.mark.parametrize(
+        "expid, job_name, expected_children_with_status",
+        [
+            ("a003", "a003_LOCAL_SETUP", [("a003_REMOTE_SETUP", "WAITING")]),
+            (
+                "a1x4",
+                "a1x4_20000101_fc0_INI",
+                [
+                    ("a1x4_20000101_fc0_1_1_SIM", "WAITING"),
+                    ("a1x4_20000101_fc0_1_2_SIM", "WAITING"),
+                    ("a1x4_20000101_fc0_1_3_SIM", "WAITING"),
+                    ("a1x4_20000101_fc0_1_4_SIM", "WAITING"),
+                ],
+            ),
+        ],
+    )
+    def test_children_with_status(
+        self,
+        fixture_fastapi_client: TestClient,
+        expid: str,
+        job_name: str,
+        expected_children_with_status: list,
+    ):
         response = fixture_fastapi_client.get(
             self.endpoint.format(expid=expid, job_name=job_name),
             params={"include_status": True},
@@ -597,31 +685,51 @@ class TestExperimentJobChildren:
         resp_obj: dict = response.json()
 
         assert response.status_code == HTTPStatus.OK
-        assert len(resp_obj["children"]) == 1
-        child = resp_obj["children"][0]
-        assert child["job_name"] == "a003_REMOTE_SETUP"
-        assert "status" in child
-        assert isinstance(child["status"], str)
+        assert len(resp_obj["children"]) == len(expected_children_with_status)
+        for child, (expected_name, expected_status) in zip(
+            resp_obj["children"], expected_children_with_status
+        ):
+            assert child["job_name"] == expected_name
+            assert "status" in child
+            assert child["status"] == expected_status
 
 
 class TestExperimentWrappers:
     endpoint = "/v4/experiments/{expid}/wrappers"
 
-    def test_wrappers(self, fixture_fastapi_client: TestClient):
-        expid = "a6zj"
+    @pytest.mark.parametrize(
+        "expid, expected_num_wrappers, expected_num_wrapped_jobs",
+        [
+            ("a6zj", 1, 4),
+            ("a1x4", 1, 8),
+        ],
+    )
+    def test_wrappers(
+        self,
+        fixture_fastapi_client: TestClient,
+        expid: str,
+        expected_num_wrappers: int,
+        expected_num_wrapped_jobs: int,
+    ):
         response = fixture_fastapi_client.get(self.endpoint.format(expid=expid))
         resp_obj: dict = response.json()
 
         assert isinstance(resp_obj, dict)
         assert isinstance(resp_obj["wrappers"], list)
-        assert len(resp_obj["wrappers"]) == 1
+        assert len(resp_obj["wrappers"]) == expected_num_wrappers
+
+        wrapped_jobs = 0
 
         for wrapper in resp_obj["wrappers"]:
             assert isinstance(wrapper, dict)
             assert isinstance(wrapper["job_names"], list)
+
             assert isinstance(wrapper["wrapper_name"], str) and wrapper[
                 "wrapper_name"
             ].startswith(expid)
+            wrapped_jobs += len(wrapper["job_names"])
+
+        assert wrapped_jobs == expected_num_wrapped_jobs
 
 
 class TestExperimentFSConfig:
@@ -818,9 +926,9 @@ class TestUserPreferences:
         payload = {
             "user_id": user_id,
             "sub": user_id,
-            "iat": int(datetime.now().timestamp()),
+            "iat": int(datetime.now(tz=timezone.utc).timestamp()),
             "exp": (
-                datetime.now(timezone.utc)
+                datetime.now(tz=timezone.utc)
                 + timedelta(seconds=config.JWT_EXP_DELTA_SECONDS)
             ),
         }

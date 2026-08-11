@@ -177,7 +177,7 @@ def get_average_total_time(jobs: List[object]) -> float:
   return 0.0
 
 def parse_version_number(str_version: str) -> Tuple[int, int]:
-  if len(str_version.strip()) > 0:
+  if isinstance(str_version, str) and len(str_version.strip()) > 0:
     version_split = str_version.split('.')
     main = int(version_split[0])
     secondary = int(version_split[1])
@@ -193,6 +193,12 @@ def is_version_historical_ready(str_version):
 def is_wrapper_type_in_pkl_version(str_version):
   main, secondary = parse_version_number(str_version)
   if (main >= 3 and secondary >= 14) or (main >= 4): # 3.14 onwards.
+    return True
+  return False
+
+def is_db_version_4_2_0_or_higher(str_version):
+  main, secondary = parse_version_number(str_version)
+  if (main > 4) or (main == 4 and secondary >= 2): # 4.2.0 onwards.
     return True
   return False
 

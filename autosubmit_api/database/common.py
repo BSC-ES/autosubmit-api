@@ -21,6 +21,8 @@ from autosubmit_api.builders import BaseBuilder
 from autosubmit_api.config.basicConfig import APIBasicConfig
 from autosubmit_api.logger import logger
 
+SQLITE_MAX_PARAMS = 999  # SQLite has a limit of 999 parameters per query by default.
+POSTGRESQL_MAX_PARAMS = 32767  # PostgreSQL has a limit of 32767 parameters per query by default.
 
 class AttachedDatabaseConnBuilder(BaseBuilder):
     """

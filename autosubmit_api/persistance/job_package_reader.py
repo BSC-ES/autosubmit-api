@@ -1,17 +1,17 @@
-from typing import Dict, List
+from __future__ import annotations
+
 from autosubmit_api.logger import logger
 from autosubmit_api.repositories.job_packages import create_job_packages_repository
 
 
 class JobPackageReader:
-
     def __init__(self, expid: str) -> None:
         self.expid = expid
-        self._content: List[Dict] = []
-        self._job_to_package: Dict[str, str] = {}
-        self._package_to_jobs: Dict[str, List[str]] = {}
-        self._package_to_package_id: Dict[str, str] = {}
-        self._package_to_symbol: Dict[str, str] = {}
+        self._content: list[dict] = []
+        self._job_to_package: dict[str, str] = {}
+        self._package_to_jobs: dict[str, list[str]] = {}
+        self._package_to_package_id: dict[str, str] = {}
+        self._package_to_symbol: dict[str, str] = {}
 
     def read(self):
         try:
