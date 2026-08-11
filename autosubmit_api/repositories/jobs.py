@@ -66,11 +66,20 @@ class JobsRepository(ABC):
         Gets jobs matching any of the given names
         """
 
+    @abstractmethod
     def search(
-        self, job_name: str | None = None, status: str | None = None
-    ) -> list[JobData]:
+        self,
+        job_name: str | None = None,
+        status: str | None = None,
+        limit: int | None = None,
+        offset: int | None = None,
+    ) -> tuple[list[JobData], int]:
         """
-        Searches jobs by a query string
+        Searches jobs by the given filters.
+
+        It also supports pagination through the `limit` and `offset` parameters.
+
+        :returns: A tuple containing the list of jobs matching the filters and the total count of the jobs in the experiment.
         """
 
 
@@ -180,34 +189,57 @@ class JobsPklRepository(JobsRepository):
         return bool(re.search(pattern, value))
 
     def search(
-        self, job_name: str | None = None, status: str | None = None
-    ) -> list[JobData]:
-        """
-        Searches jobs by a query string
-        """
+        self,
+        job_name: str | None = None,
+        status: str | None = None,
+        limit: int | None = None,
+        offset: int | None = None,
+    ) -> tuple[list[JobData], int]:
         pkl_content = self.pkl_reader.parse_job_list()
 
-        return [
-            JobData(
-                id=job.id,
-                name=job.name,
-                status=job.status,
-                priority=job.priority,
-                section=job.section,
-                date=job.date,
-                member=job.member,
-                chunk=job.chunk,
-                split=job.split,
-                splits=job.splits,
-                out_path_local=job.out_path_local,
-                err_path_local=job.err_path_local,
-                out_path_remote=job.out_path_remote,
-                err_path_remote=job.err_path_remote,
+        offset = offset if offset else 0
+        limit = limit if limit else len(pkl_content)
+        counter = 0  # Count the number of jobs that match the filters, to apply pagination correctly
+
+        filtered_jobs = []
+        for job in pkl_content:
+            # Apply filters
+            if job_name and not self._wildcard_compare(job_name, job.name):
+                continue
+            status_value = common_utils.Status.VALUE_TO_KEY.get(
+                job.status, common_utils.Status.UNKNOWN
             )
-            for job in pkl_content
-            if JobsPklRepository._wildcard_compare(job_name, job.name)
-            and (status is None or job.status == status)
-        ]
+            if status and status_value != status:
+                continue
+
+            # Pagination logic
+            if counter < offset:
+                counter += 1
+                continue
+
+            counter += 1
+            if len(filtered_jobs) < limit:
+                filtered_jobs.append(
+                    JobData(
+                        id=job.id,
+                        name=job.name,
+                        status=job.status,
+                        priority=job.priority,
+                        section=job.section,
+                        date=job.date,
+                        member=job.member,
+                        chunk=job.chunk,
+                        split=job.split,
+                        splits=job.splits,
+                        out_path_local=job.out_path_local,
+                        err_path_local=job.err_path_local,
+                        out_path_remote=job.out_path_remote,
+                        err_path_remote=job.err_path_remote,
+                    )
+                )
+
+        # Return the result as a list of JobData and the total count
+        return filtered_jobs, counter
 
 
 class JobsSQLRepository(JobsRepository):
@@ -331,6 +363,62 @@ class JobsSQLRepository(JobsRepository):
                         )
                     )
         return rows
+
+    def search(
+        self,
+        job_name: str | None = None,
+        status: str | None = None,
+        limit: int | None = None,
+        offset: int | None = None,
+    ) -> tuple[list[JobData], int]:
+        """
+        Searches jobs by the given filters.
+
+        It also supports pagination through the `limit` and `offset` parameters.
+
+        :returns: A tuple containing the list of jobs matching the filters and the total count of the jobs in the experiment.
+        """
+        with self.engine.connect() as conn:
+            statement = self.table.select()
+
+            if job_name:
+                statement = statement.where(self.table.c.name.like(job_name))
+                # TODO: Implement wildcard support for job_name search in SQL repository. Currently, it only supports exact matches or SQL LIKE patterns.
+            if status:
+                statement = statement.where(self.table.c.status == status)
+
+            # Get total count before applying limit and offset
+            counter = conn.execute(statement).rowcount
+
+            if offset is not None:
+                statement = statement.offset(offset)
+            if limit is not None:
+                statement = statement.limit(limit)
+
+            result = conn.execute(statement).all()
+
+            filtered_jobs = [
+                JobData(
+                    id=row.id,
+                    name=row.name,
+                    status=STRING_TO_CODE.get(
+                        row.status, common_utils.Status.UNKNOWN
+                    ),
+                    priority=row.priority,
+                    section=row.section,
+                    date=row.date,
+                    member=row.member,
+                    chunk=row.chunk,
+                    split=row.split,
+                    splits=row.splits,
+                    out_path_local=row.local_logs_out,
+                    err_path_local=row.local_logs_err,
+                    out_path_remote=row.remote_logs_out,
+                    err_path_remote=row.remote_logs_err,
+                )
+                for row in result
+            ]
+            return filtered_jobs, counter
 
 
 def create_jobs_repository(expid: str) -> JobsRepository:
