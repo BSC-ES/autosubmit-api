@@ -9,7 +9,7 @@ from autosubmit_api.repositories.experiment_status import (
 )
 from autosubmit_api.repositories.graph_layout import create_exp_graph_layout_repository
 from autosubmit_api.repositories.jobs import create_jobs_repository
-from autosubmit_api.repositories.jobs import JobsPklRepository
+from autosubmit_api.repositories.jobs import JobsPklRepository, JobsSQLRepository
 from autosubmit_api.repositories.join.experiment_join import (
     create_experiment_join_repository,
     generate_query_listexp_extended,
@@ -298,7 +298,7 @@ class TestJobsRepository:
             assert isinstance(job.name, str) and job.name.startswith(expid)
             assert isinstance(job.status, int)
 
-            
+
 @pytest.mark.parametrize(
     "expression,value,expected",
     [
@@ -330,3 +330,129 @@ class TestJobsRepository:
 )
 def test_wildcard_compare(expression: str, value: str, expected: bool):
     assert JobsPklRepository._wildcard_compare(expression, value) == expected
+
+
+@pytest.mark.parametrize(
+    "expression, expected_negated, expected_pattern",
+    [
+        # Plain literal — wrapped with % on both sides for contains search
+        ("foo", False, "%foo%"),
+        # Wildcard at end
+        ("foo*", False, "%foo%%"),
+        # Wildcard at start
+        ("*foo", False, "%%foo%"),
+        # Wildcard in the middle
+        ("foo*bar", False, "%foo%bar%"),
+        # Negation prefix
+        ("!foo*", True, "%foo%%"),
+        ("!*bar", True, "%%bar%"),
+        # SQL special chars are escaped
+        ("foo%bar", False, "%foo\\%bar%"),
+        ("foo_bar", False, "%foo\\_bar%"),
+        # Multiple wildcards
+        ("foo*bar*baz", False, "%foo%bar%baz%"),
+        # Negation with SQL special chars
+        ("!foo_bar%", True, "%foo\\_bar\\%%"),
+    ],
+)
+def test_wildcard_to_sql_like(
+    expression: str, expected_negated: bool, expected_pattern: str
+):
+    negated, pattern = JobsSQLRepository._wildcard_to_sql_like(expression)
+    assert negated == expected_negated
+    assert pattern == expected_pattern
+
+
+class TestJobsRepositorySearch:
+    @pytest.mark.parametrize("expid, total", [("a007", 8), ("a1x4", 10)])
+    def test_search_no_filters_returns_all(
+        self, fixture_mock_basic_config, expid: str, total: int
+    ):
+        repo = create_jobs_repository(expid)
+        jobs, count = repo.search()
+        assert count == total
+        assert len(jobs) == total
+
+    @pytest.mark.parametrize(
+        "expid, job_name_filter, expected_count",
+        [
+            # PKL backend — contains search on a007
+            ("a007", "*SIM", 2),
+            ("a007", "a007_20000101*", 4),
+            ("a007", "!*SIM", 6),
+            # SQL backend — contains search on a1x4
+            ("a1x4", "*SIM", 8),
+            ("a1x4", "a1x4_20000101_fc0_1*", 4),
+            ("a1x4", "!*SIM", 2),
+        ],
+    )
+    def test_search_by_job_name(
+        self,
+        fixture_mock_basic_config,
+        expid: str,
+        job_name_filter: str,
+        expected_count: int,
+    ):
+        repo = create_jobs_repository(expid)
+        jobs, count = repo.search(job_name=job_name_filter)
+        assert count == expected_count
+        assert len(jobs) == expected_count
+
+    @pytest.mark.parametrize(
+        "expid, status_filter, expected_count",
+        [
+            ("a007", "COMPLETED", 8),
+            ("a1x4", "READY", 1),
+            ("a1x4", "WAITING", 9),
+        ],
+    )
+    def test_search_by_status(
+        self,
+        fixture_mock_basic_config,
+        expid: str,
+        status_filter: str,
+        expected_count: int,
+    ):
+        repo = create_jobs_repository(expid)
+        jobs, count = repo.search(status=status_filter)
+        assert count == expected_count
+        assert len(jobs) == expected_count
+
+    @pytest.mark.parametrize("expid, total", [("a007", 8), ("a1x4", 10)])
+    def test_search_pagination_count_is_total(
+        self, fixture_mock_basic_config, expid: str, total: int
+    ):
+        """The count returned always reflects total matching items, not the page size."""
+        repo = create_jobs_repository(expid)
+        jobs, count = repo.search(limit=3, offset=0)
+        assert count == total
+        assert len(jobs) == 3
+
+    @pytest.mark.parametrize("expid, total", [("a007", 8), ("a1x4", 10)])
+    def test_search_pagination_last_page(
+        self, fixture_mock_basic_config, expid: str, total: int
+    ):
+        repo = create_jobs_repository(expid)
+        jobs, count = repo.search(limit=3, offset=total - 1)
+        assert count == total
+        assert len(jobs) == 1
+
+    @pytest.mark.parametrize("expid, total", [("a007", 8), ("a1x4", 10)])
+    def test_search_pagination_offset_beyond_total(
+        self, fixture_mock_basic_config, expid: str, total: int
+    ):
+        repo = create_jobs_repository(expid)
+        jobs, count = repo.search(limit=5, offset=total)
+        assert count == total
+        assert len(jobs) == 0
+
+    @pytest.mark.parametrize("expid, total", [("a007", 8), ("a1x4", 10)])
+    def test_search_combined_filter_and_pagination(
+        self, fixture_mock_basic_config, expid: str, total: int
+    ):
+        """Combined job_name filter + pagination: count reflects filtered total."""
+        repo = create_jobs_repository(expid)
+        _, full_count = repo.search(job_name="*SIM")
+        jobs, count = repo.search(job_name="*SIM", limit=1, offset=0)
+        assert count == full_count
+        assert len(jobs) == 1

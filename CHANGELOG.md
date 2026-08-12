@@ -5,6 +5,7 @@
 #### New features
 
 * Support Autosubmit version 4.2.0 new job list database schema #223
+* Endpoint `/v4/experiments/{expid}/jobs` now supports pagination #220
 * Added endpoint to get eta of remaining chunks based on a given section #297
 
 ### Pre-release v4.1.2b6 - Release date: 2026-07-21

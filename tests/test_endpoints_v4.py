@@ -283,6 +283,100 @@ class TestExperimentJobs:
             assert isinstance(job["name"], str) and job["name"].startswith(expid)
             assert isinstance(job["status"], str)
 
+        assert "pagination" in resp_obj
+        pagination = resp_obj["pagination"]
+        assert pagination["total_items"] == expected_len
+        assert pagination["page_size"] is None
+        assert pagination["total_pages"] == 1
+
+
+    @pytest.mark.parametrize(
+        "expid, total, page, page_size, expected_items, expected_pages",
+        [
+            ("a1x4", 10, 1, 3, 3, 4),
+            ("a1x4", 10, 4, 3, 1, 4),
+            ("a1x4", 10, 1, 10, 10, 1),
+            ("a007", 8, 1, 5, 5, 2),
+            ("a007", 8, 2, 5, 3, 2),
+        ],
+    )
+    def test_pagination(
+        self,
+        fixture_fastapi_client: TestClient,
+        expid: str,
+        total: int,
+        page: int,
+        page_size: int,
+        expected_items: int,
+        expected_pages: int,
+    ):
+        response = fixture_fastapi_client.get(
+            self.endpoint.format(expid=expid),
+            params={"page": page, "page_size": page_size},
+        )
+        assert response.status_code == HTTPStatus.OK
+        resp_obj = response.json()
+        pagination = resp_obj["pagination"]
+
+        assert len(resp_obj["jobs"]) == expected_items
+        assert pagination["total_items"] == total
+        assert pagination["total_pages"] == expected_pages
+        assert pagination["page"] == page
+        assert pagination["page_size"] == page_size
+        assert pagination["page_items"] == expected_items
+
+    @pytest.mark.parametrize(
+        "expid, job_name_filter, expected_count",
+        [
+            ("a1x4", "SIM", 8),
+            ("a1x4", "!SIM", 2),
+            ("a1x4", "_1_*SIM", 5),
+            ("a007", "SIM", 2),
+        ],
+    )
+    def test_filter_by_job_name(
+        self,
+        fixture_fastapi_client: TestClient,
+        expid: str,
+        job_name_filter: str,
+        expected_count: int,
+    ):
+        response = fixture_fastapi_client.get(
+            self.endpoint.format(expid=expid),
+            params={"job_name": job_name_filter},
+        )
+        assert response.status_code == HTTPStatus.OK
+        resp_obj = response.json()
+        assert len(resp_obj["jobs"]) == expected_count
+        assert resp_obj["pagination"]["total_items"] == expected_count
+
+    @pytest.mark.parametrize(
+        "expid, status_filter, expected_count",
+        [
+            ("a1x4", "WAITING", 9),
+            ("a1x4", "READY", 1),
+            ("a007", "COMPLETED", 8),
+            ("a3tb", "QUEUING", 4),
+            ("a3tb", "COMPLETED", 24),
+        ],
+    )
+    def test_filter_by_status(
+        self,
+        fixture_fastapi_client: TestClient,
+        expid: str,
+        status_filter: str,
+        expected_count: int,
+    ):
+        response = fixture_fastapi_client.get(
+            self.endpoint.format(expid=expid),
+            params={"status": status_filter},
+        )
+        assert response.status_code == HTTPStatus.OK
+        resp_obj = response.json()
+        assert len(resp_obj["jobs"]) == expected_count
+        assert resp_obj["pagination"]["total_items"] == expected_count
+        assert all(job["status"] == status_filter for job in resp_obj["jobs"])
+
 
 class TestExperimentJobDetail:
     endpoint = "/v4/experiments/{expid}/jobs/{job_name}"
