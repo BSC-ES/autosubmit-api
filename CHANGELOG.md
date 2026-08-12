@@ -5,6 +5,7 @@
 #### New features
 
 * Support Autosubmit version 4.2.0 new job list database schema #223
+* Endpoint `/v4/experiments/{expid}/jobs` now supports pagination #220
 * Added endpoint to get eta of remaining chunks based on a given section #297
 * Change listed authors in `__init__` to BSC - ES Department #332
 * GitHub OAuth2 login accepts an optional `redirect_uri` and forwards it in the token exchange, and reports a failed token exchange instead of a generic error #335
