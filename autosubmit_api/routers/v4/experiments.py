@@ -4,10 +4,9 @@ import math
 import os
 import re
 import traceback
-from collections import deque
 from datetime import datetime, timezone
 from http import HTTPStatus
-from typing import Annotated, Any, Literal, Optional
+from typing import Annotated, Any, Optional
 
 from bscearth.utils.config_parser import ConfigParserFactory
 from fastapi import APIRouter, Depends, HTTPException, Query
@@ -34,6 +33,7 @@ from autosubmit_api.database.models import BaseExperimentModel
 from autosubmit_api.logger import logger
 from autosubmit_api.models.requests import (
     ExperimentsSearchRequest,
+    JobsSearchRequest,
 )
 from autosubmit_api.models.responses import (
     ExperimentEtaResponse,
@@ -186,18 +186,32 @@ async def get_experiment_detail(
 @router.get("/{expid}/jobs", name="List experiment jobs")
 async def get_experiment_jobs(
     expid: str,
-    view: Annotated[Literal["quick", "base"], Query()] = "base",
+    query_params: Annotated[JobsSearchRequest, Query()],
     user_id: Optional[str] = Depends(auth_token_dependency()),
 ) -> ExperimentJobsResponse:
     """
     Get the experiment jobs from pickle file.
     BASE view returns base content of the pkl file.
     QUICK view returns a reduced payload with just the name and status of the jobs.
+    Supports pagination if page_size is provided.
     """
     # Read the pkl
     try:
-        job_list_repo = create_jobs_repository(expid)
-        current_content = job_list_repo.get_all()
+        jobs_repo = create_jobs_repository(expid)
+
+        limit = query_params.page_size
+        offset = (
+            (query_params.page - 1) * query_params.page_size
+            if query_params.page_size
+            else None
+        )
+
+        current_content, total_items = jobs_repo.search(
+            job_name=query_params.job_name,
+            status=query_params.status,
+            limit=limit,
+            offset=offset,
+        )
     except Exception as exc:
         error_message = "Error while reading the job list"
         logger.error(error_message + f": {exc}")
@@ -206,14 +220,16 @@ async def get_experiment_jobs(
             status_code=HTTPStatus.INTERNAL_SERVER_ERROR, detail=error_message
         )
 
-    pkl_jobs = deque()
+    jobs_list = []
     for job_item in current_content:
+        status_value = Status.VALUE_TO_KEY.get(job_item.status, Status.UNKNOWN)
+
         resp_job = {
             "name": job_item.name,
-            "status": Status.VALUE_TO_KEY.get(job_item.status, Status.UNKNOWN),
+            "status": status_value,
         }
 
-        if view == "base":
+        if query_params.view == "base":
             resp_job = {
                 **resp_job,
                 "priority": job_item.priority,
@@ -233,14 +249,23 @@ async def get_experiment_jobs(
                 "err_path_remote": job_item.err_path_remote,
             }
 
-        if job_item.status in [Status.COMPLETED, Status.WAITING, Status.READY]:
-            pkl_jobs.append(resp_job)
-        else:
-            pkl_jobs.appendleft(resp_job)
+        jobs_list.append(resp_job)
 
-    return JSONResponse(
-        {"jobs": list(pkl_jobs)}
-    )  # TODO Use Validation. Not respond directly.
+    paginated = query_params.page_size is not None and query_params.page_size > 0
+    response = {
+        "jobs": jobs_list,
+        "pagination": {
+            "page": query_params.page or 1 if paginated else 1,
+            "page_size": query_params.page_size if paginated else None,
+            "total_pages": math.ceil(total_items / query_params.page_size)
+            if paginated
+            else 1,
+            "page_items": len(jobs_list),
+            "total_items": total_items,
+        },
+    }
+
+    return JSONResponse(response)  # TODO Use Validation. Not respond directly.
 
 
 @router.get("/{expid}/wrappers", name="Get experiment wrappers")
@@ -456,7 +481,9 @@ async def get_runs_with_user_metrics(
 @router.get("/{expid}/eta", name="Get experiment ETA")
 async def get_experiment_eta(
     expid: str,
-    section: Annotated[str, Query(description="Job section to compute ETA for")] = "SIM",
+    section: Annotated[
+        str, Query(description="Job section to compute ETA for")
+    ] = "SIM",
     user_id: Optional[str] = Depends(auth_token_dependency()),
 ) -> ExperimentEtaResponse:
     """

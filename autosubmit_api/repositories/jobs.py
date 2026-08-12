@@ -1,11 +1,12 @@
 from __future__ import annotations
 
 import datetime
+import re
 from abc import ABC, abstractmethod
 from typing import Any
 
 from pydantic import BaseModel
-from sqlalchemy import Engine, Table, create_engine
+from sqlalchemy import Engine, Table, create_engine, func, select
 
 from autosubmit_api.logger import logger
 from autosubmit_api.common import utils as common_utils
@@ -63,6 +64,22 @@ class JobsRepository(ABC):
     def get_by_names(self, names: list[str]) -> list[JobData]:
         """
         Gets jobs matching any of the given names
+        """
+
+    @abstractmethod
+    def search(
+        self,
+        job_name: str | None = None,
+        status: str | None = None,
+        limit: int | None = None,
+        offset: int | None = None,
+    ) -> tuple[list[JobData], int]:
+        """
+        Searches jobs by the given filters.
+
+        It also supports pagination through the `limit` and `offset` parameters.
+
+        :returns: A tuple containing the list of jobs matching the filters and the total count of the jobs in the experiment.
         """
 
 
@@ -151,8 +168,104 @@ class JobsPklRepository(JobsRepository):
             if job.name in name_set
         ]
 
+    @staticmethod
+    def _wildcard_compare(expression: str | None, value: str) -> bool:
+        """
+        Compares a value with a wildcard expression.
+        The expression can contain '*' as wildcard, and '!' as negation.
+        If the expression is empty, it matches everything.
+        Examples:
+        - 'test*' matches 'test123', 'test_abc', etc. Not matching '123test'.
+        - '!test*' does not match 'test123', 'test_abc', etc
+        """
+        if not expression:
+            return True
+        if expression.startswith("!"):
+            return not JobsPklRepository._wildcard_compare(expression[1:], value)
+
+        # Transform to regex style: escape metacharacters, then convert '*' wildcard to '.*'
+        escaped_expression = re.escape(expression)
+        pattern = escaped_expression.replace(r"\*", ".*")
+        pattern = f"^.*{pattern}.*$"  # Match the whole string
+        return bool(re.fullmatch(pattern, value))
+
+    def search(
+        self,
+        job_name: str | None = None,
+        status: str | None = None,
+        limit: int | None = None,
+        offset: int | None = None,
+    ) -> tuple[list[JobData], int]:
+        pkl_content = self.pkl_reader.parse_job_list()
+
+        offset = offset if offset else 0
+        limit = limit if limit else len(pkl_content)
+        counter = 0  # Count the number of jobs that match the filters, to apply pagination correctly
+
+        filtered_jobs = []
+        for job in pkl_content:
+            # Apply filters
+            if job_name and not self._wildcard_compare(job_name, job.name):
+                continue
+            status_value = common_utils.Status.VALUE_TO_KEY.get(
+                job.status, common_utils.Status.UNKNOWN
+            )
+            if status and status_value != status:
+                continue
+
+            # Pagination logic
+            if counter < offset:
+                counter += 1
+                continue
+
+            counter += 1
+            if len(filtered_jobs) < limit:
+                filtered_jobs.append(
+                    JobData(
+                        id=job.id,
+                        name=job.name,
+                        status=job.status,
+                        priority=job.priority,
+                        section=job.section,
+                        date=job.date,
+                        member=job.member,
+                        chunk=job.chunk,
+                        split=job.split,
+                        splits=job.splits,
+                        out_path_local=job.out_path_local,
+                        err_path_local=job.err_path_local,
+                        out_path_remote=job.out_path_remote,
+                        err_path_remote=job.err_path_remote,
+                    )
+                )
+
+        # Return the result as a list of JobData and the total count
+        return filtered_jobs, counter
+
 
 class JobsSQLRepository(JobsRepository):
+    @staticmethod
+    def _wildcard_to_sql_like(expression: str) -> tuple[bool, str]:
+        """
+        Converts a wildcard expression to a SQL LIKE pattern.
+        The expression can contain '*' as wildcard, and '!' as negation prefix.
+        Special SQL LIKE characters '%' and '_' are escaped with a backslash.
+        """
+        negated = False
+        if expression.startswith("!"):
+            negated = True
+            expression = expression[1:]
+
+        # Escape SQL LIKE special characters
+        pattern = (
+            expression.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_")
+        )
+        # Convert wildcard '*' to SQL LIKE '%'
+        pattern = pattern.replace("*", "%")
+        pattern = f"%{pattern}%"  # Match anywhere in the string
+
+        return negated, pattern
+
     def __init__(self, expid: str, engine: Engine, table: Table) -> None:
         self.expid = expid
         self.engine = engine
@@ -273,6 +386,68 @@ class JobsSQLRepository(JobsRepository):
                         )
                     )
         return rows
+
+    def search(
+        self,
+        job_name: str | None = None,
+        status: str | None = None,
+        limit: int | None = None,
+        offset: int | None = None,
+    ) -> tuple[list[JobData], int]:
+        """
+        Searches jobs by the given filters.
+
+        It also supports pagination through the `limit` and `offset` parameters.
+
+        :returns: A tuple containing the list of jobs matching the filters and the total count of the jobs in the experiment.
+        """
+        with self.engine.connect() as conn:
+            statement = self.table.select()
+
+            if job_name:
+                negated, pattern = self._wildcard_to_sql_like(job_name)
+                if negated:
+                    statement = statement.where(
+                        self.table.c.name.notlike(pattern, escape="\\")
+                    )
+                else:
+                    statement = statement.where(
+                        self.table.c.name.like(pattern, escape="\\")
+                    )
+            if status:
+                statement = statement.where(self.table.c.status == status)
+
+            # Get total count before applying limit and offset
+            count_statement = select(func.count()).select_from(statement.subquery())
+            counter = conn.execute(count_statement).scalar()
+
+            if offset is not None:
+                statement = statement.offset(offset)
+            if limit is not None:
+                statement = statement.limit(limit)
+
+            result = conn.execute(statement).all()
+
+            filtered_jobs = [
+                JobData(
+                    id=row.id,
+                    name=row.name,
+                    status=STRING_TO_CODE.get(row.status, common_utils.Status.UNKNOWN),
+                    priority=row.priority,
+                    section=row.section,
+                    date=row.date,
+                    member=row.member,
+                    chunk=row.chunk,
+                    split=row.split,
+                    splits=row.splits,
+                    out_path_local=row.local_logs_out,
+                    err_path_local=row.local_logs_err,
+                    out_path_remote=row.remote_logs_out,
+                    err_path_remote=row.remote_logs_err,
+                )
+                for row in result
+            ]
+            return filtered_jobs, counter
 
 
 def create_jobs_repository(expid: str) -> JobsRepository:

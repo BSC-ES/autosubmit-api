@@ -34,6 +34,7 @@ class ExperimentsSearchResponse(BaseModel):
 
 class ExperimentJobsResponse(BaseModel):
     jobs: List[PklJobModel]
+    pagination: PaginationInfo
 
 
 class ExperimentFSConfigResponse(BaseModel):
