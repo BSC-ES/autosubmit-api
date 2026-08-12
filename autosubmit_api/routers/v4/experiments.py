@@ -4,7 +4,6 @@ import math
 import os
 import re
 import traceback
-from collections import deque
 from datetime import datetime, timezone
 from http import HTTPStatus
 from typing import Annotated, Any, Optional
@@ -221,7 +220,7 @@ async def get_experiment_jobs(
             status_code=HTTPStatus.INTERNAL_SERVER_ERROR, detail=error_message
         )
 
-    jobs_list = deque()
+    jobs_list = []
     for job_item in current_content:
         status_value = Status.VALUE_TO_KEY.get(job_item.status, Status.UNKNOWN)
 
@@ -250,12 +249,7 @@ async def get_experiment_jobs(
                 "err_path_remote": job_item.err_path_remote,
             }
 
-        if job_item.status in [Status.COMPLETED, Status.WAITING, Status.READY]:
-            jobs_list.append(resp_job)
-        else:
-            jobs_list.appendleft(resp_job)
-
-    jobs_list = list(jobs_list)
+        jobs_list.append(resp_job)
 
     paginated = query_params.page_size is not None and query_params.page_size > 0
     response = {
@@ -263,7 +257,9 @@ async def get_experiment_jobs(
         "pagination": {
             "page": query_params.page or 1 if paginated else 1,
             "page_size": query_params.page_size if paginated else None,
-            "total_pages": math.ceil(total_items / query_params.page_size) if paginated else 1,
+            "total_pages": math.ceil(total_items / query_params.page_size)
+            if paginated
+            else 1,
             "page_items": len(jobs_list),
             "total_items": total_items,
         },

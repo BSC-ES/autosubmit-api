@@ -6,7 +6,7 @@ from abc import ABC, abstractmethod
 from typing import Any
 
 from pydantic import BaseModel
-from sqlalchemy import Engine, Table, create_engine
+from sqlalchemy import Engine, Table, create_engine, func, select
 
 from autosubmit_api.logger import logger
 from autosubmit_api.common import utils as common_utils
@@ -186,7 +186,8 @@ class JobsPklRepository(JobsRepository):
         # Transform to regex style: escape metacharacters, then convert '*' wildcard to '.*'
         escaped_expression = re.escape(expression)
         pattern = escaped_expression.replace(r"\*", ".*")
-        return bool(re.search(pattern, value))
+        pattern = f"^.*{pattern}.*$"  # Match the whole string
+        return bool(re.fullmatch(pattern, value))
 
     def search(
         self,
@@ -243,6 +244,28 @@ class JobsPklRepository(JobsRepository):
 
 
 class JobsSQLRepository(JobsRepository):
+    @staticmethod
+    def _wildcard_to_sql_like(expression: str) -> tuple[bool, str]:
+        """
+        Converts a wildcard expression to a SQL LIKE pattern.
+        The expression can contain '*' as wildcard, and '!' as negation prefix.
+        Special SQL LIKE characters '%' and '_' are escaped with a backslash.
+        """
+        negated = False
+        if expression.startswith("!"):
+            negated = True
+            expression = expression[1:]
+
+        # Escape SQL LIKE special characters
+        pattern = (
+            expression.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_")
+        )
+        # Convert wildcard '*' to SQL LIKE '%'
+        pattern = pattern.replace("*", "%")
+        pattern = f"%{pattern}%"  # Match anywhere in the string
+
+        return negated, pattern
+
     def __init__(self, expid: str, engine: Engine, table: Table) -> None:
         self.expid = expid
         self.engine = engine
@@ -382,13 +405,21 @@ class JobsSQLRepository(JobsRepository):
             statement = self.table.select()
 
             if job_name:
-                statement = statement.where(self.table.c.name.like(job_name))
-                # TODO: Implement wildcard support for job_name search in SQL repository. Currently, it only supports exact matches or SQL LIKE patterns.
+                negated, pattern = self._wildcard_to_sql_like(job_name)
+                if negated:
+                    statement = statement.where(
+                        self.table.c.name.notlike(pattern, escape="\\")
+                    )
+                else:
+                    statement = statement.where(
+                        self.table.c.name.like(pattern, escape="\\")
+                    )
             if status:
                 statement = statement.where(self.table.c.status == status)
 
             # Get total count before applying limit and offset
-            counter = conn.execute(statement).rowcount
+            count_statement = select(func.count()).select_from(statement.subquery())
+            counter = conn.execute(count_statement).scalar()
 
             if offset is not None:
                 statement = statement.offset(offset)
@@ -401,9 +432,7 @@ class JobsSQLRepository(JobsRepository):
                 JobData(
                     id=row.id,
                     name=row.name,
-                    status=STRING_TO_CODE.get(
-                        row.status, common_utils.Status.UNKNOWN
-                    ),
+                    status=STRING_TO_CODE.get(row.status, common_utils.Status.UNKNOWN),
                     priority=row.priority,
                     section=row.section,
                     date=row.date,
