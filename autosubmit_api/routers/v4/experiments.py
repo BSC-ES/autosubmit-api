@@ -7,7 +7,7 @@ import traceback
 from collections import deque
 from datetime import datetime, timezone
 from http import HTTPStatus
-from typing import Annotated, Any,Dict, Literal, Optional, Union
+from typing import Annotated, Any, Dict, Optional
 
 from bscearth.utils.config_parser import ConfigParserFactory
 from fastapi import APIRouter, Depends, HTTPException, Query
@@ -35,6 +35,7 @@ from autosubmit_api.database.models import BaseExperimentModel
 from autosubmit_api.logger import logger
 from autosubmit_api.models.requests import (
     ExperimentsSearchRequest,
+    JobsSearchRequest,
 )
 from autosubmit_api.models.responses import (
     ExperimentEtaResponse,
@@ -187,13 +188,7 @@ async def get_experiment_detail(
 @router.get("/{expid}/jobs", name="List experiment jobs")
 async def get_experiment_jobs(
     expid: str,
-    view: Annotated[Literal["quick", "base", "extended"], Query()] = "base",
-    date: Optional[str] = Query(None, description="Filter by job date"),
-    member: Optional[str] = Query(None, description="Filter by job member"),
-    section: Optional[str] = Query(None, description="Filter by job section"),
-    chunk: Optional[Union[int, Literal["NA"]]] = Query(
-        None, description="Filter by job chunk"
-    ),
+    query_params: Annotated[JobsSearchRequest, Query()],
     user_id: Optional[str] = Depends(auth_token_dependency()),
 ) -> ExperimentJobsResponse:
     """
@@ -218,10 +213,10 @@ async def get_experiment_jobs(
     try:
         job_list_repo = create_jobs_repository(expid)
         current_content = job_list_repo.search(
-            date=_to_filter(date),
-            member=_to_filter(member),
-            section=_to_filter(section),
-            chunk=_to_filter(chunk),
+            date=_to_filter(query_params.date),
+            member=_to_filter(query_params.member),
+            section=_to_filter(query_params.section),
+            chunk=_to_filter(query_params.chunk),
         )
     except Exception as exc:
         error_message = "Error while reading the job list"
@@ -231,7 +226,7 @@ async def get_experiment_jobs(
             status_code=HTTPStatus.INTERNAL_SERVER_ERROR, detail=error_message
         )
 
-    if view == "extended":
+    if query_params.view == "extended":
         # Get the last job data for all jobs in the current content
         job_names = [job_item.name for job_item in current_content]
         try:
@@ -255,7 +250,7 @@ async def get_experiment_jobs(
             "status": Status.VALUE_TO_KEY.get(job_item.status, Status.UNKNOWN),
         }
 
-        if view in ["base", "extended"]:
+        if query_params.view in ["base", "extended"]:
             resp_job = {
                 **resp_job,
                 "priority": job_item.priority,
@@ -275,18 +270,17 @@ async def get_experiment_jobs(
                 "err_path_remote": job_item.err_path_remote,
             }
 
-        if view == "extended":
+        if query_params.view == "extended":
             last_job_data = last_job_data_map.get(job_item.name)
             submit, start, finish = get_fixed_experiment_times(
                 expid, job_item, last_job_data
             )
-            if last_job_data:
-                resp_job = {
-                    **resp_job,
-                    "submit": timestamp_to_datetime_format(submit),
-                    "start": timestamp_to_datetime_format(start),
-                    "finish": timestamp_to_datetime_format(finish),
-                }
+            resp_job = {
+                **resp_job,
+                "submit": timestamp_to_datetime_format(submit),
+                "start": timestamp_to_datetime_format(start),
+                "finish": timestamp_to_datetime_format(finish),
+            }
 
         if job_item.status in [Status.COMPLETED, Status.WAITING, Status.READY]:
             pkl_jobs.append(resp_job)
@@ -511,7 +505,9 @@ async def get_runs_with_user_metrics(
 @router.get("/{expid}/eta", name="Get experiment ETA")
 async def get_experiment_eta(
     expid: str,
-    section: Annotated[str, Query(description="Job section to compute ETA for")] = "SIM",
+    section: Annotated[
+        str, Query(description="Job section to compute ETA for")
+    ] = "SIM",
     user_id: Optional[str] = Depends(auth_token_dependency()),
 ) -> ExperimentEtaResponse:
     """
@@ -741,7 +737,6 @@ async def get_experiment_job_children(
 @router.get("/{expid}/jobs-category-tree", name="Get experiment jobs category tree")
 async def get_experiment_jobs_category_tree(
     expid: str,
-    include_status: bool = False,
     user_id: Optional[str] = Depends(auth_token_dependency()),
 ) -> Dict:
     """
@@ -759,15 +754,11 @@ async def get_experiment_jobs_category_tree(
         tree = {}
         # First level: date
         for key, count in counters.items():
-            raw_date, member, section, status_code = key
+            date, member, section, status = key
             # datetime to string in YYYY-MM-DD format
-            date = (
-                raw_date.strftime("%Y-%m-%d")
-                if isinstance(raw_date, datetime)
-                else "NA"
-            )
+            date = date if date else "NA"
             member = member if member else "NA"
-            status = Status.VALUE_TO_KEY.get(status_code, "UNKNOWN")
+            status = status if status else "UNKNOWN"
 
             if date not in tree:
                 tree[date] = {}

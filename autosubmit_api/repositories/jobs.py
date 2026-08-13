@@ -2,10 +2,10 @@ from __future__ import annotations
 
 import datetime
 from abc import ABC, abstractmethod
-from typing import Any, List, Optional
+from typing import Any, List
 
 from pydantic import BaseModel
-from sqlalchemy import Engine, Table, create_engine
+from sqlalchemy import Engine, Table, create_engine, func, select
 
 from autosubmit_api.logger import logger
 from autosubmit_api.common import utils as common_utils
@@ -65,12 +65,13 @@ class JobsRepository(ABC):
         Gets jobs matching any of the given names
         """
 
+    @abstractmethod
     def search(
         self,
-        status: Optional[str] = None,
-        date: Optional[str] = None,
-        member: Optional[str] = None,
-        section: Optional[str] = None,
+        date: str | None = common_utils._UNSET,
+        member: str | None = common_utils._UNSET,
+        section: str | None = common_utils._UNSET,
+        chunk: int | None = common_utils._UNSET,
     ) -> List[JobData]:
         """
         Searches jobs
@@ -171,11 +172,10 @@ class JobsPklRepository(JobsRepository):
 
     def search(
         self,
-        status: Optional[str] = common_utils._UNSET,
-        date: Optional[str] = common_utils._UNSET,
-        member: Optional[str] = common_utils._UNSET,
-        section: Optional[str] = common_utils._UNSET,
-        chunk: Optional[int] = common_utils._UNSET,
+        date: str | None = common_utils._UNSET,
+        member: str | None = common_utils._UNSET,
+        section: str | None = common_utils._UNSET,
+        chunk: int | None = common_utils._UNSET,
     ) -> List[JobData]:
         """
         Searches jobs based on the given criteria, reading the pkl once.
@@ -217,7 +217,21 @@ class JobsPklRepository(JobsRepository):
         pkl_content = self.pkl_reader.parse_job_list()
         counts = {}
         for job in pkl_content:
-            key = tuple(getattr(job, prop) for prop in properties)
+            # Ad-hoc format special properties
+            key = []
+            for prop in properties:
+                value = getattr(job, prop)
+                if prop == "status":
+                    value = common_utils.Status.VALUE_TO_KEY.get(value, "UNKNOWN")
+                elif prop == "date":
+                    value = (
+                        value.strftime("%Y-%m-%d")
+                        if isinstance(value, datetime.datetime)
+                        else value
+                    )
+                key.append(value)
+
+            key = tuple(key)
             counts[key] = counts.get(key, 0) + 1
         return counts
 
@@ -343,6 +357,81 @@ class JobsSQLRepository(JobsRepository):
                         )
                     )
         return rows
+
+    def search(
+        self,
+        date: str | None = common_utils._UNSET,
+        member: str | None = common_utils._UNSET,
+        section: str | None = common_utils._UNSET,
+        chunk: int | None = common_utils._UNSET,
+    ) -> List[JobData]:
+        """
+        Searches jobs based on the given criteria, using SQL queries.
+        """
+        with self.engine.connect() as conn:
+            statement = self.table.select()
+
+            if date is not common_utils._UNSET:
+                statement = statement.where(self.table.c.date == date)
+            if member is not common_utils._UNSET:
+                statement = statement.where(self.table.c.member == member)
+            if section is not common_utils._UNSET:
+                statement = statement.where(self.table.c.section == section)
+            if chunk is not common_utils._UNSET:
+                statement = statement.where(self.table.c.chunk == chunk)
+
+            result = conn.execute(statement).all()
+
+        return [
+            JobData(
+                id=row.id,
+                name=row.name,
+                status=STRING_TO_CODE.get(row.status, common_utils.Status.UNKNOWN),
+                priority=row.priority,
+                section=row.section,
+                date=row.date,
+                member=row.member,
+                chunk=row.chunk,
+                split=row.split,
+                splits=row.splits,
+                out_path_local=row.local_logs_out,
+                err_path_local=row.local_logs_err,
+                out_path_remote=row.remote_logs_out,
+                err_path_remote=row.remote_logs_err,
+            )
+            for row in result
+        ]
+
+    def get_properties_counts(self, properties: List[str]) -> dict[tuple, int]:
+        with self.engine.connect() as conn:
+            statement = select(
+                func.count().label("count"),
+                *[getattr(self.table.c, prop) for prop in properties],
+            ).group_by(*[getattr(self.table.c, prop) for prop in properties])
+            result = conn.execute(statement).all()
+
+        counts = {}
+        for row in result:
+            # ad-hoc format special properties
+            key = []
+            for prop in properties:
+                value = getattr(row, prop)
+                if prop == "date":
+                    if isinstance(value, datetime.datetime):
+                        value = value.strftime("%Y-%m-%d")
+                    else:
+                        try:
+                            value = datetime.datetime.fromisoformat(value).strftime(
+                                "%Y-%m-%d"
+                            )
+                        except (ValueError, TypeError):
+                            value = None
+
+                key.append(value)
+
+            key = tuple(key)
+            counts[key] = row.count
+        return counts
 
 
 def create_jobs_repository(expid: str) -> JobsRepository:
