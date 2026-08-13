@@ -12,6 +12,11 @@ from typing import List, Optional, Tuple, TYPE_CHECKING
 if TYPE_CHECKING:
     from autosubmit_api.components.jobs.job_factory import Job
 
+# Sentinel value to indicate that a parameter was not provided.
+# This is used to distinguish between a parameter being explicitly
+# set to None and a parameter not being provided at all.
+_UNSET = object()
+
 LOCAL_TZ = datetime.datetime.now(datetime.timezone.utc).astimezone().tzinfo
 
 class Section:

@@ -296,3 +296,45 @@ class TestJobsRepository:
         for job in all_jobs:
             assert isinstance(job.name, str) and job.name.startswith(expid)
             assert isinstance(job.status, int)
+
+    @pytest.mark.parametrize(
+        "expid, properties, expected_counts",
+        [
+            ("a1x4", ["status"], {("READY",): 1, ("WAITING",): 9}),
+            (
+                "a1x4",
+                ["date", "member", "section", "status"],
+                {
+                    ("2000-01-01", "fc0", "INI", "READY"): 1,
+                    ("2000-01-01", "fc0", "SIM", "WAITING"): 8,
+                    (None, None, "POST", "WAITING"): 1,
+                },
+            ),
+            (
+                "a007",
+                ["date", "member", "section", "status"],
+                {
+                    (None, None, "LOCAL_SETUP", "COMPLETED"): 1,
+                    (None, None, "REMOTE_SETUP", "COMPLETED"): 1,
+                    ("2000-01-01", "fc0", "SIM", "COMPLETED"): 2,
+                },
+            ),
+        ],
+    )
+    def test_get_properties_counts(
+        self,
+        fixture_mock_basic_config,
+        expid: str,
+        properties: list[str],
+        expected_counts: dict,
+    ):
+        job_list_repo = create_jobs_repository(expid)
+
+        # Get properties counts
+        properties_counts = job_list_repo.get_properties_counts(properties)
+
+        # Check if the returned dictionary has the expected keys and values
+        assert isinstance(properties_counts, dict)
+        for property_tuple, count in expected_counts.items():
+            assert property_tuple in properties_counts
+            assert properties_counts[property_tuple] == count

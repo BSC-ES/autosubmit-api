@@ -2,10 +2,10 @@ from __future__ import annotations
 
 import datetime
 from abc import ABC, abstractmethod
-from typing import Any
+from typing import Any, List
 
 from pydantic import BaseModel
-from sqlalchemy import Engine, Table, create_engine
+from sqlalchemy import Engine, Table, create_engine, func, select
 
 from autosubmit_api.logger import logger
 from autosubmit_api.common import utils as common_utils
@@ -63,6 +63,25 @@ class JobsRepository(ABC):
     def get_by_names(self, names: list[str]) -> list[JobData]:
         """
         Gets jobs matching any of the given names
+        """
+
+    @abstractmethod
+    def search(
+        self,
+        date: str | None = common_utils._UNSET,
+        member: str | None = common_utils._UNSET,
+        section: str | None = common_utils._UNSET,
+        chunk: int | None = common_utils._UNSET,
+    ) -> List[JobData]:
+        """
+        Searches jobs
+        """
+
+    @abstractmethod
+    def get_properties_counts(self, properties: List[str]) -> dict[tuple, int]:
+        """
+        Gets the counts of jobs in each set of properties (e.g., status, section, etc.)
+        Do similar to a group by query in SQL, but for the given properties.
         """
 
 
@@ -150,6 +169,71 @@ class JobsPklRepository(JobsRepository):
             for job in pkl_content
             if job.name in name_set
         ]
+
+    def search(
+        self,
+        date: str | None = common_utils._UNSET,
+        member: str | None = common_utils._UNSET,
+        section: str | None = common_utils._UNSET,
+        chunk: int | None = common_utils._UNSET,
+    ) -> List[JobData]:
+        """
+        Searches jobs based on the given criteria, reading the pkl once.
+        """
+        pkl_content = self.pkl_reader.parse_job_list()
+        results = []
+        for job in pkl_content:
+            job_date = job.date.strftime("%Y-%m-%d") if job.date is not None else None
+            if date is not common_utils._UNSET and date != job_date:
+                continue
+            if member is not common_utils._UNSET and member != job.member:
+                continue
+            if section is not common_utils._UNSET and section != job.section:
+                continue
+            if chunk is not common_utils._UNSET and chunk != job.chunk:
+                continue
+
+            results.append(
+                JobData(
+                    id=job.id,
+                    name=job.name,
+                    status=job.status,
+                    priority=job.priority,
+                    section=job.section,
+                    date=job.date,
+                    member=job.member,
+                    chunk=job.chunk,
+                    split=job.split,
+                    splits=job.splits,
+                    out_path_local=job.out_path_local,
+                    err_path_local=job.err_path_local,
+                    out_path_remote=job.out_path_remote,
+                    err_path_remote=job.err_path_remote,
+                )
+            )
+        return results
+
+    def get_properties_counts(self, properties: List[str]) -> dict[tuple, int]:
+        pkl_content = self.pkl_reader.parse_job_list()
+        counts = {}
+        for job in pkl_content:
+            # Ad-hoc format special properties
+            key = []
+            for prop in properties:
+                value = getattr(job, prop)
+                if prop == "status":
+                    value = common_utils.Status.VALUE_TO_KEY.get(value, "UNKNOWN")
+                elif prop == "date":
+                    value = (
+                        value.strftime("%Y-%m-%d")
+                        if isinstance(value, datetime.datetime)
+                        else value
+                    )
+                key.append(value)
+
+            key = tuple(key)
+            counts[key] = counts.get(key, 0) + 1
+        return counts
 
 
 class JobsSQLRepository(JobsRepository):
@@ -273,6 +357,81 @@ class JobsSQLRepository(JobsRepository):
                         )
                     )
         return rows
+
+    def search(
+        self,
+        date: str | None = common_utils._UNSET,
+        member: str | None = common_utils._UNSET,
+        section: str | None = common_utils._UNSET,
+        chunk: int | None = common_utils._UNSET,
+    ) -> List[JobData]:
+        """
+        Searches jobs based on the given criteria, using SQL queries.
+        """
+        with self.engine.connect() as conn:
+            statement = self.table.select()
+
+            if date is not common_utils._UNSET:
+                statement = statement.where(self.table.c.date == date)
+            if member is not common_utils._UNSET:
+                statement = statement.where(self.table.c.member == member)
+            if section is not common_utils._UNSET:
+                statement = statement.where(self.table.c.section == section)
+            if chunk is not common_utils._UNSET:
+                statement = statement.where(self.table.c.chunk == chunk)
+
+            result = conn.execute(statement).all()
+
+        return [
+            JobData(
+                id=row.id,
+                name=row.name,
+                status=STRING_TO_CODE.get(row.status, common_utils.Status.UNKNOWN),
+                priority=row.priority,
+                section=row.section,
+                date=row.date,
+                member=row.member,
+                chunk=row.chunk,
+                split=row.split,
+                splits=row.splits,
+                out_path_local=row.local_logs_out,
+                err_path_local=row.local_logs_err,
+                out_path_remote=row.remote_logs_out,
+                err_path_remote=row.remote_logs_err,
+            )
+            for row in result
+        ]
+
+    def get_properties_counts(self, properties: List[str]) -> dict[tuple, int]:
+        with self.engine.connect() as conn:
+            statement = select(
+                func.count().label("count"),
+                *[getattr(self.table.c, prop) for prop in properties],
+            ).group_by(*[getattr(self.table.c, prop) for prop in properties])
+            result = conn.execute(statement).all()
+
+        counts = {}
+        for row in result:
+            # ad-hoc format special properties
+            key = []
+            for prop in properties:
+                value = getattr(row, prop)
+                if prop == "date":
+                    if isinstance(value, datetime.datetime):
+                        value = value.strftime("%Y-%m-%d")
+                    else:
+                        try:
+                            value = datetime.datetime.fromisoformat(value).strftime(
+                                "%Y-%m-%d"
+                            )
+                        except (ValueError, TypeError):
+                            value = None
+
+                key.append(value)
+
+            key = tuple(key)
+            counts[key] = row.count
+        return counts
 
 
 def create_jobs_repository(expid: str) -> JobsRepository:
