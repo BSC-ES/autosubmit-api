@@ -3,7 +3,7 @@ from __future__ import annotations
 import datetime
 import re
 from abc import ABC, abstractmethod
-from typing import Any, List, Optional
+from typing import Any, List
 
 from pydantic import BaseModel
 from sqlalchemy import Engine, Table, create_engine, func, select
@@ -228,11 +228,10 @@ class JobsPklRepository(JobsRepository):
 
     def search(
         self,
-        status: Optional[str] = common_utils._UNSET,
-        date: Optional[str] = common_utils._UNSET,
-        member: Optional[str] = common_utils._UNSET,
-        section: Optional[str] = common_utils._UNSET,
-        chunk: Optional[int] = common_utils._UNSET,
+        date: str | None = common_utils._UNSET,
+        member: str | None = common_utils._UNSET,
+        section: str | None = common_utils._UNSET,
+        chunk: int | None = common_utils._UNSET,
     ) -> List[JobData]:
         """
         Searches jobs based on the given criteria, reading the pkl once.
@@ -274,7 +273,21 @@ class JobsPklRepository(JobsRepository):
         pkl_content = self.pkl_reader.parse_job_list()
         counts = {}
         for job in pkl_content:
-            key = tuple(getattr(job, prop) for prop in properties)
+            # Ad-hoc format special properties
+            key = []
+            for prop in properties:
+                value = getattr(job, prop)
+                if prop == "status":
+                    value = common_utils.Status.VALUE_TO_KEY.get(value, "UNKNOWN")
+                elif prop == "date":
+                    value = (
+                        value.strftime("%Y-%m-%d")
+                        if isinstance(value, datetime.datetime)
+                        else value
+                    )
+                key.append(value)
+
+            key = tuple(key)
             counts[key] = counts.get(key, 0) + 1
         return counts
 

@@ -713,7 +713,6 @@ async def get_experiment_job_children(
 @router.get("/{expid}/jobs-category-tree", name="Get experiment jobs category tree")
 async def get_experiment_jobs_category_tree(
     expid: str,
-    include_status: bool = False,
     user_id: Optional[str] = Depends(auth_token_dependency()),
 ) -> Dict:
     """
@@ -731,15 +730,11 @@ async def get_experiment_jobs_category_tree(
         tree = {}
         # First level: date
         for key, count in counters.items():
-            raw_date, member, section, status_code = key
+            date, member, section, status = key
             # datetime to string in YYYY-MM-DD format
-            date = (
-                raw_date.strftime("%Y-%m-%d")
-                if isinstance(raw_date, datetime)
-                else "NA"
-            )
+            date = date if date else "NA"
             member = member if member else "NA"
-            status = Status.VALUE_TO_KEY.get(status_code, "UNKNOWN")
+            status = status if status else "UNKNOWN"
 
             if date not in tree:
                 tree[date] = {}
