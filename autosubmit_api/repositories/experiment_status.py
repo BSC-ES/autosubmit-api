@@ -9,7 +9,7 @@ from sqlalchemy.schema import CreateTable
 from autosubmit_api.common.utils import LOCAL_TZ
 from autosubmit_api.config.basicConfig import APIBasicConfig
 from autosubmit_api.database import tables
-from autosubmit_api.database.common import create_as_times_db_engine, upsert_row
+from autosubmit_api.database.common import create_as_times_db_engine, upsert_or_replace
 
 
 class ExperimentStatusModel(BaseModel):
@@ -100,11 +100,10 @@ class ExperimentStatusSQLRepository(ExperimentStatusRepository):
         }
         with self.engine.connect() as conn:
             try:
-                # `upsert_row` picks a schema-agnostic DELETE+INSERT
-                # on SQLite because legacy `experiment_status`table 
-                # in the hubs lacks a PK/UNIQUE on exp_id, and a native
-                # upsert on PostgreSQL.
-                rowcount = upsert_row(
+                # `upsert_or_replace` picks a schema-agnostic DELETE+INSERT on
+                # SQLite because legacy `experiment_status` tables in the hubs
+                # lack a PK/UNIQUE on exp_id, and a native upsert on PostgreSQL.
+                rowcount = upsert_or_replace(
                     conn, self.table, values, index_elements=["exp_id"]
                 )
                 conn.commit()

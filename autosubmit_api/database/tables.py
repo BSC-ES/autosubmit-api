@@ -114,7 +114,7 @@ ExperimentStatusTable = Table(
     # PRIMARY KEY /UNIQUE on `exp_id` and the repositories only run
     # `CREATE TABLE IF NOT EXISTS`, which does not modify the existing 
     # table. Do not rely on this metadata when writing. Writes must go 
-    # through `upsert_row` which uses a schema-agnostic DELETE+INSERT on 
+    # through `upsert_or_replace` which uses a schema-agnostic DELETE+INSERT on 
     # SQLite and native upsert on PostgreSQL.
     Column("exp_id", Integer, primary_key=True),
     Column("name", Text, nullable=False),

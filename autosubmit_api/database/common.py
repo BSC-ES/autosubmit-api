@@ -232,7 +232,7 @@ def execute_replace(
     return result.rowcount
 
 
-def upsert_row(
+def upsert_or_replace(
     conn: Connection,
     table: Table,
     values: Dict[str, Any],
@@ -263,5 +263,4 @@ def upsert_row(
 
     if conn.dialect.name == "postgresql":
         return execute_upsert(conn, table, values, index_elements, set_)
-    else:
-        return execute_replace(conn, table, values, index_elements)
+    return execute_replace(conn, table, values, index_elements)
