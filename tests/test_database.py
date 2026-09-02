@@ -2,7 +2,16 @@ import os
 from typing import Tuple
 from unittest.mock import MagicMock
 
-from sqlalchemy import Engine, Table, select
+from sqlalchemy import (
+    Column,
+    Engine,
+    Integer,
+    MetaData,
+    String,
+    Table,
+    create_engine,
+    select,
+)
 
 from autosubmit_api.database import common, tables
 
@@ -192,3 +201,71 @@ class TestExecuteUpsert:
             # Verify that no row was inserted
             row = conn.execute(select(table)).first()
             assert row is None
+
+    def upsert_row_on_legacy_table_without_unique_constraint(self):
+        """
+        Regression test for the hubs: the as_times.db ``experiment_status``
+        tables deployed may not have a PRIMARY KEY/UNIQUE constraint on ``exp_id``
+        so a native ``ON CONFLICT`` clause would raise.
+        ``upsert_row`` must fall back to a schema-agnostic DELETE+INSERT on
+        SQLite and native upsert on PostgreSQL.
+        """
+        engine = create_engine("sqlite:///:memory:")
+        meta = MetaData()
+        legacy_table = Table(
+            "experiment_status",
+            meta,
+            Column("exp_id", Integer, nullable=False),
+            Column("name", String, nullable=False),
+            Column("status", String, nullable=False),
+            Column("seconds_diff", Integer, nullable=False),
+            Column("modified", String, nullable=False),
+        )
+        meta.create_all(engine)
+
+        values = {
+            "exp_id": 1,
+            "name": "t000",
+            "status": "RUNNING",
+            "seconds_diff": 0,
+            "modified": "2026-09-01-14:54:53+02:00",
+        }
+        with engine.connect() as conn:
+            rowcount = common.upsert_or_replace(conn, legacy_table, values, ["exp_id"])
+            conn.commit()
+            assert rowcount == 1
+
+            # Same exp_id again must replace the existing row, not raise nor duplicate
+            values["status"] = "NOT_RUNNING"
+            rowcount = common.upsert_or_replace(conn, legacy_table, values, ["exp_id"])
+            conn.commit()
+            assert rowcount == 1
+            rows = conn.execute(select(legacy_table)).all()
+
+        assert len(rows) == 1
+        assert rows[0].status == "NOT_RUNNING"
+
+    def test_upsert_row_inserts_and_replaces(self, fixture_dummy_db: Tuple[Engine, Table]):
+        """
+        ``upsert_row`` must insert a new row if it does not exist, and replace the existing row if it does.
+        Tested on a dummy table with a PRIMARY KEY on ``id``.
+        """
+        engine, table = fixture_dummy_db
+        with engine.connect() as conn:
+            # Insert a new row
+            rowcount = common.upsert_or_replace(
+                conn, table, {"id": 1, "name": "alpha", "value": "v1"}, ["id"]
+            )
+            conn.commit()
+            assert rowcount == 1
+        
+            # Replace the existing row with the same id
+            rowcount = common.upsert_or_replace(
+                conn, table, {"id": 1, "name": "beta", "value": "v2"}, ["id"]
+            )
+            conn.commit()
+            assert rowcount == 1
+            rows = conn.execute(select(table)).all()
+
+        assert len(rows) == 1
+        assert rows[0].name == "beta"
