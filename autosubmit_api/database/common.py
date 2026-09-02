@@ -190,3 +190,78 @@ def execute_upsert(
         .on_conflict_do_update(index_elements=index_elements, set_=set_)
     )
     return conn.execute(stmt).rowcount
+
+
+def execute_replace(
+    conn: Connection,
+    table: Table,
+    values: Dict[str, Any],
+    index_elements: List[Union[str, Column]],
+) -> int:
+    """
+    Replace a row with a transactional DELETE + INSERT identified by ``index_elements``.
+    
+    This strategy is schema-agnostic: unlike ``INSERT ... ON CONFLICT`` it does not
+    require any PRIMARY KEY/UNIQUE constraint on the key columns, so it is safe for
+    the legacy tables found in the hubs, whose schemas cannot be altered and which
+    may lack a constraint on ``exp_id``.
+    
+    Under SQLite's single-writer model, the DELETE takes the write lock before the
+    INSERT, so concurrent writers are serialized and only one row per key is kept.
+    
+    Statements are not committed here: the caller manages the transactions.
+    
+    :param conn: An open SQLAlchemy Connection (caller manages the transaction).
+    :param table: The target SQLAlchemy Table.
+    :param values: Full row values dict (column name -> value) to insert.
+    :param index_elements: Conflict target. List of column names or Column objects.
+    :return: rowcount of the executed insert statement.
+    """
+    str_index_elements = [
+        el if isinstance(el, str) else el.name for el in index_elements
+    ]
+
+    # Delete any existing row with the same key
+    delete_stmt = table.delete().where(
+        *[table.c[el] == values[el] for el in str_index_elements]
+    )
+    insert_stmt = insert(table).values(**values)
+
+    conn.execute(delete_stmt)
+    result = conn.execute(insert_stmt)
+    return result.rowcount
+
+
+def upsert_row(
+    conn: Connection,
+    table: Table,
+    values: Dict[str, Any],
+    index_elements: List[Union[str, Column]],
+    set_: Dict[str, Any] = None,
+) -> int:
+    """
+    Make the row identified by ``index_elements`` exist with the given ``values``.
+    Choose the safest primitive for the actual database backend:
+
+    * PostgreSQL: tables always created though SQLAlchemy, which declares a
+    PRIMARY KEY on the key columns. The atomic upsert is used.
+
+    * SQLite: tables may be legacy and lack a PRIMARY KEY on the key columns.
+    A transactional DELETE + INSERT is used, which is safe under SQLite's
+    single-writer model.
+
+    Statements are not committed here: the caller manages the transactions.
+
+    :param conn: An open SQLAlchemy Connection (caller manages the transaction).
+    :param table: The target SQLAlchemy Table.
+    :param values: Full row values dict (column name -> value) to insert.
+    :param index_elements: Conflict target. List of column names or Column objects.
+    :param set_: Columns to update on conflict (upsert only). If None, all
+        columns except index_elements will be updated.
+    :return: rowcount of the executed insert statement.
+    """
+
+    if conn.dialect.name == "postgresql":
+        return execute_upsert(conn, table, values, index_elements, set_)
+    else:
+        return execute_replace(conn, table, values, index_elements)
