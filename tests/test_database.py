@@ -245,7 +245,9 @@ class TestExecuteUpsert:
         assert len(rows) == 1
         assert rows[0].status == "NOT_RUNNING"
 
-    def test_upsert_row_inserts_and_replaces(self, fixture_dummy_db: Tuple[Engine, Table]):
+    def test_upsert_row_inserts_and_replaces(
+        self, fixture_dummy_db: Tuple[Engine, Table]
+    ):
         """
         ``upsert_row`` must insert a new row if it does not exist, and replace the existing row if it does.
         Tested on a dummy table with a PRIMARY KEY on ``id``.
@@ -258,7 +260,7 @@ class TestExecuteUpsert:
             )
             conn.commit()
             assert rowcount == 1
-        
+
             # Replace the existing row with the same id
             rowcount = common.upsert_or_replace(
                 conn, table, {"id": 1, "name": "beta", "value": "v2"}, ["id"]
