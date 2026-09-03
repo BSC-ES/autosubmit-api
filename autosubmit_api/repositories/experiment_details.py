@@ -130,6 +130,8 @@ class ExperimentDetailsSQLRepository(ExperimentDetailsRepository):
         }
         with self.engine.connect() as conn:
             try:
+                # keep `execute_upsert` call as `details` table has a primary
+                # key on `exp_id`in the hubs
                 rowcount = execute_upsert(
                     conn, self.table, values, index_elements=["exp_id"]
                 )
