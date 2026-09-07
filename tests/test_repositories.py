@@ -8,8 +8,11 @@ from autosubmit_api.repositories.experiment_status import (
     create_experiment_status_repository,
 )
 from autosubmit_api.repositories.graph_layout import create_exp_graph_layout_repository
-from autosubmit_api.repositories.jobs import create_jobs_repository
-from autosubmit_api.repositories.jobs import JobsPklRepository, JobsSQLRepository
+from autosubmit_api.repositories.jobs import (
+    JobsPklRepository,
+    JobsSQLRepository,
+    create_jobs_repository,
+)
 from autosubmit_api.repositories.join.experiment_join import (
     create_experiment_join_repository,
     generate_query_listexp_extended,
@@ -485,6 +488,6 @@ class TestJobsRepositorySearch:
     ):
         """Search results should be sorted by job name for deterministic output."""
         repo = create_jobs_repository(expid)
-        jobs, count = repo.search()
+        jobs, _ = repo.search()
         job_names = [job.name for job in jobs]
         assert job_names == sorted(job_names)

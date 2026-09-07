@@ -394,7 +394,7 @@ class TestExperimentJobs:
     def test_page_size_positive(
         self, fixture_fastapi_client: TestClient, page_size: int
     ):
-        """page_size must be positive or -1 for unbounded."""
+        """page_size must be positive. 0 and negative are rejected."""
         response = fixture_fastapi_client.get(
             self.endpoint.format(expid="a1x4"), params={"page_size": page_size}
         )
