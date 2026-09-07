@@ -1,6 +1,5 @@
 from pydantic import BaseModel
 
-from autosubmit_api.database.models import PklJobModel
 from autosubmit_api.models.experiment import (
     BaseExperimentRun,
     BaseExperimentWrapper,
@@ -32,8 +31,24 @@ class ExperimentsSearchResponse(BaseModel):
     pagination: PaginationInfo
 
 
+class ExperimentJobItem(BaseModel):
+    name: str
+    status: str
+    priority: int | None = None
+    section: str | None = None
+    date: str | None = None
+    member: str | None = None
+    chunk: int | None = None
+    split: int | None = None
+    splits: int | None = None
+    out_path_local: str | None = None
+    err_path_local: str | None = None
+    out_path_remote: str | None = None
+    err_path_remote: str | None = None
+
+
 class ExperimentJobsResponse(BaseModel):
-    jobs: list[PklJobModel]
+    jobs: list[ExperimentJobItem]
     pagination: PaginationInfo
 
 

@@ -3,7 +3,6 @@ from __future__ import annotations
 import datetime
 import re
 from abc import ABC, abstractmethod
-from typing import Any
 
 from pydantic import BaseModel
 from sqlalchemy import Engine, Table, create_engine, func, select
@@ -25,7 +24,7 @@ STRING_TO_CODE = common_utils.Status.STRING_TO_CODE
 
 
 class JobData(BaseModel):
-    id: Any
+    id: int | None
     name: str
     status: int | None = common_utils.Status.UNKNOWN
     priority: int
@@ -39,6 +38,46 @@ class JobData(BaseModel):
     err_path_local: str | None
     out_path_remote: str | None
     err_path_remote: str | None
+
+
+def _pkl_job_to_data(job) -> JobData:
+    """Maps a raw pkl job entry to a `JobData` instance."""
+    return JobData(
+        id=job.id,
+        name=job.name,
+        status=job.status,
+        priority=job.priority,
+        section=job.section,
+        date=job.date,
+        member=job.member,
+        chunk=job.chunk,
+        split=job.split,
+        splits=job.splits,
+        out_path_local=job.out_path_local,
+        err_path_local=job.err_path_local,
+        out_path_remote=job.out_path_remote,
+        err_path_remote=job.err_path_remote,
+    )
+
+
+def _sql_row_to_data(row) -> JobData:
+    """Maps a DB job row to a `JobData` instance."""
+    return JobData(
+        id=row.id,
+        name=row.name,
+        status=STRING_TO_CODE.get(row.status, common_utils.Status.UNKNOWN),
+        priority=row.priority,
+        section=row.section,
+        date=row.date,
+        member=row.member,
+        chunk=row.chunk,
+        split=row.split,
+        splits=row.splits,
+        out_path_local=row.local_logs_out,
+        err_path_local=row.local_logs_err,
+        out_path_remote=row.remote_logs_out,
+        err_path_remote=row.remote_logs_err,
+    )
 
 
 class JobsRepository(ABC):
@@ -93,25 +132,7 @@ class JobsPklRepository(JobsRepository):
         Gets all jobs from pkl file
         """
         pkl_content = self.pkl_reader.parse_job_list()
-        return [
-            JobData(
-                id=job.id,
-                name=job.name,
-                status=job.status,
-                priority=job.priority,
-                section=job.section,
-                date=job.date,
-                member=job.member,
-                chunk=job.chunk,
-                split=job.split,
-                splits=job.splits,
-                out_path_local=job.out_path_local,
-                err_path_local=job.err_path_local,
-                out_path_remote=job.out_path_remote,
-                err_path_remote=job.err_path_remote,
-            )
-            for job in pkl_content
-        ]
+        return [_pkl_job_to_data(job) for job in pkl_content]
 
     def get_last_modified_timestamp(self) -> int:
         return self.pkl_reader.get_modified_time()
@@ -123,22 +144,7 @@ class JobsPklRepository(JobsRepository):
         pkl_content = self.pkl_reader.parse_job_list()
         for job in pkl_content:
             if job.name == name:
-                return JobData(
-                    id=job.id,
-                    name=job.name,
-                    status=job.status,
-                    priority=job.priority,
-                    section=job.section,
-                    date=job.date,
-                    member=job.member,
-                    chunk=job.chunk,
-                    split=job.split,
-                    splits=job.splits,
-                    out_path_local=job.out_path_local,
-                    err_path_local=job.err_path_local,
-                    out_path_remote=job.out_path_remote,
-                    err_path_remote=job.err_path_remote,
-                )
+                return _pkl_job_to_data(job)
         return None
 
     def get_by_names(self, names: list[str]) -> list[JobData]:
@@ -147,26 +153,7 @@ class JobsPklRepository(JobsRepository):
         """
         name_set = set(names)
         pkl_content = self.pkl_reader.parse_job_list()
-        return [
-            JobData(
-                id=job.id,
-                name=job.name,
-                status=job.status,
-                priority=job.priority,
-                section=job.section,
-                date=job.date,
-                member=job.member,
-                chunk=job.chunk,
-                split=job.split,
-                splits=job.splits,
-                out_path_local=job.out_path_local,
-                err_path_local=job.err_path_local,
-                out_path_remote=job.out_path_remote,
-                err_path_remote=job.err_path_remote,
-            )
-            for job in pkl_content
-            if job.name in name_set
-        ]
+        return [_pkl_job_to_data(job) for job in pkl_content if job.name in name_set]
 
     @staticmethod
     def _wildcard_compare(expression: str | None, value: str) -> bool:
@@ -238,28 +225,7 @@ class JobsPklRepository(JobsRepository):
         else:
             page = matching_jobs[offset : offset + max(limit, 0)]
 
-        return (
-            [
-                JobData(
-                    id=job.id,
-                    name=job.name,
-                    status=job.status,
-                    priority=job.priority,
-                    section=job.section,
-                    date=job.date,
-                    member=job.member,
-                    chunk=job.chunk,
-                    split=job.split,
-                    splits=job.splits,
-                    out_path_local=job.out_path_local,
-                    err_path_local=job.err_path_local,
-                    out_path_remote=job.out_path_remote,
-                    err_path_remote=job.err_path_remote,
-                )
-                for job in page
-            ],
-            total_count,
-        )
+        return [_pkl_job_to_data(job) for job in page], total_count
 
 
 class JobsSQLRepository(JobsRepository):
@@ -302,25 +268,7 @@ class JobsSQLRepository(JobsRepository):
         """
         with self.engine.connect() as conn:
             result = conn.execute(self.table.select())
-            return [
-                JobData(
-                    id=row.id,
-                    name=row.name,
-                    status=STRING_TO_CODE.get(row.status, common_utils.Status.UNKNOWN),
-                    priority=row.priority,
-                    section=row.section,
-                    date=row.date,
-                    member=row.member,
-                    chunk=row.chunk,
-                    split=row.split,
-                    splits=row.splits,
-                    out_path_local=row.local_logs_out,
-                    err_path_local=row.local_logs_err,
-                    out_path_remote=row.remote_logs_out,
-                    err_path_remote=row.remote_logs_err,
-                )
-                for row in result
-            ]
+            return [_sql_row_to_data(row) for row in result]
 
     def get_last_modified_timestamp(self) -> int:
         with self.engine.connect() as conn:
@@ -349,24 +297,7 @@ class JobsSQLRepository(JobsRepository):
             statement = self.table.select().where(self.table.c.name == name)
             result = conn.execute(statement).first()
             if result is not None:
-                return JobData(
-                    id=result.id,
-                    name=result.name,
-                    status=STRING_TO_CODE.get(
-                        result.status, common_utils.Status.UNKNOWN
-                    ),
-                    priority=result.priority,
-                    section=result.section,
-                    date=result.date,
-                    member=result.member,
-                    chunk=result.chunk,
-                    split=result.split,
-                    splits=result.splits,
-                    out_path_local=result.local_logs_out,
-                    err_path_local=result.local_logs_err,
-                    out_path_remote=result.remote_logs_out,
-                    err_path_remote=result.remote_logs_err,
-                )
+                return _sql_row_to_data(result)
             else:
                 return None
 
@@ -384,26 +315,7 @@ class JobsSQLRepository(JobsRepository):
                 result = conn.execute(statement).all()
 
                 for row in result:
-                    rows.append(
-                        JobData(
-                            id=row.id,
-                            name=row.name,
-                            status=STRING_TO_CODE.get(
-                                row.status, common_utils.Status.UNKNOWN
-                            ),
-                            priority=row.priority,
-                            section=row.section,
-                            date=row.date,
-                            member=row.member,
-                            chunk=row.chunk,
-                            split=row.split,
-                            splits=row.splits,
-                            out_path_local=row.local_logs_out,
-                            err_path_local=row.local_logs_err,
-                            out_path_remote=row.remote_logs_out,
-                            err_path_remote=row.remote_logs_err,
-                        )
-                    )
+                    rows.append(_sql_row_to_data(row))
         return rows
 
     def search(
@@ -420,7 +332,7 @@ class JobsSQLRepository(JobsRepository):
         `limit` is the maximum number of jobs to return; `limit=0` returns no jobs.
         `offset` is the number of jobs to skip before starting to return the results.
 
-        :returns: A tuple containing the list of jobs matching the filters and 
+        :returns: A tuple containing the list of jobs matching the filters and
             the total count of the jobs matching the filters (before pagination).
         """
 
@@ -440,40 +352,26 @@ class JobsSQLRepository(JobsRepository):
             if status:
                 statement = statement.where(self.table.c.status == status)
 
-            # Get total count before applying limit and offset
-            count_statement = select(func.count()).select_from(statement.subquery())
-            counter = conn.execute(count_statement).scalar()
-
             # Deterministic order shared with the PKL repository.
             # Job name is the unique key (primary key in the jobs table).
-            statement = statement.order_by(self.table.c.name)
+            ordered_statement = statement.order_by(self.table.c.name)
 
-            if offset is not None:
-                statement = statement.offset(offset)
-            if limit is not None:
-                statement = statement.limit(limit)
+            paginated = offset is not None or limit is not None
+            if paginated:
+                count_statement = select(func.count()).select_from(statement.subquery())
+                counter = conn.execute(count_statement).scalar()
 
-            result = conn.execute(statement).all()
+                if offset is not None:
+                    ordered_statement = ordered_statement.offset(offset)
+                if limit is not None:
+                    ordered_statement = ordered_statement.limit(limit)
 
-            filtered_jobs = [
-                JobData(
-                    id=row.id,
-                    name=row.name,
-                    status=STRING_TO_CODE.get(row.status, common_utils.Status.UNKNOWN),
-                    priority=row.priority,
-                    section=row.section,
-                    date=row.date,
-                    member=row.member,
-                    chunk=row.chunk,
-                    split=row.split,
-                    splits=row.splits,
-                    out_path_local=row.local_logs_out,
-                    err_path_local=row.local_logs_err,
-                    out_path_remote=row.remote_logs_out,
-                    err_path_remote=row.remote_logs_err,
-                )
-                for row in result
-            ]
+                result = conn.execute(ordered_statement).all()
+            else:
+                result = conn.execute(ordered_statement).all()
+                counter = len(result)
+
+            filtered_jobs = [_sql_row_to_data(row) for row in result]
             return filtered_jobs, counter
 
 
