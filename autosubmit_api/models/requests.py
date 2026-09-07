@@ -31,10 +31,11 @@ class JobsSearchRequest(BaseModel):
         str | None, Field(description="Job status", example="COMPLETED")
     ] = None
 
-    page: Annotated[int | None, Field(ge=1, description="Page number", example=1)] = (
-        None
-    )
-    page_size: int | None = None
+    page: Annotated[int | None, Field(ge=1, description="Page number", example=1)] = 1
+    page_size: Annotated[
+        int | None,
+        Field(ge=1, description="Page size. Omit to disable pagination", example=12),
+    ] = None
 
 
 class PreferredUsernameRequest(BaseModel):

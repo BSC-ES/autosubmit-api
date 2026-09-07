@@ -395,12 +395,16 @@ class JobsSQLRepository(JobsRepository):
         offset: int | None = None,
     ) -> tuple[list[JobData], int]:
         """
-        Searches jobs by the given filters.
+        Searches jobs by the given filters in a deterministic order (job name).
 
         It also supports pagination through the `limit` and `offset` parameters.
+        `limit` is the maximum number of jobs to return; `limit=0` returns no jobs.
+        `offset` is the number of jobs to skip before starting to return the results.
 
-        :returns: A tuple containing the list of jobs matching the filters and the total count of the jobs in the experiment.
+        :returns: A tuple containing the list of jobs matching the filters and 
+            the total count of the jobs matching the filters (before pagination).
         """
+
         with self.engine.connect() as conn:
             statement = self.table.select()
 
