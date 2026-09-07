@@ -193,18 +193,15 @@ async def get_experiment_jobs(
     Get the experiment jobs from pickle file.
     BASE view returns base content of the pkl file.
     QUICK view returns a reduced payload with just the name and status of the jobs.
-    Supports pagination if page_size is provided.
+    Pagination is enabled when `page_size` is provided (`page` defaults to 1).
     """
-    # Read the pkl
+    # Read the jobs
     try:
         jobs_repo = create_jobs_repository(expid)
 
+        paginated = query_params.page_size is not None
         limit = query_params.page_size
-        offset = (
-            (query_params.page - 1) * query_params.page_size
-            if query_params.page_size
-            else None
-        )
+        offset = (query_params.page - 1) * query_params.page_size if paginated else None
 
         current_content, total_items = jobs_repo.search(
             job_name=query_params.job_name,
@@ -251,7 +248,6 @@ async def get_experiment_jobs(
 
         jobs_list.append(resp_job)
 
-    paginated = query_params.page_size is not None and query_params.page_size > 0
     response = {
         "jobs": jobs_list,
         "pagination": {
