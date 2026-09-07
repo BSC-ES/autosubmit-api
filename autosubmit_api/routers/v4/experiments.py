@@ -67,7 +67,7 @@ router = APIRouter()
 @router.get("", name="Search experiments")
 async def search_experiments(
     query_params: Annotated[ExperimentsSearchRequest, Query()],
-    user_id: Optional[str] = Depends(auth_token_dependency()),
+    user_id: str | None = Depends(auth_token_dependency()),
 ) -> ExperimentsSearchResponse:
     """
     Search experiments
@@ -173,7 +173,7 @@ async def search_experiments(
 
 @router.get("/{expid}", name="Get experiment detail")
 async def get_experiment_detail(
-    expid: str, user_id: Optional[str] = Depends(auth_token_dependency())
+    expid: str, user_id: str | None = Depends(auth_token_dependency())
 ) -> BaseExperimentModel:
     """
     Get details of an experiment
@@ -187,15 +187,15 @@ async def get_experiment_detail(
 async def get_experiment_jobs(
     expid: str,
     query_params: Annotated[JobsSearchRequest, Query()],
-    user_id: Optional[str] = Depends(auth_token_dependency()),
+    user_id: str | None = Depends(auth_token_dependency()),
 ) -> ExperimentJobsResponse:
     """
-    Get the experiment jobs from pickle file.
+    Get the experiment jobs from the database.
+    The jobs are stored in the database and can be filtered by job name and status.
     BASE view returns base content of the pkl file.
     QUICK view returns a reduced payload with just the name and status of the jobs.
     Pagination is enabled when `page_size` is provided (`page` defaults to 1).
     """
-    # Read the jobs
     try:
         jobs_repo = create_jobs_repository(expid)
 
@@ -251,7 +251,7 @@ async def get_experiment_jobs(
     response = {
         "jobs": jobs_list,
         "pagination": {
-            "page": query_params.page or 1 if paginated else 1,
+            "page": query_params.page if paginated else 1,
             "page_size": query_params.page_size if paginated else None,
             "total_pages": math.ceil(total_items / query_params.page_size)
             if paginated
@@ -266,7 +266,7 @@ async def get_experiment_jobs(
 
 @router.get("/{expid}/wrappers", name="Get experiment wrappers")
 async def get_experiment_wrappers(
-    expid: str, user_id: Optional[str] = Depends(auth_token_dependency())
+    expid: str, user_id: str | None = Depends(auth_token_dependency())
 ) -> ExperimentWrappersResponse:
     """
     Get wrappers for an experiment
@@ -337,7 +337,7 @@ def _format_config_response(
     "/{expid}/filesystem-config", name="Get experiment current filesystem configuration"
 )
 async def get_experiment_fs_config(
-    expid: str, user_id: Optional[str] = Depends(auth_token_dependency())
+    expid: str, user_id: str | None = Depends(auth_token_dependency())
 ) -> ExperimentFSConfigResponse:
     """
     Get the filesystem config of an experiment
@@ -400,7 +400,7 @@ async def get_runs(
 async def get_run_config(
     expid: str,
     run_id: str,
-    user_id: Optional[str] = Depends(auth_token_dependency()),
+    user_id: str | None = Depends(auth_token_dependency()),
 ) -> ExperimentRunConfigResponse:
     """
     Get the config of a specific run of an experiment
@@ -427,7 +427,7 @@ async def get_run_config(
 async def get_run_user_metrics(
     expid: str,
     run_id: int,
-    user_id: Optional[str] = Depends(auth_token_dependency()),
+    user_id: str | None = Depends(auth_token_dependency()),
 ):
     """
     Get the user-defined metrics of a specific run of an experiment
@@ -450,7 +450,7 @@ async def get_run_user_metrics(
 @router.get("/{expid}/user-metrics-runs", name="Get the runs with user-defined metrics")
 async def get_runs_with_user_metrics(
     expid: str,
-    user_id: Optional[str] = Depends(auth_token_dependency()),
+    user_id: str | None = Depends(auth_token_dependency()),
 ):
     """
     Get the runs with user-defined metrics of an experiment
@@ -480,7 +480,7 @@ async def get_experiment_eta(
     section: Annotated[
         str, Query(description="Job section to compute ETA for")
     ] = "SIM",
-    user_id: Optional[str] = Depends(auth_token_dependency()),
+    user_id: str | None = Depends(auth_token_dependency()),
 ) -> ExperimentEtaResponse:
     """
     Get the estimated time of arrival (remaining time) for an experiment's
@@ -507,36 +507,36 @@ class JobDetailResponse(BaseModel):
     # From pkl
     name: str
     status: str
-    section: Optional[str] = None
-    date: Optional[str] = None
-    member: Optional[str] = None
-    chunk: Optional[int] = None
-    split: Optional[int] = None
-    splits: Optional[int] = None
-    out_path_local: Optional[str] = None
-    err_path_local: Optional[str] = None
+    section: str | None = None
+    date: str | None = None
+    member: str | None = None
+    chunk: int | None = None
+    split: int | None = None
+    splits: int | None = None
+    out_path_local: str | None = None
+    err_path_local: str | None = None
     # From config
-    chunk_size: Optional[int] = None
-    chunk_unit: Optional[str] = None
-    platform: Optional[str] = None
+    chunk_size: int | None = None
+    chunk_unit: str | None = None
+    platform: str | None = None
     # From historical DB
-    remote_id: Optional[int] = None
-    qos: Optional[str] = None
-    workflow_commit: Optional[str] = None
-    processors: Optional[int] = None  # Requested ncpus
-    submit: Optional[str] = None
-    start: Optional[str] = None
-    finish: Optional[str] = None
-    wallclock: Optional[str] = None
+    remote_id: int | None = None
+    qos: str | None = None
+    workflow_commit: str | None = None
+    processors: int | None = None  # Requested ncpus
+    submit: str | None = None
+    start: str | None = None
+    finish: str | None = None
+    wallclock: str | None = None
     # Wrapper data
-    last_wrapper: Optional[str] = None
+    last_wrapper: str | None = None
 
 
 @router.get("/{expid}/jobs/{job_name}", name="Get experiment job detail")
 async def get_experiment_job_detail(
     expid: str,
     job_name: str,
-    user_id: Optional[str] = Depends(auth_token_dependency()),
+    user_id: str | None = Depends(auth_token_dependency()),
 ) -> JobDetailResponse:
     """
     Get the details of a specific job of an experiment
@@ -629,7 +629,7 @@ async def get_experiment_job_parents(
     expid: str,
     job_name: str,
     include_status: bool = False,
-    user_id: Optional[str] = Depends(auth_token_dependency()),
+    user_id: str | None = Depends(auth_token_dependency()),
 ) -> dict:
     """
     Get the parents of a specific job of an experiment.
@@ -670,7 +670,7 @@ async def get_experiment_job_children(
     expid: str,
     job_name: str,
     include_status: bool = False,
-    user_id: Optional[str] = Depends(auth_token_dependency()),
+    user_id: str | None = Depends(auth_token_dependency()),
 ) -> dict:
     """
     Get the children of a specific job of an experiment

@@ -8,7 +8,6 @@ from typing import Any
 from pydantic import BaseModel
 from sqlalchemy import Engine, Table, create_engine, func, select
 
-from autosubmit_api.logger import logger
 from autosubmit_api.common import utils as common_utils
 from autosubmit_api.config.basicConfig import APIBasicConfig
 from autosubmit_api.database import tables
@@ -17,6 +16,7 @@ from autosubmit_api.database.common import (
     SQLITE_MAX_PARAMS,
     create_sqlite_db_engine,
 )
+from autosubmit_api.logger import logger
 from autosubmit_api.persistance.experiment import ExperimentPaths
 from autosubmit_api.persistance.pkl_reader import PklReader
 from autosubmit_api.repositories.experiment import create_experiment_repository
@@ -79,7 +79,7 @@ class JobsRepository(ABC):
 
         It also supports pagination through the `limit` and `offset` parameters.
 
-        :returns: A tuple containing the list of jobs matching the filters and the total count of the jobs in the experiment.
+        :returns: A tuple containing the list of jobs matching the filters and the total count of the jobs matching the filters.
         """
 
 
@@ -201,6 +201,17 @@ class JobsPklRepository(JobsRepository):
         limit: int | None = None,
         offset: int | None = None,
     ) -> tuple[list[JobData], int]:
+        """
+        Searches jobs by the given filters in a deterministic order (job name).
+
+        It also supports pagination through the `limit` and `offset` parameters.
+        `limit` is the maximum number of jobs to return; `limit=0` returns no jobs.
+        `offset` is the number of jobs to skip before starting to return the results.
+
+        :returns: A tuple containing the list of jobs matching the filters and
+            the total count of the jobs matching the filters (before pagination).
+        """
+
         pkl_content = self.pkl_reader.parse_job_list()
 
         matching_jobs = []

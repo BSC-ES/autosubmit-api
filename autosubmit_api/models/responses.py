@@ -1,4 +1,3 @@
-from typing import List, Optional
 from pydantic import BaseModel
 
 from autosubmit_api.database.models import PklJobModel
@@ -9,31 +8,32 @@ from autosubmit_api.models.experiment import (
 )
 from autosubmit_api.models.misc import PaginationInfo, RouteInfo
 
+
 class AuthResponse(BaseModel):
     authenticated: bool
-    user: Optional[str]
+    user: str | None
 
 
 class LoginResponse(AuthResponse):
-    token: Optional[str]
-    message: Optional[str]
+    token: str | None
+    message: str | None
 
 
 class ExperimentRunsResponse(BaseModel):
-    runs: List[BaseExperimentRun]
+    runs: list[BaseExperimentRun]
 
 
 class RoutesResponse(BaseModel):
-    routes: List[RouteInfo]
+    routes: list[RouteInfo]
 
 
 class ExperimentsSearchResponse(BaseModel):
-    experiments: List[ExperimentSearchItem]
+    experiments: list[ExperimentSearchItem]
     pagination: PaginationInfo
 
 
 class ExperimentJobsResponse(BaseModel):
-    jobs: List[PklJobModel]
+    jobs: list[PklJobModel]
     pagination: PaginationInfo
 
 
@@ -42,19 +42,19 @@ class ExperimentFSConfigResponse(BaseModel):
 
 
 class ExperimentRunConfigResponse(BaseModel):
-    run_id: Optional[int]
+    run_id: int | None
     config: dict
 
 
 class ExperimentWrappersResponse(BaseModel):
-    wrappers: List[BaseExperimentWrapper]
+    wrappers: list[BaseExperimentWrapper]
 
 
 class ExperimentEtaResponse(BaseModel):
-    eta_seconds: Optional[float]
-    chunks_total: Optional[int]
-    chunks_remaining: Optional[int]
-    avg_runtime_per_chunk_seconds: Optional[float]
+    eta_seconds: float | None
+    chunks_total: int | None
+    chunks_remaining: int | None
+    avg_runtime_per_chunk_seconds: float | None
 
 
 class PreferredUsernameResponse(BaseModel):
