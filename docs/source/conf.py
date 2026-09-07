@@ -8,20 +8,7 @@ author = "Barcelona Supercomputing Center"
 
 # -- General configuration
 
-extensions = ["sphinxcontrib.redoc"]
-
-# -- Options for HTML output
-
-redoc = [
-    {
-        "name": "Autosubmit API",
-        "page": "api",
-        "spec": "_static/openapi.json",
-        # 'spec': 'https://petstore3.swagger.io/api/v3/openapi.json',
-        # 'spec': 'https://petstore.swagger.io/v2/swagger.json'
-        "opts": {"suppress-warnings": True, "hide-hostname": True},
-    }
-]
+extensions = ["sphinxcontrib.openapi"]
 
 html_theme = "pydata_sphinx_theme"
 
