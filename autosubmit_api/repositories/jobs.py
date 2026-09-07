@@ -180,6 +180,11 @@ class JobsPklRepository(JobsRepository):
         """
         if not expression:
             return True
+
+        # Case-insensitive comparison
+        expression = expression.lower()
+        value = value.lower()
+
         if expression.startswith("!"):
             return not JobsPklRepository._wildcard_compare(expression[1:], value)
 
