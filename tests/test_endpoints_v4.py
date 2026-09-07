@@ -10,7 +10,10 @@ import pytest
 from fastapi.testclient import TestClient
 
 from autosubmit_api import config
-from autosubmit_api.models.requests import PAGINATION_LIMIT_DEFAULT
+from autosubmit_api.models.requests import (
+    PAGINATION_LIMIT_DEFAULT,
+    PAGINATION_LIMIT_MAX,
+)
 from autosubmit_api.repositories.runner_processes import RunnerProcessesDataModel
 from autosubmit_api.routers.v4.experiments import JobDetailResponse
 from tests.utils import custom_return_value
@@ -289,7 +292,6 @@ class TestExperimentJobs:
         assert pagination["page_size"] is None
         assert pagination["total_pages"] == 1
 
-
     @pytest.mark.parametrize(
         "expid, total, page, page_size, expected_items, expected_pages",
         [
@@ -377,7 +379,7 @@ class TestExperimentJobs:
         assert resp_obj["pagination"]["total_items"] == expected_count
         assert all(job["status"] == status_filter for job in resp_obj["jobs"])
 
-    def test_page_size_without_page(self,fixture_fastapi_client: TestClient):
+    def test_page_size_without_page(self, fixture_fastapi_client: TestClient):
         """page_size provided without page should default to 1."""
         response = fixture_fastapi_client.get(
             self.endpoint.format(expid="a1x4"), params={"page_size": 3}
@@ -389,7 +391,6 @@ class TestExperimentJobs:
         assert len(body["jobs"]) == 3
         assert body["pagination"]["total_items"] == 10
 
-
     @pytest.mark.parametrize("page_size", [0, -1])
     def test_page_size_positive(
         self, fixture_fastapi_client: TestClient, page_size: int
@@ -399,6 +400,36 @@ class TestExperimentJobs:
             self.endpoint.format(expid="a1x4"), params={"page_size": page_size}
         )
         assert response.status_code == HTTPStatus.UNPROCESSABLE_ENTITY
+
+    def test_page_size_over_limit_rejected(self, fixture_fastapi_client: TestClient):
+        """page_size above the API limit should be rejected."""
+        response = fixture_fastapi_client.get(
+            self.endpoint.format(expid="a1x4"),
+            params={"page_size": PAGINATION_LIMIT_MAX + 1},
+        )
+        assert response.status_code == HTTPStatus.UNPROCESSABLE_ENTITY
+
+    def test_invalid_status_rejected(self, fixture_fastapi_client: TestClient):
+        """An unknown status value should be rejected instead of returning empty."""
+        response = fixture_fastapi_client.get(
+            self.endpoint.format(expid="a1x4"), params={"status": "NOT_A_STATUS"}
+        )
+        assert response.status_code == HTTPStatus.UNPROCESSABLE_ENTITY
+
+    def test_empty_paginated_result_reports_total_pages(
+        self, fixture_fastapi_client: TestClient
+    ):
+        """A paginated request with no matches should still return >= 1 total pages."""
+        # a1x4 has no FAILED jobs, so the filtered result is empty
+        response = fixture_fastapi_client.get(
+            self.endpoint.format(expid="a1x4"),
+            params={"page": 1, "page_size": 5, "status": "FAILED"},
+        )
+        assert response.status_code == HTTPStatus.OK
+        body = response.json()
+        assert body["jobs"] == []
+        assert body["pagination"]["total_items"] == 0
+        assert body["pagination"]["total_pages"] >= 1
 
 
 class TestExperimentJobDetail:

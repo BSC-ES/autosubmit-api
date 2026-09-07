@@ -470,7 +470,9 @@ class TestJobsRepositorySearch:
         assert jobs == []
         assert count == total
 
-    @pytest.mark.parametrize("expid, pattern", [("a007", "*SIM"), ("a1x4", "*SIM")], ids=["pkl", "sql"])
+    @pytest.mark.parametrize(
+        "expid, pattern", [("a007", "*SIM"), ("a1x4", "*SIM")], ids=["pkl", "sql"]
+    )
     def test_search_case_insensitive(
         self, fixture_mock_basic_config, expid: str, pattern: str
     ):

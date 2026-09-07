@@ -1,8 +1,11 @@
 from typing import Annotated, Literal
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
+
+from autosubmit_api.common.utils import Status
 
 PAGINATION_LIMIT_DEFAULT = 12
+PAGINATION_LIMIT_MAX = 1000
 
 
 class ExperimentsSearchRequest(BaseModel):
@@ -32,10 +35,25 @@ class JobsSearchRequest(BaseModel):
         str | None, Field(description="Job status", example="COMPLETED")
     ] = None
 
+    @field_validator("status")
+    @classmethod
+    def _check_status(cls, status: str | None) -> str | None:
+        if status is not None and status not in Status.STRING_TO_CODE:
+            raise ValueError(
+                "Invalid job status. Allowed values: "
+                f"{', '.join(sorted(Status.STRING_TO_CODE))}"
+            )
+        return status
+
     page: Annotated[int, Field(ge=1, description="Page number", example=1)] = 1
     page_size: Annotated[
         int | None,
-        Field(ge=1, description="Page size. Omit to disable pagination", example=12),
+        Field(
+            ge=1,
+            le=PAGINATION_LIMIT_MAX,
+            description="Page size. Omit to disable pagination",
+            example=12,
+        ),
     ] = None
 
 

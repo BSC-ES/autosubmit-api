@@ -183,17 +183,24 @@ async def get_experiment_detail(
     return exp_builder.product.model_dump(include=tables.ExperimentTable.c.keys())
 
 
-@router.get("/{expid}/jobs", name="List experiment jobs")
+@router.get(
+    "/{expid}/jobs",
+    name="List experiment jobs",
+    response_model=ExperimentJobsResponse,
+    response_model_exclude_unset=True,
+)
 async def get_experiment_jobs(
     expid: str,
     query_params: Annotated[JobsSearchRequest, Query()],
     user_id: str | None = Depends(auth_token_dependency()),
 ) -> ExperimentJobsResponse:
     """
-    Get the experiment jobs from the database.
-    The jobs are stored in the database and can be filtered by job name and status.
-    BASE view returns base content of the pkl file.
-    QUICK view returns a reduced payload with just the name and status of the jobs.
+    Get the experiment job list (from the pkl file or the jobs database),
+    optionally filtered by job name and status.
+
+    - ``base`` view: returns the full job content.
+    - ``quick`` view: returns only the name and status of each job.
+
     Pagination is enabled when `page_size` is provided (`page` defaults to 1).
     """
     try:
@@ -248,20 +255,20 @@ async def get_experiment_jobs(
 
         jobs_list.append(resp_job)
 
-    response = {
+    return {
         "jobs": jobs_list,
         "pagination": {
             "page": query_params.page if paginated else 1,
             "page_size": query_params.page_size if paginated else None,
-            "total_pages": math.ceil(total_items / query_params.page_size)
-            if paginated
-            else 1,
+            "total_pages": (
+                max(1, math.ceil(total_items / query_params.page_size))
+                if paginated
+                else 1
+            ),
             "page_items": len(jobs_list),
             "total_items": total_items,
         },
     }
-
-    return JSONResponse(response)  # TODO Use Validation. Not respond directly.
 
 
 @router.get("/{expid}/wrappers", name="Get experiment wrappers")
