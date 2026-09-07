@@ -420,11 +420,11 @@ class JobsSQLRepository(JobsRepository):
                 negated, pattern = self._wildcard_to_sql_like(job_name)
                 if negated:
                     statement = statement.where(
-                        self.table.c.name.notlike(pattern, escape="\\")
+                        self.table.c.name.notilike(pattern, escape="\\")
                     )
                 else:
                     statement = statement.where(
-                        self.table.c.name.like(pattern, escape="\\")
+                        self.table.c.name.ilike(pattern, escape="\\")
                     )
             if status:
                 statement = statement.where(self.table.c.status == status)

@@ -377,6 +377,29 @@ class TestExperimentJobs:
         assert resp_obj["pagination"]["total_items"] == expected_count
         assert all(job["status"] == status_filter for job in resp_obj["jobs"])
 
+    def test_page_size_without_page(self,fixture_fastapi_client: TestClient):
+        """page_size provided without page should default to 1."""
+        response = fixture_fastapi_client.get(
+            self.endpoint.format(expid="a1x4"), params={"page_size": 3}
+        )
+        assert response.status_code == HTTPStatus.OK
+        body = response.json()
+        assert body["pagination"]["page"] == 1
+        assert body["pagination"]["page_size"] == 3
+        assert len(body["jobs"]) == 3
+        assert body["pagination"]["total_items"] == 10
+
+
+    @pytest.mark.parametrize("page_size", [0, -1])
+    def test_page_size_positive(
+        self, fixture_fastapi_client: TestClient, page_size: int
+    ):
+        """page_size must be positive or -1 for unbounded."""
+        response = fixture_fastapi_client.get(
+            self.endpoint.format(expid="a1x4"), params={"page_size": page_size}
+        )
+        assert response.status_code == HTTPStatus.UNPROCESSABLE_ENTITY
+
 
 class TestExperimentJobDetail:
     endpoint = "/v4/experiments/{expid}/jobs/{job_name}"

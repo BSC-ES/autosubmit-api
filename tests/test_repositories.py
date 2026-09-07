@@ -456,3 +456,35 @@ class TestJobsRepositorySearch:
         jobs, count = repo.search(job_name="*SIM", limit=1, offset=0)
         assert count == full_count
         assert len(jobs) == 1
+
+    @pytest.mark.parametrize("expid, total", [("a007", 8), ("a1x4", 10)])
+    def test_search_limit_zero_returns_no_jobs(
+        self, fixture_mock_basic_config, expid: str, total: int
+    ):
+        """limit=0 should return 0 jobs on both backends."""
+        repo = create_jobs_repository(expid)
+        jobs, count = repo.search(limit=0, offset=0)
+        assert jobs == []
+        assert count == total
+
+    @pytest.mark.parametrize("expid, pattern", [("a007", "*SIM"), ("a1x4", "*SIM")], ids=["pkl", "sql"])
+    def test_search_case_insensitive(
+        self, fixture_mock_basic_config, expid: str, pattern: str
+    ):
+        """Search should be case-insensitive on both backends."""
+        repo = create_jobs_repository(expid)
+        upper, upper_count = repo.search(job_name=pattern)
+        lower, lower_count = repo.search(job_name=pattern.lower())
+        assert lower == upper
+        assert lower_count == upper_count
+        assert len(upper) > 0
+
+    @pytest.mark.parametrize("expid", ["a007", "a1x4"])
+    def test_search_deterministic_sorted_by_name(
+        self, fixture_mock_basic_config, expid: str
+    ):
+        """Search results should be sorted by job name for deterministic output."""
+        repo = create_jobs_repository(expid)
+        jobs, count = repo.search()
+        job_names = [job.name for job in jobs]
+        assert job_names == sorted(job_names)
