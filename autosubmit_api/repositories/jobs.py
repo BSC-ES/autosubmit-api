@@ -203,13 +203,8 @@ class JobsPklRepository(JobsRepository):
     ) -> tuple[list[JobData], int]:
         pkl_content = self.pkl_reader.parse_job_list()
 
-        offset = offset if offset else 0
-        limit = limit if limit else len(pkl_content)
-        counter = 0  # Count the number of jobs that match the filters, to apply pagination correctly
-
-        filtered_jobs = []
+        matching_jobs = []
         for job in pkl_content:
-            # Apply filters
             if job_name and not self._wildcard_compare(job_name, job.name):
                 continue
             status_value = common_utils.Status.VALUE_TO_KEY.get(
@@ -217,35 +212,43 @@ class JobsPklRepository(JobsRepository):
             )
             if status and status_value != status:
                 continue
+            matching_jobs.append(job)
 
-            # Pagination logic
-            if counter < offset:
-                counter += 1
-                continue
+        # Deterministic backend-agnostic order shared with the SQL repository.
+        # Offset pagination is useful if the same order is guaranteed across
+        # different backends and across different calls to the same backend.
+        # name is the unique key (primary key in the jobs table).
+        matching_jobs.sort(key=lambda job: job.name)
+        total_count = len(matching_jobs)
 
-            counter += 1
-            if len(filtered_jobs) < limit:
-                filtered_jobs.append(
-                    JobData(
-                        id=job.id,
-                        name=job.name,
-                        status=job.status,
-                        priority=job.priority,
-                        section=job.section,
-                        date=job.date,
-                        member=job.member,
-                        chunk=job.chunk,
-                        split=job.split,
-                        splits=job.splits,
-                        out_path_local=job.out_path_local,
-                        err_path_local=job.err_path_local,
-                        out_path_remote=job.out_path_remote,
-                        err_path_remote=job.err_path_remote,
-                    )
+        offset = max(offset or 0, 0)
+        if limit is None:
+            page = matching_jobs[offset:]
+        else:
+            page = matching_jobs[offset : offset + max(limit, 0)]
+
+        return (
+            [
+                JobData(
+                    id=job.id,
+                    name=job.name,
+                    status=job.status,
+                    priority=job.priority,
+                    section=job.section,
+                    date=job.date,
+                    member=job.member,
+                    chunk=job.chunk,
+                    split=job.split,
+                    splits=job.splits,
+                    out_path_local=job.out_path_local,
+                    err_path_local=job.err_path_local,
+                    out_path_remote=job.out_path_remote,
+                    err_path_remote=job.err_path_remote,
                 )
-
-        # Return the result as a list of JobData and the total count
-        return filtered_jobs, counter
+                for job in page
+            ],
+            total_count,
+        )
 
 
 class JobsSQLRepository(JobsRepository):
@@ -429,6 +432,10 @@ class JobsSQLRepository(JobsRepository):
             # Get total count before applying limit and offset
             count_statement = select(func.count()).select_from(statement.subquery())
             counter = conn.execute(count_statement).scalar()
+
+            # Deterministic order shared with the PKL repository.
+            # Job name is the unique key (primary key in the jobs table).
+            statement = statement.order_by(self.table.c.name)
 
             if offset is not None:
                 statement = statement.offset(offset)
