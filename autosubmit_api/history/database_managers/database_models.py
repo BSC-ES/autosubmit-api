@@ -85,8 +85,6 @@ ExperimentRunRowBase = collections.namedtuple('ExperimentRunRow', ['run_id', 'cr
 ExperimentStatusRow = collections.namedtuple('ExperimentStatusRow', ['exp_id', 'name', 'status', 'seconds_diff', 'modified'])
 
 
-
-
 def get_experiment_row_model(db_version: int) -> collections.namedtuple:
   if db_version >= DatabaseVersion.EXPERIMENT_HEADER_PLATFORM_ADDED.value:    
     return ExperimentRunRow
@@ -106,15 +104,20 @@ def get_job_data_row_model(db_version: int) -> collections.namedtuple:
     return JobDataRow10
 
 
-
 ExperimentRow = collections.namedtuple('ExperimentRow', ["id", "name", "autosubmit_version", "description"])
 
 PragmaVersion = collections.namedtuple('PragmaVersion', ['version'])
 MaxCounterRow = collections.namedtuple('MaxCounter', ['maxcounter'])
 
-class RunningStatus:
-  RUNNING = "RUNNING"
-  NOT_RUNNING = "NOT RUNNING"
+
+class RunningStatus(str, Enum):
+    """Enum representing the possible status of an experiment."""
+
+    RUNNING = "RUNNING"
+    NOT_RUNNING = "NOT RUNNING"
+    ARCHIVED = "ARCHIVED"
+    DELETED = "DELETED"
+
 
 class RowType:
     NORMAL = 2

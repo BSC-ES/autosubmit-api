@@ -1,15 +1,15 @@
 from abc import ABC, abstractmethod
 from datetime import datetime
-from typing import Any, List
+from typing import Any
 
 from pydantic import BaseModel
-from sqlalchemy import Engine, Table, create_engine, delete
-from sqlalchemy.schema import CreateTable
+from sqlalchemy import Engine, Table, create_engine, delete, insert
+from sqlalchemy.schema import CreateSchema, CreateTable
 
 from autosubmit_api.common.utils import LOCAL_TZ
 from autosubmit_api.config.basicConfig import APIBasicConfig
 from autosubmit_api.database import tables
-from autosubmit_api.database.common import create_as_times_db_engine, execute_upsert
+from autosubmit_api.database.common import create_as_times_db_engine
 
 
 class ExperimentStatusModel(BaseModel):
@@ -18,11 +18,12 @@ class ExperimentStatusModel(BaseModel):
     status: str
     seconds_diff: Any
     modified: Any
+    last_heartbeat: Any = None
 
 
 class ExperimentStatusRepository(ABC):
     @abstractmethod
-    def get_all(self) -> List[ExperimentStatusModel]:
+    def get_all(self) -> list[ExperimentStatusModel]:
         """
         Get all experiments status
         """
@@ -38,13 +39,13 @@ class ExperimentStatusRepository(ABC):
         """
 
     @abstractmethod
-    def upsert_status(self, exp_id: int, expid: str, status: str) -> int:
+    def upsert_status(self, exp_id: int, expid: str, status: str, last_heartbeat: str | None = None) -> int:
         """
         Delete and insert experiment status by expid
         """
 
     @abstractmethod
-    def get_only_running_expids(self) -> List[str]:
+    def get_only_running_expids(self) -> list[str]:
         """
         Gets list of running experiments expids
         """
@@ -57,11 +58,17 @@ class ExperimentStatusRepository(ABC):
 
 
 class ExperimentStatusSQLRepository(ExperimentStatusRepository):
-    def __init__(self, engine: Engine, table: Table):
+    def __init__(self, engine: Engine, valid_tables: list[Table]):
         self.engine = engine
-        self.table = table
+        self.table = tables.check_table_schema(self.engine, valid_tables)
+        if self.table is None:
+            if len(valid_tables) == 0:
+                raise ValueError("No valid tables provided.")
+            self.table = valid_tables[0]
 
         with self.engine.connect() as conn:
+            if self.table.schema:
+                conn.execute(CreateSchema(self.table.schema, if_not_exists=True))
             conn.execute(CreateTable(self.table, if_not_exists=True))
             conn.commit()
 
@@ -86,28 +93,35 @@ class ExperimentStatusSQLRepository(ExperimentStatusRepository):
             status=result.status,
             seconds_diff=result.seconds_diff,
             modified=result.modified,
+            last_heartbeat=getattr(result, "last_heartbeat", None),
         )
 
-    def upsert_status(self, exp_id: int, expid: str, status: str):
-        values = {
-            "exp_id": exp_id,
-            "name": expid,
-            "status": status,
-            "seconds_diff": 0,
-            "modified": datetime.now(tz=LOCAL_TZ).isoformat(
-                sep="-", timespec="seconds"
-            ),
-        }
-        with self.engine.connect() as conn:
+    def upsert_status(
+        self, exp_id: int, expid: str, status: str, last_heartbeat: str = None
+    ) -> int:
+        with self.engine.connect() as conn, conn.begin():
             try:
-                rowcount = execute_upsert(
-                    conn, self.table, values, index_elements=["exp_id"]
-                )
+                del_stmnt = delete(self.table).where(self.table.c.exp_id == exp_id)
+                ins_values = {
+                    "exp_id": exp_id,
+                    "name": expid,
+                    "status": status,
+                    "seconds_diff": 0,
+                    "modified": datetime.now(tz=LOCAL_TZ).isoformat(
+                        sep="-", timespec="seconds"
+                    ),
+                }
+                if "last_heartbeat" in self.table.c:
+                    ins_values["last_heartbeat"] = last_heartbeat
+
+                ins_stmnt = insert(self.table).values(**ins_values)
+                conn.execute(del_stmnt)
+                result = conn.execute(ins_stmnt)
                 conn.commit()
-            except Exception as exc:
+                return result.rowcount
+            except Exception:
                 conn.rollback()
-                raise exc
-        return rowcount
+                raise
 
     def get_only_running_expids(self):
         with self.engine.connect() as conn:
@@ -127,8 +141,12 @@ def create_experiment_status_repository() -> ExperimentStatusRepository:
     if APIBasicConfig.DATABASE_BACKEND == "postgres":
         # PostgreSQL
         _engine = create_engine(APIBasicConfig.DATABASE_CONN_URL)
+        _tables = [
+            tables.table_change_schema("as_times", tables.ExperimentStatusTableV18),
+            tables.table_change_schema("as_times", tables.ExperimentStatusTable),
+        ]
     else:
         # SQLite
         _engine = create_as_times_db_engine()
-    _table = tables.ExperimentStatusTable
-    return ExperimentStatusSQLRepository(_engine, _table)
+        _tables = [tables.ExperimentStatusTableV18, tables.ExperimentStatusTable]
+    return ExperimentStatusSQLRepository(_engine, _tables)
