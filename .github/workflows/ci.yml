@@ -15,8 +15,6 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v7
-        with:
-          fetch-depth: 0
 
       - name: Set up Python
         uses: actions/setup-python@v7
@@ -28,32 +26,10 @@ jobs:
           python -m pip install --upgrade pip
           pip install -e .[all]
 
-      - name: Determine diff range
-        id: range
+      - name: Lint code
         run: |
-          if [ "$GITHUB_EVENT_NAME" = "pull_request" ]; then
-            echo "range=origin/${GITHUB_BASE_REF}...HEAD" >> "$GITHUB_OUTPUT"
-          elif [ "$GITHUB_EVENT_NAME" = "push" ] && [ "${{github.event.before}}" != "0000000000000000000000000000000000000000" ]; then
-            echo "range=${{github.event.before}}...${GITHUB_SHA}" >> "$GITHUB_OUTPUT"
-          else
-            echo "range=" >> "$GITHUB_OUTPUT"
-          fi
-      
-      - name: Lint changed files
-        run: |
-          RANGE="${{ steps.range.outputs.range }}"
-          if [ -n "$RANGE" ]; then
-            git diff -z --name-only --diff-filter=ACMRT "$RANGE" -- '*.py' > changed.txt
-          else
-            git ls-files -z -- '*.py' > changed.txt
-          fi
+          ruff check .
 
-          if [ -s changed.txt ]; then
-            xargs -0 -a changed.txt ruff check
-          else
-            echo "No Python files to lint."
-          fi
-            
   test:
     runs-on: ubuntu-latest
     timeout-minutes: 5
