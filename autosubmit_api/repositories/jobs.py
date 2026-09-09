@@ -45,7 +45,7 @@ def _pkl_job_to_data(job) -> JobData:
     return JobData(
         id=job.id,
         name=job.name,
-        status=job.status,
+        status=job.status if job.status is not None else common_utils.Status.UNKNOWN,
         priority=job.priority,
         section=job.section,
         date=job.date,
@@ -205,9 +205,7 @@ class JobsPklRepository(JobsRepository):
         for job in pkl_content:
             if job_name and not self._wildcard_compare(job_name, job.name):
                 continue
-            status_value = common_utils.Status.VALUE_TO_KEY.get(
-                job.status, common_utils.Status.UNKNOWN
-            )
+            status_value = common_utils.Status.VALUE_TO_KEY.get(job.status, "UNKNOWN")
             if status and status_value != status:
                 continue
             matching_jobs.append(job)
@@ -216,7 +214,7 @@ class JobsPklRepository(JobsRepository):
         # Offset pagination is useful if the same order is guaranteed across
         # different backends and across different calls to the same backend.
         # name is the unique key (primary key in the jobs table).
-        matching_jobs.sort(key=lambda job: job.name)
+        matching_jobs.sort(key=lambda job: (job.name.lower(), job.name))
         total_count = len(matching_jobs)
 
         offset = max(offset or 0, 0)
@@ -354,7 +352,9 @@ class JobsSQLRepository(JobsRepository):
 
             # Deterministic order shared with the PKL repository.
             # Job name is the unique key (primary key in the jobs table).
-            ordered_statement = statement.order_by(self.table.c.name)
+            ordered_statement = statement.order_by(
+                func.lower(self.table.c.name), self.table.c.name
+            )
 
             paginated = offset is not None or limit is not None
             if paginated:
