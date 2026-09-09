@@ -226,7 +226,7 @@ async def get_experiment_jobs(
 
     jobs_list = []
     for job_item in current_content:
-        status_value = Status.VALUE_TO_KEY.get(job_item.status, Status.UNKNOWN)
+        status_value = Status.VALUE_TO_KEY.get(job_item.status, "UNKNOWN")
 
         resp_job = {
             "name": job_item.name,
@@ -261,7 +261,11 @@ async def get_experiment_jobs(
             "page": query_params.page if paginated else 1,
             "page_size": query_params.page_size if paginated else None,
             "total_pages": (
-                max(1, math.ceil(total_items / query_params.page_size))
+                max(
+                    1,
+                    (total_items + query_params.page_size - 1)
+                    // query_params.page_size,
+                )
                 if paginated
                 else 1
             ),
