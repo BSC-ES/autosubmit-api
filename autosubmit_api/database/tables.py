@@ -107,15 +107,14 @@ DetailsTable = Table(
 ExperimentStatusTable = Table(
     "experiment_status",
     metadata_obj,
-    # NOTE: `primary_key=True` is the schema the API expects and
-    # creates on a fresh database. It does not guarantee the real
-    # table has that constraint. In the hubs, this table is a legacy
-    # schema created by old Autosubmit versions, which do not enforce
-    # PRIMARY KEY /UNIQUE on `exp_id` and the repositories only run
-    # `CREATE TABLE IF NOT EXISTS`, which does not modify the existing 
-    # table. Do not rely on this metadata when writing. Writes must go 
-    # through `upsert_or_replace` which uses a schema-agnostic DELETE+INSERT on 
-    # SQLite and native upsert on PostgreSQL.
+    # NOTE: ``primary_key=True`` is the schema the API creates on a fresh
+    # database, but it is not guaranteed on existing deployments. In the hubs,
+    # ``experiment_status`` is a legacy table created by old Autosubmit
+    # versions, with no PRIMARY KEY/UNIQUE on ``exp_id``, and it is never
+    # altered because repositories only run ``CREATE TABLE IF NOT EXISTS``.
+    # So do not rely on this metadata when writing: use ``upsert_or_replace``,
+    # which is schema-agnostic (DELETE+INSERT on SQLite, native upsert on
+    # PostgreSQL).
     Column("exp_id", Integer, primary_key=True),
     Column("name", Text, nullable=False),
     Column("status", Text, nullable=False),
