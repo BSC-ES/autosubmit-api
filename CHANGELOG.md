@@ -5,6 +5,7 @@
 #### New features
 
 * Support Autosubmit version 4.2.0 new job list database schema #223
+* Endpoint `/v4/experiments/{expid}/jobs` now supports pagination #220
 * Added endpoint to get eta of remaining chunks based on a given section #297
 
 ### Pre-release v4.1.2b6.post1 - Release date: 2026-09-09
@@ -25,7 +26,7 @@
 * Updated the API to handle the new wrapper schema structure introduced in Autosubmit 4.1.17
 * SYPD and ASYPD metrics now consider the splits of each chunk for individual jobs
 * Updated config parser dependency to enable `rt` mode and read special YAML tags
-* Minor code improvements and CI updates 
+* Minor code improvements and CI updates
 
 #### Bug fixes
 
@@ -40,10 +41,10 @@
 ### Pre-release v4.1.2b4 - Release date: 2026-03-30
 
 * Added new runner interactivity endpoints:
-    * Run experiment
-    * Stop experiment
-    * Get runner run status
-    * Create experiment
+  * Run experiment
+  * Stop experiment
+  * Get runner run status
+  * Create experiment
 * Added runner configuration options to enable and disable features
 * Optimized job list historical data load
 * Refactored and cleaned up code in preparation for future changes
@@ -52,7 +53,7 @@
 
 * Redefined the runner permissions system to favor the use of profiles (details can be inspected in the new `/v4/runners/configuration/profiles` endpoint)
 * Added an endpoint to share public SSH keys to facilitate API access via SSH in `/v4/runners/configuration/ssh-public-keys`
-* Released supported runner endpoint `/v4/runners/command/set-job-status"` to change the job status of the experiments 
+* Released supported runner endpoint `/v4/runners/command/set-job-status"` to change the job status of the experiments
 
 ### Pre-release v4.1.2b2 - Release date: 2025-12-15
 
@@ -62,9 +63,9 @@
 * Added CHSY & Parallelization metrics in `/v3/runs/{expid}`
 * Updated uvicorn and uvicorn worker dependencies
 * Add username preferences endpoints
-* Added new alpha SSH Runner 
+* Added new alpha SSH Runner
 * Updated Runner stop strategy to use `autosubmit stop.`
-* Added more operations (create experiment, create job list, set job status) to the alpha API runners 
+* Added more operations (create experiment, create job list, set job status) to the alpha API runners
 * Minor bug fixes and refactors
 
 ### Pre-release v4.1.2b1 - Release date: 2025-07-10
@@ -196,16 +197,16 @@
 
 * Fix HPC value in the running endpoint
 * **Major change:** Updated all route names. Versioning path prefix is included:
-    * Previous routes have been moved with the prefix `/v3`
-    * New routes have been added with prefix `/v4` to better follow the RESTful convention 
+  * Previous routes have been moved with the prefix `/v3`
+  * New routes have been added with prefix `/v4` to better follow the RESTful convention
 * `pydantic` have been added to improve data validation
 * `SQLAlchemy` have been added to improve SQL interaction
 * *New* RESTful endpoint `GET /v4/experiments` added for experiment info search that handles pagination
 * Fix `running` in `/v3/expinfo/<expid>` endpoint to return the right value
-* Add the `--disable-bg-tasks` on the CLI 
+* Add the `--disable-bg-tasks` on the CLI
 * Support new Autosubmit >= 4.1 pickle file
-    * Affected endpoints: `/v3/quick/<expid>`, `/v3/expcount/<expid>`, `/v3/summary/<expid>`
-    * Affected Background task: `PopulateQueueRuntimes`
+  * Affected endpoints: `/v3/quick/<expid>`, `/v3/expcount/<expid>`, `/v3/summary/<expid>`
+  * Affected Background task: `PopulateQueueRuntimes`
 * Added chunks to the `/v3/performance/<expid>` endpoint
 * Added `/v4/auth/cas/v2/login` endpoint to handle CAS version 2 protocol by giving a whitelisted `service` instead of using the `Referer` header in the request. Also, supports wildcard `*` in the `ALLOWED_CLIENTS` list, and by default gives the API base URL as the `service` for direct authentication.
 * Added more tests
@@ -223,7 +224,6 @@
 * Added a Processing Elements (PE) estimation that extends the `Parallelization` logic in the `/performance/<expid>` endpoint which improves the CHSY metric accuracy.
 * Fixed bug where jobs don't show the correct platform.
 * Fixed error while populating the `experiment_times` table which affected the `/running/` endpoint.
-
 
 ### Pre-release v4.0.0b1 - Release date: 2023-11-02
 

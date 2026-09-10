@@ -4,10 +4,9 @@ import math
 import os
 import re
 import traceback
-from collections import deque
 from datetime import datetime, timezone
 from http import HTTPStatus
-from typing import Annotated, Any, Literal, Optional
+from typing import Annotated, Any, Optional
 
 from bscearth.utils.config_parser import ConfigParserFactory
 from fastapi import APIRouter, Depends, HTTPException, Query
@@ -34,6 +33,7 @@ from autosubmit_api.database.models import BaseExperimentModel
 from autosubmit_api.logger import logger
 from autosubmit_api.models.requests import (
     ExperimentsSearchRequest,
+    JobsSearchRequest,
 )
 from autosubmit_api.models.responses import (
     ExperimentEtaResponse,
@@ -67,7 +67,7 @@ router = APIRouter()
 @router.get("", name="Search experiments")
 async def search_experiments(
     query_params: Annotated[ExperimentsSearchRequest, Query()],
-    user_id: Optional[str] = Depends(auth_token_dependency()),
+    user_id: str | None = Depends(auth_token_dependency()),
 ) -> ExperimentsSearchResponse:
     """
     Search experiments
@@ -173,7 +173,7 @@ async def search_experiments(
 
 @router.get("/{expid}", name="Get experiment detail")
 async def get_experiment_detail(
-    expid: str, user_id: Optional[str] = Depends(auth_token_dependency())
+    expid: str, user_id: str | None = Depends(auth_token_dependency())
 ) -> BaseExperimentModel:
     """
     Get details of an experiment
@@ -183,21 +183,39 @@ async def get_experiment_detail(
     return exp_builder.product.model_dump(include=tables.ExperimentTable.c.keys())
 
 
-@router.get("/{expid}/jobs", name="List experiment jobs")
+@router.get(
+    "/{expid}/jobs",
+    name="List experiment jobs",
+    response_model=ExperimentJobsResponse,
+    response_model_exclude_unset=True,
+)
 async def get_experiment_jobs(
     expid: str,
-    view: Annotated[Literal["quick", "base"], Query()] = "base",
-    user_id: Optional[str] = Depends(auth_token_dependency()),
+    query_params: Annotated[JobsSearchRequest, Query()],
+    user_id: str | None = Depends(auth_token_dependency()),
 ) -> ExperimentJobsResponse:
     """
-    Get the experiment jobs from pickle file.
-    BASE view returns base content of the pkl file.
-    QUICK view returns a reduced payload with just the name and status of the jobs.
+    Get the experiment job list (from the pkl file or the jobs database),
+    optionally filtered by job name and status.
+
+    - ``base`` view: returns the full job content.
+    - ``quick`` view: returns only the name and status of each job.
+
+    Pagination is enabled when `page_size` is provided (`page` defaults to 1).
     """
-    # Read the pkl
     try:
-        job_list_repo = create_jobs_repository(expid)
-        current_content = job_list_repo.get_all()
+        jobs_repo = create_jobs_repository(expid)
+
+        paginated = query_params.page_size is not None
+        limit = query_params.page_size
+        offset = (query_params.page - 1) * query_params.page_size if paginated else None
+
+        current_content, total_items = jobs_repo.search(
+            job_name=query_params.job_name,
+            status=query_params.status,
+            limit=limit,
+            offset=offset,
+        )
     except Exception as exc:
         error_message = "Error while reading the job list"
         logger.error(error_message + f": {exc}")
@@ -206,14 +224,16 @@ async def get_experiment_jobs(
             status_code=HTTPStatus.INTERNAL_SERVER_ERROR, detail=error_message
         )
 
-    pkl_jobs = deque()
+    jobs_list = []
     for job_item in current_content:
+        status_value = Status.VALUE_TO_KEY.get(job_item.status, "UNKNOWN")
+
         resp_job = {
             "name": job_item.name,
-            "status": Status.VALUE_TO_KEY.get(job_item.status, Status.UNKNOWN),
+            "status": status_value,
         }
 
-        if view == "base":
+        if query_params.view == "base":
             resp_job = {
                 **resp_job,
                 "priority": job_item.priority,
@@ -233,19 +253,31 @@ async def get_experiment_jobs(
                 "err_path_remote": job_item.err_path_remote,
             }
 
-        if job_item.status in [Status.COMPLETED, Status.WAITING, Status.READY]:
-            pkl_jobs.append(resp_job)
-        else:
-            pkl_jobs.appendleft(resp_job)
+        jobs_list.append(resp_job)
 
-    return JSONResponse(
-        {"jobs": list(pkl_jobs)}
-    )  # TODO Use Validation. Not respond directly.
+    return {
+        "jobs": jobs_list,
+        "pagination": {
+            "page": query_params.page if paginated else 1,
+            "page_size": query_params.page_size if paginated else None,
+            "total_pages": (
+                max(
+                    1,
+                    (total_items + query_params.page_size - 1)
+                    // query_params.page_size,
+                )
+                if paginated
+                else 1
+            ),
+            "page_items": len(jobs_list),
+            "total_items": total_items,
+        },
+    }
 
 
 @router.get("/{expid}/wrappers", name="Get experiment wrappers")
 async def get_experiment_wrappers(
-    expid: str, user_id: Optional[str] = Depends(auth_token_dependency())
+    expid: str, user_id: str | None = Depends(auth_token_dependency())
 ) -> ExperimentWrappersResponse:
     """
     Get wrappers for an experiment
@@ -316,7 +348,7 @@ def _format_config_response(
     "/{expid}/filesystem-config", name="Get experiment current filesystem configuration"
 )
 async def get_experiment_fs_config(
-    expid: str, user_id: Optional[str] = Depends(auth_token_dependency())
+    expid: str, user_id: str | None = Depends(auth_token_dependency())
 ) -> ExperimentFSConfigResponse:
     """
     Get the filesystem config of an experiment
@@ -379,7 +411,7 @@ async def get_runs(
 async def get_run_config(
     expid: str,
     run_id: str,
-    user_id: Optional[str] = Depends(auth_token_dependency()),
+    user_id: str | None = Depends(auth_token_dependency()),
 ) -> ExperimentRunConfigResponse:
     """
     Get the config of a specific run of an experiment
@@ -406,7 +438,7 @@ async def get_run_config(
 async def get_run_user_metrics(
     expid: str,
     run_id: int,
-    user_id: Optional[str] = Depends(auth_token_dependency()),
+    user_id: str | None = Depends(auth_token_dependency()),
 ):
     """
     Get the user-defined metrics of a specific run of an experiment
@@ -429,7 +461,7 @@ async def get_run_user_metrics(
 @router.get("/{expid}/user-metrics-runs", name="Get the runs with user-defined metrics")
 async def get_runs_with_user_metrics(
     expid: str,
-    user_id: Optional[str] = Depends(auth_token_dependency()),
+    user_id: str | None = Depends(auth_token_dependency()),
 ):
     """
     Get the runs with user-defined metrics of an experiment
@@ -456,8 +488,10 @@ async def get_runs_with_user_metrics(
 @router.get("/{expid}/eta", name="Get experiment ETA")
 async def get_experiment_eta(
     expid: str,
-    section: Annotated[str, Query(description="Job section to compute ETA for")] = "SIM",
-    user_id: Optional[str] = Depends(auth_token_dependency()),
+    section: Annotated[
+        str, Query(description="Job section to compute ETA for")
+    ] = "SIM",
+    user_id: str | None = Depends(auth_token_dependency()),
 ) -> ExperimentEtaResponse:
     """
     Get the estimated time of arrival (remaining time) for an experiment's
@@ -484,36 +518,36 @@ class JobDetailResponse(BaseModel):
     # From pkl
     name: str
     status: str
-    section: Optional[str] = None
-    date: Optional[str] = None
-    member: Optional[str] = None
-    chunk: Optional[int] = None
-    split: Optional[int] = None
-    splits: Optional[int] = None
-    out_path_local: Optional[str] = None
-    err_path_local: Optional[str] = None
+    section: str | None = None
+    date: str | None = None
+    member: str | None = None
+    chunk: int | None = None
+    split: int | None = None
+    splits: int | None = None
+    out_path_local: str | None = None
+    err_path_local: str | None = None
     # From config
-    chunk_size: Optional[int] = None
-    chunk_unit: Optional[str] = None
-    platform: Optional[str] = None
+    chunk_size: int | None = None
+    chunk_unit: str | None = None
+    platform: str | None = None
     # From historical DB
-    remote_id: Optional[int] = None
-    qos: Optional[str] = None
-    workflow_commit: Optional[str] = None
-    processors: Optional[int] = None  # Requested ncpus
-    submit: Optional[str] = None
-    start: Optional[str] = None
-    finish: Optional[str] = None
-    wallclock: Optional[str] = None
+    remote_id: int | None = None
+    qos: str | None = None
+    workflow_commit: str | None = None
+    processors: int | None = None  # Requested ncpus
+    submit: str | None = None
+    start: str | None = None
+    finish: str | None = None
+    wallclock: str | None = None
     # Wrapper data
-    last_wrapper: Optional[str] = None
+    last_wrapper: str | None = None
 
 
 @router.get("/{expid}/jobs/{job_name}", name="Get experiment job detail")
 async def get_experiment_job_detail(
     expid: str,
     job_name: str,
-    user_id: Optional[str] = Depends(auth_token_dependency()),
+    user_id: str | None = Depends(auth_token_dependency()),
 ) -> JobDetailResponse:
     """
     Get the details of a specific job of an experiment
@@ -606,7 +640,7 @@ async def get_experiment_job_parents(
     expid: str,
     job_name: str,
     include_status: bool = False,
-    user_id: Optional[str] = Depends(auth_token_dependency()),
+    user_id: str | None = Depends(auth_token_dependency()),
 ) -> dict:
     """
     Get the parents of a specific job of an experiment.
@@ -647,7 +681,7 @@ async def get_experiment_job_children(
     expid: str,
     job_name: str,
     include_status: bool = False,
-    user_id: Optional[str] = Depends(auth_token_dependency()),
+    user_id: str | None = Depends(auth_token_dependency()),
 ) -> dict:
     """
     Get the children of a specific job of an experiment

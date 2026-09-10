@@ -10,7 +10,10 @@ import pytest
 from fastapi.testclient import TestClient
 
 from autosubmit_api import config
-from autosubmit_api.models.requests import PAGINATION_LIMIT_DEFAULT
+from autosubmit_api.models.requests import (
+    PAGINATION_LIMIT_DEFAULT,
+    PAGINATION_LIMIT_MAX,
+)
 from autosubmit_api.repositories.runner_processes import RunnerProcessesDataModel
 from autosubmit_api.routers.v4.experiments import JobDetailResponse
 from tests.utils import custom_return_value
@@ -282,6 +285,151 @@ class TestExperimentJobs:
                 assert isinstance(job, dict) and len(job.keys()) > 2
             assert isinstance(job["name"], str) and job["name"].startswith(expid)
             assert isinstance(job["status"], str)
+
+        assert "pagination" in resp_obj
+        pagination = resp_obj["pagination"]
+        assert pagination["total_items"] == expected_len
+        assert pagination["page_size"] is None
+        assert pagination["total_pages"] == 1
+
+    @pytest.mark.parametrize(
+        "expid, total, page, page_size, expected_items, expected_pages",
+        [
+            ("a1x4", 10, 1, 3, 3, 4),
+            ("a1x4", 10, 4, 3, 1, 4),
+            ("a1x4", 10, 1, 10, 10, 1),
+            ("a007", 8, 1, 5, 5, 2),
+            ("a007", 8, 2, 5, 3, 2),
+        ],
+    )
+    def test_pagination(
+        self,
+        fixture_fastapi_client: TestClient,
+        expid: str,
+        total: int,
+        page: int,
+        page_size: int,
+        expected_items: int,
+        expected_pages: int,
+    ):
+        response = fixture_fastapi_client.get(
+            self.endpoint.format(expid=expid),
+            params={"page": page, "page_size": page_size},
+        )
+        assert response.status_code == HTTPStatus.OK
+        resp_obj = response.json()
+        pagination = resp_obj["pagination"]
+
+        assert len(resp_obj["jobs"]) == expected_items
+        assert pagination["total_items"] == total
+        assert pagination["total_pages"] == expected_pages
+        assert pagination["page"] == page
+        assert pagination["page_size"] == page_size
+        assert pagination["page_items"] == expected_items
+
+    @pytest.mark.parametrize(
+        "expid, job_name_filter, expected_count",
+        [
+            ("a1x4", "SIM", 8),
+            ("a1x4", "!SIM", 2),
+            ("a1x4", "_1_*SIM", 5),
+            ("a007", "SIM", 2),
+        ],
+    )
+    def test_filter_by_job_name(
+        self,
+        fixture_fastapi_client: TestClient,
+        expid: str,
+        job_name_filter: str,
+        expected_count: int,
+    ):
+        response = fixture_fastapi_client.get(
+            self.endpoint.format(expid=expid),
+            params={"job_name": job_name_filter},
+        )
+        assert response.status_code == HTTPStatus.OK
+        resp_obj = response.json()
+        assert len(resp_obj["jobs"]) == expected_count
+        assert resp_obj["pagination"]["total_items"] == expected_count
+
+    @pytest.mark.parametrize(
+        "expid, status_filter, expected_count",
+        [
+            ("a1x4", "WAITING", 9),
+            ("a1x4", "READY", 1),
+            ("a007", "COMPLETED", 8),
+            ("a3tb", "QUEUING", 4),
+            ("a3tb", "COMPLETED", 24),
+        ],
+    )
+    def test_filter_by_status(
+        self,
+        fixture_fastapi_client: TestClient,
+        expid: str,
+        status_filter: str,
+        expected_count: int,
+    ):
+        response = fixture_fastapi_client.get(
+            self.endpoint.format(expid=expid),
+            params={"status": status_filter},
+        )
+        assert response.status_code == HTTPStatus.OK
+        resp_obj = response.json()
+        assert len(resp_obj["jobs"]) == expected_count
+        assert resp_obj["pagination"]["total_items"] == expected_count
+        assert all(job["status"] == status_filter for job in resp_obj["jobs"])
+
+    def test_page_size_without_page(self, fixture_fastapi_client: TestClient):
+        """page_size provided without page should default to 1."""
+        response = fixture_fastapi_client.get(
+            self.endpoint.format(expid="a1x4"), params={"page_size": 3}
+        )
+        assert response.status_code == HTTPStatus.OK
+        body = response.json()
+        assert body["pagination"]["page"] == 1
+        assert body["pagination"]["page_size"] == 3
+        assert len(body["jobs"]) == 3
+        assert body["pagination"]["total_items"] == 10
+
+    @pytest.mark.parametrize("page_size", [0, -1])
+    def test_page_size_positive(
+        self, fixture_fastapi_client: TestClient, page_size: int
+    ):
+        """page_size must be positive. 0 and negative are rejected."""
+        response = fixture_fastapi_client.get(
+            self.endpoint.format(expid="a1x4"), params={"page_size": page_size}
+        )
+        assert response.status_code == HTTPStatus.UNPROCESSABLE_ENTITY
+
+    def test_page_size_over_limit_rejected(self, fixture_fastapi_client: TestClient):
+        """page_size above the API limit should be rejected."""
+        response = fixture_fastapi_client.get(
+            self.endpoint.format(expid="a1x4"),
+            params={"page_size": PAGINATION_LIMIT_MAX + 1},
+        )
+        assert response.status_code == HTTPStatus.UNPROCESSABLE_ENTITY
+
+    def test_invalid_status_rejected(self, fixture_fastapi_client: TestClient):
+        """An unknown status value should be rejected instead of returning empty."""
+        response = fixture_fastapi_client.get(
+            self.endpoint.format(expid="a1x4"), params={"status": "NOT_A_STATUS"}
+        )
+        assert response.status_code == HTTPStatus.UNPROCESSABLE_ENTITY
+
+    def test_empty_paginated_result_reports_total_pages(
+        self, fixture_fastapi_client: TestClient
+    ):
+        """A paginated request with no matches should still return >= 1 total pages."""
+        # a1x4 has no FAILED jobs, so the filtered result is empty
+        response = fixture_fastapi_client.get(
+            self.endpoint.format(expid="a1x4"),
+            params={"page": 1, "page_size": 5, "status": "FAILED"},
+        )
+        assert response.status_code == HTTPStatus.OK
+        body = response.json()
+        assert body["jobs"] == []
+        assert body["pagination"]["total_items"] == 0
+        assert body["pagination"]["total_pages"] >= 1
 
 
 class TestExperimentJobDetail:
