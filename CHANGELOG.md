@@ -7,6 +7,14 @@
 * Support Autosubmit version 4.2.0 new job list database schema #223
 * Added endpoint to get eta of remaining chunks based on a given section #297
 
+### Pre-release v4.1.2b6.post1 - Release date: 2026-09-09
+
+#### Bug fixes
+
+* Hotfix: experiment status updates now work on the hubs whose legacy `as_times.db`
+  `experiment_status` table lacks a PRIMARY KEY/UNIQUE constraint on `exp_id`.
+  Uses `upsert_or_replace`. #329
+
 ### Pre-release v4.1.2b6 - Release date: 2026-07-21
 
 #### New features
