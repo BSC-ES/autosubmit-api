@@ -3,6 +3,7 @@ from uuid import uuid4
 
 import pytest
 
+from autosubmit_api.models.requests import ExperimentsSearchRequest
 from autosubmit_api.repositories.experiment import create_experiment_repository
 from autosubmit_api.repositories.experiment_status import (
     create_experiment_status_repository,
@@ -21,6 +22,10 @@ BASE_FROM = (
     "FROM experiment LEFT OUTER JOIN details ON experiment.id = details.exp_id "
     "LEFT OUTER JOIN experiment_status ON experiment.id = experiment_status.exp_id"
 )
+
+
+def test_experiments_search_defaults_to_ascending_order():
+    assert ExperimentsSearchRequest().order_desc is False
 
 
 @pytest.mark.parametrize(

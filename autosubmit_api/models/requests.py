@@ -13,7 +13,7 @@ class ExperimentsSearchRequest(BaseModel):
     hpc: Optional[str] = None
 
     order_by: Optional[Literal["expid", "created", "description"]] = None
-    order_desc: bool = True
+    order_desc: bool = False
 
     page: Annotated[int, Field(ge=1, description="Page number", example=1)] = 1
     page_size: int = PAGINATION_LIMIT_DEFAULT

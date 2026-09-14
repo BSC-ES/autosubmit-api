@@ -18,5 +18,5 @@
 # along with Autosubmit.  If not, see <http://www.gnu.org/licenses/>.
 
 __version__ = "4.1.2b6.post1"
-__author__ = "Luiggi Tenorio, Bruno P. Kinoshita, Cristian Gutiérrez, Julian Berlin, Wilmer Uruchi"
+__author__ = "The Autosubmit Team - Models and Workflows Team (MWT) - Barcelona Supercomputing Center (BSC)"
 __credits__ = "Barcelona Supercomputing Center"
