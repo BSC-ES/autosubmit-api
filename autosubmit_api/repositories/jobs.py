@@ -380,6 +380,8 @@ def create_jobs_repository(expid: str) -> JobsRepository:
     Factory function to create a JobsRepository instance.
     It decides whether to use the SQL or PKL repository based on the
     existence of the SQLite database.
+
+    :raises ExperimentNotFoundError: If the experiment does not exist
     """
     # Experiment should exist
     experiment = create_experiment_repository().get_by_expid(expid)

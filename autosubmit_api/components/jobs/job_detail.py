@@ -6,6 +6,7 @@ from autosubmit_api.builders.configuration_facade_builder import (
     ConfigurationFacadeDirector,
 )
 from autosubmit_api.components.jobs.utils import get_fixed_experiment_times
+from autosubmit_api.exceptions import JobNotFoundError
 from autosubmit_api.repositories.experiment_run import (
     ExperimentRunModel,
     create_experiment_run_repository,
@@ -19,10 +20,6 @@ from autosubmit_api.repositories.job_packages import (
     create_job_packages_repository,
 )
 from autosubmit_api.repositories.jobs import JobData, create_jobs_repository
-
-
-class JobNotFoundError(Exception):
-    """Exception raised when a job is not found."""
 
 
 class JobDetailRetriever:
@@ -61,7 +58,7 @@ class JobDetailRetriever:
         job_list_repo = create_jobs_repository(self.expid)
         self._job_data = job_list_repo.get_by_name(self.job_name)
         if not self._job_data:
-            raise JobNotFoundError()
+            raise JobNotFoundError(self.expid, self.job_name)
 
     def _load_experiment_run_data(self):
         try:
@@ -246,11 +243,11 @@ class JobDetailRetriever:
     @property
     def submit(self) -> Optional[int]:
         return self._submit
-    
+
     @property
     def start(self) -> Optional[int]:
         return self._start
-    
+
     @property
     def finish(self) -> Optional[int]:
         return self._finish

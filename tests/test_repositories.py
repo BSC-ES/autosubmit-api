@@ -3,6 +3,7 @@ from uuid import uuid4
 
 import pytest
 
+from autosubmit_api.exceptions import ExperimentNotFoundError
 from autosubmit_api.repositories.experiment import create_experiment_repository
 from autosubmit_api.repositories.experiment_status import (
     create_experiment_status_repository,
@@ -163,6 +164,12 @@ class TestExperimentRepository:
         for expid in EXPIDS:
             row = experiment_db.get_by_expid(expid)
             assert row.name == expid
+
+    def test_get_by_expid_not_found(self, fixture_mock_basic_config):
+        """Non-existing experiment should raise ExperimentNotFoundError."""
+        experiment_db = create_experiment_repository()
+        with pytest.raises(ExperimentNotFoundError):
+            experiment_db.get_by_expid("test")
 
 
 class TestExperimentStatusRepository:
