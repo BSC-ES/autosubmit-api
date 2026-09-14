@@ -1,22 +1,19 @@
 from types import SimpleNamespace
 
 from autosubmit_api.estimation.eta import calculate_eta
+from autosubmit_api.exceptions import SectionNotFoundError, SectionNotChunkedError
 from autosubmit_api.models.responses import ExperimentEtaResponse
 from autosubmit_api.repositories.jobs import JobsRepository
 from autosubmit_api.repositories.job_data import ExperimentJobDataRepository
 
 
-class SectionNotFoundError(LookupError):
-    """Raised when no jobs match the requested section for an experiment."""
-
-
-class SectionNotChunkedError(LookupError):
-    """Raised when the section exists but is not configured with RUNNING: chunk."""
-
-
 class ExperimentEtaService:
-
-    def __init__(self, jobs_repo: JobsRepository, job_data_repo: ExperimentJobDataRepository, expid: str):
+    def __init__(
+        self,
+        jobs_repo: JobsRepository,
+        job_data_repo: ExperimentJobDataRepository,
+        expid: str,
+    ):
         self.jobs_repo = jobs_repo
         self.job_data_repo = job_data_repo
         self.expid = expid
@@ -32,7 +29,7 @@ class ExperimentEtaService:
         Raises SectionNotFoundError if no jobs match the section.
         Raises SectionNotChunkedError if the section has no chunked jobs.
         """
-        # FIXME: For AS4.2.0, replace this with a more efficient query that doesn't 
+        # FIXME: For AS4.2.0, replace this with a more efficient query that doesn't
         # require loading all jobs into memory.
         current_jobs = self.jobs_repo.get_all()
         section_jobs = [job for job in current_jobs if job.section == section]

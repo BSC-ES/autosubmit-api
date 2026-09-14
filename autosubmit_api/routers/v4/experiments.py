@@ -20,10 +20,7 @@ from autosubmit_api.builders.experiment_history_builder import (
     ExperimentHistoryDirector,
 )
 from autosubmit_api.common.utils import Status, timestamp_to_datetime_format
-from autosubmit_api.components.jobs.job_detail import (
-    JobDetailRetriever,
-    JobNotFoundError,
-)
+from autosubmit_api.components.jobs.job_detail import JobDetailRetriever
 from autosubmit_api.config.basicConfig import APIBasicConfig
 from autosubmit_api.config.confConfigStrategy import confConfigStrategy
 from autosubmit_api.config.config_common import AutosubmitConfigResolver
@@ -49,17 +46,14 @@ from autosubmit_api.persistance.job_package_reader import JobPackageReader
 from autosubmit_api.repositories.experiment_structure import (
     create_experiment_structure_repository,
 )
+from autosubmit_api.exceptions import DomainError
 from autosubmit_api.repositories.job_data import create_experiment_job_data_repository
 from autosubmit_api.repositories.jobs import create_jobs_repository
 from autosubmit_api.repositories.join.experiment_join import (
     create_experiment_join_repository,
 )
 from autosubmit_api.repositories.user_metric import create_user_metric_repository
-from autosubmit_api.services.experiment_eta import (
-    ExperimentEtaService,
-    SectionNotChunkedError,
-    SectionNotFoundError,
-)
+from autosubmit_api.services.experiment_eta import ExperimentEtaService
 
 router = APIRouter()
 
@@ -216,6 +210,8 @@ async def get_experiment_jobs(
             limit=limit,
             offset=offset,
         )
+    except DomainError:
+        raise
     except Exception as exc:
         error_message = "Error while reading the job list"
         logger.error(error_message + f": {exc}")
@@ -502,8 +498,8 @@ async def get_experiment_eta(
         job_data_repo = create_experiment_job_data_repository(expid)
         eta_service = ExperimentEtaService(repo, job_data_repo, expid)
         result = eta_service.compute_experiment_eta(section)
-    except (SectionNotChunkedError, SectionNotFoundError) as exc:
-        raise HTTPException(status_code=HTTPStatus.BAD_REQUEST, detail=str(exc))
+    except DomainError:
+        raise
     except Exception:
         logger.error(f"Failed to compute ETA for {expid}: {traceback.format_exc()}")
         raise HTTPException(
@@ -556,11 +552,8 @@ async def get_experiment_job_detail(
     try:
         job_detail_retriever = JobDetailRetriever(expid, job_name)
         job_detail_retriever.load_data()
-    except JobNotFoundError:
-        raise HTTPException(
-            status_code=HTTPStatus.NOT_FOUND,
-            detail=f"Job with name '{job_name}' not found in experiment '{expid}'",
-        )
+    except DomainError:
+        raise
     except Exception:
         logger.error(traceback.format_exc())
         raise HTTPException(

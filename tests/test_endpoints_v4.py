@@ -289,15 +289,16 @@ class TestExperimentEta:
             params={"section": "__INVALID_SECTION__"},
         )
         assert response.status_code == HTTPStatus.BAD_REQUEST
+        assert response.json()["error"] is True
 
     def test_eta_invalid_experiment(self, fixture_fastapi_client: TestClient):
-        """Test that an invalid experiment returns 500."""
+        """Test that an unknown experiment returns 404."""
         expid = "__INVALID_EXPERIMENT__"
         response = fixture_fastapi_client.get(
             self.endpoint.format(expid=expid),
             params={"section": "SIM"},
         )
-        assert response.status_code == HTTPStatus.INTERNAL_SERVER_ERROR
+        assert response.status_code == HTTPStatus.NOT_FOUND
 
     def test_eta_section_not_chunked(self, fixture_fastapi_client: TestClient):
         """Test that a section without chunked jobs returns 400."""
@@ -458,6 +459,9 @@ class TestExperimentJobs:
             self.endpoint.format(expid="a1x4"), params={"page_size": page_size}
         )
         assert response.status_code == HTTPStatus.UNPROCESSABLE_ENTITY
+        body = response.json()
+        assert body["error"] is True
+        assert "page_size" in body["error_message"]
 
     def test_page_size_over_limit_rejected(self, fixture_fastapi_client: TestClient):
         """page_size above the API limit should be rejected."""
@@ -466,6 +470,9 @@ class TestExperimentJobs:
             params={"page_size": PAGINATION_LIMIT_MAX + 1},
         )
         assert response.status_code == HTTPStatus.UNPROCESSABLE_ENTITY
+        body = response.json()
+        assert body["error"] is True
+        assert "page_size" in body["error_message"]
 
     def test_invalid_status_rejected(self, fixture_fastapi_client: TestClient):
         """An unknown status value should be rejected instead of returning empty."""
@@ -473,6 +480,19 @@ class TestExperimentJobs:
             self.endpoint.format(expid="a1x4"), params={"status": "NOT_A_STATUS"}
         )
         assert response.status_code == HTTPStatus.UNPROCESSABLE_ENTITY
+        body = response.json()
+        assert body["error"] is True
+        assert "Invalid job status" in body["error_message"]
+
+    def test_invalid_page_rejected(self, fixture_fastapi_client: TestClient):
+        """A non-integer page should be rejected with the API error envelope."""
+        response = fixture_fastapi_client.get(
+            self.endpoint.format(expid="a1x4"), params={"page": "not-a-number"}
+        )
+        assert response.status_code == HTTPStatus.UNPROCESSABLE_ENTITY
+        body = response.json()
+        assert body["error"] is True
+        assert "page" in body["error_message"]
 
     def test_empty_paginated_result_reports_total_pages(
         self, fixture_fastapi_client: TestClient
@@ -488,6 +508,12 @@ class TestExperimentJobs:
         assert body["jobs"] == []
         assert body["pagination"]["total_items"] == 0
         assert body["pagination"]["total_pages"] >= 1
+
+    def test_unknown_experiment_returns_404(self, fixture_fastapi_client: TestClient):
+        """An unknown experiment should return 404 error."""
+        response = fixture_fastapi_client.get(self.endpoint.format(expid="test"))
+        assert response.status_code == HTTPStatus.NOT_FOUND
+        assert response.json()["error"] is True
 
 
 class TestExperimentJobDetail:
