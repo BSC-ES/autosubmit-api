@@ -6,6 +6,11 @@
 
 * Support Autosubmit version 4.2.0 new job list database schema #223
 * Added endpoint to get eta of remaining chunks based on a given section #297
+* Set listed authors in `__init__` to Autosubmit Team #332
+
+#### Bug fixes
+
+* `order_desc` default value is set to `False` in `/v4/experiments` endpoint #333
 
 ### Pre-release v4.1.2b6.post1 - Release date: 2026-09-09
 
