@@ -92,7 +92,9 @@ async def cas_v2_login(
 
 
 @router.get("/oauth2/github/login", name="Github OAuth2 login")
-async def github_oauth2_login(code: Optional[str] = None) -> LoginResponse:
+async def github_oauth2_login(
+    code: Optional[str] = None, redirect_uri: Optional[str] = None
+) -> LoginResponse:
     """
     Authenticate and authorize user using a cofigured GitHub Oauth app.
     The authorization in done by verifying users membership to either a Github Team
@@ -109,13 +111,18 @@ async def github_oauth2_login(code: Optional[str] = None) -> LoginResponse:
             status_code=HTTPStatus.UNAUTHORIZED,
         )
 
+    token_request_data = {
+        "client_id": config.GITHUB_OAUTH_CLIENT_ID,
+        "client_secret": config.GITHUB_OAUTH_CLIENT_SECRET,
+        "code": code,
+    }
+    if redirect_uri:
+        # Must be identical to the redirect_uri sent to GitHub's authorize endpoint
+        token_request_data["redirect_uri"] = redirect_uri
+
     resp_obj: dict = requests.post(
         "https://github.com/login/oauth/access_token",
-        data={
-            "client_id": config.GITHUB_OAUTH_CLIENT_ID,
-            "client_secret": config.GITHUB_OAUTH_CLIENT_SECRET,
-            "code": code,
-        },
+        data=token_request_data,
         headers={"Accept": "application/json"},
     ).json()
     access_token = resp_obj.get("access_token")

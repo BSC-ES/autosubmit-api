@@ -112,6 +112,55 @@ class TestOIDCLogin:
         assert resp_obj.get("token") is None
 
 
+class TestGitHubOAuth2Login:
+    endpoint = "/v4/auth/oauth2/github/login"
+
+    def test_no_code(self, fixture_fastapi_client: TestClient):
+        resp_obj = fixture_fastapi_client.get(
+            self.endpoint, params={"redirect_uri": "foo"}
+        ).json()
+        assert resp_obj.get("authenticated") is False
+        assert resp_obj.get("user") is None
+        assert resp_obj.get("token") is None
+
+    @pytest.mark.parametrize("redirect_uri", [None, "http://localhost:3000/login"])
+    def test_valid(
+        self,
+        fixture_fastapi_client: TestClient,
+        monkeypatch: pytest.MonkeyPatch,
+        redirect_uri: str,
+    ):
+        username = str(uuid4())
+        monkeypatch.setattr(config, "GITHUB_OAUTH_WHITELIST_ORGANIZATION", None)
+        monkeypatch.setattr(config, "GITHUB_OAUTH_WHITELIST_TEAM", None)
+
+        with (
+            patch("autosubmit_api.routers.v4.auth.requests.post") as mock_post,
+            patch("autosubmit_api.routers.v4.auth.requests.get") as mock_get,
+        ):
+            mock_post.return_value.json.return_value = {"access_token": "access"}
+            mock_get.return_value.json.return_value = {"login": username}
+
+            params = {"code": "123"}
+            if redirect_uri:
+                params["redirect_uri"] = redirect_uri
+            response = fixture_fastapi_client.get(self.endpoint, params=params)
+            resp_obj: dict = response.json()
+
+        # redirect_uri is only forwarded to GitHub when the client sends it
+        token_request_data = mock_post.call_args.kwargs["data"]
+        assert token_request_data["code"] == "123"
+        if redirect_uri:
+            assert token_request_data["redirect_uri"] == redirect_uri
+        else:
+            assert "redirect_uri" not in token_request_data
+
+        assert response.status_code == HTTPStatus.OK
+        assert resp_obj.get("authenticated") is True
+        assert resp_obj.get("user") == username
+        assert resp_obj.get("token") is not None
+
+
 class TestJWTVerify:
     endpoint = "/v4/auth/verify-token"
 
