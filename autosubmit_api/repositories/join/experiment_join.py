@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any
 
 from sqlalchemy import Column, Select, create_engine, or_, select
 
@@ -24,13 +24,13 @@ def wildcard_search(query: str, column: Column) -> str:
 
 
 def generate_query_listexp_extended(
-    query: str = None,
+    query: str | None = None,
     only_active: bool = False,
-    owner: str = None,
-    exp_type: str = None,
-    autosubmit_version: str = None,
-    hpc: str = None,
-    order_by: str = None,
+    owner: str | None = None,
+    exp_type: str | None = None,
+    autosubmit_version: str | None = None,
+    hpc: str | None = None,
+    order_by: str | None = None,
     order_desc: bool = False,
 ) -> Select:
     """
@@ -100,7 +100,7 @@ def generate_query_listexp_extended(
         "created": tables.DetailsTable.c.created,
         "description": tables.ExperimentTable.c.description,
     }
-    order_col: Optional[Column[Any]] = None
+    order_col: Column[Any] | None = None
     if order_by:
         order_col = ORDER_OPTIONS.get(order_by, None)
 
@@ -116,17 +116,17 @@ class ExperimentJoinRepository(ABC):
     @abstractmethod
     def search(
         self,
-        query: str = None,
+        query: str | None = None,
         only_active: bool = False,
-        owner: str = None,
-        exp_type: str = None,
-        autosubmit_version: str = None,
-        hpc: str = None,
-        order_by: str = None,
+        owner: str | None = None,
+        exp_type: str | None = None,
+        autosubmit_version: str | None = None,
+        hpc: str | None = None,
+        order_by: str | None = None,
         order_desc: bool = False,
-        limit: int = None,
-        offset: int = None,
-    ) -> Tuple[List[Dict[str, Any]], int]:
+        limit: int | None = None,
+        offset: int | None = None,
+    ) -> tuple[list[dict[str, Any]], int]:
         """
         Search experiments with extended information.
 
@@ -149,16 +149,16 @@ class ExperimentJoinSQLRepository(ExperimentJoinRepository):
 
     def search(
         self,
-        query: str = None,
+        query: str | None = None,
         only_active: bool = False,
-        owner: str = None,
-        exp_type: str = None,
-        autosubmit_version: str = None,
-        hpc: str = None,
-        order_by: str = None,
+        owner: str | None = None,
+        exp_type: str | None = None,
+        autosubmit_version: str | None = None,
+        hpc: str | None = None,
+        order_by: str | None = None,
         order_desc: bool = False,
-        limit: int = None,
-        offset: int = None,
+        limit: int | None = None,
+        offset: int | None = None,
     ):
         statement = generate_query_listexp_extended(
             query=query,
