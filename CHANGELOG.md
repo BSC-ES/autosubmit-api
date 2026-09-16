@@ -6,7 +6,7 @@
 
 * Support Autosubmit version 4.2.0 new job list database schema #223
 * Added endpoint to get eta of remaining chunks based on a given section #297
-* Change listed authors in `__init__` to to BSC - ES Department #332
+* Change listed authors in `__init__` to BSC - ES Department #332
 
 #### Bug fixes
 
