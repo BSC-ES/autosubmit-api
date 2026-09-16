@@ -19,6 +19,10 @@ def get_authors():
     return autosubmit_api.__author__
 
 
+def get_author_email():
+    return autosubmit_api.__email__
+
+
 install_requires = [
     "fastapi[all]==0.115.0",
     "pyjwt~=2.8.0",
@@ -59,7 +63,7 @@ setup(
     long_description_content_type="text/markdown",
     url="https://github.com/BSC-ES/autosubmit-api",
     author=get_authors(),
-    author_email="support-autosubmit@bsc.es",
+    author_email=get_author_email(),
     license="GNU GPL",
     packages=find_packages(),
     keywords=["autosubmit", "API"],

@@ -18,5 +18,6 @@
 # along with Autosubmit.  If not, see <http://www.gnu.org/licenses/>.
 
 __version__ = "4.1.2b6.post1"
-__author__ = "The Autosubmit Team - Models and Workflows Team (MWT) - Barcelona Supercomputing Center (BSC)"
+__author__ = "Barcelona Supercomputing Center (BSC-CNS) - Earth Sciences Department"
+__email__ = "support-autosubmit@bsc.es"
 __credits__ = "Barcelona Supercomputing Center"
