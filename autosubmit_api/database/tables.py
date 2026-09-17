@@ -140,7 +140,7 @@ ExperimentStructureV4_2_0 = Table(
     Column("min_trigger_status", String),
     Column("completion_status", String),
     Column("from_step", Integer),
-    Column("fail_ok", Boolean),
+    Column("weak", Boolean),
     UniqueConstraint("e_from", "e_to", name="unique_e_from_and_e_to"),
 )
 """Table that holds the structure of the experiment jobs. After autosubmit 4.2.0 (inclusive)."""
