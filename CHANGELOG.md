@@ -1,5 +1,9 @@
 # CHANGELOG
 
+### Release v4.1.2 - Release date: 2026-09-21
+
+* Includes all the changes until v4.1.2b6.post1
+
 ### Pre-release v4.1.2b6.post1 - Release date: 2026-09-09
 
 #### Bug fixes
