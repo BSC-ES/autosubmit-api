@@ -54,6 +54,7 @@ To se tup the **GitHub OAuth App** authentication, you need to:
 - Create a GitHub OAuth App in your GitHub account.
 - Set up the environment variables with prefix ``GITHUB_OAUTH_CLIENT_`` as it is explained in :ref:`configuration` which identifies the third-party authentication service.
 - In case of whitelist users, you need to set up the environment variable ``GITHUB_OAUTH_WHITELIST_ORGANIZATION`` or ``GITHUB_OAUTH_WHITELIST_TEAM`` with the name of the organization/team in GitHub.
+- If the client sends a ``redirect_uri`` to GitHub's authorize endpoint (e.g. multiple deployments sharing one OAuth App), it must also pass the same value to ``/v4/auth/oauth2/github/login``. The API forwards it in the token exchange. Every redirect URL must be registered as a callback URL in the OAuth App.
 
 
 OpenID Connect

@@ -112,6 +112,64 @@ class TestOIDCLogin:
         assert resp_obj.get("token") is None
 
 
+class TestGitHubOAuth2Login:
+    endpoint = "/v4/auth/oauth2/github/login"
+
+    @pytest.fixture
+    def mock_github(self, monkeypatch: pytest.MonkeyPatch):
+        """Mock GitHub's token exchange (post) and user lookup (get)."""
+        monkeypatch.setattr(config, "GITHUB_OAUTH_WHITELIST_ORGANIZATION", None)
+        monkeypatch.setattr(config, "GITHUB_OAUTH_WHITELIST_TEAM", None)
+        with (
+            patch("autosubmit_api.routers.v4.auth.requests.post") as mock_post,
+            patch("autosubmit_api.routers.v4.auth.requests.get") as mock_get,
+        ):
+            yield mock_post, mock_get
+
+    def test_no_code(self, fixture_fastapi_client: TestClient):
+        response = fixture_fastapi_client.get(self.endpoint)
+
+        assert response.status_code == HTTPStatus.UNAUTHORIZED
+        assert response.json()["authenticated"] is False
+
+    @pytest.mark.parametrize(
+        "params",
+        [
+            {"code": "123"},
+            {"code": "123", "redirect_uri": "http://localhost:3000/login"},
+        ],
+    )
+    def test_valid(self, fixture_fastapi_client: TestClient, mock_github, params: dict):
+        mock_post, mock_get = mock_github
+        mock_post.return_value.json.return_value = {"access_token": "access"}
+        mock_get.return_value.json.return_value = {"login": "test_user"}
+
+        response = fixture_fastapi_client.get(self.endpoint, params=params)
+
+        assert response.status_code == HTTPStatus.OK
+        assert response.json()["user"] == "test_user"
+        # redirect_uri is forwarded to GitHub only when the client sends it
+        token_request_data = mock_post.call_args.kwargs["data"]
+        assert token_request_data.get("redirect_uri") == params.get("redirect_uri")
+
+    def test_token_exchange_error(
+        self, fixture_fastapi_client: TestClient, mock_github
+    ):
+        mock_post, mock_get = mock_github
+        mock_post.return_value.json.return_value = {
+            "error": "bad_verification_code",
+            "error_description": "The code passed is incorrect or expired.",
+        }
+
+        response = fixture_fastapi_client.get(self.endpoint, params={"code": "123"})
+
+        assert response.status_code == HTTPStatus.UNAUTHORIZED
+        assert response.json()["message"] == (
+            "GitHub token exchange failed: The code passed is incorrect or expired."
+        )
+        mock_get.assert_not_called()
+
+
 class TestJWTVerify:
     endpoint = "/v4/auth/verify-token"
 

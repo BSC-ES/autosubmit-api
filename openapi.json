@@ -1400,6 +1400,14 @@
             "schema": {
               "type": "string"
             }
+          },
+          {
+            "name": "redirect_uri",
+            "in": "query",
+            "description": "Optional. Must be identical to the redirect_uri sent to GitHub's authorize endpoint. It is forwarded in the access_token request",
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "responses": {
