@@ -1,12 +1,13 @@
+from typing import Annotated
+
 from pydantic import BaseModel, Field
-from typing import Annotated, List, Optional
 
 
 class RouteInfo(BaseModel):
     path: Annotated[
         str, Field(description="Path of the route", json_schema_extra={"example": "/"})
     ]
-    methods: List[
+    methods: list[
         Annotated[
             str, Field(description="HTTP methods", json_schema_extra={"example": "GET"})
         ]
@@ -18,7 +19,7 @@ class PaginationInfo(BaseModel):
         int, Field(1, ge=1, description="Page number", json_schema_extra={"example": 1})
     ]
     page_size: Annotated[
-        Optional[int],
+        int | None,
         Field(
             description="Number of items per page", json_schema_extra={"example": 12}
         ),
