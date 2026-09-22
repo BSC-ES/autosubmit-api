@@ -11,7 +11,6 @@ from typing import Annotated, Any,Dict, Optional, Union
 from bscearth.utils.config_parser import ConfigParserFactory
 from fastapi import APIRouter, Depends, HTTPException, Query
 from fastapi.responses import JSONResponse
-from pydantic import BaseModel
 
 from autosubmit_api.auth import auth_token_dependency
 from autosubmit_api.builders.experiment_builder import ExperimentBuilder
@@ -28,6 +27,7 @@ from autosubmit_api.database import tables
 from autosubmit_api.database.db_jobdata import JobDataStructure
 from autosubmit_api.database.models import BaseExperimentModel
 from autosubmit_api.logger import logger
+from autosubmit_api.models.misc import PaginationInfo
 from autosubmit_api.models.requests import (
     ExperimentsSearchRequest,
     JobsSearchRequest,
@@ -35,11 +35,13 @@ from autosubmit_api.models.requests import (
 from autosubmit_api.models.responses import (
     ExperimentEtaResponse,
     ExperimentFSConfigResponse,
+    ExperimentJobsCategoryTreeResponse,
     ExperimentJobsResponse,
     ExperimentRunConfigResponse,
     ExperimentRunsResponse,
     ExperimentsSearchResponse,
     ExperimentWrappersResponse,
+    JobDetailResponse,
 )
 from autosubmit_api.persistance.experiment import ExperimentPaths
 from autosubmit_api.persistance.job_package_reader import JobPackageReader
@@ -56,6 +58,9 @@ from autosubmit_api.repositories.user_metric import create_user_metric_repositor
 from autosubmit_api.services.experiment_eta import ExperimentEtaService
 
 router = APIRouter()
+
+# TODO: Should be an enum and maybe not here?
+JOBS_CATEGORY_HIERARCHY = ("date", "member", "section", "status")
 
 
 @router.get("", name="Search experiments")
@@ -153,6 +158,7 @@ async def search_experiments(
     response = {
         "experiments": experiments,
         "pagination": {
+            # TODO: generalize pagination
             "page": query_params.page,
             "page_size": query_params.page_size,
             "total_pages": math.ceil(total_rows / query_params.page_size)
@@ -363,7 +369,7 @@ async def get_experiment_fs_config(
 
 @router.get("/{expid}/runs", name="List experiment runs")
 async def get_runs(
-    expid: str, user_id: Optional[str] = Depends(auth_token_dependency())
+    expid: str, user_id: str | None = Depends(auth_token_dependency())
 ) -> ExperimentRunsResponse:
     """
     Get runs for a given experiment
@@ -710,40 +716,53 @@ async def get_experiment_job_children(
     return {"children": child_items}
 
 
+def _build_category_tree(
+    counters: dict[tuple, int], hierarchy: tuple[str, ...]
+) -> dict:
+    """
+    Build a nested category tree out of the counters returned by the repository.
+
+    Each level of ``hierarchy`` corresponds to a level of the tree, and the number
+    of jobs is stored at the deepest level. ``None`` values are reported as ``"NA"``.
+
+    Example:
+    _build_category_tree({("2000-01-01", "fc0", "SIM", "WAITING"): 3}, ("date", "member", "section", "status"))
+    returns: {"2000-01-01": {"fc0": {"SIM": {"WAITING": 3}}}}
+    """
+    # TODO: not the most efficient way to build the tree...
+    tree = {}
+    for key, count in counters.items():
+        date, member, section, status = key
+        # datetime to string in YYYY-MM-DD format
+        date = date if date else "NA"
+        member = member if member else "NA"
+        status = status if status else "UNKNOWN"
+
+        if date not in tree:
+            tree[date] = {}
+        if member not in tree[date]:
+            tree[date][member] = {}
+        if section not in tree[date][member]:
+            tree[date][member][section] = {}
+        tree[date][member][section][status] = count
+    return tree
+
+
 @router.get("/{expid}/jobs-category-tree", name="Get experiment jobs category tree")
 async def get_experiment_jobs_category_tree(
     expid: str,
-    user_id: Optional[str] = Depends(auth_token_dependency()),
-) -> Dict:
+    user_id: str | None = Depends(auth_token_dependency()),
+) -> ExperimentJobsCategoryTreeResponse:
     """
-    Get the jobs category tree of an experiment
+    Get the jobs category tree of an experiment.
+
     It helps navigating the jobs in a hierarchical way,
     based on their date, member, chunk, section, and status.
     This doesn't return the jobs themselves, but a tree structure that can be used to filter them.
     """
-    PROPS = ["date", "member", "section", "status"]
     try:
         job_list_repo = create_jobs_repository(expid)
-
-        counters = job_list_repo.get_properties_counts(PROPS)
-
-        tree = {}
-        # First level: date
-        for key, count in counters.items():
-            date, member, section, status = key
-            # datetime to string in YYYY-MM-DD format
-            date = date if date else "NA"
-            member = member if member else "NA"
-            status = status if status else "UNKNOWN"
-
-            if date not in tree:
-                tree[date] = {}
-            if member not in tree[date]:
-                tree[date][member] = {}
-            if section not in tree[date][member]:
-                tree[date][member][section] = {}
-            tree[date][member][section][status] = count
-
+        counters = job_list_repo.get_properties_counts(list(JOBS_CATEGORY_HIERARCHY))
     except Exception as exc:
         error_message = "Error while reading the experiment jobs category tree"
         logger.error(error_message + f": {exc}")
@@ -752,4 +771,7 @@ async def get_experiment_jobs_category_tree(
             status_code=HTTPStatus.INTERNAL_SERVER_ERROR, detail=error_message
         )
 
-    return {"properties_hierarchy": PROPS, "category_tree": tree}
+    return {
+        "properties_hierarchy": list(JOBS_CATEGORY_HIERARCHY),
+        "category_tree": _build_category_tree(counters, JOBS_CATEGORY_HIERARCHY),
+    }

@@ -232,7 +232,7 @@ class JobsPklRepository(JobsRepository):
         member: str | None = common_utils._UNSET,
         section: str | None = common_utils._UNSET,
         chunk: int | None = common_utils._UNSET,
-    ) -> List[JobData]:
+    ) -> list[JobData]:
         """
         Searches jobs based on the given criteria, reading the pkl once.
         """

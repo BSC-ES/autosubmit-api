@@ -77,3 +77,36 @@ class PreferredUsernameResponse(BaseModel):
     preferred_username: str
     created: str
     modified: str
+
+
+class JobDetailResponse(BaseModel):
+    # From pkl
+    name: str
+    status: str
+    section: str | None = None
+    date: str | None = None
+    member: str | None = None
+    chunk: int | None = None
+    split: int | None = None
+    splits: int | None = None
+    out_path_local: str | None = None
+    err_path_local: str | None = None
+    # From config
+    chunk_size: int | None = None
+    chunk_unit: str | None = None
+    platform: str | None = None
+    # From historical DB
+    remote_id: int | None = None
+    qos: str | None = None
+    workflow_commit: str | None = None
+    processors: int | None = None  # Requested ncpus
+    submit: str | None = None
+    start: str | None = None
+    finish: str | None = None
+    wallclock: str | None = None
+    # Wrapper data
+    last_wrapper: str | None = None
+
+
+class ExperimentJobsCategoryTreeResponse(BaseModel):
+    ...
