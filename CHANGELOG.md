@@ -1,6 +1,6 @@
 # CHANGELOG
 
-### Pre-release v4.1.2b7
+### Pre-release v4.2.0 - Unreleased
 
 #### New features
 
@@ -13,6 +13,10 @@
 #### Bug fixes
 
 * `order_desc` default value is set to `False` in `/v4/experiments` endpoint #333
+
+### Release v4.1.2 - Release date: 2026-09-21
+
+* Includes all the changes until v4.1.2b6.post1
 
 ### Pre-release v4.1.2b6.post1 - Release date: 2026-09-09
 
