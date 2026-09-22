@@ -1,4 +1,3 @@
-from typing import List, Optional
 from pydantic import BaseModel
 
 from autosubmit_api.database.models import PklJobModel
@@ -9,31 +8,32 @@ from autosubmit_api.models.experiment import (
 )
 from autosubmit_api.models.misc import PaginationInfo, RouteInfo
 
+
 class AuthResponse(BaseModel):
     authenticated: bool
-    user: Optional[str]
+    user: str | None
 
 
 class LoginResponse(AuthResponse):
-    token: Optional[str]
-    message: Optional[str]
+    token: str | None
+    message: str | None
 
 
 class ExperimentRunsResponse(BaseModel):
-    runs: List[BaseExperimentRun]
+    runs: list[BaseExperimentRun]
 
 
 class RoutesResponse(BaseModel):
-    routes: List[RouteInfo]
+    routes: list[RouteInfo]
 
 
 class ExperimentsSearchResponse(BaseModel):
-    experiments: List[ExperimentSearchItem]
+    experiments: list[ExperimentSearchItem]
     pagination: PaginationInfo
 
 
 class ExperimentJobsResponse(BaseModel):
-    jobs: List[PklJobModel]
+    jobs: list[PklJobModel]
 
 
 class ExperimentFSConfigResponse(BaseModel):
@@ -41,19 +41,19 @@ class ExperimentFSConfigResponse(BaseModel):
 
 
 class ExperimentRunConfigResponse(BaseModel):
-    run_id: Optional[int]
+    run_id: int | None
     config: dict
 
 
 class ExperimentWrappersResponse(BaseModel):
-    wrappers: List[BaseExperimentWrapper]
+    wrappers: list[BaseExperimentWrapper]
 
 
 class ExperimentEtaResponse(BaseModel):
-    eta_seconds: Optional[float]
-    chunks_total: Optional[int]
-    chunks_remaining: Optional[int]
-    avg_runtime_per_chunk_seconds: Optional[float]
+    eta_seconds: float | None
+    chunks_total: int | None
+    chunks_remaining: int | None
+    avg_runtime_per_chunk_seconds: float | None
 
 
 class PreferredUsernameResponse(BaseModel):
@@ -61,3 +61,36 @@ class PreferredUsernameResponse(BaseModel):
     preferred_username: str
     created: str
     modified: str
+
+
+class JobDetailResponse(BaseModel):
+    # From pkl
+    name: str
+    status: str
+    section: str | None = None
+    date: str | None = None
+    member: str | None = None
+    chunk: int | None = None
+    split: int | None = None
+    splits: int | None = None
+    out_path_local: str | None = None
+    err_path_local: str | None = None
+    # From config
+    chunk_size: int | None = None
+    chunk_unit: str | None = None
+    platform: str | None = None
+    # From historical DB
+    remote_id: int | None = None
+    qos: str | None = None
+    workflow_commit: str | None = None
+    processors: int | None = None  # Requested ncpus
+    submit: str | None = None
+    start: str | None = None
+    finish: str | None = None
+    wallclock: str | None = None
+    # Wrapper data
+    last_wrapper: str | None = None
+
+
+class ExperimentJobsCategoryTreeResponse(BaseModel):
+    ...
