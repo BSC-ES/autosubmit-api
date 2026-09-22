@@ -17,7 +17,7 @@
 # You should have received a copy of the GNU General Public License
 # along with Autosubmit.  If not, see <http://www.gnu.org/licenses/>.
 
-__version__ = "4.1.2b6.post1"
+__version__ = "4.1.2"
 __author__ = "Barcelona Supercomputing Center (BSC-CNS) - Earth Sciences Department"
 __email__ = "support-autosubmit@bsc.es"
 __credits__ = "Barcelona Supercomputing Center"

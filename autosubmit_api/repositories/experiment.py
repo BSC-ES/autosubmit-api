@@ -8,6 +8,7 @@ from sqlalchemy.schema import CreateTable
 from autosubmit_api.config.basicConfig import APIBasicConfig
 from autosubmit_api.database import tables
 from autosubmit_api.database.common import create_autosubmit_db_engine
+from autosubmit_api.exceptions import ExperimentNotFoundError
 
 
 class ExperimentModel(BaseModel):
@@ -34,7 +35,7 @@ class ExperimentRepository(ABC):
 
         :param expid: The experiment id
         :return experiment: The experiment
-        :raises ValueError: If the experiment is not found
+        :raises ExperimentNotFoundError: If the experiment is not found
         """
         pass
 
@@ -67,7 +68,7 @@ class ExperimentSQLRepository(ExperimentRepository):
             statement = self.table.select().where(self.table.c.name == expid)
             result = conn.execute(statement).first()
         if result is None:
-            raise ValueError(f"Experiment with id {expid} not found")
+            raise ExperimentNotFoundError(expid)
         return ExperimentModel(
             id=result.id,
             name=result.name,

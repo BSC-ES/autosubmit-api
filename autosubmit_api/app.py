@@ -1,8 +1,8 @@
 import os
 import sys
 import time
-from fastapi.responses import JSONResponse
 from autosubmit_api import routers
+from autosubmit_api.api_error_handlers import register_exception_handlers
 from autosubmit_api.bgtasks.scheduler import create_scheduler
 from autosubmit_api.database import prepare_db
 from autosubmit_api.experiment import common_requests as CommonRequests
@@ -16,7 +16,7 @@ from autosubmit_api.config import (
     get_run_background_tasks_on_start,
     get_disable_background_tasks,
 )
-from fastapi import FastAPI, HTTPException as FastAPIHTTPException, Request
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
 from autosubmit_api import __version__ as APIVersion
@@ -81,25 +81,7 @@ def create_app():
 
 
 app = create_app()
-
-
-# Exception handlers
-
-
-@app.exception_handler(FastAPIHTTPException)
-async def http_exception_handler(request: Request, exc: FastAPIHTTPException):
-    return JSONResponse(
-        content={"error": True, "error_message": exc.detail},
-        status_code=exc.status_code,
-    )
-
-
-@app.exception_handler(Exception)
-async def global_exception_handler(request: Request, exc: Exception):
-    return JSONResponse(
-        content={"error": True, "error_message": "An unexpected error occurred."},
-        status_code=500,
-    )
+register_exception_handlers(app)
 
 
 # Middlewares
