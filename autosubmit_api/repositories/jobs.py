@@ -72,13 +72,13 @@ class JobsRepository(ABC):
         member: str | None = common_utils._UNSET,
         section: str | None = common_utils._UNSET,
         chunk: int | None = common_utils._UNSET,
-    ) -> List[JobData]:
+    ) -> list[JobData]:
         """
         Searches jobs
         """
 
     @abstractmethod
-    def get_properties_counts(self, properties: List[str]) -> dict[tuple, int]:
+    def get_properties_counts(self, properties: list[str]) -> dict[tuple, int]:
         """
         Gets the counts of jobs in each set of properties (e.g., status, section, etc.)
         Do similar to a group by query in SQL, but for the given properties.
@@ -176,7 +176,7 @@ class JobsPklRepository(JobsRepository):
         member: str | None = common_utils._UNSET,
         section: str | None = common_utils._UNSET,
         chunk: int | None = common_utils._UNSET,
-    ) -> List[JobData]:
+    ) -> list[JobData]:
         """
         Searches jobs based on the given criteria, reading the pkl once.
         """
@@ -364,7 +364,7 @@ class JobsSQLRepository(JobsRepository):
         member: str | None = common_utils._UNSET,
         section: str | None = common_utils._UNSET,
         chunk: int | None = common_utils._UNSET,
-    ) -> List[JobData]:
+    ) -> list[JobData]:
         """
         Searches jobs based on the given criteria, using SQL queries.
         """
