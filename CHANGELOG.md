@@ -1,6 +1,6 @@
 # CHANGELOG
 
-### Pre-release v4.2.0 - Unreleased
+### Release v4.2.0 - Release date: 2026-09-28
 
 #### New features
 
