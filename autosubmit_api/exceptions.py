@@ -37,6 +37,17 @@ class JobNotFoundError(NotFoundError):
         )
 
 
+class JobListNotFoundError(NotFoundError):
+    """Raised when the job list of an experiment is not available yet.
+
+    Experiments that have never run do not have a job list (neither a pkl file
+    nor a jobs database).
+    """
+
+    def __init__(self, expid: str) -> None:
+        super().__init__(f"Job list for experiment '{expid}' not found.")
+
+
 class SectionNotFoundError(ValidationError):
     """Raised when no jobs match the requested section for an experiment."""
 
