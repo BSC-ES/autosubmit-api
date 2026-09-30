@@ -1,10 +1,13 @@
 from typing import Any
+from unittest.mock import MagicMock
 from uuid import uuid4
 
 import pytest
 
-from autosubmit_api.exceptions import ExperimentNotFoundError
+from autosubmit_api.config.basicConfig import APIBasicConfig
+from autosubmit_api.exceptions import ExperimentNotFoundError, JobListNotFoundError
 from autosubmit_api.models.requests import ExperimentsSearchRequest
+from autosubmit_api.persistance.experiment import ExperimentPaths
 from autosubmit_api.repositories.experiment import create_experiment_repository
 from autosubmit_api.repositories.experiment_status import (
     create_experiment_status_repository,
@@ -312,6 +315,93 @@ class TestJobsRepository:
         for job in all_jobs:
             assert isinstance(job.name, str) and job.name.startswith(expid)
             assert isinstance(job.status, int)
+
+
+@pytest.fixture
+def fixture_job_list_experiment_4_2_0(monkeypatch: pytest.MonkeyPatch):
+    """
+    Factory resolves an Autosubmit 4.2.0 experiment without touching the
+    real database.
+    """
+    repository = MagicMock()
+    repository.get_by_expid.return_value = MagicMock(autosubmit_version="4.2.0")
+    monkeypatch.setattr(
+        "autosubmit_api.repositories.jobs.create_experiment_repository",
+        lambda: repository,
+    )
+
+
+class TestCreateJobsRepository:
+    """
+    The factory should separate between experiments that have
+    not generated the job list yet from a job list that exists
+    but is incompatible (real error).
+    """
+
+    def test_missing_job_list_db_file(
+        self,
+        fixture_job_list_experiment_4_2_0,
+        monkeypatch: pytest.MonkeyPatch,
+        tmp_path,
+    ):
+        """Autosubmit >= 4.2.0 in sqlite without job_list.db."""
+        monkeypatch.setattr(APIBasicConfig, "DATABASE_BACKEND", "sqlite", raising=False)
+        monkeypatch.setattr(
+            ExperimentPaths,
+            "job_list_db",
+            property(lambda self: str(tmp_path / "a1x4" / "db" / "job_list.db")),
+        )
+
+        with pytest.raises(JobListNotFoundError, match="a1x4"):
+            create_jobs_repository("a1x4")
+
+    def test_missing_job_list_table(
+        self, fixture_job_list_experiment_4_2_0, monkeypatch: pytest.MonkeyPatch
+    ):
+        """Autosubmit >= 4.2.0 in postgres without the jobs table has no job list yet."""
+        monkeypatch.setattr(
+            APIBasicConfig, "DATABASE_BACKEND", "postgres", raising=False
+        )
+        monkeypatch.setattr(
+            "autosubmit_api.repositories.jobs.create_engine",
+            lambda *args, **kwargs: object(),
+        )
+        inspector = MagicMock()
+        inspector.has_table.return_value = False
+        monkeypatch.setattr(
+            "autosubmit_api.repositories.jobs.inspect", lambda engine: inspector
+        )
+
+        with pytest.raises(JobListNotFoundError, match="a1x4"):
+            create_jobs_repository("a1x4")
+
+    def test_incompatible_job_list_schema_is_not_reported_as_missing(
+        self, fixture_job_list_experiment_4_2_0, monkeypatch: pytest.MonkeyPatch
+    ):
+        """An existing table with an incorrect schema should be a schema error."""
+        monkeypatch.setattr(
+            APIBasicConfig, "DATABASE_BACKEND", "postgres", raising=False
+        )
+        monkeypatch.setattr(
+            "autosubmit_api.repositories.jobs.create_engine",
+            lambda *args, **kwargs: object(),
+        )
+        inspector = MagicMock()
+        inspector.has_table.return_value = True
+        monkeypatch.setattr(
+            "autosubmit_api.repositories.jobs.inspect", lambda engine: inspector
+        )
+        monkeypatch.setattr(
+            "autosubmit_api.repositories.jobs.tables.check_table_schema",
+            lambda engine, valid_tables: None,
+        )
+
+        with pytest.raises(
+            ValueError, match="does not match expected schema"
+        ) as exc_info:
+            create_jobs_repository("a1x4")
+
+        assert not isinstance(exc_info.value, JobListNotFoundError)
 
 
 @pytest.mark.parametrize(
