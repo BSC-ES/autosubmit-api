@@ -6,7 +6,7 @@ from abc import ABC, abstractmethod
 
 from pathlib import Path
 from pydantic import BaseModel
-from sqlalchemy import Engine, Table, create_engine, func, select
+from sqlalchemy import Engine, Table, create_engine, func, inspect, select
 
 from autosubmit_api.common import utils as common_utils
 from autosubmit_api.config.basicConfig import APIBasicConfig
@@ -384,6 +384,7 @@ def create_jobs_repository(expid: str) -> JobsRepository:
     existence of the SQLite database.
 
     :raises ExperimentNotFoundError: If the experiment does not exist
+    :raises JobListNotFoundError: If the experiment has no job list yet
     """
     # Experiment should exist
     experiment = create_experiment_repository().get_by_expid(expid)
@@ -396,12 +397,16 @@ def create_jobs_repository(expid: str) -> JobsRepository:
         if is_gt_4_2_0:
             engine = create_engine(APIBasicConfig.DATABASE_CONN_URL)
             table = tables.table_change_schema(expid, tables.JobsTable)
+            if not inspect(engine).has_table(table.name, table.schema):
+                # The experiment has not generated its job list table yet
+                raise JobListNotFoundError(expid)
             return JobsSQLRepository(expid, engine, table)
     else:
         exp_paths = ExperimentPaths(expid)
 
         if is_gt_4_2_0:
             if not Path(exp_paths.job_list_db).exists():
+                # The experiment has not generated its job list database yet
                 raise JobListNotFoundError(expid)
             engine = create_sqlite_db_engine(exp_paths.job_list_db, read_only=True)
             table = tables.JobsTable
