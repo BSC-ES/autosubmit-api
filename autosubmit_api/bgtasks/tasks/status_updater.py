@@ -2,6 +2,7 @@ import time
 from typing import Dict, List
 
 from autosubmit_api.bgtasks.bgtask import BackgroundTaskTemplate
+from autosubmit_api.exceptions import JobListNotFoundError
 from autosubmit_api.experiment.common_requests import _is_exp_running
 from autosubmit_api.history.database_managers.database_models import RunningStatus
 from autosubmit_api.repositories.experiment import (
@@ -60,11 +61,10 @@ class StatusUpdater(BackgroundTaskTemplate):
         MAX_PKL_AGE_EXHAUSTIVE = 3600  # 1 hour
 
         try:
-            job_list_repo = create_jobs_repository(expid)
-
             try:
+                job_list_repo = create_jobs_repository(expid)
                 pkl_age = int(time.time()) - job_list_repo.get_last_modified_timestamp()
-            except (FileNotFoundError, ValueError):
+            except (FileNotFoundError, JobListNotFoundError):
                 # The experiment has not run yet, there is no job list available.
                 cls.logger.debug(
                     f"[{cls.id}] No job list found for experiment {expid}, considering it as not running"

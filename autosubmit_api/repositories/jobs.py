@@ -4,6 +4,7 @@ import datetime
 import re
 from abc import ABC, abstractmethod
 
+from pathlib import Path
 from pydantic import BaseModel
 from sqlalchemy import Engine, Table, create_engine, func, select
 
@@ -15,6 +16,7 @@ from autosubmit_api.database.common import (
     SQLITE_MAX_PARAMS,
     create_sqlite_db_engine,
 )
+from autosubmit_api.exceptions import JobListNotFoundError
 from autosubmit_api.logger import logger
 from autosubmit_api.persistance.experiment import ExperimentPaths
 from autosubmit_api.persistance.pkl_reader import PklReader
@@ -399,6 +401,8 @@ def create_jobs_repository(expid: str) -> JobsRepository:
         exp_paths = ExperimentPaths(expid)
 
         if is_gt_4_2_0:
+            if not Path(exp_paths.job_list_db).exists():
+                raise JobListNotFoundError(expid)
             engine = create_sqlite_db_engine(exp_paths.job_list_db, read_only=True)
             table = tables.JobsTable
             return JobsSQLRepository(expid, engine, table)
