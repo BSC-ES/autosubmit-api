@@ -6,7 +6,6 @@ import re
 import traceback
 from datetime import datetime, timezone
 from http import HTTPStatus
-from pathlib import Path
 from typing import Annotated, Any, Optional
 
 from bscearth.utils.config_parser import ConfigParserFactory
@@ -28,6 +27,7 @@ from autosubmit_api.config.config_common import AutosubmitConfigResolver
 from autosubmit_api.database import tables
 from autosubmit_api.database.db_jobdata import JobDataStructure
 from autosubmit_api.database.models import BaseExperimentModel
+from autosubmit_api.exceptions import DomainError, ExperimentRunNotFoundError
 from autosubmit_api.logger import logger
 from autosubmit_api.models.requests import (
     ExperimentsSearchRequest,
@@ -47,7 +47,6 @@ from autosubmit_api.persistance.job_package_reader import JobPackageReader
 from autosubmit_api.repositories.experiment_structure import (
     create_experiment_structure_repository,
 )
-from autosubmit_api.exceptions import DomainError
 from autosubmit_api.repositories.job_data import create_experiment_job_data_repository
 from autosubmit_api.repositories.jobs import create_jobs_repository
 from autosubmit_api.repositories.join.experiment_join import (
@@ -106,29 +105,28 @@ async def search_experiments(
         failed = 0
         suspended = 0
 
-        db_paths = ExperimentPaths(exp.name).job_data_db
-        if Path(db_paths).exists():
-            try:
-                current_run = (
-                    ExperimentHistoryDirector(ExperimentHistoryBuilder(exp.name))
-                    .build_reader_experiment_history()
-                    .manager.get_experiment_run_dc_with_max_id()
-                )
-                if current_run and current_run.total > 0:
-                    completed = current_run.completed
-                    total = current_run.total
-                    submitted = current_run.submitted
-                    queuing = current_run.queuing
-                    running = current_run.running
-                    failed = current_run.failed
-                    suspended = current_run.suspended
-                    # last_modified_timestamp = current_run.modified_timestamp
-            except Exception as exc:
-                logger.warning((f"Exception getting the current run on search: {exc}"))
-                logger.warning(traceback.format_exc())
+        try:
+            current_run = (
+                ExperimentHistoryDirector(ExperimentHistoryBuilder(exp.name))
+                .build_reader_experiment_history()
+                .manager.get_experiment_run_dc_with_max_id()
+            )
+        except ExperimentRunNotFoundError:
+            # The experiment has not run yet, so there is no run data to report
+            logger.debug(f"No run data found for experiment {exp.name}.")
+        except Exception as exc:
+            logger.warning((f"Exception getting the current run on search: {exc}"))
+            logger.warning(traceback.format_exc())
         else:
-            logger.debug(f"No job_data database found for experiment {exp.name}. Skipping it.")
-
+            if current_run and current_run.total > 0:
+                completed = current_run.completed
+                total = current_run.total
+                submitted = current_run.submitted
+                queuing = current_run.queuing
+                running = current_run.running
+                failed = current_run.failed
+                suspended = current_run.suspended
+                # last_modified_timestamp = current_run.modified_timestamp
         # Format data
         return {
             "id": exp.id,

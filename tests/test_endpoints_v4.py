@@ -246,6 +246,23 @@ class TestExperimentList:
         assert resp_obj["pagination"]["page"] == 1
         assert resp_obj["pagination"]["page"] == resp_obj["pagination"]["total_pages"]
 
+    def test_experiment_run_counters(self, fixture_fastapi_client: TestClient):
+        """
+        Experiments with run data must report their run counters on every backend,
+        not only when a job data file happens to exist on disk.
+        """
+        response = fixture_fastapi_client.get(
+            self.endpoint, params={"only_active": False}
+        )
+        assert response.status_code == HTTPStatus.OK
+
+        experiments = [
+            exp for exp in response.json()["experiments"] if exp["name"] == "a1ve"
+        ]
+        assert len(experiments) == 1
+        assert experiments[0]["total"] == 8
+        assert experiments[0]["completed"] == 8
+
 
 class TestExperimentDetail:
     endpoint = "/v4/experiments/{expid}"

@@ -41,11 +41,22 @@ class JobListNotFoundError(NotFoundError):
     """Raised when the job list of an experiment is not available yet.
 
     Experiments that have never run do not have a job list (neither a pkl file
-    nor a jobs database).
+    nor a job data database).
     """
 
     def __init__(self, expid: str) -> None:
         super().__init__(f"Job list for experiment '{expid}' not found.")
+
+
+class ExperimentRunNotFoundError(NotFoundError):
+    """Raised when an experiment has no run data available yet.
+
+    Experiments that have never run do not have run data (neither a job data
+    file for the sqlite backend nor an experiment run table for postgres).
+    """
+
+    def __init__(self, expid: str) -> None:
+        super().__init__(f"Run data for experiment '{expid}' not found.")
 
 
 class SectionNotFoundError(ValidationError):

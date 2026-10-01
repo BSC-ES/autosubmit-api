@@ -5,10 +5,15 @@ from uuid import uuid4
 import pytest
 
 from autosubmit_api.config.basicConfig import APIBasicConfig
-from autosubmit_api.exceptions import ExperimentNotFoundError, JobListNotFoundError
+from autosubmit_api.exceptions import (
+    ExperimentNotFoundError,
+    ExperimentRunNotFoundError,
+    JobListNotFoundError,
+)
 from autosubmit_api.models.requests import ExperimentsSearchRequest
 from autosubmit_api.persistance.experiment import ExperimentPaths
 from autosubmit_api.repositories.experiment import create_experiment_repository
+from autosubmit_api.repositories.experiment_run import create_experiment_run_repository
 from autosubmit_api.repositories.experiment_status import (
     create_experiment_status_repository,
 )
@@ -202,6 +207,39 @@ class TestExperimentStatusRepository:
         # Assert only_running
         only_running = experiment_status_db.get_only_running_expids()
         assert set(only_running) == {"a3tb"}
+
+
+class TestExperimentRunRepository:
+    def test_get_last_run_without_data_file(self, monkeypatch: pytest.MonkeyPatch):
+        """The sqlite backend has no run data when the job data file is missing."""
+        monkeypatch.setattr(APIBasicConfig, "DATABASE_BACKEND", "sqlite", raising=False)
+        monkeypatch.setattr(
+            ExperimentPaths,
+            "job_data_db",
+            property(lambda self: "/not_found/job_data.db"),
+        )
+
+        with pytest.raises(ExperimentRunNotFoundError, match="a000"):
+            create_experiment_run_repository("a000").get_last_run()
+
+    def test_get_last_run_without_table(self, monkeypatch: pytest.MonkeyPatch):
+        """The postgres backend has no run data when the run table is missing."""
+        monkeypatch.setattr(
+            APIBasicConfig, "DATABASE_BACKEND", "postgres", raising=False
+        )
+        monkeypatch.setattr(
+            "autosubmit_api.repositories.experiment_run.create_engine",
+            lambda *args, **kwargs: object(),
+        )
+        inspector = MagicMock()
+        inspector.has_table.return_value = False
+        monkeypatch.setattr(
+            "autosubmit_api.repositories.experiment_run.inspect",
+            lambda engine: inspector,
+        )
+
+        with pytest.raises(ExperimentRunNotFoundError, match="a000"):
+            create_experiment_run_repository("a000").get_last_run()
 
 
 class TestExpGraphLayoutRepository:
