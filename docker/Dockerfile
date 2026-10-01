@@ -1,5 +1,5 @@
 # Use build argument for Python version
-ARG PYTHON_VERSION=3.9-slim-bullseye
+ARG PYTHON_VERSION=3.12-slim-trixie
 FROM python:${PYTHON_VERSION}
 
 # Set the environment
