@@ -303,6 +303,41 @@ class TestExperimentList:
         assert "No run data found for experiment" in caplog.text
         assert [r for r in caplog.records if r.levelno >= logging.ERROR] == []
 
+    def test_experiment_run_data_unexpected_exception(
+        self,
+        fixture_fastapi_client: TestClient,
+        monkeypatch: pytest.MonkeyPatch,
+        caplog: pytest.LogCaptureFixture,
+    ):
+        """
+        Check that an unexpected exception while reading run data is logged
+        as warning but does not break the endpoint.
+        """
+
+        def _raise_exception(expid: str):
+            raise Exception("Unexpected error")
+
+        # None of the experiments has run data
+        monkeypatch.setattr(
+            "autosubmit_api.history.database_managers.experiment_history_db_manager"
+            ".create_experiment_run_repository",
+            _raise_exception,
+        )
+
+        with caplog.at_level(logging.WARNING):
+            response = fixture_fastapi_client.get(
+                self.endpoint, params={"only_active": False}
+            )
+
+        assert response.status_code == HTTPStatus.OK
+        experiments = response.json()["experiments"]
+        assert len(experiments) > 0
+        assert all(exp["total"] == 0 for exp in experiments)
+
+        # Check its reported as warning
+        assert "Exception getting the current" in caplog.text
+        assert [r for r in caplog.records if r.levelno >= logging.ERROR] == []
+
 
 class TestExperimentDetail:
     endpoint = "/v4/experiments/{expid}"
