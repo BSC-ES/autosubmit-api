@@ -1178,6 +1178,31 @@ class TestExperimentRuns:
         assert response.status_code == HTTPStatus.NOT_FOUND
         assert response.json()["error"] is True
 
+    def test_unexpected_error_returns_500(
+        self,
+        fixture_fastapi_client: TestClient,
+        monkeypatch: pytest.MonkeyPatch,
+        caplog: pytest.LogCaptureFixture,
+    ):
+        """A failure returns 500 and keeps the traceback out of the logs."""
+
+        def _raise_unexpected_error(expid: str):
+            raise RuntimeError("unexpected error")
+
+        monkeypatch.setattr(
+            "autosubmit_api.history.database_managers.experiment_history_db_manager"
+            ".create_experiment_run_repository",
+            _raise_unexpected_error,
+        )
+
+        response = fixture_fastapi_client.get(self.endpoint.format(expid="a6zj"))
+
+        assert response.status_code == HTTPStatus.INTERNAL_SERVER_ERROR
+        assert response.json() == {
+            "error": True,
+            "error_message": "Error while getting experiment runs",
+        }
+
 
 class TestExperimentRunConfig:
     endpoint = "/v4/experiments/{expid}/runs/{run_id}/config"
