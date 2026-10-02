@@ -281,7 +281,7 @@ class TestExperimentList:
 
         # None of the experiments has run data
         monkeypatch.setattr(
-            "autosubmit_api.history.database_managers.experiment_history_db_manager",
+            "autosubmit_api.history.database_managers.experiment_history_db_manager"
             ".create_experiment_run_repository",
             _raise_experiment_run_not_found,
         )
