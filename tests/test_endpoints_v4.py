@@ -1,3 +1,4 @@
+import logging
 import random
 from datetime import datetime, timedelta, timezone
 from http import HTTPStatus
@@ -10,6 +11,7 @@ import pytest
 from fastapi.testclient import TestClient
 
 from autosubmit_api import config
+from autosubmit_api.exceptions import ExperimentRunNotFoundError
 from autosubmit_api.models.requests import (
     PAGINATION_LIMIT_DEFAULT,
     PAGINATION_LIMIT_MAX,
@@ -262,6 +264,41 @@ class TestExperimentList:
         assert len(experiments) == 1
         assert experiments[0]["total"] == 8
         assert experiments[0]["completed"] == 8
+
+    def test_experiment_without_run_data(
+        self,
+        fixture_fastapi_client: TestClient,
+        monkeypatch: pytest.MonkeyPatch,
+        caplog: pytest.LogCaptureFixture,
+    ):
+        """
+        Experiments that have not run yet have no run data.
+        The endpoint must report it and log it at debug level.
+        """
+
+        def _raise_experiment_run_not_found(expid: str):
+            raise ExperimentRunNotFoundError(expid)
+
+        # None of the experiments has run data
+        monkeypatch.setattr(
+            "autosubmit_api.history.database_managers.experiment_history_db_manager",
+            ".create_experiment_run_repository",
+            _raise_experiment_run_not_found,
+        )
+
+        with caplog.at_level(logging.DEBUG):
+            response = fixture_fastapi_client.get(
+                self.endpoint, params={"only_active": False}
+            )
+
+        assert response.status_code == HTTPStatus.OK
+        experiments = response.json()["experiments"]
+        assert len(experiments) > 0
+        assert all(exp["total"] == 0 for exp in experiments)
+
+        # Check its reported as debug
+        assert "No run data found for experiment" in caplog.text
+        assert [r for r in caplog.records if r.levelno >= logging.ERROR] == []
 
 
 class TestExperimentDetail:
