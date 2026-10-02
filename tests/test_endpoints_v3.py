@@ -9,7 +9,6 @@ from fastapi.testclient import TestClient
 from autosubmit_api import config
 from autosubmit_api.config.basicConfig import APIBasicConfig
 
-
 class TestLogin:
     endpoint = "/v3/login"
 

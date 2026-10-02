@@ -3,7 +3,6 @@ from __future__ import annotations
 import datetime
 import re
 from abc import ABC, abstractmethod
-
 from pathlib import Path
 from pydantic import BaseModel
 from sqlalchemy import Engine, Table, create_engine, func, inspect, select
@@ -21,6 +20,7 @@ from autosubmit_api.logger import logger
 from autosubmit_api.persistance.experiment import ExperimentPaths
 from autosubmit_api.persistance.pkl_reader import PklReader
 from autosubmit_api.repositories.experiment import create_experiment_repository
+from autosubmit_api.repositories.job_pkl import create_job_pkl_repository
 
 STRING_TO_CODE = common_utils.Status.STRING_TO_CODE
 
@@ -83,6 +83,15 @@ def _sql_row_to_data(row) -> JobData:
 
 
 class JobsRepository(ABC):
+    @classmethod
+    @abstractmethod
+    def create(cls, expid: str) -> JobsRepository:
+        """
+        Build the repository for the given experiment.
+
+        :raises JobListNotFoundError: If the experiment has no job list yet
+        """
+    
     @abstractmethod
     def get_all(self) -> list[JobData]:
         """
@@ -128,6 +137,26 @@ class JobsPklRepository(JobsRepository):
     def __init__(self, expid: str) -> None:
         self.expid = expid
         self.pkl_reader = PklReader(expid)
+
+    @classmethod
+    def create(cls, expid: str) -> JobsPklRepository:
+        """
+        Build the pkl jobs repository used before Autosubmit 4.2.0.
+
+        :raises JobListNotFoundError: If the experiment has not generated its job
+            list yet (the ``job_list_<expid>.pkl`` file for sqlite, the stored pkl
+            for postgres).
+        """
+        if APIBasicConfig.DATABASE_BACKEND == "postgres":
+            # Postgres stores the pkl in a shared table instead of a file
+            if not create_job_pkl_repository(expid).has_pkl():
+                raise JobListNotFoundError(expid)
+            return cls(expid)
+
+        if not Path(ExperimentPaths(expid).job_list_pkl).is_file():
+            # The experiment has not generated its job list pkl file yet
+            raise JobListNotFoundError(expid)
+        return cls(expid)
 
     def get_all(self) -> list[JobData]:
         """
@@ -262,6 +291,36 @@ class JobsSQLRepository(JobsRepository):
                 f"Table schema for {self.table.name} does not match expected schema."
             )
 
+    @classmethod
+    def create(cls, expid: str) -> JobsSQLRepository:
+        """
+        Build the SQL jobs repository used from Autosubmit 4.2.0 on, where the job
+        list lives in a database instead of a pkl file.
+
+        :raises JobListNotFoundError: If the experiment has not generated its job
+            list yet (the ``job_list.db`` file for sqlite, the ``<expid>.job_list``
+            table for postgres).
+        """
+        if APIBasicConfig.DATABASE_BACKEND == "postgres":
+            engine = create_engine(APIBasicConfig.DATABASE_CONN_URL)
+            table = tables.table_change_schema(expid, tables.JobsTable)
+            with engine.connect() as conn:
+                has_table = inspect(conn).has_table(table.name, table.schema)
+            if not has_table:
+                # The experiment has not generated its job list table yet
+                raise JobListNotFoundError(expid)
+            return cls(expid, engine, table)
+
+        job_list_db = Path(ExperimentPaths(expid).job_list_db)
+        if not job_list_db.is_file():
+            # The experiment has not generated its job list database yet
+            raise JobListNotFoundError(expid)
+        return cls(
+            expid,
+            create_sqlite_db_engine(job_list_db, read_only=True),
+            tables.JobsTable,
+        )
+
     def get_all(self) -> list[JobData]:
         """
         Gets all jobs from SQL database
@@ -380,36 +439,16 @@ class JobsSQLRepository(JobsRepository):
 def create_jobs_repository(expid: str) -> JobsRepository:
     """
     Factory function to create a JobsRepository instance.
-    It decides whether to use the SQL or PKL repository based on the
-    existence of the SQLite database.
+
+    Autosubmit 4.2.0 replaced the pkl job list with a database, so the version
+    of the experiment decides which implementation is used.
 
     :raises ExperimentNotFoundError: If the experiment does not exist
-    :raises JobListNotFoundError: If the experiment has no job list yet
+    :raises JobListNotFoundError: If the experiment has no job list yet because
+        it has not been run. A job list that exists but has an incompatible
+        schema is a different, real error.
     """
-    # Experiment should exist
     experiment = create_experiment_repository().get_by_expid(expid)
-    is_gt_4_2_0 = common_utils.is_db_version_4_2_0_or_higher(
-        experiment.autosubmit_version
-    )
-
-    if APIBasicConfig.DATABASE_BACKEND == "postgres":
-        # Postgres
-        if is_gt_4_2_0:
-            engine = create_engine(APIBasicConfig.DATABASE_CONN_URL)
-            table = tables.table_change_schema(expid, tables.JobsTable)
-            if not inspect(engine).has_table(table.name, table.schema):
-                # The experiment has not generated its job list table yet
-                raise JobListNotFoundError(expid)
-            return JobsSQLRepository(expid, engine, table)
-    else:
-        exp_paths = ExperimentPaths(expid)
-
-        if is_gt_4_2_0:
-            if not Path(exp_paths.job_list_db).exists():
-                # The experiment has not generated its job list database yet
-                raise JobListNotFoundError(expid)
-            engine = create_sqlite_db_engine(exp_paths.job_list_db, read_only=True)
-            table = tables.JobsTable
-            return JobsSQLRepository(expid, engine, table)
-
-    return JobsPklRepository(expid)
+    if common_utils.is_db_version_4_2_0_or_higher(experiment.autosubmit_version):
+        return JobsSQLRepository.create(expid)
+    return JobsPklRepository.create(expid)

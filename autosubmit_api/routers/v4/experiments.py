@@ -44,6 +44,7 @@ from autosubmit_api.models.responses import (
 )
 from autosubmit_api.persistance.experiment import ExperimentPaths
 from autosubmit_api.persistance.job_package_reader import JobPackageReader
+from autosubmit_api.repositories.experiment import create_experiment_repository
 from autosubmit_api.repositories.experiment_structure import (
     create_experiment_structure_repository,
 )
@@ -372,14 +373,23 @@ async def get_runs(
     """
     Get runs for a given experiment
     """
+    create_experiment_repository().get_by_expid(expid)
+
     try:
         experiment_history = ExperimentHistoryDirector(
             ExperimentHistoryBuilder(expid)
         ).build_reader_experiment_history()
         exp_runs = experiment_history.get_experiment_runs()
-    except Exception:
-        logger.error("Error while getting experiment runs")
-        logger.error(traceback.format_exc())
+    except ExperimentRunNotFoundError:
+        # The experiment has not been run yet, so it has no run data. This is
+        # not an error.
+        logger.debug(f"Experiment {expid} has no run data yet.")
+        exp_runs = []
+    except DomainError:
+        raise
+    except Exception as exc:
+        logger.error(f"Could not get the runs of experiment {expid}: {exc}")
+        logger.debug(traceback.format_exc())
         raise HTTPException(
             status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
             detail="Error while getting experiment runs",

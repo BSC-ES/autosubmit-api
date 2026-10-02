@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from pathlib import Path
-from typing import Any, List
+from typing import Any
 
 from pydantic import BaseModel
 from sqlalchemy import Engine, Table, create_engine, inspect
@@ -32,7 +32,7 @@ class ExperimentRunModel(BaseModel):
 
 class ExperimentRunRepository(ABC):
     @abstractmethod
-    def get_all(self) -> List[ExperimentRunModel]:
+    def get_all(self) -> list[ExperimentRunModel]:
         """
         Gets all runs of the experiment
         """
@@ -63,12 +63,23 @@ class ExperimentRunSQLRepository(ExperimentRunRepository):
 
     def _has_run_data(self) -> bool:
         """
-        Whether the experiment has run data at all: the job data file for the
-        sqlite backend, or the experiment run table for postgres.
+        Whether the experiment ``experiment_run`` table exists on the backend.
         """
-        if APIBasicConfig.DATABASE_BACKEND == "postgres":
-            return inspect(self.engine).has_table(self.table.name, self.table.schema)
-        return Path(ExperimentPaths(self.expid).job_data_db).exists()
+        is_postgres = APIBasicConfig.DATABASE_BACKEND == "postgres"
+        if not is_postgres and not Path(
+            ExperimentPaths(self.expid).job_data_db
+        ).exists():
+            # The job data file is created when the experiment is run for the
+            # first time; if it doesn't exist, there is no run data yet.
+            return False
+
+        with self.engine.connect() as conn:
+            # The file may exist, but an older Autosubmit version can have
+            # created it without the run table, which also means no run data.
+            inspector = inspect(conn)
+            if is_postgres:
+                return inspector.has_table(self.table.name, self.table.schema)
+            return inspector.has_table(self.table.name)
 
     def get_all(self):
         """
