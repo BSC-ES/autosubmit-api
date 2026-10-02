@@ -27,6 +27,7 @@ from autosubmit_api.config.config_common import AutosubmitConfigResolver
 from autosubmit_api.database import tables
 from autosubmit_api.database.db_jobdata import JobDataStructure
 from autosubmit_api.database.models import BaseExperimentModel
+from autosubmit_api.exceptions import DomainError, ExperimentRunNotFoundError
 from autosubmit_api.logger import logger
 from autosubmit_api.models.requests import (
     ExperimentsSearchRequest,
@@ -43,10 +44,10 @@ from autosubmit_api.models.responses import (
 )
 from autosubmit_api.persistance.experiment import ExperimentPaths
 from autosubmit_api.persistance.job_package_reader import JobPackageReader
+from autosubmit_api.repositories.experiment import create_experiment_repository
 from autosubmit_api.repositories.experiment_structure import (
     create_experiment_structure_repository,
 )
-from autosubmit_api.exceptions import DomainError
 from autosubmit_api.repositories.job_data import create_experiment_job_data_repository
 from autosubmit_api.repositories.jobs import create_jobs_repository
 from autosubmit_api.repositories.join.experiment_join import (
@@ -104,12 +105,20 @@ async def search_experiments(
         running = 0
         failed = 0
         suspended = 0
+
         try:
             current_run = (
                 ExperimentHistoryDirector(ExperimentHistoryBuilder(exp.name))
                 .build_reader_experiment_history()
                 .manager.get_experiment_run_dc_with_max_id()
             )
+        except ExperimentRunNotFoundError:
+            # The experiment has not run yet, so there is no run data to report
+            logger.debug(f"No run data found for experiment {exp.name}.")
+        except Exception as exc:
+            logger.warning((f"Exception getting the current run on search: {exc}"))
+            logger.warning(traceback.format_exc())
+        else:
             if current_run and current_run.total > 0:
                 completed = current_run.completed
                 total = current_run.total
@@ -119,10 +128,6 @@ async def search_experiments(
                 failed = current_run.failed
                 suspended = current_run.suspended
                 # last_modified_timestamp = current_run.modified_timestamp
-        except Exception as exc:
-            logger.warning(f"Exception getting the current run on search: {exc}")
-            logger.warning(traceback.format_exc())
-
         # Format data
         return {
             "id": exp.id,
@@ -368,13 +373,22 @@ async def get_runs(
     """
     Get runs for a given experiment
     """
+    create_experiment_repository().get_by_expid(expid)
+
     try:
         experiment_history = ExperimentHistoryDirector(
             ExperimentHistoryBuilder(expid)
         ).build_reader_experiment_history()
         exp_runs = experiment_history.get_experiment_runs()
-    except Exception:
-        logger.error("Error while getting experiment runs")
+    except ExperimentRunNotFoundError:
+        # The experiment has not been run yet, so it has no run data. This is
+        # not an error.
+        logger.debug(f"Experiment {expid} has no run data yet.")
+        exp_runs = []
+    except DomainError:
+        raise
+    except Exception as exc:
+        logger.error(f"Could not get the runs of experiment {expid}: {exc}")
         logger.error(traceback.format_exc())
         raise HTTPException(
             status_code=HTTPStatus.INTERNAL_SERVER_ERROR,

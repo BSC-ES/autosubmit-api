@@ -67,6 +67,9 @@ from autosubmit_api.config.confConfigStrategy import confConfigStrategy
 from autosubmit_api.config.config_common import AutosubmitConfigResolver
 from autosubmit_api.database import db_common as db_common
 from autosubmit_api.database import db_jobdata
+from autosubmit_api.exceptions import (
+    ExperimentRunNotFoundError,
+)
 from autosubmit_api.experiment import common_db_requests as DbRequests
 from autosubmit_api.experiment.utils import (
     decompress_gzip_tailed,
@@ -192,7 +195,10 @@ def get_experiment_data(expid: str) -> Dict[str, Any]:
     except Exception as exc:
         result["error"] = True
         result["error_message"] += f"{str(exc)}\n"
-        logger.error((traceback.format_exc()))
+        logger.error(
+            f"Could not read the file metadata of experiment {expid}: {exc}"
+        )
+        logger.debug(traceback.format_exc())
 
     # Get info from as conf facade
     try:
@@ -215,7 +221,8 @@ def get_experiment_data(expid: str) -> Dict[str, Any]:
     except Exception as exc:
         result["error"] = True
         result["error_message"] += f"{str(exc)}\n"
-        logger.error((traceback.format_exc()))
+        logger.error(f"Could not read the configuration of experiment {expid}: {exc}")
+        logger.debug(traceback.format_exc())
 
     # Get from experiment table
     try:
@@ -226,37 +233,31 @@ def get_experiment_data(expid: str) -> Dict[str, Any]:
     except Exception as exc:
         result["error"] = True
         result["error_message"] += f"{str(exc)}\n"
-        logger.warning((traceback.format_exc()))
         logger.warning(
-            (
-                f"Warning: Error in get_experiment_data while retrieving experiment from DB by id: {exc}"
-            )
+            f"Could not retrieve experiment {expid} from the experiment table: {exc}"
         )
+        logger.debug(traceback.format_exc())
 
     # Get status
     try:
         _, experiment_status = DbRequests.get_specific_experiment_status(expid)
         result["running"] = experiment_status == "RUNNING"
     except Exception as exc:
-        logger.warning((traceback.format_exc()))
         logger.warning(
-            (
-                f"Warning: Error in get_experiment_data while quickly get experiment status: {exc}."
-                "Trying to get the status exhaustively. "
-            )
+            f"Could not get the status of experiment {expid} quickly: {exc}. "
+            "Trying to get the status exhaustively."
         )
+        logger.debug(traceback.format_exc())
         try:
             _, _, is_running, _, _ = _is_exp_running(expid)
             result["running"] = is_running
         except Exception as exc:
             result["error"] = True
             result["error_message"] += f"{str(exc)}\n"
-            logger.warning((traceback.format_exc()))
             logger.warning(
-                (
-                    f"Warning: Error in get_experiment_data while retrieving the status exhaustively: {exc}. "
-                )
+                f"Could not get the status of experiment {expid} exhaustively: {exc}"
             )
+            logger.debug(traceback.format_exc())
 
     # Get historic data
     try:
@@ -267,13 +268,15 @@ def get_experiment_data(expid: str) -> Dict[str, Any]:
         if experiment_run and experiment_run.total > 0:
             result["total_jobs"] = experiment_run.total
             result["completed_jobs"] = experiment_run.completed
+    except ExperimentRunNotFoundError:
+        # The experiment has not been run yet, so it has no run data. This is
+        # not an error.
+        logger.debug(f"Experiment {expid} has no run data yet.")
     except Exception as exc:
-        logger.warning((traceback.format_exc()))
         logger.warning(
-            (
-                f"Warning: Error in get_experiment_data while reading historical data: {exc}"
-            )
+            f"Could not read the historical data of experiment {expid}: {exc}"
         )
+        logger.debug(traceback.format_exc())
 
     return result
 

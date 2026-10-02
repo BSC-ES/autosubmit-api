@@ -1,3 +1,4 @@
+import logging
 import random
 from datetime import datetime, timedelta, timezone
 from http import HTTPStatus
@@ -10,6 +11,10 @@ import pytest
 from fastapi.testclient import TestClient
 
 from autosubmit_api import config
+from autosubmit_api.exceptions import (
+    ExperimentRunNotFoundError,
+    JobListNotFoundError,
+)
 from autosubmit_api.models.requests import (
     PAGINATION_LIMIT_DEFAULT,
     PAGINATION_LIMIT_MAX,
@@ -245,6 +250,93 @@ class TestExperimentList:
         )
         assert resp_obj["pagination"]["page"] == 1
         assert resp_obj["pagination"]["page"] == resp_obj["pagination"]["total_pages"]
+
+    def test_experiment_run_counters(self, fixture_fastapi_client: TestClient):
+        """
+        Experiments with run data must report their run counters on every backend,
+        not only when a job data file happens to exist on disk.
+        """
+        response = fixture_fastapi_client.get(
+            self.endpoint, params={"only_active": False}
+        )
+        assert response.status_code == HTTPStatus.OK
+
+        experiments = [
+            exp for exp in response.json()["experiments"] if exp["name"] == "a1ve"
+        ]
+        assert len(experiments) == 1
+        assert experiments[0]["total"] == 8
+        assert experiments[0]["completed"] == 8
+
+    def test_experiment_without_run_data(
+        self,
+        fixture_fastapi_client: TestClient,
+        monkeypatch: pytest.MonkeyPatch,
+        caplog: pytest.LogCaptureFixture,
+    ):
+        """
+        Experiments that have not run yet have no run data.
+        The endpoint must report it and log it at debug level.
+        """
+
+        def _raise_experiment_run_not_found(expid: str):
+            raise ExperimentRunNotFoundError(expid)
+
+        # None of the experiments has run data
+        monkeypatch.setattr(
+            "autosubmit_api.history.database_managers.experiment_history_db_manager"
+            ".create_experiment_run_repository",
+            _raise_experiment_run_not_found,
+        )
+
+        with caplog.at_level(logging.DEBUG):
+            response = fixture_fastapi_client.get(
+                self.endpoint, params={"only_active": False}
+            )
+
+        assert response.status_code == HTTPStatus.OK
+        experiments = response.json()["experiments"]
+        assert len(experiments) > 0
+        assert all(exp["total"] == 0 for exp in experiments)
+
+        # Check its reported as debug
+        assert "No run data found for experiment" in caplog.text
+        assert [r for r in caplog.records if r.levelno >= logging.ERROR] == []
+
+    def test_experiment_run_data_unexpected_exception(
+        self,
+        fixture_fastapi_client: TestClient,
+        monkeypatch: pytest.MonkeyPatch,
+        caplog: pytest.LogCaptureFixture,
+    ):
+        """
+        Check that an unexpected exception while reading run data is logged
+        as warning but does not break the endpoint.
+        """
+
+        def _raise_exception(expid: str):
+            raise Exception("Unexpected error")
+
+        # None of the experiments has run data
+        monkeypatch.setattr(
+            "autosubmit_api.history.database_managers.experiment_history_db_manager"
+            ".create_experiment_run_repository",
+            _raise_exception,
+        )
+
+        with caplog.at_level(logging.WARNING):
+            response = fixture_fastapi_client.get(
+                self.endpoint, params={"only_active": False}
+            )
+
+        assert response.status_code == HTTPStatus.OK
+        experiments = response.json()["experiments"]
+        assert len(experiments) > 0
+        assert all(exp["total"] == 0 for exp in experiments)
+
+        # Check its reported as warning
+        assert "Exception getting the current" in caplog.text
+        assert [r for r in caplog.records if r.levelno >= logging.ERROR] == []
 
 
 class TestExperimentDetail:
@@ -512,6 +604,23 @@ class TestExperimentJobs:
     def test_unknown_experiment_returns_404(self, fixture_fastapi_client: TestClient):
         """An unknown experiment should return 404 error."""
         response = fixture_fastapi_client.get(self.endpoint.format(expid="test"))
+        assert response.status_code == HTTPStatus.NOT_FOUND
+        assert response.json()["error"] is True
+
+    def test_experiment_without_job_list_returns_404(
+        self, fixture_fastapi_client: TestClient, monkeypatch: pytest.MonkeyPatch
+    ):
+        """An experiment that has not generated its job list yet returns 404."""
+
+        def _raise_job_list_not_found(expid: str):
+            raise JobListNotFoundError(expid)
+
+        monkeypatch.setattr(
+            "autosubmit_api.routers.v4.experiments.create_jobs_repository",
+            _raise_job_list_not_found,
+        )
+
+        response = fixture_fastapi_client.get(self.endpoint.format(expid="a1x4"))
         assert response.status_code == HTTPStatus.NOT_FOUND
         assert response.json()["error"] is True
 
@@ -1036,6 +1145,63 @@ class TestExperimentRuns:
             assert isinstance(run["run_id"], int)
             assert isinstance(run["start"], str) or run["start"] is None
             assert isinstance(run["finish"], str) or run["finish"] is None
+
+    def test_experiment_without_runs_returns_empty_list(
+        self,
+        fixture_fastapi_client: TestClient,
+        monkeypatch: pytest.MonkeyPatch,
+        caplog: pytest.LogCaptureFixture,
+    ):
+        """An experiment that has not run yet has no runs: not an error."""
+
+        def _raise_experiment_run_not_found(expid: str):
+            raise ExperimentRunNotFoundError(expid)
+
+        monkeypatch.setattr(
+            "autosubmit_api.history.database_managers.experiment_history_db_manager"
+            ".create_experiment_run_repository",
+            _raise_experiment_run_not_found,
+        )
+
+        with caplog.at_level(logging.DEBUG):
+            response = fixture_fastapi_client.get(self.endpoint.format(expid="a6zj"))
+
+        assert response.status_code == HTTPStatus.OK
+        assert response.json()["runs"] == []
+        assert "has no run data yet" in caplog.text
+
+    def test_unknown_experiment_returns_404(self, fixture_fastapi_client: TestClient):
+        """An unknown experiment should return 404 instead of a 500 error."""
+        response = fixture_fastapi_client.get(
+            self.endpoint.format(expid="not-an-experiment")
+        )
+        assert response.status_code == HTTPStatus.NOT_FOUND
+        assert response.json()["error"] is True
+
+    def test_unexpected_error_returns_500(
+        self,
+        fixture_fastapi_client: TestClient,
+        monkeypatch: pytest.MonkeyPatch,
+        caplog: pytest.LogCaptureFixture,
+    ):
+        """A failure returns 500 and keeps the traceback out of the logs."""
+
+        def _raise_unexpected_error(expid: str):
+            raise RuntimeError("unexpected error")
+
+        monkeypatch.setattr(
+            "autosubmit_api.history.database_managers.experiment_history_db_manager"
+            ".create_experiment_run_repository",
+            _raise_unexpected_error,
+        )
+
+        response = fixture_fastapi_client.get(self.endpoint.format(expid="a6zj"))
+
+        assert response.status_code == HTTPStatus.INTERNAL_SERVER_ERROR
+        assert response.json() == {
+            "error": True,
+            "error_message": "Error while getting experiment runs",
+        }
 
 
 class TestExperimentRunConfig:
