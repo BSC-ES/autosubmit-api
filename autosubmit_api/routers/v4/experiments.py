@@ -389,7 +389,7 @@ async def get_runs(
         raise
     except Exception as exc:
         logger.error(f"Could not get the runs of experiment {expid}: {exc}")
-        logger.debug(traceback.format_exc())
+        logger.error(traceback.format_exc())
         raise HTTPException(
             status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
             detail="Error while getting experiment runs",
