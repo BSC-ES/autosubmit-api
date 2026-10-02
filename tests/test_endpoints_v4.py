@@ -11,7 +11,10 @@ import pytest
 from fastapi.testclient import TestClient
 
 from autosubmit_api import config
-from autosubmit_api.exceptions import ExperimentRunNotFoundError
+from autosubmit_api.exceptions import (
+    ExperimentRunNotFoundError,
+    JobListNotFoundError,
+)
 from autosubmit_api.models.requests import (
     PAGINATION_LIMIT_DEFAULT,
     PAGINATION_LIMIT_MAX,
@@ -569,6 +572,23 @@ class TestExperimentJobs:
         assert response.status_code == HTTPStatus.NOT_FOUND
         assert response.json()["error"] is True
 
+    def test_experiment_without_job_list_returns_404(
+        self, fixture_fastapi_client: TestClient, monkeypatch: pytest.MonkeyPatch
+    ):
+        """An experiment that has not generated its job list yet returns 404."""
+
+        def _raise_job_list_not_found(expid: str):
+            raise JobListNotFoundError(expid)
+
+        monkeypatch.setattr(
+            "autosubmit_api.routers.v4.experiments.create_jobs_repository",
+            _raise_job_list_not_found,
+        )
+
+        response = fixture_fastapi_client.get(self.endpoint.format(expid="a1x4"))
+        assert response.status_code == HTTPStatus.NOT_FOUND
+        assert response.json()["error"] is True
+
 
 class TestExperimentJobDetail:
     endpoint = "/v4/experiments/{expid}/jobs/{job_name}"
@@ -1090,6 +1110,38 @@ class TestExperimentRuns:
             assert isinstance(run["run_id"], int)
             assert isinstance(run["start"], str) or run["start"] is None
             assert isinstance(run["finish"], str) or run["finish"] is None
+
+    def test_experiment_without_runs_returns_empty_list(
+        self,
+        fixture_fastapi_client: TestClient,
+        monkeypatch: pytest.MonkeyPatch,
+        caplog: pytest.LogCaptureFixture,
+    ):
+        """An experiment that has not run yet has no runs: not an error."""
+
+        def _raise_experiment_run_not_found(expid: str):
+            raise ExperimentRunNotFoundError(expid)
+
+        monkeypatch.setattr(
+            "autosubmit_api.history.database_managers.experiment_history_db_manager"
+            ".create_experiment_run_repository",
+            _raise_experiment_run_not_found,
+        )
+
+        with caplog.at_level(logging.DEBUG):
+            response = fixture_fastapi_client.get(self.endpoint.format(expid="a6zj"))
+
+        assert response.status_code == HTTPStatus.OK
+        assert response.json()["runs"] == []
+        assert "has no run data yet" in caplog.text
+
+    def test_unknown_experiment_returns_404(self, fixture_fastapi_client: TestClient):
+        """An unknown experiment should return 404 instead of a 500 error."""
+        response = fixture_fastapi_client.get(
+            self.endpoint.format(expid="not-an-experiment")
+        )
+        assert response.status_code == HTTPStatus.NOT_FOUND
+        assert response.json()["error"] is True
 
 
 class TestExperimentRunConfig:

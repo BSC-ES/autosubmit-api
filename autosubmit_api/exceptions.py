@@ -40,8 +40,9 @@ class JobNotFoundError(NotFoundError):
 class JobListNotFoundError(NotFoundError):
     """Raised when the job list of an experiment is not available yet.
 
-    Experiments that have never run do not have a job list (neither a pkl file
-    nor a job data database).
+    Experiments that have never run do not have a job list: neither the
+    ``job_list_<expid>.pkl`` file (Autosubmit before 4.2.0) nor the
+    ``job_list.db`` file / ``<expid>.job_list`` table (4.2.0 and later).
     """
 
     def __init__(self, expid: str) -> None:
@@ -51,8 +52,9 @@ class JobListNotFoundError(NotFoundError):
 class ExperimentRunNotFoundError(NotFoundError):
     """Raised when an experiment has no run data available yet.
 
-    Experiments that have never run do not have run data (neither a job data
-    file for the sqlite backend nor an experiment run table for postgres).
+    Experiments that have never run do not have run data: neither the
+    ``experiment_run`` table of the ``job_data_<expid>.db`` file (sqlite) nor
+    the ``<expid>.experiment_run`` table (postgres).
     """
 
     def __init__(self, expid: str) -> None:

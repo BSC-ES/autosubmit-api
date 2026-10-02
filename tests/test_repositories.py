@@ -3,8 +3,10 @@ from unittest.mock import MagicMock
 from uuid import uuid4
 
 import pytest
+from sqlalchemy import create_engine, text
 
 from autosubmit_api.config.basicConfig import APIBasicConfig
+from autosubmit_api.database import tables
 from autosubmit_api.exceptions import (
     ExperimentNotFoundError,
     ExperimentRunNotFoundError,
@@ -18,6 +20,7 @@ from autosubmit_api.repositories.experiment_status import (
     create_experiment_status_repository,
 )
 from autosubmit_api.repositories.graph_layout import create_exp_graph_layout_repository
+from autosubmit_api.repositories.job_pkl import JobPklSQLRepository
 from autosubmit_api.repositories.jobs import (
     JobsPklRepository,
     JobsSQLRepository,
@@ -229,17 +232,64 @@ class TestExperimentRunRepository:
         )
         monkeypatch.setattr(
             "autosubmit_api.repositories.experiment_run.create_engine",
-            lambda *args, **kwargs: object(),
+            lambda *args, **kwargs: MagicMock(),
         )
         inspector = MagicMock()
         inspector.has_table.return_value = False
         monkeypatch.setattr(
             "autosubmit_api.repositories.experiment_run.inspect",
-            lambda engine: inspector,
+            lambda conn: inspector,
         )
 
         with pytest.raises(ExperimentRunNotFoundError, match="a000"):
             create_experiment_run_repository("a000").get_last_run()
+
+    def test_get_last_run_without_run_table(
+        self, monkeypatch: pytest.MonkeyPatch, tmp_path
+    ):
+        """The sqlite job data file may exist without the run table in it."""
+        monkeypatch.setattr(APIBasicConfig, "DATABASE_BACKEND", "sqlite", raising=False)
+        db_path = tmp_path / "job_data_a000.db"
+        engine = create_engine(f"sqlite:///{db_path}")
+        with engine.connect() as conn:
+            conn.execute(text("CREATE TABLE job_data (id INTEGER)"))
+            conn.commit()
+        monkeypatch.setattr(
+            ExperimentPaths,
+            "job_data_db",
+            property(lambda self: str(db_path)),
+        )
+
+        with pytest.raises(ExperimentRunNotFoundError, match="a000"):
+            create_experiment_run_repository("a000").get_last_run()
+
+
+class TestJobPklRepository:
+    @staticmethod
+    def _engine_without_pkl() -> MagicMock:
+        engine = MagicMock()
+        conn = engine.connect.return_value.__enter__.return_value
+        conn.execute.return_value.first.return_value = None
+        return engine
+
+    def test_has_pkl(self):
+        engine = self._engine_without_pkl()
+        assert JobPklSQLRepository("a000", engine, tables.JobPklTable).has_pkl() is False
+
+        engine = MagicMock()
+        conn = engine.connect.return_value.__enter__.return_value
+        conn.execute.return_value.first.return_value = ("a000",)
+        assert JobPklSQLRepository("a000", engine, tables.JobPklTable).has_pkl() is True
+
+    def test_missing_pkl_is_reported_as_missing_job_list(self):
+        """Postgres stores the pkl in a table: a missing row means no job list."""
+        repo = JobPklSQLRepository("a000", self._engine_without_pkl(), tables.JobPklTable)
+
+        with pytest.raises(JobListNotFoundError, match="a000"):
+            repo.get_pkl()
+
+        with pytest.raises(JobListNotFoundError, match="a000"):
+            repo.get_modified_timestamp()
 
 
 class TestExpGraphLayoutRepository:
@@ -355,20 +405,6 @@ class TestJobsRepository:
             assert isinstance(job.status, int)
 
 
-@pytest.fixture
-def fixture_job_list_experiment_4_2_0(monkeypatch: pytest.MonkeyPatch):
-    """
-    Factory resolves an Autosubmit 4.2.0 experiment without touching the
-    real database.
-    """
-    repository = MagicMock()
-    repository.get_by_expid.return_value = MagicMock(autosubmit_version="4.2.0")
-    monkeypatch.setattr(
-        "autosubmit_api.repositories.jobs.create_experiment_repository",
-        lambda: repository,
-    )
-
-
 class TestCreateJobsRepository:
     """
     The factory should separate between experiments that have
@@ -402,12 +438,46 @@ class TestCreateJobsRepository:
         )
         monkeypatch.setattr(
             "autosubmit_api.repositories.jobs.create_engine",
-            lambda *args, **kwargs: object(),
+            lambda *args, **kwargs: MagicMock(),
         )
         inspector = MagicMock()
         inspector.has_table.return_value = False
         monkeypatch.setattr(
-            "autosubmit_api.repositories.jobs.inspect", lambda engine: inspector
+            "autosubmit_api.repositories.jobs.inspect", lambda conn: inspector
+        )
+
+        with pytest.raises(JobListNotFoundError, match="a1x4"):
+            create_jobs_repository("a1x4")
+
+    def test_missing_job_list_pkl_file(
+        self,
+        fixture_job_list_experiment_pre_4_2_0,
+        monkeypatch: pytest.MonkeyPatch,
+        tmp_path,
+    ):
+        """Autosubmit < 4.2.0 in sqlite without job_list_<expid>.pkl."""
+        monkeypatch.setattr(APIBasicConfig, "DATABASE_BACKEND", "sqlite", raising=False)
+        monkeypatch.setattr(
+            ExperimentPaths,
+            "job_list_pkl",
+            property(lambda self: str(tmp_path / "a1x4" / "pkl" / "job_list_a1x4.pkl")),
+        )
+
+        with pytest.raises(JobListNotFoundError, match="a1x4"):
+            create_jobs_repository("a1x4")
+
+    def test_missing_job_list_pkl_row(
+        self, fixture_job_list_experiment_pre_4_2_0, monkeypatch: pytest.MonkeyPatch
+    ):
+        """Autosubmit < 4.2.0 in postgres without the stored pkl."""
+        monkeypatch.setattr(
+            APIBasicConfig, "DATABASE_BACKEND", "postgres", raising=False
+        )
+        pkl_repository = MagicMock()
+        pkl_repository.has_pkl.return_value = False
+        monkeypatch.setattr(
+            "autosubmit_api.repositories.jobs.create_job_pkl_repository",
+            lambda expid: pkl_repository,
         )
 
         with pytest.raises(JobListNotFoundError, match="a1x4"):
@@ -422,12 +492,12 @@ class TestCreateJobsRepository:
         )
         monkeypatch.setattr(
             "autosubmit_api.repositories.jobs.create_engine",
-            lambda *args, **kwargs: object(),
+            lambda *args, **kwargs: MagicMock(),
         )
         inspector = MagicMock()
         inspector.has_table.return_value = True
         monkeypatch.setattr(
-            "autosubmit_api.repositories.jobs.inspect", lambda engine: inspector
+            "autosubmit_api.repositories.jobs.inspect", lambda conn: inspector
         )
         monkeypatch.setattr(
             "autosubmit_api.repositories.jobs.tables.check_table_schema",
