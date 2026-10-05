@@ -1246,6 +1246,22 @@ class TestExperimentRunConfig:
             assert key in resp_obj["config"]
             assert isinstance(resp_obj["config"][key], dict)
 
+    def test_unknown_experiment_returns_404(self, fixture_fastapi_client: TestClient):
+        """Test that an unknown experiment should return 404."""
+        response = fixture_fastapi_client.get(
+            self.endpoint.format(expid="not-an-experiment", run_id=1)
+        )
+        assert response.status_code == HTTPStatus.NOT_FOUND
+        assert response.json()["error"] is True
+
+    def test_unknown_run_returns_404(self, fixture_fastapi_client: TestClient):
+        """Test that an unknown run id should return 404."""
+        response = fixture_fastapi_client.get(
+            self.endpoint.format(expid="a6zj", run_id=9999)
+        )
+        assert response.status_code == HTTPStatus.NOT_FOUND
+        assert response.json()["error"] is True
+
 
 class TestUserMetrics:
     endpoint = "/v4/experiments/{expid}/runs/{run_id}/user-metrics"

@@ -35,6 +35,8 @@ class ExperimentRunRepository(ABC):
     def get_all(self) -> list[ExperimentRunModel]:
         """
         Gets all runs of the experiment
+
+        :raises ExperimentRunNotFoundError: If the experiment has no run data
         """
 
     @abstractmethod
@@ -81,7 +83,7 @@ class ExperimentRunSQLRepository(ExperimentRunRepository):
                 return inspector.has_table(self.table.name, self.table.schema)
             return inspector.has_table(self.table.name)
 
-    def get_all(self):
+    def get_all(self) -> list[ExperimentRunModel]:
         """
         Gets all runs of the experiment.
 
@@ -99,7 +101,7 @@ class ExperimentRunSQLRepository(ExperimentRunRepository):
             for row in result
         ]
 
-    def get_last_run(self):
+    def get_last_run(self) -> ExperimentRunModel:
         """
         Gets last run of the experiment.
 
@@ -115,7 +117,7 @@ class ExperimentRunSQLRepository(ExperimentRunRepository):
             raise ExperimentRunNotFoundError(self.expid)
         return ExperimentRunModel.model_validate(result, from_attributes=True)
 
-    def get_run_by_id(self, run_id: int):
+    def get_run_by_id(self, run_id: int) -> ExperimentRunModel:
         """
         Gets run by id.
 
