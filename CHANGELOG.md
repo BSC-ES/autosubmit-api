@@ -1,5 +1,12 @@
 # CHANGELOG
 
+### Unreleased (v4.2.1)
+
+#### Bug fixes
+
+* Migrated `setup.py`, `pytest.ini`, `ruff.toml` and `.coveragerc` to `pyproject.toml` to allow
+  Dependabot to discover outdated dependencies #350
+
 ### Release v4.2.0 - Release date: 2026-09-28
 
 #### New features
