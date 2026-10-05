@@ -6,12 +6,13 @@ build-backend = "setuptools.build_meta"
 name = "autosubmit-api"
 dynamic = ["version"]
 description = "An extension to the Autosubmit package that serves its information as an API"
+readme = "README.md"
 requires-python = ">=3.10,<3.13"
 authors = [
     { name = "Barcelona Supercomputing Center (BSC-CNS) - Earth Sciences Department", email = "support-autosubmit@bsc.es" },
 ]
 keywords = ["autosubmit", "API"]
-license = "GLP-3.0-or-later"
+license = "GPL-3.0-or-later"
 license-files = ["LICENSE"]
 
 classifiers = [
@@ -200,5 +201,3 @@ ignore = [
     "TRY004",
     "TRY201",
 ]
-
-
