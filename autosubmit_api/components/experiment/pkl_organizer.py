@@ -6,6 +6,7 @@ from autosubmit_api.common.utils import JobSection, Status
 from autosubmit_api.components.jobs import job_factory as factory
 from autosubmit_api.components.jobs.job_factory import Job, SimpleJob
 from autosubmit_api.database.models import PklJobModel
+from autosubmit_api.exceptions import JobListNotFoundError
 from autosubmit_api.repositories.jobs import create_jobs_repository
 
 
@@ -51,8 +52,10 @@ class PklOrganizer(object):
     try:
       job_list_repo = create_jobs_repository(self.expid)
       self.current_content = job_list_repo.get_all()
+    except JobListNotFoundError:
+      raise
     except Exception as exc:
-      raise Exception("Exception while reading the pkl content: {}".format(str(exc)))
+      raise Exception(f"Exception while reading the pkl content: {exc}")
 
   def identify_dates_members_sections(self):
     for job in self.current_content:

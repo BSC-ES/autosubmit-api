@@ -16,6 +16,7 @@ from sqlalchemy import (
     UniqueConstraint,
     inspect,
 )
+from sqlalchemy.exc import NoSuchTableError, OperationalError, SQLAlchemyError
 from sqlalchemy.orm import DeclarativeBase
 
 from autosubmit_api.logger import logger
@@ -55,6 +56,12 @@ def check_table_schema(engine: Engine, valid_tables: list[Table]) -> Table | Non
     """
     Check if one of the valid table schemas matches the current table schema.
     Returns the first matching table schema or None if no match is found.
+
+    All candidate tables that are not present on the backend are skipped. Could
+    happen that a database was created by an older Autosubmit version and not
+    contain every candidate table. Same happens when the database cannot be
+    opened yet, which happens for experiment that have not run.
+
     ORDER MATTERS!!! Table with more columns (more restrictive) should be first
     """
     for valid_table in valid_tables:
@@ -63,16 +70,26 @@ def check_table_schema(engine: Engine, valid_tables: list[Table]) -> Table | Non
             current_columns = inspect(engine).get_columns(
                 valid_table.name, valid_table.schema
             )
-            column_names = [column["name"] for column in current_columns]
-
-            # Get the columns of the valid table
-            valid_columns = valid_table.columns.keys()
-            # Check if all the valid table columns are present in the current table
-            if all(column in column_names for column in valid_columns):
-                return valid_table
-        except Exception as exc:
-            logger.debug(f"Error inspecting table {valid_table.name}: {exc}")
+        except NoSuchTableError:
+            # Table not present on the backend
             continue
+        except OperationalError as exc:
+            # The database could not be opened: for an experiment that has not
+            # run yet the job data file does not exist, this is not an error.
+            logger.debug(f"Could not inspect table {valid_table.name}: {exc}")
+            continue
+        except SQLAlchemyError as exc:
+            # Unexpected failure: do not hide it
+            logger.error(f"Error inspecting table {valid_table.name}: {exc}")
+            continue
+
+        column_names = [column["name"] for column in current_columns]
+
+        # Get the columns of the valid table
+        valid_columns = valid_table.columns.keys()
+        # Check if all the valid table columns are present in the current table
+        if all(column in column_names for column in valid_columns):
+            return valid_table
     return None
 
 
