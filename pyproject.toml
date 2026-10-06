@@ -24,7 +24,7 @@ classifiers = [
 
 dependencies = [
     "fastapi[all]==0.115.0",
-    "pyjwt~=2.8.0",
+    "pyjwt>=2.8,<2.16",
     "requests~=2.28.1",
     "bscearth.utils~=0.5.2",
     "pydotplus~=2.0.2",
