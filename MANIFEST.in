@@ -1,0 +1,12 @@
+# Files included in the source distribution (sdist)
+
+include CHANGELOG.md
+include LICENSE
+include README.md
+include pyproject.toml
+
+# Tests are useful in the sdist, but are omitted when building the package
+recursive-include tests *.py
+
+global-exclude __pycache__
+global-exclude *.py[cod]
