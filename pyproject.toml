@@ -38,7 +38,7 @@ dependencies = [
     "SQLAlchemy~=2.0.23",
     "python-cas>=1.6,<1.8",
     "autosubmit~=4.1.17",
-    "uvicorn~=0.34.0,<0.36.0",
+    "uvicorn>=0.34,<0.55",
     "uvicorn-worker~=0.3.0",
     "paramiko",
 ]
