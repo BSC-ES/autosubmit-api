@@ -22,4 +22,8 @@ updates:
       interval: "daily"
     labels:
       - 'dependencies'
-
+    groups:
+      uvicorn-stack:
+        patterns:
+          - "uvicorn"
+          - "uvicorn-worker"
