@@ -355,7 +355,7 @@ async def get_job_log_from_path(
 )
 async def get_experiment_pklinfo(
     expid: str,
-    timeStamp: str = Path(description="Unused path parameter", example="0"),
+    timeStamp: str = Path(description="Unused path parameter", examples=["0"]),
     user_id: Optional[str] = Depends(auth_token_dependency()),
 ) -> dict:
     """
@@ -370,7 +370,7 @@ async def get_experiment_pklinfo(
 )
 async def get_experiment_tree_pklinfo(
     expid: str,
-    timeStamp: str = Path(description="Unused path parameter", example="0"),
+    timeStamp: str = Path(description="Unused path parameter", examples=["0"]),
     user_id: Optional[str] = Depends(auth_token_dependency()),
 ) -> dict:
     """
@@ -387,7 +387,7 @@ async def get_experiment_statistics(
     expid: str,
     filter_period: str,
     filter_type: str = Path(
-        example="Any", description="Job Section filter, use 'Any' for all"
+        examples=["Any"], description="Job Section filter, use 'Any' for all"
     ),
     user_id: Optional[str] = Depends(auth_token_dependency()),
 ) -> dict:
