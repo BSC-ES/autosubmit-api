@@ -2,14 +2,17 @@ import sys
 import os
 import argparse
 from gunicorn.app.wsgiapp import WSGIApplication
+from gunicorn.config import Config as GunicornConfig
 from autosubmit_api import __version__ as api_version
-from gunicorn.config import KNOWN_SETTINGS, Setting as GunicornSetting
 
-FIXED_GUNICORN_SETTINGS = [
-    "preload_app",
-    "capture_output",
-    "worker_class",
-]
+# Gunicorn settings the CLI fixes: they are not exposed as options.
+# Always handled to gunicorn with these values.
+FIXED_GUNICORN_SETTINGS = {
+    "preload_app": True,
+    "capture_output": True,
+    "worker_class": "uvicorn_worker.UvicornWorker",
+    "control_socket_disable": True,
+}
 
 
 class StandaloneApplication(WSGIApplication):
@@ -19,13 +22,9 @@ class StandaloneApplication(WSGIApplication):
         super().__init__()
 
     def load_config(self):
-        config = {
-            key: value
-            for key, value in self.options.items()
-            if key in self.cfg.settings and value is not None
-        }
-        for key, value in config.items():
-            self.cfg.set(key.lower(), value)
+        for key, value in self.options.items():
+            if key in self.cfg.settings:
+                self.cfg.set(key, value)
 
 
 def start_app_gunicorn(
@@ -41,14 +40,14 @@ def start_app_gunicorn(
         os.environ.setdefault("DISABLE_BACKGROUND_TASKS", str(disable_bg_tasks))
 
     # Gunicorn options
-    ## Drop None values in kwargs
-    kwargs = {k: v for k, v in kwargs.items() if v is not None}
+    # Drop None values in kwargs: an omitted CLI option lets gunicorn use its default
+    kwargs = {key: value for key, value in kwargs.items() if value is not None}
 
-    options = {  # Options to always have
-        "preload_app": True,
-        "capture_output": True,
-        "worker_class": "uvicorn_worker.UvicornWorker",
-        "timeout": 600, # Change the default timeout to 10 minutes
+    options = {
+        # Settings the CLI always fixes, not exposed as options
+        **FIXED_GUNICORN_SETTINGS,
+        # Raise the default timeout to 10 min
+        "timeout": 600,
         **kwargs,
     }
 
@@ -75,53 +74,34 @@ def main():
         version="%(prog)s v{version}".format(version=api_version),
     )
 
-    subparsers = parser.add_subparsers(dest="command")
+    subparsers = parser.add_subparsers(dest="command", required=True)
 
     # start parser
     start_parser = subparsers.add_parser("start", description="start the API")
 
-    # Autosubmit API opts
-    start_parser.add_argument(
+    # Autosubmit API opts. The two flags are mutually exclusive.
+    bg_task_group = start_parser.add_mutually_exclusive_group()
+    bg_task_group.add_argument(
         "--init-bg-tasks", action="store_true", help="run background tasks on start. "
     )
-
-    start_parser.add_argument(
+    bg_task_group.add_argument(
         "--disable-bg-tasks", action="store_true", help="disable background tasks."
     )
 
-    # Gunicorn args
-    for setting in KNOWN_SETTINGS:
-        setting: GunicornSetting = setting
-
+    # Gunicorn args. Delegate to gunicorn ``Setting.add_option`` instead of manually rebuilding it.
+    for name, setting in GunicornConfig().settings.items():
         # Skip fixed parameters
-        if setting.name in FIXED_GUNICORN_SETTINGS:
+        if name in FIXED_GUNICORN_SETTINGS:
             continue
 
-        if isinstance(setting.cli, list):
-            arg_options = {
-                "dest": setting.name,
-            }
-            if isinstance(setting.desc, str):
-                # Get first part of the description
-                description = setting.desc.split("\n")[0]
-                arg_options["help"] = f"[gunicorn] {description}"
-            if setting.type is not None:
-                arg_options["type"] = setting.type
-            if setting.action is not None:
-                arg_options["action"] = setting.action
-            if setting.const is not None:
-                arg_options["const"] = setting.const
-
-            start_parser.add_argument(*setting.cli, **arg_options)
+        setting.add_option(start_parser)
 
     args = parser.parse_args()
-    print("Starting autosubmit_api with args: " + str(vars(args)))
+    cli_args = {key: value for key, value in vars(args).items() if key != "command"}
+    print("Starting autosubmit_api with args: " + str(cli_args))
 
     if args.command == "start":
-        start_app_gunicorn(**vars(args))
-    else:
-        parser.print_help()
-        parser.exit()
+        start_app_gunicorn(**cli_args)
 
 
 if __name__ == "__main__":
