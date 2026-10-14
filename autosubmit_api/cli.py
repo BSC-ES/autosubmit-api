@@ -11,6 +11,7 @@ FIXED_GUNICORN_SETTINGS = {
     "preload_app": True,
     "capture_output": True,
     "worker_class": "uvicorn_worker.UvicornWorker",
+    "control_socket_disable": True,
 }
 
 
