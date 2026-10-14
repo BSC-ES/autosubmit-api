@@ -30,7 +30,6 @@ def test_main_start_command():
         "--init-bg-tasks",
         "--workers",
         "2",
-        "--disable-bg-tasks",
     ]
     with patch.object(sys, "argv", test_args):
         with patch("autosubmit_api.cli.start_app_gunicorn") as mock_start_app:
@@ -38,8 +37,23 @@ def test_main_start_command():
             # Get the args passed to start_app_gunicorn
             args = mock_start_app.call_args[1]
             assert args["init_bg_tasks"] is True
+            assert args["disable_bg_tasks"] is False
             assert args["workers"] == 2
-            assert args["disable_bg_tasks"] is True
+
+
+    def test_main_start_bg_tasks_mutually_exclusive(capsys: CaptureFixture):
+        test_args = [
+            "autosubmit_api",
+            "start",
+            "--init-bg-tasks",
+            "--disable-bg-tasks",
+        ]
+        with patch.object(sys, "argv", test_args):
+            with pytest.raises(SystemExit) as exec_info:
+                main()
+        assert exec_info.value.code == 2
+        captured = capsys.readouterr()
+        assert "not allowed with argument" in captured.err
 
 
 def test_start_app_gunicorn():
