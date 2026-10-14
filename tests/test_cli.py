@@ -2,7 +2,7 @@ import pytest
 from pytest import CaptureFixture
 import sys
 from unittest.mock import patch
-from autosubmit_api.cli import main, start_app_gunicorn
+from autosubmit_api.cli import StandaloneApplication, main, start_app_gunicorn
 
 
 def test_main_no_command(capsys: CaptureFixture):
@@ -41,19 +41,19 @@ def test_main_start_command():
             assert args["workers"] == 2
 
 
-    def test_main_start_bg_tasks_mutually_exclusive(capsys: CaptureFixture):
-        test_args = [
-            "autosubmit_api",
-            "start",
-            "--init-bg-tasks",
-            "--disable-bg-tasks",
-        ]
-        with patch.object(sys, "argv", test_args):
-            with pytest.raises(SystemExit) as exec_info:
-                main()
-        assert exec_info.value.code == 2
-        captured = capsys.readouterr()
-        assert "not allowed with argument" in captured.err
+def test_main_start_bg_tasks_mutually_exclusive(capsys: CaptureFixture):
+    test_args = [
+        "autosubmit_api",
+        "start",
+        "--init-bg-tasks",
+        "--disable-bg-tasks",
+    ]
+    with patch.object(sys, "argv", test_args):
+        with pytest.raises(SystemExit) as exec_info:
+            main()
+    assert exec_info.value.code == 2
+    captured = capsys.readouterr()
+    assert "not allowed with argument" in captured.err
 
 
 def test_start_app_gunicorn():
@@ -63,3 +63,18 @@ def test_start_app_gunicorn():
             mock_app_instance = MockApp.return_value
             start_app_gunicorn(init_bg_tasks=True, disable_bg_tasks=True, workers=2)
             mock_app_instance.run.assert_called_once()
+
+
+def test_standalone_application_load_config():
+    options = {
+        "workers": 3,
+        "timeout": 42,
+        # Not a gunicorn setting: should be ignored
+        "unknown_option": "ignored",
+    }
+
+    app = StandaloneApplication("tests.unknown:app", options)
+
+    assert app.cfg.workers == 3
+    assert app.cfg.timeout == 42
+    assert not hasattr(app.cfg, "unknown_option")
