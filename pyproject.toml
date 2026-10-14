@@ -25,7 +25,9 @@ classifiers = [
 dependencies = [
     "fastapi[all]==0.142.2",
     "pyjwt>=2.8,<2.16",
-    "requests~=2.28.1",
+    # requests upper bound mirrors autosubmit's requests upper bound.
+    # Review the dependency version once autosubmit is updated.
+    "requests>=2.31.0,<2.33.0",
     "bscearth.utils~=0.5.2",
     "pydotplus~=2.0.2",
     "portalocker>=2.6,<4.5",
