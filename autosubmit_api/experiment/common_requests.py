@@ -67,6 +67,10 @@ from autosubmit_api.config.confConfigStrategy import confConfigStrategy
 from autosubmit_api.config.config_common import AutosubmitConfigResolver
 from autosubmit_api.database import db_common as db_common
 from autosubmit_api.database import db_jobdata
+from autosubmit_api.exceptions import (
+    ExperimentRunNotFoundError,
+    JobListNotFoundError,
+)
 from autosubmit_api.experiment import common_db_requests as DbRequests
 from autosubmit_api.experiment.utils import (
     decompress_gzip_tailed,
@@ -191,8 +195,8 @@ def get_experiment_data(expid: str) -> Dict[str, Any]:
         result["time_last_mod"] = file_metadata.modified_time
     except Exception as exc:
         result["error"] = True
-        result["error_message"] += f"{str(exc)}\n"
-        logger.error((traceback.format_exc()))
+        result["error_message"] += f"{exc}\n"
+        logger.exception(f"Could not read the file metadata of experiment {expid}")
 
     # Get info from as conf facade
     try:
@@ -212,10 +216,13 @@ def get_experiment_data(expid: str) -> Dict[str, Any]:
             autosubmit_config_facade.get_pkl_last_modified_timestamp()
         )
         result["workflow_commit"] = autosubmit_config_facade.get_workflow_commit()
+    except JobListNotFoundError:
+        # The experiment has not generated its job list yet, not an error
+        logger.debug(f"Experiment {expid} has no job list yet.")
     except Exception as exc:
         result["error"] = True
-        result["error_message"] += f"{str(exc)}\n"
-        logger.error((traceback.format_exc()))
+        result["error_message"] += f"{exc}\n"
+        logger.exception(f"Could not read the configuration of experiment {expid}")
 
     # Get from experiment table
     try:
@@ -225,37 +232,31 @@ def get_experiment_data(expid: str) -> Dict[str, Any]:
         result["version"] = experiment.autosubmit_version
     except Exception as exc:
         result["error"] = True
-        result["error_message"] += f"{str(exc)}\n"
-        logger.warning((traceback.format_exc()))
+        result["error_message"] += f"{exc}\n"
         logger.warning(
-            (
-                f"Warning: Error in get_experiment_data while retrieving experiment from DB by id: {exc}"
-            )
+            f"Could not retrieve experiment {expid} from the experiment table",
+            exc_info=True,
         )
 
     # Get status
     try:
         _, experiment_status = DbRequests.get_specific_experiment_status(expid)
         result["running"] = experiment_status == "RUNNING"
-    except Exception as exc:
-        logger.warning((traceback.format_exc()))
+    except Exception:
         logger.warning(
-            (
-                f"Warning: Error in get_experiment_data while quickly get experiment status: {exc}."
-                "Trying to get the status exhaustively. "
-            )
+            f"Could not get the status of experiment {expid} quickly. "
+            "Trying to get the status exhaustively.",
+            exc_info=True,
         )
         try:
             _, _, is_running, _, _ = _is_exp_running(expid)
             result["running"] = is_running
         except Exception as exc:
             result["error"] = True
-            result["error_message"] += f"{str(exc)}\n"
-            logger.warning((traceback.format_exc()))
+            result["error_message"] += f"{exc}\n"
             logger.warning(
-                (
-                    f"Warning: Error in get_experiment_data while retrieving the status exhaustively: {exc}. "
-                )
+                f"Could not get the status of experiment {expid} exhaustively",
+                exc_info=True,
             )
 
     # Get historic data
@@ -267,12 +268,14 @@ def get_experiment_data(expid: str) -> Dict[str, Any]:
         if experiment_run and experiment_run.total > 0:
             result["total_jobs"] = experiment_run.total
             result["completed_jobs"] = experiment_run.completed
-    except Exception as exc:
-        logger.warning((traceback.format_exc()))
+    except ExperimentRunNotFoundError:
+        # The experiment has not been run yet, so it has no run data. This is
+        # not an error.
+        logger.debug(f"Experiment {expid} has no run data yet.")
+    except Exception:
         logger.warning(
-            (
-                f"Warning: Error in get_experiment_data while reading historical data: {exc}"
-            )
+            f"Could not read the historical data of experiment {expid}",
+            exc_info=True,
         )
 
     return result
@@ -895,7 +898,7 @@ def get_experiment_graph(expid, log, layout=Layout.STANDARD, grouped=GroupedBy.N
     except Exception as e:
         print((traceback.format_exc()))
         print(("New Graph Representation failed: {0}".format(e)))
-        log.info("Could not generate Graph and recieved the following exception: " + str(e))
+        logger.info("Could not generate Graph and recieved the following exception: " + str(e))
         return {'nodes': [],
                 'edges': [],
                 'fake_edges': [],
@@ -963,11 +966,29 @@ def get_experiment_tree_structured(expid, log):
         else:
             raise ValueError('Autosubmit version is not supported')
         
-    except Exception as e:
-        print((traceback.format_exc()))
-        print(("New Tree Representation failed: {0}".format(e)))
-        log.info("New Tree Representation failed: {0}".format(e))
-        return {'tree': [], 'jobs': [], 'total': 0, 'reference': [], 'error': True, 'error_message': str(e), 'pkl_timestamp': 0}
+    except JobListNotFoundError as exc:
+        # The experiment has not generated its job list yet, this is not an error
+        logger.debug(f"Experiment {expid} has no job list yet.")
+        return {
+            "tree": [],
+            "jobs": [],
+            "total": 0,
+            "reference": [],
+            "error": True,
+            "error_message": str(exc),
+            "pkl_timestamp": 0,
+        }
+    except Exception as exc:
+        logger.exception(f"New Tree Representation failed for experiment {expid}")
+        return {
+            "tree": [],
+            "jobs": [],
+            "total": 0,
+            "reference": [],
+            "error": True,
+            "error_message": str(exc),
+            "pkl_timestamp": 0,
+        }
 
 
 def get_experiment_counters(expid: str):

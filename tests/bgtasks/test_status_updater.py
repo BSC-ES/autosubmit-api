@@ -1,7 +1,14 @@
+import logging
+
+import pytest
+
 from autosubmit_api.bgtasks.tasks.status_updater import StatusUpdater
+from autosubmit_api.exceptions import JobListNotFoundError
 from autosubmit_api.history.database_managers.database_models import RunningStatus
 from autosubmit_api.repositories.experiment import create_experiment_repository
-from autosubmit_api.repositories.experiment_status import create_experiment_status_repository
+from autosubmit_api.repositories.experiment_status import (
+    create_experiment_status_repository,
+)
 
 
 class TestStatusUpdater:
@@ -27,3 +34,25 @@ class TestStatusUpdater:
 
         for e_st in exps_status:
             assert e_st.status in [RunningStatus.RUNNING, RunningStatus.NOT_RUNNING]
+
+    def test_check_exp_running_without_job_list(
+        self, fixture_mock_basic_config, monkeypatch: pytest.MonkeyPatch, caplog
+    ):
+        """
+        An experiment without a job list should be considered as not running
+        without logging an error.
+        """
+
+        def _raise_job_list_not_found(expid: str):
+            raise JobListNotFoundError(expid)
+
+        monkeypatch.setattr(
+            "autosubmit_api.bgtasks.tasks.status_updater.create_jobs_repository",
+            _raise_job_list_not_found,
+        )
+
+        with caplog.at_level(logging.DEBUG):
+            assert StatusUpdater._check_exp_running("a1x4") is False
+
+        assert "No job list found for experiment a1x4" in caplog.text
+        assert "Error while checking experiment" not in caplog.text

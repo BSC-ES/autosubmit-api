@@ -4,6 +4,7 @@
 import os
 import tempfile
 from collections.abc import Generator
+from unittest.mock import MagicMock
 
 import pytest
 from fastapi.testclient import TestClient
@@ -268,3 +269,31 @@ def fixture_dummy_db(
     meta.create_all(engine)
     yield engine, test_table
     meta.drop_all(engine)
+
+
+@pytest.fixture
+def fixture_job_list_experiment_4_2_0(monkeypatch: pytest.MonkeyPatch):
+    """
+    Factory resolves an Autosubmit 4.2.0 experiment without touching the
+    real database.
+    """
+    repository = MagicMock()
+    repository.get_by_expid.return_value = MagicMock(autosubmit_version="4.2.0")
+    monkeypatch.setattr(
+        "autosubmit_api.repositories.jobs.create_experiment_repository",
+        lambda: repository,
+    )
+
+
+@pytest.fixture
+def fixture_job_list_experiment_pre_4_2_0(monkeypatch: pytest.MonkeyPatch):
+    """
+    Factory resolves an Autosubmit < 4.2.0 (pkl based) experiment without
+    touching the real database.
+    """
+    repository = MagicMock()
+    repository.get_by_expid.return_value = MagicMock(autosubmit_version="4.1.17")
+    monkeypatch.setattr(
+        "autosubmit_api.repositories.jobs.create_experiment_repository",
+        lambda: repository,
+    )

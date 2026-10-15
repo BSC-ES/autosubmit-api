@@ -2,6 +2,7 @@ import time
 from typing import Dict, List
 
 from autosubmit_api.bgtasks.bgtask import BackgroundTaskTemplate
+from autosubmit_api.exceptions import JobListNotFoundError
 from autosubmit_api.experiment.common_requests import _is_exp_running
 from autosubmit_api.history.database_managers.database_models import RunningStatus
 from autosubmit_api.repositories.experiment import (
@@ -59,23 +60,31 @@ class StatusUpdater(BackgroundTaskTemplate):
         MAX_PKL_AGE = 600  # 10 minutes
         MAX_PKL_AGE_EXHAUSTIVE = 3600  # 1 hour
 
-        is_running = False
         try:
-            job_list_repo = create_jobs_repository(expid)
-            pkl_age = int(time.time()) - job_list_repo.get_last_modified_timestamp()
+            try:
+                job_list_repo = create_jobs_repository(expid)
+                pkl_age = int(time.time()) - job_list_repo.get_last_modified_timestamp()
+            except (FileNotFoundError, JobListNotFoundError):
+                # The experiment has not run yet, there is no job list available.
+                cls.logger.debug(
+                    f"[{cls.id}] No job list found for experiment {expid}, considering it as not running"
+                )
+                return False
 
             if pkl_age < MAX_PKL_AGE:  # First running check
-                is_running = True
-            elif pkl_age < MAX_PKL_AGE_EXHAUSTIVE:  # Exhaustive check
+                return True
+
+            if pkl_age < MAX_PKL_AGE_EXHAUSTIVE:  # Exhaustive check
                 _, _, _flag, _, _ = _is_exp_running(expid)  # Exhaustive validation
                 if _flag:
-                    is_running = True
+                    return True
+
+            return False
         except Exception as exc:
             cls.logger.error(
                 f"[{cls.id}] Error while checking experiment {expid}: {exc}"
             )
-
-        return is_running
+            return False
 
     @classmethod
     def _update_experiment_status(cls, experiment: ExperimentModel, is_running: bool):
