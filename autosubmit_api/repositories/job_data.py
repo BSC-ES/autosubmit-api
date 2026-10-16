@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import Any, List, Optional
+from typing import Any
 
 from pydantic import BaseModel, field_validator
 from sqlalchemy import Engine, Table, create_engine, or_
@@ -53,8 +53,8 @@ class ExperimentJobDataModel(BaseModel):
     children: Any
     platform_output: Any
     workflow_commit: Any = None
-    split: Optional[int] = None
-    splits: Optional[int] = None
+    split: int | None = None
+    splits: int | None = None
     fail_count: Any = None
 
     @field_validator("split", "splits", mode="before")
@@ -85,19 +85,19 @@ class ExperimentJobDataModel(BaseModel):
 
 class ExperimentJobDataRepository(ABC):
     @abstractmethod
-    def get_last_job_data_by_run_id(self, run_id: int) -> List[ExperimentJobDataModel]:
+    def get_last_job_data_by_run_id(self, run_id: int) -> list[ExperimentJobDataModel]:
         """
         Gets last job data of an specific run id
         """
 
     @abstractmethod
-    def get_last_job_data(self) -> List[ExperimentJobDataModel]:
+    def get_last_job_data(self) -> list[ExperimentJobDataModel]:
         """
         Gets last job data
         """
 
     @abstractmethod
-    def get_jobs_by_name(self, job_name: str) -> List[ExperimentJobDataModel]:
+    def get_jobs_by_name(self, job_name: str) -> list[ExperimentJobDataModel]:
         """
         Gets historical job data by job_name
         """
@@ -110,14 +110,14 @@ class ExperimentJobDataRepository(ABC):
 
     @abstractmethod
     def get_last_job_data_by_name_list(
-        self, job_names: List[str]
-    ) -> List[ExperimentJobDataModel]:
+        self, job_names: list[str]
+    ) -> list[ExperimentJobDataModel]:
         """
         Gets last job data of a specific list of job names
         """
 
     @abstractmethod
-    def get_all(self) -> List[ExperimentJobDataModel]:
+    def get_all(self) -> list[ExperimentJobDataModel]:
         """
         Gets all job data
         """
@@ -125,7 +125,7 @@ class ExperimentJobDataRepository(ABC):
     @abstractmethod
     def get_job_data_COMPLETED_by_rowtype_run_id(
         self, rowtype: int, run_id: int
-    ) -> List[ExperimentJobDataModel]:
+    ) -> list[ExperimentJobDataModel]:
         """
         Gets job data by rowtype and run id
         """
@@ -133,14 +133,14 @@ class ExperimentJobDataRepository(ABC):
     @abstractmethod
     def get_job_data_COMPLETD_by_section(
         self, section: str
-    ) -> List[ExperimentJobDataModel]:
+    ) -> list[ExperimentJobDataModel]:
         """
         Gets job data by section
         """
 
 
 class ExperimentJobDataSQLRepository(ExperimentJobDataRepository):
-    def __init__(self, expid: str, engine: Engine, valid_tables: List[Table]):
+    def __init__(self, expid: str, engine: Engine, valid_tables: list[Table]):
         self.expid = expid
         self.engine = engine
         self.table = tables.check_table_schema(self.engine, valid_tables)
@@ -211,7 +211,7 @@ class ExperimentJobDataSQLRepository(ExperimentJobDataRepository):
         else:
             raise ValueError(f"No job data found for job name: {job_name}")
 
-    def get_last_job_data_by_name_list(self, job_names: List[str]):
+    def get_last_job_data_by_name_list(self, job_names: list[str]):
         rows = []
         with self.engine.connect() as conn:
             for chunk in iter_param_chunks(job_names):

@@ -46,10 +46,10 @@ class ExperimentJobItem(BaseModel):
     status: str
     # ``base`` view: content of the job list entry
     priority: int | None = None
-    section: str | None = None
+    section: str | None = None  # Also returned by the ``extended`` view
     date: str | None = None
     member: str | None = None
-    chunk: int | None = None
+    chunk: int | None = None  # Also returned by the ``extended`` view
     split: int | None = None
     splits: int | None = None
     out_path_local: str | None = None
