@@ -4,7 +4,7 @@ from fastapi import FastAPI, HTTPException as FastAPIHTTPException, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 
-from autosubmit_api.exceptions import NotFoundError, ValidationError
+from autosubmit_api.exceptions import InternalError, NotFoundError, ValidationError
 from autosubmit_api.logger import logger
 
 
@@ -50,6 +50,13 @@ def register_exception_handlers(app: FastAPI) -> None:
         request: Request, exc: FastAPIHTTPException
     ) -> JSONResponse:
         return _error_response(exc.detail, status_code=exc.status_code)
+
+    @app.exception_handler(InternalError)
+    async def internal_error_handler(
+        request: Request, exc: InternalError
+    ) -> JSONResponse:
+        logger.error("Internal error while processing the request", exc_info=exc)
+        return _error_response(str(exc), status_code=500)
 
     @app.exception_handler(Exception)
     async def global_exception_handler(
