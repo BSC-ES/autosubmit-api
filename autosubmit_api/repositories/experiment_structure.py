@@ -86,6 +86,14 @@ class ExperimentStructureSQLRepository(ExperimentStructureRepository):
 
 
 def create_experiment_structure_repository(expid: str) -> ExperimentStructureRepository:
+    """
+    Builds the experiment structure repository of an experiment.
+
+    :raises ExperimentNotFoundError: If the experiment does not exist
+    """
+    # Experiment should exist, whatever the backend is
+    experiment = create_experiment_repository().get_by_expid(expid)
+
     if APIBasicConfig.DATABASE_BACKEND == "postgres":
         # Postgres
         _engine = create_engine(APIBasicConfig.DATABASE_CONN_URL)
@@ -97,7 +105,6 @@ def create_experiment_structure_repository(expid: str) -> ExperimentStructureRep
     else:
         # SQLite
         exp_paths = ExperimentPaths(expid)
-        experiment = create_experiment_repository().get_by_expid(expid)
         if is_db_version_4_2_0_or_higher(experiment.autosubmit_version):
             _engine = create_sqlite_db_engine(exp_paths.job_list_db, read_only=True)
             _table = tables.ExperimentStructureV4_2_0

@@ -3,13 +3,20 @@ from uuid import uuid4
 
 import pytest
 
+from autosubmit_api.common.utils import Status
 from autosubmit_api.exceptions import ExperimentNotFoundError
+from autosubmit_api.models.jobs import UNSET
+from autosubmit_api.models.pagination import Page
 from autosubmit_api.models.requests import ExperimentsSearchRequest
 from autosubmit_api.repositories.experiment import create_experiment_repository
 from autosubmit_api.repositories.experiment_status import (
     create_experiment_status_repository,
 )
 from autosubmit_api.repositories.graph_layout import create_exp_graph_layout_repository
+from autosubmit_api.repositories.job_data import (
+    ExperimentJobDataModel,
+    create_experiment_job_data_repository,
+)
 from autosubmit_api.repositories.jobs import (
     JobsPklRepository,
     JobsSQLRepository,
@@ -313,6 +320,66 @@ class TestJobsRepository:
             assert isinstance(job.name, str) and job.name.startswith(expid)
             assert isinstance(job.status, int)
 
+    def test_get_by_names(self, fixture_mock_basic_config):
+        job_list_repo = create_jobs_repository("a1x4")
+        expected = [job.name for job in job_list_repo.get_all()][:3]
+
+        jobs = job_list_repo.get_by_names(expected + ["a1x4_missing_1"])
+
+        assert sorted(job.name for job in jobs) == sorted(expected)
+
+    def test_get_by_names_over_the_query_parameter_limit(
+        self, fixture_mock_basic_config
+    ):
+        """Names are chunked, so lookups bigger than the backend limit work."""
+        job_list_repo = create_jobs_repository("a1x4")
+        names = [f"a1x4_missing_{number}" for number in range(2500)]
+
+        assert job_list_repo.get_by_names(names) == []
+
+
+class TestExperimentJobDataModel:
+    """Tests of the job data rows read from the database."""
+
+    @staticmethod
+    def _get_record() -> ExperimentJobDataModel:
+        repo = create_experiment_job_data_repository("a003")
+        records = repo.get_last_job_data_by_name_list(["a003_20220401_fc0_1_SIM"])
+        assert records
+        return records[0]
+
+    def test_status_is_stored_as_its_name(self, fixture_mock_basic_config):
+        """Unlike the jobs repository, the job data database stores the name."""
+        record = self._get_record()
+
+        assert record.status == "COMPLETED"
+
+    def test_times_are_integers(self, fixture_mock_basic_config):
+        record = self._get_record()
+
+        for value in (record.submit, record.start, record.finish):
+            assert isinstance(value, int)
+
+    def test_numeric_status_is_normalized_to_its_name(self, fixture_mock_basic_config):
+        """A row storing the code instead of the name stays comparable."""
+        record = self._get_record()
+
+        revalidated = ExperimentJobDataModel.model_validate(
+            {**record.model_dump(), "status": Status.COMPLETED}
+        )
+
+        assert revalidated.status == "COMPLETED"
+
+    def test_missing_times_are_zero(self, fixture_mock_basic_config):
+        """Rows without times report 0, which means "no timestamp"."""
+        record = self._get_record()
+
+        revalidated = ExperimentJobDataModel.model_validate(
+            {**record.model_dump(), "submit": None, "start": None, "finish": None}
+        )
+
+        assert (revalidated.submit, revalidated.start, revalidated.finish) == (0, 0, 0)
+
 
 @pytest.mark.parametrize(
     "expression,value,expected",
@@ -388,6 +455,16 @@ class TestJobsRepositorySearch:
         assert count == total
         assert len(jobs) == total
 
+    @pytest.mark.parametrize("expid, total", [("a007", 8), ("a1x4", 10)])
+    def test_search_by_job_name_unset_does_not_filter(
+        self, fixture_mock_basic_config, expid: str, total: int
+    ):
+        """The name filter has no empty state: ``UNSET`` is its way of not filtering."""
+        repo = create_jobs_repository(expid)
+        jobs, count = repo.search(job_name=UNSET)
+        assert count == total
+        assert len(jobs) == total
+
     @pytest.mark.parametrize(
         "expid, job_name_filter, expected_count",
         [
@@ -439,7 +516,7 @@ class TestJobsRepositorySearch:
     ):
         """The count returned always reflects total matching items, not the page size."""
         repo = create_jobs_repository(expid)
-        jobs, count = repo.search(limit=3, offset=0)
+        jobs, count = repo.search(page=Page(limit=3))
         assert count == total
         assert len(jobs) == 3
 
@@ -448,7 +525,7 @@ class TestJobsRepositorySearch:
         self, fixture_mock_basic_config, expid: str, total: int
     ):
         repo = create_jobs_repository(expid)
-        jobs, count = repo.search(limit=3, offset=total - 1)
+        jobs, count = repo.search(page=Page(limit=3, offset=total - 1))
         assert count == total
         assert len(jobs) == 1
 
@@ -457,7 +534,7 @@ class TestJobsRepositorySearch:
         self, fixture_mock_basic_config, expid: str, total: int
     ):
         repo = create_jobs_repository(expid)
-        jobs, count = repo.search(limit=5, offset=total)
+        jobs, count = repo.search(page=Page(limit=5, offset=total))
         assert count == total
         assert len(jobs) == 0
 
@@ -468,19 +545,9 @@ class TestJobsRepositorySearch:
         """Combined job_name filter + pagination: count reflects filtered total."""
         repo = create_jobs_repository(expid)
         _, full_count = repo.search(job_name="*SIM")
-        jobs, count = repo.search(job_name="*SIM", limit=1, offset=0)
+        jobs, count = repo.search(job_name="*SIM", page=Page(limit=1))
         assert count == full_count
         assert len(jobs) == 1
-
-    @pytest.mark.parametrize("expid, total", [("a007", 8), ("a1x4", 10)])
-    def test_search_limit_zero_returns_no_jobs(
-        self, fixture_mock_basic_config, expid: str, total: int
-    ):
-        """limit=0 should return 0 jobs on both backends."""
-        repo = create_jobs_repository(expid)
-        jobs, count = repo.search(limit=0, offset=0)
-        assert jobs == []
-        assert count == total
 
     @pytest.mark.parametrize(
         "expid, pattern", [("a007", "*SIM"), ("a1x4", "*SIM")], ids=["pkl", "sql"]

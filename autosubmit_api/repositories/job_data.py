@@ -1,25 +1,35 @@
 from abc import ABC, abstractmethod
-from typing import Any, List, Optional
+from typing import Any
 
 from pydantic import BaseModel, field_validator
 from sqlalchemy import Engine, Table, create_engine, or_
 
 from autosubmit_api.config.basicConfig import APIBasicConfig
 from autosubmit_api.database import tables
-from autosubmit_api.database.common import create_sqlite_db_engine
+from autosubmit_api.database.common import create_sqlite_db_engine, iter_param_chunks
+from autosubmit_api.models.jobs import UNKNOWN_STATUS, status_name
 from autosubmit_api.persistance.experiment import ExperimentPaths
 
 
 class ExperimentJobDataModel(BaseModel):
+    """A row of the job data database.
+
+    The table is owned by Autosubmit, so only the fields the API reads are typed;
+    the rest are kept as ``Any`` to avoid rejecting rows written by other
+    versions of Autosubmit.
+    """
+
     id: Any
     counter: Any
     job_name: Any
     created: Any
     modified: Any
-    submit: Any
-    start: Any
-    finish: Any
-    status: Any
+    # Times are reported as 0 when the row has no value
+    submit: int = 0
+    start: int = 0
+    finish: int = 0
+    # Stored as the status name, normalized on read
+    status: str = UNKNOWN_STATUS
     rowtype: Any
     ncpus: Any
     wallclock: Any
@@ -43,8 +53,8 @@ class ExperimentJobDataModel(BaseModel):
     children: Any
     platform_output: Any
     workflow_commit: Any = None
-    split: Optional[int] = None
-    splits: Optional[int] = None
+    split: int | None = None
+    splits: int | None = None
     fail_count: Any = None
 
     @field_validator("split", "splits", mode="before")
@@ -57,22 +67,37 @@ class ExperimentJobDataModel(BaseModel):
         except (ValueError, TypeError):
             return None
 
+    @field_validator("status", mode="before")
+    @classmethod
+    def parse_status(cls, value):
+        return status_name(value)
+
+    @field_validator("submit", "start", "finish", mode="before")
+    @classmethod
+    def parse_timestamp(cls, value):
+        if value is None:
+            return 0
+        try:
+            return int(value)
+        except (TypeError, ValueError):
+            return 0
+
 
 class ExperimentJobDataRepository(ABC):
     @abstractmethod
-    def get_last_job_data_by_run_id(self, run_id: int) -> List[ExperimentJobDataModel]:
+    def get_last_job_data_by_run_id(self, run_id: int) -> list[ExperimentJobDataModel]:
         """
         Gets last job data of an specific run id
         """
 
     @abstractmethod
-    def get_last_job_data(self) -> List[ExperimentJobDataModel]:
+    def get_last_job_data(self) -> list[ExperimentJobDataModel]:
         """
         Gets last job data
         """
 
     @abstractmethod
-    def get_jobs_by_name(self, job_name: str) -> List[ExperimentJobDataModel]:
+    def get_jobs_by_name(self, job_name: str) -> list[ExperimentJobDataModel]:
         """
         Gets historical job data by job_name
         """
@@ -84,7 +109,15 @@ class ExperimentJobDataRepository(ABC):
         """
 
     @abstractmethod
-    def get_all(self) -> List[ExperimentJobDataModel]:
+    def get_last_job_data_by_name_list(
+        self, job_names: list[str]
+    ) -> list[ExperimentJobDataModel]:
+        """
+        Gets last job data of a specific list of job names
+        """
+
+    @abstractmethod
+    def get_all(self) -> list[ExperimentJobDataModel]:
         """
         Gets all job data
         """
@@ -92,7 +125,7 @@ class ExperimentJobDataRepository(ABC):
     @abstractmethod
     def get_job_data_COMPLETED_by_rowtype_run_id(
         self, rowtype: int, run_id: int
-    ) -> List[ExperimentJobDataModel]:
+    ) -> list[ExperimentJobDataModel]:
         """
         Gets job data by rowtype and run id
         """
@@ -100,14 +133,14 @@ class ExperimentJobDataRepository(ABC):
     @abstractmethod
     def get_job_data_COMPLETD_by_section(
         self, section: str
-    ) -> List[ExperimentJobDataModel]:
+    ) -> list[ExperimentJobDataModel]:
         """
         Gets job data by section
         """
 
 
 class ExperimentJobDataSQLRepository(ExperimentJobDataRepository):
-    def __init__(self, expid: str, engine: Engine, valid_tables: List[Table]):
+    def __init__(self, expid: str, engine: Engine, valid_tables: list[Table]):
         self.expid = expid
         self.engine = engine
         self.table = tables.check_table_schema(self.engine, valid_tables)
@@ -177,6 +210,26 @@ class ExperimentJobDataSQLRepository(ExperimentJobDataRepository):
             return ExperimentJobDataModel.model_validate(result, from_attributes=True)
         else:
             raise ValueError(f"No job data found for job name: {job_name}")
+
+    def get_last_job_data_by_name_list(self, job_names: list[str]):
+        rows = []
+        with self.engine.connect() as conn:
+            for chunk in iter_param_chunks(job_names):
+                statement = (
+                    self.table.select()
+                    .where(
+                        (self.table.c.job_name.in_(chunk)),
+                        (self.table.c.rowtype >= 2),
+                        (self.table.c.last == 1),
+                    )
+                    .order_by(self.table.c.counter.desc())
+                )
+                rows.extend(conn.execute(statement).all())
+
+        return [
+            ExperimentJobDataModel.model_validate(row, from_attributes=True)
+            for row in rows
+        ]
 
     def get_all(self):
         with self.engine.connect() as conn:
