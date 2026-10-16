@@ -11,12 +11,13 @@ import pytest
 from fastapi.testclient import TestClient
 
 from autosubmit_api import config
+from autosubmit_api.exceptions import InternalError
 from autosubmit_api.models.requests import (
     PAGINATION_LIMIT_DEFAULT,
     PAGINATION_LIMIT_MAX,
 )
+from autosubmit_api.models.responses import JobDetailResponse
 from autosubmit_api.repositories.runner_processes import RunnerProcessesDataModel
-from autosubmit_api.routers.v4.experiments import JobDetailResponse
 from tests.utils import custom_return_value
 
 
@@ -351,6 +352,124 @@ class TestExperimentJobs:
         assert pagination["total_items"] == expected_len
         assert pagination["page_size"] is None
         assert pagination["total_pages"] == 1
+
+    @pytest.mark.parametrize("expid", ["a003", "a1x4"])
+    def test_jobs_extended_view(
+        self, fixture_fastapi_client: TestClient, expid: str
+    ):
+        """The extended view returns the job times instead of the base content."""
+        response = fixture_fastapi_client.get(
+            self.endpoint.format(expid=expid),
+            params={"view": "extended"},
+        )
+        assert response.status_code == HTTPStatus.OK
+        resp_obj: dict = response.json()
+
+        assert len(resp_obj["jobs"]) > 0
+        for job in resp_obj["jobs"]:
+            assert set(job) == {"name", "status", "submit", "start", "finish"}
+
+    def test_jobs_base_view(self, fixture_fastapi_client: TestClient):
+        """The base view returns the content of the job list entry."""
+        response = fixture_fastapi_client.get(
+            self.endpoint.format(expid="a007"), params={"view": "base"}
+        )
+        assert response.status_code == HTTPStatus.OK
+
+        for job in response.json()["jobs"]:
+            assert set(job) == {"name", "status"} | {
+                "priority",
+                "section",
+                "date",
+                "member",
+                "chunk",
+                "split",
+                "splits",
+                "out_path_local",
+                "err_path_local",
+                "out_path_remote",
+                "err_path_remote",
+            }
+
+    @pytest.mark.parametrize("view", ["quick", "base"])
+    def test_jobs_extended_fields_are_optional(
+        self, fixture_fastapi_client: TestClient, view: str
+    ):
+        """The job times are not returned by the quick and base views."""
+        response = fixture_fastapi_client.get(
+            self.endpoint.format(expid="a007"),
+            params={"view": view},
+        )
+        assert response.status_code == HTTPStatus.OK
+
+        for job in response.json()["jobs"]:
+            assert "submit" not in job
+            assert "start" not in job
+            assert "finish" not in job
+
+    def test_jobs_response_echoes_the_applied_filters(
+        self, fixture_fastapi_client: TestClient
+    ):
+        """The filters are reported once per page, not on every job."""
+        response = fixture_fastapi_client.get(
+            self.endpoint.format(expid="a003"),
+            params={"view": "extended", "date": "2000-01-01", "chunk": "NA"},
+        )
+        assert response.status_code == HTTPStatus.OK
+        resp_obj: dict = response.json()
+
+        # A filter for the jobs without a value is reported as it was asked for,
+        # and the filters that were not used are not reported at all
+        assert resp_obj["filters"] == {"date": "2000-01-01", "chunk": "NA"}
+        for job in resp_obj["jobs"]:
+            assert "filters" not in job
+            assert "date" not in job
+
+    def test_jobs_response_reports_no_filters_when_none_was_used(
+        self, fixture_fastapi_client: TestClient
+    ):
+        response = fixture_fastapi_client.get(
+            self.endpoint.format(expid="a003"), params={"view": "quick"}
+        )
+        assert response.status_code == HTTPStatus.OK
+
+        assert response.json()["filters"] == {}
+
+    def test_jobs_extended_view_times(self, fixture_fastapi_client: TestClient):
+        """a007 has historical job data matching the job statuses."""
+        response = fixture_fastapi_client.get(
+            self.endpoint.format(expid="a007"), params={"view": "extended"}
+        )
+        assert response.status_code == HTTPStatus.OK
+
+        jobs = response.json()["jobs"]
+        assert jobs
+        for job in jobs:
+            assert job["submit"] is not None
+            assert job["start"] is not None
+            assert job["finish"] is not None
+
+    def test_repository_failure_returns_500(
+        self, fixture_fastapi_client: TestClient, monkeypatch: pytest.MonkeyPatch
+    ):
+        """A failure on our side is reported with the message of the error."""
+        monkeypatch.setattr(
+            "autosubmit_api.routers.v4.experiments.create_experiment_jobs_service",
+            custom_return_value(
+                MagicMock(
+                    list_jobs=MagicMock(
+                        side_effect=InternalError("Error while reading the job list")
+                    )
+                )
+            ),
+        )
+
+        response = fixture_fastapi_client.get(self.endpoint.format(expid="a003"))
+
+        assert response.status_code == HTTPStatus.INTERNAL_SERVER_ERROR
+        body = response.json()
+        assert body["error"] is True
+        assert body["error_message"] == "Error while reading the job list"
 
     @pytest.mark.parametrize(
         "expid, total, page, page_size, expected_items, expected_pages",
@@ -1880,3 +1999,28 @@ class TestRunnerConfigurations:
         #         isinstance(resp_obj[endpoint_name]["ENABLED"], bool)
         #         and resp_obj[endpoint_name]["ENABLED"] is True
         #     )
+
+
+class TestUnknownExperiment:
+    """A missing experiment is a client error, not a server error."""
+
+    @pytest.mark.parametrize(
+        "endpoint",
+        [
+            "/v4/experiments/{expid}/jobs",
+            "/v4/experiments/{expid}/jobs-category-tree",
+            "/v4/experiments/{expid}/jobs/{job_name}",
+            "/v4/experiments/{expid}/jobs/{job_name}/parents",
+            "/v4/experiments/{expid}/jobs/{job_name}/children",
+            "/v4/experiments/{expid}/eta",
+        ],
+    )
+    def test_not_found(self, fixture_fastapi_client: TestClient, endpoint: str):
+        response = fixture_fastapi_client.get(
+            endpoint.format(expid="non_existing_exp", job_name="non_existing_job")
+        )
+
+        assert response.status_code == HTTPStatus.NOT_FOUND
+        body = response.json()
+        assert body["error"] is True
+        assert "not found" in body["error_message"]

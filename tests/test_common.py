@@ -55,6 +55,7 @@ def test_outlier_detection(
         (1736208000, "2025-01-07T00:00:00+00:00", "UTC"),
         (1633072800, "2021-10-01T02:20:00-05:00", "America/Lima"),  # Other timezone
         (1633072800, "2021-10-01T05:20:00-02:00", "Etc/GMT+2"),
+        (10**30, None, "UTC"),  # Out of range timestamp
     ],
 )
 def test_timestamp_to_datetime_format(

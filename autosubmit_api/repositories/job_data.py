@@ -6,20 +6,30 @@ from sqlalchemy import Engine, Table, create_engine, or_
 
 from autosubmit_api.config.basicConfig import APIBasicConfig
 from autosubmit_api.database import tables
-from autosubmit_api.database.common import create_sqlite_db_engine
+from autosubmit_api.database.common import create_sqlite_db_engine, iter_param_chunks
+from autosubmit_api.models.jobs import UNKNOWN_STATUS, status_name
 from autosubmit_api.persistance.experiment import ExperimentPaths
 
 
 class ExperimentJobDataModel(BaseModel):
+    """A row of the job data database.
+
+    The table is owned by Autosubmit, so only the fields the API reads are typed;
+    the rest are kept as ``Any`` to avoid rejecting rows written by other
+    versions of Autosubmit.
+    """
+
     id: Any
     counter: Any
     job_name: Any
     created: Any
     modified: Any
-    submit: Any
-    start: Any
-    finish: Any
-    status: Any
+    # Times are reported as 0 when the row has no value
+    submit: int = 0
+    start: int = 0
+    finish: int = 0
+    # Stored as the status name, normalized on read
+    status: str = UNKNOWN_STATUS
     rowtype: Any
     ncpus: Any
     wallclock: Any
@@ -56,6 +66,21 @@ class ExperimentJobDataModel(BaseModel):
             return int(v)
         except (ValueError, TypeError):
             return None
+
+    @field_validator("status", mode="before")
+    @classmethod
+    def parse_status(cls, value):
+        return status_name(value)
+
+    @field_validator("submit", "start", "finish", mode="before")
+    @classmethod
+    def parse_timestamp(cls, value):
+        if value is None:
+            return 0
+        try:
+            return int(value)
+        except (TypeError, ValueError):
+            return 0
 
 
 class ExperimentJobDataRepository(ABC):
@@ -187,13 +212,9 @@ class ExperimentJobDataSQLRepository(ExperimentJobDataRepository):
             raise ValueError(f"No job data found for job name: {job_name}")
 
     def get_last_job_data_by_name_list(self, job_names: List[str]):
-        # SQLite default SQLITE_MAX_VARIABLE_NUMBER is 999
-        # PostgreSQL default max number of parameters is 32767
-        _CHUNK_SIZE = 32767 if APIBasicConfig.DATABASE_BACKEND == "postgres" else 999
         rows = []
         with self.engine.connect() as conn:
-            for i in range(0, len(job_names), _CHUNK_SIZE):
-                chunk = job_names[i : i + _CHUNK_SIZE]
+            for chunk in iter_param_chunks(job_names):
                 statement = (
                     self.table.select()
                     .where(
