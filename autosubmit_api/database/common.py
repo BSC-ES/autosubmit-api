@@ -1,5 +1,6 @@
 import os
-from typing import Any, Dict, List, Union
+from collections.abc import Iterator, Sequence
+from typing import Any, Dict, List, TypeVar, Union
 
 from sqlalchemy import (
     Column,
@@ -23,6 +24,41 @@ from autosubmit_api.logger import logger
 
 SQLITE_MAX_PARAMS = 999  # SQLite has a limit of 999 parameters per query by default.
 POSTGRESQL_MAX_PARAMS = 32767  # PostgreSQL has a limit of 32767 parameters per query by default.
+
+T = TypeVar("T")
+
+
+def max_sql_params(backend: str | None = None) -> int:
+    """
+    Gets the maximum number of parameters that fit in a single query.
+
+    Databases bound the number of parameters of a query, so statements
+    that bind a number of values have to be split.
+    Backends without known limit are treated as SQLite, the most restrictive.
+
+    :param backend: Database backend to ask about. Defaults to the configured one.
+    :return: Maximum number of parameters for the given backend.
+    """
+    if backend is None:
+        backend = APIBasicConfig.DATABASE_BACKEND
+    if backend == "postgres":
+        return POSTGRESQL_MAX_PARAMS
+    return SQLITE_MAX_PARAMS
+
+
+def iter_param_chunks(
+    values: Sequence[T], backend: str | None = None
+) -> Iterator[Sequence[T]]:
+    """
+    Splits ``values`` into chunks that fit in a single query.
+
+    :param values: Values to split.
+    :param backend: Database backend to ask about. Defaults to the configured one.
+    """
+    chunk_size = max_sql_params(backend)
+    for start in range(0, len(values), chunk_size):
+        yield values[start : start + chunk_size]
+
 
 class AttachedDatabaseConnBuilder(BaseBuilder):
     """
@@ -113,9 +149,9 @@ def execute_with_limit_offset(
     count_stmnt = select(func.count()).select_from(statement.subquery())
 
     # Add limit and offset
-    if offset and offset >= 0:
+    if offset is not None and offset > 0:
         statement = statement.offset(offset)
-    if limit and limit > 0:
+    if limit is not None and limit >= 0:
         statement = statement.limit(limit)
 
     # Execute query

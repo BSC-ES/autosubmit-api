@@ -9,13 +9,10 @@ from bscearth.utils.date import date2str
 from dateutil.relativedelta import relativedelta
 from typing import List, Optional, Tuple, TYPE_CHECKING
 
+from autosubmit_api.logger import logger
+
 if TYPE_CHECKING:
     from autosubmit_api.components.jobs.job_factory import Job
-
-# Sentinel value to indicate that a parameter was not provided.
-# This is used to distinguish between a parameter being explicitly
-# set to None and a parameter not being provided at all.
-_UNSET = object()
 
 LOCAL_TZ = datetime.datetime.now(datetime.timezone.utc).astimezone().tzinfo
 
@@ -217,16 +214,17 @@ def get_experiments_from_folder(root_folder: str) -> List[str]:
   folders = stdOut.split()      
   return [expid for expid in folders if len(expid) == 4]
 
-def timestamp_to_datetime_format(timestamp: Optional[int]) -> str:
+def timestamp_to_datetime_format(timestamp: Optional[int]) -> Optional[str]:
   """
   Formats a timestamp to a iso format datetime string with timezone information.
+
+  Returns None when the timestamp is missing, zero or out of range.
   """
   try:
     if timestamp and timestamp > 0:
       return datetime.datetime.fromtimestamp(timestamp, tz=LOCAL_TZ).isoformat()
-  except Exception as exp:    
-    print(("Timestamp {} cannot be converted to datetime string. {}".format(str(timestamp), str(exp))))
-    return None
+  except (OverflowError, OSError, TypeError, ValueError) as exc:
+    logger.warning(f"Timestamp {timestamp} cannot be converted to datetime string: {exc}")
   return None
 
 def datechunk_to_year(chunk_unit: int, chunk_size: int) -> float:

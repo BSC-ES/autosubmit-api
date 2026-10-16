@@ -9,6 +9,7 @@ from autosubmit_api.database.common import (
     create_main_db_conn,
     execute_with_limit_offset,
 )
+from autosubmit_api.models.pagination import UNPAGINATED, Page
 
 
 def wildcard_search(query: str, column: Column) -> str:
@@ -124,8 +125,7 @@ class ExperimentJoinRepository(ABC):
         hpc: str | None = None,
         order_by: str | None = None,
         order_desc: bool = False,
-        limit: int | None = None,
-        offset: int | None = None,
+        page: Page = UNPAGINATED,
     ) -> tuple[list[dict[str, Any]], int]:
         """
         Search experiments with extended information.
@@ -157,8 +157,7 @@ class ExperimentJoinSQLRepository(ExperimentJoinRepository):
         hpc: str | None = None,
         order_by: str | None = None,
         order_desc: bool = False,
-        limit: int | None = None,
-        offset: int | None = None,
+        page: Page = UNPAGINATED,
     ):
         statement = generate_query_listexp_extended(
             query=query,
@@ -172,7 +171,10 @@ class ExperimentJoinSQLRepository(ExperimentJoinRepository):
         )
         with self._get_connection() as conn:
             query_result, total_rows = execute_with_limit_offset(
-                statement=statement, conn=conn, limit=limit, offset=offset
+                statement=statement,
+                conn=conn,
+                limit=page.limit,
+                offset=page.offset,
             )
 
         result = [row._asdict() for row in query_result]
