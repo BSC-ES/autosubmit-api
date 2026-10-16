@@ -2013,6 +2013,7 @@ class TestUnknownExperiment:
             "/v4/experiments/{expid}/jobs/{job_name}/parents",
             "/v4/experiments/{expid}/jobs/{job_name}/children",
             "/v4/experiments/{expid}/eta",
+            "/v4/experiments/{expid}/wrappers",
         ],
     )
     def test_not_found(self, fixture_fastapi_client: TestClient, endpoint: str):
