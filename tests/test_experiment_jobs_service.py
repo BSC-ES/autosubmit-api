@@ -29,6 +29,8 @@ CONTENT_FIELDS = {
     "err_path_remote",
 }
 TIME_FIELDS = {"submit", "start", "finish"}
+# The extended view locates the job (section and chunk) and reports its times
+EXTENDED_FIELDS = {"section", "chunk"} | TIME_FIELDS
 
 
 def make_job(name: str, status: int = Status.COMPLETED, chunk: int | None = 1) -> JobData:
@@ -166,7 +168,7 @@ class TestViews:
         for item in response.jobs:
             assert not item.model_fields_set & TIME_FIELDS
 
-    def test_extended_view_returns_the_job_times_instead_of_the_content(
+    def test_extended_view_returns_the_job_location_and_times(
         self, jobs_repo, job_data_factory
     ):
         job_data_factory.repository.records = [
@@ -184,14 +186,16 @@ class TestViews:
         response = service.list_jobs(JobsSearchRequest(view="extended"))
 
         item = response.jobs[0]
-        assert item.model_fields_set == {"name", "status"} | TIME_FIELDS
+        assert item.model_fields_set == {"name", "status"} | EXTENDED_FIELDS
+        assert item.section == "SIM"
+        assert item.chunk == 1
         assert item.submit is not None
         assert item.start is not None
         assert item.finish is not None
         # Times are ISO datetime strings with timezone information
         datetime.datetime.fromisoformat(item.submit)
         # The job without job data reports unknown times
-        assert response.jobs[1].model_fields_set == {"name", "status"} | TIME_FIELDS
+        assert response.jobs[1].model_fields_set == {"name", "status"} | EXTENDED_FIELDS
         assert response.jobs[1].submit is None
 
     @pytest.mark.parametrize("view", [JobView.QUICK, JobView.BASE])

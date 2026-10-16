@@ -111,9 +111,9 @@ class ExperimentJobsService:
     Builds the job list of an experiment applying its filters and the view.
 
     Each job comes from the jobs repository (pkl or database). The ``extended``
-    view reports the execution times of the job, which come from the historical job
-    data: that is the only view that needs the job data repository, and it is built
-    on demand so the other views keep a single query.
+    view reports where the job is and its execution times, and the times come from
+    the historical job data: that is the only view that needs the job data
+    repository, and it is built on demand so the other views keep a single query.
     """
 
     def __init__(
@@ -209,7 +209,14 @@ class ExperimentJobsService:
         if view is JobView.BASE:
             fields.update(_job_content(job))
         elif view is JobView.EXTENDED:
-            fields.update(_job_times(self.expid, job, last_job_data))
+            # Section and chunk are there to locate the job: the job list of the
+            # tree view groups the jobs by section and only estimates the time of
+            # arrival of the sections that run within chunks.
+            fields.update(
+                section=job.section,
+                chunk=job.chunk,
+                **_job_times(self.expid, job, last_job_data),
+            )
 
         return ExperimentJobItem(**fields)
 

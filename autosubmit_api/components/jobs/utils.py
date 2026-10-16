@@ -1,9 +1,7 @@
-#!/usr/bin/env python
-
 import datetime
 import os
 import subprocess
-from typing import TYPE_CHECKING, Dict, List, Optional, Tuple
+from typing import TYPE_CHECKING, Optional
 
 from bscearth.utils.date import parse_date
 
@@ -54,7 +52,8 @@ START_STATUS = {Status.COMPLETED, Status.FAILED, Status.RUNNING}
 FINISH_STATUS = {Status.COMPLETED, Status.FAILED}
 
 
-def is_a_completed_retrial(fields: List[str]) -> bool:
+
+def is_a_completed_retrial(fields: list[str]) -> bool:
     """Identifies one line of _TOTAL_STATS file"""
     if len(fields) == 4:
         if fields[3] == "COMPLETED":
@@ -154,7 +153,7 @@ def get_folder_date_member_title(
     formatted_date: str,
     member: str,
     date_member_jobs_count: int,
-    counters: Dict[int, int],
+    counters: dict[int, int],
 ) -> str:
     return "{0}_{1}_{2} {3}{4}{5}{6}{7}{8}".format(
         expid,
@@ -170,7 +169,7 @@ def get_folder_date_member_title(
 
 
 def get_folder_package_title(
-    package_name: str, jobs_count: int, counters: Dict[int, int]
+    package_name: str, jobs_count: int, counters: dict[int, int]
 ) -> str:
     return "Wrapper: {0} {1}{2}{3}{4}{5}{6}".format(
         package_name,
@@ -192,7 +191,7 @@ def convert_int_default(value, default_value=None):
 
 def get_job_total_stats(
     status_code: int, name: str, tmp_path: str
-) -> Tuple[datetime.datetime, datetime.datetime, datetime.datetime, str]:
+) -> tuple[datetime.datetime, datetime.datetime, datetime.datetime, str]:
     """
     Receives job data and returns the data from its TOTAL_STATS file in an ordered way.
     Function migrated from the legacy JobList class method _job_running_check()
@@ -298,7 +297,7 @@ def get_fixed_experiment_times(
     expid: str,
     current_job: "JobData",
     job_last_data: Optional["ExperimentJobDataModel"],
-) -> Tuple[int, int, int]:
+) -> tuple[int, int, int]:
     # If status is SUSPENDED, set submit/start/finish to 0
     if current_job.status == Status.SUSPENDED or job_last_data is None:
         submit = 0
