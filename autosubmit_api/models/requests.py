@@ -1,5 +1,5 @@
 import re
-from typing import Annotated, Literal, Optional
+from typing import Annotated, Literal
 
 from pydantic import BaseModel, Field, field_validator
 
@@ -20,7 +20,7 @@ class ExperimentsSearchRequest(BaseModel):
     autosubmit_version: str | None = None
     hpc: str | None = None
 
-    order_by: Optional[Literal["expid", "created", "description"]] = None
+    order_by: Literal["expid", "created", "description"] | None = None
     order_desc: bool = False
 
     page: Annotated[

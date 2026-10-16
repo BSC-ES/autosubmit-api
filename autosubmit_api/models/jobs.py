@@ -41,9 +41,11 @@ class JobView(str, Enum):
     """
     Content returned for each job of an experiment.
 
-    - `QUICK`` is the minimum a job list needs: the name and the status of each job.
+    - ``QUICK`` is the minimum a job list needs: the name and the status of each job.
     - ``BASE`` is the content of the job list entry
-    - ``EXTENDED`` reports the execution times of the job, necessary for the job list of the tree view.
+    - ``EXTENDED`` reports where the job is (its section, to group the jobs, and
+      whether it runs within a chunk) and its execution times, necessary for the job
+      list of the tree view.
     """
 
     QUICK = "quick"

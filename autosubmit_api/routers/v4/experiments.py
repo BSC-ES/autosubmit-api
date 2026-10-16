@@ -190,9 +190,10 @@ async def get_experiment_jobs(
 
     - ``base`` view: returns the full job content.
     - ``quick`` view: returns only the name and status of each job.
-    - ``extended`` view: returns only the name, the status and the ``submit``,
-      ``start`` and ``finish`` times of each job, taken from the job data database.
-      It is the view of the job list of the tree view.
+    - ``extended`` view: returns only the name, the status, the ``section``, the
+      ``chunk`` and the ``submit``, ``start`` and ``finish`` times of each job. It
+      is the view of the job list of the tree view, which groups the jobs by section
+      and estimates the time of arrival of the chunked sections.
 
     Pagination is enabled when `page_size` is provided (`page` defaults to 1).
     """

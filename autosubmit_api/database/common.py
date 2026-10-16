@@ -1,6 +1,6 @@
 import os
 from collections.abc import Iterator, Sequence
-from typing import Any, Dict, List, TypeVar, Union
+from typing import Any, TypeVar
 
 from sqlalchemy import (
     Column,
@@ -32,10 +32,6 @@ def max_sql_params(backend: str | None = None) -> int:
     """
     Gets the maximum number of parameters that fit in a single query.
 
-    Databases bound the number of parameters of a query, so statements
-    that bind a number of values have to be split.
-    Backends without known limit are treated as SQLite, the most restrictive.
-
     :param backend: Database backend to ask about. Defaults to the configured one.
     :return: Maximum number of parameters for the given backend.
     """
@@ -54,6 +50,7 @@ def iter_param_chunks(
 
     :param values: Values to split.
     :param backend: Database backend to ask about. Defaults to the configured one.
+    :return: Iterator over chunks of ``values`` that fit in a single query.
     """
     chunk_size = max_sql_params(backend)
     for start in range(0, len(values), chunk_size):
@@ -166,9 +163,9 @@ def execute_with_limit_offset(
 def execute_upsert(
     conn: Connection,
     table: Table,
-    values: Dict[str, Any],
-    index_elements: List[Union[str, Column]],
-    set_: Dict[str, Any] = None,
+    values: dict[str, Any],
+    index_elements: list[str | Column],
+    set_: dict[str, Any] | None = None,
 ) -> int:
     """
     Execute an atomic upsert (INSERT ... ON CONFLICT DO UPDATE) for SQLite and PostgreSQL.
@@ -233,8 +230,8 @@ def execute_upsert(
 def execute_replace(
     conn: Connection,
     table: Table,
-    values: Dict[str, Any],
-    index_elements: List[Union[str, Column]],
+    values: dict[str, Any],
+    index_elements: list[str | Column],
 ) -> int:
     """
     Replace a row with a transactional DELETE + INSERT identified by ``index_elements``.
@@ -273,9 +270,9 @@ def execute_replace(
 def upsert_or_replace(
     conn: Connection,
     table: Table,
-    values: Dict[str, Any],
-    index_elements: List[Union[str, Column]],
-    set_: Dict[str, Any] = None,
+    values: dict[str, Any],
+    index_elements: list[str | Column],
+    set_: dict[str, Any] | None = None,
 ) -> int:
     """
     Make the row identified by ``index_elements`` exist with the given ``values``.

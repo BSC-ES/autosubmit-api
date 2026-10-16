@@ -425,7 +425,7 @@ class TestExperimentJobs:
     def test_jobs_extended_view(
         self, fixture_fastapi_client: TestClient, expid: str
     ):
-        """The extended view returns the job times instead of the base content."""
+        """The extended view locates the job and returns its times."""
         response = fixture_fastapi_client.get(
             self.endpoint.format(expid=expid),
             params={"view": "extended"},
@@ -435,7 +435,15 @@ class TestExperimentJobs:
 
         assert len(resp_obj["jobs"]) > 0
         for job in resp_obj["jobs"]:
-            assert set(job) == {"name", "status", "submit", "start", "finish"}
+            assert set(job) == {
+                "name",
+                "status",
+                "section",
+                "chunk",
+                "submit",
+                "start",
+                "finish",
+            }
 
     def test_jobs_base_view(self, fixture_fastapi_client: TestClient):
         """The base view returns the content of the job list entry."""
