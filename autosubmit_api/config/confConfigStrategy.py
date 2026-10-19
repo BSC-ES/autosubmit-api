@@ -977,7 +977,7 @@ class confConfigStrategy(IConfigStrategy):
             chunk_size = self._exp_parser.get_option(
                 'experiment', 'CHUNKSIZE', default)
         except Exception as exp:
-            print(exp)
+            logger.warning(exp)
             chunk_size = ''
         if chunk_size == '':
             return default

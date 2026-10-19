@@ -8,6 +8,7 @@ from collections import namedtuple
 from bscearth.utils.date import date2str
 from dateutil.relativedelta import relativedelta
 from typing import List, Optional, Tuple, TYPE_CHECKING
+from autosubmit_api.logger import logger
 
 if TYPE_CHECKING:
     from autosubmit_api.components.jobs.job_factory import Job
@@ -220,7 +221,7 @@ def timestamp_to_datetime_format(timestamp: Optional[int]) -> str:
     if timestamp and timestamp > 0:
       return datetime.datetime.fromtimestamp(timestamp, tz=LOCAL_TZ).isoformat()
   except Exception as exp:    
-    print(("Timestamp {} cannot be converted to datetime string. {}".format(str(timestamp), str(exp))))
+    logger.warning("Timestamp {} cannot be converted to datetime string. {}".format(str(timestamp), str(exp)))
     return None
   return None
 

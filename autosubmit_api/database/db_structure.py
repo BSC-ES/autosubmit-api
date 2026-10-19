@@ -4,6 +4,7 @@ from typing import Dict, List
 from autosubmit_api.repositories.experiment_structure import (
     create_experiment_structure_repository,
 )
+from autosubmit_api.logger import logger
 
 
 def get_structure(expid: str) -> Dict[str, List[str]]:
@@ -27,4 +28,4 @@ def get_structure(expid: str) -> Dict[str, List[str]]:
 
         return structure
     except Exception:
-        print((traceback.format_exc()))
+        logger.error(traceback.format_exc())

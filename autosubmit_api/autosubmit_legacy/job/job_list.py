@@ -53,6 +53,7 @@ from autosubmit_api.performance.utils import (
     calculate_SYPD_perjob,
 )
 from autosubmit_api.persistance.experiment import ExperimentPaths
+from autosubmit_api.logger import logger
 
 if TYPE_CHECKING:
     # Avoid circular imports
@@ -193,7 +194,7 @@ class JobList:
                 #     lambda x: x.date == key and x.member == member, jobs)
                 local_list = [x for x in job_list if (
                     str(x.date) == str(key) and str(x.section) == str(member)) or x in current_list]
-                print(("Local list {} for {} - {}".format(len(local_list), key, member)))
+                logger.debug("Local list {} for {} - {}".format(len(local_list), key, member))
                 date_member_groups[(key, member)] = sorted(
                     local_list, key=lambda x: x.chunk if x.chunk is not None else 0)
                 added_job_names.update({job.job_name for job in local_list})
@@ -201,7 +202,7 @@ class JobList:
                 # jobs = [job for job in jobs if job not in local_short_list]
                 # jobs.extend(date_member_repetition[(date,member)])
                 # jobs -= local_list
-        print(("Spent in main: " + str(time() - start_time)))
+        logger.debug("Spent in main: " + str(time() - start_time))
 
         # Printing date - member groups / date - chunk syncs
         # Working with date-member groups
@@ -855,7 +856,7 @@ class JobList:
                     finish_time = 0
 
         except Exception:
-            print((traceback.format_exc()))
+            logger.error(traceback.format_exc())
             return
 
         seconds_queued = seconds_queued * \
