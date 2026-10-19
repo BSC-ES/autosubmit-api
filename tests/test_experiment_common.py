@@ -1,7 +1,10 @@
 import tempfile
 from pathlib import Path
 import random
-from autosubmit_api.experiment.utils import get_files_from_dir_with_pattern
+from autosubmit_api.experiment.utils import (
+    get_cas_user_from_xml,
+    get_files_from_dir_with_pattern,
+)
 
 
 def test_get_files_from_dir_with_pattern():
@@ -42,3 +45,7 @@ def test_get_files_from_dir_with_pattern():
             temp_dir, "non_existent_pattern"
         )
         assert len(non_matching_files) == 0
+
+
+def test_get_cas_user_from_xml_returns_none_on_invalid_xml():
+    assert get_cas_user_from_xml(b"<html>Service unavailable") is None

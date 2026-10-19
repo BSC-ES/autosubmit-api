@@ -1,9 +1,11 @@
 from datetime import datetime, timedelta, timezone
 from http import HTTPStatus
+from unittest.mock import MagicMock, patch
 from uuid import uuid4
 
 import jwt
 import pytest
+import requests
 from fastapi.testclient import TestClient
 
 from autosubmit_api import config
@@ -43,6 +45,32 @@ class TestLogin:
         assert response.status_code in [HTTPStatus.FOUND, HTTPStatus.TEMPORARY_REDIRECT]
         assert config.CAS_LOGIN_URL in response.headers["Location"]
         assert random_referer in response.headers["Location"]
+
+    def test_cas_response_not_xml(
+        self,
+        fixture_fastapi_client: TestClient,
+        fixture_mock_basic_config: APIBasicConfig,
+        monkeypatch: pytest.MonkeyPatch,
+    ):
+        random_referer = str(f"https://${uuid4()!s}/")
+        monkeypatch.setattr(APIBasicConfig, "ALLOWED_CLIENTS", [random_referer])
+
+        cas_response = MagicMock(spec=requests.Response)
+        cas_response.__bool__.return_value = True
+        cas_response.content = b"<html>Service unavailable"
+        with patch(
+            "autosubmit_api.routers.v3.auth.requests.get",
+            autospec=True,
+            return_value=cas_response,
+        ):
+            response = fixture_fastapi_client.get(
+                self.endpoint,
+                params={"ticket": "ST-1"},
+                headers={"Referer": random_referer},
+            )
+
+        assert response.status_code == HTTPStatus.UNAUTHORIZED
+        assert response.json().get("authenticated") is False
 
 
 class TestVerifyToken:
