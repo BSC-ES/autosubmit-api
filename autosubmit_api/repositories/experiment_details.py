@@ -49,22 +49,6 @@ class ExperimentDetailsRepository(ABC):
         """
 
     @abstractmethod
-    def upsert_details(
-        self, exp_id: int, user: str, created: str, model: str, branch: str, hpc: str
-    ) -> int:
-        """
-        Upsert the experiment details
-
-        :param exp_id: The numerical experiment id
-        :param user: The user who created the experiment
-        :param created: The creation date of the experiment
-        :param model: The model used in the experiment
-        :param branch: The branch of the model
-        :param hpc: The HPC used in the experiment
-        :return: The number of rows affected
-        """
-
-    @abstractmethod
     def upsert_many_details(self, details: List[ExperimentDetailsModel]) -> int:
         """
         Upsert the details of many experiments in a single transaction
@@ -128,32 +112,12 @@ class ExperimentDetailsSQLRepository(ExperimentDetailsRepository):
             hpc=result.hpc,
         )
 
-    def upsert_details(self, exp_id, user, created, model, branch, hpc):
-        values = {
-            "exp_id": exp_id,
-            "user": user,
-            "created": created,
-            "model": model,
-            "branch": branch,
-            "hpc": hpc,
-        }
-        with self.engine.connect() as conn:
-            try:
-                # keep ``execute_upsert`` call as ``details`` table has a primary
-                # key on ``exp_id`` in the hubs
-                rowcount = execute_upsert(
-                    conn, self.table, values, index_elements=["exp_id"]
-                )
-                conn.commit()
-            except Exception as exc:
-                conn.rollback()
-                raise exc
-        return rowcount
-
     def upsert_many_details(self, details):
         rowcount = 0
         with self.engine.begin() as conn:
             for detail in details:
+                # keep ``execute_upsert`` call as ``details`` table has a primary
+                # key on ``exp_id`` in the hubs
                 rowcount += execute_upsert(
                     conn, self.table, detail.model_dump(), index_elements=["exp_id"]
                 )
