@@ -27,23 +27,22 @@ class PopulateDetailsDB(BackgroundTaskTemplate):
         # Get experiments
         experiments = cls._get_experiments()
 
-        rows_added = 0
-
+        # Read every experiment configuration before opening the write
+        # transaction, so the database lock is not held during the reads.
+        details = []
         for experiment in experiments:
             try:
-                # Get details data from the experiment
-                details_data = cls._build_details_data_from_experiment(
-                    experiment.id, experiment.name
+                details.append(
+                    cls._build_details_data_from_experiment(
+                        experiment.id, experiment.name
+                    )
                 )
-
-                # Insert details data into the details table
-                rows_added += cls._upsert_details_data(details_data)
             except Exception as exc:
                 cls.logger.error(
                     f"[{cls.id}] Error while processing experiment {experiment.name}: {exc}"
                 )
 
-        return rows_added
+        return cls._upsert_details_data(details)
 
     @classmethod
     def _get_experiments(cls) -> List[ExperimentModel]:
@@ -73,16 +72,9 @@ class PopulateDetailsDB(BackgroundTaskTemplate):
         )
 
     @classmethod
-    def _upsert_details_data(cls, details_data: ExperimentDetailsModel):
+    def _upsert_details_data(cls, details: List[ExperimentDetailsModel]) -> int:
         """
-        Insert or update details data into the details table
+        Insert or update the details data into the details table in a single transaction
         """
         details_repository = create_experiment_details_repository()
-        return details_repository.upsert_details(
-            details_data.exp_id,
-            details_data.user,
-            details_data.created,
-            details_data.model,
-            details_data.branch,
-            details_data.hpc,
-        )
+        return details_repository.upsert_many_details(details)

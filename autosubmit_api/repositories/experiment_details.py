@@ -64,6 +64,15 @@ class ExperimentDetailsRepository(ABC):
         :return: The number of rows affected
         """
 
+    @abstractmethod
+    def upsert_many_details(self, details: List[ExperimentDetailsModel]) -> int:
+        """
+        Upsert the details of many experiments in a single transaction
+
+        :param details: The experiment details to upsert
+        :return: The number of rows affected
+        """
+
 
 class ExperimentDetailsSQLRepository(ExperimentDetailsRepository):
     def __init__(self, engine: Engine, table: Table):
@@ -139,6 +148,15 @@ class ExperimentDetailsSQLRepository(ExperimentDetailsRepository):
             except Exception as exc:
                 conn.rollback()
                 raise exc
+        return rowcount
+
+    def upsert_many_details(self, details):
+        rowcount = 0
+        with self.engine.begin() as conn:
+            for detail in details:
+                rowcount += execute_upsert(
+                    conn, self.table, detail.model_dump(), index_elements=["exp_id"]
+                )
         return rowcount
 
 
