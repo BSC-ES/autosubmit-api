@@ -1,3 +1,4 @@
+import pytest
 import tempfile
 from pathlib import Path
 import random
@@ -49,3 +50,17 @@ def test_get_files_from_dir_with_pattern():
 
 def test_get_cas_user_from_xml_returns_none_on_invalid_xml():
     assert get_cas_user_from_xml(b"<html>Service unavailable") is None
+
+
+def test_get_cas_user_from_xml_returns_user_on_success():
+    xmlstring = (
+        b"<cas:serviceResponse xmlns:cas='http://www.yale.edu/tp/cas'>"
+        b"<cas:authenticationSuccess><cas:user>jdoe</cas:user>"
+        b"</cas:authenticationSuccess></cas:serviceResponse>"
+    )
+    assert get_cas_user_from_xml(xmlstring) == "jdoe"
+
+
+def test_get_cas_user_from_xml_does_not_hide_non_xml_errors():
+    with pytest.raises(TypeError):
+        get_cas_user_from_xml(None)
