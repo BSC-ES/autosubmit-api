@@ -1,4 +1,5 @@
 from http import HTTPStatus
+import xml.etree.ElementTree as ET
 from typing import Optional
 from fastapi import APIRouter, Depends, Request
 from fastapi.responses import JSONResponse, RedirectResponse
@@ -66,7 +67,11 @@ async def cas_v2_login(
 
     # There is a ticket, the request come from CAS as callback.
     # need call `verify_ticket()` to validate ticket and get user profile.
-    user, attributes, pgtiou = cas_client.verify_ticket(ticket)
+    try:
+        user, attributes, pgtiou = cas_client.verify_ticket(ticket)
+    except ET.ParseError:
+        # The CAS server did not answer with a validation document
+        user = None
 
     if not user:
         return JSONResponse(

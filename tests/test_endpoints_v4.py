@@ -44,6 +44,52 @@ class TestCASV2Login:
         response = fixture_fastapi_client.get(self.endpoint, params={"service": "asd"})
         assert response.status_code == HTTPStatus.UNAUTHORIZED
 
+    @pytest.mark.parametrize(
+        "cas_response, expected_status, expected_user",
+        [
+            pytest.param(
+                b"<cas:serviceResponse xmlns:cas='http://www.yale.edu/tp/cas'>"
+                b"<cas:authenticationSuccess><cas:user>jdoe</cas:user>"
+                b"</cas:authenticationSuccess></cas:serviceResponse>",
+                HTTPStatus.OK,
+                "jdoe",
+                id="success",
+            ),
+            pytest.param(
+                b"<cas:serviceResponse xmlns:cas='http://www.yale.edu/tp/cas'>"
+                b"<cas:authenticationFailure code='INVALID_TICKET'>"
+                b"Ticket not recognized</cas:authenticationFailure>"
+                b"</cas:serviceResponse>",
+                HTTPStatus.UNAUTHORIZED,
+                None,
+                id="failure",
+            ),
+            pytest.param(
+                b"<html>Service unavailable",
+                HTTPStatus.UNAUTHORIZED,
+                None,
+                id="not_xml",
+            ),
+        ],
+    )
+    def test_ticket_validation(
+        self,
+        fixture_fastapi_client: TestClient,
+        monkeypatch: pytest.MonkeyPatch,
+        cas_response: bytes,
+        expected_status: HTTPStatus,
+        expected_user: str | None,
+    ):
+        monkeypatch.setattr(
+            "cas.CASClientV2.get_verification_response",
+            lambda self, ticket: cas_response,
+        )
+        response = fixture_fastapi_client.get(
+            self.endpoint, params={"ticket": "ST-1-test"}
+        )
+        assert response.status_code == expected_status
+        assert response.json()["user"] == expected_user
+
 
 class TestOIDCLogin:
     endpoint = "/v4/auth/oidc/login"
