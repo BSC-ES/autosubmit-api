@@ -7,7 +7,7 @@
 * Migrated `setup.py`, `pytest.ini`, `ruff.toml` and `.coveragerc` to `pyproject.toml` to allow Dependabot to discover outdated dependencies #350
 * Tightened `requests` upper bound to `<2.33.0` matching the ceiling imposed by `autosubmit` v4.1.17 dependency (`requests<=2.32.5`)
 * `/v3/login` answers 401 instead of 500 when the CAS ticket verification response is not valid XML #383
-* `/v4/auth/cas/v2/login` returns 401 instead of 500 when the CAS server's ticket validation response is not well-formed XML #383
+* `/v4/auth/cas/v2/login` returns 401 instead of 500 when the CAS server's ticket validation response is not a valid CAS document #383
 
 ### Release v4.2.0 - Release date: 2026-09-28
 

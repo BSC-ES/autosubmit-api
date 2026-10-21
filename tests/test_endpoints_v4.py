@@ -70,6 +70,28 @@ class TestCASV2Login:
                 None,
                 id="not_xml",
             ),
+            pytest.param(
+                b"<cas:serviceResponse xmlns:cas='http://www.yale.edu/tp/cas'>"
+                b"</cas:serviceResponse>",
+                HTTPStatus.UNAUTHORIZED,
+                None,
+                id="empty_service_response",
+            ),
+            pytest.param(
+                b"<cas:serviceResponse xmlns:cas='http://www.yale.edu/tp/cas'>"
+                b"<cas:authenticationSuccess></cas:authenticationSuccess>"
+                b"</cas:serviceResponse>",
+                HTTPStatus.UNAUTHORIZED,
+                None,
+                id="success_without_user",
+            ),
+            pytest.param(
+                b"<serviceResponse><authenticationSuccess><user>jdoe</user>"
+                b"</authenticationSuccess></serviceResponse>",
+                HTTPStatus.UNAUTHORIZED,
+                None,
+                id="no_namespace",
+            ),
         ],
     )
     def test_ticket_validation(
