@@ -5,6 +5,7 @@
 #### Bug fixes
 
 * Migrated `setup.py`, `pytest.ini`, `ruff.toml` and `.coveragerc` to `pyproject.toml` to allow Dependabot to discover outdated dependencies #350
+* `POST /v4/runners/command/get-runner-run-status` returns 200 with status `NO_RUNNER` instead of 500 when the experiment has no runner process #315
 * Tightened `requests` upper bound to `<2.33.0` matching the ceiling imposed by `autosubmit` v4.1.17 dependency (`requests<=2.32.5`)
 
 ### Release v4.2.0 - Release date: 2026-09-28

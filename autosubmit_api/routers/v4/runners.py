@@ -239,13 +239,24 @@ async def get_runner_run_status(
     try:
         runner_repo = create_runner_processes_repository()
         last_process = runner_repo.get_last_process_by_expid(expid)
-        if not last_process:
-            raise ValueError(f"No runner process found for expid: {expid}")
     except Exception as exc:
         raise HTTPException(
             status_code=500,
             detail=f"Failed to get status for experiment {expid}: {exc}",
         )
+
+    if not last_process:
+        return {
+            "expid": expid,
+            "runner_id": None,
+            "runner": None,
+            "module_loader": None,
+            "modules": None,
+            "status": "NO_RUNNER",
+            "pid": None,
+            "created": None,
+            "modified": None,
+        }
 
     return {
         "expid": expid,
