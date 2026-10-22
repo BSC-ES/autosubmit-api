@@ -19,6 +19,7 @@ import os
 from autosubmit_api.experiment import utils as HUtils
 # from database_managers.database_manager import DEFAULT_LOCAL_ROOT_DIR, DEFAULT_HISTORICAL_LOGS_DIR
 from autosubmit_api.config.basicConfig import APIBasicConfig
+from autosubmit_api.logger import logger
 
 class Logging():
   def __init__(self, expid: str, basic_config: APIBasicConfig):
@@ -35,8 +36,8 @@ class Logging():
       with open(log_path, "a") as exp_log:
         exp_log.write(self.build_message(main_msg, traceback_msg))
     except Exception as exp:
-      print(exp)
-      print("Logging failed. Please report it to the developers.")
+      logger.error(exp)
+      logger.error("Logging failed. Please report it to the developers.")
 
   def build_message(self, main_msg, traceback_msg):
     return "{0} :: {1} :: {2}\n".format(HUtils.get_current_datetime(), main_msg, traceback_msg)

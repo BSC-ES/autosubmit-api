@@ -33,6 +33,7 @@ from autosubmit_api.builders.configuration_facade_builder import (
 from autosubmit_api.repositories.join.experiment_join import (
     create_experiment_join_repository,
 )
+from autosubmit_api.logger import logger
 
 
 def search_experiment_by_id(query, exp_type=None, only_active=None, owner=None):
@@ -103,7 +104,7 @@ def search_experiment_by_id(query, exp_type=None, only_active=None, owner=None):
                 suspended = current_run.suspended
                 # last_modified_timestamp = current_run.modified_timestamp
         except Exception as exp:
-            print(("Exception on search_experiment_by_id : {}".format(exp)))
+            logger.warning("Exception on search_experiment_by_id : {}".format(exp))
             pass
 
         result.append(
@@ -187,7 +188,7 @@ def get_current_running_exp():
                     suspended = current_run.suspended
                     # last_modified_timestamp = current_run.modified_timestamp
             except Exception as exp:
-                print(("Exception on get_current_running_exp : {}".format(exp)))
+                logger.warning("Exception on get_current_running_exp : {}".format(exp))
 
             # Append to result
             result.append(

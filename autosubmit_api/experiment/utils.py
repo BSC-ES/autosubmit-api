@@ -5,6 +5,7 @@ from pathlib import Path
 from typing import List
 import lzma
 import gzip
+from autosubmit_api.logger import logger
 
 
 XZ_MAGIC = "FD 37 7A 58 5A 00"
@@ -21,7 +22,7 @@ def get_cas_user_from_xml(xmlstring: bytes | str) -> str | None:
     try:
         root_node = ET.fromstring(xmlstring)
     except ET.ParseError as exp:
-        print(exp)
+        logger.error(exp)
         return None
 
     user = None

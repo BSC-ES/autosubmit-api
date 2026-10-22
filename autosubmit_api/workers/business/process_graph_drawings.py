@@ -13,6 +13,7 @@ from autosubmit_api.builders.joblist_loader_builder import (
 from typing import List, Any, Optional
 
 from autosubmit_api.repositories.experiment_status import create_experiment_status_repository
+from autosubmit_api.logger import logger
 
 
 def process_active_graphs():
@@ -32,12 +33,12 @@ def process_active_graphs():
                 ):
                     _process_graph(expid, autosubmit_configuration_facade.chunk_size)
             except Exception:
-                print((traceback.format_exc()))
-                print(("Error while processing: {}".format(expid)))
+                logger.error(traceback.format_exc())
+                logger.error("Error while processing: {}".format(expid))
 
     except Exception as exp:
-        print((traceback.format_exc()))
-        print(("Error while processing graph drawing: {}".format(exp)))
+        logger.error(traceback.format_exc())
+        logger.error("Error while processing graph drawing: {}".format(exp))
 
 
 def _process_graph(expid: str, chunk_size: int) -> Optional[List[Any]]:
@@ -52,21 +53,15 @@ def _process_graph(expid: str, chunk_size: int) -> Optional[List[Any]]:
         ).build_loaded_joblist_loader()
         current_data = experimentGraphDrawing.get_validated_data(job_list_loader.jobs)
         if not current_data:
-            print(("Must update {}".format(expid)))
+            logger.info("Must update {}".format(expid))
             result = experimentGraphDrawing.calculate_drawing(
                 job_list_loader.jobs,
                 independent=False,
                 num_chunks=chunk_size,
                 job_dictionary=job_list_loader.job_dictionary,
             )
-            print(
-                (
-                    "Time Spent in {}: {} seconds.".format(
-                        expid, int(time.time() - start_time)
-                    )
-                )
-            )
+            logger.info("Time Spent in {}: {} seconds.".format(expid, int(time.time() - start_time)))
     else:
-        print(("{} Locked".format(expid)))
+        logger.info("{} Locked".format(expid))
 
     return result

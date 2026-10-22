@@ -307,7 +307,7 @@ class ymlConfigStrategy(IConfigStrategy):
         try:
             chunk_size = self._conf_parser.get_chunk_size(default)
         except Exception as exp:
-            print(exp)
+            logger.warning(exp)
             chunk_size = ''
         if chunk_size == '':
             return default

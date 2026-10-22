@@ -139,7 +139,7 @@ def get_experiment_stats(expid: str, filter_period: int, filter_type: str) -> Di
             raise Exception("Autosubmit API couldn't find jobs that match your search critearia (Section: {0}) in the period from {1} to {2}.".format(filter_type, period_ini, period_fi))
 
     except Exception as e:
-        print((traceback.format_exc()))
+        logger.error(traceback.format_exc())
         error_message = str(e)
         error = True
 
@@ -558,7 +558,7 @@ def quick_test_run(expid):
     except Exception as exp:
         error = True
         error_message = str(exp)
-        print((traceback.format_exc()))
+        logger.error(traceback.format_exc())
 
     return {
         'running': running,
@@ -893,8 +893,8 @@ def get_experiment_graph(expid, log, layout=Layout.STANDARD, grouped=GroupedBy.N
             raise ValueError('Autosubmit version is not supported')
 
     except Exception as e:
-        print((traceback.format_exc()))
-        print(("New Graph Representation failed: {0}".format(e)))
+        logger.error(traceback.format_exc())
+        logger.error("New Graph Representation failed: {0}".format(e))
         log.info("Could not generate Graph and recieved the following exception: " + str(e))
         return {'nodes': [],
                 'edges': [],
@@ -916,7 +916,7 @@ def get_experiment_tree_rundetail(expid, run_id):
     base_list = dict()
     pkl_timestamp = 10000000
     try:
-        print(("Received Tree RunDetail " + str(expid)))
+        logger.debug("Received Tree RunDetail " + str(expid))
         APIBasicConfig.read()
         tree_structure, current_collection, reference = JobList.get_tree_structured_from_previous_run(expid, APIBasicConfig, run_id=run_id)
         base_list['tree'] = tree_structure
@@ -924,7 +924,7 @@ def get_experiment_tree_rundetail(expid, run_id):
         base_list['total'] = len(current_collection)
         base_list['reference'] = reference
     except Exception as e:
-        print((traceback.format_exc()))
+        logger.error(traceback.format_exc())
         return {'tree': [], 'jobs': [], 'total': 0, 'reference': [], 'error': True, 'error_message': str(e), 'pkl_timestamp': 0}
     base_list['error'] = False
     base_list['error_message'] = ''
@@ -964,8 +964,8 @@ def get_experiment_tree_structured(expid, log):
             raise ValueError('Autosubmit version is not supported')
         
     except Exception as e:
-        print((traceback.format_exc()))
-        print(("New Tree Representation failed: {0}".format(e)))
+        logger.error(traceback.format_exc())
+        logger.error("New Tree Representation failed: {0}".format(e))
         log.info("New Tree Representation failed: {0}".format(e))
         return {'tree': [], 'jobs': [], 'total': 0, 'reference': [], 'error': True, 'error_message': str(e), 'pkl_timestamp': 0}
 
@@ -1109,7 +1109,7 @@ def get_job_history(expid: str, job_name: str) -> Dict[str, Any]:
         path_to_job_logs = exp_paths.tmp_log_dir
         result = ExperimentHistoryDirector(ExperimentHistoryBuilder(expid)).build_reader_experiment_history().get_historic_job_data(job_name)
     except Exception as exp:
-        print((traceback.format_exc()))
+        logger.error(traceback.format_exc())
         error = True
         error_message = str(exp)
         pass

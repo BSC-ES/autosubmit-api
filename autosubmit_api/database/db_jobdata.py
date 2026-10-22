@@ -86,7 +86,7 @@ class ExperimentRun():
 
     def __init__(self, run_id, created=None, start=0, finish=0, chunk_unit="NA", chunk_size=0, completed=0, total=0, failed=0, queuing=0, running=0, submitted=0, suspended=0, metadata="", modified=None):
         self.run_id = run_id
-        self.created = created if created else datetime.today().strftime('%Y-%m-%d-%H:%M:%S')
+        self.created = created if created else datetime.now().strftime('%Y-%m-%d-%H:%M:%S')
         self.start = start
         self.finish = finish
         self.chunk_unit = chunk_unit
@@ -194,8 +194,8 @@ class JobData(object):
         self._id = _id
         self.counter = counter
         self.job_name = job_name
-        self.created = created if created else datetime.today().strftime('%Y-%m-%d-%H:%M:%S')
-        self.modified = modified if modified else datetime.today().strftime('%Y-%m-%d-%H:%M:%S')
+        self.created = created if created else datetime.now().strftime('%Y-%m-%d-%H:%M:%S')
+        self.modified = modified if modified else datetime.now().strftime('%Y-%m-%d-%H:%M:%S')
         self._submit = int(submit)
         self._start = int(start)
         self._finish = int(finish)
@@ -490,8 +490,8 @@ class JobDataStructure:
                 current_experiment_run.modified,
             )
         except Exception as exc:
-            print((str(exc)))
-            print((traceback.format_exc()))
+            logger.error(str(exc))
+            logger.error(traceback.format_exc())
             return None
 
     def get_experiment_run_by_id(self, run_id: int) -> Optional[ExperimentRun]:
@@ -579,6 +579,6 @@ class JobDataStructure:
 
             return current_collection
         except Exception:
-            print((traceback.format_exc()))
-            print(("Error on returning current job data. run_id {0}".format(run_id)))
+            logger.error(traceback.format_exc())
+            logger.error("Error on returning current job data. run_id {0}".format(run_id))
             return None
