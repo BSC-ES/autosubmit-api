@@ -1,4 +1,4 @@
-import os
+import pwd
 from pathlib import Path
 from typing import Union
 
@@ -17,11 +17,9 @@ class FileMetadata:
     @property
     def owner_name(self) -> str:
         try:
-            stdout = os.popen("id -nu {0}".format(str(self.owner_id)))
-            owner_name = stdout.read().strip()
-            return str(owner_name)
-        except Exception:
-            raise Exception("Error while getting owner name")
+            return pwd.getpwuid(self.owner_id).pw_name
+        except KeyError:
+            return ""
 
     @property
     def access_time(self) -> str:
