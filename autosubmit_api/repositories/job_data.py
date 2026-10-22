@@ -25,6 +25,7 @@ class ExperimentJobDataModel(BaseModel):
     wallclock: Any
     qos: Any
     energy: Any
+    CPUTimeRAW: Any = 0
     date: Any
     section: Any
     member: Any
@@ -233,6 +234,8 @@ def create_experiment_job_data_repository(expid: str):
     if APIBasicConfig.DATABASE_BACKEND == "postgres":
         _engine = create_engine(APIBasicConfig.DATABASE_CONN_URL)
         _tables = [
+            tables.table_change_schema(expid, tables.JobDataTableV21),
+            tables.table_change_schema(expid, tables.JobDataTableV20),
             tables.table_change_schema(expid, tables.JobDataTableV19),
             tables.table_change_schema(expid, tables.JobDataTableV18),
             tables.table_change_schema(expid, tables.JobDataTable),
@@ -242,6 +245,8 @@ def create_experiment_job_data_repository(expid: str):
             ExperimentPaths(expid).job_data_db, read_only=True
         )
         _tables = [
+            tables.JobDataTableV21,
+            tables.JobDataTableV20,
             tables.JobDataTableV19,
             tables.JobDataTableV18,
             tables.JobDataTable,

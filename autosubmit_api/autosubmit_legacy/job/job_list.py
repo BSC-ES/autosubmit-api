@@ -689,6 +689,7 @@ class JobList:
                     sub.run,
                     sub.status,
                     current_job_info.energy,
+                    current_job_info.CPUTimeRAW,
                     current_job_info.submit,
                     current_job_info.start,
                     current_job_info.finish,
@@ -744,6 +745,7 @@ class JobList:
         """
         status = "NA"
         energy = 0
+        cpu_time_raw = 0
         seconds_queued = 0
         seconds_running = 0
         queue_time = running_time = 0
@@ -759,6 +761,7 @@ class JobList:
                 status = Status.VALUE_TO_KEY[status_code]
                 if status == job_data.status:
                     energy = job_data.energy
+                    cpu_time_raw = job_data.CPUTimeRAW
                     if job_times:
                         t_submit, t_start, t_finish, _, _ = job_times.get(
                             name, (0, 0, 0, 0, 0)
@@ -805,6 +808,7 @@ class JobList:
                         int(running_time),
                         status,
                         energy,
+                        cpu_time_raw,
                         t_submit,
                         t_start,
                         t_finish,
@@ -877,6 +881,7 @@ class JobList:
             int(running_time),
             status,
             energy,
+            cpu_time_raw,
             int(submit_time),
             int(start_time),
             int(finish_time),

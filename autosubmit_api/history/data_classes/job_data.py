@@ -48,6 +48,7 @@ class JobData(object):
         wallclock="00:00",
         qos="debug",
         energy=0,
+        CPUTimeRAW=0,
         date="",
         section="",
         member="",
@@ -100,6 +101,7 @@ class JobData(object):
           self.extra_data_parsed = {} # Fail fast
       self.extra_data = extra_data
       self.nnodes = nnodes
+      self.CPUTimeRAW = CPUTimeRAW
       self.run_id: int = run_id
       self.require_update = False
       # DB VERSION 15 attributes
@@ -134,6 +136,7 @@ class JobData(object):
             row_dict.get("wallclock", "01:00"),
             row_dict.get("qos", ""),
             row_dict.get("energy", 0),
+            row_dict.get("CPUTimeRAW", 0),
             row_dict["date"],
             row_dict["section"],
             row_dict["member"],
@@ -365,6 +368,7 @@ class JobData(object):
         hdata["ncpus"] = self.ncpus
         hdata["nnodes"] = self.nnodes
         hdata["energy"] = self.energy
+        hdata["CPUTimeRAW"] = self.CPUTimeRAW
         hdata["platform"] = self.platform
         hdata["MaxRSS"] = self.MaxRSS
         hdata["AveRSS"] = self.AveRSS

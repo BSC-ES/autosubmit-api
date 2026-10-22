@@ -244,7 +244,10 @@ JobDataTableV18.append_column(Column("workflow_commit", Text, nullable=True))
 JobDataTableV19 = table_copy(JobDataTableV18)
 JobDataTableV19.append_column(Column("split", Integer, nullable=True))
 JobDataTableV19.append_column(Column("splits", Integer, nullable=True))
-JobDataTableV19.append_column(Column("fail_count", Integer, nullable=False, default=0))
+JobDataTableV20 = table_copy(JobDataTableV19)
+JobDataTableV20.append_column(Column("fail_count", Integer, nullable=False, default=0))
+JobDataTableV21 = table_copy(JobDataTableV20)
+JobDataTableV21.append_column(Column("CPUTimeRAW", Integer, nullable=False, default=0))
 
 
 UserMetricTable = Table(
