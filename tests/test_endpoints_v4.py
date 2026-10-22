@@ -1526,6 +1526,28 @@ class TestRunnerGetRunnerRunStatus:
                 json={"expid": "test_expid"},
             )
 
+            assert response.status_code == 200
+            resp_obj: dict = response.json()
+            assert resp_obj["expid"] == "test_expid"
+            assert resp_obj["status"] == "NO_RUNNER"
+            assert resp_obj["runner_id"] is None
+            assert resp_obj["pid"] is None
+
+    def test_repository_error(self, fixture_fastapi_client: TestClient):
+        with patch(
+            "autosubmit_api.routers.v4.runners.create_runner_processes_repository"
+        ) as mock_create_repo:
+            mock_repo = MagicMock()
+            mock_repo.get_last_process_by_expid.side_effect = RuntimeError(
+                "database is locked"
+            )
+            mock_create_repo.return_value = mock_repo
+
+            response = fixture_fastapi_client.post(
+                self.endpoint,
+                json={"expid": "test_expid"},
+            )
+
             assert response.status_code == 500
 
 
