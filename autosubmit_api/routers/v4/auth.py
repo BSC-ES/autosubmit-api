@@ -1,4 +1,5 @@
 from http import HTTPStatus
+import xml.etree.ElementTree as ET
 from typing import Optional
 from fastapi import APIRouter, Depends, Request
 from fastapi.responses import JSONResponse, RedirectResponse
@@ -8,6 +9,7 @@ from autosubmit_api import config
 from autosubmit_api.auth import ProtectionLevels, auth_token_dependency, oidc
 from autosubmit_api.auth.utils import validate_client
 from autosubmit_api.auth.utils import generate_jwt_token
+from autosubmit_api.logger import logger
 from autosubmit_api.models.responses import AuthResponse, LoginResponse
 
 
@@ -66,7 +68,11 @@ async def cas_v2_login(
 
     # There is a ticket, the request come from CAS as callback.
     # need call `verify_ticket()` to validate ticket and get user profile.
-    user, attributes, pgtiou = cas_client.verify_ticket(ticket)
+    try:
+        user, attributes, pgtiou = cas_client.verify_ticket(ticket)
+    except (ET.ParseError, IndexError, AttributeError, ValueError) as exc:
+        logger.warning("Unexpected CAS ticket validation response: %s", exc)
+        user = None
 
     if not user:
         return JSONResponse(
