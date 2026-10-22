@@ -1,4 +1,3 @@
-from typing import List
 from autosubmit_api.bgtasks.bgtask import BackgroundTaskTemplate
 from autosubmit_api.builders.configuration_facade_builder import (
     AutosubmitConfigurationFacadeBuilder,
@@ -26,27 +25,38 @@ class PopulateDetailsDB(BackgroundTaskTemplate):
 
         # Get experiments
         experiments = cls._get_experiments()
+        if not experiments:
+            return 0
 
-        rows_added = 0
+        details_repository = create_experiment_details_repository()
+        stored_details = {
+            detail.exp_id: detail for detail in details_repository.get_all()
+        }
 
+        # Read every experiment configuration before opening the write
+        # transaction, so the database lock is not held during the reads.
+        # Only the details that are missing or differ from the stored ones are written.
+        changed_details = []
         for experiment in experiments:
             try:
-                # Get details data from the experiment
-                details_data = cls._build_details_data_from_experiment(
+                detail = cls._build_details_data_from_experiment(
                     experiment.id, experiment.name
                 )
-
-                # Insert details data into the details table
-                rows_added += cls._upsert_details_data(details_data)
             except Exception as exc:
                 cls.logger.error(
                     f"[{cls.id}] Error while processing experiment {experiment.name}: {exc}"
                 )
+                continue
+            if stored_details.get(experiment.id) != detail:
+                changed_details.append(detail)
 
-        return rows_added
+        if not changed_details:
+            return 0
+
+        return details_repository.upsert_many_details(changed_details)
 
     @classmethod
-    def _get_experiments(cls) -> List[ExperimentModel]:
+    def _get_experiments(cls) -> list[ExperimentModel]:
         """
         Get the experiments list
         """
@@ -70,19 +80,4 @@ class PopulateDetailsDB(BackgroundTaskTemplate):
             model=autosubmit_config.get_model(),
             branch=autosubmit_config.get_branch(),
             hpc=autosubmit_config.get_main_platform(),
-        )
-
-    @classmethod
-    def _upsert_details_data(cls, details_data: ExperimentDetailsModel):
-        """
-        Insert or update details data into the details table
-        """
-        details_repository = create_experiment_details_repository()
-        return details_repository.upsert_details(
-            details_data.exp_id,
-            details_data.user,
-            details_data.created,
-            details_data.model,
-            details_data.branch,
-            details_data.hpc,
         )
