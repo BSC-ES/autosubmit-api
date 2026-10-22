@@ -23,7 +23,7 @@ classifiers = [
 ]
 
 dependencies = [
-    "fastapi[all]==0.146.0",
+    "fastapi[all]==0.149.0",
     "pyjwt>=2.8,<2.16",
     # requests upper bound mirrors autosubmit's requests upper bound.
     # Review the dependency version once autosubmit is updated.
