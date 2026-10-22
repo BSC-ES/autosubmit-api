@@ -49,7 +49,7 @@ class ExperimentDetailsRepository(ABC):
         """
 
     @abstractmethod
-    def upsert_many_details(self, details: List[ExperimentDetailsModel]) -> int:
+    def upsert_many_details(self, details: list[ExperimentDetailsModel]) -> int:
         """
         Upsert the details of many experiments in a single transaction
 
