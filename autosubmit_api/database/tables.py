@@ -29,11 +29,7 @@ def table_copy(table: Table, metadata: MetaData | None = None) -> Table:
     """
     if not isinstance(metadata, MetaData):
         metadata = MetaData()
-    return Table(
-        table.name,
-        metadata,
-        *[col.copy() for col in table.columns],
-    )
+    return table.to_metadata(metadata, schema=None)
 
 
 def table_change_schema(schema: str, source: type[DeclarativeBase] | Table) -> Table:

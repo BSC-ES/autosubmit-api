@@ -23,7 +23,7 @@ classifiers = [
 ]
 
 dependencies = [
-    "fastapi[all]==0.146.0",
+    "fastapi[all]==0.161.1",
     "pyjwt>=2.8,<2.16",
     # requests upper bound mirrors autosubmit's requests upper bound.
     # Review the dependency version once autosubmit is updated.
@@ -51,7 +51,7 @@ test = [
     "pytest-cov",
     "pytest-asyncio",
     "ruff==0.17.1",
-    "testcontainers",
+    "testcontainers>=4.15.0",
     "mock",
 ]
 postgres = ["psycopg2"]
@@ -95,6 +95,11 @@ addopts = [
     "not ssh_runner",
 ]
 testpaths = ["tests"]
+markers = [
+    "ssh_runner: tests that require the SSH/Slurm container environment",
+    "sqlite: tests run against the SQLite backend",
+    "postgres: tests run against the PostgreSQL backend (testcontainers)",
+]
 doctest_optionflags = [
     "NORMALIZE_WHITESPACE",
     "IGNORE_EXCEPTION_DETAIL",

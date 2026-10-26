@@ -19,20 +19,27 @@ class ExperimentsSearchRequest(BaseModel):
     order_by: Optional[Literal["expid", "created", "description"]] = None
     order_desc: bool = False
 
-    page: Annotated[int, Field(ge=1, description="Page number", example=1)] = 1
+    page: Annotated[
+        int, Field(ge=1, description="Page number", json_schema_extra={"example": 1})
+    ] = 1
     page_size: int = PAGINATION_LIMIT_DEFAULT
 
 
 class JobsSearchRequest(BaseModel):
     view: Annotated[
-        Literal["quick", "base"], Field(description="View type", example="base")
+        Literal["quick", "base"],
+        Field(description="View type", json_schema_extra={"example": "base"}),
     ] = "base"
     job_name: Annotated[
         str | None,
-        Field(description="Job name. Wildcard supported", example="example_job_*"),
+        Field(
+            description="Job name. Wildcard supported",
+            json_schema_extra={"example": "example_job_*"},
+        ),
     ] = None
     status: Annotated[
-        str | None, Field(description="Job status", example="COMPLETED")
+        str | None,
+        Field(description="Job status", json_schema_extra={"example": "COMPLETED"}),
     ] = None
 
     @field_validator("status")
@@ -45,14 +52,16 @@ class JobsSearchRequest(BaseModel):
             )
         return status
 
-    page: Annotated[int, Field(ge=1, description="Page number", example=1)] = 1
+    page: Annotated[
+        int, Field(ge=1, description="Page number", json_schema_extra={"example": 1})
+    ] = 1
     page_size: Annotated[
         int | None,
         Field(
             ge=1,
             le=PAGINATION_LIMIT_MAX,
             description="Page size. Omit to disable pagination",
-            example=12,
+            json_schema_extra={"example": 12},
         ),
     ] = None
 

@@ -8,7 +8,7 @@ from collections.abc import Generator
 import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import Column, Engine, Integer, MetaData, String, Table, create_engine
-from testcontainers.postgres import PostgresContainer
+from testcontainers.community.postgres import PostgresContainer
 
 from autosubmit_api import config
 from autosubmit_api.config.basicConfig import APIBasicConfig
