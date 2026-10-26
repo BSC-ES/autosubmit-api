@@ -30,7 +30,7 @@ from autosubmit.config.configcommon import (
 )
 from bscearth.utils.config_parser import ConfigParser, ConfigParserFactory
 from bscearth.utils.date import parse_date
-from pyparsing import nestedExpr
+from pyparsing import nested_expr
 
 from autosubmit_api.config.basicConfig import APIBasicConfig
 from autosubmit_api.config.IConfigStrategy import IConfigStrategy
@@ -907,7 +907,7 @@ class confConfigStrategy(IConfigStrategy):
         string = self._exp_parser.get('experiment', 'DATELIST')
         if not string.startswith("["):
             string = '[{0}]'.format(string)
-        split_string = nestedExpr('[', ']').parseString(string).asList()
+        split_string = nested_expr('[', ']').parse_string(string).as_list()
         string_date = None
         for split in split_string[0]:
             if type(split) is list:
@@ -996,7 +996,7 @@ class confConfigStrategy(IConfigStrategy):
             'experiment', 'RUN_ONLY_MEMBERS', '')
         if not string.startswith("["):
             string = '[{0}]'.format(string)
-        split_string = nestedExpr('[', ']').parseString(string).asList()
+        split_string = nested_expr('[', ']').parse_string(string).as_list()
         string_member = None
         for split in split_string[0]:
             if type(split) is list:
@@ -1279,10 +1279,7 @@ class confConfigStrategy(IConfigStrategy):
 
     @staticmethod
     def is_valid_mail_address(mail_address):
-        if re.match('^[_a-z0-9-]+(\.[_a-z0-9-]+)*@[a-z0-9-]+(\.[a-z0-9-]+)*(\.[a-z]{2,4})$', mail_address):
-            return True
-        else:
-            return False
+        return bool(re.match(r'^[_a-z0-9-]+(\.[_a-z0-9-]+)*@[a-z0-9-]+(\.[a-z0-9-]+)*(\.[a-z]{2,4})$', mail_address))
 
     def is_valid_communications_library(self):
         library = self.get_communications_library()

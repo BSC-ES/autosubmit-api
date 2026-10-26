@@ -1,18 +1,21 @@
 import os
-from typing import Any, Dict, Optional
+from typing import Any
+from unittest.mock import patch
 from uuid import uuid4
-from fastapi import HTTPException
-from fastapi.security import HTTPAuthorizationCredentials
+
 import jwt
 import pytest
-from unittest.mock import patch
-from autosubmit_api.auth.oidc import oidc_token_exchange, oidc_resolve_username
+from fastapi import HTTPException
+from fastapi.security import HTTPAuthorizationCredentials
+
+from autosubmit_api import auth, config
 from autosubmit_api.auth import ProtectionLevels, auth_token_dependency
-from autosubmit_api import auth
-from autosubmit_api.auth.utils import validate_client, generate_jwt_token
+from autosubmit_api.auth.oidc import oidc_resolve_username, oidc_token_exchange
+from autosubmit_api.auth.utils import generate_jwt_token, validate_client
 from autosubmit_api.config.basicConfig import APIBasicConfig
-from autosubmit_api import config
 from tests.utils import custom_return_value
+
+TEST_ID_TOKEN_SECRET = "autosubmit-api-test-id-token-secret"
 
 
 class TestCommonAuth:
@@ -168,16 +171,16 @@ class TestOIDC:
     )
     def test_oidc_resolve_username_from_id_token(
         self,
-        id_token_content: Dict[str, Any],
-        oidc_username_claim: Optional[str],
-        expected_username: Optional[str],
+        id_token_content: dict[str, Any],
+        oidc_username_claim: str | None,
+        expected_username: str | None,
     ):
         """
         Test where OIDC_USERNAME_SOURCE="id_token" and
         parametrized OIDC_USERNAME_CLAIM
         """
 
-        id_token = jwt.encode(id_token_content, "test_secret", algorithm="HS256")
+        id_token = jwt.encode(id_token_content, TEST_ID_TOKEN_SECRET, algorithm="HS256")
 
         with patch("autosubmit_api.auth.oidc.config") as mock_config:
             mock_config.OIDC_USERNAME_SOURCE = "id_token"
@@ -198,9 +201,9 @@ class TestOIDC:
     )
     def test_oidc_resolve_username_from_userinfo(
         self,
-        user_info: Dict[str, Any],
-        oidc_username_claim: Optional[str],
-        expected_username: Optional[str],
+        user_info: dict[str, Any],
+        oidc_username_claim: str | None,
+        expected_username: str | None,
     ):
         """
         Test where OIDC_USERNAME_SOURCE="userinfo" and

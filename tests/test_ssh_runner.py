@@ -1,4 +1,5 @@
 from unittest.mock import patch
+
 import pytest
 
 from autosubmit_api.runners.base import RunnerProcessStatus, RunnerType
