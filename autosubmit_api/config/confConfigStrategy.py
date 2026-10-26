@@ -983,6 +983,33 @@ class confConfigStrategy(IConfigStrategy):
             return default
         return int(chunk_size)
 
+    def get_split_size_unit(self) -> str:
+        """
+        Unit for the split length
+
+        :return: Unit for the split length  Options: {hour, day, month, year}
+        :rtype: str
+        """
+
+        return self._exp_parser.get('experiment', 'SPLITSIZEUNIT').lower()
+
+    def get_split_size(self, default: int = 1) -> int:
+        """
+        Split Size as defined in the expdef file.
+
+        :return: Split size, 1 as default.
+        :rtype: int
+        """
+        try:
+            split_size = self._exp_parser.get_option(
+                'experiment', 'SPLITSIZE', default)
+        except Exception as exp:
+            print(exp)
+            split_size = ''
+        if split_size == '':
+            return default
+        return int(split_size)
+
     def get_member_list(self, run_only=False):
         """
         Returns members list from experiment's config file

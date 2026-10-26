@@ -302,7 +302,6 @@ class ymlConfigStrategy(IConfigStrategy):
         """
         return self._conf_parser.get_chunk_size_unit()
 
-
     def get_chunk_size(self, default=1):
         try:
             chunk_size = self._conf_parser.get_chunk_size(default)
@@ -312,6 +311,25 @@ class ymlConfigStrategy(IConfigStrategy):
         if chunk_size == '':
             return default
         return int(chunk_size)
+
+    def get_split_size_unit(self) -> str:
+        """
+        Unit for the split length
+
+        :return: Unit for the split length  Options: {hour, day, month, year}
+        :rtype: str
+        """
+        return self._conf_parser.get_split_size_unit()
+
+    def get_split_size(self, default=1):
+        try:
+            split_size = self._conf_parser.get_split_size(default)
+        except Exception as exp:
+            print(exp)
+            split_size = ''
+        if split_size == '':
+            return default
+        return int(split_size)
 
     def get_member_list(self, run_only=False):
         #return self._conf_parser.get_member_list(run_only)

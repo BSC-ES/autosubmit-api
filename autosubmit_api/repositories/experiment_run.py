@@ -18,6 +18,8 @@ class ExperimentRunModel(BaseModel):
     finish: Any
     chunk_unit: Any
     chunk_size: Any
+    split_unit: Any
+    split_size: Any
     completed: Any
     total: Any
     failed: Any

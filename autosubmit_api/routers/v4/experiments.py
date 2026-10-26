@@ -516,6 +516,8 @@ class JobDetailResponse(BaseModel):
     status: str
     section: str | None = None
     date: str | None = None
+    start_date: str | None = None
+    end_date: str | None = None
     member: str | None = None
     chunk: int | None = None
     split: int | None = None
@@ -525,6 +527,8 @@ class JobDetailResponse(BaseModel):
     # From config
     chunk_size: int | None = None
     chunk_unit: str | None = None
+    split_size: int | None = None
+    split_unit: str | None = None
     platform: str | None = None
     # From historical DB
     remote_id: int | None = None
@@ -551,7 +555,6 @@ async def get_experiment_job_detail(
     # Get the latest job details from the retriever
     try:
         job_detail_retriever = JobDetailRetriever(expid, job_name)
-        job_detail_retriever.load_data()
     except DomainError:
         raise
     except Exception:
@@ -600,6 +603,12 @@ async def get_experiment_job_detail(
             "date": job_detail_retriever.date.strftime("%Y%m%d")
             if job_detail_retriever.date
             else None,
+            "start_date": job_detail_retriever.start_date.strftime("%Y%m%d")
+            if job_detail_retriever.start_date
+            else None,
+            "end_date": job_detail_retriever.end_date.strftime("%Y%m%d")
+            if job_detail_retriever.end_date
+            else None,
             "member": job_detail_retriever.member,
             "chunk": job_detail_retriever.chunk,
             "split": job_detail_retriever.split,
@@ -612,6 +621,8 @@ async def get_experiment_job_detail(
             else None,
             "chunk_size": job_detail_retriever.chunk_size,
             "chunk_unit": job_detail_retriever.chunk_unit,
+            "split_size": job_detail_retriever.split_size,
+            "split_unit": job_detail_retriever.split_unit,
             "platform": job_detail_retriever.platform,
             "remote_id": job_detail_retriever.remote_id,
             "qos": job_detail_retriever.qos,
