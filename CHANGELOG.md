@@ -4,7 +4,7 @@
 
 #### New features
 
-* The experiment owner name is read with `pwd.getpwuid` instead of running `id -nu` in a subprocess for every experiment
+* The experiment owner name is read with `pwd.getpwuid` instead of running `id -nu` in a subprocess for every experiment - Issue #397 by @DavidAmsellem
 
 #### Bug fixes
 
