@@ -40,7 +40,7 @@ class ExperimentGraphDrawing:
                 fh.flush()
                 os.fsync(fh.fileno())
         except portalocker.AlreadyLocked:
-            print("It is locked")
+            logger.debug("It is locked")
             self.locked = True
         except Exception:
             self.locked = True
@@ -122,12 +122,12 @@ class ExperimentGraphDrawing:
             return self.get_validated_data(allJobs)
         except portalocker.AlreadyLocked:
             message = "Already calculating graph drawing."
-            print(message)
+            logger.info(message)
             return None
         except Exception as exp:
-            print((traceback.format_exc()))
+            logger.error(traceback.format_exc())
             os.remove(lock_path_file)
-            print(("Exception while calculating coordinates {}".format(str(exp))))
+            logger.error("Exception while calculating coordinates {}".format(str(exp)))
             return None
 
     def insert_coordinates(self):
@@ -143,7 +143,7 @@ class ExperimentGraphDrawing:
                 return result
             return None
         except Exception as exp:
-            print((str(exp)))
+            logger.error(str(exp))
             return None
 
     def set_current_position(self):
@@ -169,8 +169,8 @@ class ExperimentGraphDrawing:
             result = self.graph_data_repository.get_all()
             return [(item.id, item.job_name, item.x, item.y) for item in result]
         except Exception as exp:
-            print((traceback.format_exc()))
-            print((str(exp)))
+            logger.error(traceback.format_exc())
+            logger.error(str(exp))
             return None
 
     def _insert_many_graph_coordinates(
@@ -186,7 +186,7 @@ class ExperimentGraphDrawing:
             logger.debug(_vals)
             return self.graph_data_repository.insert_many(_vals)
         except Exception as exp:
-            print((traceback.format_exc()))
+            logger.warning(traceback.format_exc())
             logger.warning("Error on Insert many graph drawing : {}".format(str(exp)))
             return None
 
@@ -197,7 +197,7 @@ class ExperimentGraphDrawing:
         try:
             self.graph_data_repository.delete_all()
         except Exception as exp:
-            print((traceback.format_exc()))
-            print(("Error on Database clear: {}".format(str(exp))))
+            logger.error(traceback.format_exc())
+            logger.error("Error on Database clear: {}".format(str(exp)))
             return False
         return True
