@@ -35,7 +35,7 @@ class GetRunnerBody(BaseModel):
 @router.get("/runner-detail", name="Get runner detail")
 async def get_runner_detail(
     query_params: Annotated[GetRunnerBody, Query()],
-    body: Annotated[GetRunnerExtraParamsBody, Body()] = None,
+    body: Annotated[GetRunnerExtraParamsBody | None, Body()] = None,
     user_id: Optional[str] = Depends(auth_token_dependency()),
 ):
     """
