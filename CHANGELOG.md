@@ -2,6 +2,10 @@
 
 ### Unreleased (v4.2.1)
 
+#### New features
+
+* The experiment owner name is read with `pwd.getpwuid` instead of running `id -nu` in a subprocess for every experiment - Issue #397 by @DavidAmsellem
+
 #### Bug fixes
 
 * Migrated `setup.py`, `pytest.ini`, `ruff.toml` and `.coveragerc` to `pyproject.toml` to allow Dependabot to discover outdated dependencies - Issue #350 by @ntorqulu
