@@ -4,10 +4,14 @@
 
 #### Bug fixes
 
-* Migrated `setup.py`, `pytest.ini`, `ruff.toml` and `.coveragerc` to `pyproject.toml` to allow Dependabot to discover outdated dependencies #350
-* Tightened `requests` upper bound to `<2.33.0` matching the ceiling imposed by `autosubmit` v4.1.17 dependency (`requests<=2.32.5`)
-* `/v3/login` answers 401 instead of 500 when the CAS ticket verification response is not valid XML #383
-* `/v4/auth/cas/v2/login` returns 401 instead of 500 when the CAS server's ticket validation response is not a valid CAS document #383
+* Migrated `setup.py`, `pytest.ini`, `ruff.toml` and `.coveragerc` to `pyproject.toml` to allow Dependabot to discover outdated dependencies - Issue #350 by @ntorqulu
+* `/v3/login` answers 401 instead of 500 when the CAS ticket verification response is not valid XML - Issue #383 by @DavidAmsellem
+* `/v4/auth/cas/v2/login` returns 401 instead of 500 when the CAS server's ticket validation response is not a valid CAS document - Issue #383 by @DavidAmsellem
+
+### Maintenance
+
+* Tightened `requests` upper bound to `<2.33.0` matching the ceiling imposed by `autosubmit` v4.1.17 dependency (`requests<=2.32.5`) - By @ntorqulu
+* Removed deprecation warnings from the test suite by replacing deprecated calls (`Column.copy()`, Pydantic `Field(example=...)`, `testcontainers.postgres`...) - Issue #387 by @ntorqulu
 
 ### Release v4.2.0 - Release date: 2026-09-28
 
