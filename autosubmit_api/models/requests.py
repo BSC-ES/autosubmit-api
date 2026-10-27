@@ -52,7 +52,7 @@ class JobsSearchRequest(BaseModel):
                 "Filter by job date in YYYY-MM-DD format. Use "
                 f"'{MISSING_CATEGORY_VALUE}' for the jobs without a date"
             ),
-            example="2000-01-01",
+            json_schema_extra={"example": "2000-01-01"},
         ),
     ] = None
     member: Annotated[
@@ -62,11 +62,11 @@ class JobsSearchRequest(BaseModel):
                 "Filter by job member. Use "
                 f"'{MISSING_CATEGORY_VALUE}' for the jobs without a member"
             ),
-            example="fc0",
+            json_schema_extra={"example": "fc0"},
         ),
     ] = None
     section: Annotated[
-        str | None, Field(description="Filter by job section", example="SIM")
+        str | None, Field(description="Filter by job section", json_schema_extra={"example": "SIM"})
     ] = None
     chunk: Annotated[
         int | Literal["NA"] | None,
@@ -75,7 +75,7 @@ class JobsSearchRequest(BaseModel):
                 "Filter by job chunk. Use "
                 f"'{MISSING_CATEGORY_VALUE}' for the jobs without a chunk"
             ),
-            example=1,
+            json_schema_extra={"example": 1},
         ),
     ] = None
 

@@ -70,18 +70,18 @@ UNPAGINATED = Page()
 class PaginationInfo(BaseModel):
     """Description of the page of a result set that is being returned."""
 
-    page: Annotated[int, Field(1, ge=1, description="Page number", example=1)]
+    page: Annotated[int, Field(1, ge=1, description="Page number", json_schema_extra={"example": 1})]
     page_size: Annotated[
-        int | None, Field(ge=1, description="Number of items per page", example=12)
+        int | None, Field(ge=1, description="Number of items per page", json_schema_extra={"example": 12})
     ]
     total_pages: Annotated[
-        int, Field(1, ge=1, description="Total number of pages", example=1)
+        int, Field(1, ge=1, description="Total number of pages", json_schema_extra={"example": 1})
     ]
     page_items: Annotated[
-        int, Field(ge=0, description="Number of items in the current page", example=1)
+        int, Field(ge=0, description="Number of items in the current page", json_schema_extra={"example": 1})
     ]
     total_items: Annotated[
-        int, Field(ge=0, description="Total number of items", example=1)
+        int, Field(ge=0, description="Total number of items", json_schema_extra={"example": 1})
     ]
 
     @classmethod
