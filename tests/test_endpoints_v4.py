@@ -12,7 +12,7 @@ from fastapi.testclient import TestClient
 from pydantic import ValidationError
 
 from autosubmit_api import config
-from autosubmit_api.exceptions import InternalError
+from autosubmit_api.exceptions import ExperimentNotFoundError, InternalError
 from autosubmit_api.models.jobs import JobCategoryProperty
 from autosubmit_api.models.requests import (
     PAGINATION_LIMIT_DEFAULT,
@@ -24,6 +24,8 @@ from autosubmit_api.models.responses import (
 )
 from autosubmit_api.repositories.runner_processes import RunnerProcessesDataModel
 from tests.utils import custom_return_value
+
+ROUTER = "autosubmit_api.routers.v4.experiments"
 
 
 class TestCASV2Login:
@@ -339,6 +341,23 @@ class TestExperimentDetail:
         assert (
             isinstance(resp_obj["autosubmit_version"], str)
             and len(resp_obj["autosubmit_version"]) > 0
+        )
+
+    def test_failing_retrieval_returns_500(
+        self, fixture_fastapi_client: TestClient, monkeypatch: pytest.MonkeyPatch
+    ):
+        monkeypatch.setattr(
+            f"{ROUTER}.JobDetailRetriever",
+            MagicMock(side_effect=OSError("cannot read the job")),
+        )
+
+        response = fixture_fastapi_client.get(
+            self.endpoint.format(expid="a003", job_name="a003_LOCAL_SETUP")
+        )
+
+        assert response.status_code == HTTPStatus.INTERNAL_SERVER_ERROR
+        assert response.json()["error_message"] == (
+            "Error while retrieving job details"
         )
 
 
@@ -1331,6 +1350,33 @@ class TestExperimentRuns:
             assert isinstance(run["run_id"], int)
             assert isinstance(run["start"], str) or run["start"] is None
             assert isinstance(run["finish"], str) or run["finish"] is None
+
+    def test_a_failing_history_returns_500(
+        self, fixture_fastapi_client: TestClient, monkeypatch: pytest.MonkeyPatch
+    ):
+        monkeypatch.setattr(
+            f"{ROUTER}.ExperimentHistoryBuilder",
+            MagicMock(side_effect=OSError("cannot open the history database")),
+        )
+
+        response = fixture_fastapi_client.get(self.endpoint.format(expid="a003"))
+
+        assert response.status_code == HTTPStatus.INTERNAL_SERVER_ERROR
+        body = response.json()
+        assert body["error"] is True
+        assert body["error_message"] == "Error while getting experiment runs"
+
+    def test_a_domain_error_returns_404(
+        self, fixture_fastapi_client: TestClient, monkeypatch: pytest.MonkeyPatch
+    ):
+        monkeypatch.setattr(
+            f"{ROUTER}.ExperimentHistoryBuilder",
+            MagicMock(side_effect=ExperimentNotFoundError("a003")),
+        )
+
+        response = fixture_fastapi_client.get(self.endpoint.format(expid="a003"))
+
+        assert response.status_code == HTTPStatus.NOT_FOUND
 
 
 class TestExperimentRunConfig:
