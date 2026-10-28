@@ -64,7 +64,7 @@ class ExperimentJobDataModel(BaseModel):
             return None
         try:
             return int(v)
-        except (ValueError, TypeError):
+        except (TypeError, ValueError):
             return None
 
     @field_validator("status", mode="before")

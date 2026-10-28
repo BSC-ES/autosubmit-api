@@ -6,6 +6,7 @@
 
 * The experiment owner name is read with `pwd.getpwuid` instead of running `id -nu` in a subprocess for every experiment - Issue #397 by @DavidAmsellem
 * Refactor `cli.py` to reuse gunicorn functions - PR #370 by @ntorqulu 
+* Add extended view to `/v4/experiments/{expid}/jobs` endpoint to support lazy loading and pagination in the tree view - Issue #261 by @ntorqulu
 
 #### Bug fixes
 
