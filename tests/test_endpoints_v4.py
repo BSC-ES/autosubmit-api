@@ -386,6 +386,17 @@ class TestExperimentEta:
         )
         assert response.status_code == HTTPStatus.BAD_REQUEST
 
+    def test_eta_failing_computation(
+        self, fixture_fastapi_client: TestClient, monkeypatch: pytest.MonkeyPatch
+    ):
+        monkeypatch.setattr(
+            f"{ROUTER}.ExperimentEtaService",
+            MagicMock(side_effect=OSError("cannot compute eta")),
+        )
+        response = fixture_fastapi_client.get("/v4/experiments/a003/eta")
+
+        assert response.status_code == HTTPStatus.INTERNAL_SERVER_ERROR
+
 
 class TestExperimentJobs:
     endpoint = "/v4/experiments/{expid}/jobs"
