@@ -1,13 +1,15 @@
-#!/usr/bin/env python
+import datetime
+import math
 import statistics
 import subprocess
 import time
-import datetime
-import math
 from collections import namedtuple
+from typing import TYPE_CHECKING
+
 from bscearth.utils.date import date2str
 from dateutil.relativedelta import relativedelta
-from typing import List, Optional, Tuple, TYPE_CHECKING
+
+from autosubmit_api.logger import logger
 
 if TYPE_CHECKING:
     from autosubmit_api.components.jobs.job_factory import Job
@@ -85,7 +87,7 @@ def get_processors_number(conf_job_processors: str) -> int:
     """ In case of error, nothing is done and num_processors will be 0"""
   return num_processors
 
-def separate_job_outliers(jobs: List["Job"]) -> Tuple[List["Job"], List["Job"]]:
+def separate_job_outliers(jobs: list["Job"]) -> tuple[list["Job"], list["Job"]]:
   """
   Detect job outliers and separate them from the job list. 
   Zero (and negative) run times are considered outliers.
@@ -131,7 +133,8 @@ def separate_job_outliers(jobs: List["Job"]) -> Tuple[List["Job"], List["Job"]]:
   return (new_list, outliers)
 
 
-def get_jobs_with_no_outliers(jobs: List["Job"]) -> List["Job"]:
+
+def get_jobs_with_no_outliers(jobs: list["Job"]) -> list["Job"]:
   """
   Returns a list of jobs without outliers
   """  
@@ -169,14 +172,14 @@ def _date_to_str_space(date_str):
   else:
       return ""
 
-def get_average_total_time(jobs: List[object]) -> float:
+def get_average_total_time(jobs: list[object]) -> float:
   """ Job has attribute total_time (See JobFactory)"""
   if len(jobs):
     average = sum(job.total_time for job in jobs)/ len(jobs)
     return round(average, 4)
   return 0.0
 
-def parse_version_number(str_version: str) -> Tuple[int, int]:
+def parse_version_number(str_version: str) -> tuple[int, int]:
   if isinstance(str_version, str) and len(str_version.strip()) > 0:
     version_split = str_version.split('.')
     main = int(version_split[0])
@@ -206,22 +209,24 @@ def get_current_timestamp() -> int:
   return int(time.time())
 
 
-def get_experiments_from_folder(root_folder: str) -> List[str]:     
+
+def get_experiments_from_folder(root_folder: str) -> list[str]:     
   currentDirectories = subprocess.Popen(['ls', '-t', root_folder], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
   stdOut, _ = currentDirectories.communicate()
   folders = stdOut.split()      
   return [expid for expid in folders if len(expid) == 4]
 
-def timestamp_to_datetime_format(timestamp: Optional[int]) -> str:
+def timestamp_to_datetime_format(timestamp: int | None) -> str | None:
   """
   Formats a timestamp to a iso format datetime string with timezone information.
+
+  Returns None when the timestamp is missing, zero or out of range.
   """
   try:
     if timestamp and timestamp > 0:
       return datetime.datetime.fromtimestamp(timestamp, tz=LOCAL_TZ).isoformat()
-  except Exception as exp:    
-    print(("Timestamp {} cannot be converted to datetime string. {}".format(str(timestamp), str(exp))))
-    return None
+  except (OverflowError, OSError, TypeError, ValueError) as exc:
+    logger.warning(f"Timestamp {timestamp} cannot be converted to datetime string: {exc}")
   return None
 
 def datechunk_to_year(chunk_unit: int, chunk_size: int) -> float:

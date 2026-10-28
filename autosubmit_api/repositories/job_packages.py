@@ -84,7 +84,11 @@ def create_job_packages_repository(
     Create a job packages repository.
 
     :param preview: Whether to use the alternative preview job packages table.
+    :raises ExperimentNotFoundError: If the experiment does not exist
     """
+    # Experiment should exist, whatever the backend is
+    experiment = create_experiment_repository().get_by_expid(expid)
+
     if APIBasicConfig.DATABASE_BACKEND == "postgres":
         # Postgres
         _engine = create_engine(APIBasicConfig.DATABASE_CONN_URL)
@@ -102,7 +106,6 @@ def create_job_packages_repository(
             ]
     else:
         # SQLite
-        experiment = create_experiment_repository().get_by_expid(expid)
         if is_db_version_4_2_0_or_higher(experiment.autosubmit_version):
             db_path = ExperimentPaths(expid).job_list_db
         else:
