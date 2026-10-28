@@ -1,10 +1,11 @@
 from __future__ import annotations
 
 import datetime
+import heapq
 import re
 from abc import ABC, abstractmethod
 from collections.abc import Sequence
-from typing import Any
+from typing import Any, NamedTuple
 
 from sqlalchemy import Engine, Table, create_engine, func, select
 
@@ -30,6 +31,59 @@ from autosubmit_api.persistance.pkl_reader import PklReader
 from autosubmit_api.repositories.experiment import create_experiment_repository
 
 STRING_TO_CODE = common_utils.Status.STRING_TO_CODE
+
+
+class JobRow(NamedTuple):
+    """
+    A job of the pkl job list, in the compact form used to filter and page it.
+    """
+
+    id: int | None
+    name: str
+    status: int | None
+    priority: int
+    section: str
+    date: datetime.datetime | None
+    member: str | None
+    chunk: int | None
+    split: int | None
+    splits: int | None
+    out_path_local: str | None
+    err_path_local: str | None
+    out_path_remote: str | None
+    err_path_remote: str | None
+
+
+def _to_row(job: Any) -> JobRow:
+    """
+    Builds a ``JobRow`` from a job entry of the parsed pkl job list.
+    """
+    return JobRow(
+        id=job.id,
+        name=job.name,
+        status=(
+            job.status if job.status is not None else common_utils.Status.UNKNOWN
+        ),
+        priority=job.priority,
+        section=job.section,
+        date=job.date,
+        member=job.member,
+        chunk=job.chunk,
+        split=job.split,
+        splits=job.splits,
+        out_path_local=job.out_path_local,
+        err_path_local=job.err_path_local,
+        out_path_remote=job.out_path_remote,
+        err_path_remote=job.err_path_remote,
+    )
+
+
+def _order_key(row: JobRow) -> tuple[str, str]:
+    """
+    Order shared with the SQL repository: by name, case-insensitively.
+    """
+    return (row.name.lower(), row.name)
+
 
 class JobsRepository(ABC):
     @abstractmethod
@@ -101,31 +155,21 @@ class JobsPklRepository(JobsRepository):
         self.expid = expid
         self.pkl_reader = PklReader(expid)
 
+    def _rows(self) -> tuple[JobRow, ...]:
+        """
+        Gets the jobs of the pkl in the compact form used to filter and page them.
+
+        Only the rows of the returned page become ``JobData``, so a big job list does
+        not require building a big list of models.
+        """
+        return tuple(_to_row(job) for job in self.pkl_reader.parse_job_list())
+
     @staticmethod
-    def _to_job_data(job: Any) -> JobData:
+    def _row_to_job_data(row: JobRow) -> JobData:
         """
-        Builds a ``JobData`` instance from a raw job entry from the pkl job list.
+        Builds the ``JobData`` only for the rows being returned.
         """
-        return JobData(
-            id=job.id,
-            name=job.name,
-            status=(
-                job.status
-                if job.status is not None
-                else common_utils.Status.UNKNOWN
-            ),
-            priority=job.priority,
-            section=job.section,
-            date=job.date,
-            member=job.member,
-            chunk=job.chunk,
-            split=job.split,
-            splits=job.splits,
-            out_path_local=job.out_path_local,
-            err_path_local=job.err_path_local,
-            out_path_remote=job.out_path_remote,
-            err_path_remote=job.err_path_remote,
-        )
+        return JobData(**row._asdict())
 
     @staticmethod
     def _matches_property(job: Any, prop: JobCategoryProperty, expected: Any) -> bool:
@@ -197,20 +241,20 @@ class JobsPklRepository(JobsRepository):
 
     def get_all(self) -> list[JobData]:
         """
-        Gets all jobs from pkl file
+        Gets all jobs from the pkl job list
         """
-        return [self._to_job_data(job) for job in self.pkl_reader.parse_job_list()]
+        return [self._row_to_job_data(row) for row in self._rows()]
 
     def get_last_modified_timestamp(self) -> int:
         return self.pkl_reader.get_modified_time()
 
     def get_by_name(self, name: str) -> JobData | None:
         """
-        Gets a job by its name from pkl file
+        Gets a job by its name from the pkl job list
         """
-        for job in self.pkl_reader.parse_job_list():
-            if job.name == name:
-                return self._to_job_data(job)
+        for row in self._rows():
+            if row.name == name:
+                return self._row_to_job_data(row)
         return None
 
     def get_by_names(self, names: list[str]) -> list[JobData]:
@@ -218,8 +262,9 @@ class JobsPklRepository(JobsRepository):
         Gets all jobs whose names are in the given list.
         """
         name_set = set(names)
-        pkl_content = self.pkl_reader.parse_job_list()
-        return [self._to_job_data(job) for job in pkl_content if job.name in name_set]
+        return [
+            self._row_to_job_data(row) for row in self._rows() if row.name in name_set
+        ]
 
     def search(
         self,
@@ -237,11 +282,11 @@ class JobsPklRepository(JobsRepository):
         :returns: A tuple containing the jobs of the page and the total count of
             the jobs matching the filters (before pagination).
         """
-        matching_jobs = [
-            self._to_job_data(job)
-            for job in self.pkl_reader.parse_job_list()
+        matching_rows = [
+            row
+            for row in self._rows()
             if self._matches_filters(
-                job, job_name, status, date, member, section, chunk
+                row, job_name, status, date, member, section, chunk
             )
         ]
 
@@ -249,9 +294,15 @@ class JobsPklRepository(JobsRepository):
         # Offset pagination is only reliable if the order is stable across
         # different backends and across different calls to the same backend.
         # name is the unique key (primary key in the jobs table).
-        matching_jobs.sort(key=lambda job: (job.name.lower(), job.name))
+        if page.is_paginated:
+            # Only the rows of the page are needed
+            page_rows = heapq.nsmallest(
+                page.offset + page.limit, matching_rows, key=_order_key
+            )[page.offset :]
+        else:
+            page_rows = sorted(matching_rows, key=_order_key)
 
-        return page.apply(matching_jobs), len(matching_jobs)
+        return [self._row_to_job_data(row) for row in page_rows], len(matching_rows)
 
     def get_properties_counts(
         self, properties: Sequence[JobCategoryProperty]
@@ -261,9 +312,9 @@ class JobsPklRepository(JobsRepository):
         """
         properties = [JobCategoryProperty(prop) for prop in properties]
         counts: dict[tuple, int] = {}
-        for job in self.pkl_reader.parse_job_list():
+        for row in self._rows():
             key = tuple(
-                format_category_value(prop, getattr(job, prop.value))
+                format_category_value(prop, getattr(row, prop.value))
                 for prop in properties
             )
             counts[key] = counts.get(key, 0) + 1
