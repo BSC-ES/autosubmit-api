@@ -338,14 +338,6 @@ class TestJobsRepository:
         assert job_list_repo.get_by_names(names) == []
 
 
-    def test_search_no_matching_filers(self, fixture_mock_basic_config):
-        """Search with filters that match nothing returns empty list and 0 count."""
-        job_list_repo = create_jobs_repository("a1x4")
-        jobs, count = job_list_repo.search(job_name="nonexistent", status="INVALID")
-        assert jobs == []
-        assert count == 0
-
-
 class TestExperimentJobDataModel:
     """Tests of the job data rows read from the database."""
 

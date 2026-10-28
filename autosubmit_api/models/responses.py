@@ -1,12 +1,13 @@
-from typing import Any, Literal
+from typing import Literal
 
-from pydantic import BaseModel
+from pydantic import BaseModel, RootModel
 
 from autosubmit_api.models.experiment import (
     BaseExperimentRun,
     BaseExperimentWrapper,
     ExperimentSearchItem,
 )
+from autosubmit_api.models.jobs import JobCategoryProperty
 from autosubmit_api.models.misc import RouteInfo
 from autosubmit_api.models.pagination import PaginationInfo
 
@@ -135,6 +136,14 @@ class JobDetailResponse(BaseModel):
     last_wrapper: str | None = None
 
 
+class ExperimentJobsCategoryTree(
+    RootModel[dict[str, "ExperimentJobsCategoryTree | int"]]
+):
+    """
+    Counters of the jobs category tree, nested one level per filtered property.
+    """
+
+
 class ExperimentJobsCategoryTreeResponse(BaseModel):
-    properties_hierarchy: list[str]
-    category_tree: dict[str, Any]
+    properties_hierarchy: list[JobCategoryProperty]
+    category_tree: ExperimentJobsCategoryTree

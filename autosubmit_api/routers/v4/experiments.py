@@ -35,6 +35,7 @@ from autosubmit_api.models.requests import (
 from autosubmit_api.models.responses import (
     ExperimentEtaResponse,
     ExperimentFSConfigResponse,
+    ExperimentJobsCategoryTree,
     ExperimentJobsCategoryTreeResponse,
     ExperimentJobsResponse,
     ExperimentRunConfigResponse,
@@ -594,7 +595,9 @@ async def get_experiment_job_children(
     return {"children": child_items}
 
 
-def _build_category_tree(counters: dict[tuple, int]) -> dict:
+def _build_category_tree(
+    counters: dict[tuple, int],
+) -> ExperimentJobsCategoryTree:
     """
     Build a nested category tree out of the counters returned by the repository.
 
@@ -613,7 +616,7 @@ def _build_category_tree(counters: dict[tuple, int]) -> dict:
         for value in key[:-1]:
             node = node.setdefault(value, {})
         node[key[-1]] = count
-    return tree
+    return ExperimentJobsCategoryTree(root=tree)
 
 
 @router.get(
@@ -643,6 +646,6 @@ async def get_experiment_jobs_category_tree(
         ) from exc
 
     return ExperimentJobsCategoryTreeResponse(
-        properties_hierarchy=[prop.value for prop in JOBS_CATEGORY_HIERARCHY],
+        properties_hierarchy=list(JOBS_CATEGORY_HIERARCHY),
         category_tree=_build_category_tree(counters),
     )

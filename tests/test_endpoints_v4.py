@@ -9,14 +9,19 @@ from uuid import uuid4
 import jwt
 import pytest
 from fastapi.testclient import TestClient
+from pydantic import ValidationError
 
 from autosubmit_api import config
 from autosubmit_api.exceptions import InternalError
+from autosubmit_api.models.jobs import JobCategoryProperty
 from autosubmit_api.models.requests import (
     PAGINATION_LIMIT_DEFAULT,
     PAGINATION_LIMIT_MAX,
 )
-from autosubmit_api.models.responses import JobDetailResponse
+from autosubmit_api.models.responses import (
+    ExperimentJobsCategoryTreeResponse,
+    JobDetailResponse,
+)
 from autosubmit_api.repositories.runner_processes import RunnerProcessesDataModel
 from tests.utils import custom_return_value
 
@@ -1124,6 +1129,14 @@ class TestExperimentJobChildren:
 
 class TestExperimentJobsCategoryTree:
     endpoint = "/v4/experiments/{expid}/jobs-category-tree"
+
+    def test_the_tree_counters_are_validated(self):
+        """The tree is a typed structure: a non-numeric counter is rejected."""
+        with pytest.raises(ValidationError):
+            ExperimentJobsCategoryTreeResponse(
+                properties_hierarchy=[JobCategoryProperty.DATE],
+                category_tree={"2000-01-01": "not a count"},
+            )
 
     @pytest.mark.parametrize("expid", ["a003", "a6zj"])
     def test_tree_nested_structure(

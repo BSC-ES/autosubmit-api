@@ -66,7 +66,11 @@ class JobsSearchRequest(BaseModel):
         ),
     ] = None
     section: Annotated[
-        str | None, Field(description="Filter by job section", json_schema_extra={"example": "SIM"})
+        str | None,
+        Field(
+            description="Filter by job section",
+            json_schema_extra={"example": "SIM"},
+        ),
     ] = None
     chunk: Annotated[
         int | Literal["NA"] | None,
@@ -78,12 +82,6 @@ class JobsSearchRequest(BaseModel):
             json_schema_extra={"example": 1},
         ),
     ] = None
-
-    @field_validator("job_name")
-    @classmethod
-    def _check_job_name(cls, job_name: str | None) -> str | None:
-        """A job always has a name, so an empty name is not a filter."""
-        return job_name or None
 
     @field_validator("job_name")
     @classmethod
