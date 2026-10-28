@@ -343,23 +343,6 @@ class TestExperimentDetail:
             and len(resp_obj["autosubmit_version"]) > 0
         )
 
-    def test_failing_retrieval_returns_500(
-        self, fixture_fastapi_client: TestClient, monkeypatch: pytest.MonkeyPatch
-    ):
-        monkeypatch.setattr(
-            f"{ROUTER}.JobDetailRetriever",
-            MagicMock(side_effect=OSError("cannot read the job")),
-        )
-
-        response = fixture_fastapi_client.get(
-            self.endpoint.format(expid="a003", job_name="a003_LOCAL_SETUP")
-        )
-
-        assert response.status_code == HTTPStatus.INTERNAL_SERVER_ERROR
-        assert response.json()["error_message"] == (
-            "Error while retrieving job details"
-        )
-
 
 class TestExperimentEta:
     endpoint = "/v4/experiments/{expid}/eta"
@@ -936,6 +919,23 @@ class TestExperimentJobDetail:
         assert isinstance(resp_obj["err_path_local"], str) and resp_obj[
             "err_path_local"
         ].endswith(err)
+
+    def test_failing_retrieval_returns_500(
+        self, fixture_fastapi_client: TestClient, monkeypatch: pytest.MonkeyPatch
+    ):
+        monkeypatch.setattr(
+            f"{ROUTER}.JobDetailRetriever",
+            MagicMock(side_effect=OSError("cannot read the job")),
+        )
+
+        response = fixture_fastapi_client.get(
+            self.endpoint.format(expid="a003", job_name="a003_LOCAL_SETUP")
+        )
+
+        assert response.status_code == HTTPStatus.INTERNAL_SERVER_ERROR
+        assert response.json()["error_message"] == (
+            "Error while retrieving job details"
+        )
 
 
 class TestExperimentJobParents:
