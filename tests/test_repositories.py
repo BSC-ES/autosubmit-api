@@ -5,7 +5,7 @@ import pytest
 
 from autosubmit_api.common.utils import Status
 from autosubmit_api.exceptions import ExperimentNotFoundError
-from autosubmit_api.models.jobs import UNSET
+from autosubmit_api.models.jobs import JOBS_CATEGORY_HIERARCHY, UNSET
 from autosubmit_api.models.pagination import Page
 from autosubmit_api.models.requests import ExperimentsSearchRequest
 from autosubmit_api.repositories.experiment import create_experiment_repository
@@ -572,3 +572,43 @@ class TestJobsRepositorySearch:
         jobs, _ = repo.search()
         job_names = [job.name for job in jobs]
         assert job_names == sorted(job_names)
+
+
+class TestJobsCategoryCounts:
+
+    @pytest.mark.parametrize("expid", ["a007", "a8qc", "a1x4"])
+    def test_every_leaf_counts_the_jobs_of_its_filters(
+        self, fixture_mock_basic_config, expid: str
+    ):
+        """The counts of the leaves of the hierarchy should match the number of jobs"""
+        repo = create_jobs_repository(expid)
+        counts = repo.get_properties_counts(list(JOBS_CATEGORY_HIERARCHY))
+
+        _, total = repo.search()
+
+        assert sum(counts.values()) == total
+        for (date, member, section, status), count in counts.items():
+            _, filtered = repo.search(
+                date=date, member=member, section=section, status=status
+            )
+            assert filtered == count, (date, member, section, status)
+
+
+class TestJobsRepositoryPages:
+
+    @pytest.mark.parametrize("expid", ["a007", "a8qc", "a1x4"])
+    @pytest.mark.parametrize(
+        "limit, offset", [(1, 0), (3, 2), (5, 0), (2, 100), (3, 1000)]
+    )
+    def test_a_page_is_a_slice_of_the_whole_list(
+        self, fixture_mock_basic_config, expid: str, limit: int, offset: int
+    ):
+        """Pages should be slices of the whole list, and the total count should match."""
+        repo = create_jobs_repository(expid)
+        everything, total = repo.search()
+
+        page, page_total = repo.search(page=Page(limit=limit, offset=offset))
+
+        assert page_total == total
+        expected = everything[offset : offset + limit]
+        assert [job.name for job in page] == [job.name for job in expected]
