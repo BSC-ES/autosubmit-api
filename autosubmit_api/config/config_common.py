@@ -548,6 +548,25 @@ class AutosubmitConfigResolver(object):
         """
         return self._configWrapper.get_chunk_size(default)
 
+    def get_split_size_unit(self) -> str:
+        """
+        Unit for the split length
+
+        :return: Unit for the split length  Options: {hour, day, month, year}
+        :rtype: str
+        """
+
+        return self._configWrapper.get_split_size_unit()
+
+    def get_split_size(self, default: int = 1) -> int:
+        """
+        Split Size as defined in the expdef file.
+
+        :return: Split size, 1 as default.
+        :rtype: int
+        """
+        return self._configWrapper.get_split_size(default)
+
     def get_member_list(self, run_only=False):
         """
         Returns members list from experiment's config file

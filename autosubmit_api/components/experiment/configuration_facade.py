@@ -130,6 +130,26 @@ class AutosubmitConfigurationFacade(ConfigurationFacade):
   @chunk_size.setter
   def chunk_size(self, value: int):
     self._chunk_size = value
+
+  @property
+  def split_unit(self) -> str:
+    if not hasattr(self, '_split_unit'):
+      self._split_unit = self.autosubmit_conf.get_split_size_unit()
+    return self._split_unit
+
+  @split_unit.setter
+  def split_unit(self, value: str):
+    self._split_unit = value
+
+  @property
+  def split_size(self) -> int:
+    if not hasattr(self, '_split_size'):
+      self._split_size = self.autosubmit_conf.get_split_size()
+    return self._split_size
+
+  @split_size.setter
+  def split_size(self, value: int):
+    self._split_size = value
   
   @property
   def current_years_per_sim(self) -> float:

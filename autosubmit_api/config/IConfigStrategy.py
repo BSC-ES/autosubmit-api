@@ -472,6 +472,22 @@ class IConfigStrategy(ABC):
         :rtype: int
         """
 
+    def get_split_size_unit(self) -> str:
+        """
+        Unit for the split length
+
+        :return: Unit for the split length  Options: {hour, day, month, year}
+        :rtype: str
+        """
+
+    def get_split_size(self, default: int = 1) -> int:
+        """
+        Split Size as defined in the expdef file.
+
+        :return: Split size, 1 as default.
+        :rtype: int
+        """
+
     def get_member_list(self, run_only=False):
         """
         Returns members list from experiment's config file

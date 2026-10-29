@@ -1,4 +1,5 @@
 from datetime import datetime
+from dateutil.relativedelta import relativedelta
 from typing import List, Optional
 
 from autosubmit_api.builders.configuration_facade_builder import (
@@ -46,7 +47,13 @@ class JobDetailRetriever:
         # Initialize warnings list
         self.warnings = []
 
-    def load_data(self):
+        # Load all data
+        self._load_data()
+
+        # Initialize the job execution interval
+        self._start_time, self._end_time = self._calculate_start_end_time()
+
+    def _load_data(self):
         self._load_base_job_data()
         self._load_experiment_run_data()
         self._load_historical_job_last_data()
@@ -134,6 +141,14 @@ class JobDetailRetriever:
         return self._job_data.date
 
     @property
+    def start_date(self) -> Optional[datetime]:
+        return self._start_time
+
+    @property
+    def end_date(self) -> Optional[datetime]:
+        return self._end_time
+
+    @property
     def member(self) -> Optional[str]:
         return self._job_data.member
 
@@ -163,6 +178,22 @@ class JobDetailRetriever:
             return self._config_facade.chunk_unit
         elif self._run_data and self._run_data.chunk_unit is not None:
             return self._run_data.chunk_unit
+        return None
+
+    @property
+    def split_size(self) -> Optional[int]:
+        if self._config_facade and self._config_facade.split_size is not None:
+            return self._config_facade.split_size
+        elif self._run_data and self._run_data.split_size is not None:
+            return self._run_data.split_size
+        return None
+
+    @property
+    def split_unit(self) -> Optional[str]:
+        if self._config_facade and self._config_facade.split_unit is not None:
+            return self._config_facade.split_unit
+        elif self._run_data and self._run_data.split_unit is not None:
+            return self._run_data.split_unit
         return None
 
     @property
@@ -251,3 +282,44 @@ class JobDetailRetriever:
     @property
     def finish(self) -> Optional[int]:
         return self._finish
+
+    def add_units(self, date: datetime, unit: str, amount: int) -> datetime:
+        """
+        Adds a specified amount of time to a given date based on the unit provided
+        through the use of relativedelta, which needs the unit in plural form.
+
+        :param date: The original date to which time will be added.
+        :param unit: The unit of time to add (e.g., 'year', 'month', 'day', 'hour').
+        :param amount: The amount of the specified unit to add to the date.
+
+        :return: A new datetime object with the added time.
+        :rtype: datetime
+        """
+        return date + relativedelta(**{unit + "s": amount})
+
+    def _calculate_start_end_time(self) -> Optional[tuple[datetime, datetime]]:
+        """
+        Calculates the start and end time of a job based on its chunk and split parameters.
+
+        :return: A tuple containing the start and end times, or None if the calculation
+        cannot be performed.
+        :rtype: tuple[datetime, datetime] or None
+        """
+        if (self._job_data.date is None or
+                self.chunk is None or self.chunk_unit is None or self.chunk_size is None):
+            return None
+
+        chunk_base = self._job_data.date
+        start_date = self.add_units(
+            chunk_base, self.chunk_unit, (self.chunk - 1) * self.chunk_size)
+        end_date = self.add_units(
+            chunk_base, self.chunk_unit, self.chunk * self.chunk_size)
+
+        if self.split and self.split_unit and self.split_size:
+            split_base = start_date
+            start_date = self.add_units(
+                split_base, self.split_unit, (self.split - 1) * self.split_size)
+            end_date = self.add_units(
+                split_base, self.split_unit, self.split * self.split_size)
+
+        return start_date, end_date
