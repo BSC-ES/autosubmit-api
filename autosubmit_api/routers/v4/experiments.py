@@ -3,7 +3,6 @@ import json
 import math
 import os
 import re
-import traceback
 from datetime import datetime, timezone
 from http import HTTPStatus
 from typing import Annotated, Any, Optional
@@ -27,6 +26,7 @@ from autosubmit_api.config.config_common import AutosubmitConfigResolver
 from autosubmit_api.database import tables
 from autosubmit_api.database.db_jobdata import JobDataStructure
 from autosubmit_api.database.models import BaseExperimentModel
+from autosubmit_api.exceptions import DomainError, ExperimentRunNotFoundError
 from autosubmit_api.logger import logger
 from autosubmit_api.models.requests import (
     ExperimentsSearchRequest,
@@ -43,10 +43,10 @@ from autosubmit_api.models.responses import (
 )
 from autosubmit_api.persistance.experiment import ExperimentPaths
 from autosubmit_api.persistance.job_package_reader import JobPackageReader
+from autosubmit_api.repositories.experiment import create_experiment_repository
 from autosubmit_api.repositories.experiment_structure import (
     create_experiment_structure_repository,
 )
-from autosubmit_api.exceptions import DomainError
 from autosubmit_api.repositories.job_data import create_experiment_job_data_repository
 from autosubmit_api.repositories.jobs import create_jobs_repository
 from autosubmit_api.repositories.join.experiment_join import (
@@ -104,12 +104,19 @@ async def search_experiments(
         running = 0
         failed = 0
         suspended = 0
+
         try:
             current_run = (
                 ExperimentHistoryDirector(ExperimentHistoryBuilder(exp.name))
                 .build_reader_experiment_history()
                 .manager.get_experiment_run_dc_with_max_id()
             )
+        except ExperimentRunNotFoundError:
+            # The experiment has not run yet, so there is no run data to report
+            logger.debug(f"No run data found for experiment {exp.name}.")
+        except Exception:
+            logger.warning("Exception getting the current run on search", exc_info=True)
+        else:
             if current_run and current_run.total > 0:
                 completed = current_run.completed
                 total = current_run.total
@@ -119,10 +126,6 @@ async def search_experiments(
                 failed = current_run.failed
                 suspended = current_run.suspended
                 # last_modified_timestamp = current_run.modified_timestamp
-        except Exception as exc:
-            logger.warning(f"Exception getting the current run on search: {exc}")
-            logger.warning(traceback.format_exc())
-
         # Format data
         return {
             "id": exp.id,
@@ -212,10 +215,9 @@ async def get_experiment_jobs(
         )
     except DomainError:
         raise
-    except Exception as exc:
+    except Exception:
         error_message = "Error while reading the job list"
-        logger.error(error_message + f": {exc}")
-        logger.error(traceback.format_exc())
+        logger.exception(error_message)
         raise HTTPException(
             status_code=HTTPStatus.INTERNAL_SERVER_ERROR, detail=error_message
         )
@@ -368,14 +370,22 @@ async def get_runs(
     """
     Get runs for a given experiment
     """
+    create_experiment_repository().get_by_expid(expid)
+
     try:
         experiment_history = ExperimentHistoryDirector(
             ExperimentHistoryBuilder(expid)
         ).build_reader_experiment_history()
         exp_runs = experiment_history.get_experiment_runs()
+    except ExperimentRunNotFoundError:
+        # The experiment has not been run yet, so it has no run data. This is
+        # not an error.
+        logger.debug(f"Experiment {expid} has no run data yet.")
+        exp_runs = []
+    except DomainError:
+        raise
     except Exception:
-        logger.error("Error while getting experiment runs")
-        logger.error(traceback.format_exc())
+        logger.exception(f"Could not get the runs of experiment {expid}")
         raise HTTPException(
             status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
             detail="Error while getting experiment runs",
@@ -406,23 +416,26 @@ async def get_runs(
 @router.get("/{expid}/runs/{run_id}/config", name="Get experiment run configuration")
 async def get_run_config(
     expid: str,
-    run_id: str,
+    run_id: int,
     user_id: str | None = Depends(auth_token_dependency()),
 ) -> ExperimentRunConfigResponse:
     """
     Get the config of a specific run of an experiment
     """
+    # The experiment should exist; if not, a 404 is raised
+    create_experiment_repository().get_by_expid(expid)
+
     historical_db = JobDataStructure(expid, APIBasicConfig)
     experiment_run = historical_db.get_experiment_run_by_id(run_id=run_id)
-    metadata = (
-        json.loads(experiment_run.metadata)
-        if experiment_run and experiment_run.metadata
-        else {}
-    )
+    if experiment_run is None:
+        # No run data, or the run id does not exist for this experiment
+        raise ExperimentRunNotFoundError(expid)
+
+    metadata = json.loads(experiment_run.metadata) if experiment_run.metadata else {}
 
     # Format the response
     response = {
-        "run_id": experiment_run.run_id if experiment_run else None,
+        "run_id": experiment_run.run_id,
         "config": _format_config_response(metadata),
     }
     return response
@@ -468,8 +481,7 @@ async def get_runs_with_user_metrics(
         run_ids = user_metric_repo.get_runs_with_user_metrics()
     except Exception:
         run_ids = []
-        logger.error("Error while getting the runs with user-defined metrics")
-        logger.error(traceback.format_exc())
+        logger.exception("Error while getting the runs with user-defined metrics")
 
     return {
         "runs": [
@@ -501,7 +513,7 @@ async def get_experiment_eta(
     except DomainError:
         raise
     except Exception:
-        logger.error(f"Failed to compute ETA for {expid}: {traceback.format_exc()}")
+        logger.exception(f"Failed to compute ETA for {expid}")
         raise HTTPException(
             status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
             detail="Failed to compute ETA",
@@ -555,7 +567,7 @@ async def get_experiment_job_detail(
     except DomainError:
         raise
     except Exception:
-        logger.error(traceback.format_exc())
+        logger.exception(f"Error while retrieving job details for {expid}/{job_name}")
         raise HTTPException(
             status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
             detail="Error while retrieving job details",
@@ -585,8 +597,7 @@ async def get_experiment_job_detail(
         job_logs_out.sort()
         job_logs_err.sort()
     except Exception:
-        logger.warning("Error while retrieving job logs")
-        logger.warning(traceback.format_exc())
+        logger.warning("Error while retrieving job logs", exc_info=True)
 
     # Build the response
     response = JobDetailResponse(
@@ -642,10 +653,9 @@ async def get_experiment_job_parents(
     try:
         structure_repo = create_experiment_structure_repository(expid)
         parents = structure_repo.get_parents(job_name)
-    except Exception as exc:
+    except Exception:
         error_message = "Error while reading the experiment structure"
-        logger.error(error_message + f": {exc}")
-        logger.error(traceback.format_exc())
+        logger.exception(error_message)
         raise HTTPException(
             status_code=HTTPStatus.INTERNAL_SERVER_ERROR, detail=error_message
         )
@@ -662,9 +672,8 @@ async def get_experiment_job_parents(
             }
             for item in parent_items:
                 item["status"] = status_map.get(item["job_name"])
-        except Exception as exc:
-            logger.warning(f"Error while fetching parent job statuses: {exc}")
-            logger.warning(traceback.format_exc())
+        except Exception:
+            logger.warning("Error while fetching parent job statuses", exc_info=True)
 
     return {"parents": parent_items}
 
@@ -683,10 +692,9 @@ async def get_experiment_job_children(
     try:
         structure_repo = create_experiment_structure_repository(expid)
         children = structure_repo.get_children(job_name)
-    except Exception as exc:
+    except Exception:
         error_message = "Error while reading the experiment structure"
-        logger.error(error_message + f": {exc}")
-        logger.error(traceback.format_exc())
+        logger.exception(error_message)
         raise HTTPException(
             status_code=HTTPStatus.INTERNAL_SERVER_ERROR, detail=error_message
         )
@@ -703,8 +711,7 @@ async def get_experiment_job_children(
             }
             for item in child_items:
                 item["status"] = status_map.get(item["job_name"])
-        except Exception as exc:
-            logger.warning(f"Error while fetching child job statuses: {exc}")
-            logger.warning(traceback.format_exc())
+        except Exception:
+            logger.warning("Error while fetching child job statuses", exc_info=True)
 
     return {"children": child_items}
