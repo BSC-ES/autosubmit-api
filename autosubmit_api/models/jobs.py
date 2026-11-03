@@ -31,22 +31,11 @@ class JobCategoryProperty(str, Enum):
     """Properties used to filter jobs."""
 
     JOB_NAME = "job_name"
-    """Name of the job."""
-
     DATE = "date"
-    """Start date the job belongs to."""
-
     MEMBER = "member"
-    """Member the job belongs to."""
-
     SECTION = "section"
-    """Section the job belongs to."""
-
     CHUNK = "chunk"
-    """Chunk the job belongs to."""
-
     STATUS = "status"
-    """Current status of the job."""
 
 
 class JobView(str, Enum):
@@ -108,43 +97,19 @@ class JobData(BaseModel):
     """A single job of the experiment job list."""
 
     id: int | None
-    """Unique identifier of the job."""
-
     name: str
-    """Name of the job."""
-
     status: int | None = common_utils.Status.UNKNOWN
-    """Current status of the job. Defaults to UNKNOWN if not set."""
-
     priority: int
-    """Order in which the job is executed within its section. Lower values are executed first."""
-
     section: str
-    """Section the job belongs to."""
-
     date: datetime.datetime | None
-    """Start date the job belongs to."""
-
     member: str | None
-    """Member the job belongs to."""
-
     chunk: int | None
-    """Chunk the job belongs to."""
-
+    split: int | None
     splits: int | None
-    """Split the job belongs to. ``-1`` if it is not part of a split."""
-
     out_path_local: str | None
-    """Path to the job output file in the local filesystem."""
-
     err_path_local: str | None
-    """Path to the job error file in the local filesystem."""
-
     out_path_remote: str | None
-    """Path to the job output file in the remote filesystem."""
-
     err_path_remote: str | None
-    """Path to the job error file in the remote filesystem."""
 
 
 def format_category_value(prop: JobCategoryProperty, value: Any) -> Any:
