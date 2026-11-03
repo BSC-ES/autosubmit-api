@@ -65,6 +65,7 @@ def test_outlier_detection(
         "Valid timestamp, float value",
         "Valid timestamp, future date",
         "Valid timestamp, other timezone",
+        "Valid timestamp, other timezone with GMT offset",
         "Out of range timestamp",
     ],
 )
