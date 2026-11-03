@@ -7,12 +7,12 @@ from autosubmit_api import __version__ as api_version
 
 
 FIXED_GUNICORN_SETTINGS = {
-    """Gunicorn settings the CLI fixes: not exposed as options, always handled to gunicorn with these values."""
     "preload_app": True,
     "capture_output": True,
     "worker_class": "uvicorn_worker.UvicornWorker",
     "control_socket_disable": True,
 }
+"""Gunicorn settings the CLI fixes: not exposed as options, always handled to gunicorn with these values."""
 
 
 class StandaloneApplication(WSGIApplication):
