@@ -5,6 +5,7 @@
 #### New features
 
 * The experiment owner name is read with `pwd.getpwuid` instead of running `id -nu` in a subprocess for every experiment - Issue #397 by @DavidAmsellem
+* Refactor `cli.py` to reuse gunicorn functions - PR #370 by @ntorqulu 
 
 #### Bug fixes
 
