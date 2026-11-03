@@ -46,9 +46,7 @@ PklJob = namedtuple('PklJob', ['name', 'id', 'status', 'priority', 'section', 'd
 PklJob14 = namedtuple('PklJob14', ['name', 'id', 'status', 'priority', 'section', 'date', 'member', 'chunk', 'out_path_local', 'err_path_local', 'out_path_remote', 'err_path_remote', 'wrapper_type'])
 
 def tostamp(string_date: str) -> int:
-  """
-  String datetime to timestamp
-  """
+  """Converts a string datetime to a timestamp."""
   timestamp_value = 0
   if string_date and len(string_date) > 0:    
     try:
@@ -61,9 +59,8 @@ def tostamp(string_date: str) -> int:
   return timestamp_value
 
 
-
 def parse_number_processors(processors_str: str) -> int:
-  """ Defaults to 1 in case of error """
+  """Defaults to 1 in case of error"""
   if ':' in processors_str:  
     components = processors_str.split(":")
     processors = int(sum(
@@ -76,6 +73,7 @@ def parse_number_processors(processors_str: str) -> int:
     except Exception:
       return 1
 
+
 def get_processors_number(conf_job_processors: str) -> int:
   num_processors = 0
   try:
@@ -87,12 +85,15 @@ def get_processors_number(conf_job_processors: str) -> int:
     """ In case of error, nothing is done and num_processors will be 0"""
   return num_processors
 
+
 def separate_job_outliers(jobs: list["Job"]) -> tuple[list["Job"], list["Job"]]:
-  """
-  Detect job outliers and separate them from the job list. 
-  Zero (and negative) run times are considered outliers.
+  """Detect job outliers and separate them from the job list. 
   
+  Zero (and negative) run times are considered outliers.
   Method: https://www.ibm.com/docs/en/cognos-analytics/11.1.0?topic=terms-modified-z-score
+
+  :param jobs: List of jobs to analyze
+  :return: A tuple of two lists: (jobs without outliers, outlier jobs)
   """
   MAD_K = 1.4826 # = 1/(CDF-1(3/4)) https://en.wikipedia.org/wiki/Median_absolute_deviation#Derivation
   MEANAD_K = 1.2533 # Ratio STD / MeanAD - Geary (1935) = 1/sqrt(2/pi)
@@ -133,11 +134,8 @@ def separate_job_outliers(jobs: list["Job"]) -> tuple[list["Job"], list["Job"]]:
   return (new_list, outliers)
 
 
-
 def get_jobs_with_no_outliers(jobs: list["Job"]) -> list["Job"]:
-  """
-  Returns a list of jobs without outliers
-  """  
+  """Returns a list of jobs without outliers"""  
   return separate_job_outliers(jobs)[0]
 
 
@@ -166,11 +164,13 @@ def date_plus(date, chunk_unit, chunk, chunk_size=1):
               datetime.timedelta(days=+int(chunk_previous / 24))
   return _date_to_str_space(date2str(previous_date)), _date_to_str_space(date2str(date))
 
+
 def _date_to_str_space(date_str):
   if (len(date_str) == 8):
       return str(date_str[0:4] + " " + date_str[4:6] + " " + date_str[6:])
   else:
       return ""
+
 
 def get_average_total_time(jobs: list[object]) -> float:
   """ Job has attribute total_time (See JobFactory)"""
@@ -178,6 +178,7 @@ def get_average_total_time(jobs: list[object]) -> float:
     average = sum(job.total_time for job in jobs)/ len(jobs)
     return round(average, 4)
   return 0.0
+
 
 def parse_version_number(str_version: str) -> tuple[int, int]:
   if isinstance(str_version, str) and len(str_version.strip()) > 0:
@@ -187,11 +188,13 @@ def parse_version_number(str_version: str) -> tuple[int, int]:
     return (main, secondary)
   return (0, 0)
 
+
 def is_version_historical_ready(str_version):
   main, secondary = parse_version_number(str_version)
   if (main >= 3 and secondary >= 13) or (main >= 4): # 3.13 onwards.
     return True
   return False
+
 
 def is_wrapper_type_in_pkl_version(str_version):
   main, secondary = parse_version_number(str_version)
@@ -199,15 +202,16 @@ def is_wrapper_type_in_pkl_version(str_version):
     return True
   return False
 
+
 def is_db_version_4_2_0_or_higher(str_version):
   main, secondary = parse_version_number(str_version)
   if (main > 4) or (main == 4 and secondary >= 2): # 4.2.0 onwards.
     return True
   return False
 
+
 def get_current_timestamp() -> int:
   return int(time.time())
-
 
 
 def get_experiments_from_folder(root_folder: str) -> list[str]:     
@@ -216,11 +220,12 @@ def get_experiments_from_folder(root_folder: str) -> list[str]:
   folders = stdOut.split()      
   return [expid for expid in folders if len(expid) == 4]
 
-def timestamp_to_datetime_format(timestamp: int | None) -> str | None:
-  """
-  Formats a timestamp to a iso format datetime string with timezone information.
 
-  Returns None when the timestamp is missing, zero or out of range.
+def timestamp_to_datetime_format(timestamp: int | None) -> str | None:
+  """Formats a timestamp to a iso format datetime string with timezone information.
+
+  :param timestamp: The timestamp to format.
+  :return: The formatted datetime string, or None if the timestamp is invalid.
   """
   try:
     if timestamp and timestamp > 0:
@@ -229,12 +234,13 @@ def timestamp_to_datetime_format(timestamp: int | None) -> str | None:
     logger.warning(f"Timestamp {timestamp} cannot be converted to datetime string: {exc}")
   return None
 
-def datechunk_to_year(chunk_unit: int, chunk_size: int) -> float:
-    """
-    Gets chunk unit and size and returns the value in years
 
-    :return: years  
-    :rtype: float
+def datechunk_to_year(chunk_unit: int, chunk_size: int) -> float:
+    """Gets chunk unit and size and returns the value in years
+
+    :param chunk_unit: The unit of the chunk (year, month, day, hour).
+    :param chunk_size: The size of the chunk in the given unit.
+    :return: The size of the chunk in years.
     """    
     chunk_size = chunk_size * 1.0
     # options = ["year", "month", "day", "hour"]
@@ -251,9 +257,7 @@ def datechunk_to_year(chunk_unit: int, chunk_size: int) -> float:
 
 
 class Status:
-    """
-    Class to handle the status of a job
-    """
+    """Class to handle the status of a job"""
     WAITING = 0
     READY = 1
     SUBMITTED = 2
