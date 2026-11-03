@@ -34,9 +34,7 @@ STRING_TO_CODE = common_utils.Status.STRING_TO_CODE
 
 
 class JobRow(NamedTuple):
-    """
-    A job of the pkl job list, in the compact form used to filter and page it.
-    """
+    """A job of the pkl job list, in the compact form used to filter and page it."""
 
     id: int | None
     name: str
@@ -55,8 +53,10 @@ class JobRow(NamedTuple):
 
 
 def _to_row(job: Any) -> JobRow:
-    """
-    Builds a ``JobRow`` from a job entry of the parsed pkl job list.
+    """Builds a ``JobRow`` from a job entry of the parsed pkl job list.
+    
+    :param job: A job of the pkl job list.
+    :return: A ``JobRow`` instance, in the compact form used to filter and page it.
     """
     return JobRow(
         id=job.id,
@@ -79,8 +79,10 @@ def _to_row(job: Any) -> JobRow:
 
 
 def _order_key(row: JobRow) -> tuple[str, str]:
-    """
-    Order shared with the SQL repository: by name, case-insensitively.
+    """Order shared with the SQL repository: by name, case-insensitively.
+    
+    :param row: A job of the pkl in the compact form used to filter and page it.
+    :return: A tuple containing the lowercase name and the original name.
     """
     return (row.name.lower(), row.name)
 
@@ -88,27 +90,19 @@ def _order_key(row: JobRow) -> tuple[str, str]:
 class JobsRepository(ABC):
     @abstractmethod
     def get_all(self) -> list[JobData]:
-        """
-        Gets all jobs
-        """
+        """Gets all jobs"""
 
     @abstractmethod
     def get_last_modified_timestamp(self) -> int:
-        """
-        Gets the last modified UNIX timestamp of the jobs
-        """
+        """Gets the last modified UNIX timestamp of the jobs"""
 
     @abstractmethod
     def get_by_name(self, name: str) -> JobData | None:
-        """
-        Gets a job by its name
-        """
+        """Gets a job by its name"""
 
     @abstractmethod
     def get_by_names(self, names: list[str]) -> list[JobData]:
-        """
-        Gets jobs matching any of the given names
-        """
+        """Gets jobs matching any of the given names"""
 
     @abstractmethod
     def search(
@@ -121,8 +115,7 @@ class JobsRepository(ABC):
         chunk: int | None | Unset = UNSET,
         page: Page = UNPAGINATED,
     ) -> tuple[list[JobData], int]:
-        """
-        Searches jobs applying the given filters.
+        """Searches jobs applying the given filters.
 
         Filters are combined with AND. For the property filters, ``UNSET`` means
         "do not filter by this property", ``None`` means "match the jobs without
@@ -141,12 +134,15 @@ class JobsRepository(ABC):
     def get_properties_counts(
         self, properties: Sequence[JobCategoryProperty]
     ) -> dict[tuple, int]:
-        """
-        Gets the number of jobs for each combination of the given properties,
+        """Gets the number of jobs for each combination of the given properties,
         similar to a SQL GROUP BY query.
 
         The keys of the returned mapping follow the order of ``properties`` and
         the values are normalized with :func:`format_category_value`.
+
+        :param properties: The properties to group by.
+        :return: A mapping from the combination of property values to the number
+            of jobs with that combination.
         """
 
 
@@ -156,25 +152,32 @@ class JobsPklRepository(JobsRepository):
         self.pkl_reader = PklReader(expid)
 
     def _rows(self) -> tuple[JobRow, ...]:
-        """
-        Gets the jobs of the pkl in the compact form used to filter and page them.
+        """Gets the jobs of the pkl in the compact form used to filter and page them.
 
         Only the rows of the returned page become ``JobData``, so a big job list does
         not require building a big list of models.
+
+        :return: The jobs of the pkl in the compact form used to filter and page them.
         """
         return tuple(_to_row(job) for job in self.pkl_reader.parse_job_list())
 
     @staticmethod
     def _row_to_job_data(row: JobRow) -> JobData:
-        """
-        Builds the ``JobData`` only for the rows being returned.
+        """Builds the ``JobData`` only for the rows being returned.
+        
+        :param row: A job of the pkl in the compact form used to filter and page it.
+        :return: The job data model of the row.
         """
         return JobData(**row._asdict())
 
     @staticmethod
     def _matches_property(job: Any, prop: JobCategoryProperty, expected: Any) -> bool:
-        """
-        Checks a single property filter against a raw job entry of the pkl list.
+        """Checks a single property filter against a raw job entry of the pkl list.
+
+        :param job: A job of the pkl in the compact form used to filter and page it.
+        :param prop: The property to check.
+        :param expected: The expected value of the property
+        :return: True if the job matches the filter, False otherwise.
         """
         if expected is UNSET:
             return True
@@ -196,8 +199,16 @@ class JobsPklRepository(JobsRepository):
         section: Any,
         chunk: Any,
     ) -> bool:
-        """
-        Checks if a job of the pkl job list matches the given filters.
+        """Checks if a job of the pkl job list matches the given filters.
+
+        :param job: A job of the pkl in the compact form used to filter and page it.
+        :param job_name: The job name filter, as a wildcard expression.
+        :param status: The job status filter.
+        :param date: The job date filter.
+        :param member: The job member filter.
+        :param section: The job section filter.
+        :param chunk: The job chunk filter.
+        :return: True if the job matches the filters, False otherwise.
         """
         if job_name is not UNSET and not cls._wildcard_compare(job_name, job.name):
             return False
@@ -215,13 +226,17 @@ class JobsPklRepository(JobsRepository):
 
     @staticmethod
     def _wildcard_compare(expression: str | None, value: str) -> bool:
-        """
-        Compares a value with a wildcard expression.
+        """Compares a value with a wildcard expression.
+
         The expression can contain '*' as wildcard, and '!' as negation.
         If the expression is empty, it matches everything.
         Examples:
         - 'test*' matches 'test123', 'test_abc', etc. Not matching '123test'.
         - '!test*' does not match 'test123', 'test_abc', etc
+
+        :param expression: The wildcard expression to compare against.
+        :param value: The value to compare.
+        :return: True if the value matches the expression, False otherwise.
         """
         if not expression:
             return True
@@ -240,27 +255,21 @@ class JobsPklRepository(JobsRepository):
         return bool(re.fullmatch(pattern, value))
 
     def get_all(self) -> list[JobData]:
-        """
-        Gets all jobs from the pkl job list
-        """
+        """Gets all jobs from the pkl job list"""
         return [self._row_to_job_data(row) for row in self._rows()]
 
     def get_last_modified_timestamp(self) -> int:
         return self.pkl_reader.get_modified_time()
 
     def get_by_name(self, name: str) -> JobData | None:
-        """
-        Gets a job by its name from the pkl job list
-        """
+        """Gets a job by its name from the pkl job list"""
         for row in self._rows():
             if row.name == name:
                 return self._row_to_job_data(row)
         return None
 
     def get_by_names(self, names: list[str]) -> list[JobData]:
-        """
-        Gets all jobs whose names are in the given list.
-        """
+        """Gets all jobs whose names are in the given list."""
         name_set = set(names)
         return [
             self._row_to_job_data(row) for row in self._rows() if row.name in name_set
@@ -276,9 +285,15 @@ class JobsPklRepository(JobsRepository):
         chunk: int | None | Unset = UNSET,
         page: Page = UNPAGINATED,
     ) -> tuple[list[JobData], int]:
-        """
-        Searches jobs by the given filters in a deterministic order (job name).
+        """Searches jobs by the given filters in a deterministic order (job name).
 
+        :param job_name: Filter by job name.
+        :param status: Filter by job status.
+        :param date: Filter by job date.
+        :param member: Filter by job member.
+        :param section: Filter by job section.
+        :param chunk: Filter by job chunk.
+        :param page: Slice of the matching jobs to return, paginated by job name.
         :returns: A tuple containing the jobs of the page and the total count of
             the jobs matching the filters (before pagination).
         """
@@ -307,8 +322,10 @@ class JobsPklRepository(JobsRepository):
     def get_properties_counts(
         self, properties: Sequence[JobCategoryProperty]
     ) -> dict[tuple, int]:
-        """
-        Gets the number of jobs for each combination of the given properties.
+        """Gets the number of jobs for each combination of the given properties.
+        
+        :param properties: The properties to group by.
+        :returns: A dictionary mapping each combination of property values to the number of jobs with that combination.
         """
         properties = [JobCategoryProperty(prop) for prop in properties]
         counts: dict[tuple, int] = {}
@@ -336,9 +353,7 @@ class JobsSQLRepository(JobsRepository):
     
     @staticmethod
     def _to_job_data(row: Any) -> JobData:
-        """
-        Builds a ``JobData`` instance from a raw SQL row.
-        """
+        """Builds a ``JobData`` instance from a raw SQL row."""
         return JobData(
             id=row.id,
             name=row.name,
@@ -358,8 +373,8 @@ class JobsSQLRepository(JobsRepository):
 
     @staticmethod
     def _wildcard_to_sql_like(expression: str) -> tuple[bool, str]:
-        """
-        Converts a wildcard expression to a SQL LIKE pattern.
+        """Converts a wildcard expression to a SQL LIKE pattern.
+        
         The expression can contain '*' as wildcard, and '!' as negation prefix.
         Special SQL LIKE characters '%' and '_' are escaped with a backslash.
         """
@@ -379,9 +394,7 @@ class JobsSQLRepository(JobsRepository):
         return negated, pattern
 
     def get_all(self) -> list[JobData]:
-        """
-        Gets all jobs from SQL database
-        """
+        """Gets all jobs from SQL database"""
         with self.engine.connect() as conn:
             result = conn.execute(self.table.select())
             return [self._to_job_data(row) for row in result]
@@ -432,8 +445,7 @@ class JobsSQLRepository(JobsRepository):
 
     @staticmethod
     def _property_column(table: Table, prop: JobCategoryProperty):
-        """
-        Gets the column to compare the given property against.
+        """Gets the column to compare the given property against.
 
         Dates are stored as ISO-8601 datetime strings, so only the date part is
         compared, keeping the same ``YYYY-MM-DD`` vocabulary as the pkl backend.
@@ -452,8 +464,7 @@ class JobsSQLRepository(JobsRepository):
         chunk: int | None | Unset = UNSET,
         page: Page = UNPAGINATED,
     ) -> tuple[list[JobData], int]:
-        """
-        Searches jobs by the given filters in a deterministic order (job name).
+        """Searches jobs by the given filters in a deterministic order (job name).
 
         :returns: A tuple containing the jobs of the page and the total count of
             the jobs matching the filters (before pagination).
@@ -517,9 +528,7 @@ class JobsSQLRepository(JobsRepository):
     def get_properties_counts(
         self, properties: Sequence[JobCategoryProperty]
     ) -> dict[tuple, int]:
-        """
-        Gets the number of jobs for each combination of the given properties.
-        """
+        """Gets the number of jobs for each combination of the given properties."""
         properties = [JobCategoryProperty(prop) for prop in properties]
         columns = [self._property_column(self.table, prop) for prop in properties]
         with self.engine.connect() as conn:
@@ -541,8 +550,8 @@ class JobsSQLRepository(JobsRepository):
 
 
 def create_jobs_repository(expid: str) -> JobsRepository:
-    """
-    Factory function to create a JobsRepository instance.
+    """Factory function to create a JobsRepository instance.
+    
     It decides whether to use the SQL or PKL repository based on the
     existence of the SQLite database.
 

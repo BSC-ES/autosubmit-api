@@ -282,11 +282,12 @@ class TestMaxSqlParams:
             ("sqlite", common.SQLITE_MAX_PARAMS),
             ("postgres", common.POSTGRESQL_MAX_PARAMS),
         ],
+        ids=["sqlite max params", "postgres max params"],
     )
     def test_known_backends(self, backend: str, expected: int):
         assert common.max_sql_params(backend) == expected
 
-    @pytest.mark.parametrize("backend", [None, "", "mysql"])
+    @pytest.mark.parametrize("backend", [None, "", "mysql"], ids=["None backend", "Empty backend", "Unknown backend"])
     def test_unknown_backends_use_the_lowest_limit(self, backend: str | None):
         """A smaller chunk is always safe, a bigger one is not."""
         assert common.max_sql_params(backend) == common.SQLITE_MAX_PARAMS
@@ -294,9 +295,10 @@ class TestMaxSqlParams:
     @pytest.mark.parametrize(
         "configured_backend, expected",
         [
-            ("postgres", common.POSTGRESQL_MAX_PARAMS),
             ("sqlite", common.SQLITE_MAX_PARAMS),
+            ("postgres", common.POSTGRESQL_MAX_PARAMS),
         ],
+        ids=["sqlite max params", "postgres max params"],
     )
     def test_defaults_to_the_configured_backend(
         self,

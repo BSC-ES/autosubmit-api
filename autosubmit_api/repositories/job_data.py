@@ -86,57 +86,41 @@ class ExperimentJobDataModel(BaseModel):
 class ExperimentJobDataRepository(ABC):
     @abstractmethod
     def get_last_job_data_by_run_id(self, run_id: int) -> list[ExperimentJobDataModel]:
-        """
-        Gets last job data of an specific run id
-        """
+        """Gets last job data of an specific run id"""
 
     @abstractmethod
     def get_last_job_data(self) -> list[ExperimentJobDataModel]:
-        """
-        Gets last job data
-        """
+        """Gets last job data"""
 
     @abstractmethod
     def get_jobs_by_name(self, job_name: str) -> list[ExperimentJobDataModel]:
-        """
-        Gets historical job data by job_name
-        """
+        """Gets historical job data by job_name"""
 
     @abstractmethod
     def get_last_job_data_by_name(self, job_name: str) -> ExperimentJobDataModel:
-        """
-        Gets last job data of a specific job name
-        """
+        """Gets last job data of a specific job name"""
 
     @abstractmethod
     def get_last_job_data_by_name_list(
         self, job_names: list[str]
     ) -> list[ExperimentJobDataModel]:
-        """
-        Gets last job data of a specific list of job names
-        """
+        """Gets last job data of a specific list of job names"""
 
     @abstractmethod
     def get_all(self) -> list[ExperimentJobDataModel]:
-        """
-        Gets all job data
-        """
+        """Gets all job data"""
 
     @abstractmethod
     def get_job_data_COMPLETED_by_rowtype_run_id(
         self, rowtype: int, run_id: int
     ) -> list[ExperimentJobDataModel]:
-        """
-        Gets job data by rowtype and run id
-        """
+        """Gets job data by rowtype and run id"""
 
     @abstractmethod
     def get_job_data_COMPLETD_by_section(
         self, section: str
     ) -> list[ExperimentJobDataModel]:
-        """
-        Gets job data by section
-        """
+        """Gets job data by section"""
 
 
 class ExperimentJobDataSQLRepository(ExperimentJobDataRepository):

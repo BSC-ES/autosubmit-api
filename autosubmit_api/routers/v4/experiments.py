@@ -66,9 +66,7 @@ async def search_experiments(
     query_params: Annotated[ExperimentsSearchRequest, Query()],
     user_id: str | None = Depends(auth_token_dependency()),
 ) -> ExperimentsSearchResponse:
-    """
-    Search experiments
-    """
+    """Search experiments"""
     logger.debug(f"Search args: {query_params}")
 
     page = Page.of(query_params.page, query_params.page_size)
@@ -161,9 +159,7 @@ async def search_experiments(
 async def get_experiment_detail(
     expid: str, user_id: str | None = Depends(auth_token_dependency())
 ) -> BaseExperimentModel:
-    """
-    Get details of an experiment
-    """
+    """Get details of an experiment"""
     exp_builder = ExperimentBuilder()
     exp_builder.produce_base(expid)
     return exp_builder.product.model_dump(include=tables.ExperimentTable.c.keys())
@@ -180,8 +176,7 @@ async def get_experiment_jobs(
     query_params: Annotated[JobsSearchRequest, Query()],
     user_id: str | None = Depends(auth_token_dependency()),
 ) -> ExperimentJobsResponse:
-    """
-    Get the experiment job list (from the pkl file or the jobs database).
+    """Get the experiment job list (from the pkl file or the jobs database).
 
     Filters are combined with AND. The job properties shown by the jobs category
     tree endpoint can be used as filters here, using the special value ``NA`` to
@@ -196,7 +191,7 @@ async def get_experiment_jobs(
       is the view of the job list of the tree view, which groups the jobs by section
       and estimates the time of arrival of the chunked sections.
 
-    Pagination is enabled when `page_size` is provided (`page` defaults to 1).
+    Pagination is enabled when ``page_size`` is provided (``page`` defaults to 1).
     """
     service = create_experiment_jobs_service(expid)
     return service.list_jobs(query_params)
@@ -206,9 +201,7 @@ async def get_experiment_jobs(
 async def get_experiment_wrappers(
     expid: str, user_id: str | None = Depends(auth_token_dependency())
 ) -> ExperimentWrappersResponse:
-    """
-    Get wrappers for an experiment
-    """
+    """Get wrappers for an experiment"""
     job_package_reader = JobPackageReader(expid)
     job_package_reader.read()
 
@@ -223,9 +216,7 @@ async def get_experiment_wrappers(
 
 
 def _to_plain_python(obj: Any) -> Any:
-    """
-    Recursively convert ruamel.yaml objects to plain Python types.
-    """
+    """Recursively convert ruamel.yaml objects to plain Python types."""
     # First, check for basic types that don't need conversion
     if isinstance(obj, (str, int, float, bool)) or obj is None:
         return obj
@@ -254,9 +245,10 @@ def _to_plain_python(obj: Any) -> Any:
 def _format_config_response(
     config: dict[str, Any], is_as3: bool = False
 ) -> dict[str, Any]:
-    """
-    Format the config response, removing some keys if it's an AS3 config
-    Also, add a key to indicate if the config is empty
+    """Format the config response, removing some keys if it's an AS3 config.
+
+    Also, add a key to indicate if the config is empty.
+
     :param config: The config to format
     :param is_as3: If the config is an AS3 config
     """
@@ -277,9 +269,7 @@ def _format_config_response(
 async def get_experiment_fs_config(
     expid: str, user_id: str | None = Depends(auth_token_dependency())
 ) -> ExperimentFSConfigResponse:
-    """
-    Get the filesystem config of an experiment
-    """
+    """Get the filesystem config of an experiment"""
     # Read the config
     APIBasicConfig.read()
     as_config = AutosubmitConfigResolver(expid, APIBasicConfig, ConfigParserFactory())
@@ -296,9 +286,7 @@ async def get_experiment_fs_config(
 async def get_runs(
     expid: str, user_id: str | None = Depends(auth_token_dependency())
 ) -> ExperimentRunsResponse:
-    """
-    Get runs for a given experiment
-    """
+    """Get runs for a given experiment"""
     try:
         experiment_history = ExperimentHistoryDirector(
             ExperimentHistoryBuilder(expid)
@@ -364,9 +352,7 @@ async def get_run_user_metrics(
     run_id: int,
     user_id: str | None = Depends(auth_token_dependency()),
 ):
-    """
-    Get the user-defined metrics of a specific run of an experiment
-    """
+    """Get the user-defined metrics of a specific run of an experiment"""
     user_metric_repo = create_user_metric_repository(expid)
 
     metrics = [
@@ -387,9 +373,7 @@ async def get_runs_with_user_metrics(
     expid: str,
     user_id: str | None = Depends(auth_token_dependency()),
 ):
-    """
-    Get the runs with user-defined metrics of an experiment
-    """
+    """Get the runs with user-defined metrics of an experiment"""
     user_metric_repo = create_user_metric_repository(expid)
 
     try:
@@ -417,8 +401,7 @@ async def get_experiment_eta(
     ] = "SIM",
     user_id: str | None = Depends(auth_token_dependency()),
 ) -> ExperimentEtaResponse:
-    """
-    Get the estimated time of arrival (remaining time) for an experiment's
+    """Get the estimated time of arrival (remaining time) for an experiment's
     job section (e.g. SIM, APP, POST). Defaults to SIM.
     """
     try:
@@ -440,9 +423,7 @@ async def get_experiment_job_detail(
     job_name: str,
     user_id: str | None = Depends(auth_token_dependency()),
 ) -> JobDetailResponse:
-    """
-    Get the details of a specific job of an experiment
-    """
+    """Get the details of a specific job of an experiment"""
     # Get the latest job details from the retriever
     try:
         job_detail_retriever = JobDetailRetriever(expid, job_name)
@@ -526,8 +507,8 @@ async def get_experiment_job_parents(
     include_status: bool = False,
     user_id: str | None = Depends(auth_token_dependency()),
 ) -> dict:
-    """
-    Get the parents of a specific job of an experiment.
+    """Get the parents of a specific job of an experiment.
+    
     Set include_status=true to also return the current status of each parent job.
     """
     try:
@@ -564,8 +545,8 @@ async def get_experiment_job_children(
     include_status: bool = False,
     user_id: str | None = Depends(auth_token_dependency()),
 ) -> dict:
-    """
-    Get the children of a specific job of an experiment
+    """Get the children of a specific job of an experiment
+    
     Set include_status=true to also return the current status of each child job.
     """
     try:
@@ -598,17 +579,21 @@ async def get_experiment_job_children(
 def _build_category_tree(
     counters: dict[tuple, int],
 ) -> ExperimentJobsCategoryTree:
-    """
-    Build a nested category tree out of the counters returned by the repository.
+    """Build a nested category tree out of the counters returned by the repository.
 
     Each level of the key returned by
     :meth:`JobsRepository.get_properties_counts` becomes a level of the tree, and
     the number of jobs is stored at the deepest level. Missing values are already
     reported as ``NA`` by the repository.
 
-    Example:
-    _build_category_tree({("2000-01-01", "fc0", "SIM", "WAITING"): 3})
-    returns: {"2000-01-01": {"fc0": {"SIM": {"WAITING": 3}}}}
+    Example::
+
+        >>> _build_category_tree({("2000-01-01", "fc0", "SIM", "WAITING"): 3})
+        {'2000-01-01': {'fc0': {'SIM': {'WAITING': 3}}}}
+
+    :param counters: Job counts keyed by tuples of property values, one
+        element per tree level.
+    :return: Nested dictionary with the job count at the deepest level.
     """
     tree: dict = {}
     for key, count in counters.items():
@@ -628,12 +613,14 @@ async def get_experiment_jobs_category_tree(
     expid: str,
     user_id: str | None = Depends(auth_token_dependency()),
 ) -> ExperimentJobsCategoryTreeResponse:
-    """
-    Get the jobs category tree of an experiment.
+    """Get the jobs category tree of an experiment.
 
     It helps navigating the jobs in a hierarchical way, based on their date,
     member, section and status. It does not return the jobs themselves, but a
     tree of counters that can be used to filter the job list endpoint.
+
+    :param expid: Experiment identifier
+    :return: Nested dictionary with the job count at the deepest level.
     """
     try:
         job_list_repo = create_jobs_repository(expid)

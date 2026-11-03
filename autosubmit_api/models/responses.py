@@ -36,8 +36,7 @@ class ExperimentsSearchResponse(BaseModel):
 
 
 class ExperimentJobItem(BaseModel):
-    """
-    A job of the job list.
+    """A job of the job list.
 
     Depending on the view, it contains different information about the job.
     """
@@ -139,11 +138,10 @@ class JobDetailResponse(BaseModel):
 class ExperimentJobsCategoryTree(
     RootModel[dict[str, "ExperimentJobsCategoryTree | int"]]
 ):
-    """
-    Counters of the jobs category tree, nested one level per filtered property.
-    """
+    """Counters of the jobs category tree, nested one level per filtered property."""
 
 
 class ExperimentJobsCategoryTreeResponse(BaseModel):
+    """The jobs category tree, with the counters of the jobs in each category."""
     properties_hierarchy: list[JobCategoryProperty]
     category_tree: ExperimentJobsCategoryTree

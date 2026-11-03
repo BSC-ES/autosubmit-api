@@ -86,7 +86,11 @@ class JobsSearchRequest(BaseModel):
     @field_validator("job_name")
     @classmethod
     def _check_job_name(cls, job_name: str | None) -> str | None:
-        """A job always has a name, so an empty name is not a filter."""
+        """A job always has a name, so an empty name is not a filter.
+        
+        :param job_name: The job name filter.
+        :return: The job name filter, or None if it is empty.
+        """
         return job_name or None
 
     @field_validator("status")

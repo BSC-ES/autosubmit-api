@@ -86,8 +86,7 @@ class ExperimentStructureSQLRepository(ExperimentStructureRepository):
 
 
 def create_experiment_structure_repository(expid: str) -> ExperimentStructureRepository:
-    """
-    Builds the experiment structure repository of an experiment.
+    """Builds the experiment structure repository of an experiment.
 
     :raises ExperimentNotFoundError: If the experiment does not exist
     """

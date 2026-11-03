@@ -28,12 +28,15 @@ from autosubmit_api.repositories.jobs import (
 
 
 def _to_filter(value: Any) -> Any:
-    """
-    Translates an HTTP filter parameter into a repository filter value.
+    """Translates an HTTP filter parameter into a repository filter value.
 
     - ``None`` (not provided): ``UNSET``, meaning "do not filter".
     - ``NA``: ``None``, meaning "jobs without a value for this property".
-    - anything else: the value itself.
+    - Anything else: the value itself.
+
+    :param value: Filter value received from the HTTP request.
+    :return: ``UNSET`` if the ``value`` is ``None``, ``None`` if it is ``NA``,
+        otherwise ``value`` unchanged.
     """
     if value is None:
         return UNSET
@@ -43,22 +46,27 @@ def _to_filter(value: Any) -> Any:
 
 
 def _to_name_filter(name: str | None) -> str | Unset:
-    """
-    Translates the HTTP job name parameter into a repository filter value.
+    """Translates the HTTP job name parameter into a repository filter value.
 
     A job always has a name, so this filter has no empty value: an absent or empty
     parameter means "do not filter by name".
+
+    :param name: Job name received from the HTTP request.
+    :return: ``UNSET`` if the ``name`` is ``None`` or empty
     """
     return name if name else UNSET
 
 
 def _applied_filters(query: JobsSearchRequest) -> ExperimentJobsFilters:
-    """
-    Gets the filters of the search that were applied to the job list.
+    """Gets the filters of the search that were applied to the job list.
 
     The filters that were not used are left unset, so they are excluded from the
     payload: that tells them apart from a filter for the jobs without a value for
     the property (``"NA"``).
+
+    :param query: Validated request, holding the filters, the view and the
+        pagination of the job list.
+    :return: Filters that were applied to the job list.
     """
     return ExperimentJobsFilters(
         **{
@@ -70,7 +78,11 @@ def _applied_filters(query: JobsSearchRequest) -> ExperimentJobsFilters:
 
 
 def _job_content(job: JobData) -> dict[str, Any]:
-    """Content of a job of the job list, as returned by the ``base`` view."""
+    """Content of a job of the job list, as returned by the ``base`` view.
+    
+    :param job: Job data from the jobs repository.
+    :return: Dictionary with the job content.
+    """
     return {
         "priority": job.priority,
         "section": job.section,
@@ -91,12 +103,16 @@ def _job_content(job: JobData) -> dict[str, Any]:
 def _job_times(
     expid: str, job: JobData, last_job_data: ExperimentJobDataModel | None
 ) -> dict[str, Any]:
-    """
-    Execution times of a job, as returned by the ``extended`` view.
+    """Execution times of a job, as returned by the ``extended`` view.
 
     The times of the job data are only used when that record matches the status of
     the job: a job that ran after its last record has no times to report, and they
     are reported as ``None``.
+
+    :param expid: Experiment identifier.
+    :param job: Job data from the jobs repository.
+    :param last_job_data: Last job data of the job, or ``None`` if it does not exist.
+    :return: Dictionary with the job execution times.
     """
     submit, start, finish = get_fixed_experiment_times(expid, job, last_job_data)
     return {
@@ -107,8 +123,7 @@ def _job_times(
 
 
 class ExperimentJobsService:
-    """
-    Builds the job list of an experiment applying its filters and the view.
+    """Builds the job list of an experiment applying its filters and the view.
 
     Each job comes from the jobs repository (pkl or database). The ``extended``
     view reports where the job is and its execution times, and the times come from
@@ -129,11 +144,12 @@ class ExperimentJobsService:
         self._job_data_repo_factory = job_data_repo_factory
 
     def list_jobs(self, query: JobsSearchRequest) -> ExperimentJobsResponse:
-        """
-        Gets the page of jobs matching the filters of the validated ``query``.
+        """Gets the page of jobs matching the filters of the validated ``query``.
 
         :param query: Validated request, holding the filters, the view and the
             pagination of the job list.
+        :return: Job list response, with the jobs, the applied filters and the
+            pagination information.
         """
         page = Page.of(query.page, query.page_size)
 
@@ -169,8 +185,11 @@ class ExperimentJobsService:
     def _get_last_job_data(
         self, jobs: list[JobData], view: JobView
     ) -> dict[str, ExperimentJobDataModel]:
-        """
-        Gets the last job data of ``jobs``, only needed by the extended view.
+        """Gets the last job data of ``jobs``, only needed by the extended view.
+
+        :param jobs: Jobs of the job list.
+        :param view: View of the job list, to know if the last job data is needed.
+        :return: Dictionary of last job data, keyed by job name.
         """
         if view is not JobView.EXTENDED or not jobs:
             return {}
@@ -194,12 +213,16 @@ class ExperimentJobsService:
         view: JobView,
         last_job_data: ExperimentJobDataModel | None = None,
     ) -> ExperimentJobItem:
-        """
-        Builds the item of a job with the content of the requested view.
+        """Builds the item of a job with the content of the requested view.
 
         The fields of the other views are left unset (instead of ``None``) so the
         response model can exclude them from the payload. Within a view, a field is
         always present and ``None`` means that its value is unknown.
+
+        :param job: Job data from the jobs repository.
+        :param view: View of the job list, to know which fields to include.
+        :param last_job_data: Last job data of the job, or ``None`` if it does not exist. Only needed by the extended view.
+        :return: Job list item with the content of the requested view.
         """
         fields: dict[str, Any] = {
             "name": job.name,
@@ -222,9 +245,10 @@ class ExperimentJobsService:
 
 
 def create_experiment_jobs_service(expid: str) -> ExperimentJobsService:
-    """
-    Builds the job list service of an experiment.
+    """Builds the job list service of an experiment.
 
+    :param expid: Experiment identifier.
+    :return: Service that builds the job list of the experiment.
     :raises ExperimentNotFoundError: If the experiment does not exist
     """
     return ExperimentJobsService(jobs_repo=create_jobs_repository(expid), expid=expid)

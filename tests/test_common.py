@@ -47,15 +47,25 @@ def test_outlier_detection(
 @pytest.mark.parametrize(
     "timestamp, expected, timezone",
     [
-        (1633072800, "2021-10-01T07:20:00+00:00", "UTC"),  # Valid timestamp
-        (0, None, "UTC"),  # Invalid timestamp (0)
-        (-1, None, "UTC"),  # Invalid timestamp (negative)
-        (None, None, "UTC"),  # None timestamp
-        (1633072800.0, "2021-10-01T07:20:00+00:00", "UTC"),  # Valid timestamp as float
+        (1633072800, "2021-10-01T07:20:00+00:00", "UTC"),
+        (0, None, "UTC"),
+        (-1, None, "UTC"),
+        (None, None, "UTC"),
+        (1633072800.0, "2021-10-01T07:20:00+00:00", "UTC"),
         (1736208000, "2025-01-07T00:00:00+00:00", "UTC"),
-        (1633072800, "2021-10-01T02:20:00-05:00", "America/Lima"),  # Other timezone
+        (1633072800, "2021-10-01T02:20:00-05:00", "America/Lima"),
         (1633072800, "2021-10-01T05:20:00-02:00", "Etc/GMT+2"),
-        (10**30, None, "UTC"),  # Out of range timestamp
+        (10**30, None, "UTC"),
+    ],
+    ids=[
+        "Valid timestamp",
+        "Invalid timestamp, zero value",
+        "Invalid timestamp, negative value",
+        "None timestamp",
+        "Valid timestamp, float value",
+        "Valid timestamp, future date",
+        "Valid timestamp, other timezone",
+        "Out of range timestamp",
     ],
 )
 def test_timestamp_to_datetime_format(
