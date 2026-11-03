@@ -61,7 +61,7 @@ JOBS_CATEGORY_HIERARCHY: tuple[JobCategoryProperty, ...] = (
     JobCategoryProperty.SECTION,
     JobCategoryProperty.STATUS,
 )
-"""Order in which the job properties are shown in teh jobs category tree. Used as filters."""
+"""Order in which the job properties are shown in the jobs category tree. Used as filters."""
 
 MISSING_CATEGORY_VALUE = "NA"
 """Default value for a job property that is not set."""
