@@ -5,9 +5,9 @@ from gunicorn.app.wsgiapp import WSGIApplication
 from gunicorn.config import Config as GunicornConfig
 from autosubmit_api import __version__ as api_version
 
-# Gunicorn settings the CLI fixes: they are not exposed as options.
-# Always handled to gunicorn with these values.
+
 FIXED_GUNICORN_SETTINGS = {
+    """Gunicorn settings the CLI fixes: not exposed as options, always handled to gunicorn with these values."""
     "preload_app": True,
     "capture_output": True,
     "worker_class": "uvicorn_worker.UvicornWorker",
