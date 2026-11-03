@@ -22,15 +22,17 @@ from autosubmit_api.builders import BaseBuilder
 from autosubmit_api.config.basicConfig import APIBasicConfig
 from autosubmit_api.logger import logger
 
-SQLITE_MAX_PARAMS = 999  # SQLite has a limit of 999 parameters per query by default.
-POSTGRESQL_MAX_PARAMS = 32767  # PostgreSQL has a limit of 32767 parameters per query by default.
+SQLITE_MAX_PARAMS = 999
+"""The maximum number of parameters that can be used in a single SQLite query."""
+
+POSTGRESQL_MAX_PARAMS = 32767
+"""The maximum number of parameters that can be used in a single PostgreSQL query."""
 
 T = TypeVar("T")
 
 
 def max_sql_params(backend: str | None = None) -> int:
-    """
-    Gets the maximum number of parameters that fit in a single query.
+    """Gets the maximum number of parameters that fit in a single query.
 
     :param backend: Database backend to ask about. Defaults to the configured one.
     :return: Maximum number of parameters for the given backend.
@@ -45,8 +47,7 @@ def max_sql_params(backend: str | None = None) -> int:
 def iter_param_chunks(
     values: Sequence[T], backend: str | None = None
 ) -> Iterator[Sequence[T]]:
-    """
-    Splits ``values`` into chunks that fit in a single query.
+    """Splits ``values`` into chunks that fit in a single query.
 
     :param values: Values to split.
     :param backend: Database backend to ask about. Defaults to the configured one.
@@ -58,9 +59,7 @@ def iter_param_chunks(
 
 
 class AttachedDatabaseConnBuilder(BaseBuilder):
-    """
-    SQLite utility to build attached databases.
-    """
+    """SQLite utility to build attached databases."""
 
     def __init__(self) -> None:
         super().__init__(False)
@@ -88,11 +87,9 @@ class AttachedDatabaseConnBuilder(BaseBuilder):
     def product(self) -> Connection:
         return super().product
 
-
+  
 def create_main_db_conn(read_only: bool = False) -> Connection:
-    """
-    Connection with the autosubmit and as_times DDBB.
-    """
+    """Creates a connection with the autosubmit and as_times DDBB."""
     builder = AttachedDatabaseConnBuilder()
     builder.attach_autosubmit_db(read_only=read_only)
     builder.attach_as_times_db(read_only=read_only)
@@ -167,11 +164,10 @@ def execute_upsert(
     index_elements: list[str | Column],
     set_: dict[str, Any] | None = None,
 ) -> int:
-    """
-    Execute an atomic upsert (INSERT ... ON CONFLICT DO UPDATE) for SQLite and PostgreSQL.
+    """Execute an atomic upsert (INSERT ... ON CONFLICT DO UPDATE) for SQLite and PostgreSQL.
+    
     This is extendable to other dialects like MySQL (ON DUPLICATE KEY UPDATE),
     mssql (MERGE), or oracle (UPSERT), if needed in the future.
-
     Notice that statements are executed without an explicit commit, so the caller can manage transactions as needed.
 
     :param conn: An open SQLAlchemy Connection (caller manages the transaction).
@@ -233,8 +229,7 @@ def execute_replace(
     values: dict[str, Any],
     index_elements: list[str | Column],
 ) -> int:
-    """
-    Replace a row with a transactional DELETE + INSERT identified by ``index_elements``.
+    """Replace a row with a transactional DELETE + INSERT identified by ``index_elements``.
     
     This strategy is schema-agnostic: unlike ``INSERT ... ON CONFLICT`` it does not
     require any PRIMARY KEY/UNIQUE constraint on the key columns, so it is safe for
@@ -274,8 +269,7 @@ def upsert_or_replace(
     index_elements: list[str | Column],
     set_: dict[str, Any] | None = None,
 ) -> int:
-    """
-    Make the row identified by ``index_elements`` exist with the given ``values``.
+    """Make the row identified by ``index_elements`` exist with the given ``values``.
     Choose the safest primitive for the actual database backend:
 
     * PostgreSQL: tables always created though SQLAlchemy, which declares a
