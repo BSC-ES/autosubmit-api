@@ -12,12 +12,10 @@ T = TypeVar("T")
 
 @dataclass(frozen=True)
 class Page:
-    """
-    The page of a result that is being requested.
+    """The page of a result that is being requested.
 
     A page is either unbounded (return everything) or bounded (``limit`` items
     starting at ``offset``).
-
     - unbounded: ``limit`` is ``None`` and ``offset`` is ``0``
     - bounded: ``limit`` is 1 or greater and ``offset`` is not negative
     """
@@ -40,6 +38,10 @@ class Page:
 
         A missing or non-positive ``page_size`` means "do not paginate".
         The page number is ignored in that case.
+        
+        :param page: The page number, starting at 1.
+        :param page_size: The number of items per page.
+        :return: The page object.
         """
         if page_size is None or page_size <= 0:
             return UNPAGINATED
@@ -47,24 +49,35 @@ class Page:
 
     @property
     def is_paginated(self) -> bool:
-        """Whether a maximum number of items was requested."""
+        """Whether a maximum number of items was requested.
+        
+        :return: True if the page has a limit, False otherwise.
+        """
         return self.limit is not None
 
     @property
     def number(self) -> int:
-        """The number of this page, or 1 when there is no pagination."""
+        """The number of this page, or 1 when there is no pagination.
+        
+        :return: The page number, starting at 1.
+        """
         if self.limit is None:
             return 1
         return self.offset // self.limit + 1
 
     def apply(self, items: Sequence[T]) -> list[T]:
-        """Returns the items covered by this page."""
+        """Returns the items covered by this page.
+        
+        :param items: The items to paginate.
+        :return: The items covered by this page.
+        """
         if self.limit is None:
             return list(items)
         return list(items[self.offset : self.offset + self.limit])
 
 
 UNPAGINATED = Page()
+"""A page that returns all items without pagination."""
 
 
 class PaginationInfo(BaseModel):
@@ -88,7 +101,13 @@ class PaginationInfo(BaseModel):
     def from_page(
         cls, page: Page, *, total_items: int, page_items: int
     ) -> PaginationInfo:
-        """Builds the wrapper of ``page`` out of the totals of the query."""
+        """Builds the wrapper of ``page`` out of the totals of the query.
+        
+        :param page: The page that was requested.
+        :param total_items: The total number of items in the query.
+        :param page_items: The number of items in the current page.
+        :return: The pagination info object.
+        """
         total_pages = 1
         if page.limit is not None:
             total_pages = max(1, math.ceil(total_items / page.limit))
