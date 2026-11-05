@@ -1,3 +1,4 @@
+from types import SimpleNamespace
 from typing import Any, Dict
 
 import pytest
@@ -7,6 +8,7 @@ from autosubmit_api.builders.joblist_helper_builder import (
     JobListHelperDirector,
 )
 from autosubmit_api.common.utils import Status
+from autosubmit_api.components.jobs.job_factory import SimJob, StandardJob
 from autosubmit_api.performance.performance_metrics import PerformanceMetrics
 from autosubmit_api.performance.utils import (
     calculate_ASYPD_perjob,
@@ -91,7 +93,7 @@ from autosubmit_api.performance.utils import (
                 "ASYPD": 0.3538,
                 "CHSY": 19075.9429,
                 "JPSY": 574614285.7143,
-                "RSYPD": 0.9134,
+                "RSYPD": 0.3581,
                 "post_jobs_total_time_average": 0.0,
                 "processing_elements": 288,
                 "sim_processors": 288,
@@ -108,9 +110,9 @@ from autosubmit_api.performance.utils import (
         (
             "aa6f",
             {
-                "SY": 2.6666666666666665,
-                "SYPD": 5760,
-                "ASYPD": 199.308,
+                "SY": 0.6666666666666666,
+                "SYPD": 1440.0,
+                "ASYPD": 49.827,
                 "CHSY": 0.0,
                 "JPSY": 121770.0,
                 "RSYPD": 0.0,
@@ -177,6 +179,134 @@ def test_performance_metrics(
         len(performance_metrics._not_considered)
         == counters["not_considered_jobs_count"]
     )
+    response = performance_metrics.to_json()
+    assert {
+        "SYPD",
+        "ASYPD",
+        "RSYPD",
+        "mean_sypd_per_chunk",
+        "mean_qsypd_per_chunk",
+        "experiment_throughput",
+        "mean_csypd_per_chunk",
+        "mean_cqsypd_per_chunk",
+    }.issubset(response)
+
+
+def _build_sim_job(
+    name: str,
+    chunk: int,
+    submit: int,
+    start: int,
+    finish: int,
+    years_per_sim: float = 1 / 12,
+    splits: int = None,
+) -> SimJob:
+    job = SimJob()
+    job.name = name
+    job.status = Status.COMPLETED
+    job.member = "fc0"
+    job.chunk = chunk
+    job.splits = splits
+    job._submit = submit
+    job._start = start
+    job._finish = finish
+    job.set_years_per_sim(years_per_sim)
+    return job
+
+
+def _build_opa_job(name: str, chunk: int, start: int, finish: int) -> StandardJob:
+    job = StandardJob()
+    job.name = name
+    job.status = Status.COMPLETED
+    job.section = "OPA"
+    job.member = "fc0"
+    job.chunk = chunk
+    job._submit = start
+    job._start = start
+    job._finish = finish
+    return job
+
+
+def _build_metrics_without_sources(sim_jobs, opa_jobs=None) -> PerformanceMetrics:
+    metrics = PerformanceMetrics.__new__(PerformanceMetrics)
+    metrics.warnings = []
+    metrics.pkl_organizer = SimpleNamespace(
+        opa_jobs=opa_jobs or [],
+        get_completed_section_jobs=lambda _: sim_jobs,
+    )
+    return metrics
+
+
+class TestDescriptiveThroughputMetrics:
+    def test_mean_throughput_keeps_splits_in_the_same_chunk(self):
+        sim_jobs = [
+            _build_sim_job("sim_1", 1, submit=5, start=10, finish=40),
+            _build_sim_job("sim_2_1", 2, submit=15, start=20, finish=40, splits=2),
+            _build_sim_job("sim_2_2", 2, submit=15, start=25, finish=50, splits=2),
+        ]
+        metrics = _build_metrics_without_sources(sim_jobs)
+
+        metrics._calculate_descriptive_throughput_metrics()
+
+        assert metrics.mean_sypd_per_chunk == pytest.approx(240.0)
+        assert metrics.mean_qsypd_per_chunk == pytest.approx(205.7143)
+        assert metrics.experiment_throughput == pytest.approx(320.0)
+
+    def test_opa_metrics_use_the_last_opa_job_and_one_simulated_day(self):
+        sim_jobs = [_build_sim_job("sim_1", 1, submit=5, start=10, finish=40)]
+        opa_jobs = [
+            _build_opa_job("opa_1", 1, start=45, finish=60),
+            _build_opa_job("opa_2", 1, start=60, finish=80),
+        ]
+        metrics = _build_metrics_without_sources(sim_jobs, opa_jobs)
+
+        metrics._calculate_descriptive_throughput_metrics()
+
+        opa_throughput = round((1 / 365.25) * 86400 / 20, 4)
+        assert metrics.mean_csypd_per_chunk == pytest.approx(opa_throughput)
+        assert metrics.mean_cqsypd_per_chunk == pytest.approx(96.0)
+        assert metrics.warnings == []
+
+    def test_opa_metrics_ignore_chunks_without_a_matching_opa_job(self):
+        sim_jobs = [
+            _build_sim_job("sim_1", 1, submit=5, start=10, finish=40),
+            _build_sim_job("sim_2", 2, submit=5, start=10, finish=40),
+        ]
+        opa_jobs = [_build_opa_job("opa_1", 1, start=40, finish=60)]
+        metrics = _build_metrics_without_sources(sim_jobs, opa_jobs)
+
+        metrics._calculate_descriptive_throughput_metrics()
+
+        assert metrics.mean_csypd_per_chunk > 0
+        assert len(metrics.warnings) == 1
+        assert "not considered" in metrics.warnings[0]
+
+    def test_opa_metrics_are_zero_when_there_are_no_opa_jobs(self):
+        sim_jobs = [_build_sim_job("sim_1", 1, submit=5, start=10, finish=40)]
+        metrics = _build_metrics_without_sources(sim_jobs)
+
+        metrics._calculate_descriptive_throughput_metrics()
+
+        assert metrics.mean_csypd_per_chunk == 0
+        assert metrics.mean_cqsypd_per_chunk == 0
+        assert metrics.warnings == []
+
+
+class TestRSYPDDivisor:
+    def test_uses_earliest_start_and_latest_finish_regardless_of_order(self):
+        metrics = PerformanceMetrics.__new__(PerformanceMetrics)
+        metrics.sim_jobs_valid = [
+            SimpleNamespace(start_ts=200),
+            SimpleNamespace(start_ts=100),
+        ]
+        metrics.pkl_organizer = SimpleNamespace(
+            get_completed_section_jobs=lambda _: [
+                SimpleNamespace(finish_ts=400),
+                SimpleNamespace(finish_ts=300),
+            ]
+        )
+
+        assert metrics._get_RSYPD_divisor() == 300
 
 
 class TestCalculateSYPDPerjob:
