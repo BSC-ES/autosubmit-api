@@ -146,8 +146,8 @@ ignore = [
     "W605",
     "D419",
     "D1",
-    "D203", # Collision with rule D211 `blank-line-before-class. Both rules do the same check.
-    "D212", # Collision with rule D213 `multi-line-summary-second-line`. Both rules do the same check.
+    "D203", # Collision with rule D211 `blank-line-before-class.
+    "D213", # Collision with rule D212 `multi-line-summary-second-line`.
     "D401",
     "PLC0206",
     "PLC0414",
