@@ -190,8 +190,6 @@ class PerformanceMetrics(object):
     if len(first_submits) == 0:
       return 0
     elapsed_time = max(last_finishes) - min(first_submits)
-    if elapsed_time <= 0:
-      return 0
     return round(years_per_sim_sum * utils.SECONDS_IN_A_DAY / elapsed_time, 4)
 
   def _calculate_opa_throughput_metrics(self, sim_chunks: dict[tuple, list[SimJob]]) -> tuple[float, float]:

@@ -291,6 +291,115 @@ class TestDescriptiveThroughputMetrics:
         assert metrics.mean_cqsypd_per_chunk == 0
         assert metrics.warnings == []
 
+    def test_chunks_without_years_per_sim_are_ignored(self):
+        sim_jobs = [
+            _build_sim_job("sim_1", 1, submit=5, start=10, finish=40, years_per_sim=0)
+        ]
+        metrics = _build_metrics_without_sources(sim_jobs)
+
+        metrics._calculate_descriptive_throughput_metrics()
+
+        assert metrics.mean_sypd_per_chunk == 0
+        assert metrics.mean_qsypd_per_chunk == 0
+        assert metrics.experiment_throughput == 0
+
+    def test_opa_jobs_that_are_not_completed_or_not_timed_are_ignored(self):
+        sim_jobs = [_build_sim_job("sim_1", 1, submit=5, start=10, finish=40)]
+        failed_opa_job = _build_opa_job("opa_failed", 1, start=45, finish=60)
+        failed_opa_job.status = Status.FAILED
+        untimed_opa_job = _build_opa_job("opa_untimed", 1, start=45, finish=60)
+        untimed_opa_job._finish = 0
+        metrics = _build_metrics_without_sources(
+            sim_jobs, [failed_opa_job, untimed_opa_job]
+        )
+
+        metrics._calculate_descriptive_throughput_metrics()
+
+        assert metrics.mean_csypd_per_chunk == 0
+        assert metrics.mean_cqsypd_per_chunk == 0
+
+    def test_opa_metrics_are_zero_when_no_chunk_can_be_coupled(self):
+        sim_jobs = [
+            _build_sim_job("sim_1", 1, submit=5, start=10, finish=40, years_per_sim=0)
+        ]
+        opa_jobs = [_build_opa_job("opa_1", 1, start=45, finish=60)]
+        metrics = _build_metrics_without_sources(sim_jobs, opa_jobs)
+
+        metrics._calculate_descriptive_throughput_metrics()
+
+        assert metrics.mean_csypd_per_chunk == 0
+        assert metrics.mean_cqsypd_per_chunk == 0
+        assert len(metrics.warnings) == 1
+
+    def test_opa_finishing_before_the_sim_submit_only_reports_the_bottleneck(self):
+        sim_jobs = [_build_sim_job("sim_1", 1, submit=100, start=110, finish=120)]
+        opa_jobs = [_build_opa_job("opa_1", 1, start=50, finish=60)]
+        metrics = _build_metrics_without_sources(sim_jobs, opa_jobs)
+
+        metrics._calculate_descriptive_throughput_metrics()
+
+        assert metrics.mean_csypd_per_chunk == pytest.approx(
+            round((1 / 365.25) * 86400 / 10, 4)
+        )
+        assert metrics.mean_cqsypd_per_chunk == 0
+        assert metrics.warnings == []
+
+
+class TestMetricsInternals:
+    def test_init_error_sets_error_state(self):
+        metrics = PerformanceMetrics("unknown", SimpleNamespace())
+
+        assert metrics.error is True
+        assert metrics.error_message.startswith("Error while preparing data sources")
+        assert metrics.to_json()["error"] is True
+
+    def test_invalid_cf_and_pue_numbers_add_warnings(self):
+        metrics = PerformanceMetrics.__new__(PerformanceMetrics)
+        metrics.warnings = []
+        metrics.sim_jobs_platform = ""
+        metrics.sim_platform_CF = 0.0
+        metrics.sim_platform_PUE = 0.0
+        metrics.configuration_facade = SimpleNamespace(
+            get_platorm_conf_footprint=lambda _: {
+                "CF": "not-a-number",
+                "PUE": "not-a-number",
+            }
+        )
+
+        metrics._update_sim_jobs_platform("MN5")
+
+        assert metrics.sim_jobs_platform == "MN5"
+        assert len(metrics.warnings) == 2
+
+    def test_outlier_jobs_add_a_warning(self):
+        job = _build_sim_job("sim_1", 1, submit=5, start=10, finish=40)
+        metrics = PerformanceMetrics.__new__(PerformanceMetrics)
+        metrics.sim_jobs_valid = []
+        metrics.warnings = []
+        metrics.pkl_organizer = SimpleNamespace(
+            get_completed_section_jobs=lambda _: [job]
+        )
+        metrics.joblist_helper = SimpleNamespace(job_to_package={})
+
+        metrics._identify_outlier_jobs()
+
+        assert len(metrics.warnings) == 1
+        assert "runtime outlier" in metrics.warnings[0]
+
+    def test_not_considered_jobs_are_serialized(self):
+        metrics = PerformanceMetrics.__new__(PerformanceMetrics)
+        metrics._considered = []
+        metrics._not_considered = []
+        metrics.sim_platform_CF = 0.0
+        metrics.sim_platform_PUE = 0.0
+        metrics.sim_jobs_valid = [_build_sim_job("sim_1", 1, 5, 10, 40)]
+        metrics.sim_jobs_invalid = [_build_sim_job("sim_2", 2, 5, 10, 40)]
+
+        metrics._populate_considered_jobs()
+
+        assert len(metrics._considered) == 1
+        assert len(metrics._not_considered) == 1
+
 
 class TestRSYPDDivisor:
     def test_uses_earliest_start_and_latest_finish_regardless_of_order(self):
