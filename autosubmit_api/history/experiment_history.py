@@ -139,6 +139,7 @@ class ExperimentHistory:
                     "job_id": job_data_dc.job_id,
                     "nodes": job_data_dc.nnodes,
                     "energy": job_data_dc.energy,
+                    "CPUTimeRAW": job_data_dc.CPUTimeRAW,
                     "status": job_data_dc.status,
                     "ASYPD": PUtils.calculate_ASYPD_perjob(
                         queue_run_time=job_data_dc.queuing_time_considering_package(

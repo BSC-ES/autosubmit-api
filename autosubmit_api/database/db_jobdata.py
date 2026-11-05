@@ -72,6 +72,7 @@ JobRow = collections.namedtuple(
         "run_time",
         "status",
         "energy",
+        "CPUTimeRAW",
         "submit",
         "start",
         "finish",
@@ -165,7 +166,7 @@ class JobData(object):
     """Job Data object
     """
 
-    def __init__(self, _id, counter=1, job_name="None", created=None, modified=None, submit=0, start=0, finish=0, status="UNKNOWN", rowtype=1, ncpus=0, wallclock="00:00", qos="debug", energy=0, date="", section="", member="", chunk=0, last=1, platform="NA", job_id=0, extra_data=dict(), nnodes=0, run_id=None, MaxRSS=0.0, AveRSS=0.0, out='', err='', rowstatus=0):
+    def __init__(self, _id, counter=1, job_name="None", created=None, modified=None, submit=0, start=0, finish=0, status="UNKNOWN", rowtype=1, ncpus=0, wallclock="00:00", qos="debug", energy=0, CPUTimeRAW=0, date="", section="", member="", chunk=0, last=1, platform="NA", job_id=0, extra_data=dict(), nnodes=0, run_id=None, MaxRSS=0.0, AveRSS=0.0, out='', err='', rowstatus=0):
         """[summary]
 
         Args:
@@ -183,6 +184,7 @@ class JobData(object):
             wallclock (str, optional): [description]. Defaults to "00:00".
             qos (str, optional): [description]. Defaults to "debug".
             energy (int, optional): [description]. Defaults to 0.
+            CPUTimeRAW (int, optional): [description]. Defaults to 0.
             date (str, optional): [description]. Defaults to "".
             section (str, optional): [description]. Defaults to "".
             member (str, optional): [description]. Defaults to "".
@@ -207,6 +209,7 @@ class JobData(object):
         self.wallclock = wallclock
         self.qos = qos if qos else "debug"
         self._energy = energy if energy else 0
+        self._CPUTimeRAW = CPUTimeRAW if CPUTimeRAW else 0
         self.date = date if date else ""
         # member and section were confused in the database.
         self.section = section if section else ""
@@ -421,6 +424,13 @@ class JobData(object):
         """
         return int(self._energy)
 
+    @property
+    def CPUTimeRAW(self):
+        """
+        Return as integer
+        """
+        return int(self._CPUTimeRAW)
+
     @submit.setter
     def submit(self, submit):
         self._submit = int(submit)
@@ -446,6 +456,13 @@ class JobData(object):
                 #     energy, self._energy))
                 self.require_update = True
             self._energy = energy if energy else 0
+
+    @CPUTimeRAW.setter
+    def CPUTimeRAW(self, CPUTimeRAW):
+        if CPUTimeRAW > 0:
+            if (CPUTimeRAW != self._CPUTimeRAW):
+                self.require_update = True
+            self._CPUTimeRAW = CPUTimeRAW if CPUTimeRAW else 0
 
 
 class JobDataStructure:
@@ -559,6 +576,7 @@ class JobDataStructure:
                         wallclock=job_data.wallclock,
                         qos=job_data.qos,
                         energy=job_data.energy,
+                        CPUTimeRAW=job_data.CPUTimeRAW,
                         date=job_data.date,
                         section=job_data.section,
                         member=job_data.member,

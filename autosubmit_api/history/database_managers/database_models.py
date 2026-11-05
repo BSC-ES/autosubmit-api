@@ -44,6 +44,7 @@ JobDataRow = collections.namedtuple(
         "wallclock",
         "qos",
         "energy",
+        "CPUTimeRAW",
         "date",
         "section",
         "member",

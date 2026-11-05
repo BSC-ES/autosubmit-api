@@ -42,6 +42,7 @@ class Job(metaclass=ABCMeta):
     self._queue_time: int = 0
     self._run_time: int = 0
     self.energy: int = 0
+    self.CPUTimeRAW: int = 0
     self._submit: int = 0
     self._start: int = 0
     self._finish: int = 0
@@ -201,11 +202,12 @@ class Job(metaclass=ABCMeta):
       self.name, self.section, self.qos, self.children_names, self.platform, self.date, self.tree_parent)))
 
   def update_from_jobrow(self, jobrow: "JobRow"):
-    """ Updates: submit, start, finish, queue_time, run_time, energy, run_id. """
+    """ Updates: submit, start, finish, queue_time, run_time, energy, CPUTimeRAW, run_id. """
     if jobrow:
       self._queue_time = max(int(jobrow.queue_time), 0)
       self._run_time = max(int(jobrow.run_time), 0)
       self.energy = max(int(jobrow.energy), 0)
+      self.CPUTimeRAW = max(int(jobrow.CPUTimeRAW), 0)
       self._submit = int(jobrow.submit)
       self._start = int(jobrow.start)
       self._finish = int(jobrow.finish)
@@ -284,6 +286,7 @@ class Job(metaclass=ABCMeta):
     job._queue_time = job_data_dc.queuing_time
     job._run_time = job_data_dc.running_time
     job.energy = job_data_dc.energy
+    job.CPUTimeRAW = job_data_dc.CPUTimeRAW
     job._submit = job_data_dc.submit
     job._start = job_data_dc.start
     job._finish = job_data_dc.finish
