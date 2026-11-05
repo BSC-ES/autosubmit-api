@@ -115,6 +115,7 @@ omit = ["*test*.py"]
 target-version = "py310"
 
 [tool.ruff.lint]
+extend-select = ["D"]
 ignore = [
     "ASYNC210",
     "ASYNC221",
@@ -144,6 +145,11 @@ ignore = [
     "N999",
     "W605",
     "D419",
+    "D1",
+    "D200",
+    "D205",
+    "D400",
+    "D401",
     "PLC0206",
     "PLC0414",
     "PLR1704",

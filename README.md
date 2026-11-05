@@ -7,10 +7,15 @@
 
 # Table of Contents
 
-1. [Overview](#overview)
-2. [Installation](#installation)
-3. [Configuration options](#configuration-options)
-4. [How to run tests](#how-to-run-tests)
+- [Autosubmit API](#autosubmit-api)
+- [Table of Contents](#table-of-contents)
+  - [Overview](#overview)
+  - [Installation](#installation)
+  - [Configuration options](#configuration-options)
+  - [How to run tests](#how-to-run-tests)
+    - [Install pytest](#install-pytest)
+    - [Run tests:](#run-tests)
+  - [Contributing](#contributing)
 
 ## Overview
 
@@ -61,3 +66,7 @@ pytest
 ```
 
 You will find the coverage report in `htmlcov/index.html`
+
+## Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for code stype and doctring conventions before submitting a pull request.
