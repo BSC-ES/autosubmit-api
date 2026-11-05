@@ -1,17 +1,14 @@
 import asyncio
 import json
-import math
 import os
 import re
 import traceback
 from datetime import datetime, timezone
-from http import HTTPStatus
-from typing import Annotated, Any, Optional
+from typing import Annotated, Any
 
 from bscearth.utils.config_parser import ConfigParserFactory
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, Query
 from fastapi.responses import JSONResponse
-from pydantic import BaseModel
 
 from autosubmit_api.auth import auth_token_dependency
 from autosubmit_api.builders.experiment_builder import ExperimentBuilder
@@ -27,7 +24,10 @@ from autosubmit_api.config.config_common import AutosubmitConfigResolver
 from autosubmit_api.database import tables
 from autosubmit_api.database.db_jobdata import JobDataStructure
 from autosubmit_api.database.models import BaseExperimentModel
+from autosubmit_api.exceptions import DomainError, InternalError
 from autosubmit_api.logger import logger
+from autosubmit_api.models.jobs import JOBS_CATEGORY_HIERARCHY
+from autosubmit_api.models.pagination import Page, PaginationInfo
 from autosubmit_api.models.requests import (
     ExperimentsSearchRequest,
     JobsSearchRequest,
@@ -35,18 +35,20 @@ from autosubmit_api.models.requests import (
 from autosubmit_api.models.responses import (
     ExperimentEtaResponse,
     ExperimentFSConfigResponse,
+    ExperimentJobsCategoryTree,
+    ExperimentJobsCategoryTreeResponse,
     ExperimentJobsResponse,
     ExperimentRunConfigResponse,
     ExperimentRunsResponse,
     ExperimentsSearchResponse,
     ExperimentWrappersResponse,
+    JobDetailResponse,
 )
 from autosubmit_api.persistance.experiment import ExperimentPaths
 from autosubmit_api.persistance.job_package_reader import JobPackageReader
 from autosubmit_api.repositories.experiment_structure import (
     create_experiment_structure_repository,
 )
-from autosubmit_api.exceptions import DomainError
 from autosubmit_api.repositories.job_data import create_experiment_job_data_repository
 from autosubmit_api.repositories.jobs import create_jobs_repository
 from autosubmit_api.repositories.join.experiment_join import (
@@ -54,6 +56,7 @@ from autosubmit_api.repositories.join.experiment_join import (
 )
 from autosubmit_api.repositories.user_metric import create_user_metric_repository
 from autosubmit_api.services.experiment_eta import ExperimentEtaService
+from autosubmit_api.services.experiment_jobs import create_experiment_jobs_service
 
 router = APIRouter()
 
@@ -63,16 +66,10 @@ async def search_experiments(
     query_params: Annotated[ExperimentsSearchRequest, Query()],
     user_id: str | None = Depends(auth_token_dependency()),
 ) -> ExperimentsSearchResponse:
-    """
-    Search experiments
-    """
+    """Search experiments"""
     logger.debug(f"Search args: {query_params}")
 
-    if query_params.page_size > 0:
-        offset = (query_params.page - 1) * query_params.page_size
-    else:
-        offset = None
-        query_params.page_size = None
+    page = Page.of(query_params.page, query_params.page_size)
 
     # Query
     experiment_join_repo = create_experiment_join_repository()
@@ -85,8 +82,7 @@ async def search_experiments(
         hpc=query_params.hpc,
         order_by=query_params.order_by,
         order_desc=query_params.order_desc,
-        limit=query_params.page_size,
-        offset=offset,
+        page=page,
     )
 
     async def _get_experiment(raw_exp: dict[str, Any]) -> dict[str, Any]:
@@ -152,15 +148,9 @@ async def search_experiments(
     # Response
     response = {
         "experiments": experiments,
-        "pagination": {
-            "page": query_params.page,
-            "page_size": query_params.page_size,
-            "total_pages": math.ceil(total_rows / query_params.page_size)
-            if query_params.page_size
-            else 1,
-            "page_items": len(experiments),
-            "total_items": total_rows,
-        },
+        "pagination": PaginationInfo.from_page(
+            page, total_items=total_rows, page_items=len(experiments)
+        ).model_dump(),
     }
     return JSONResponse(response)  # TODO Use Validation. Not respond directly.
 
@@ -169,9 +159,7 @@ async def search_experiments(
 async def get_experiment_detail(
     expid: str, user_id: str | None = Depends(auth_token_dependency())
 ) -> BaseExperimentModel:
-    """
-    Get details of an experiment
-    """
+    """Get details of an experiment"""
     exp_builder = ExperimentBuilder()
     exp_builder.produce_base(expid)
     return exp_builder.product.model_dump(include=tables.ExperimentTable.c.keys())
@@ -188,96 +176,32 @@ async def get_experiment_jobs(
     query_params: Annotated[JobsSearchRequest, Query()],
     user_id: str | None = Depends(auth_token_dependency()),
 ) -> ExperimentJobsResponse:
-    """
-    Get the experiment job list (from the pkl file or the jobs database),
-    optionally filtered by job name and status.
+    """Get the experiment job list (from the pkl file or the jobs database).
+
+    Filters are combined with AND. The job properties shown by the jobs category
+    tree endpoint can be used as filters here, using the special value ``NA`` to
+    get the jobs without a value for that property (e.g. ``date=NA``). The filters
+    that were applied are reported in ``filters``, once per page instead of on
+    every job.
 
     - ``base`` view: returns the full job content.
     - ``quick`` view: returns only the name and status of each job.
+    - ``extended`` view: returns only the name, the status, the ``section``, the
+      ``chunk`` and the ``submit``, ``start`` and ``finish`` times of each job. It
+      is the view of the job list of the tree view, which groups the jobs by section
+      and estimates the time of arrival of the chunked sections.
 
-    Pagination is enabled when `page_size` is provided (`page` defaults to 1).
+    Pagination is enabled when ``page_size`` is provided (``page`` defaults to 1).
     """
-    try:
-        jobs_repo = create_jobs_repository(expid)
-
-        paginated = query_params.page_size is not None
-        limit = query_params.page_size
-        offset = (query_params.page - 1) * query_params.page_size if paginated else None
-
-        current_content, total_items = jobs_repo.search(
-            job_name=query_params.job_name,
-            status=query_params.status,
-            limit=limit,
-            offset=offset,
-        )
-    except DomainError:
-        raise
-    except Exception as exc:
-        error_message = "Error while reading the job list"
-        logger.error(error_message + f": {exc}")
-        logger.error(traceback.format_exc())
-        raise HTTPException(
-            status_code=HTTPStatus.INTERNAL_SERVER_ERROR, detail=error_message
-        )
-
-    jobs_list = []
-    for job_item in current_content:
-        status_value = Status.VALUE_TO_KEY.get(job_item.status, "UNKNOWN")
-
-        resp_job = {
-            "name": job_item.name,
-            "status": status_value,
-        }
-
-        if query_params.view == "base":
-            resp_job = {
-                **resp_job,
-                "priority": job_item.priority,
-                "section": job_item.section,
-                "date": (
-                    job_item.date.date().isoformat()
-                    if isinstance(job_item.date, datetime)
-                    else None
-                ),
-                "member": job_item.member,
-                "chunk": job_item.chunk,
-                "split": job_item.split,
-                "splits": job_item.splits,
-                "out_path_local": job_item.out_path_local,
-                "err_path_local": job_item.err_path_local,
-                "out_path_remote": job_item.out_path_remote,
-                "err_path_remote": job_item.err_path_remote,
-            }
-
-        jobs_list.append(resp_job)
-
-    return {
-        "jobs": jobs_list,
-        "pagination": {
-            "page": query_params.page if paginated else 1,
-            "page_size": query_params.page_size if paginated else None,
-            "total_pages": (
-                max(
-                    1,
-                    (total_items + query_params.page_size - 1)
-                    // query_params.page_size,
-                )
-                if paginated
-                else 1
-            ),
-            "page_items": len(jobs_list),
-            "total_items": total_items,
-        },
-    }
+    service = create_experiment_jobs_service(expid)
+    return service.list_jobs(query_params)
 
 
 @router.get("/{expid}/wrappers", name="Get experiment wrappers")
 async def get_experiment_wrappers(
     expid: str, user_id: str | None = Depends(auth_token_dependency())
 ) -> ExperimentWrappersResponse:
-    """
-    Get wrappers for an experiment
-    """
+    """Get wrappers for an experiment"""
     job_package_reader = JobPackageReader(expid)
     job_package_reader.read()
 
@@ -292,9 +216,7 @@ async def get_experiment_wrappers(
 
 
 def _to_plain_python(obj: Any) -> Any:
-    """
-    Recursively convert ruamel.yaml objects to plain Python types.
-    """
+    """Recursively convert ruamel.yaml objects to plain Python types."""
     # First, check for basic types that don't need conversion
     if isinstance(obj, (str, int, float, bool)) or obj is None:
         return obj
@@ -323,9 +245,10 @@ def _to_plain_python(obj: Any) -> Any:
 def _format_config_response(
     config: dict[str, Any], is_as3: bool = False
 ) -> dict[str, Any]:
-    """
-    Format the config response, removing some keys if it's an AS3 config
-    Also, add a key to indicate if the config is empty
+    """Format the config response, removing some keys if it's an AS3 config.
+
+    Also, add a key to indicate if the config is empty.
+
     :param config: The config to format
     :param is_as3: If the config is an AS3 config
     """
@@ -346,9 +269,7 @@ def _format_config_response(
 async def get_experiment_fs_config(
     expid: str, user_id: str | None = Depends(auth_token_dependency())
 ) -> ExperimentFSConfigResponse:
-    """
-    Get the filesystem config of an experiment
-    """
+    """Get the filesystem config of an experiment"""
     # Read the config
     APIBasicConfig.read()
     as_config = AutosubmitConfigResolver(expid, APIBasicConfig, ConfigParserFactory())
@@ -363,23 +284,18 @@ async def get_experiment_fs_config(
 
 @router.get("/{expid}/runs", name="List experiment runs")
 async def get_runs(
-    expid: str, user_id: Optional[str] = Depends(auth_token_dependency())
+    expid: str, user_id: str | None = Depends(auth_token_dependency())
 ) -> ExperimentRunsResponse:
-    """
-    Get runs for a given experiment
-    """
+    """Get runs for a given experiment"""
     try:
         experiment_history = ExperimentHistoryDirector(
             ExperimentHistoryBuilder(expid)
         ).build_reader_experiment_history()
         exp_runs = experiment_history.get_experiment_runs()
-    except Exception:
-        logger.error("Error while getting experiment runs")
-        logger.error(traceback.format_exc())
-        raise HTTPException(
-            status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
-            detail="Error while getting experiment runs",
-        )
+    except DomainError:
+        raise
+    except Exception as exc:
+        raise InternalError("Error while getting experiment runs") from exc
 
     # Format the response
     response = {"runs": []}
@@ -436,9 +352,7 @@ async def get_run_user_metrics(
     run_id: int,
     user_id: str | None = Depends(auth_token_dependency()),
 ):
-    """
-    Get the user-defined metrics of a specific run of an experiment
-    """
+    """Get the user-defined metrics of a specific run of an experiment"""
     user_metric_repo = create_user_metric_repository(expid)
 
     metrics = [
@@ -459,9 +373,7 @@ async def get_runs_with_user_metrics(
     expid: str,
     user_id: str | None = Depends(auth_token_dependency()),
 ):
-    """
-    Get the runs with user-defined metrics of an experiment
-    """
+    """Get the runs with user-defined metrics of an experiment"""
     user_metric_repo = create_user_metric_repository(expid)
 
     try:
@@ -489,8 +401,7 @@ async def get_experiment_eta(
     ] = "SIM",
     user_id: str | None = Depends(auth_token_dependency()),
 ) -> ExperimentEtaResponse:
-    """
-    Get the estimated time of arrival (remaining time) for an experiment's
+    """Get the estimated time of arrival (remaining time) for an experiment's
     job section (e.g. SIM, APP, POST). Defaults to SIM.
     """
     try:
@@ -500,43 +411,10 @@ async def get_experiment_eta(
         result = eta_service.compute_experiment_eta(section)
     except DomainError:
         raise
-    except Exception:
-        logger.error(f"Failed to compute ETA for {expid}: {traceback.format_exc()}")
-        raise HTTPException(
-            status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
-            detail="Failed to compute ETA",
-        )
+    except Exception as exc:
+        raise InternalError("Failed to compute ETA") from exc
 
     return result
-
-
-class JobDetailResponse(BaseModel):
-    # From pkl
-    name: str
-    status: str
-    section: str | None = None
-    date: str | None = None
-    member: str | None = None
-    chunk: int | None = None
-    split: int | None = None
-    splits: int | None = None
-    out_path_local: str | None = None
-    err_path_local: str | None = None
-    # From config
-    chunk_size: int | None = None
-    chunk_unit: str | None = None
-    platform: str | None = None
-    # From historical DB
-    remote_id: int | None = None
-    qos: str | None = None
-    workflow_commit: str | None = None
-    processors: int | None = None  # Requested ncpus
-    submit: str | None = None
-    start: str | None = None
-    finish: str | None = None
-    wallclock: str | None = None
-    # Wrapper data
-    last_wrapper: str | None = None
 
 
 @router.get("/{expid}/jobs/{job_name}", name="Get experiment job detail")
@@ -545,21 +423,15 @@ async def get_experiment_job_detail(
     job_name: str,
     user_id: str | None = Depends(auth_token_dependency()),
 ) -> JobDetailResponse:
-    """
-    Get the details of a specific job of an experiment
-    """
+    """Get the details of a specific job of an experiment"""
     # Get the latest job details from the retriever
     try:
         job_detail_retriever = JobDetailRetriever(expid, job_name)
         job_detail_retriever.load_data()
     except DomainError:
         raise
-    except Exception:
-        logger.error(traceback.format_exc())
-        raise HTTPException(
-            status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
-            detail="Error while retrieving job details",
-        )
+    except Exception as exc:
+        raise InternalError("Error while retrieving job details") from exc
 
     # Get the latest logs for the job, if it has finished
     exp_paths = ExperimentPaths(expid)
@@ -635,20 +507,17 @@ async def get_experiment_job_parents(
     include_status: bool = False,
     user_id: str | None = Depends(auth_token_dependency()),
 ) -> dict:
-    """
-    Get the parents of a specific job of an experiment.
+    """Get the parents of a specific job of an experiment.
+    
     Set include_status=true to also return the current status of each parent job.
     """
     try:
         structure_repo = create_experiment_structure_repository(expid)
         parents = structure_repo.get_parents(job_name)
+    except DomainError:
+        raise
     except Exception as exc:
-        error_message = "Error while reading the experiment structure"
-        logger.error(error_message + f": {exc}")
-        logger.error(traceback.format_exc())
-        raise HTTPException(
-            status_code=HTTPStatus.INTERNAL_SERVER_ERROR, detail=error_message
-        )
+        raise InternalError("Error while reading the experiment structure") from exc
 
     parent_items = [{"job_name": parent} for parent in parents]
 
@@ -676,20 +545,17 @@ async def get_experiment_job_children(
     include_status: bool = False,
     user_id: str | None = Depends(auth_token_dependency()),
 ) -> dict:
-    """
-    Get the children of a specific job of an experiment
+    """Get the children of a specific job of an experiment
+    
     Set include_status=true to also return the current status of each child job.
     """
     try:
         structure_repo = create_experiment_structure_repository(expid)
         children = structure_repo.get_children(job_name)
+    except DomainError:
+        raise
     except Exception as exc:
-        error_message = "Error while reading the experiment structure"
-        logger.error(error_message + f": {exc}")
-        logger.error(traceback.format_exc())
-        raise HTTPException(
-            status_code=HTTPStatus.INTERNAL_SERVER_ERROR, detail=error_message
-        )
+        raise InternalError("Error while reading the experiment structure") from exc
 
     child_items = [{"job_name": child} for child in children]
 
@@ -708,3 +574,65 @@ async def get_experiment_job_children(
             logger.warning(traceback.format_exc())
 
     return {"children": child_items}
+
+
+def _build_category_tree(
+    counters: dict[tuple, int],
+) -> ExperimentJobsCategoryTree:
+    """Build a nested category tree out of the counters returned by the repository.
+
+    Each level of the key returned by
+    :meth:`JobsRepository.get_properties_counts` becomes a level of the tree, and
+    the number of jobs is stored at the deepest level. Missing values are already
+    reported as ``NA`` by the repository.
+
+    Example::
+
+        >>> _build_category_tree({("2000-01-01", "fc0", "SIM", "WAITING"): 3})
+        {'2000-01-01': {'fc0': {'SIM': {'WAITING': 3}}}}
+
+    :param counters: Job counts keyed by tuples of property values, one
+        element per tree level.
+    :return: Nested dictionary with the job count at the deepest level.
+    """
+    tree: dict = {}
+    for key, count in counters.items():
+        node = tree
+        for value in key[:-1]:
+            node = node.setdefault(value, {})
+        node[key[-1]] = count
+    return ExperimentJobsCategoryTree(root=tree)
+
+
+@router.get(
+    "/{expid}/jobs-category-tree",
+    name="Get experiment jobs category tree",
+    response_model=ExperimentJobsCategoryTreeResponse,
+)
+async def get_experiment_jobs_category_tree(
+    expid: str,
+    user_id: str | None = Depends(auth_token_dependency()),
+) -> ExperimentJobsCategoryTreeResponse:
+    """Get the jobs category tree of an experiment.
+
+    It helps navigating the jobs in a hierarchical way, based on their date,
+    member, section and status. It does not return the jobs themselves, but a
+    tree of counters that can be used to filter the job list endpoint.
+
+    :param expid: Experiment identifier
+    :return: Nested dictionary with the job count at the deepest level.
+    """
+    try:
+        job_list_repo = create_jobs_repository(expid)
+        counters = job_list_repo.get_properties_counts(JOBS_CATEGORY_HIERARCHY)
+    except DomainError:
+        raise
+    except Exception as exc:
+        raise InternalError(
+            "Error while reading the experiment jobs category tree"
+        ) from exc
+
+    return ExperimentJobsCategoryTreeResponse(
+        properties_hierarchy=list(JOBS_CATEGORY_HIERARCHY),
+        category_tree=_build_category_tree(counters),
+    )

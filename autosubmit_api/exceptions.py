@@ -21,6 +21,10 @@ class ValidationError(DomainError):
     """Raised when a request is not valid for the domain."""
 
 
+class InternalError(DomainError):
+    """Raised when an operation fails due to an error in the Autosubmit side."""
+
+
 class ExperimentNotFoundError(NotFoundError):
     """Raised when an experiment does not exist."""
 
