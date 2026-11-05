@@ -88,7 +88,7 @@ def get_processors_number(conf_job_processors: str) -> int:
 
 
 def separate_job_outliers(jobs: list["Job"]) -> tuple[list["Job"], list["Job"]]:
-  """Detect job outliers and separate them from the job list. 
+  """Detect job outliers and separate them from the job list.
   
   Zero (and negative) run times are considered outliers.
   Method: https://www.ibm.com/docs/en/cognos-analytics/11.1.0?topic=terms-modified-z-score
@@ -174,7 +174,7 @@ def _date_to_str_space(date_str):
 
 
 def get_average_total_time(jobs: list[object]) -> float:
-  """ Job has attribute total_time (See JobFactory)"""
+  """Job has attribute total_time (See JobFactory)."""
   if len(jobs):
     average = sum(job.total_time for job in jobs)/ len(jobs)
     return round(average, 4)
@@ -237,7 +237,7 @@ def timestamp_to_datetime_format(timestamp: int | None) -> str | None:
 
 
 def datechunk_to_year(chunk_unit: int, chunk_size: int) -> float:
-    """Gets chunk unit and size and returns the value in years
+    """Gets chunk unit and size and returns the value in years.
 
     :param chunk_unit: The unit of the chunk (year, month, day, hour).
     :param chunk_size: The size of the chunk in the given unit.
@@ -258,7 +258,8 @@ def datechunk_to_year(chunk_unit: int, chunk_size: int) -> float:
 
 
 class Status:
-    """Class to handle the status of a job"""
+    """Class to handle the status of a job."""
+
     WAITING = 0
     READY = 1
     SUBMITTED = 2
