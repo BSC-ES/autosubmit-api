@@ -61,7 +61,7 @@ def tostamp(string_date: str) -> int:
 
 
 def parse_number_processors(processors_str: str) -> int:
-  """Defaults to 1 in case of error"""
+  """Defaults to 1 in case of error."""
   if ':' in processors_str:  
     components = processors_str.split(":")
     processors = int(sum(
@@ -136,7 +136,7 @@ def separate_job_outliers(jobs: list["Job"]) -> tuple[list["Job"], list["Job"]]:
 
 
 def get_jobs_with_no_outliers(jobs: list["Job"]) -> list["Job"]:
-  """Returns a list of jobs without outliers"""  
+  """Returns a list of jobs without outliers."""  
   return separate_job_outliers(jobs)[0]
 
 
