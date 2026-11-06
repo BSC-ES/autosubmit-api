@@ -52,7 +52,7 @@ class Monitor:
     @staticmethod
     def color_status(status):
         """
-        Return color associated to given status
+        Return color associated to given status.
 
         :param status: status
         :type status: Status
@@ -63,7 +63,7 @@ class Monitor:
 
     def create_tree_list(self, expid, joblist, packages, groups, hide_groups=False, job_dictionary=None):
         """
-        Create graph from joblist
+        Create graph from joblist.
 
         :param expid: experiment's identifier
         :type expid: str
