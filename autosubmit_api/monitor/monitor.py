@@ -51,44 +51,17 @@ class Monitor:
 
     @staticmethod
     def color_status(status):
-        """
-        Return color associated to given status
+        """Return color associated to given status.
 
         :param status: status
         :type status: Status
         :return: color
         :rtype: str
         """
-        if status == Status.WAITING:
-            return Monitor._table[Status.WAITING]
-        elif status == Status.READY:
-            return Monitor._table[Status.READY]
-        elif status == Status.PREPARED:
-            return Monitor._table[Status.PREPARED]
-        elif status == Status.SUBMITTED:
-            return Monitor._table[Status.SUBMITTED]
-        elif status == Status.HELD:
-            return Monitor._table[Status.HELD]
-        elif status == Status.QUEUING:
-            return Monitor._table[Status.QUEUING]
-        elif status == Status.RUNNING:
-            return Monitor._table[Status.RUNNING]
-        elif status == Status.COMPLETED:
-            return Monitor._table[Status.COMPLETED]
-        elif status == Status.SKIPPED:
-            return Monitor._table[Status.SKIPPED]
-        elif status == Status.FAILED:
-            return Monitor._table[Status.FAILED]
-        elif status == Status.SUSPENDED:
-            return Monitor._table[Status.SUSPENDED]
-        elif status == Status.DELAYED:
-            return Monitor._table[Status.DELAYED]
-        else:
-            return Monitor._table[Status.UNKNOWN]
+        return Monitor._table.get(status, Monitor._table[Status.UNKNOWN])
 
     def create_tree_list(self, expid, joblist, packages, groups, hide_groups=False, job_dictionary=None):
-        """
-        Create graph from joblist
+        """Create graph from joblist.
 
         :param expid: experiment's identifier
         :type expid: str
