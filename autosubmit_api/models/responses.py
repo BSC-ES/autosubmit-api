@@ -50,6 +50,7 @@ class ExperimentJobItem(BaseModel):
     date: str | None = None
     member: str | None = None
     chunk: int | None = None  # Also returned by the ``extended`` view
+    wrapper: str | None = None  # Also returned by the ``extended`` view
     split: int | None = None
     splits: int | None = None
     out_path_local: str | None = None
@@ -143,5 +144,6 @@ class ExperimentJobsCategoryTree(
 
 class ExperimentJobsCategoryTreeResponse(BaseModel):
     """The jobs category tree, with the counters of the jobs in each category."""
+
     properties_hierarchy: list[JobCategoryProperty]
     category_tree: ExperimentJobsCategoryTree
