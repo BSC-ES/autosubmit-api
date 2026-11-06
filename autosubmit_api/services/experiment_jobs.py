@@ -7,7 +7,7 @@ from typing import Any
 from autosubmit_api.common.utils import Status, timestamp_to_datetime_format
 from autosubmit_api.components.jobs.utils import get_fixed_experiment_times
 from autosubmit_api.exceptions import DomainError, InternalError
-from autosubmit.api.logger import logger
+from autosubmit_api.logger import logger
 from autosubmit_api.models.jobs import UNSET, JobCategoryProperty, JobView, Unset
 from autosubmit_api.models.pagination import Page, PaginationInfo
 from autosubmit_api.models.requests import JobsSearchRequest
