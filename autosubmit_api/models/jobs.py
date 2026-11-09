@@ -34,6 +34,7 @@ class JobCategoryProperty(str, Enum):
     DATE = "date"
     MEMBER = "member"
     SECTION = "section"
+    WRAPPER = "wrapper"
     CHUNK = "chunk"
     STATUS = "status"
 
@@ -61,7 +62,26 @@ JOBS_CATEGORY_HIERARCHY: tuple[JobCategoryProperty, ...] = (
     JobCategoryProperty.SECTION,
     JobCategoryProperty.STATUS,
 )
-"""Order in which the job properties are shown in the jobs category tree. Used as filters."""
+"""Order in which the job properties are shown in the jobs category tree. Used as filters.
+
+Every job has one date, one member, one section and one status, so each level
+splits the jobs of its parent and the counters of the leaves add up to the total
+number of jobs.
+"""
+
+JOBS_WRAPPER_HIERARCHY: tuple[JobCategoryProperty, ...] = (
+    JobCategoryProperty.DATE,
+    JobCategoryProperty.MEMBER,
+    JobCategoryProperty.WRAPPER,
+    JobCategoryProperty.STATUS,
+)
+"""Order in which the job properties are shown in the wrapper tree. Used as filters.
+
+Wrappers are independent of their sections: a wrapper can hold jobs jobs from several
+sections and the jobs of one section could be spread over several wrappers.
+That is why the wrapper is not a level of ``JOBS_CATEGORY_HIERARCHY``, but
+share the same ancestors (date and member) and the same leaves (status).
+"""
 
 MISSING_CATEGORY_VALUE = "NA"
 """Default value for a job property that is not set."""
@@ -103,6 +123,7 @@ class JobData(BaseModel):
     section: str
     date: datetime.datetime | None
     member: str | None
+    wrapper: str | None = None
     chunk: int | None
     split: int | None
     splits: int | None
