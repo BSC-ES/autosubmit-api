@@ -3,6 +3,7 @@ import json
 import os
 import re
 import traceback
+from collections.abc import Sequence
 from datetime import datetime, timezone
 from typing import Annotated, Any
 
@@ -26,7 +27,12 @@ from autosubmit_api.database.db_jobdata import JobDataStructure
 from autosubmit_api.database.models import BaseExperimentModel
 from autosubmit_api.exceptions import DomainError, InternalError
 from autosubmit_api.logger import logger
-from autosubmit_api.models.jobs import JOBS_CATEGORY_HIERARCHY
+from autosubmit_api.models.jobs import (
+    JOBS_CATEGORY_HIERARCHY,
+    JOBS_WRAPPER_HIERARCHY,
+    MISSING_CATEGORY_VALUE,
+    JobCategoryProperty,
+)
 from autosubmit_api.models.pagination import Page, PaginationInfo
 from autosubmit_api.models.requests import (
     ExperimentsSearchRequest,
@@ -66,7 +72,7 @@ async def search_experiments(
     query_params: Annotated[ExperimentsSearchRequest, Query()],
     user_id: str | None = Depends(auth_token_dependency()),
 ) -> ExperimentsSearchResponse:
-    """Search experiments"""
+    """Search experiments."""
     logger.debug(f"Search args: {query_params}")
 
     page = Page.of(query_params.page, query_params.page_size)
@@ -159,7 +165,7 @@ async def search_experiments(
 async def get_experiment_detail(
     expid: str, user_id: str | None = Depends(auth_token_dependency())
 ) -> BaseExperimentModel:
-    """Get details of an experiment"""
+    """Get details of an experiment."""
     exp_builder = ExperimentBuilder()
     exp_builder.produce_base(expid)
     return exp_builder.product.model_dump(include=tables.ExperimentTable.c.keys())
@@ -201,7 +207,7 @@ async def get_experiment_jobs(
 async def get_experiment_wrappers(
     expid: str, user_id: str | None = Depends(auth_token_dependency())
 ) -> ExperimentWrappersResponse:
-    """Get wrappers for an experiment"""
+    """Get wrappers for an experiment."""
     job_package_reader = JobPackageReader(expid)
     job_package_reader.read()
 
@@ -269,7 +275,7 @@ def _format_config_response(
 async def get_experiment_fs_config(
     expid: str, user_id: str | None = Depends(auth_token_dependency())
 ) -> ExperimentFSConfigResponse:
-    """Get the filesystem config of an experiment"""
+    """Get the filesystem config of an experiment."""
     # Read the config
     APIBasicConfig.read()
     as_config = AutosubmitConfigResolver(expid, APIBasicConfig, ConfigParserFactory())
@@ -286,7 +292,7 @@ async def get_experiment_fs_config(
 async def get_runs(
     expid: str, user_id: str | None = Depends(auth_token_dependency())
 ) -> ExperimentRunsResponse:
-    """Get runs for a given experiment"""
+    """Get runs for a given experiment."""
     try:
         experiment_history = ExperimentHistoryDirector(
             ExperimentHistoryBuilder(expid)
@@ -325,9 +331,7 @@ async def get_run_config(
     run_id: str,
     user_id: str | None = Depends(auth_token_dependency()),
 ) -> ExperimentRunConfigResponse:
-    """
-    Get the config of a specific run of an experiment
-    """
+    """Get the config of a specific run of an experiment."""
     historical_db = JobDataStructure(expid, APIBasicConfig)
     experiment_run = historical_db.get_experiment_run_by_id(run_id=run_id)
     metadata = (
@@ -352,7 +356,7 @@ async def get_run_user_metrics(
     run_id: int,
     user_id: str | None = Depends(auth_token_dependency()),
 ):
-    """Get the user-defined metrics of a specific run of an experiment"""
+    """Get the user-defined metrics of a specific run of an experiment."""
     user_metric_repo = create_user_metric_repository(expid)
 
     metrics = [
@@ -373,7 +377,7 @@ async def get_runs_with_user_metrics(
     expid: str,
     user_id: str | None = Depends(auth_token_dependency()),
 ):
-    """Get the runs with user-defined metrics of an experiment"""
+    """Get the runs with user-defined metrics of an experiment."""
     user_metric_repo = create_user_metric_repository(expid)
 
     try:
@@ -401,9 +405,7 @@ async def get_experiment_eta(
     ] = "SIM",
     user_id: str | None = Depends(auth_token_dependency()),
 ) -> ExperimentEtaResponse:
-    """Get the estimated time of arrival (remaining time) for an experiment's
-    job section (e.g. SIM, APP, POST). Defaults to SIM.
-    """
+    """Get the estimated time of arrival (remaining time) for an experiment's job section (e.g. SIM, APP, POST). Defaults to SIM."""
     try:
         repo = create_jobs_repository(expid)
         job_data_repo = create_experiment_job_data_repository(expid)
@@ -423,7 +425,7 @@ async def get_experiment_job_detail(
     job_name: str,
     user_id: str | None = Depends(auth_token_dependency()),
 ) -> JobDetailResponse:
-    """Get the details of a specific job of an experiment"""
+    """Get the details of a specific job of an experiment."""
     # Get the latest job details from the retriever
     try:
         job_detail_retriever = JobDetailRetriever(expid, job_name)
@@ -545,7 +547,7 @@ async def get_experiment_job_children(
     include_status: bool = False,
     user_id: str | None = Depends(auth_token_dependency()),
 ) -> dict:
-    """Get the children of a specific job of an experiment
+    """Get the children of a specific job of an experiment.
     
     Set include_status=true to also return the current status of each child job.
     """
@@ -604,6 +606,26 @@ def _build_category_tree(
     return ExperimentJobsCategoryTree(root=tree)
 
 
+def _only_packaged(
+    counters: dict[tuple, int], hierarchy: Sequence[JobCategoryProperty]
+) -> dict[tuple, int]:
+    """Keep the counted jobs that belong to a wrapper.
+
+    The wrapper branch navigates the packaging, so a job that no package holds is
+    not part of it: it is only reachable through the section branch.
+
+    :param counters: Job counts of a hierarchy that groups by wrapper.
+    :param hierarchy: The properties of the hierarchy, to locate the wrapper.
+    :return: The counts of the jobs that belong to a wrapper.
+    """
+    position = hierarchy.index(JobCategoryProperty.WRAPPER)
+    return {
+        key: count
+        for key, count in counters.items()
+        if key[position] != MISSING_CATEGORY_VALUE
+    }
+
+
 @router.get(
     "/{expid}/jobs-category-tree",
     name="Get experiment jobs category tree",
@@ -615,16 +637,25 @@ async def get_experiment_jobs_category_tree(
 ) -> ExperimentJobsCategoryTreeResponse:
     """Get the jobs category tree of an experiment.
 
-    It helps navigating the jobs in a hierarchical way, based on their date,
-    member, section and status. It does not return the jobs themselves, but a
-    tree of counters that can be used to filter the job list endpoint.
+    It helps navigating the jobs in a hierarchical way with two trees:
+
+    - the jobs grouped by date, member, section and status,
+    - the jobs that belong to a wrapper, grouped by date, member, wrapper and
+      status. It is omitted when no job is inside a wrapper.
+
+    They are not additive: the section tree counts every job once, while the
+    wrapper tree only counts the ones that the wrapper holds. The wrapper cannot
+    be a level of the section tree because a wrapper can hold jobs from different
+    sections.
 
     :param expid: Experiment identifier
-    :return: Nested dictionary with the job count at the deepest level.
+    :return: Nested dictionaries with the job count at the deepest level.
     """
     try:
         job_list_repo = create_jobs_repository(expid)
-        counters = job_list_repo.get_properties_counts(JOBS_CATEGORY_HIERARCHY)
+        category_counters, wrapper_counters = job_list_repo.get_properties_counts(
+            [JOBS_CATEGORY_HIERARCHY, JOBS_WRAPPER_HIERARCHY]
+        )
     except DomainError:
         raise
     except Exception as exc:
@@ -632,7 +663,16 @@ async def get_experiment_jobs_category_tree(
             "Error while reading the experiment jobs category tree"
         ) from exc
 
+    wrapper_counters = _only_packaged(wrapper_counters, JOBS_WRAPPER_HIERARCHY)
+    has_packaged_jobs = bool(wrapper_counters)
+
     return ExperimentJobsCategoryTreeResponse(
         properties_hierarchy=list(JOBS_CATEGORY_HIERARCHY),
-        category_tree=_build_category_tree(counters),
+        category_tree=_build_category_tree(category_counters),
+        wrapper_hierarchy=(
+            list(JOBS_WRAPPER_HIERARCHY) if has_packaged_jobs else None
+        ),
+        wrapper_tree=(
+            _build_category_tree(wrapper_counters) if has_packaged_jobs else None
+        ),
     )
