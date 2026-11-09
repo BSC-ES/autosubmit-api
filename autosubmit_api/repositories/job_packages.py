@@ -46,23 +46,20 @@ class JobPackagesRepository(ABC):
 
 
 class JobPackagesSQLRepository(JobPackagesRepository):
-    def __init__(self, expid: str, engine: Engine, valid_tables: Table | list[Table]):
+    def __init__(self, expid: str, engine: Engine, valid_tables: list[Table]):
         self.expid = expid
         self.engine = engine
 
-        if isinstance(valid_tables, list):
-            self.table = tables.check_table_schema(self.engine, valid_tables)
-            if self.table is None:
-                if len(valid_tables) == 0:
-                    raise ValueError("No valid tables provided.")
-                self.table = valid_tables[0]
-        else:
-            self.table = valid_tables
+        if not valid_tables:
+            raise ValueError("No valid tables provided.")
+
+        self.table = tables.check_table_schema(self.engine, valid_tables)
+        if self.table is None:
+            self.table = valid_tables[0]
 
     def get_all(self) -> list[JobPackageModel]:
         with self.engine.connect() as conn:
-            statement = self.table.select()
-            result = conn.execute(statement).all()   
+            result = conn.execute(self.table.select()).all()
         return self._to_models(result)
 
     def get_by_job_name(self, job_name: str) -> list[JobPackageModel]:
@@ -120,7 +117,7 @@ class JobPackagesSQLRepository(JobPackagesRepository):
         """
         return [
             JobPackageModel(
-                exp_id=row.exp_id if hasattr(row, "exp_id") else self.expid,
+                exp_id=getattr(row, "exp_id", self.expid),
                 package_name=row.package_name,
                 job_name=row.job_name,
             )
@@ -128,7 +125,7 @@ class JobPackagesSQLRepository(JobPackagesRepository):
         ]
 
 
-def wrapper_jobs_table_candidates(
+def _wrapper_jobs_table_candidates(
     expid: str, preview: bool = False
 ) -> list[Table]:
     """Gets the tables that may hold the packaging of the jobs, most specific first.
@@ -141,31 +138,27 @@ def wrapper_jobs_table_candidates(
         packaging of an experiment that has not run yet.
     :return: Candidate tables of the packaging, most specific first.
     """
-    if APIBasicConfig.DATABASE_BACKEND == "postgres":
-        # Postgres: every experiment is a schema
-        if preview:
-            return [
-                tables.table_change_schema(expid, tables.PreviewWrapperJobsTableV2),
-                tables.table_change_schema(expid, tables.PreviewWrapperJobsTable),
-                tables.table_change_schema(expid, tables.WrapperJobPackageTable),
-            ]
-        return [
-            tables.table_change_schema(expid, tables.WrapperJobsTableV2),
-            tables.table_change_schema(expid, tables.WrapperJobsTable),
-            tables.table_change_schema(expid, tables.JobPackageTable),
-        ]
-
-    if preview:
-        return [
+    candidates = (
+        [
             tables.PreviewWrapperJobsTableV2,
             tables.PreviewWrapperJobsTable,
             tables.WrapperJobPackageTable,
         ]
-    return [
-        tables.WrapperJobsTableV2,
-        tables.WrapperJobsTable,
-        tables.JobPackageTable,
-    ]
+        if preview
+        else [
+            tables.WrapperJobsTableV2,
+            tables.WrapperJobsTable,
+            tables.JobPackageTable,
+        ]
+    )
+
+    if APIBasicConfig.DATABASE_BACKEND == "postgres":
+        # Postgres: every experiment is a schema
+        return [
+            tables.table_change_schema(expid, candidate) for candidate in candidates
+        ]
+
+    return candidates
 
 
 def create_job_packages_repository(
@@ -192,7 +185,7 @@ def create_job_packages_repository(
         _engine = create_sqlite_db_engine(db_path, read_only=True)
 
     return JobPackagesSQLRepository(
-        expid, _engine, wrapper_jobs_table_candidates(expid, preview)
+        expid, _engine, _wrapper_jobs_table_candidates(expid, preview)
     )
 
 
@@ -211,7 +204,7 @@ def get_wrapper_jobs_table(expid: str, engine: Engine) -> Table | None:
     """
     inspector = inspect(engine)
     for preview in (False, True):
-        for candidate in wrapper_jobs_table_candidates(expid, preview):
+        for candidate in _wrapper_jobs_table_candidates(expid, preview):
             if inspector.has_table(candidate.name, candidate.schema):
                 return candidate
     return None
