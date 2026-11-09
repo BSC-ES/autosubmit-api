@@ -1581,7 +1581,7 @@ class TestUserPreferences:
     get_endpoint = "/v4/user-settings/preferred-username"
 
     def _create_jwt_token(self, user_id: str) -> str:
-        """Helper method to create a valid JWT token for testing"""
+        """Helper method to create a valid JWT token for testing."""
         payload = {
             "user_id": user_id,
             "sub": user_id,
@@ -1596,7 +1596,7 @@ class TestUserPreferences:
     def test_register_preferred_username_unauthorized(
         self, fixture_fastapi_client: TestClient
     ):
-        """Test that registering a username without authentication fails"""
+        """Test that registering a username without authentication fails."""
         response = fixture_fastapi_client.post(
             self.register_endpoint,
             json={"preferred_username": "test_user"},
@@ -1607,7 +1607,7 @@ class TestUserPreferences:
     def test_register_preferred_username_invalid_token(
         self, fixture_fastapi_client: TestClient
     ):
-        """Test that registering with an invalid token fails"""
+        """Test that registering with an invalid token fails."""
         response = fixture_fastapi_client.post(
             self.register_endpoint,
             json={"preferred_username": "test_user"},
@@ -1619,7 +1619,7 @@ class TestUserPreferences:
     def test_register_preferred_username_success(
         self, fixture_fastapi_client: TestClient
     ):
-        """Test successfully registering a preferred username"""
+        """Test successfully registering a preferred username."""
         user_id = str(uuid4())
         preferred_username = f"linux_user_{uuid4().hex[:8]}"
         jwt_token = self._create_jwt_token(user_id)
