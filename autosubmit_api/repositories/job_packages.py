@@ -11,16 +11,10 @@ from autosubmit_api.config.basicConfig import APIBasicConfig
 from autosubmit_api.database import tables
 from autosubmit_api.database.common import (
     create_sqlite_db_engine,
+    iter_param_chunks,
 )
 from autosubmit_api.persistance.experiment import ExperimentPaths
 from autosubmit_api.repositories.experiment import create_experiment_repository
-
-
-IN_CLAUSE_CHUNK_SIZE = 900
-"""Maximum number of job names in an SQL IN clause.
-Older SQLite versions have a limit of 999 parameters in a query, and the job
-list can ask up to 1000 jobs in one page. Long lookups are split.
-"""
 
 
 class JobPackageModel(BaseModel):
@@ -107,11 +101,8 @@ class JobPackagesSQLRepository(JobPackagesRepository):
             if job_names is None:
                 rows = conn.execute(self._latest_first(statement)).all()
             else:
-                for start in range(0, len(job_names), IN_CLAUSE_CHUNK_SIZE):
-                    chunk = job_names[start : start + IN_CLAUSE_CHUNK_SIZE]
-                    chunk_statement = statement.where(
-                        self.table.c.job_name.in_(chunk)
-                    )
+                for chunk in iter_param_chunks(job_names):
+                    chunk_statement = statement.where(self.table.c.job_name.in_(chunk))
                     rows.extend(conn.execute(self._latest_first(chunk_statement)).all())
 
         wrappers: dict[str, str] = {}
