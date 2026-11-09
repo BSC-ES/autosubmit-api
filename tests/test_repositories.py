@@ -5,7 +5,11 @@ import pytest
 
 from autosubmit_api.common.utils import Status
 from autosubmit_api.exceptions import ExperimentNotFoundError
-from autosubmit_api.models.jobs import JOBS_CATEGORY_HIERARCHY, UNSET
+from autosubmit_api.models.jobs import (
+    JOBS_CATEGORY_HIERARCHY,
+    JOBS_WRAPPER_HIERARCHY,
+    UNSET,
+)
 from autosubmit_api.models.pagination import Page
 from autosubmit_api.models.requests import ExperimentsSearchRequest
 from autosubmit_api.repositories.experiment import create_experiment_repository
@@ -577,21 +581,43 @@ class TestJobsRepositorySearch:
 class TestJobsCategoryCounts:
 
     @pytest.mark.parametrize("expid", ["a007", "a8qc", "a1x4"])
+    @pytest.mark.parametrize(
+        "hierarchy",
+        [JOBS_CATEGORY_HIERARCHY, JOBS_WRAPPER_HIERARCHY],
+        ids=["section", "wrapper"],
+    )
     def test_every_leaf_counts_the_jobs_of_its_filters(
-        self, fixture_mock_basic_config, expid: str
+        self, fixture_mock_basic_config, expid: str, hierarchy: tuple
     ):
-        """The counts of the leaves of the hierarchy should match the number of jobs"""
+        """The counts of the leaves of the hierarchy should match the number of jobs."""
         repo = create_jobs_repository(expid)
-        counts = repo.get_properties_counts(list(JOBS_CATEGORY_HIERARCHY))
+        [counts] = repo.get_properties_counts([hierarchy])
 
         _, total = repo.search()
 
         assert sum(counts.values()) == total
-        for (date, member, section, status), count in counts.items():
-            _, filtered = repo.search(
-                date=date, member=member, section=section, status=status
-            )
-            assert filtered == count, (date, member, section, status)
+        for key, count in counts.items():
+            filters = dict(zip([prop.value for prop in hierarchy], key))
+            _, filtered = repo.search(**filters)
+            assert filtered == count, (key, filters)
+
+    @pytest.mark.parametrize("expid", ["a007", "a1x4"])
+    def test_groupings_are_counted_together(
+        self, fixture_mock_basic_config, expid: str
+    ):
+        """One call should return one mapping per grouping, in the same order."""
+        repo = create_jobs_repository(expid)
+
+        [category_counts, wrapper_counts] = repo.get_properties_counts(
+            [JOBS_CATEGORY_HIERARCHY, JOBS_WRAPPER_HIERARCHY]
+        )
+
+        assert category_counts == repo.get_properties_counts(
+            [JOBS_CATEGORY_HIERARCHY]
+        )[0]
+        assert wrapper_counts == repo.get_properties_counts(
+            [JOBS_WRAPPER_HIERARCHY]
+        )[0]
 
 
 class TestJobsRepositoryPages:

@@ -4,10 +4,10 @@ import datetime
 import heapq
 import re
 from abc import ABC, abstractmethod
-from collections.abc import Sequence
+from collections.abc import Callable, Sequence
 from typing import Any, NamedTuple
 
-from sqlalchemy import Engine, Table, create_engine, func, select
+from sqlalchemy import Connection, Engine, Table, create_engine, false, func, select
 
 from autosubmit_api.common import utils as common_utils
 from autosubmit_api.config.basicConfig import APIBasicConfig
@@ -29,6 +29,11 @@ from autosubmit_api.models.pagination import UNPAGINATED, Page
 from autosubmit_api.persistance.experiment import ExperimentPaths
 from autosubmit_api.persistance.pkl_reader import PklReader
 from autosubmit_api.repositories.experiment import create_experiment_repository
+from autosubmit_api.repositories.job_packages import (
+    JobPackagesRepository,
+    create_job_packages_repository,
+    get_wrapper_jobs_table,
+)
 
 STRING_TO_CODE = common_utils.Status.STRING_TO_CODE
 
@@ -90,19 +95,19 @@ def _order_key(row: JobRow) -> tuple[str, str]:
 class JobsRepository(ABC):
     @abstractmethod
     def get_all(self) -> list[JobData]:
-        """Gets all jobs"""
+        """Gets all jobs."""
 
     @abstractmethod
     def get_last_modified_timestamp(self) -> int:
-        """Gets the last modified UNIX timestamp of the jobs"""
+        """Gets the last modified UNIX timestamp of the jobs."""
 
     @abstractmethod
     def get_by_name(self, name: str) -> JobData | None:
-        """Gets a job by its name"""
+        """Gets a job by its name."""
 
     @abstractmethod
     def get_by_names(self, names: list[str]) -> list[JobData]:
-        """Gets jobs matching any of the given names"""
+        """Gets jobs matching any of the given names."""
 
     @abstractmethod
     def search(
@@ -112,7 +117,9 @@ class JobsRepository(ABC):
         date: str | None | Unset = UNSET,
         member: str | None | Unset = UNSET,
         section: str | None | Unset = UNSET,
+        wrapper: str | None | Unset = UNSET,
         chunk: int | None | Unset = UNSET,
+        with_wrapper: bool = False,
         page: Page = UNPAGINATED,
     ) -> tuple[list[JobData], int]:
         """Searches jobs applying the given filters.
@@ -125,6 +132,11 @@ class JobsRepository(ABC):
         every job has a name, so it has no empty value: ``UNSET`` is its only way
         of not filtering.
 
+        ``wrapper`` is a property filter, but it is not stored in the job list, so
+        reading it is not free: the backend decides how to get it and only does it
+        when the filter is set or ``with_wrapper`` requests it.
+
+        :param with_wrapper: Whether the returned jobs report their wrapper.
         :param page: Slice of the matching jobs to return, paginated by job name.
         :returns: A tuple containing the jobs of the page and the total count of
             the jobs matching the filters (before pagination).
@@ -132,24 +144,83 @@ class JobsRepository(ABC):
 
     @abstractmethod
     def get_properties_counts(
-        self, properties: Sequence[JobCategoryProperty]
-    ) -> dict[tuple, int]:
-        """Gets the number of jobs for each combination of the given properties,
-        similar to a SQL GROUP BY query.
+        self, groupings: Sequence[Sequence[JobCategoryProperty]]
+    ) -> list[dict[tuple, int]]:
+        """Gets the number of jobs for each combination of the given properties.
 
-        The keys of the returned mapping follow the order of ``properties`` and
-        the values are normalized with :func:`format_category_value`.
+        It works like a SQL GROUP BY query: the keys of the returned mappings
+        follow the order of their grouping and the values are normalized with
+        :func:`format_category_value`.
 
-        :param properties: The properties to group by.
-        :return: A mapping from the combination of property values to the number
-            of jobs with that combination.
+        ``wrapper`` is not stored in the job list, so grouping by it requires
+        reading the packaging, which the backend only does when it is requested.
+
+        :param groupings: The properties to group by, one grouping per tree to
+            build. The backends read all of them in the same pass, so two
+            groupings do not read the job list twice.
+        :return: One mapping per grouping, in the same order. Each mapping goes
+            from the combination of property values to the number of jobs with
+            that combination.
         """
 
 
 class JobsPklRepository(JobsRepository):
-    def __init__(self, expid: str) -> None:
+    PROPERTY_ORDER: tuple[JobCategoryProperty, ...] = (
+        JobCategoryProperty.DATE,
+        JobCategoryProperty.MEMBER,
+        JobCategoryProperty.SECTION,
+        JobCategoryProperty.WRAPPER,
+        JobCategoryProperty.CHUNK,
+        JobCategoryProperty.STATUS,
+    )
+    """Properties of a job that can be grouped, in the order they are read."""
+
+    def __init__(
+        self,
+        expid: str,
+        wrapper_repo_factory: Callable[
+            ..., JobPackagesRepository
+        ] = create_job_packages_repository,
+    ) -> None:
         self.expid = expid
         self.pkl_reader = PklReader(expid)
+        self._wrapper_repo_factory = wrapper_repo_factory
+        self._wrappers: dict[str, str] | None = None
+
+    def _wrapper_map(
+        self, job_names: list[str] | None = None, wrapper: str | None = None
+    ) -> dict[str, str]:
+        """Gets the wrapper of the jobs, keyed by job name.
+
+        The pkl job list does not store the packaging: it comes from the packaging
+        database. An experiment that has not been packaged yet has no wrappers,
+        which is not an error.
+
+        :param job_names: Only these jobs. ``None`` reads the whole packaging.
+        :param wrapper: Only the jobs of this wrapper. ``None`` does not filter.
+        :return: The wrapper of each packaged job. Jobs outside a wrapper are not
+            included.
+        """
+        if self._wrappers is not None and job_names is None and wrapper is None:
+            return self._wrappers
+
+        for preview in (False, True):
+            try:
+                wrappers = self._wrapper_repo_factory(
+                    self.expid, preview=preview
+                ).get_wrapper_map(job_names, wrapper)
+            except Exception as exc:
+                logger.debug("Error while reading the job wrappers: %s", exc)
+                continue
+
+            if wrappers or preview:
+                # Nothing else to try: either the packaging was found or the
+                # experiment has no preview packaging either
+                if job_names is None and wrapper is None:
+                    self._wrappers = wrappers
+                return wrappers
+
+        return {}
 
     def _rows(self) -> tuple[JobRow, ...]:
         """Gets the jobs of the pkl in the compact form used to filter and page them.
@@ -162,13 +233,14 @@ class JobsPklRepository(JobsRepository):
         return tuple(_to_row(job) for job in self.pkl_reader.parse_job_list())
 
     @staticmethod
-    def _row_to_job_data(row: JobRow) -> JobData:
+    def _row_to_job_data(row: JobRow, wrapper: str | None = None) -> JobData:
         """Builds the ``JobData`` only for the rows being returned.
         
         :param row: A job of the pkl in the compact form used to filter and page it.
+        :param wrapper: The wrapper of the job, when it was requested.
         :return: The job data model of the row.
         """
-        return JobData(**row._asdict())
+        return JobData(**row._asdict(), wrapper=wrapper)
 
     @staticmethod
     def _matches_property(job: Any, prop: JobCategoryProperty, expected: Any) -> bool:
@@ -187,6 +259,31 @@ class JobsPklRepository(JobsRepository):
         if expected is None:
             return raw_value is None
         return format_category_value(prop, raw_value) == expected
+
+    @staticmethod
+    def _matches_wrapper(
+        job: Any, expected: Any, wrappers: dict[str, str], filter_by_absence: bool
+    ) -> bool:
+        """Checks the wrapper filter against a job.
+
+        The wrapper is not part of the job of the pkl list, so it is looked up in
+        the packaging of the experiment.
+
+        :param job: A job of the pkl in the compact form used to filter and page it.
+        :param expected: The expected wrapper, ``UNSET`` to not filter, ``None`` for
+            the jobs outside a wrapper.
+        :param wrappers: The wrapper of each packaged job, keyed by job name. It may
+            only hold the wrappers of one wrapper, or of the jobs of the page.
+        :param filter_by_absence: Whether ``wrappers`` holds every packaged job, which
+            is required to tell the jobs without a wrapper apart.
+        :return: True if the job matches the filter, False otherwise.
+        """
+        if expected is UNSET:
+            return True
+
+        if expected is None:
+            return filter_by_absence and job.name not in wrappers
+        return wrappers.get(job.name) == expected
 
     @classmethod
     def _matches_filters(
@@ -229,8 +326,7 @@ class JobsPklRepository(JobsRepository):
         """Compares a value with a wildcard expression.
 
         The expression can contain '*' as wildcard, and '!' as negation.
-        If the expression is empty, it matches everything.
-        Examples:
+        If the expression is empty, it matches everything. Examples:
         - 'test*' matches 'test123', 'test_abc', etc. Not matching '123test'.
         - '!test*' does not match 'test123', 'test_abc', etc
 
@@ -255,14 +351,14 @@ class JobsPklRepository(JobsRepository):
         return bool(re.fullmatch(pattern, value))
 
     def get_all(self) -> list[JobData]:
-        """Gets all jobs from the pkl job list"""
+        """Gets all jobs from the pkl job list."""
         return [self._row_to_job_data(row) for row in self._rows()]
 
     def get_last_modified_timestamp(self) -> int:
         return self.pkl_reader.get_modified_time()
 
     def get_by_name(self, name: str) -> JobData | None:
-        """Gets a job by its name from the pkl job list"""
+        """Gets a job by its name from the pkl job list."""
         for row in self._rows():
             if row.name == name:
                 return self._row_to_job_data(row)
@@ -282,7 +378,9 @@ class JobsPklRepository(JobsRepository):
         date: str | None | Unset = UNSET,
         member: str | None | Unset = UNSET,
         section: str | None | Unset = UNSET,
+        wrapper: str | None | Unset = UNSET,
         chunk: int | None | Unset = UNSET,
+        with_wrapper: bool = False,
         page: Page = UNPAGINATED,
     ) -> tuple[list[JobData], int]:
         """Searches jobs by the given filters in a deterministic order (job name).
@@ -292,17 +390,38 @@ class JobsPklRepository(JobsRepository):
         :param date: Filter by job date.
         :param member: Filter by job member.
         :param section: Filter by job section.
+        :param wrapper: Filter by job wrapper, read from the packaging database.
         :param chunk: Filter by job chunk.
+        :param with_wrapper: Whether the returned jobs report their wrapper.
         :param page: Slice of the matching jobs to return, paginated by job name.
         :returns: A tuple containing the jobs of the page and the total count of
             the jobs matching the filters (before pagination).
         """
+        if wrapper is not UNSET:
+            expected_wrapper = normalize_filter_value(wrapper)
+        else:
+            expected_wrapper = UNSET
+
+        # The wrapper of a job is not in the pkl, so it is read from the packaging
+        # database: only the page when it is just returned, and the whole packaging
+        # when the jobs have to be filtered or grouped by it.
+        if expected_wrapper is UNSET and with_wrapper:
+            wrappers = {}
+            needs_full_map = False
+        elif expected_wrapper is None:
+            wrappers = self._wrapper_map()
+            needs_full_map = True
+        else:
+            wrappers = self._wrapper_map(wrapper=expected_wrapper)
+            needs_full_map = False
+
         matching_rows = [
             row
             for row in self._rows()
             if self._matches_filters(
                 row, job_name, status, date, member, section, chunk
             )
+            and self._matches_wrapper(row, expected_wrapper, wrappers, needs_full_map)
         ]
 
         # Deterministic backend-agnostic order shared with the SQL repository.
@@ -317,38 +436,152 @@ class JobsPklRepository(JobsRepository):
         else:
             page_rows = sorted(matching_rows, key=_order_key)
 
-        return [self._row_to_job_data(row) for row in page_rows], len(matching_rows)
+        if with_wrapper and expected_wrapper is UNSET:
+            # The wrapper of the jobs of the page only
+            wrappers = self._wrapper_map(job_names=[row.name for row in page_rows])
+
+        return [
+            self._row_to_job_data(row, wrappers.get(row.name)) for row in page_rows
+        ], len(matching_rows)
 
     def get_properties_counts(
-        self, properties: Sequence[JobCategoryProperty]
-    ) -> dict[tuple, int]:
+        self, groupings: Sequence[Sequence[JobCategoryProperty]]
+    ) -> list[dict[tuple, int]]:
         """Gets the number of jobs for each combination of the given properties.
-        
-        :param properties: The properties to group by.
-        :returns: A dictionary mapping each combination of property values to the number of jobs with that combination.
+
+        The whole packaging is read at most once, and only when one of the
+        groupings uses the wrapper.
+
+        :param groupings: The properties to group by, one grouping per tree to
+            build.
+        :return: One mapping per grouping, in the same order.
         """
-        properties = [JobCategoryProperty(prop) for prop in properties]
-        counts: dict[tuple, int] = {}
+        groupings = [
+            [JobCategoryProperty(prop) for prop in grouping]
+            for grouping in groupings
+        ]
+        wrappers = (
+            self._wrapper_map()
+            if any(JobCategoryProperty.WRAPPER in grouping for grouping in groupings)
+            else {}
+        )
+
+        # Dates, members, sections, wrappers, chunks and statuses are shared by
+        # many jobs, so normalizing the values is done once per distinct value
+        # instead of once per job and grouping.
+        properties = [
+            prop for prop in self.PROPERTY_ORDER if any(prop in g for g in groupings)
+        ]
+        normalized: dict[JobCategoryProperty, dict[Any, Any]] = {
+            prop: {} for prop in properties
+        }
+        positions = [
+            [properties.index(prop) for prop in grouping] for grouping in groupings
+        ]
+
+        counts: list[dict[tuple, int]] = [{} for _ in groupings]
         for row in self._rows():
-            key = tuple(
-                format_category_value(prop, getattr(row, prop.value))
-                for prop in properties
-            )
-            counts[key] = counts.get(key, 0) + 1
+            values = []
+            for prop in properties:
+                cache = normalized[prop]
+                raw_value = (
+                    wrappers.get(row.name)
+                    if prop is JobCategoryProperty.WRAPPER
+                    else getattr(row, prop.value)
+                )
+                value = cache.get(raw_value)
+                if value is None:
+                    value = cache[raw_value] = format_category_value(prop, raw_value)
+                values.append(value)
+
+            for order, grouping_counts in zip(positions, counts):
+                key = tuple(values[position] for position in order)
+                grouping_counts[key] = grouping_counts.get(key, 0) + 1
         return counts
 
 
 class JobsSQLRepository(JobsRepository):
-    def __init__(self, expid: str, engine: Engine, table: Table) -> None:
+    def __init__(
+        self,
+        expid: str,
+        engine: Engine,
+        table: Table,
+        wrapper_table: Table | None = None,
+    ) -> None:
         self.expid = expid
         self.engine = engine
         self.table = table
+        self.wrapper_table = wrapper_table
+        self._wrappers_subquery: Any = None
 
         # Check table schema
         if tables.check_table_schema(self.engine, [self.table]) is None:
             raise ValueError(
                 f"Table schema for {self.table.name} does not match expected schema."
             )
+
+    def _wrapper_subquery(self) -> Any:
+        """Builds the subquery with the wrapper of each job, once per repository.
+
+        The packaging table keeps the packages of every run, so the wrapper of a
+        job is the one of its latest package (a v2 table has the run id and every
+        revision has a package id). An experiment without a packaging table has no
+        wrappers, which is not an error.
+
+        :return: Subquery with the columns ``job_name`` and ``wrapper``, or
+            ``None`` if the experiment has no packaging table.
+        """
+        if self.wrapper_table is None:
+            return None
+        if self._wrappers_subquery is not None:
+            return self._wrappers_subquery
+
+        wrapper_table = self.wrapper_table
+        if "package_id" in wrapper_table.c:
+            # One row per job: the packaging of its latest package
+            latest_packages = (
+                select(
+                    wrapper_table.c.job_name.label("job_name"),
+                    func.max(wrapper_table.c.package_id).label("package_id"),
+                )
+                .group_by(wrapper_table.c.job_name)
+                .subquery()
+            )
+            statement = (
+                select(
+                    wrapper_table.c.job_name.label("job_name"),
+                    wrapper_table.c.package_name.label("wrapper"),
+                )
+                .select_from(
+                    wrapper_table.join(
+                        latest_packages,
+                        (wrapper_table.c.job_name == latest_packages.c.job_name)
+                        & (wrapper_table.c.package_id == latest_packages.c.package_id),
+                    )
+                )
+            )
+        else:
+            statement = select(
+                wrapper_table.c.job_name.label("job_name"),
+                wrapper_table.c.package_name.label("wrapper"),
+            )
+
+        self._wrappers_subquery = statement.subquery()
+        return self._wrappers_subquery
+
+    def _with_wrappers(self, statement, wrapper_subquery):
+        """Adds the wrapper of the jobs and applies the wrapper filter.
+
+        :param statement: Statement of the job list.
+        :param wrapper_subquery: Subquery with the wrapper of each job.
+        :return: The statement joined with the wrappers.
+        """
+        return statement.select_from(
+            self.table.outerjoin(
+                wrapper_subquery,
+                wrapper_subquery.c.job_name == self.table.c.name,
+            )
+        ).add_columns(wrapper_subquery.c.wrapper)
 
     
     @staticmethod
@@ -362,6 +595,7 @@ class JobsSQLRepository(JobsRepository):
             section=row.section,
             date=row.date,
             member=row.member,
+            wrapper=getattr(row, "wrapper", None),
             chunk=row.chunk,
             split=row.split,
             splits=row.splits,
@@ -394,7 +628,7 @@ class JobsSQLRepository(JobsRepository):
         return negated, pattern
 
     def get_all(self) -> list[JobData]:
-        """Gets all jobs from SQL database"""
+        """Gets all jobs from SQL database."""
         with self.engine.connect() as conn:
             result = conn.execute(self.table.select())
             return [self._to_job_data(row) for row in result]
@@ -461,7 +695,9 @@ class JobsSQLRepository(JobsRepository):
         date: str | None | Unset = UNSET,
         member: str | None | Unset = UNSET,
         section: str | None | Unset = UNSET,
+        wrapper: str | None | Unset = UNSET,
         chunk: int | None | Unset = UNSET,
+        with_wrapper: bool = False,
         page: Page = UNPAGINATED,
     ) -> tuple[list[JobData], int]:
         """Searches jobs by the given filters in a deterministic order (job name).
@@ -469,9 +705,16 @@ class JobsSQLRepository(JobsRepository):
         :returns: A tuple containing the jobs of the page and the total count of
             the jobs matching the filters (before pagination).
         """
+        wrapper_subquery = (
+            self._wrapper_subquery()
+            if wrapper is not UNSET or with_wrapper
+            else None
+        )
 
         with self.engine.connect() as conn:
             statement = self.table.select()
+            if wrapper_subquery is not None:
+                statement = self._with_wrappers(statement, wrapper_subquery)
 
             if job_name is not UNSET:
                 negated, pattern = self._wildcard_to_sql_like(job_name)
@@ -502,6 +745,21 @@ class JobsSQLRepository(JobsRepository):
                         column == format_category_value(prop, expected)
                     )
 
+            if wrapper is not UNSET:
+                expected_wrapper = normalize_filter_value(wrapper)
+                wrapper_column = (
+                    wrapper_subquery.c.wrapper
+                    if wrapper_subquery is not None
+                    else None
+                )
+                if wrapper_column is None:
+                    # The experiment has no packaging: no job has a wrapper
+                    statement = statement.where(false())
+                elif expected_wrapper is None:
+                    statement = statement.where(wrapper_column.is_(None))
+                else:
+                    statement = statement.where(wrapper_column == expected_wrapper)
+
             # Deterministic order shared with the PKL repository.
             # Job name is the unique key (primary key in the jobs table).
             ordered_statement = statement.order_by(
@@ -526,19 +784,62 @@ class JobsSQLRepository(JobsRepository):
             return filtered_jobs, counter
 
     def get_properties_counts(
-        self, properties: Sequence[JobCategoryProperty]
-    ) -> dict[tuple, int]:
-        """Gets the number of jobs for each combination of the given properties."""
-        properties = [JobCategoryProperty(prop) for prop in properties]
-        columns = [self._property_column(self.table, prop) for prop in properties]
+        self, groupings: Sequence[Sequence[JobCategoryProperty]]
+    ) -> list[dict[tuple, int]]:
+        """Gets the number of jobs for each combination of the given properties.
+
+        Each grouping is a GROUP BY query. They share the connection and the
+        subquery of the wrappers, which is built once per repository.
+
+        :param groupings: The properties to group by, one grouping per tree to
+            build.
+        :return: One mapping per grouping, in the same order.
+        """
+        groupings = [
+            [JobCategoryProperty(prop) for prop in grouping]
+            for grouping in groupings
+        ]
         with self.engine.connect() as conn:
-            statement = select(
-                func.count().label("jobs_count"), *columns
-            ).group_by(*columns)
-            result = conn.execute(statement).all()
+            return [
+                self._grouped_counts(conn, grouping) for grouping in groupings
+            ]
+
+    def _grouped_counts(
+        self, conn: Connection, properties: Sequence[JobCategoryProperty]
+    ) -> dict[tuple, int]:
+        """Counts the jobs of each combination of properties with a GROUP BY query.
+
+        :param conn: Connection to the database of the job list.
+        :param properties: The properties to group by.
+        :return: A mapping from the combination of property values to the number
+            of jobs with that combination.
+        """
+        wrapper_subquery = (
+            self._wrapper_subquery()
+            if JobCategoryProperty.WRAPPER in properties
+            else None
+        )
+        columns = [
+            (
+                wrapper_subquery.c.wrapper
+                if prop is JobCategoryProperty.WRAPPER
+                and wrapper_subquery is not None
+                else self._property_column(self.table, prop)
+            )
+            for prop in properties
+        ]
+        statement = select(func.count().label("jobs_count"), *columns)
+        if wrapper_subquery is not None:
+            statement = statement.select_from(
+                self.table.outerjoin(
+                    wrapper_subquery,
+                    wrapper_subquery.c.job_name == self.table.c.name,
+                )
+            )
+        statement = statement.group_by(*columns)
 
         counts: dict[tuple, int] = {}
-        for row in result:
+        for row in conn.execute(statement).all():
             # Positional access: the first column is the counter and the
             # expressions returned by _property_column may be unlabeled.
             key = tuple(
@@ -568,13 +869,23 @@ def create_jobs_repository(expid: str) -> JobsRepository:
         if is_gt_4_2_0:
             engine = create_engine(APIBasicConfig.DATABASE_CONN_URL)
             table = tables.table_change_schema(expid, tables.JobsTable)
-            return JobsSQLRepository(expid, engine, table)
+            return JobsSQLRepository(
+                expid,
+                engine,
+                table,
+                wrapper_table=get_wrapper_jobs_table(expid, engine),
+            )
     else:
         exp_paths = ExperimentPaths(expid)
 
         if is_gt_4_2_0:
             engine = create_sqlite_db_engine(exp_paths.job_list_db, read_only=True)
             table = tables.JobsTable
-            return JobsSQLRepository(expid, engine, table)
+            return JobsSQLRepository(
+                expid,
+                engine,
+                table,
+                wrapper_table=get_wrapper_jobs_table(expid, engine),
+            )
 
     return JobsPklRepository(expid)
