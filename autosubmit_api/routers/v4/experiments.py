@@ -3,7 +3,6 @@ import json
 import os
 import re
 import traceback
-from collections.abc import Sequence
 from datetime import datetime, timezone
 from typing import Annotated, Any
 
@@ -31,7 +30,6 @@ from autosubmit_api.models.jobs import (
     JOBS_CATEGORY_HIERARCHY,
     JOBS_WRAPPER_HIERARCHY,
     MISSING_CATEGORY_VALUE,
-    JobCategoryProperty,
 )
 from autosubmit_api.models.pagination import Page, PaginationInfo
 from autosubmit_api.models.requests import (
@@ -606,23 +604,19 @@ def _build_category_tree(
     return ExperimentJobsCategoryTree(root=tree)
 
 
-def _only_packaged(
-    counters: dict[tuple, int], hierarchy: Sequence[JobCategoryProperty]
-) -> dict[tuple, int]:
+def _only_packaged(counters: dict[tuple, int]) -> dict[tuple, int]:
     """Keep the counted jobs that belong to a wrapper.
 
-    The wrapper branch navigates the packaging, so a job that no package holds is
-    not part of it: it is only reachable through the section branch.
+    The wrapper tree navigates the packaging, so a job that no package holds is
+    not part of it: it is only reachable through the section tree.
 
-    :param counters: Job counts of a hierarchy that groups by wrapper.
-    :param hierarchy: The properties of the hierarchy, to locate the wrapper.
+    :param counters: Job counts of the wrapper hierarchy, keyed by wrapper.
     :return: The counts of the jobs that belong to a wrapper.
     """
-    position = hierarchy.index(JobCategoryProperty.WRAPPER)
     return {
         key: count
         for key, count in counters.items()
-        if key[position] != MISSING_CATEGORY_VALUE
+        if key[0] != MISSING_CATEGORY_VALUE
     }
 
 
@@ -640,13 +634,13 @@ async def get_experiment_jobs_category_tree(
     It helps navigating the jobs in a hierarchical way with two trees:
 
     - the jobs grouped by date, member, section and status,
-    - the jobs that belong to a wrapper, grouped by date, member, wrapper and
-      status. It is omitted when no job is inside a wrapper.
+    - the jobs that belong to a wrapper, grouped by wrapper and status. It is
+      omitted when no job is inside a wrapper.
 
     They are not additive: the section tree counts every job once, while the
-    wrapper tree only counts the ones that the wrapper holds. The wrapper cannot
-    be a level of the section tree because a wrapper can hold jobs from different
-    sections.
+    wrapper tree only counts the ones that a wrapper holds. A wrapper is not a
+    level of the section tree because it can hold jobs of several sections, dates
+    and members.
 
     :param expid: Experiment identifier
     :return: Nested dictionaries with the job count at the deepest level.
@@ -663,7 +657,7 @@ async def get_experiment_jobs_category_tree(
             "Error while reading the experiment jobs category tree"
         ) from exc
 
-    wrapper_counters = _only_packaged(wrapper_counters, JOBS_WRAPPER_HIERARCHY)
+    wrapper_counters = _only_packaged(wrapper_counters)
     has_packaged_jobs = bool(wrapper_counters)
 
     return ExperimentJobsCategoryTreeResponse(
