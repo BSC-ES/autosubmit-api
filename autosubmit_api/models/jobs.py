@@ -70,17 +70,15 @@ number of jobs.
 """
 
 JOBS_WRAPPER_HIERARCHY: tuple[JobCategoryProperty, ...] = (
-    JobCategoryProperty.DATE,
-    JobCategoryProperty.MEMBER,
     JobCategoryProperty.WRAPPER,
     JobCategoryProperty.STATUS,
 )
 """Order in which the job properties are shown in the wrapper tree. Used as filters.
 
-Wrappers are independent of their sections: a wrapper can hold jobs jobs from several
-sections and the jobs of one section could be spread over several wrappers.
-That is why the wrapper is not a level of ``JOBS_CATEGORY_HIERARCHY``, but
-share the same ancestors (date and member) and the same leaves (status).
+Wrappers are independent of the rest of the job properties: a wrapper can hold
+jobs of several sections, dates and members. That is why the wrapper is the root of
+its own tree, where every wrapper is counted once, and only the status is shown
+under it.
 """
 
 MISSING_CATEGORY_VALUE = "NA"
