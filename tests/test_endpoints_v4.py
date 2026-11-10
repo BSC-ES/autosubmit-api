@@ -1218,35 +1218,27 @@ class TestExperimentJobsCategoryTree:
                         assert isinstance(count, int) and count > 0
 
     @pytest.mark.parametrize("expid", ["a6zj", "a1x4"])
-    def test_wrapper_tree_nested_structure(
+    def test_wrapper_tree_structure(
         self, fixture_fastapi_client: TestClient, expid: str
     ):
-        """Tree should be date -> member -> wrapper -> status -> count."""
+        """Tree should be wrapper -> status -> count."""
         response = fixture_fastapi_client.get(self.endpoint.format(expid=expid))
         resp_obj: dict = response.json()
 
         assert response.status_code == HTTPStatus.OK
 
-        assert resp_obj["wrapper_hierarchy"] == [
-            "date",
-            "member",
-            "wrapper",
-            "status",
-        ]
+        assert resp_obj["wrapper_hierarchy"] == ["wrapper", "status"]
 
         tree = resp_obj["wrapper_tree"]
         assert isinstance(tree, dict)
         assert len(tree) > 0
 
-        for members in tree.values():
-            assert isinstance(members, dict)
-            for wrappers in members.values():
-                assert isinstance(wrappers, dict)
-                for wrapper_val, statuses in wrappers.items():
-                    assert isinstance(wrapper_val, str)
-                    assert isinstance(statuses, dict)
-                    for count in statuses.values():
-                        assert isinstance(count, int) and count > 0
+        for wrapper_val, statuses in tree.items():
+            assert isinstance(wrapper_val, str)
+            assert isinstance(statuses, dict)
+            for status_val, count in statuses.items():
+                assert isinstance(status_val, str)
+                assert isinstance(count, int) and count > 0
 
     @pytest.mark.parametrize("expid", ["a6zj", "a1x4"])
     def test_wrapper_tree_only_counts_packaged_jobs(
@@ -1258,10 +1250,7 @@ class TestExperimentJobsCategoryTree:
 
         assert response.status_code == HTTPStatus.OK
 
-        for members in resp_obj["wrapper_tree"].values():
-            for wrappers in members.values():
-                assert "NA" not in wrappers
-
+        assert "NA" not in resp_obj["wrapper_tree"]
         # The section tree still counts every job of the experiment
         assert _tree_total(resp_obj["wrapper_tree"]) < _tree_total(
             resp_obj["category_tree"]
@@ -1274,17 +1263,10 @@ class TestExperimentJobsCategoryTree:
 
         assert response.status_code == HTTPStatus.OK
 
-        wrapper_jobs: dict[str, int] = {}
-        for members in resp_obj["wrapper_tree"].values():
-            for wrappers in members.values():
-                for wrapper_val, statuses in wrappers.items():
-                    wrapper_jobs[wrapper_val] = wrapper_jobs.get(wrapper_val, 0) + sum(
-                        statuses.values()
-                    )
-
         # The fixture has a single wrapper, holding the 4 jobs of its section
-        assert wrapper_jobs == {"a6zj_ASThread_17128472368642_1_4": 4}
-        assert _tree_total(resp_obj["wrapper_tree"]) == 4
+        assert resp_obj["wrapper_tree"] == {
+            "a6zj_ASThread_17128472368642_1_4": {"WAITING": 4}
+        }
 
     def test_without_packaging_the_wrapper_tree_is_omitted(
         self, fixture_fastapi_client: TestClient

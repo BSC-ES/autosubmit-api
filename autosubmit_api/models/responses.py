@@ -147,7 +147,7 @@ class ExperimentJobsCategoryTreeResponse(BaseModel):
     """The job counters of an experiment, grouped in two trees.
 
     - ``category_tree`` counts every job of the experiment.
-    - ``wrapper_tree``only counts jobs from wrappers.
+    - ``wrapper_tree`` only counts the jobs that a wrapper holds.
     """
 
     properties_hierarchy: list[JobCategoryProperty]
@@ -160,7 +160,7 @@ class ExperimentJobsCategoryTreeResponse(BaseModel):
     """Properties of each level of ``wrapper_tree``, ``None`` if there is no packaging."""
 
     wrapper_tree: ExperimentJobsCategoryTree | None = None
-    """Counters of the packaged jobs, by date, member, wrapper and status.
+    """Counters of the packaged jobs, by wrapper and status.
 
     The jobs that no wrapper packages are not part of the packaging, so they are
     not counted here. The whole tree is ``None`` when no job is packaged.
