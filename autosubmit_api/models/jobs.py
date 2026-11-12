@@ -117,6 +117,7 @@ class JobData(BaseModel):
     id: int | None
     name: str
     status: int | None = common_utils.Status.UNKNOWN
+    run_status: str | None = None
     priority: int
     section: str
     date: datetime.datetime | None

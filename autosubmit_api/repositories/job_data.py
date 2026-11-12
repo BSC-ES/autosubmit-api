@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 from typing import Any
 
 from pydantic import BaseModel, field_validator
-from sqlalchemy import Engine, Table, create_engine, or_
+from sqlalchemy import Engine, Table, create_engine, or_, select
 
 from autosubmit_api.config.basicConfig import APIBasicConfig
 from autosubmit_api.database import tables
@@ -83,44 +83,62 @@ class ExperimentJobDataModel(BaseModel):
             return 0
 
 
+class RunJobStatus(BaseModel):
+    """Status and execution times of a job in one run."""
+
+    status: str
+    submit: int
+    start: int
+    finish: int
+
+
 class ExperimentJobDataRepository(ABC):
     @abstractmethod
     def get_last_job_data_by_run_id(self, run_id: int) -> list[ExperimentJobDataModel]:
-        """Gets last job data of an specific run id"""
+        """Gets last job data of an specific run id."""
 
     @abstractmethod
     def get_last_job_data(self) -> list[ExperimentJobDataModel]:
-        """Gets last job data"""
+        """Gets last job data."""
 
     @abstractmethod
     def get_jobs_by_name(self, job_name: str) -> list[ExperimentJobDataModel]:
-        """Gets historical job data by job_name"""
+        """Gets historical job data by job_name."""
 
     @abstractmethod
     def get_last_job_data_by_name(self, job_name: str) -> ExperimentJobDataModel:
-        """Gets last job data of a specific job name"""
+        """Gets last job data of a specific job name."""
 
     @abstractmethod
     def get_last_job_data_by_name_list(
         self, job_names: list[str]
     ) -> list[ExperimentJobDataModel]:
-        """Gets last job data of a specific list of job names"""
+        """Gets last job data of a specific list of job names."""
 
     @abstractmethod
     def get_all(self) -> list[ExperimentJobDataModel]:
-        """Gets all job data"""
+        """Gets all job data."""
 
     @abstractmethod
     def get_job_data_COMPLETED_by_rowtype_run_id(
         self, rowtype: int, run_id: int
     ) -> list[ExperimentJobDataModel]:
-        """Gets job data by rowtype and run id"""
+        """Gets job data by rowtype and run id."""
 
     @abstractmethod
     def get_job_data_COMPLETD_by_section(
         self, section: str
     ) -> list[ExperimentJobDataModel]:
-        """Gets job data by section"""
+        """Gets job data by section."""
+
+    @abstractmethod
+    def get_run_status_map(self, run_id: int) -> dict[str, RunJobStatus]:
+        """Gets the status of each job of a run, keyed by job name.
+        
+        Only the jobs that have a record in the run are returned: the caller
+        decides what to do with the rest (the job list reports them as
+        ``NOT_IN_RUN``, which keeps the structure of the experiment stable).
+        """
 
 
 class ExperimentJobDataSQLRepository(ExperimentJobDataRepository):
@@ -264,6 +282,47 @@ class ExperimentJobDataSQLRepository(ExperimentJobDataRepository):
             ExperimentJobDataModel.model_validate(row, from_attributes=True)
             for row in result
         ]
+
+    def get_run_status_map(self, run_id: int) -> dict[str, RunJobStatus]:
+        """Gets the status of each job of a run, keyed by job name.
+
+        The rows are read as tuples on purpose: this is the only query whose
+        result grows with the whole experiment, so a model per row would add a
+        cost that the endpoint does not need.
+
+        :param run_id: Run to read.
+        :return: Status and times of the jobs that ran in ``run_id``.
+        """
+        statement = (
+            select(
+                self.table.c.job_name,
+                self.table.c.status,
+                self.table.c.submit,
+                self.table.c.start,
+                self.table.c.finish,
+            )
+            .where(
+                (self.table.c.run_id == run_id),
+                (self.table.c.rowtype >= 2),
+            )
+            # The latest attempt of each job first: setdefault keeps it
+            .order_by(self.table.c.job_name, self.table.c.counter.desc())
+        )
+
+        statuses: dict[str, RunJobStatus] = {}
+        with self.engine.connect() as conn:
+            for row in conn.execute(statement):
+                statuses.setdefault(
+                    row.job_name,
+                    RunJobStatus(
+                        status=status_name(row.status),
+                        submit=row.submit or 0,
+                        start=row.start or 0,
+                        finish=row.finish or 0,
+                    ),
+                )
+
+        return statuses
 
 
 def create_experiment_job_data_repository(expid: str):
