@@ -1,6 +1,6 @@
 from multiprocessing import Lock, Manager
 import os
-from typing import Literal, Optional
+from typing import Literal
 from fastapi import APIRouter, Depends, Path, Query
 from autosubmit_api.builders.joblist_helper_builder import (
     JobListHelperBuilder,
@@ -25,44 +25,36 @@ lock = Lock()
 
 @router.get("/cconfig/{expid}", name="Get Experiment Configuration")
 async def get_current_configuration(
-    expid: str, user_id: Optional[str] = Depends(auth_token_dependency())
+    expid: str, user_id: str | None = Depends(auth_token_dependency())
 ) -> dict:
-    """
-    Get the current configuration of the experiment
-    """
+    """Get the current configuration of the experiment."""
     result = CommonRequests.get_current_configuration_by_expid(expid, user_id)
     return result
 
 
 @router.get("/expinfo/{expid}", name="Get Experiment Information")
 async def get_exp_info(
-    expid: str, user_id: Optional[str] = Depends(auth_token_dependency())
+    expid: str, user_id: str | None = Depends(auth_token_dependency())
 ) -> dict:
-    """
-    Get the information of the experiment
-    """
+    """Get the information of the experiment."""
     result = CommonRequests.get_experiment_data(expid)
     return result
 
 
 @router.get("/expcount/{expid}", name="Get Experiment Counters")
 async def get_exp_counters(
-    expid: str, user_id: Optional[str] = Depends(auth_token_dependency())
+    expid: str, user_id: str | None = Depends(auth_token_dependency())
 ) -> dict:
-    """
-    Get the job status counters of the experiment
-    """
+    """Get the job status counters of the experiment."""
     result = CommonRequests.get_experiment_counters(expid)
     return result
 
 
 @router.get("/searchowner/{owner}", name="Search Owner")
 async def search_owner(
-    owner: str, user_id: Optional[str] = Depends(auth_token_dependency())
+    owner: str, user_id: str | None = Depends(auth_token_dependency())
 ) -> dict:
-    """
-    Search for experiments by owner
-    """
+    """Search for experiments by owner."""
     result = search_experiment_by_id(
         query=None, owner=owner, exp_type=None, only_active=None
     )
@@ -72,11 +64,9 @@ async def search_owner(
 @router.get("/search/{expid}", name="Search Experiment by expid")
 async def search_expid(
     expid: str,
-    user_id: Optional[str] = Depends(auth_token_dependency()),
+    user_id: str | None = Depends(auth_token_dependency()),
 ) -> dict:
-    """
-    Search for experiments by expid
-    """
+    """Search for experiments by expid."""
     result = search_experiment_by_id(
         query=expid, owner=None, exp_type=None, only_active=None
     )
@@ -91,11 +81,9 @@ async def search_expid_plus(
     expid: str,
     exptype: str,
     onlyactive: str,
-    user_id: Optional[str] = Depends(auth_token_dependency()),
+    user_id: str | None = Depends(auth_token_dependency()),
 ) -> dict:
-    """
-    Search for experiments by expid, type and active status
-    """
+    """Search for experiments by expid, type and active status."""
     result = search_experiment_by_id(
         query=expid, owner=None, exp_type=exptype, only_active=onlyactive
     )
@@ -104,44 +92,36 @@ async def search_expid_plus(
 
 @router.get("/running/", name="Search Running Experiments")
 async def search_running(
-    user_id: Optional[str] = Depends(auth_token_dependency()),
+    user_id: str | None = Depends(auth_token_dependency()),
 ) -> dict:
-    """
-    Returns the list of all experiments that are currently running.
-    """
+    """Returns the list of all experiments that are currently running."""
     result = get_current_running_exp()
     return result
 
 
 @router.get("/runs/{expid}", name="Get Experiment Runs")
 async def get_runs(
-    expid: str, user_id: Optional[str] = Depends(auth_token_dependency())
+    expid: str, user_id: str | None = Depends(auth_token_dependency())
 ) -> dict:
-    """
-    Get list of runs of the same experiment from the historical db
-    """
+    """Get list of runs of the same experiment from the historical db."""
     result = CommonRequests.get_experiment_runs(expid)
     return result
 
 
 @router.get("/ifrun/{expid}", name="Check if Experiment is Running")
 async def get_if_running(
-    expid: str, user_id: Optional[str] = Depends(auth_token_dependency())
+    expid: str, user_id: str | None = Depends(auth_token_dependency())
 ) -> dict:
-    """
-    Quick check if the experiment is currently running.
-    """
+    """Quick check if the experiment is currently running."""
     result = CommonRequests.quick_test_run(expid)
     return result
 
 
 @router.get("/logrun/{expid}", name="Get Experiment running status and log path")
 async def get_running_detail(
-    expid: str, user_id: Optional[str] = Depends(auth_token_dependency())
+    expid: str, user_id: str | None = Depends(auth_token_dependency())
 ) -> dict:
-    """
-    Get Experiment running status and log path.
-    """
+    """Get Experiment running status and log path."""
     result = CommonRequests.get_current_status_log_plus(expid)
     return result
 
@@ -150,11 +130,9 @@ async def get_running_detail(
 async def get_exp_summary(
     expid: str,
     loggedUser: str = Query("null"),
-    user_id: Optional[str] = Depends(auth_token_dependency()),
+    user_id: str | None = Depends(auth_token_dependency()),
 ) -> dict:
-    """
-    Get Experiment Summary
-    """
+    """Get Experiment Summary."""
     if loggedUser != "null":
         lock.acquire()
         D[os.getpid()] = [loggedUser, "summary", True]
@@ -177,11 +155,12 @@ async def shutdown(
     route: str,
     loggedUser: str = Query("null"),
     expid: str = Query("null"),
-    user_id: Optional[str] = Depends(auth_token_dependency()),
+    user_id: str | None = Depends(auth_token_dependency()),
 ):
-    """
-    This function is invoked from the frontend (AS-GUI) to kill workers that are no longer needed.
-    This call is common in heavy parts of the GUI such as the Tree and Graph generation or Summaries fetching.
+    """Kill the workers that are no longer needed.
+
+    Invoked from the frontend (AS-GUI) in heavy parts of the GUI such as the Tree
+    and Graph generation or Summaries fetching.
     """
     if loggedUser != "null":
         logger.info(
@@ -222,11 +201,9 @@ async def shutdown(
 
 @router.get("/performance/{expid}", name="Get Experiment Performance")
 async def get_exp_performance(
-    expid: str, user_id: Optional[str] = Depends(auth_token_dependency())
+    expid: str, user_id: str | None = Depends(auth_token_dependency())
 ) -> dict:
-    """
-    Get Experiment Performance
-    """
+    """Get Experiment Performance."""
     result = {}
     try:
         result = PerformanceMetrics(
@@ -238,6 +215,11 @@ async def get_exp_performance(
             "SYPD": None,
             "ASYPD": None,
             "RSYPD": None,
+            "mean_sypd_per_chunk": None,
+            "mean_qsypd_per_chunk": None,
+            "experiment_throughput": None,
+            "mean_csypd_per_chunk": None,
+            "mean_cqsypd_per_chunk": None,
             "CHSY": None,
             "JPSY": None,
             "Parallelization": None,
@@ -256,11 +238,9 @@ async def get_graph_format(
     layout: Literal["standard", "laplacian"],
     grouped: Literal["none", "status", "date-member"],
     loggedUser: str = Query("null"),
-    user_id: Optional[str] = Depends(auth_token_dependency()),
+    user_id: str | None = Depends(auth_token_dependency()),
 ) -> dict:
-    """
-    Get Experiment Graph
-    """
+    """Get Experiment Graph."""
     if loggedUser != "null":
         lock.acquire()
         D[os.getpid()] = [loggedUser, "graph", expid, True]
@@ -282,11 +262,9 @@ async def get_graph_format(
 async def get_exp_tree(
     expid: str,
     loggedUser: str = Query("null"),
-    user_id: Optional[str] = Depends(auth_token_dependency()),
+    user_id: str | None = Depends(auth_token_dependency()),
 ) -> dict:
-    """
-    Get Experiment Tree
-    """
+    """Get Experiment Tree."""
     if loggedUser != "null":
         lock.acquire()
         D[os.getpid()] = [loggedUser, "tree", expid, True]
@@ -306,44 +284,36 @@ async def get_exp_tree(
 
 @router.get("/quick/{expid}", name="Get Quick View Data")
 async def get_quick_view_data(
-    expid: str, user_id: Optional[str] = Depends(auth_token_dependency())
+    expid: str, user_id: str | None = Depends(auth_token_dependency())
 ) -> dict:
-    """
-    Get Quick View Data
-    """
+    """Get Quick View Data."""
     result = CommonRequests.get_quick_view(expid)
     return result
 
 
 @router.get("/exprun/{expid}", name="Get Experiment Run Log")
 async def get_experiment_run_log(
-    expid: str, user_id: Optional[str] = Depends(auth_token_dependency())
+    expid: str, user_id: str | None = Depends(auth_token_dependency())
 ) -> dict:
-    """
-    Finds log and gets the last 150 lines
-    """
+    """Finds log and gets the last 150 lines."""
     result = CommonRequests.get_experiment_log_last_lines(expid)
     return result
 
 
 @router.get("/exp-recovery-logs/{expid}", name="Get Experiment Recovery Logs")
 async def get_experiment_recovery_log(
-    expid: str, user_id: Optional[str] = Depends(auth_token_dependency())
+    expid: str, user_id: str | None = Depends(auth_token_dependency())
 ) -> dict:
-    """
-    Finds the last recovery log for each platform and gets the last 150 lines
-    """
+    """Finds the last recovery log for each platform and gets the last 150 lines."""
     result = CommonRequests.get_experiment_recovery_log_last_lines(expid)
     return result
 
 
 @router.get("/joblog/{logfile}", name="Get Job Log from Path")
 async def get_job_log_from_path(
-    logfile: str, user_id: Optional[str] = Depends(auth_token_dependency())
+    logfile: str, user_id: str | None = Depends(auth_token_dependency())
 ) -> dict:
-    """
-    Get Job Log from Path
-    """
+    """Get Job Log from Path."""
     expid = logfile.split("_") if logfile is not None else ""
     expid = expid[0] if len(expid) > 0 else ""
     result = CommonRequests.get_job_log(expid, logfile)
@@ -356,11 +326,9 @@ async def get_job_log_from_path(
 async def get_experiment_pklinfo(
     expid: str,
     timeStamp: str = Path(description="Unused path parameter", examples=["0"]),
-    user_id: Optional[str] = Depends(auth_token_dependency()),
+    user_id: str | None = Depends(auth_token_dependency()),
 ) -> dict:
-    """
-    Get Experiment Pickle Info for Graph View
-    """
+    """Get Experiment Pickle Info for Graph View."""
     result = CommonRequests.get_experiment_pkl(expid)
     return result
 
@@ -371,11 +339,9 @@ async def get_experiment_pklinfo(
 async def get_experiment_tree_pklinfo(
     expid: str,
     timeStamp: str = Path(description="Unused path parameter", examples=["0"]),
-    user_id: Optional[str] = Depends(auth_token_dependency()),
+    user_id: str | None = Depends(auth_token_dependency()),
 ) -> dict:
-    """
-    Get Experiment Pickle Info for Tree View
-    """
+    """Get Experiment Pickle Info for Tree View."""
     result = CommonRequests.get_experiment_tree_pkl(expid)
     return result
 
@@ -389,11 +355,9 @@ async def get_experiment_statistics(
     filter_type: str = Path(
         examples=["Any"], description="Job Section filter, use 'Any' for all"
     ),
-    user_id: Optional[str] = Depends(auth_token_dependency()),
+    user_id: str | None = Depends(auth_token_dependency()),
 ) -> dict:
-    """
-    Get Experiment Statistics
-    """
+    """Get Experiment Statistics."""
     result = CommonRequests.get_experiment_stats(expid, filter_period, filter_type)
     return result
 
@@ -402,11 +366,9 @@ async def get_experiment_statistics(
 async def get_exp_job_history(
     expid: str,
     jobname: str,
-    user_id: Optional[str] = Depends(auth_token_dependency()),
+    user_id: str | None = Depends(auth_token_dependency()),
 ) -> dict:
-    """
-    Get Experiment Job History
-    """
+    """Get Experiment Job History."""
     result = CommonRequests.get_job_history(expid, jobname)
     return result
 
@@ -415,20 +377,18 @@ async def get_exp_job_history(
 async def get_experiment_run_job_detail(
     expid: str,
     runid: str,
-    user_id: Optional[str] = Depends(auth_token_dependency()),
+    user_id: str | None = Depends(auth_token_dependency()),
 ) -> dict:
-    """
-    Get Experiment Run Job Detail
-    """
+    """Get Experiment Run Job Detail."""
     result = CommonRequests.get_experiment_tree_rundetail(expid, runid)
     return result
 
 
 @router.get("/filestatus", name="[UNSUPPORTED] Get File Status", deprecated=True)
 async def get_file_status() -> dict:
-    """
-    This endpoint is not supported in this version of the API.
-    Will be removed in future versions.
+    """Report that the endpoint is not supported in this version of the API.
+
+    It will be removed in future versions.
     """
     return {
         "status": False,
