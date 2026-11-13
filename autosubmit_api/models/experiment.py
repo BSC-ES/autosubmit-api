@@ -1,23 +1,120 @@
+from enum import Enum
 from typing import Annotated, List, Optional
 from pydantic import BaseModel, Field
 
 
+class RunStatus(str, Enum):
+    """State of a run, derived from the job counts of the historical database."""
+
+    RUNNING = "RUNNING"
+    """There are jobs queuing, running or submitted."""
+
+    COMPLETED = "COMPLETED"
+    """Every job of the run is completed."""
+
+    FAILED = "FAILED"
+    """There are failed jobs and nothing in flight."""
+
+    UNKNOWN = "UNKNOWN"
+    """Anything else, e.g. a run that was interrupted before finishing."""
+
+
 class BaseExperimentRun(BaseModel):
+    """A run of an experiment, as recorded in its historical database.
+
+    Only per-run data is reported, so the payload stays small regardless of the number
+    of runs of the experiment.
+    """
+
     run_id: Annotated[
         int, Field(description="Run ID", json_schema_extra={"example": 1})
+    ]
+    created: Annotated[
+        Optional[str],
+        Field(
+            description="Creation time of the run",
+            json_schema_extra={"example": "2024-04-11-16:53:56"},
+        ),
     ]
     start: Annotated[
         Optional[str],
         Field(
-            description="Start time of the run",
-            json_schema_extra={"example": "2021-01-01T00:00:00Z"},
+            description="Start time of the run. `None` if the run never started",
+            json_schema_extra={"example": "2024-04-11T18:53:56+02:00"},
         ),
     ]
     finish: Annotated[
         Optional[str],
         Field(
-            description="Finish time of the run",
-            json_schema_extra={"example": "2021-01-01T00:00:00Z"},
+            description="Finish time of the run. `None` if the run has not finished",
+            json_schema_extra={"example": "2024-04-11T19:30:00+02:00"},
+        ),
+    ]
+    status: Annotated[
+        RunStatus,
+        Field(
+            description="State of the run, derived from its job counters",
+            json_schema_extra={"example": RunStatus.RUNNING.value},
+        ),
+    ]
+    chunk_unit: Annotated[
+        Optional[str],
+        Field(
+            description="Chunking unit of the run",
+            json_schema_extra={"example": "month"},
+        ),
+    ]
+    chunk_size: Annotated[
+        Optional[int],
+        Field(description="Chunk size of the run", json_schema_extra={"example": 4}),
+    ]
+    queuing: Annotated[
+        Optional[int],
+        Field(
+            description="Number of queuing jobs of the run",
+            json_schema_extra={"example": 0},
+        ),
+    ]
+    running: Annotated[
+        Optional[int],
+        Field(
+            description="Number of running jobs of the run",
+            json_schema_extra={"example": 0},
+        ),
+    ]
+    submitted: Annotated[
+        Optional[int],
+        Field(
+            description="Number of submitted jobs of the run",
+            json_schema_extra={"example": 0},
+        ),
+    ]
+    completed: Annotated[
+        Optional[int],
+        Field(
+            description="Number of completed jobs of the run",
+            json_schema_extra={"example": 8},
+        ),
+    ]
+    failed: Annotated[
+        Optional[int],
+        Field(
+            description="Number of failed jobs of the run",
+            json_schema_extra={"example": 0},
+        ),
+    ]
+    suspended: Annotated[
+        Optional[int],
+        Field(
+            description="Number of suspended jobs of the run",
+            json_schema_extra={"example": 0},
+        ),
+    ]
+    total: Annotated[
+        Optional[int],
+        Field(
+            description="Number of jobs of the run",
+            json_schema_extra={"example": 8},
         ),
     ]
 

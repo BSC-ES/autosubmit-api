@@ -3,7 +3,6 @@ import json
 import os
 import re
 import traceback
-from datetime import datetime, timezone
 from typing import Annotated, Any
 
 from bscearth.utils.config_parser import ConfigParserFactory
@@ -57,6 +56,7 @@ from autosubmit_api.repositories.join.experiment_join import (
 from autosubmit_api.repositories.user_metric import create_user_metric_repository
 from autosubmit_api.services.experiment_eta import ExperimentEtaService
 from autosubmit_api.services.experiment_jobs import create_experiment_jobs_service
+from autosubmit_api.services.experiment_runs import create_experiment_runs_service
 
 router = APIRouter()
 
@@ -66,7 +66,7 @@ async def search_experiments(
     query_params: Annotated[ExperimentsSearchRequest, Query()],
     user_id: str | None = Depends(auth_token_dependency()),
 ) -> ExperimentsSearchResponse:
-    """Search experiments"""
+    """Search experiments."""
     logger.debug(f"Search args: {query_params}")
 
     page = Page.of(query_params.page, query_params.page_size)
@@ -159,7 +159,7 @@ async def search_experiments(
 async def get_experiment_detail(
     expid: str, user_id: str | None = Depends(auth_token_dependency())
 ) -> BaseExperimentModel:
-    """Get details of an experiment"""
+    """Get details of an experiment."""
     exp_builder = ExperimentBuilder()
     exp_builder.produce_base(expid)
     return exp_builder.product.model_dump(include=tables.ExperimentTable.c.keys())
@@ -201,7 +201,7 @@ async def get_experiment_jobs(
 async def get_experiment_wrappers(
     expid: str, user_id: str | None = Depends(auth_token_dependency())
 ) -> ExperimentWrappersResponse:
-    """Get wrappers for an experiment"""
+    """Get wrappers for an experiment."""
     job_package_reader = JobPackageReader(expid)
     job_package_reader.read()
 
@@ -269,7 +269,7 @@ def _format_config_response(
 async def get_experiment_fs_config(
     expid: str, user_id: str | None = Depends(auth_token_dependency())
 ) -> ExperimentFSConfigResponse:
-    """Get the filesystem config of an experiment"""
+    """Get the filesystem config of an experiment."""
     # Read the config
     APIBasicConfig.read()
     as_config = AutosubmitConfigResolver(expid, APIBasicConfig, ConfigParserFactory())
@@ -286,37 +286,18 @@ async def get_experiment_fs_config(
 async def get_runs(
     expid: str, user_id: str | None = Depends(auth_token_dependency())
 ) -> ExperimentRunsResponse:
-    """Get runs for a given experiment"""
+    """Get the runs of an experiment, newest first.
+
+    Only the data that the historical database stores per run is reported, so the
+    response does not depend on the number of jobs of the experiment.
+    """
     try:
-        experiment_history = ExperimentHistoryDirector(
-            ExperimentHistoryBuilder(expid)
-        ).build_reader_experiment_history()
-        exp_runs = experiment_history.get_experiment_runs()
+        service = create_experiment_runs_service(expid)
+        return service.list_runs()
     except DomainError:
         raise
     except Exception as exc:
         raise InternalError("Error while getting experiment runs") from exc
-
-    # Format the response
-    response = {"runs": []}
-    for run in exp_runs:
-        response["runs"].append(
-            {
-                "run_id": run.run_id,
-                "start": datetime.fromtimestamp(run.start, timezone.utc).isoformat(
-                    timespec="seconds"
-                )
-                if run.start > 0
-                else None,
-                "finish": datetime.fromtimestamp(run.finish, timezone.utc).isoformat(
-                    timespec="seconds"
-                )
-                if run.finish > 0
-                else None,
-            }
-        )
-
-    return response
 
 
 @router.get("/{expid}/runs/{run_id}/config", name="Get experiment run configuration")
@@ -325,9 +306,7 @@ async def get_run_config(
     run_id: str,
     user_id: str | None = Depends(auth_token_dependency()),
 ) -> ExperimentRunConfigResponse:
-    """
-    Get the config of a specific run of an experiment
-    """
+    """Get the config of a specific run of an experiment."""
     historical_db = JobDataStructure(expid, APIBasicConfig)
     experiment_run = historical_db.get_experiment_run_by_id(run_id=run_id)
     metadata = (
@@ -352,7 +331,7 @@ async def get_run_user_metrics(
     run_id: int,
     user_id: str | None = Depends(auth_token_dependency()),
 ):
-    """Get the user-defined metrics of a specific run of an experiment"""
+    """Get the user-defined metrics of a specific run of an experiment."""
     user_metric_repo = create_user_metric_repository(expid)
 
     metrics = [
@@ -373,7 +352,7 @@ async def get_runs_with_user_metrics(
     expid: str,
     user_id: str | None = Depends(auth_token_dependency()),
 ):
-    """Get the runs with user-defined metrics of an experiment"""
+    """Get the runs with user-defined metrics of an experiment."""
     user_metric_repo = create_user_metric_repository(expid)
 
     try:
@@ -401,8 +380,9 @@ async def get_experiment_eta(
     ] = "SIM",
     user_id: str | None = Depends(auth_token_dependency()),
 ) -> ExperimentEtaResponse:
-    """Get the estimated time of arrival (remaining time) for an experiment's
-    job section (e.g. SIM, APP, POST). Defaults to SIM.
+    """Get the estimated time of arrival (remaining time) for an experiment's job section (e.g. SIM, APP, POST).
+    
+    Defaults to SIM.
     """
     try:
         repo = create_jobs_repository(expid)
@@ -423,7 +403,7 @@ async def get_experiment_job_detail(
     job_name: str,
     user_id: str | None = Depends(auth_token_dependency()),
 ) -> JobDetailResponse:
-    """Get the details of a specific job of an experiment"""
+    """Get the details of a specific job of an experiment."""
     # Get the latest job details from the retriever
     try:
         job_detail_retriever = JobDetailRetriever(expid, job_name)
@@ -545,7 +525,7 @@ async def get_experiment_job_children(
     include_status: bool = False,
     user_id: str | None = Depends(auth_token_dependency()),
 ) -> dict:
-    """Get the children of a specific job of an experiment
+    """Get the children of a specific job of an experiment.
     
     Set include_status=true to also return the current status of each child job.
     """
