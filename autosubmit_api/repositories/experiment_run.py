@@ -31,21 +31,15 @@ class ExperimentRunModel(BaseModel):
 class ExperimentRunRepository(ABC):
     @abstractmethod
     def get_all(self) -> List[ExperimentRunModel]:
-        """
-        Gets all runs of the experiment
-        """
+        """Gets all runs of the experiment."""
 
     @abstractmethod
     def get_last_run(self) -> ExperimentRunModel:
-        """
-        Gets last run of the experiment. Raises ValueError if no runs found.
-        """
+        """Gets last run of the experiment. Raises ValueError if no runs found."""
 
     @abstractmethod
     def get_run_by_id(self, run_id: int) -> ExperimentRunModel:
-        """
-        Gets run by id. Raises ValueError if run not found.
-        """
+        """Gets run by id. Raises ValueError if run not found."""
 
 
 class ExperimentRunSQLRepository(ExperimentRunRepository):
@@ -56,7 +50,8 @@ class ExperimentRunSQLRepository(ExperimentRunRepository):
 
     def get_all(self):
         with self.engine.connect() as conn:
-            statement = self.table.select()
+            # Newest first: consumers list the runs from the most recent one
+            statement = self.table.select().order_by(self.table.c.run_id.desc())
             result = conn.execute(statement).all()
 
         return [
@@ -83,13 +78,21 @@ class ExperimentRunSQLRepository(ExperimentRunRepository):
         return ExperimentRunModel.model_validate(result, from_attributes=True)
 
 
-def create_experiment_run_repository(expid: str):
+def create_experiment_run_repository(expid: str) -> ExperimentRunRepository:
+    """Create a repository to read the runs stored in the historical database.
+
+    The caller is responsible for checking that the experiment exists; the legacy
+    ``JobDataStructure`` builds this repository for experiments that do not, and
+    reports the missing data on its own.
+    """
     if APIBasicConfig.DATABASE_BACKEND == "postgres":
         # Postgres
         _engine = create_engine(APIBasicConfig.DATABASE_CONN_URL)
         _table = tables.table_change_schema(expid, tables.ExperimentRunTable)
     else:
         # SQLite
-        _engine = create_sqlite_db_engine(ExperimentPaths(expid).job_data_db, read_only=True)
+        _engine = create_sqlite_db_engine(
+            ExperimentPaths(expid).job_data_db, read_only=True
+        )
         _table = tables.ExperimentRunTable
     return ExperimentRunSQLRepository(expid, _engine, _table)

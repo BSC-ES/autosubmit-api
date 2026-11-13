@@ -19,8 +19,7 @@ class ExperimentEtaService:
         self.expid = expid
 
     def compute_experiment_eta(self, section: str = "SIM") -> ExperimentEtaResponse:
-        """
-        Get the estimated time of arrival (remaining time) for the given section.
+        """Get the estimated time of arrival (remaining time) for the given section.
 
         Merges last job data with the historical database to get
         the actual jobs that last run and the start and finish timestamps for

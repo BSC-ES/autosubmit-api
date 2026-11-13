@@ -3,7 +3,6 @@ import json
 import os
 import re
 import traceback
-from datetime import datetime, timezone
 from typing import Annotated, Any
 
 from bscearth.utils.config_parser import ConfigParserFactory
@@ -61,6 +60,7 @@ from autosubmit_api.repositories.join.experiment_join import (
 from autosubmit_api.repositories.user_metric import create_user_metric_repository
 from autosubmit_api.services.experiment_eta import ExperimentEtaService
 from autosubmit_api.services.experiment_jobs import create_experiment_jobs_service
+from autosubmit_api.services.experiment_runs import create_experiment_runs_service
 
 router = APIRouter()
 
@@ -290,37 +290,18 @@ async def get_experiment_fs_config(
 async def get_runs(
     expid: str, user_id: str | None = Depends(auth_token_dependency())
 ) -> ExperimentRunsResponse:
-    """Get runs for a given experiment."""
+    """Get the runs of an experiment, newest first.
+
+    Only the data that the historical database stores per run is reported, so the
+    response does not depend on the number of jobs of the experiment.
+    """
     try:
-        experiment_history = ExperimentHistoryDirector(
-            ExperimentHistoryBuilder(expid)
-        ).build_reader_experiment_history()
-        exp_runs = experiment_history.get_experiment_runs()
+        service = create_experiment_runs_service(expid)
+        return service.list_runs()
     except DomainError:
         raise
     except Exception as exc:
         raise InternalError("Error while getting experiment runs") from exc
-
-    # Format the response
-    response = {"runs": []}
-    for run in exp_runs:
-        response["runs"].append(
-            {
-                "run_id": run.run_id,
-                "start": datetime.fromtimestamp(run.start, timezone.utc).isoformat(
-                    timespec="seconds"
-                )
-                if run.start > 0
-                else None,
-                "finish": datetime.fromtimestamp(run.finish, timezone.utc).isoformat(
-                    timespec="seconds"
-                )
-                if run.finish > 0
-                else None,
-            }
-        )
-
-    return response
 
 
 @router.get("/{expid}/runs/{run_id}/config", name="Get experiment run configuration")
