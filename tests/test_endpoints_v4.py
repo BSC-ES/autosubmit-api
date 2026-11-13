@@ -12,7 +12,7 @@ from fastapi.testclient import TestClient
 from pydantic import ValidationError
 
 from autosubmit_api import config
-from autosubmit_api.exceptions import ExperimentNotFoundError, InternalError
+from autosubmit_api.exceptions import InternalError
 from autosubmit_api.models.jobs import JobCategoryProperty
 from autosubmit_api.models.requests import (
     PAGINATION_LIMIT_DEFAULT,
@@ -26,6 +26,7 @@ from autosubmit_api.repositories.runner_processes import RunnerProcessesDataMode
 from tests.utils import custom_return_value
 
 ROUTER = "autosubmit_api.routers.v4.experiments"
+SERVICES = "autosubmit_api.services"
 
 
 class TestCASV2Login:
@@ -1347,27 +1348,111 @@ class TestExperimentFSConfig:
 class TestExperimentRuns:
     endpoint = "/v4/experiments/{expid}/runs"
 
+    RUN_KEYS = {
+        "run_id",
+        "created",
+        "start",
+        "finish",
+        "status",
+        "chunk_unit",
+        "chunk_size",
+        "queuing",
+        "running",
+        "submitted",
+        "completed",
+        "failed",
+        "suspended",
+        "total",
+    }
+
     @pytest.mark.parametrize("expid, num_runs", [("a6zj", 1), ("a3tb", 51)])
     def test_runs(self, expid: str, num_runs: int, fixture_fastapi_client: TestClient):
         response = fixture_fastapi_client.get(self.endpoint.format(expid=expid))
         resp_obj: dict = response.json()
 
-        assert isinstance(resp_obj, dict)
+        assert response.status_code == HTTPStatus.OK
         assert isinstance(resp_obj["runs"], list)
         assert len(resp_obj["runs"]) == num_runs
 
         for run in resp_obj["runs"]:
             assert isinstance(run, dict)
+            assert set(run.keys()) == self.RUN_KEYS
             assert isinstance(run["run_id"], int)
+            assert isinstance(run["created"], str) or run["created"] is None
             assert isinstance(run["start"], str) or run["start"] is None
             assert isinstance(run["finish"], str) or run["finish"] is None
+            assert run["status"] in {"RUNNING", "COMPLETED", "FAILED", "UNKNOWN"}
 
-    def test_a_failing_history_returns_500(
+        # The newest run is reported first
+        run_ids = [run["run_id"] for run in resp_obj["runs"]]
+        assert run_ids == sorted(run_ids, reverse=True)
+
+    def test_run_values(self, fixture_fastapi_client: TestClient):
+        def get_runs(expid: str) -> list[dict]:
+            response = fixture_fastapi_client.get(self.endpoint.format(expid=expid))
+            assert response.status_code == HTTPStatus.OK
+            return response.json()["runs"]
+
+        # Run where every job is completed
+        a007_last_run = get_runs("a007")[0]
+        assert a007_last_run["run_id"] == 52
+        assert a007_last_run["created"] == "2024-05-21-10:09:35"
+        # The times are formatted like every other time of the API, in the local
+        # time zone, so they are compared as instants instead of literal offsets
+        assert datetime.fromisoformat(a007_last_run["start"]) == datetime(
+            2024, 5, 21, 8, 9, 35, tzinfo=timezone.utc
+        )
+        assert datetime.fromisoformat(a007_last_run["finish"]) == datetime(
+            2024, 5, 21, 8, 11, 33, tzinfo=timezone.utc
+        )
+        assert a007_last_run["status"] == "COMPLETED"
+        assert a007_last_run["chunk_unit"] == "month"
+        assert a007_last_run["chunk_size"] == 4
+        assert a007_last_run["completed"] == 8
+        assert a007_last_run["total"] == 8
+
+        # Run that still has jobs in flight
+        a3tb_last_run = get_runs("a3tb")[0]
+        assert a3tb_last_run["run_id"] == 51
+        assert a3tb_last_run["status"] == "RUNNING"
+        assert a3tb_last_run["queuing"] == 1
+        assert a3tb_last_run["completed"] == 28
+        assert a3tb_last_run["total"] == 55
+
+        # Run that never finished: the historical database stores a 0 timestamp
+        a6zj_only_run = get_runs("a6zj")[0]
+        assert a6zj_only_run["run_id"] == 1
+        assert isinstance(a6zj_only_run["start"], str)
+        assert a6zj_only_run["finish"] is None
+        assert a6zj_only_run["status"] == "UNKNOWN"
+
+    def test_unknown_experiment_returns_404(
+        self, fixture_fastapi_client: TestClient
+    ):
+        response = fixture_fastapi_client.get(self.endpoint.format(expid="aaaa"))
+
+        assert response.status_code == HTTPStatus.NOT_FOUND
+
+    def test_experiment_without_run_history_returns_no_runs(
+        self, fixture_fastapi_client: TestClient, monkeypatch: pytest.MonkeyPatch
+    ):
+        # An experiment that has never run has no historical database, which is not
+        # an error: it has no runs
+        monkeypatch.setattr(
+            f"{SERVICES}.experiment_runs._has_run_history", MagicMock(return_value=False)
+        )
+
+        response = fixture_fastapi_client.get(self.endpoint.format(expid="a003"))
+
+        assert response.status_code == HTTPStatus.OK
+        assert response.json() == {"runs": []}
+
+    def test_a_failing_repository_returns_500(
         self, fixture_fastapi_client: TestClient, monkeypatch: pytest.MonkeyPatch
     ):
         monkeypatch.setattr(
-            f"{ROUTER}.ExperimentHistoryBuilder",
-            MagicMock(side_effect=OSError("cannot open the history database")),
+            f"{SERVICES}.experiment_runs.create_experiment_run_repository",
+            MagicMock(side_effect=OSError("cannot open the historical database")),
         )
 
         response = fixture_fastapi_client.get(self.endpoint.format(expid="a003"))
@@ -1376,18 +1461,6 @@ class TestExperimentRuns:
         body = response.json()
         assert body["error"] is True
         assert body["error_message"] == "Error while getting experiment runs"
-
-    def test_a_domain_error_returns_404(
-        self, fixture_fastapi_client: TestClient, monkeypatch: pytest.MonkeyPatch
-    ):
-        monkeypatch.setattr(
-            f"{ROUTER}.ExperimentHistoryBuilder",
-            MagicMock(side_effect=ExperimentNotFoundError("a003")),
-        )
-
-        response = fixture_fastapi_client.get(self.endpoint.format(expid="a003"))
-
-        assert response.status_code == HTTPStatus.NOT_FOUND
 
 
 class TestExperimentRunConfig:

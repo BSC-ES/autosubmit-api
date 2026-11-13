@@ -31,21 +31,15 @@ class ExperimentRunModel(BaseModel):
 class ExperimentRunRepository(ABC):
     @abstractmethod
     def get_all(self) -> List[ExperimentRunModel]:
-        """
-        Gets all runs of the experiment
-        """
+        """Gets all runs of the experiment."""
 
     @abstractmethod
     def get_last_run(self) -> ExperimentRunModel:
-        """
-        Gets last run of the experiment. Raises ValueError if no runs found.
-        """
+        """Gets last run of the experiment. Raises ValueError if no runs found."""
 
     @abstractmethod
     def get_run_by_id(self, run_id: int) -> ExperimentRunModel:
-        """
-        Gets run by id. Raises ValueError if run not found.
-        """
+        """Gets run by id. Raises ValueError if run not found."""
 
 
 class ExperimentRunSQLRepository(ExperimentRunRepository):
@@ -56,7 +50,8 @@ class ExperimentRunSQLRepository(ExperimentRunRepository):
 
     def get_all(self):
         with self.engine.connect() as conn:
-            statement = self.table.select()
+            # Newest first: consumers list the runs from the most recent one
+            statement = self.table.select().order_by(self.table.c.run_id.desc())
             result = conn.execute(statement).all()
 
         return [
