@@ -72,6 +72,16 @@ class JobsSearchRequest(BaseModel):
             json_schema_extra={"example": "SIM"},
         ),
     ] = None
+    wrapper: Annotated[
+        str | None,
+        Field(
+            description=(
+                "Filter by job wrapper. Use "
+                f"'{MISSING_CATEGORY_VALUE}' for the jobs without a wrapper"
+            ),
+            json_schema_extra={"example": "a000_ASThread_SIM_17000000000000_1_1"},
+        ),
+    ] = None
     chunk: Annotated[
         int | Literal["NA"] | None,
         Field(

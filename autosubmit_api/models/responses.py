@@ -50,6 +50,7 @@ class ExperimentJobItem(BaseModel):
     date: str | None = None
     member: str | None = None
     chunk: int | None = None  # Also returned by the ``extended`` view
+    wrapper: str | None = None  # Also returned by the ``extended`` view
     split: int | None = None
     splits: int | None = None
     out_path_local: str | None = None
@@ -70,6 +71,7 @@ class ExperimentJobsFilters(BaseModel):
     date: str | None = None
     member: str | None = None
     section: str | None = None
+    wrapper: str | None = None
     chunk: int | Literal["NA"] | None = None
 
 
@@ -142,6 +144,24 @@ class ExperimentJobsCategoryTree(
 
 
 class ExperimentJobsCategoryTreeResponse(BaseModel):
-    """The jobs category tree, with the counters of the jobs in each category."""
+    """The job counters of an experiment, grouped in two trees.
+
+    - ``category_tree`` counts every job of the experiment.
+    - ``wrapper_tree`` only counts the jobs that a wrapper holds.
+    """
+
     properties_hierarchy: list[JobCategoryProperty]
+    """Properties of each level of ``category_tree``, from the root to the leaves."""
+
     category_tree: ExperimentJobsCategoryTree
+    """Counters of every job, by date, member, section and status."""
+
+    wrapper_hierarchy: list[JobCategoryProperty] | None = None
+    """Properties of each level of ``wrapper_tree``, ``None`` if there is no packaging."""
+
+    wrapper_tree: ExperimentJobsCategoryTree | None = None
+    """Counters of the packaged jobs, by wrapper and status.
+
+    The jobs that no wrapper packages are not part of the packaging, so they are
+    not counted here. The whole tree is ``None`` when no job is packaged.
+    """

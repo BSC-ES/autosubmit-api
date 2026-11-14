@@ -458,6 +458,7 @@ class TestExperimentJobs:
                 "status",
                 "section",
                 "chunk",
+                "wrapper",
                 "submit",
                 "start",
                 "finish",
@@ -476,6 +477,7 @@ class TestExperimentJobs:
                 "section",
                 "date",
                 "member",
+                "wrapper",
                 "chunk",
                 "split",
                 "splits",
@@ -1157,6 +1159,14 @@ class TestExperimentJobChildren:
             assert child["status"] == expected_status
 
 
+def _tree_total(tree: dict) -> int:
+    """Sum of the counters of a tree, whatever its depth."""
+    total = 0
+    for value in tree.values():
+        total += value if isinstance(value, int) else _tree_total(value)
+    return total
+
+
 class TestExperimentJobsCategoryTree:
     endpoint = "/v4/experiments/{expid}/jobs-category-tree"
 
@@ -1169,10 +1179,10 @@ class TestExperimentJobsCategoryTree:
             )
 
     @pytest.mark.parametrize("expid", ["a003", "a6zj"])
-    def test_tree_nested_structure(
+    def test_category_tree_nested_structure(
         self, fixture_fastapi_client: TestClient, expid: str
     ):
-        """Tree should be date -> member -> section -> status -> int count."""
+        """Tree should be date -> member -> section -> status -> count."""
         response = fixture_fastapi_client.get(self.endpoint.format(expid=expid))
         resp_obj: dict = response.json()
 
@@ -1207,6 +1217,70 @@ class TestExperimentJobsCategoryTree:
                         assert isinstance(status_val, str)
                         assert isinstance(count, int) and count > 0
 
+    @pytest.mark.parametrize("expid", ["a6zj", "a1x4"])
+    def test_wrapper_tree_structure(
+        self, fixture_fastapi_client: TestClient, expid: str
+    ):
+        """Tree should be wrapper -> status -> count."""
+        response = fixture_fastapi_client.get(self.endpoint.format(expid=expid))
+        resp_obj: dict = response.json()
+
+        assert response.status_code == HTTPStatus.OK
+
+        assert resp_obj["wrapper_hierarchy"] == ["wrapper", "status"]
+
+        tree = resp_obj["wrapper_tree"]
+        assert isinstance(tree, dict)
+        assert len(tree) > 0
+
+        for wrapper_val, statuses in tree.items():
+            assert isinstance(wrapper_val, str)
+            assert isinstance(statuses, dict)
+            for status_val, count in statuses.items():
+                assert isinstance(status_val, str)
+                assert isinstance(count, int) and count > 0
+
+    @pytest.mark.parametrize("expid", ["a6zj", "a1x4"])
+    def test_wrapper_tree_only_counts_packaged_jobs(
+        self, fixture_fastapi_client: TestClient, expid: str
+    ):
+        """The wrapper tree navigates the packaging: it holds no wrapper-less jobs."""
+        response = fixture_fastapi_client.get(self.endpoint.format(expid=expid))
+        resp_obj: dict = response.json()
+
+        assert response.status_code == HTTPStatus.OK
+
+        assert "NA" not in resp_obj["wrapper_tree"]
+        # The section tree still counts every job of the experiment
+        assert _tree_total(resp_obj["wrapper_tree"]) < _tree_total(
+            resp_obj["category_tree"]
+        )
+
+    def test_a_package_is_counted_once(self, fixture_fastapi_client: TestClient):
+        """A wrapper holds its jobs once, even if it spans several sections."""
+        response = fixture_fastapi_client.get(self.endpoint.format(expid="a6zj"))
+        resp_obj: dict = response.json()
+
+        assert response.status_code == HTTPStatus.OK
+
+        # The fixture has a single wrapper, holding the 4 jobs of its section
+        assert resp_obj["wrapper_tree"] == {
+            "a6zj_ASThread_17128472368642_1_4": {"WAITING": 4}
+        }
+
+    def test_without_packaging_the_wrapper_tree_is_omitted(
+        self, fixture_fastapi_client: TestClient
+    ):
+        """An experiment without packaging has no wrapper branch."""
+        response = fixture_fastapi_client.get(self.endpoint.format(expid="a003"))
+        resp_obj: dict = response.json()
+
+        assert response.status_code == HTTPStatus.OK
+        assert resp_obj["wrapper_hierarchy"] is None
+        assert resp_obj["wrapper_tree"] is None
+        # a003 has 8 jobs in its pkl fixture
+        assert _tree_total(resp_obj["category_tree"]) == 8
+
     def test_null_member_becomes_na(self, fixture_fastapi_client: TestClient):
         """Jobs without a member (e.g. LOCAL_SETUP) should appear under 'NA'."""
         response = fixture_fastapi_client.get(self.endpoint.format(expid="a003"))
@@ -1217,23 +1291,6 @@ class TestExperimentJobsCategoryTree:
         # a003 has no date/member
         assert "NA" in tree
         assert "NA" in tree["NA"]
-
-    def test_total_count_matches_jobs(self, fixture_fastapi_client: TestClient):
-        """Sum of all leaf counts must equal the total number of jobs."""
-        response = fixture_fastapi_client.get(self.endpoint.format(expid="a003"))
-        resp_obj: dict = response.json()
-
-        assert response.status_code == HTTPStatus.OK
-        tree = resp_obj["category_tree"]
-        total = sum(
-            count
-            for members in tree.values()
-            for sections in members.values()
-            for statuses in sections.values()
-            for count in statuses.values()
-        )
-        # a003 has 8 jobs in its pkl fixture
-        assert total == 8
 
     def test_repo_error_returns_500(
         self, fixture_fastapi_client: TestClient, monkeypatch: pytest.MonkeyPatch
@@ -1506,7 +1563,7 @@ class TestUserPreferences:
     get_endpoint = "/v4/user-settings/preferred-username"
 
     def _create_jwt_token(self, user_id: str) -> str:
-        """Helper method to create a valid JWT token for testing"""
+        """Helper method to create a valid JWT token for testing."""
         payload = {
             "user_id": user_id,
             "sub": user_id,
@@ -1521,7 +1578,7 @@ class TestUserPreferences:
     def test_register_preferred_username_unauthorized(
         self, fixture_fastapi_client: TestClient
     ):
-        """Test that registering a username without authentication fails"""
+        """Test that registering a username without authentication fails."""
         response = fixture_fastapi_client.post(
             self.register_endpoint,
             json={"preferred_username": "test_user"},
@@ -1532,7 +1589,7 @@ class TestUserPreferences:
     def test_register_preferred_username_invalid_token(
         self, fixture_fastapi_client: TestClient
     ):
-        """Test that registering with an invalid token fails"""
+        """Test that registering with an invalid token fails."""
         response = fixture_fastapi_client.post(
             self.register_endpoint,
             json={"preferred_username": "test_user"},
@@ -1544,7 +1601,7 @@ class TestUserPreferences:
     def test_register_preferred_username_success(
         self, fixture_fastapi_client: TestClient
     ):
-        """Test successfully registering a preferred username"""
+        """Test successfully registering a preferred username."""
         user_id = str(uuid4())
         preferred_username = f"linux_user_{uuid4().hex[:8]}"
         jwt_token = self._create_jwt_token(user_id)

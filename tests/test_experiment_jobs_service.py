@@ -20,6 +20,7 @@ CONTENT_FIELDS = {
     "section",
     "date",
     "member",
+    "wrapper",
     "chunk",
     "split",
     "splits",
@@ -29,8 +30,9 @@ CONTENT_FIELDS = {
     "err_path_remote",
 }
 TIME_FIELDS = {"submit", "start", "finish"}
-# The extended view locates the job (section and chunk) and reports its times
-EXTENDED_FIELDS = {"section", "chunk"} | TIME_FIELDS
+# The extended view locates the job (section, wrapper and chunk) and reports its
+# times
+EXTENDED_FIELDS = {"section", "wrapper", "chunk"} | TIME_FIELDS
 
 
 def make_job(name: str, status: int = Status.COMPLETED, chunk: int | None = 1) -> JobData:
