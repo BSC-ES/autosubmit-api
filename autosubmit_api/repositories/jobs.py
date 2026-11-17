@@ -78,7 +78,7 @@ def _to_row(job: Any) -> JobRow:
     )
 
 
-def _order_key(row: JobRow) -> tuple[str, str]:
+def _order_key(row: JobRow) -> tuple[Any, ...]:
     """Order shared with the SQL repository: by job properties, then by name.
 
     The properties are the ones from the category tree (date, member and section),
