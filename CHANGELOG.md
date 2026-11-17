@@ -8,6 +8,7 @@
 * Refactor `cli.py` to reuse gunicorn functions - Issue #370 by @ntorqulu 
 * Add extended view to `/v4/experiments/{expid}/jobs` endpoint to support lazy loading and pagination in the tree view - Issue #261 by @ntorqulu
 * Substitute if/elif/else chain in `color_status` with a direct lookup - Issue #326 by @agenticsymphony-tech
+* `/v4/experiments/{expid}/jobs` orders the jobs by date, member, section, chunk and split instead of by name - Issue #420 by @ntorqulu
 
 #### Bug fixes
 

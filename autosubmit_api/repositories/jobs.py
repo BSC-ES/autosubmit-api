@@ -7,7 +7,7 @@ from abc import ABC, abstractmethod
 from collections.abc import Sequence
 from typing import Any, NamedTuple
 
-from sqlalchemy import Engine, Table, create_engine, func, select
+from sqlalchemy import Engine, Table, create_engine, func, nulls_last, select
 
 from autosubmit_api.common import utils as common_utils
 from autosubmit_api.config.basicConfig import APIBasicConfig
@@ -79,30 +79,48 @@ def _to_row(job: Any) -> JobRow:
 
 
 def _order_key(row: JobRow) -> tuple[str, str]:
-    """Order shared with the SQL repository: by name, case-insensitively.
-    
+    """Order shared with the SQL repository: by job properties, then by name.
+
+    The properties are the ones from the category tree (date, member and section),
+    followed by the chunk and the splits. Missing values are ordered last and sorted
+    by its job name (is the only unique key), so the order is deterministic and
+    the offset pagination stays stable.
+
     :param row: A job of the pkl in the compact form used to filter and page it.
-    :return: A tuple containing the lowercase name and the original name.
+    :return: A tuple of comparable sort keys.
     """
-    return (row.name.lower(), row.name)
+    return (
+        row.date is None,
+        str(row.date or ""),
+        row.member is None,
+        row.member or "",
+        row.section is None,
+        row.section or "",
+        row.chunk is None,
+        row.chunk or 0,
+        row.split is None,
+        row.split or 0,
+        row.name.lower(),
+        row.name,
+    )
 
 
 class JobsRepository(ABC):
     @abstractmethod
     def get_all(self) -> list[JobData]:
-        """Gets all jobs"""
+        """Gets all jobs."""
 
     @abstractmethod
     def get_last_modified_timestamp(self) -> int:
-        """Gets the last modified UNIX timestamp of the jobs"""
+        """Gets the last modified UNIX timestamp of the jobs."""
 
     @abstractmethod
     def get_by_name(self, name: str) -> JobData | None:
-        """Gets a job by its name"""
+        """Gets a job by its name."""
 
     @abstractmethod
     def get_by_names(self, names: list[str]) -> list[JobData]:
-        """Gets jobs matching any of the given names"""
+        """Gets jobs matching any of the given names."""
 
     @abstractmethod
     def search(
@@ -134,8 +152,7 @@ class JobsRepository(ABC):
     def get_properties_counts(
         self, properties: Sequence[JobCategoryProperty]
     ) -> dict[tuple, int]:
-        """Gets the number of jobs for each combination of the given properties,
-        similar to a SQL GROUP BY query.
+        """Gets the number of jobs for each combination of the given properties, similar to a SQL GROUP BY query.
 
         The keys of the returned mapping follow the order of ``properties`` and
         the values are normalized with :func:`format_category_value`.
@@ -255,14 +272,14 @@ class JobsPklRepository(JobsRepository):
         return bool(re.fullmatch(pattern, value))
 
     def get_all(self) -> list[JobData]:
-        """Gets all jobs from the pkl job list"""
+        """Gets all jobs from the pkl job list."""
         return [self._row_to_job_data(row) for row in self._rows()]
 
     def get_last_modified_timestamp(self) -> int:
         return self.pkl_reader.get_modified_time()
 
     def get_by_name(self, name: str) -> JobData | None:
-        """Gets a job by its name from the pkl job list"""
+        """Gets a job by its name from the pkl job list."""
         for row in self._rows():
             if row.name == name:
                 return self._row_to_job_data(row)
@@ -285,7 +302,9 @@ class JobsPklRepository(JobsRepository):
         chunk: int | None | Unset = UNSET,
         page: Page = UNPAGINATED,
     ) -> tuple[list[JobData], int]:
-        """Searches jobs by the given filters in a deterministic order (job name).
+        """Searches jobs by the given filters in a deterministic order.
+
+        The order is the one of ``_order_key``: the job properties, then the name.
 
         :param job_name: Filter by job name.
         :param status: Filter by job status.
@@ -350,7 +369,6 @@ class JobsSQLRepository(JobsRepository):
                 f"Table schema for {self.table.name} does not match expected schema."
             )
 
-    
     @staticmethod
     def _to_job_data(row: Any) -> JobData:
         """Builds a ``JobData`` instance from a raw SQL row."""
@@ -394,7 +412,7 @@ class JobsSQLRepository(JobsRepository):
         return negated, pattern
 
     def get_all(self) -> list[JobData]:
-        """Gets all jobs from SQL database"""
+        """Gets all jobs from SQL database."""
         with self.engine.connect() as conn:
             result = conn.execute(self.table.select())
             return [self._to_job_data(row) for row in result]
@@ -464,12 +482,13 @@ class JobsSQLRepository(JobsRepository):
         chunk: int | None | Unset = UNSET,
         page: Page = UNPAGINATED,
     ) -> tuple[list[JobData], int]:
-        """Searches jobs by the given filters in a deterministic order (job name).
+        """Searches jobs by the given filters in a deterministic order.
+
+        The order is the one of ``_order_key``: the job properties, then the name.
 
         :returns: A tuple containing the jobs of the page and the total count of
             the jobs matching the filters (before pagination).
         """
-
         with self.engine.connect() as conn:
             statement = self.table.select()
 
@@ -503,9 +522,20 @@ class JobsSQLRepository(JobsRepository):
                     )
 
             # Deterministic order shared with the PKL repository.
-            # Job name is the unique key (primary key in the jobs table).
+            # NULLs are ordered last.
             ordered_statement = statement.order_by(
-                func.lower(self.table.c.name), self.table.c.name
+                *map(
+                    nulls_last,
+                    (
+                        self.table.c.date,
+                        self.table.c.member,
+                        self.table.c.section,
+                        self.table.c.chunk,
+                        self.table.c.split,
+                    ),
+                ),
+                func.lower(self.table.c.name),
+                self.table.c.name,
             )
 
             if page.is_paginated:
