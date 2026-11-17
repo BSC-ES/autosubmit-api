@@ -246,8 +246,7 @@ class JobsPklRepository(JobsRepository):
         """Compares a value with a wildcard expression.
 
         The expression can contain '*' as wildcard, and '!' as negation.
-        If the expression is empty, it matches everything.
-        Examples:
+        If the expression is empty, it matches everything. Examples:
         - 'test*' matches 'test123', 'test_abc', etc. Not matching '123test'.
         - '!test*' does not match 'test123', 'test_abc', etc
 
