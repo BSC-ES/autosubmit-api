@@ -4,7 +4,7 @@ import statistics
 import subprocess
 import time
 from collections import namedtuple
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from bscearth.utils.date import date2str
 from dateutil.relativedelta import relativedelta
@@ -14,7 +14,14 @@ from autosubmit_api.logger import logger
 if TYPE_CHECKING:
     from autosubmit_api.components.jobs.job_factory import Job
 
+UTC = datetime.timezone.utc
+"""Timezone of every timestamp reported by the API."""
+
+TIMESPEC = "seconds"
+"""Precision of the timestamps written and reported by the API."""
+
 LOCAL_TZ = datetime.datetime.now(datetime.timezone.utc).astimezone().tzinfo
+"""Timezone of the server. Kept for backward compatibility for timestamps without timezone information."""
 
 class Section:
   CONFIG = "CONFIG"
@@ -45,6 +52,7 @@ SECONDS_IN_A_DAY = 86400
 PklJob = namedtuple('PklJob', ['name', 'id', 'status', 'priority', 'section', 'date', 'member', 'chunk', 'out_path_local', 'err_path_local', 'out_path_remote', 'err_path_remote'])
 PklJob14 = namedtuple('PklJob14', ['name', 'id', 'status', 'priority', 'section', 'date', 'member', 'chunk', 'out_path_local', 'err_path_local', 'out_path_remote', 'err_path_remote', 'wrapper_type'])
 
+
 def tostamp(string_date: str) -> int:
   """Converts a string datetime to a timestamp."""
   timestamp_value = 0
@@ -59,8 +67,16 @@ def tostamp(string_date: str) -> int:
   return timestamp_value
 
 
+def utc_now_iso() -> str:
+   """Gets the current time in the standarized UTC ISO-8601 format.
+   
+   :return: The current UTC time, e.g. ``2026-11-17T09:00:00+00:00``.
+   """
+   return datetime.datetime.now(tz=UTC).isoformat(timespec=TIMESPEC)
+
+
 def parse_number_processors(processors_str: str) -> int:
-  """Defaults to 1 in case of error"""
+  """Defaults to 1 in case of error."""
   if ':' in processors_str:  
     components = processors_str.split(":")
     processors = int(sum(
@@ -87,7 +103,7 @@ def get_processors_number(conf_job_processors: str) -> int:
 
 
 def separate_job_outliers(jobs: list["Job"]) -> tuple[list["Job"], list["Job"]]:
-  """Detect job outliers and separate them from the job list. 
+  """Detect job outliers and separate them from the job list.
   
   Zero (and negative) run times are considered outliers.
   Method: https://www.ibm.com/docs/en/cognos-analytics/11.1.0?topic=terms-modified-z-score
@@ -135,7 +151,7 @@ def separate_job_outliers(jobs: list["Job"]) -> tuple[list["Job"], list["Job"]]:
 
 
 def get_jobs_with_no_outliers(jobs: list["Job"]) -> list["Job"]:
-  """Returns a list of jobs without outliers"""  
+  """Returns a list of jobs without outliers."""  
   return separate_job_outliers(jobs)[0]
 
 
@@ -173,7 +189,7 @@ def _date_to_str_space(date_str):
 
 
 def get_average_total_time(jobs: list[object]) -> float:
-  """ Job has attribute total_time (See JobFactory)"""
+  """Job has attribute total_time (See JobFactory)."""
   if len(jobs):
     average = sum(job.total_time for job in jobs)/ len(jobs)
     return round(average, 4)
@@ -222,21 +238,23 @@ def get_experiments_from_folder(root_folder: str) -> list[str]:
 
 
 def timestamp_to_datetime_format(timestamp: int | None) -> str | None:
-  """Formats a timestamp to a iso format datetime string with timezone information.
+  """Formats a timestamp as a UTC ISO-8601 datetime string.
 
+  The API always reports them in UTC. The GUI is responsible for converting them to the local timezone if needed.
   :param timestamp: The timestamp to format.
-  :return: The formatted datetime string, or None if the timestamp is invalid.
+  :return: The datetime in UTC ISO-8601 format with second precision, e.g.
+    ``2026-11-17T09:00:00+00:00``, or None if the timestamp is invalid.
   """
   try:
     if timestamp and timestamp > 0:
-      return datetime.datetime.fromtimestamp(timestamp, tz=LOCAL_TZ).isoformat()
+      return to_utc_iso(timestamp)
   except (OverflowError, OSError, TypeError, ValueError) as exc:
     logger.warning(f"Timestamp {timestamp} cannot be converted to datetime string: {exc}")
   return None
 
 
 def datechunk_to_year(chunk_unit: int, chunk_size: int) -> float:
-    """Gets chunk unit and size and returns the value in years
+    """Gets chunk unit and size and returns the value in years.
 
     :param chunk_unit: The unit of the chunk (year, month, day, hour).
     :param chunk_size: The size of the chunk in the given unit.
@@ -257,7 +275,8 @@ def datechunk_to_year(chunk_unit: int, chunk_size: int) -> float:
 
 
 class Status:
-    """Class to handle the status of a job"""
+    """Class to handle the status of a job."""
+
     WAITING = 0
     READY = 1
     SUBMITTED = 2

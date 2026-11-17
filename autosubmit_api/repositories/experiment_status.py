@@ -1,12 +1,11 @@
 from abc import ABC, abstractmethod
-from datetime import datetime
 from typing import Any, List
 
 from pydantic import BaseModel
 from sqlalchemy import Engine, Table, create_engine, delete
 from sqlalchemy.schema import CreateTable
 
-from autosubmit_api.common.utils import LOCAL_TZ
+from autosubmit_api.common.utils import utc_now_iso
 from autosubmit_api.config.basicConfig import APIBasicConfig
 from autosubmit_api.database import tables
 from autosubmit_api.database.common import create_as_times_db_engine, upsert_or_replace
@@ -23,14 +22,11 @@ class ExperimentStatusModel(BaseModel):
 class ExperimentStatusRepository(ABC):
     @abstractmethod
     def get_all(self) -> List[ExperimentStatusModel]:
-        """
-        Get all experiments status
-        """
+        """Get all experiments status."""
 
     @abstractmethod
     def get_by_expid(self, expid: str) -> ExperimentStatusModel:
-        """
-        Get experiment status by expid
+        """Get experiment status by expid.
 
         :param expid: Experiment name
         :return: Experiment status
@@ -39,21 +35,15 @@ class ExperimentStatusRepository(ABC):
 
     @abstractmethod
     def upsert_status(self, exp_id: int, expid: str, status: str) -> int:
-        """
-        Delete and insert experiment status by expid
-        """
+        """Delete and insert experiment status by expid."""
 
     @abstractmethod
     def get_only_running_expids(self) -> List[str]:
-        """
-        Gets list of running experiments expids
-        """
+        """Gets list of running experiments expids."""
 
     @abstractmethod
     def delete_all(self) -> int:
-        """
-        Delete all experiment status
-        """
+        """Delete all experiment status."""
 
 
 class ExperimentStatusSQLRepository(ExperimentStatusRepository):
@@ -94,9 +84,7 @@ class ExperimentStatusSQLRepository(ExperimentStatusRepository):
             "name": expid,
             "status": status,
             "seconds_diff": 0,
-            "modified": datetime.now(tz=LOCAL_TZ).isoformat(
-                sep="-", timespec="seconds"
-            ),
+            "modified": utc_now_iso(),
         }
         with self.engine.connect() as conn:
             try:
