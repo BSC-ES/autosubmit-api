@@ -400,10 +400,7 @@ async def get_experiment_eta(
     ] = "SIM",
     user_id: str | None = Depends(auth_token_dependency()),
 ) -> ExperimentEtaResponse:
-    """Get the estimated time of arrival (remaining time) for an experiment's job section (e.g. SIM, APP, POST).
-    
-    Defaults to SIM.
-    """
+    """Get the remaining time for an experiment's job section to finish. Defaults to SIM."""
     try:
         repo = create_jobs_repository(expid)
         job_data_repo = create_experiment_job_data_repository(expid)
