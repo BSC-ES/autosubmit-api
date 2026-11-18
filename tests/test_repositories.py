@@ -1,3 +1,4 @@
+import datetime
 from typing import Any
 from uuid import uuid4
 
@@ -18,8 +19,10 @@ from autosubmit_api.repositories.job_data import (
     create_experiment_job_data_repository,
 )
 from autosubmit_api.repositories.jobs import (
+    JobRow,
     JobsPklRepository,
     JobsSQLRepository,
+    _order_key,
     create_jobs_repository,
 )
 from autosubmit_api.repositories.join.experiment_join import (
@@ -564,14 +567,60 @@ class TestJobsRepositorySearch:
         assert len(upper) > 0
 
     @pytest.mark.parametrize("expid", ["a007", "a1x4"])
-    def test_search_deterministic_sorted_by_name(
+    def test_search_order_deterministic_across_backends(
         self, fixture_mock_basic_config, expid: str
     ):
-        """Search results should be sorted by job name for deterministic output."""
+        """Search results should follow ``_order_key``."""
         repo = create_jobs_repository(expid)
         jobs, _ = repo.search()
-        job_names = [job.name for job in jobs]
-        assert job_names == sorted(job_names)
+        assert [job.name for job in jobs] == [
+            job.name for job in sorted(jobs, key=_order_key)
+        ]
+
+
+class TestJobsOrder:
+    @staticmethod
+    def _row(name: str, chunk: int | None, split: int | None = None) -> JobRow:
+        return JobRow(
+            id=None,
+            name=name,
+            status=Status.COMPLETED,
+            priority=0,
+            section="SIM",
+            date=datetime.datetime(2025, 1, 1),
+            member="fc0",
+            chunk=chunk,
+            split=split,
+            splits=None,
+            out_path_local=None,
+            err_path_local=None,
+            out_path_remote=None,
+            err_path_remote=None,
+        )
+
+    def test_order_key_sorts_chunks_splits_numerically(self):
+        """The order key should sort by chunk and split numerically, not lexicographically."""
+        chunks = [
+            self._row(f"a000_20250101_fc0_{chunk}_SIM", chunk)
+            for chunk in (10, 2, 12, 1)
+        ]
+        assert [row.chunk for row in sorted(chunks, key=_order_key)] == [1, 2, 10, 12]
+
+        splits = [
+            self._row("a000_20250101_fc0_1_SIM", 1, split) for split in (10, 1, 2)
+        ]
+        assert [row.split for row in sorted(splits, key=_order_key)] == [1, 2, 10]
+
+    def test_order_key_puts_jobs_without_chunk_last(self):
+        """Jobs without a chunk should be ordered after those with a chunk."""
+        rows = [
+            self._row("a000_20250101_fc0_NO_CHUNK", None),
+            self._row("a000_20250101_fc0_1_SIM", 1),
+        ]
+        assert [row.name for row in sorted(rows, key=_order_key)] == [
+            "a000_20250101_fc0_1_SIM",
+            "a000_20250101_fc0_NO_CHUNK",
+        ]
 
 
 class TestJobsCategoryCounts:
@@ -580,7 +629,7 @@ class TestJobsCategoryCounts:
     def test_every_leaf_counts_the_jobs_of_its_filters(
         self, fixture_mock_basic_config, expid: str
     ):
-        """The counts of the leaves of the hierarchy should match the number of jobs"""
+        """The counts of the leaves of the hierarchy should match the number of jobs."""
         repo = create_jobs_repository(expid)
         counts = repo.get_properties_counts(list(JOBS_CATEGORY_HIERARCHY))
 
