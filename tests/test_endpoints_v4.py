@@ -873,7 +873,7 @@ class TestExperimentJobDetail:
                     "chunk_size": 4,
                     "chunk_unit": "month",
                     "processors": 1,
-                    "last_wrapper": None,
+                    "last_wrapper": "a1x4_ASThread_SIM_17858477032499_1_8",
                 },
             ),
         ],
