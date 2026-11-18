@@ -24,6 +24,13 @@ class JobPackageModel(BaseModel):
 
 
 class JobPackagesRepository(ABC):
+    """Wrappers of the jobs of an experiment.
+    
+    An experiment without a packaging table has no wrappers. This is not an error,
+    it just means that the jobs are not grouped into wrappers. The reads report an empty
+    packaging in that case, so the callers do not have to handle a missing table.
+    """
+    
     @abstractmethod
     def get_all(self) -> list[JobPackageModel]:
         """Get all job packages."""
@@ -40,8 +47,8 @@ class JobPackagesRepository(ABC):
 
         :param job_names: Only the jobs with these names. ``None`` reads all of them.
         :param wrapper: Only the jobs of this wrapper. ``None`` does not filter.
-        :return: The wrapper of each packaged job. Jobs outside a wrapper are not
-            included.
+        :return: The wrapper of each packaged job. Jobs outside a wrappers, and every
+            job of an experiment without a packaging table, are not included.
         """
 
 
@@ -53,16 +60,22 @@ class JobPackagesSQLRepository(JobPackagesRepository):
         if not valid_tables:
             raise ValueError("No valid tables provided.")
 
+        # ``None`` means that the experiment has no packaging table.
+        # The reads report an empty packaging instead of querying a table that does not exist.
         self.table = tables.check_table_schema(self.engine, valid_tables)
-        if self.table is None:
-            self.table = valid_tables[0]
 
     def get_all(self) -> list[JobPackageModel]:
+        if self.table is None:
+            return []
+
         with self.engine.connect() as conn:
             result = conn.execute(self.table.select()).all()
         return self._to_models(result)
 
     def get_by_job_name(self, job_name: str) -> list[JobPackageModel]:
+        if self.table is None:
+            return []
+
         with self.engine.connect() as conn:
             statement = self.table.select().where(self.table.c.job_name == job_name)
             result = conn.execute(statement).all()
@@ -84,7 +97,7 @@ class JobPackagesSQLRepository(JobPackagesRepository):
     def get_wrapper_map(
         self, job_names: list[str] | None = None, wrapper: str | None = None
     ) -> dict[str, str]:
-        if job_names is not None and not job_names:
+        if self.table is None or (job_names is not None and not job_names):
             return {}
 
         statement = self.table.select().where(
