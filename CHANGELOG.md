@@ -5,7 +5,7 @@
 #### New features
 
 * The experiment owner name is read with `pwd.getpwuid` instead of running `id -nu` in a subprocess for every experiment - Issue #397 by @DavidAmsellem
-* Refactor `cli.py` to reuse gunicorn functions - Issue #370 by @ntorqulu 
+* Refactor `cli.py` to reuse gunicorn functions - Issue #370 by @ntorqulu
 * Add extended view to `/v4/experiments/{expid}/jobs` endpoint to support lazy loading and pagination in the tree view - Issue #261 by @ntorqulu
 * Substitute if/elif/else chain in `color_status` with a direct lookup - Issue #326 by @agenticsymphony-tech
 * `/v4/experiments/{expid}/jobs` orders the jobs by date, member, section, chunk and split instead of by name - Issue #420 by @ntorqulu
@@ -20,6 +20,7 @@
 
 * Tightened `requests` upper bound to `<2.33.0` matching the ceiling imposed by `autosubmit` v4.1.17 dependency (`requests<=2.32.5`) - By @ntorqulu
 * Removed deprecation warnings from the test suite by replacing deprecated calls (`Column.copy()`, Pydantic `Field(example=...)`, `testcontainers.postgres`...) - Issue #387 by @ntorqulu
+* Added a `mypy` CI job that type-checks the Python files changed in each PR - Issue #427 by @ntorqulu
 
 ### Release v4.2.0 - Release date: 2026-09-28
 
