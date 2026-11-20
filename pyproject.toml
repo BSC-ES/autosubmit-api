@@ -55,6 +55,7 @@ test = [
     "mock",
 ]
 postgres = ["psycopg2"]
+mypy = ["mypy==2.4.1"]
 
 all = [
     "autosubmit-api[test]",
