@@ -26,7 +26,11 @@ from autosubmit_api.database.db_jobdata import JobDataStructure
 from autosubmit_api.database.models import BaseExperimentModel
 from autosubmit_api.exceptions import DomainError, InternalError
 from autosubmit_api.logger import logger
-from autosubmit_api.models.jobs import JOBS_CATEGORY_HIERARCHY
+from autosubmit_api.models.jobs import (
+    JOBS_CATEGORY_HIERARCHY,
+    JOBS_WRAPPER_HIERARCHY,
+    MISSING_CATEGORY_VALUE,
+)
 from autosubmit_api.models.pagination import Page, PaginationInfo
 from autosubmit_api.models.requests import (
     ExperimentsSearchRequest,
@@ -159,7 +163,7 @@ async def search_experiments(
 async def get_experiment_detail(
     expid: str, user_id: str | None = Depends(auth_token_dependency())
 ) -> BaseExperimentModel:
-    """Get details of an experiment."""
+    """Get details of an experiment.."""
     exp_builder = ExperimentBuilder()
     exp_builder.produce_base(expid)
     return exp_builder.product.model_dump(include=tables.ExperimentTable.c.keys())
@@ -601,6 +605,22 @@ def _build_category_tree(
     return ExperimentJobsCategoryTree(root=tree)
 
 
+def _only_packaged(counters: dict[tuple, int]) -> dict[tuple, int]:
+    """Keep the counted jobs that belong to a wrapper.
+
+    The wrapper tree navigates the packaging, so a job that no package holds is
+    not part of it: it is only reachable through the section tree.
+
+    :param counters: Job counts of the wrapper hierarchy, keyed by wrapper.
+    :return: The counts of the jobs that belong to a wrapper.
+    """
+    return {
+        key: count
+        for key, count in counters.items()
+        if key[0] != MISSING_CATEGORY_VALUE
+    }
+
+
 @router.get(
     "/{expid}/jobs-category-tree",
     name="Get experiment jobs category tree",
@@ -612,16 +632,25 @@ async def get_experiment_jobs_category_tree(
 ) -> ExperimentJobsCategoryTreeResponse:
     """Get the jobs category tree of an experiment.
 
-    It helps navigating the jobs in a hierarchical way, based on their date,
-    member, section and status. It does not return the jobs themselves, but a
-    tree of counters that can be used to filter the job list endpoint.
+    It helps navigating the jobs in a hierarchical way with two trees:
+
+    - the jobs grouped by date, member, section and status,
+    - the jobs that belong to a wrapper, grouped by wrapper and status. It is
+      omitted when no job is inside a wrapper.
+
+    They are not additive: the section tree counts every job once, while the
+    wrapper tree only counts the ones that a wrapper holds. A wrapper is not a
+    level of the section tree because it can hold jobs of several sections, dates
+    and members.
 
     :param expid: Experiment identifier
-    :return: Nested dictionary with the job count at the deepest level.
+    :return: Nested dictionaries with the job count at the deepest level.
     """
     try:
         job_list_repo = create_jobs_repository(expid)
-        counters = job_list_repo.get_properties_counts(JOBS_CATEGORY_HIERARCHY)
+        category_counters, wrapper_counters = job_list_repo.get_properties_counts(
+            [JOBS_CATEGORY_HIERARCHY, JOBS_WRAPPER_HIERARCHY]
+        )
     except DomainError:
         raise
     except Exception as exc:
@@ -629,7 +658,16 @@ async def get_experiment_jobs_category_tree(
             "Error while reading the experiment jobs category tree"
         ) from exc
 
+    wrapper_counters = _only_packaged(wrapper_counters)
+    has_packaged_jobs = bool(wrapper_counters)
+
     return ExperimentJobsCategoryTreeResponse(
         properties_hierarchy=list(JOBS_CATEGORY_HIERARCHY),
-        category_tree=_build_category_tree(counters),
+        category_tree=_build_category_tree(category_counters),
+        wrapper_hierarchy=(
+            list(JOBS_WRAPPER_HIERARCHY) if has_packaged_jobs else None
+        ),
+        wrapper_tree=(
+            _build_category_tree(wrapper_counters) if has_packaged_jobs else None
+        ),
     )

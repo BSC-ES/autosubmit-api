@@ -129,6 +129,10 @@ class ExperimentJobsService:
     view reports where the job is and its execution times, and the times come from
     the historical job data: that is the only view that needs the job data
     repository, and it is built on demand so the other views keep a single query.
+
+    The ``base`` and ``extended`` views also report the wrapper (job package) the
+    job is part of. The repository reads the wrappers along with the jobs, so it
+    is not a second query, and it is only asked for when the view reports it.
     """
 
     def __init__(
@@ -160,7 +164,9 @@ class ExperimentJobsService:
                 date=_to_filter(query.date),
                 member=_to_filter(query.member),
                 section=_to_filter(query.section),
+                wrapper=_to_filter(query.wrapper),
                 chunk=_to_filter(query.chunk),
+                with_wrapper=query.view is not JobView.QUICK,
                 page=page,
             )
         except DomainError:
@@ -170,7 +176,9 @@ class ExperimentJobsService:
 
         last_job_data = self._get_last_job_data(jobs, query.view)
         jobs_list = [
-            self._build_item(job, query.view, last_job_data.get(job.name))
+            self._build_item(
+                job, query.view, last_job_data.get(job.name), job.wrapper
+            )
             for job in jobs
         ]
 
@@ -212,6 +220,7 @@ class ExperimentJobsService:
         job: JobData,
         view: JobView,
         last_job_data: ExperimentJobDataModel | None = None,
+        wrapper: str | None = None,
     ) -> ExperimentJobItem:
         """Builds the item of a job with the content of the requested view.
 
@@ -222,6 +231,7 @@ class ExperimentJobsService:
         :param job: Job data from the jobs repository.
         :param view: View of the job list, to know which fields to include.
         :param last_job_data: Last job data of the job, or ``None`` if it does not exist. Only needed by the extended view.
+        :param wrapper: Wrapper of the job, or ``None`` if it has none.
         :return: Job list item with the content of the requested view.
         """
         fields: dict[str, Any] = {
@@ -230,7 +240,7 @@ class ExperimentJobsService:
         }
 
         if view is JobView.BASE:
-            fields.update(_job_content(job))
+            fields.update(_job_content(job), wrapper=wrapper)
         elif view is JobView.EXTENDED:
             # Section and chunk are there to locate the job: the job list of the
             # tree view groups the jobs by section and only estimates the time of
@@ -238,6 +248,7 @@ class ExperimentJobsService:
             fields.update(
                 section=job.section,
                 chunk=job.chunk,
+                wrapper=wrapper,
                 **_job_times(self.expid, job, last_job_data),
             )
 

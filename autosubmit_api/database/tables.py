@@ -16,6 +16,7 @@ from sqlalchemy import (
     UniqueConstraint,
     inspect,
 )
+from sqlalchemy.exc import NoSuchTableError
 from sqlalchemy.orm import DeclarativeBase
 
 from autosubmit_api.logger import logger
@@ -24,18 +25,14 @@ from autosubmit_api.logger import logger
 
 
 def table_copy(table: Table, metadata: MetaData | None = None) -> Table:
-    """
-    Copy a table schema
-    """
+    """Copy a table schema."""
     if not isinstance(metadata, MetaData):
         metadata = MetaData()
     return table.to_metadata(metadata, schema=None)
 
 
 def table_change_schema(schema: str, source: type[DeclarativeBase] | Table) -> Table:
-    """
-    Copy the source table and change the schema of that SQLAlchemy table into a new table instance
-    """
+    """Copy the source table and change the schema of that SQLAlchemy table into a new table instance."""
     if isinstance(source, type) and issubclass(source, DeclarativeBase):
         _source_table: Table = source.__table__
     elif isinstance(source, Table):
@@ -48,27 +45,51 @@ def table_change_schema(schema: str, source: type[DeclarativeBase] | Table) -> T
 
 
 def check_table_schema(engine: Engine, valid_tables: list[Table]) -> Table | None:
+    """Check if one of the valid table schemas matches the current table schema.
+
+    Autosubmit changed the schema of its tables over time, so the readers try the
+    valid table schemas in order, and keep the first one that matches. A table that
+    is not present is not an error: it means that the experiment stores another version
+    of it or that it has not been created yet. So it is skipped silently and only the
+    inspection failures are logged.
+    
+    ORDER MATTERS!!! Table with more columns (more restrictive) should be first.
+
+    :param engine: Engine of the database that stores the table.
+    :param valid_tables: Known versions of the table, most recent first.
+    :return: The revision that matches the current table schema, or ``None`` if the
+        table matches none of them (including when it does not exist).
     """
-    Check if one of the valid table schemas matches the current table schema.
-    Returns the first matching table schema or None if no match is found.
-    ORDER MATTERS!!! Table with more columns (more restrictive) should be first
-    """
+    # Nothing to look for: do not open the database
+    if not valid_tables:
+        return None
+
+    try:
+        inspector = inspect(engine)
+    except Exception as exc:
+        logger.error(f"Error inspecting database engine: {exc}")
+        return None
+    
     for valid_table in valid_tables:
         try:
             # Get the current columns of the table
-            current_columns = inspect(engine).get_columns(
+            current_columns = inspector.get_columns(
                 valid_table.name, valid_table.schema
             )
-            column_names = [column["name"] for column in current_columns]
-
-            # Get the columns of the valid table
-            valid_columns = valid_table.columns.keys()
-            # Check if all the valid table columns are present in the current table
-            if all(column in column_names for column in valid_columns):
-                return valid_table
+        except NoSuchTableError:
+            # The experiment stores another version of the table or it has not been created yet.
+            # Skip silently.
+            continue
         except Exception as exc:
             logger.error(f"Error inspecting table {valid_table.name}: {exc}")
             continue
+        column_names = [column["name"] for column in current_columns]
+
+        # Get the columns of the valid table
+        valid_columns = valid_table.columns.keys()
+        # Check if all the valid table columns are present in the current table
+        if all(column in column_names for column in valid_columns):
+            return valid_table
     return None
 
 
