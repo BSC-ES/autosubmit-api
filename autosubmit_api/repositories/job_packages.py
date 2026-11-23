@@ -4,7 +4,7 @@ from abc import ABC, abstractmethod
 from typing import Any
 
 from pydantic import BaseModel
-from sqlalchemy import Engine, Table, create_engine, inspect
+from sqlalchemy import Engine, Row, Table, create_engine, inspect
 
 from autosubmit_api.common.utils import is_db_version_4_2_0_or_higher
 from autosubmit_api.config.basicConfig import APIBasicConfig
@@ -106,10 +106,10 @@ class JobPackagesSQLRepository(JobPackagesRepository):
         if wrapper is not None:
             statement = statement.where(self.table.c.package_name == wrapper)
 
-        rows = []
+        rows: list[Row[Any]] = []
         with self.engine.connect() as conn:
             if job_names is None:
-                rows = conn.execute(self._latest_first(statement)).all()
+                rows = list(conn.execute(self._latest_first(statement)).all())
             else:
                 for chunk in iter_param_chunks(job_names):
                     chunk_statement = statement.where(self.table.c.job_name.in_(chunk))
