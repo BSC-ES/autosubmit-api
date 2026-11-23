@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import datetime
+from typing import cast
 
 from sqlalchemy import (
     Boolean,
@@ -28,13 +29,13 @@ def table_copy(table: Table, metadata: MetaData | None = None) -> Table:
     """Copy a table schema."""
     if not isinstance(metadata, MetaData):
         metadata = MetaData()
-    return table.to_metadata(metadata, schema=None)
+    return table.to_metadata(metadata)
 
 
 def table_change_schema(schema: str, source: type[DeclarativeBase] | Table) -> Table:
     """Copy the source table and change the schema of that SQLAlchemy table into a new table instance."""
     if isinstance(source, type) and issubclass(source, DeclarativeBase):
-        _source_table: Table = source.__table__
+        _source_table = cast(Table, source.__table__)
     elif isinstance(source, Table):
         _source_table = source
     else:
