@@ -3,7 +3,7 @@ from typing import Annotated, List, Optional
 from pydantic import BaseModel, Field
 
 
-class RunStatus(str, Enum):
+class ExperimentRunStatus(str, Enum):
     """State of a run, derived from the job counts of the historical database."""
 
     RUNNING = "RUNNING"
@@ -51,10 +51,10 @@ class BaseExperimentRun(BaseModel):
         ),
     ]
     status: Annotated[
-        RunStatus,
+        ExperimentRunStatus,
         Field(
             description="State of the run, derived from its job counters",
-            json_schema_extra={"example": RunStatus.RUNNING.value},
+            json_schema_extra={"example": ExperimentRunStatus.RUNNING.value},
         ),
     ]
     chunk_unit: Annotated[

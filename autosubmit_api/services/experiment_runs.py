@@ -4,7 +4,7 @@ from pathlib import Path
 
 from autosubmit_api.common.utils import timestamp_to_datetime_format
 from autosubmit_api.config.basicConfig import APIBasicConfig
-from autosubmit_api.models.experiment import BaseExperimentRun, RunStatus
+from autosubmit_api.models.experiment import BaseExperimentRun, ExperimentRunStatus
 from autosubmit_api.models.responses import ExperimentRunsResponse
 from autosubmit_api.persistance.experiment import ExperimentPaths
 from autosubmit_api.repositories.experiment import create_experiment_repository
@@ -34,7 +34,8 @@ def _has_run_history(expid: str) -> bool:
     return Path(ExperimentPaths(expid).job_data_db).exists()
 
 
-def _run_status(run: ExperimentRunModel) -> RunStatus:
+
+def _run_status(run: ExperimentRunModel) -> ExperimentRunStatus:
     """Derive the state of a run from the job counters stored in the historical database.
 
     The historical database does not store the state of a run, so it is derived from
@@ -49,16 +50,16 @@ def _run_status(run: ExperimentRunModel) -> RunStatus:
     :return: State of the run.
     """
     if (run.running or 0) > 0 or (run.queuing or 0) > 0 or (run.submitted or 0) > 0:
-        return RunStatus.RUNNING
+        return ExperimentRunStatus.RUNNING
 
     total = run.total or 0
     if total > 0 and (run.completed or 0) >= total:
-        return RunStatus.COMPLETED
+        return ExperimentRunStatus.COMPLETED
 
     if (run.failed or 0) > 0:
-        return RunStatus.FAILED
+        return ExperimentRunStatus.FAILED
 
-    return RunStatus.UNKNOWN
+    return ExperimentRunStatus.UNKNOWN
 
 
 def _to_run_item(run: ExperimentRunModel) -> BaseExperimentRun:
