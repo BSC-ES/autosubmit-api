@@ -441,9 +441,7 @@ class TestExperimentJobs:
         assert pagination["total_pages"] == 1
 
     @pytest.mark.parametrize("expid", ["a003", "a1x4"])
-    def test_jobs_extended_view(
-        self, fixture_fastapi_client: TestClient, expid: str
-    ):
+    def test_jobs_extended_view(self, fixture_fastapi_client: TestClient, expid: str):
         """The extended view locates the job and returns its times."""
         response = fixture_fastapi_client.get(
             self.endpoint.format(expid=expid),
@@ -1381,7 +1379,13 @@ class TestExperimentRuns:
             assert isinstance(run["created"], str) or run["created"] is None
             assert isinstance(run["start"], str) or run["start"] is None
             assert isinstance(run["finish"], str) or run["finish"] is None
-            assert run["status"] in {"RUNNING", "COMPLETED", "FAILED", "UNKNOWN"}
+            assert run["status"] in {
+                "RUNNING",
+                "COMPLETED",
+                "FAILED",
+                "SUSPENDED",
+                "UNKNOWN",
+            }
 
         # The newest run is reported first
         run_ids = [run["run_id"] for run in resp_obj["runs"]]
@@ -1396,9 +1400,11 @@ class TestExperimentRuns:
         # Run where every job is completed
         a007_last_run = get_runs("a007")[0]
         assert a007_last_run["run_id"] == 52
-        assert a007_last_run["created"] == "2024-05-21-10:09:35"
         # The times are formatted like every other time of the API, in the local
         # time zone, so they are compared as instants instead of literal offsets
+        assert datetime.fromisoformat(a007_last_run["created"]) == datetime(
+            2024, 5, 21, 8, 9, 35, tzinfo=timezone.utc
+        )
         assert datetime.fromisoformat(a007_last_run["start"]) == datetime(
             2024, 5, 21, 8, 9, 35, tzinfo=timezone.utc
         )
@@ -1414,7 +1420,7 @@ class TestExperimentRuns:
         # Run that still has jobs in flight
         a3tb_last_run = get_runs("a3tb")[0]
         assert a3tb_last_run["run_id"] == 51
-        assert a3tb_last_run["status"] == "RUNNING"
+        assert a3tb_last_run["status"] == "SUSPENDED"
         assert a3tb_last_run["queuing"] == 1
         assert a3tb_last_run["completed"] == 28
         assert a3tb_last_run["total"] == 55
@@ -1426,9 +1432,7 @@ class TestExperimentRuns:
         assert a6zj_only_run["finish"] is None
         assert a6zj_only_run["status"] == "UNKNOWN"
 
-    def test_unknown_experiment_returns_404(
-        self, fixture_fastapi_client: TestClient
-    ):
+    def test_unknown_experiment_returns_404(self, fixture_fastapi_client: TestClient):
         response = fixture_fastapi_client.get(self.endpoint.format(expid="aaaa"))
 
         assert response.status_code == HTTPStatus.NOT_FOUND
@@ -1439,7 +1443,8 @@ class TestExperimentRuns:
         # An experiment that has never run has no historical database, which is not
         # an error: it has no runs
         monkeypatch.setattr(
-            f"{SERVICES}.experiment_runs._has_run_history", MagicMock(return_value=False)
+            f"{SERVICES}.experiment_runs._has_run_history",
+            MagicMock(return_value=False),
         )
 
         response = fixture_fastapi_client.get(self.endpoint.format(expid="a003"))

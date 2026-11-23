@@ -2,12 +2,11 @@
 
 from pathlib import Path
 
-from autosubmit_api.common.utils import timestamp_to_datetime_format
+from autosubmit_api.common.utils import timestamp_to_datetime_format, tostamp
 from autosubmit_api.config.basicConfig import APIBasicConfig
 from autosubmit_api.models.experiment import BaseExperimentRun, ExperimentRunStatus
 from autosubmit_api.models.responses import ExperimentRunsResponse
 from autosubmit_api.persistance.experiment import ExperimentPaths
-from autosubmit_api.repositories.experiment import create_experiment_repository
 from autosubmit_api.repositories.experiment_run import (
     ExperimentRunModel,
     ExperimentRunRepository,
@@ -20,7 +19,7 @@ def _has_run_history(expid: str) -> bool:
 
     An experiment that has never run does not have a historical database. This should
     not be treated as an error: it simply has no runs yet.
-    
+
     The postgres backend has a schema per experiment, created with the experiment.
     The query already returns the right empty result there and only the file of the
     sqlite backend has to be checked.
@@ -34,22 +33,26 @@ def _has_run_history(expid: str) -> bool:
     return Path(ExperimentPaths(expid).job_data_db).exists()
 
 
-
 def _run_status(run: ExperimentRunModel) -> ExperimentRunStatus:
     """Derive the state of a run from the job counters stored in the historical database.
 
     The historical database does not store the state of a run, so it is derived from
-    the counters it does store, from most to the least grave:
+    the counters it does store:
 
-    - ``RUNNING``: there are jobs in flight.
+    - ``RUNNING``: the run is unfinished and has jobs in progress.
     - ``COMPLETED``: every job of the run is completed.
-    - ``FAILED``: there are failed jobs and nothing in flight.
+    - ``FAILED``: there are failed jobs and nothing in progress.
+    - ``SUSPENDED``: there are suspended jobs and no in progress or failed jobs.
     - ``UNKNOWN``: anything else, e.g. a run that was interrupted before finishing.
 
     :param run: Run of the historical database.
     :return: State of the run.
     """
-    if (run.running or 0) > 0 or (run.queuing or 0) > 0 or (run.submitted or 0) > 0:
+    unfinished = not ((run.finish or 0) > 0)
+    in_flight = (
+        (run.running or 0) > 0 or (run.queuing or 0) > 0 or (run.submitted or 0) > 0
+    )
+    if unfinished and in_flight:
         return ExperimentRunStatus.RUNNING
 
     total = run.total or 0
@@ -58,6 +61,9 @@ def _run_status(run: ExperimentRunModel) -> ExperimentRunStatus:
 
     if (run.failed or 0) > 0:
         return ExperimentRunStatus.FAILED
+
+    if (run.suspended or 0) > 0:
+        return ExperimentRunStatus.SUSPENDED
 
     return ExperimentRunStatus.UNKNOWN
 
@@ -72,9 +78,12 @@ def _to_run_item(run: ExperimentRunModel) -> BaseExperimentRun:
     :param run: Run of the historical database.
     :return: Run ready to be serialized by the API.
     """
+    created = (
+        timestamp_to_datetime_format(tostamp(run.created)) if run.created else None
+    )
     return BaseExperimentRun(
         run_id=run.run_id,
-        created=run.created,
+        created=created,
         start=timestamp_to_datetime_format(run.start),
         finish=timestamp_to_datetime_format(run.finish),
         status=_run_status(run),
@@ -121,6 +130,8 @@ def create_experiment_runs_service(expid: str) -> ExperimentRunsService:
     :return: Service that lists the runs of the experiment.
     :raises ExperimentNotFoundError: If the experiment does not exist
     """
+    from autosubmit_api.repositories.experiment import create_experiment_repository
+
     # Experiment should exist, whatever the backend is
     create_experiment_repository().get_by_expid(expid)
 

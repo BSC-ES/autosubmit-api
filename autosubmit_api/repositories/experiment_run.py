@@ -11,21 +11,21 @@ from autosubmit_api.persistance.experiment import ExperimentPaths
 
 
 class ExperimentRunModel(BaseModel):
-    run_id: Any
-    created: Any
-    modified: Any
-    start: Any
-    finish: Any
-    chunk_unit: Any
-    chunk_size: Any
-    completed: Any
-    total: Any
-    failed: Any
-    queuing: Any
-    running: Any
-    submitted: Any
-    suspended: Any
-    metadata: Any
+    run_id: int
+    created: str | None = None
+    modified: str | None = None
+    start: int | None = None
+    finish: int | None = None
+    chunk_unit: str | None = None
+    chunk_size: int | None = None
+    completed: int | None = None
+    total: int | None = None
+    failed: int | None = None
+    queuing: int | None = None
+    running: int | None = None
+    submitted: int | None = None
+    suspended: int | None = None
+    metadata: Any = None
 
 
 class ExperimentRunRepository(ABC):
@@ -85,6 +85,8 @@ def create_experiment_run_repository(expid: str):
         _table = tables.table_change_schema(expid, tables.ExperimentRunTable)
     else:
         # SQLite
-        _engine = create_sqlite_db_engine(ExperimentPaths(expid).job_data_db, read_only=True)
+        _engine = create_sqlite_db_engine(
+            ExperimentPaths(expid).job_data_db, read_only=True
+        )
         _table = tables.ExperimentRunTable
     return ExperimentRunSQLRepository(expid, _engine, _table)

@@ -7,13 +7,16 @@ class ExperimentRunStatus(str, Enum):
     """State of a run, derived from the job counts of the historical database."""
 
     RUNNING = "RUNNING"
-    """There are jobs queuing, running or submitted."""
+    """The run is not finished and has jobs queuing, running or submitted."""
 
     COMPLETED = "COMPLETED"
     """Every job of the run is completed."""
 
     FAILED = "FAILED"
-    """There are failed jobs and nothing in flight."""
+    """There are failed jobs and nothing in progress."""
+
+    SUSPENDED = "SUSPENDED"
+    """There are suspended jobs and no in progress or failed jobs."""
 
     UNKNOWN = "UNKNOWN"
     """Anything else, e.g. a run that was interrupted before finishing."""
