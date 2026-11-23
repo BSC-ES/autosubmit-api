@@ -8,7 +8,6 @@ from typing import Annotated, Any
 
 from bscearth.utils.config_parser import ConfigParserFactory
 from fastapi import APIRouter, Depends, Query
-from fastapi.responses import JSONResponse
 
 from autosubmit_api.auth import auth_token_dependency
 from autosubmit_api.builders.experiment_builder import ExperimentBuilder
@@ -21,15 +20,16 @@ from autosubmit_api.components.jobs.job_detail import JobDetailRetriever
 from autosubmit_api.config.basicConfig import APIBasicConfig
 from autosubmit_api.config.confConfigStrategy import confConfigStrategy
 from autosubmit_api.config.config_common import AutosubmitConfigResolver
-from autosubmit_api.database import tables
 from autosubmit_api.database.db_jobdata import JobDataStructure
 from autosubmit_api.database.models import BaseExperimentModel
 from autosubmit_api.exceptions import DomainError, InternalError
 from autosubmit_api.logger import logger
+from autosubmit_api.models.experiment import BaseExperimentRun, BaseExperimentWrapper
 from autosubmit_api.models.jobs import (
     JOBS_CATEGORY_HIERARCHY,
     JOBS_WRAPPER_HIERARCHY,
     MISSING_CATEGORY_VALUE,
+    status_name,
 )
 from autosubmit_api.models.pagination import Page, PaginationInfo
 from autosubmit_api.models.requests import (
@@ -149,14 +149,14 @@ async def search_experiments(
         *[_get_experiment(raw_exp) for raw_exp in query_result]
     )
 
-    # Response
-    response = {
-        "experiments": experiments,
-        "pagination": PaginationInfo.from_page(
-            page, total_items=total_rows, page_items=len(experiments)
-        ).model_dump(),
-    }
-    return JSONResponse(response)  # TODO Use Validation. Not respond directly.
+    return ExperimentsSearchResponse.model_validate(
+        {
+            "experiments": experiments,
+            "pagination": PaginationInfo.from_page(
+                page, total_items=total_rows, page_items=len(experiments)
+            ),
+        }
+    )
 
 
 @router.get("/{expid}", name="Get experiment detail")
@@ -166,7 +166,7 @@ async def get_experiment_detail(
     """Get details of an experiment.."""
     exp_builder = ExperimentBuilder()
     exp_builder.produce_base(expid)
-    return exp_builder.product.model_dump(include=tables.ExperimentTable.c.keys())
+    return exp_builder.product
 
 
 @router.get(
@@ -212,12 +212,11 @@ async def get_experiment_wrappers(
 
     wrappers_dict: dict[str, list[str]] = job_package_reader.package_to_jobs
 
-    wrappers = []
-    for key, val in wrappers_dict.items():
-        wrappers.append({"wrapper_name": key, "job_names": val})
-
-    logger.debug(wrappers)
-    return {"wrappers": wrappers}
+    wrappers = [
+        BaseExperimentWrapper(wrapper_name=key, job_names=list(val))
+        for key, val in wrappers_dict.items()
+    ]
+    return ExperimentWrappersResponse(wrappers=wrappers)
 
 
 def _to_plain_python(obj: Any) -> Any:
@@ -277,14 +276,18 @@ async def get_experiment_fs_config(
     """Get the filesystem config of an experiment."""
     # Read the config
     APIBasicConfig.read()
-    as_config = AutosubmitConfigResolver(expid, APIBasicConfig, ConfigParserFactory())
+    as_config = AutosubmitConfigResolver(
+        expid,
+        APIBasicConfig,
+        ConfigParserFactory(),
+    )
     is_as3 = isinstance(as_config._configWrapper, confConfigStrategy)
     as_config.reload()
     curr_fs_config: dict[str, Any] = as_config.get_full_config_as_dict()
 
-    # Format the response
-    response = {"config": _format_config_response(curr_fs_config, is_as3)}
-    return response
+    return ExperimentFSConfigResponse(
+        config=_format_config_response(curr_fs_config, is_as3=is_as3)
+    )
 
 
 @router.get("/{expid}/runs", name="List experiment runs")
@@ -302,32 +305,26 @@ async def get_runs(
     except Exception as exc:
         raise InternalError("Error while getting experiment runs") from exc
 
-    # Format the response
-    response = {"runs": []}
-    for run in exp_runs:
-        response["runs"].append(
-            {
-                "run_id": run.run_id,
-                "start": datetime.fromtimestamp(run.start, timezone.utc).isoformat(
-                    timespec="seconds"
-                )
-                if run.start > 0
-                else None,
-                "finish": datetime.fromtimestamp(run.finish, timezone.utc).isoformat(
-                    timespec="seconds"
-                )
-                if run.finish > 0
-                else None,
-            }
+    runs = [
+        BaseExperimentRun(
+            run_id=run.run_id,
+            start=datetime.fromtimestamp(run.start, timezone.utc).isoformat(timespec="seconds")
+            if run.start > 0
+            else None,
+            finish=datetime.fromtimestamp(run.finish, timezone.utc).isoformat(timespec="seconds")
+            if run.finish > 0
+            else None,
         )
+        for run in exp_runs
+    ]
 
-    return response
+    return ExperimentRunsResponse(runs=runs)
 
 
 @router.get("/{expid}/runs/{run_id}/config", name="Get experiment run configuration")
 async def get_run_config(
     expid: str,
-    run_id: str,
+    run_id: int,
     user_id: str | None = Depends(auth_token_dependency()),
 ) -> ExperimentRunConfigResponse:
     """Get the config of a specific run of an experiment."""
@@ -339,12 +336,10 @@ async def get_run_config(
         else {}
     )
 
-    # Format the response
-    response = {
-        "run_id": experiment_run.run_id if experiment_run else None,
-        "config": _format_config_response(metadata),
-    }
-    return response
+    return ExperimentRunConfigResponse(
+        run_id=run_id,
+        config=_format_config_response(metadata),
+    )
 
 
 @router.get(
@@ -464,7 +459,7 @@ async def get_experiment_job_detail(
     # Build the response
     response = JobDetailResponse(
         name=job_name,
-        status=Status.VALUE_TO_KEY.get(job_detail_retriever.status_code, "UNKNOWN"),
+        status=status_name(job_detail_retriever.status_code),
     )
 
     response = response.model_copy(
@@ -520,16 +515,13 @@ async def get_experiment_job_parents(
     except Exception as exc:
         raise InternalError("Error while reading the experiment structure") from exc
 
-    parent_items = [{"job_name": parent} for parent in parents]
+    parent_items: list[dict[str, Any]] = [{"job_name": parent} for parent in parents]
 
     if include_status and parents:
         try:
             job_list_repo = create_jobs_repository(expid)
             jobs_data = job_list_repo.get_by_names(parents)
-            status_map = {
-                job.name: Status.VALUE_TO_KEY.get(job.status, "UNKNOWN")
-                for job in jobs_data
-            }
+            status_map = {job.name: status_name(job.status) for job in jobs_data}
             for item in parent_items:
                 item["status"] = status_map.get(item["job_name"])
         except Exception as exc:
@@ -558,16 +550,13 @@ async def get_experiment_job_children(
     except Exception as exc:
         raise InternalError("Error while reading the experiment structure") from exc
 
-    child_items = [{"job_name": child} for child in children]
+    child_items: list[dict[str, Any]] = [{"job_name": child} for child in children]
 
     if include_status and children:
         try:
             job_list_repo = create_jobs_repository(expid)
             jobs_data = job_list_repo.get_by_names(children)
-            status_map = {
-                job.name: Status.VALUE_TO_KEY.get(job.status, "UNKNOWN")
-                for job in jobs_data
-            }
+            status_map = {job.name: status_name(job.status) for job in jobs_data}
             for item in child_items:
                 item["status"] = status_map.get(item["job_name"])
         except Exception as exc:
