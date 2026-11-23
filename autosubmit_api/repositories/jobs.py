@@ -325,7 +325,9 @@ class JobsPklRepository(JobsRepository):
         :param chunk: The job chunk filter.
         :return: True if the job matches the filters, False otherwise.
         """
-        if job_name is not UNSET and not cls._wildcard_compare(job_name, job.name):
+        if isinstance(job_name, str) and not cls._wildcard_compare(
+            job_name, job.name
+        ):
             return False
 
         return all(
@@ -448,7 +450,7 @@ class JobsPklRepository(JobsRepository):
         # Offset pagination is only reliable if the order is stable across
         # different backends and across different calls to the same backend.
         # name is the unique key (primary key in the jobs table).
-        if page.is_paginated:
+        if page.limit is not None:
             # Only the rows of the page are needed
             page_rows = heapq.nsmallest(
                 page.offset + page.limit, matching_rows, key=_order_key
@@ -738,7 +740,7 @@ class JobsSQLRepository(JobsRepository):
             if wrapper_subquery is not None:
                 statement = self._with_wrappers(statement, wrapper_subquery)
 
-            if job_name is not UNSET:
+            if isinstance(job_name, str):
                 negated, pattern = self._wildcard_to_sql_like(job_name)
                 if negated:
                     statement = statement.where(
