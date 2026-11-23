@@ -278,7 +278,7 @@ async def get_experiment_fs_config(
     APIBasicConfig.read()
     as_config = AutosubmitConfigResolver(
         expid,
-        APIBasicConfig,
+        APIBasicConfig, # type: ignore[arg-type]
         ConfigParserFactory(),
     )
     is_as3 = isinstance(as_config._configWrapper, confConfigStrategy)
@@ -328,7 +328,7 @@ async def get_run_config(
     user_id: str | None = Depends(auth_token_dependency()),
 ) -> ExperimentRunConfigResponse:
     """Get the config of a specific run of an experiment."""
-    historical_db = JobDataStructure(expid, APIBasicConfig)
+    historical_db = JobDataStructure(expid, APIBasicConfig)  # type: ignore[arg-type]
     experiment_run = historical_db.get_experiment_run_by_id(run_id=run_id)
     metadata = (
         json.loads(experiment_run.metadata)
