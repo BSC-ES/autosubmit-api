@@ -292,13 +292,7 @@ async def get_runs(
     Only the data that the historical database stores per run is reported, so the
     response does not depend on the number of jobs of the experiment.
     """
-    try:
-        service = create_experiment_runs_service(expid)
-        return service.list_runs()
-    except DomainError:
-        raise
-    except Exception as exc:
-        raise InternalError("Error while getting experiment runs") from exc
+    return create_experiment_runs_service(expid).list_runs()
 
 
 @router.get("/{expid}/runs/{run_id}/config", name="Get experiment run configuration")
@@ -486,7 +480,7 @@ async def get_experiment_job_parents(
     user_id: str | None = Depends(auth_token_dependency()),
 ) -> dict:
     """Get the parents of a specific job of an experiment.
-    
+
     Set include_status=true to also return the current status of each parent job.
     """
     try:
@@ -524,7 +518,7 @@ async def get_experiment_job_children(
     user_id: str | None = Depends(auth_token_dependency()),
 ) -> dict:
     """Get the children of a specific job of an experiment.
-    
+
     Set include_status=true to also return the current status of each child job.
     """
     try:

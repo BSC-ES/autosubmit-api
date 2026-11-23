@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import Any, List
+from typing import Any
 
 from pydantic import BaseModel
 from sqlalchemy import Engine, Table, create_engine
@@ -30,8 +30,8 @@ class ExperimentRunModel(BaseModel):
 
 class ExperimentRunRepository(ABC):
     @abstractmethod
-    def get_all(self) -> List[ExperimentRunModel]:
-        """Gets all runs of the experiment."""
+    def get_all(self) -> list[ExperimentRunModel]:
+        """Gets all runs of the experiment, newest first."""
 
     @abstractmethod
     def get_last_run(self) -> ExperimentRunModel:
@@ -48,7 +48,7 @@ class ExperimentRunSQLRepository(ExperimentRunRepository):
         self.table = table
         self.expid = expid
 
-    def get_all(self):
+    def get_all(self) -> list[ExperimentRunModel]:
         with self.engine.connect() as conn:
             # Newest first: consumers list the runs from the most recent one
             statement = self.table.select().order_by(self.table.c.run_id.desc())
@@ -59,7 +59,7 @@ class ExperimentRunSQLRepository(ExperimentRunRepository):
             for row in result
         ]
 
-    def get_last_run(self):
+    def get_last_run(self) -> ExperimentRunModel:
         with self.engine.connect() as conn:
             statement = self.table.select().order_by(self.table.c.run_id.desc())
             result = conn.execute(statement).first()
@@ -67,7 +67,7 @@ class ExperimentRunSQLRepository(ExperimentRunRepository):
             raise ValueError(f"No runs found for experiment {self.expid}")
         return ExperimentRunModel.model_validate(result, from_attributes=True)
 
-    def get_run_by_id(self, run_id: int):
+    def get_run_by_id(self, run_id: int) -> ExperimentRunModel:
         with self.engine.connect() as conn:
             statement = self.table.select().where(self.table.c.run_id == run_id)
             result = conn.execute(statement).first()

@@ -1,12 +1,15 @@
 """Runs of an experiment, ready to be serialized by the API."""
 
+from collections.abc import Callable
 from pathlib import Path
 
-from autosubmit_api.common.utils import timestamp_to_datetime_format, tostamp
+from autosubmit_api.common.utils import timestamp_to_datetime_format
 from autosubmit_api.config.basicConfig import APIBasicConfig
+from autosubmit_api.exceptions import DomainError, InternalError
 from autosubmit_api.models.experiment import BaseExperimentRun, ExperimentRunStatus
 from autosubmit_api.models.responses import ExperimentRunsResponse
 from autosubmit_api.persistance.experiment import ExperimentPaths
+from autosubmit_api.repositories.experiment import create_experiment_repository
 from autosubmit_api.repositories.experiment_run import (
     ExperimentRunModel,
     ExperimentRunRepository,
@@ -48,11 +51,11 @@ def _run_status(run: ExperimentRunModel) -> ExperimentRunStatus:
     :param run: Run of the historical database.
     :return: State of the run.
     """
-    unfinished = not ((run.finish or 0) > 0)
-    in_flight = (
+    ended = (run.finish or 0) > 0
+    has_pending_jobs = (
         (run.running or 0) > 0 or (run.queuing or 0) > 0 or (run.submitted or 0) > 0
     )
-    if unfinished and in_flight:
+    if not ended and has_pending_jobs:
         return ExperimentRunStatus.RUNNING
 
     total = run.total or 0
@@ -71,19 +74,13 @@ def _run_status(run: ExperimentRunModel) -> ExperimentRunStatus:
 def _to_run_item(run: ExperimentRunModel) -> BaseExperimentRun:
     """Convert a run of the historical database into an API response.
 
-    The times of the historical database are UNIX timestamps, and they are reported
-    with the same helper as the job list. This way the API is formatted the
-    same way. The timestamps it does not know (it stores a 0) are reported as ``None``.
-
     :param run: Run of the historical database.
     :return: Run ready to be serialized by the API.
     """
-    created = (
-        timestamp_to_datetime_format(tostamp(run.created)) if run.created else None
-    )
     return BaseExperimentRun(
         run_id=run.run_id,
-        created=created,
+        # TODO: Normalize string to timestamp with timezone.
+        created=run.created,
         start=timestamp_to_datetime_format(run.start),
         finish=timestamp_to_datetime_format(run.finish),
         status=_run_status(run),
@@ -106,21 +103,33 @@ class ExperimentRunsService:
     response does not depend on the number of jobs of the experiment.
     """
 
-    def __init__(self, expid: str, runs_repo: ExperimentRunRepository):
+    def __init__(
+        self,
+        expid: str,
+        runs_repo: ExperimentRunRepository,
+        history_exists: Callable[[str], bool] | None = None,
+    ):
         self.expid = expid
         self.runs_repo = runs_repo
+        self._history_exists = history_exists or _has_run_history
 
     def list_runs(self) -> ExperimentRunsResponse:
         """Runs of the experiment, newest first.
 
         :return: Runs of the experiment, or no runs if it has never run.
+        :raises InternalError: If the historical database cannot be read
         """
-        if not _has_run_history(self.expid):
-            return ExperimentRunsResponse(runs=[])
+        try:
+            if not self._history_exists(self.expid):
+                return ExperimentRunsResponse(runs=[])
 
-        return ExperimentRunsResponse(
-            runs=[_to_run_item(run) for run in self.runs_repo.get_all()]
-        )
+            return ExperimentRunsResponse(
+                runs=[_to_run_item(run) for run in self.runs_repo.get_all()]
+            )
+        except DomainError:
+            raise
+        except Exception as exc:
+            raise InternalError("Error while getting experiment runs") from exc
 
 
 def create_experiment_runs_service(expid: str) -> ExperimentRunsService:
@@ -129,12 +138,16 @@ def create_experiment_runs_service(expid: str) -> ExperimentRunsService:
     :param expid: Experiment identifier.
     :return: Service that lists the runs of the experiment.
     :raises ExperimentNotFoundError: If the experiment does not exist
+    :raises InternalError: If the repositories cannot be built
     """
-    from autosubmit_api.repositories.experiment import create_experiment_repository
+    try:
+        # Experiment should exist, whatever the backend is
+        create_experiment_repository().get_by_expid(expid)
 
-    # Experiment should exist, whatever the backend is
-    create_experiment_repository().get_by_expid(expid)
-
-    return ExperimentRunsService(
-        expid=expid, runs_repo=create_experiment_run_repository(expid)
-    )
+        return ExperimentRunsService(
+            expid=expid, runs_repo=create_experiment_run_repository(expid)
+        )
+    except DomainError:
+        raise
+    except Exception as exc:
+        raise InternalError("Error while getting experiment runs") from exc

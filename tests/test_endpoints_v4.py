@@ -22,6 +22,7 @@ from autosubmit_api.models.responses import (
     ExperimentJobsCategoryTreeResponse,
     JobDetailResponse,
 )
+from autosubmit_api.repositories.experiment_run import ExperimentRunModel
 from autosubmit_api.repositories.runner_processes import RunnerProcessesDataModel
 from tests.utils import custom_return_value
 
@@ -1400,11 +1401,10 @@ class TestExperimentRuns:
         # Run where every job is completed
         a007_last_run = get_runs("a007")[0]
         assert a007_last_run["run_id"] == 52
+        # created is stored as a plain string, so it is reported as is
+        assert a007_last_run["created"] == "2024-05-21-10:09:35"
         # The times are formatted like every other time of the API, in the local
         # time zone, so they are compared as instants instead of literal offsets
-        assert datetime.fromisoformat(a007_last_run["created"]) == datetime(
-            2024, 5, 21, 8, 9, 35, tzinfo=timezone.utc
-        )
         assert datetime.fromisoformat(a007_last_run["start"]) == datetime(
             2024, 5, 21, 8, 9, 35, tzinfo=timezone.utc
         )
@@ -1431,6 +1431,57 @@ class TestExperimentRuns:
         assert isinstance(a6zj_only_run["start"], str)
         assert a6zj_only_run["finish"] is None
         assert a6zj_only_run["status"] == "UNKNOWN"
+
+    @pytest.mark.parametrize(
+        ("finish", "queuing", "failed", "expected"),
+        [
+            # Jobs still pending and the run has not ended: the experiment is running
+            (0, 1, 0, "RUNNING"),
+            # An ended run with leftover counters is not running anymore
+            (1716278975, 2, 0, "UNKNOWN"),
+            (1716278975, 0, 1, "FAILED"),
+        ],
+    )
+    def test_run_status(
+        self,
+        fixture_fastapi_client: TestClient,
+        monkeypatch: pytest.MonkeyPatch,
+        finish: int,
+        queuing: int,
+        failed: int,
+        expected: str,
+    ):
+        class FakeRunsRepository:
+            def get_all(self):
+                return [
+                    ExperimentRunModel(
+                        run_id=1,
+                        created="2024-05-21-10:09:35",
+                        modified=None,
+                        start=1716278975,
+                        finish=finish,
+                        chunk_unit="month",
+                        chunk_size=4,
+                        completed=0,
+                        total=55,
+                        failed=failed,
+                        queuing=queuing,
+                        running=0,
+                        submitted=0,
+                        suspended=0,
+                        metadata=None,
+                    )
+                ]
+
+        monkeypatch.setattr(
+            f"{SERVICES}.experiment_runs.create_experiment_run_repository",
+            MagicMock(return_value=FakeRunsRepository()),
+        )
+
+        response = fixture_fastapi_client.get(self.endpoint.format(expid="a003"))
+
+        assert response.status_code == HTTPStatus.OK
+        assert response.json()["runs"][0]["status"] == expected
 
     def test_unknown_experiment_returns_404(self, fixture_fastapi_client: TestClient):
         response = fixture_fastapi_client.get(self.endpoint.format(expid="aaaa"))
