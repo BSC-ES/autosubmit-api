@@ -1430,7 +1430,7 @@ class TestExperimentRuns:
         assert a6zj_only_run["run_id"] == 1
         assert isinstance(a6zj_only_run["start"], str)
         assert a6zj_only_run["finish"] is None
-        assert a6zj_only_run["status"] == "UNKNOWN"
+        assert a6zj_only_run["status"] == "RUNNING"
 
     @pytest.mark.parametrize(
         ("finish", "queuing", "failed", "expected"),

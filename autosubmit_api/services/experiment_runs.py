@@ -52,19 +52,21 @@ def _run_status(run: ExperimentRunModel) -> ExperimentRunStatus:
     :return: State of the run.
     """
     ended = (run.finish or 0) > 0
+    total = run.total or 0
+    completed = run.completed or 0
     has_pending_jobs = (
         (run.running or 0) > 0 or (run.queuing or 0) > 0 or (run.submitted or 0) > 0
     )
-    if not ended and has_pending_jobs:
-        return ExperimentRunStatus.RUNNING
-
-    total = run.total or 0
-    if total > 0 and (run.completed or 0) >= total:
+    if total > 0 and completed >= total:
         return ExperimentRunStatus.COMPLETED
-
+    if (run.failed or 0) > 0 and not has_pending_jobs:
+        return ExperimentRunStatus.FAILED
+    if not ended:
+        if (run.suspended or 0) > 0 and not has_pending_jobs:
+            return ExperimentRunStatus.SUSPENDED
+        return ExperimentRunStatus.RUNNING if total > completed else ExperimentRunStatus.UNKNOWN
     if (run.failed or 0) > 0:
         return ExperimentRunStatus.FAILED
-
     if (run.suspended or 0) > 0:
         return ExperimentRunStatus.SUSPENDED
 
