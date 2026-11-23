@@ -4,10 +4,10 @@ from collections.abc import Callable
 from datetime import datetime
 from typing import Any
 
-from autosubmit_api.common.utils import Status, timestamp_to_datetime_format
+from autosubmit_api.common.utils import timestamp_to_datetime_format
 from autosubmit_api.components.jobs.utils import get_fixed_experiment_times
 from autosubmit_api.exceptions import DomainError, InternalError
-from autosubmit_api.models.jobs import UNSET, JobCategoryProperty, JobView, Unset
+from autosubmit_api.models.jobs import UNSET, JobCategoryProperty, JobView, Unset, status_name
 from autosubmit_api.models.pagination import Page, PaginationInfo
 from autosubmit_api.models.requests import JobsSearchRequest
 from autosubmit_api.models.responses import (
@@ -236,7 +236,7 @@ class ExperimentJobsService:
         """
         fields: dict[str, Any] = {
             "name": job.name,
-            "status": Status.VALUE_TO_KEY.get(job.status, "UNKNOWN"),
+            "status": status_name(job.status),
         }
 
         if view is JobView.BASE:
