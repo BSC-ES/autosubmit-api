@@ -7,6 +7,7 @@ from sqlalchemy import Engine, Table, create_engine, inspect
 from autosubmit_api.config.basicConfig import APIBasicConfig
 from autosubmit_api.database import tables
 from autosubmit_api.database.common import create_sqlite_db_engine
+from autosubmit_api.exceptions import RunNotFoundError
 from autosubmit_api.persistance.experiment import ExperimentPaths
 
 
@@ -31,15 +32,24 @@ class ExperimentRunModel(BaseModel):
 class ExperimentRunRepository(ABC):
     @abstractmethod
     def get_all(self) -> list[ExperimentRunModel]:
-        """Gets all runs of the experiment, newest first."""
+        """Gets all runs of the experiment, newest first.
+        
+        :return: List of runs, or empty list if the experiment has no runs.
+        """
 
     @abstractmethod
     def get_last_run(self) -> ExperimentRunModel:
-        """Gets last run of the experiment. Raises ValueError if no runs found."""
+        """Gets last run of the experiment.
+
+        :raises RunNotFoundError: If the experiment has no runs.
+        """
 
     @abstractmethod
     def get_run_by_id(self, run_id: int) -> ExperimentRunModel:
-        """Gets run by id. Raises ValueError if run not found."""
+        """Gets run by id.
+        
+        :raises RunNotFoundError: If the run does not exist.
+        """
 
 
 class ExperimentRunSQLRepository(ExperimentRunRepository):
@@ -66,20 +76,22 @@ class ExperimentRunSQLRepository(ExperimentRunRepository):
 
     def get_last_run(self) -> ExperimentRunModel:
         with self.engine.connect() as conn:
+            if not inspect(conn).has_table(self.table.name, self.table.schema):
+                raise RunNotFoundError(self.expid)
             statement = self.table.select().order_by(self.table.c.run_id.desc())
             result = conn.execute(statement).first()
         if result is None:
-            raise ValueError(f"No runs found for experiment {self.expid}")
+            raise RunNotFoundError(self.expid)
         return ExperimentRunModel.model_validate(result, from_attributes=True)
 
     def get_run_by_id(self, run_id: int) -> ExperimentRunModel:
         with self.engine.connect() as conn:
+            if not inspect(conn).has_table(self.table.name, self.table.schema):
+                raise RunNotFoundError(self.expid, run_id)
             statement = self.table.select().where(self.table.c.run_id == run_id)
             result = conn.execute(statement).first()
         if result is None:
-            raise ValueError(
-                f"Run with id {run_id} not found for experiment {self.expid}"
-            )
+            raise RunNotFoundError(self.expid, run_id)
         return ExperimentRunModel.model_validate(result, from_attributes=True)
 
 
