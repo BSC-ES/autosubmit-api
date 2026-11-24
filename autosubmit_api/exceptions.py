@@ -2,7 +2,8 @@
 
 The exceptions defined in this module should not carry any HTTP semantics.
 The API layer should be responsible to map them to HTTP responses in
-``autosubmit_api.api_error_handlers``."""
+``autosubmit_api.api_error_handlers``.
+"""
 
 
 class DomainError(Exception):
@@ -39,6 +40,18 @@ class JobNotFoundError(NotFoundError):
         super().__init__(
             f"Job with name '{job_name}' not found in experiment '{expid}'"
         )
+
+
+class RunNotFoundError(NotFoundError):
+    """Raised when a run does not exist in an experiment."""
+
+    def __init__(self, expid: str, run_id: int | None = None) -> None:
+        if run_id is None:
+            super().__init__(f"No runs found for experiment '{expid}'")
+        else:
+            super().__init__(
+                f"Run with id '{run_id}' not found in experiment '{expid}'"
+            )
 
 
 class SectionNotFoundError(ValidationError):
