@@ -8,7 +8,6 @@ from autosubmit_api.services.experiment_runs import ExperimentRunsService
 EXPID = "a000"
 
 
-
 def make_run(run_id: int = 1) -> ExperimentRunModel:
     return ExperimentRunModel(
         run_id=run_id,
@@ -102,7 +101,9 @@ class TestListRuns:
         """If the repository fails, the service raises an InternalError."""
         service = ExperimentRunsService(
             expid=EXPID,
-            runs_repo=MockExperimentRunRepository(error=OSError("cannot read the database")),
+            runs_repo=MockExperimentRunRepository(
+                error=OSError("cannot read the database")
+            ),
             history_exists=history_exists,
         )
 
@@ -113,6 +114,7 @@ class TestListRuns:
 
     def test_failing_history_check_reported_as_internal_error(self):
         """If the history check fails, the service raises an InternalError."""
+
         def _history_exists(expid: str) -> bool:
             raise OSError("cannot check history")
 
