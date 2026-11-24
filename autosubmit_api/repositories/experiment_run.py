@@ -1,8 +1,8 @@
 from abc import ABC, abstractmethod
-from typing import Any, List
+from typing import Any
 
 from pydantic import BaseModel
-from sqlalchemy import Engine, Table, create_engine
+from sqlalchemy import Engine, Table, create_engine, inspect
 
 from autosubmit_api.config.basicConfig import APIBasicConfig
 from autosubmit_api.database import tables
@@ -11,41 +11,35 @@ from autosubmit_api.persistance.experiment import ExperimentPaths
 
 
 class ExperimentRunModel(BaseModel):
-    run_id: Any
-    created: Any
-    modified: Any
-    start: Any
-    finish: Any
-    chunk_unit: Any
-    chunk_size: Any
-    completed: Any
-    total: Any
-    failed: Any
-    queuing: Any
-    running: Any
-    submitted: Any
-    suspended: Any
-    metadata: Any
+    run_id: int
+    created: str | None = None
+    modified: str | None = None
+    start: int | None = None
+    finish: int | None = None
+    chunk_unit: str | None = None
+    chunk_size: int | None = None
+    completed: int | None = None
+    total: int | None = None
+    failed: int | None = None
+    queuing: int | None = None
+    running: int | None = None
+    submitted: int | None = None
+    suspended: int | None = None
+    metadata: Any = None
 
 
 class ExperimentRunRepository(ABC):
     @abstractmethod
-    def get_all(self) -> List[ExperimentRunModel]:
-        """
-        Gets all runs of the experiment
-        """
+    def get_all(self) -> list[ExperimentRunModel]:
+        """Gets all runs of the experiment, newest first."""
 
     @abstractmethod
     def get_last_run(self) -> ExperimentRunModel:
-        """
-        Gets last run of the experiment. Raises ValueError if no runs found.
-        """
+        """Gets last run of the experiment. Raises ValueError if no runs found."""
 
     @abstractmethod
     def get_run_by_id(self, run_id: int) -> ExperimentRunModel:
-        """
-        Gets run by id. Raises ValueError if run not found.
-        """
+        """Gets run by id. Raises ValueError if run not found."""
 
 
 class ExperimentRunSQLRepository(ExperimentRunRepository):
@@ -54,9 +48,15 @@ class ExperimentRunSQLRepository(ExperimentRunRepository):
         self.table = table
         self.expid = expid
 
-    def get_all(self):
+    def get_all(self) -> list[ExperimentRunModel]:
         with self.engine.connect() as conn:
-            statement = self.table.select()
+            # The historical database of an experiment that has not recorded a run
+            # yet may not have the table. That is not an error: it has no runs.
+            if not inspect(conn).has_table(self.table.name, self.table.schema):
+                return []
+
+            # Newest first: consumers list the runs from the most recent one
+            statement = self.table.select().order_by(self.table.c.run_id.desc())
             result = conn.execute(statement).all()
 
         return [
@@ -64,7 +64,7 @@ class ExperimentRunSQLRepository(ExperimentRunRepository):
             for row in result
         ]
 
-    def get_last_run(self):
+    def get_last_run(self) -> ExperimentRunModel:
         with self.engine.connect() as conn:
             statement = self.table.select().order_by(self.table.c.run_id.desc())
             result = conn.execute(statement).first()
@@ -72,7 +72,7 @@ class ExperimentRunSQLRepository(ExperimentRunRepository):
             raise ValueError(f"No runs found for experiment {self.expid}")
         return ExperimentRunModel.model_validate(result, from_attributes=True)
 
-    def get_run_by_id(self, run_id: int):
+    def get_run_by_id(self, run_id: int) -> ExperimentRunModel:
         with self.engine.connect() as conn:
             statement = self.table.select().where(self.table.c.run_id == run_id)
             result = conn.execute(statement).first()
@@ -90,6 +90,8 @@ def create_experiment_run_repository(expid: str):
         _table = tables.table_change_schema(expid, tables.ExperimentRunTable)
     else:
         # SQLite
-        _engine = create_sqlite_db_engine(ExperimentPaths(expid).job_data_db, read_only=True)
+        _engine = create_sqlite_db_engine(
+            ExperimentPaths(expid).job_data_db, read_only=True
+        )
         _table = tables.ExperimentRunTable
     return ExperimentRunSQLRepository(expid, _engine, _table)
