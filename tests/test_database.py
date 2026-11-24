@@ -204,13 +204,13 @@ class TestExecuteUpsert:
             row = conn.execute(select(table)).first()
             assert row is None
 
-    def upsert_row_on_legacy_table_without_unique_constraint(self):
-        """
-        Regression test for the hubs: the as_times.db ``experiment_status``
-        tables deployed may not have a PRIMARY KEY/UNIQUE constraint on ``exp_id``
-        so a native ``ON CONFLICT`` clause would raise.
-        ``upsert_row`` must fall back to a schema-agnostic DELETE+INSERT on
-        SQLite and native upsert on PostgreSQL.
+    def test_upsert_row_on_legacy_table_without_unique_constraint(self):
+        """Regression test for the hubs.
+        
+        The as_times.db ``experiment_status`` tables deployed may not have a
+        PRIMARY KEY/UNIQUE constraint on ``exp_id`` so a native ``ON CONFLICT``
+        clause would raise. ``upsert_row`` must fall back to a schema-agnostic 
+        DELETE+INSERT on SQLite and native upsert on PostgreSQL.
         """
         engine = create_engine("sqlite:///:memory:")
         meta = MetaData()
@@ -250,8 +250,8 @@ class TestExecuteUpsert:
     def test_upsert_row_inserts_and_replaces(
         self, fixture_dummy_db: Tuple[Engine, Table]
     ):
-        """
-        ``upsert_row`` must insert a new row if it does not exist, and replace the existing row if it does.
+        """``upsert_row`` must insert a new row if it does not exist, and replace the existing row if it does.
+        
         Tested on a dummy table with a PRIMARY KEY on ``id``.
         """
         engine, table = fixture_dummy_db
