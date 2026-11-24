@@ -1,31 +1,34 @@
 import pytest
 
 from autosubmit_api.exceptions import InternalError
+from autosubmit_api.models.experiment import ExperimentRunStatus
 from autosubmit_api.models.responses import ExperimentRunsResponse
 from autosubmit_api.repositories.experiment_run import ExperimentRunModel
-from autosubmit_api.services.experiment_runs import ExperimentRunsService
+from autosubmit_api.services.experiment_runs import ExperimentRunsService, _run_status
 
 EXPID = "a000"
 
 
-def make_run(run_id: int = 1) -> ExperimentRunModel:
-    return ExperimentRunModel(
-        run_id=run_id,
-        created="2026-11-24 00:00:00",
-        modified=None,
-        start=1712847236,
-        finish=1712850000,
-        chunk_unit="month",
-        chunk_size=4,
-        completed=8,
-        total=8,
-        failed=0,
-        queuing=0,
-        running=0,
-        submitted=0,
-        suspended=0,
-        metadata=None,
-    )
+def make_run(run_id: int = 1, **overrides) -> ExperimentRunModel:
+    fields = {
+        "run_id": run_id,
+        "created": "2026-11-24 00:00:00",
+        "modified": None,
+        "start": 1712847236,
+        "finish": 1712850000,
+        "chunk_unit": "month",
+        "chunk_size": 4,
+        "completed": 8,
+        "total": 8,
+        "failed": 0,
+        "queuing": 0,
+        "running": 0,
+        "submitted": 0,
+        "suspended": 0,
+        "metadata": None,
+    }
+    fields.update(overrides)
+    return ExperimentRunModel(**fields)
 
 
 class MockExperimentRunRepository:
@@ -126,3 +129,62 @@ class TestListRuns:
 
         with pytest.raises(InternalError):
             service.list_runs()
+
+    @pytest.mark.parametrize(
+        (
+            "finish",
+            "completed",
+            "total",
+            "failed",
+            "suspended",
+            "running",
+            "queuing",
+            "submitted",
+            "expected",
+        ),
+        [
+            (0, 5, 10, 0, 0, 0, 1, 0, ExperimentRunStatus.RUNNING),
+            (0, 5, 10, 0, 1, 0, 0, 0, ExperimentRunStatus.SUSPENDED),
+            (0, 10, 10, 0, 0, 0, 0, 0, ExperimentRunStatus.COMPLETED),
+            (0, 5, 10, 1, 0, 0, 0, 0, ExperimentRunStatus.FAILED),
+            (123, 10, 10, 0, 0, 0, 0, 0, ExperimentRunStatus.COMPLETED),
+            (123, 9, 10, 1, 0, 0, 0, 0, ExperimentRunStatus.FAILED),
+            (123, 28, 55, 0, 3, 0, 0, 0, ExperimentRunStatus.SUSPENDED),
+            (123, 5, 10, 0, 0, 0, 0, 0, ExperimentRunStatus.UNKNOWN),
+        ],
+        ids=[
+            "running",
+            "suspended",
+            "completed",
+            "failed",
+            "completed with finish timestamp",
+            "failed with finish timestamp",
+            "suspended with finish timestamp",
+            "unknown with finish timestamp",
+        ],
+    )
+    def test_run_status(
+        self,
+        finish: int | None,
+        completed: int | None,
+        total: int | None,
+        failed: int | None,
+        suspended: int | None,
+        running: int | None,
+        queuing: int | None,
+        submitted: int | None,
+        expected: ExperimentRunStatus,
+    ):
+        """The status of a run is computed from its fields."""
+        run = make_run(
+            finish=finish,
+            completed=completed,
+            total=total,
+            failed=failed,
+            suspended=suspended,
+            running=running,
+            queuing=queuing,
+            submitted=submitted,
+        )
+
+        assert _run_status(run) == expected
