@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 from typing import Any
 
 from pydantic import BaseModel
-from sqlalchemy import Engine, Table, create_engine
+from sqlalchemy import Engine, Table, create_engine, inspect
 
 from autosubmit_api.config.basicConfig import APIBasicConfig
 from autosubmit_api.database import tables
@@ -50,6 +50,11 @@ class ExperimentRunSQLRepository(ExperimentRunRepository):
 
     def get_all(self) -> list[ExperimentRunModel]:
         with self.engine.connect() as conn:
+            # The historical database of an experiment that has not recorded a run
+            # yet may not have the table. That is not an error: it has no runs.
+            if not inspect(conn).has_table(self.table.name, self.table.schema):
+                return []
+
             # Newest first: consumers list the runs from the most recent one
             statement = self.table.select().order_by(self.table.c.run_id.desc())
             result = conn.execute(statement).all()

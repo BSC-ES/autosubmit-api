@@ -119,7 +119,7 @@ class ExperimentRunsService:
         """Runs of the experiment, newest first.
 
         :return: Runs of the experiment, or no runs if it has never run.
-        :raises InternalError: If the historical database cannot be read
+        :raises InternalError: If the runs of the experiment cannot be read
         """
         try:
             if not self._history_exists(self.expid):
@@ -128,10 +128,8 @@ class ExperimentRunsService:
             return ExperimentRunsResponse(
                 runs=[_to_run_item(run) for run in self.runs_repo.get_all()]
             )
-        except DomainError:
-            raise
         except Exception as exc:
-            raise InternalError("Error while getting experiment runs") from exc
+            raise InternalError("Error while reading experiment runs") from exc
 
 
 def create_experiment_runs_service(expid: str) -> ExperimentRunsService:
