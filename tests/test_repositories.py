@@ -3,13 +3,23 @@ from typing import Any
 from uuid import uuid4
 
 import pytest
+from sqlalchemy import create_engine, inspect, text
+from sqlalchemy.schema import CreateSchema
 
 from autosubmit_api.common.utils import Status
+from autosubmit_api.config.basicConfig import APIBasicConfig
+from autosubmit_api.database import tables
+from autosubmit_api.database.common import create_sqlite_db_engine
 from autosubmit_api.exceptions import ExperimentNotFoundError
 from autosubmit_api.models.jobs import JOBS_CATEGORY_HIERARCHY, UNSET
 from autosubmit_api.models.pagination import Page
 from autosubmit_api.models.requests import ExperimentsSearchRequest
 from autosubmit_api.repositories.experiment import create_experiment_repository
+from autosubmit_api.repositories.experiment_run import (
+    ExperimentRunModel,
+    ExperimentRunSQLRepository,
+    create_experiment_run_repository,
+)
 from autosubmit_api.repositories.experiment_status import (
     create_experiment_status_repository,
 )
@@ -661,3 +671,49 @@ class TestJobsRepositoryPages:
         assert page_total == total
         expected = everything[offset : offset + limit]
         assert [job.name for job in page] == [job.name for job in expected]
+
+
+class TestExperimentRunRepository:
+
+    def test_runs_are_reported_newest_first(self, fixture_mock_basic_config):
+        """Every backend reads the runs from newest to oldest."""
+        runs = create_experiment_run_repository("a3tb").get_all()
+
+        assert runs and all(isinstance(run, ExperimentRunModel) for run in runs)
+        run_ids = [run.run_id for run in runs]
+        assert run_ids == sorted(run_ids, reverse=True)
+
+    def test_historical_database_without_runs_table_is_empty(
+        self, fixture_mock_basic_config, tmp_path
+    ):
+        """A database that without the runs table has no runs, not an error."""
+        expid = "zz01"  # Experiment without runs table
+        is_postgres = APIBasicConfig.DATABASE_BACKEND == "postgres"
+        engine = None
+
+        try:
+            if is_postgres:
+                # TODO: Currently, the postgres backend has a schema per experiment
+                engine = create_engine(APIBasicConfig.DATABASE_CONN_URL)
+                with engine.begin() as conn:
+                    conn.execute(CreateSchema(expid, if_not_exists=True))
+
+                table = tables.table_change_schema(expid, tables.ExperimentRunTable)
+            else:
+                db_path = tmp_path / f"job_data_{expid}.db"
+                create_sqlite_db_engine(str(db_path)).connect().close()
+
+                engine = create_sqlite_db_engine(str(db_path), read_only=True)
+                table = tables.ExperimentRunTable
+
+            with engine.connect() as conn:
+                assert not inspect(conn).has_table(table.name, table.schema)
+
+            repo = ExperimentRunSQLRepository(expid, engine, table)
+
+            assert repo.get_all() == []
+        finally:
+            if is_postgres and engine is not None:
+                with engine.begin() as conn:
+                    conn.execute(text(f'DROP SCHEMA IF EXISTS "{expid}" CASCADE'))
+                engine.dispose()
