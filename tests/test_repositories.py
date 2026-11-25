@@ -714,6 +714,23 @@ class TestJobsRepositoryWrapperFilter:
 
         assert no_packaging.search(wrapper=wrapper) == ([], 0)
 
+    def test_sql_grouping_by_wrapper_without_packaging_counts_as_na(
+        self, fixture_mock_basic_config
+    ):
+        """The legacy wrapper table keeps only one wrapper per job, even if there are multiple runs."""
+        repo = create_jobs_repository("a1x4")
+        assert isinstance(repo, JobsSQLRepository)
+
+        no_packaging = JobsSQLRepository(
+            repo.expid, repo.engine, repo.table, wrapper_table=None
+        )
+
+        [counts] = no_packaging.get_properties_counts([JOBS_WRAPPER_HIERARCHY])
+        _, total = no_packaging.search()
+
+        assert sum(counts.values()) == total
+        assert {key[0] for key in counts} == {"NA"}
+
 
 class TestJobsCategoryCounts:
 
