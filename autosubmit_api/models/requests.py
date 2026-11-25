@@ -68,7 +68,10 @@ class JobsSearchRequest(BaseModel):
     section: Annotated[
         str | None,
         Field(
-            description="Filter by job section",
+            description=(
+                "Filter by job section. Use "
+                f"'{MISSING_CATEGORY_VALUE}' for the jobs without a section"
+            ),
             json_schema_extra={"example": "SIM"},
         ),
     ] = None

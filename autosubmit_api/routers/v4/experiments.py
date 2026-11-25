@@ -586,7 +586,10 @@ def _build_category_tree(
     :return: Nested dictionary with the job count at the deepest level.
     """
     tree: dict = {}
-    for key, count in counters.items():
+    # Ordered so the levels do not reshuffle
+    for key, count in sorted(
+        counters.items(), key=lambda item: tuple(str(value) for value in item[0])
+    ):
         node = tree
         for value in key[:-1]:
             node = node.setdefault(value, {})

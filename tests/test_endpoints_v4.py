@@ -1218,6 +1218,24 @@ class TestExperimentJobsCategoryTree:
                         assert isinstance(count, int) and count > 0
 
     @pytest.mark.parametrize("expid", ["a6zj", "a1x4"])
+    def test_tree_levels_are_ordered(
+        self, fixture_fastapi_client: TestClient, expid: str
+    ):
+        """Prevent the tree levels from being returned in random order."""
+        response = fixture_fastapi_client.get(self.endpoint.format(expid=expid))
+        resp_obj: dict = response.json()
+
+        def assert_ordered(node: dict) -> None:
+            keys = list(node.keys())
+            assert keys == sorted(keys), keys
+            for value in node.values():
+                if isinstance(value, dict):
+                    assert_ordered(value)
+
+        assert_ordered(resp_obj["category_tree"])
+        assert_ordered(resp_obj["wrapper_tree"] or {})
+
+    @pytest.mark.parametrize("expid", ["a6zj", "a1x4"])
     def test_wrapper_tree_structure(
         self, fixture_fastapi_client: TestClient, expid: str
     ):
