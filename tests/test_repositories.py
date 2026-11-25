@@ -22,6 +22,7 @@ from autosubmit_api.repositories.job_data import (
     ExperimentJobDataModel,
     create_experiment_job_data_repository,
 )
+from autosubmit_api.repositories.job_packages import create_job_packages_repository
 from autosubmit_api.repositories.jobs import (
     JobRow,
     JobsPklRepository,
@@ -683,6 +684,22 @@ class TestJobsRepositoryWrapperFilter:
         assert isinstance(repo, JobsSQLRepository)
 
         assert repo.search(wrapper="a1x4_missing_wrapper") == ([], 0)
+
+    def test_sql_wrapper_is_the_latest_run(self, fixture_mock_basic_config):
+        """The wrapper reported by the jobs is the latest run of that wrapper."""
+        repo = create_jobs_repository("a1x4")
+        assert isinstance(repo, JobsSQLRepository)
+
+        jobs, _ = repo.search(with_wrapper=True)
+        packaged_names = [job for job in jobs if job.wrapper is not None]
+        assert packaged_names
+
+        # Latest run is the one with highest run id, not the one with highest package_id
+        expected = create_job_packages_repository("a1x4", preview=True).get_wrapper_map(
+            packaged_names
+        )
+        assert set(expected.values()) == {"a1x4_ASThread_SIM_17858477032499_1_8"}
+        assert [job.wrapper for job in jobs] == [expected.get(job.name) for job in jobs]
 
     @pytest.mark.parametrize("wrapper", ["any-wrapper", None], ids=["wrapper", "none"])
     def test_sql_search_by_wrapper_without_packaging_is_empty(

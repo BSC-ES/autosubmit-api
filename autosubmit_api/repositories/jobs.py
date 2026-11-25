@@ -7,7 +7,7 @@ from abc import ABC, abstractmethod
 from collections.abc import Callable, Sequence
 from typing import Any, NamedTuple
 
-from sqlalchemy import Connection, Engine, Table, create_engine, false, func, nulls_last, select
+from sqlalchemy import Connection, Engine, Table, create_engine, false, func, null, nulls_last, select
 
 from autosubmit_api.common import utils as common_utils
 from autosubmit_api.config.basicConfig import APIBasicConfig
@@ -561,32 +561,33 @@ class JobsSQLRepository(JobsRepository):
         wrapper_table = self.wrapper_table
         if "package_id" in wrapper_table.c:
             # One row per job: the packaging of its latest package
-            latest_packages = (
-                select(
-                    wrapper_table.c.job_name.label("job_name"),
-                    func.max(wrapper_table.c.package_id).label("package_id"),
-                )
-                .group_by(wrapper_table.c.job_name)
-                .subquery()
-            )
-            statement = (
+            latest_first = [wrapper_table.c.package_id.desc()]
+            if "run_id" in wrapper_table.c:
+                latest_first.insert(0, nulls_last(wrapper_table.c.run_id.desc()))
+            ranked_packages = (
                 select(
                     wrapper_table.c.job_name.label("job_name"),
                     wrapper_table.c.package_name.label("wrapper"),
-                )
-                .select_from(
-                    wrapper_table.join(
-                        latest_packages,
-                        (wrapper_table.c.job_name == latest_packages.c.job_name)
-                        & (wrapper_table.c.package_id == latest_packages.c.package_id),
+                    func.row_number()
+                    .over(
+                        partition_by=wrapper_table.c.job_name,
+                        order_by=latest_first,
                     )
+                    .label("position"),
                 )
+                .subquery()
             )
+            # One row per job: its latest package
+            statement = select(
+                ranked_packages.c.job_name,
+                ranked_packages.c.wrapper,
+            ).where(ranked_packages.c.position == 1)
         else:
+            # Legacy: tables without package id
             statement = select(
                 wrapper_table.c.job_name.label("job_name"),
-                wrapper_table.c.package_name.label("wrapper"),
-            )
+                func.max(wrapper_table.c.package_name).label("wrapper"),
+            ).group_by(wrapper_table.c.job_name)
 
         self._wrappers_subquery = statement.subquery()
         return self._wrappers_subquery
@@ -854,16 +855,21 @@ class JobsSQLRepository(JobsRepository):
             if JobCategoryProperty.WRAPPER in properties
             else None
         )
-        columns = [
-            (
-                wrapper_subquery.c.wrapper
-                if prop is JobCategoryProperty.WRAPPER
-                and wrapper_subquery is not None
-                else self._property_column(self.table, prop)
-            )
-            for prop in properties
-        ]
-        statement = select(func.count().label("jobs_count"), *columns)
+        select_columns = []
+        group_columns = []
+        for prop in properties:
+            if prop is JobCategoryProperty.WRAPPER:
+                if wrapper_subquery is not None:
+                    select_columns.append(wrapper_subquery.c.wrapper)
+                    group_columns.append(wrapper_subquery.c.wrapper)
+                else:
+                    select_columns.append(null())
+            else:
+                column = self._property_column(self.table, prop)
+                select_columns.append(column)
+                group_columns.append(column)
+
+        statement = select(func.count().label("jobs_count"), *select_columns)
         if wrapper_subquery is not None:
             statement = statement.select_from(
                 self.table.outerjoin(
@@ -871,7 +877,9 @@ class JobsSQLRepository(JobsRepository):
                     wrapper_subquery.c.job_name == self.table.c.name,
                 )
             )
-        statement = statement.group_by(*columns)
+        else:
+            statement = statement.select_from(self.table)
+        statement = statement.group_by(*group_columns)
 
         counts: dict[tuple, int] = {}
         for row in conn.execute(statement).all():

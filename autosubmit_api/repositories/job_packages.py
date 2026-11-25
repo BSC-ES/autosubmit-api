@@ -4,7 +4,7 @@ from abc import ABC, abstractmethod
 from typing import Any
 
 from pydantic import BaseModel
-from sqlalchemy import Engine, Row, Table, create_engine, inspect
+from sqlalchemy import Engine, Row, Table, create_engine, inspect, nulls_last
 
 from autosubmit_api.common.utils import is_db_version_4_2_0_or_higher
 from autosubmit_api.config.basicConfig import APIBasicConfig
@@ -89,9 +89,11 @@ class JobPackagesSQLRepository(JobPackagesRepository):
         revision, so the ordering is built from the ones that are present.
         """
         columns = self.table.c
-        order_by = [
-            columns[name].desc() for name in ("run_id", "package_id") if name in columns
-        ]
+        order_by = []
+        if "run_id" in columns:
+            order_by.append(nulls_last(columns.run_id.desc()))
+        if "package_id" in columns:
+            order_by.append(columns.package_id.desc())
         return statement.order_by(*order_by) if order_by else statement
 
     def get_wrapper_map(
