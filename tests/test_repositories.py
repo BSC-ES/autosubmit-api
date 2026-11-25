@@ -691,7 +691,7 @@ class TestJobsRepositoryWrapperFilter:
         assert isinstance(repo, JobsSQLRepository)
 
         jobs, _ = repo.search(with_wrapper=True)
-        packaged_names = [job for job in jobs if job.wrapper is not None]
+        packaged_names = [job.name for job in jobs if job.wrapper is not None]
         assert packaged_names
 
         # Latest run is the one with highest run id, not the one with highest package_id
@@ -701,18 +701,37 @@ class TestJobsRepositoryWrapperFilter:
         assert set(expected.values()) == {"a1x4_ASThread_SIM_17858477032499_1_8"}
         assert [job.wrapper for job in jobs] == [expected.get(job.name) for job in jobs]
 
-    @pytest.mark.parametrize("wrapper", ["any-wrapper", None], ids=["wrapper", "none"])
-    def test_sql_search_by_wrapper_without_packaging_is_empty(
-        self, fixture_mock_basic_config, wrapper
+    @pytest.mark.parametrize(
+        "wrapper, expected_total",
+        [("any-wrapper", 0), ("NA", 10)],
+        ids=["wrapper", "none"],
+    )
+    def test_sql_search_without_packaging(
+        self, fixture_mock_basic_config, wrapper: str, expected_total: int
     ):
-        """Without a packaging table no job can be said to be in a wrapper."""
+        """Without a packaging table every job is outside a wrapper."""
         repo = create_jobs_repository("a1x4")
         assert isinstance(repo, JobsSQLRepository)
         no_packaging = JobsSQLRepository(
             repo.expid, repo.engine, repo.table, wrapper_table=None
         )
 
-        assert no_packaging.search(wrapper=wrapper) == ([], 0)
+        _, total = no_packaging.search(wrapper=wrapper)
+
+        assert total == expected_total
+
+    def test_pkl_search_without_packaging_returns_every_job(
+        self, fixture_mock_basic_config
+    ):
+        """Without a packaging table every job is outside a wrapper."""
+        repo = create_jobs_repository("a007")
+        assert isinstance(repo, JobsPklRepository)
+
+        _, total = repo.search()
+        _, without_wrapper = repo.search(wrapper="NA")
+
+        assert total > 0
+        assert without_wrapper == total
 
     def test_sql_grouping_by_wrapper_without_packaging_counts_as_na(
         self, fixture_mock_basic_config
@@ -734,7 +753,7 @@ class TestJobsRepositoryWrapperFilter:
 
 class TestJobsCategoryCounts:
 
-    @pytest.mark.parametrize("expid", ["a007", "a8qc", "a1x4"])
+    @pytest.mark.parametrize("expid", ["a007", "a8qc", "a6zj", "a1x4"])
     @pytest.mark.parametrize(
         "hierarchy",
         [JOBS_CATEGORY_HIERARCHY, JOBS_WRAPPER_HIERARCHY],
@@ -755,7 +774,7 @@ class TestJobsCategoryCounts:
             _, filtered = repo.search(**filters)
             assert filtered == count, (key, filters)
 
-    @pytest.mark.parametrize("expid", ["a007", "a1x4"])
+    @pytest.mark.parametrize("expid", ["a007", "a6zj", "a1x4"])
     def test_groupings_are_counted_together(
         self, fixture_mock_basic_config, expid: str
     ):

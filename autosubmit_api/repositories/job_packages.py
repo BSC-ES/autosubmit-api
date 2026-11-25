@@ -94,7 +94,8 @@ class JobPackagesSQLRepository(JobPackagesRepository):
             order_by.append(nulls_last(columns.run_id.desc()))
         if "package_id" in columns:
             order_by.append(columns.package_id.desc())
-        return statement.order_by(*order_by) if order_by else statement
+        order_by.append(columns.package_name.desc())
+        return statement.order_by(*order_by)
 
     def get_wrapper_map(
         self, job_names: list[str] | None = None, wrapper: str | None = None
@@ -141,7 +142,7 @@ class JobPackagesSQLRepository(JobPackagesRepository):
 
 
 def _wrapper_jobs_table_candidates(
-    expid: str, preview: bool = False
+    expid: str, preview: bool = False, version_4_2_0: bool = False
 ) -> list[Table]:
     """Gets the tables that may hold the packaging of the jobs, most specific first.
 
@@ -151,21 +152,30 @@ def _wrapper_jobs_table_candidates(
     :param expid: Experiment identifier.
     :param preview: Whether to look for the preview tables, which hold the
         packaging of an experiment that has not run yet.
+    :param version_4_2_0: Whether the experiment is from Autosubmit 4.2.0 or
+        later.
     :return: Candidate tables of the packaging, most specific first.
     """
-    candidates = (
-        [
-            tables.PreviewWrapperJobsTableV2,
-            tables.PreviewWrapperJobsTable,
-            tables.WrapperJobPackageTable,
-        ]
-        if preview
-        else [
-            tables.WrapperJobsTableV2,
-            tables.WrapperJobsTable,
-            tables.JobPackageTable,
-        ]
-    )
+    if version_4_2_0:
+        candidates = (
+            [tables.PreviewWrapperJobsTableV2]
+            if preview
+            else [tables.WrapperJobsTableV2]
+        )
+    else:
+        candidates = (
+            [
+                tables.PreviewWrapperJobsTableV2,
+                tables.PreviewWrapperJobsTable,
+                tables.WrapperJobPackageTable,
+            ]
+            if preview
+            else [
+                tables.WrapperJobsTableV2,
+                tables.WrapperJobsTable,
+                tables.JobPackageTable,
+            ]
+        )
 
     if APIBasicConfig.DATABASE_BACKEND == "postgres":
         # Postgres: every experiment is a schema
@@ -186,21 +196,24 @@ def create_job_packages_repository(
     """
     # Experiment should exist, whatever the backend is
     experiment = create_experiment_repository().get_by_expid(expid)
+    version_4_2_0 = is_db_version_4_2_0_or_higher(experiment.autosubmit_version)
 
     if APIBasicConfig.DATABASE_BACKEND == "postgres":
         # Postgres
         _engine = create_engine(APIBasicConfig.DATABASE_CONN_URL)
     else:
         # SQLite
-        if is_db_version_4_2_0_or_higher(experiment.autosubmit_version):
-            db_path = ExperimentPaths(expid).job_list_db
-        else:
-            db_path = ExperimentPaths(expid).job_packages_db
-
+        db_path = (
+            ExperimentPaths(expid).job_list_db
+            if version_4_2_0
+            else ExperimentPaths(expid).job_packages_db
+        )
         _engine = create_sqlite_db_engine(db_path, read_only=True)
 
     return JobPackagesSQLRepository(
-        expid, _engine, _wrapper_jobs_table_candidates(expid, preview)
+        expid,
+        _engine,
+        _wrapper_jobs_table_candidates(expid, preview, version_4_2_0),
     )
 
 
@@ -219,7 +232,9 @@ def get_wrapper_jobs_table(expid: str, engine: Engine) -> Table | None:
     """
     inspector = inspect(engine)
     for preview in (False, True):
-        for candidate in _wrapper_jobs_table_candidates(expid, preview):
+        for candidate in _wrapper_jobs_table_candidates(
+            expid, preview, version_4_2_0=True
+        ):
             if inspector.has_table(candidate.name, candidate.schema):
                 return candidate
     return None

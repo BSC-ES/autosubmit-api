@@ -559,35 +559,30 @@ class JobsSQLRepository(JobsRepository):
             return self._wrappers_subquery
 
         wrapper_table = self.wrapper_table
-        if "package_id" in wrapper_table.c:
-            # One row per job: the packaging of its latest package
-            latest_first = [wrapper_table.c.package_id.desc()]
-            if "run_id" in wrapper_table.c:
-                latest_first.insert(0, nulls_last(wrapper_table.c.run_id.desc()))
-            ranked_packages = (
-                select(
-                    wrapper_table.c.job_name.label("job_name"),
-                    wrapper_table.c.package_name.label("wrapper"),
-                    func.row_number()
-                    .over(
-                        partition_by=wrapper_table.c.job_name,
-                        order_by=latest_first,
-                    )
-                    .label("position"),
-                )
-                .subquery()
-            )
-            # One row per job: its latest package
-            statement = select(
-                ranked_packages.c.job_name,
-                ranked_packages.c.wrapper,
-            ).where(ranked_packages.c.position == 1)
-        else:
-            # Legacy: tables without package id
-            statement = select(
+        # The latest run first, then the latest package of that run
+        latest_first = [
+            nulls_last(wrapper_table.c.run_id.desc()),
+            wrapper_table.c.package_id.desc(),
+            wrapper_table.c.package_name.desc(),
+        ]
+        ranked_packages = (
+            select(
                 wrapper_table.c.job_name.label("job_name"),
-                func.max(wrapper_table.c.package_name).label("wrapper"),
-            ).group_by(wrapper_table.c.job_name)
+                wrapper_table.c.package_name.label("wrapper"),
+                func.row_number()
+                .over(
+                    partition_by=wrapper_table.c.job_name,
+                    order_by=latest_first,
+                )
+                .label("position"),
+            )
+            .subquery()
+        )
+        # One row per job: its latest package
+        statement = select(
+            ranked_packages.c.job_name,
+            ranked_packages.c.wrapper,
+        ).where(ranked_packages.c.position == 1)
 
         self._wrappers_subquery = statement.subquery()
         return self._wrappers_subquery
@@ -778,8 +773,8 @@ class JobsSQLRepository(JobsRepository):
                     else None
                 )
                 if wrapper_column is None:
-                    # The experiment has no packaging: no job has a wrapper
-                    statement = statement.where(false())
+                    if expected_wrapper is not None:
+                        statement = statement.where(false())
                 elif expected_wrapper is None:
                     statement = statement.where(wrapper_column.is_(None))
                 else:
@@ -802,7 +797,7 @@ class JobsSQLRepository(JobsRepository):
                 self.table.c.name,
             )
 
-            if page.is_paginated:
+            if page.limit is not None:
                 # The total is only needed when a slice was requested
                 count_statement = select(func.count()).select_from(statement.subquery())
                 counter = conn.execute(count_statement).scalar()

@@ -163,7 +163,7 @@ async def search_experiments(
 async def get_experiment_detail(
     expid: str, user_id: str | None = Depends(auth_token_dependency())
 ) -> BaseExperimentModel:
-    """Get details of an experiment.."""
+    """Get details of an experiment."""
     exp_builder = ExperimentBuilder()
     exp_builder.produce_base(expid)
     return exp_builder.product
