@@ -50,7 +50,7 @@ test = [
     "pytest",
     "pytest-cov",
     "pytest-asyncio",
-    "ruff==0.17.5",
+    "ruff==0.17.6",
     "testcontainers>=4.15.0",
     "mock",
 ]
