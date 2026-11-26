@@ -6,7 +6,11 @@ import pytest
 
 from autosubmit_api.common.utils import Status
 from autosubmit_api.exceptions import ExperimentNotFoundError
-from autosubmit_api.models.jobs import JOBS_CATEGORY_HIERARCHY, UNSET
+from autosubmit_api.models.jobs import (
+    JOBS_CATEGORY_HIERARCHY,
+    JOBS_WRAPPER_HIERARCHY,
+    UNSET,
+)
 from autosubmit_api.models.pagination import Page
 from autosubmit_api.models.requests import ExperimentsSearchRequest
 from autosubmit_api.repositories.experiment import create_experiment_repository
@@ -18,6 +22,7 @@ from autosubmit_api.repositories.job_data import (
     ExperimentJobDataModel,
     create_experiment_job_data_repository,
 )
+from autosubmit_api.repositories.job_packages import create_job_packages_repository
 from autosubmit_api.repositories.jobs import (
     JobRow,
     JobsPklRepository,
@@ -623,24 +628,169 @@ class TestJobsOrder:
         ]
 
 
+class TestJobsRepositoryWrapperFilter:
+    """Wrapper filtering on both backends, read from the packaging database."""
+
+    A6ZJ_WRAPPER = "a6zj_ASThread_17128472368642_1_4"
+
+    def test_pkl_search_by_wrapper_selects_the_packaged_jobs(
+        self, fixture_mock_basic_config
+    ):
+        """The wrapper filter keeps the jobs of that wrapper and reports it."""
+        repo = create_jobs_repository("a6zj")
+        assert isinstance(repo, JobsPklRepository)
+
+        jobs, count = repo.search(wrapper=self.A6ZJ_WRAPPER, with_wrapper=True)
+
+        assert count == 4
+        assert [job.name for job in jobs] == [
+            "a6zj_20000101_fc0_1_SIM",
+            "a6zj_20000101_fc0_2_SIM",
+            "a6zj_20000101_fc0_3_SIM",
+            "a6zj_20000101_fc0_4_SIM",
+        ]
+        assert all(job.wrapper == self.A6ZJ_WRAPPER for job in jobs)
+
+    def test_pkl_search_by_unknown_wrapper_selects_nothing(
+        self, fixture_mock_basic_config
+    ):
+        repo = create_jobs_repository("a6zj")
+        assert isinstance(repo, JobsPklRepository)
+
+        assert repo.search(wrapper="a6zj_missing_wrapper") == ([], 0)
+
+    def test_sql_search_by_wrapper_selects_the_jobs_that_report_it(
+        self, fixture_mock_basic_config
+    ):
+        """The SQL wrapper filter agrees with the wrapper the jobs report."""
+        repo = create_jobs_repository("a1x4")
+        assert isinstance(repo, JobsSQLRepository)
+
+        all_jobs, _ = repo.search(with_wrapper=True)
+        packaged = [job for job in all_jobs if job.wrapper is not None]
+        wrappers = {job.wrapper for job in packaged}
+        assert len(wrappers) == 1
+        wrapper = wrappers.pop()
+
+        jobs, count = repo.search(wrapper=wrapper)
+
+        assert count == len(packaged)
+        assert [job.name for job in jobs] == [job.name for job in packaged]
+
+    def test_sql_search_by_unknown_wrapper_selects_nothing(
+        self, fixture_mock_basic_config
+    ):
+        repo = create_jobs_repository("a1x4")
+        assert isinstance(repo, JobsSQLRepository)
+
+        assert repo.search(wrapper="a1x4_missing_wrapper") == ([], 0)
+
+    def test_sql_wrapper_is_the_latest_run(self, fixture_mock_basic_config):
+        """The wrapper reported by the jobs is the latest run of that wrapper."""
+        repo = create_jobs_repository("a1x4")
+        assert isinstance(repo, JobsSQLRepository)
+
+        jobs, _ = repo.search(with_wrapper=True)
+        packaged_names = [job.name for job in jobs if job.wrapper is not None]
+        assert packaged_names
+
+        # Latest run is the one with highest run id, not the one with highest package_id
+        expected = create_job_packages_repository("a1x4", preview=True).get_wrapper_map(
+            packaged_names
+        )
+        assert set(expected.values()) == {"a1x4_ASThread_SIM_17858477032499_1_8"}
+        assert [job.wrapper for job in jobs] == [expected.get(job.name) for job in jobs]
+
+    @pytest.mark.parametrize(
+        "wrapper, expected_total",
+        [("any-wrapper", 0), ("NA", 10)],
+        ids=["wrapper", "none"],
+    )
+    def test_sql_search_without_packaging(
+        self, fixture_mock_basic_config, wrapper: str, expected_total: int
+    ):
+        """Without a packaging table every job is outside a wrapper."""
+        repo = create_jobs_repository("a1x4")
+        assert isinstance(repo, JobsSQLRepository)
+        no_packaging = JobsSQLRepository(
+            repo.expid, repo.engine, repo.table, wrapper_table=None
+        )
+
+        _, total = no_packaging.search(wrapper=wrapper)
+
+        assert total == expected_total
+
+    def test_pkl_search_without_packaging_returns_every_job(
+        self, fixture_mock_basic_config
+    ):
+        """Without a packaging table every job is outside a wrapper."""
+        repo = create_jobs_repository("a007")
+        assert isinstance(repo, JobsPklRepository)
+
+        _, total = repo.search()
+        _, without_wrapper = repo.search(wrapper="NA")
+
+        assert total > 0
+        assert without_wrapper == total
+
+    def test_sql_grouping_by_wrapper_without_packaging_counts_as_na(
+        self, fixture_mock_basic_config
+    ):
+        """The legacy wrapper table keeps only one wrapper per job, even if there are multiple runs."""
+        repo = create_jobs_repository("a1x4")
+        assert isinstance(repo, JobsSQLRepository)
+
+        no_packaging = JobsSQLRepository(
+            repo.expid, repo.engine, repo.table, wrapper_table=None
+        )
+
+        [counts] = no_packaging.get_properties_counts([JOBS_WRAPPER_HIERARCHY])
+        _, total = no_packaging.search()
+
+        assert sum(counts.values()) == total
+        assert {key[0] for key in counts} == {"NA"}
+
+
 class TestJobsCategoryCounts:
 
-    @pytest.mark.parametrize("expid", ["a007", "a8qc", "a1x4"])
+    @pytest.mark.parametrize("expid", ["a007", "a8qc", "a6zj", "a1x4"])
+    @pytest.mark.parametrize(
+        "hierarchy",
+        [JOBS_CATEGORY_HIERARCHY, JOBS_WRAPPER_HIERARCHY],
+        ids=["section", "wrapper"],
+    )
     def test_every_leaf_counts_the_jobs_of_its_filters(
-        self, fixture_mock_basic_config, expid: str
+        self, fixture_mock_basic_config, expid: str, hierarchy: tuple
     ):
         """The counts of the leaves of the hierarchy should match the number of jobs."""
         repo = create_jobs_repository(expid)
-        counts = repo.get_properties_counts(list(JOBS_CATEGORY_HIERARCHY))
+        [counts] = repo.get_properties_counts([hierarchy])
 
         _, total = repo.search()
 
         assert sum(counts.values()) == total
-        for (date, member, section, status), count in counts.items():
-            _, filtered = repo.search(
-                date=date, member=member, section=section, status=status
-            )
-            assert filtered == count, (date, member, section, status)
+        for key, count in counts.items():
+            filters = dict(zip([prop.value for prop in hierarchy], key))
+            _, filtered = repo.search(**filters)
+            assert filtered == count, (key, filters)
+
+    @pytest.mark.parametrize("expid", ["a007", "a6zj", "a1x4"])
+    def test_groupings_are_counted_together(
+        self, fixture_mock_basic_config, expid: str
+    ):
+        """One call should return one mapping per grouping, in the same order."""
+        repo = create_jobs_repository(expid)
+
+        [category_counts, wrapper_counts] = repo.get_properties_counts(
+            [JOBS_CATEGORY_HIERARCHY, JOBS_WRAPPER_HIERARCHY]
+        )
+
+        assert category_counts == repo.get_properties_counts(
+            [JOBS_CATEGORY_HIERARCHY]
+        )[0]
+        assert wrapper_counts == repo.get_properties_counts(
+            [JOBS_WRAPPER_HIERARCHY]
+        )[0]
 
 
 class TestJobsRepositoryPages:
